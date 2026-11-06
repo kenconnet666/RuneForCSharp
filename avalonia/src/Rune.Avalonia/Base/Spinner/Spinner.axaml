@@ -1,7 +1,8 @@
 <!--
   Spinner 的主题：模板里只有一个图标部件；图标、大小、旋转写在嵌套样式里（不是模板属性），
   使用方的 /template/ 样式排在后面，能逐个属性改（DESIGN §7）。
-  旋转本身就是"还在加载"的信息，不随时长 token 变为 0
+  旋转本身就是"还在加载"的信息，不随时长 token 变为 0。
+  只在可见时转（动画按 IsVisible 生效）：样式里的动画不管看不看得见都每帧走，按钮加载完收起的指示不能一直占着渲染
 -->
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -15,6 +16,8 @@
     <Style Selector="^ /template/ rune|Icon#PART_Icon">
       <Setter Property="Data" Value="{x:Static rune:Lucide.LoaderCircle}" />
       <Setter Property="Size" Value="{Binding $parent[rune:Spinner].Size}" />
+    </Style>
+    <Style Selector="^[IsVisible=True] /template/ rune|Icon#PART_Icon">
       <Style.Animations>
         <Animation Duration="0:0:0.8" IterationCount="Infinite">
           <KeyFrame Cue="0%"><Setter Property="RotateTransform.Angle" Value="0" /></KeyFrame>

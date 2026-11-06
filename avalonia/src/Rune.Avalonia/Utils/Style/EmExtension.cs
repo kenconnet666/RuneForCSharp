@@ -1,5 +1,6 @@
 using System.Globalization;
 using Avalonia;
+using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Markup.Xaml.MarkupExtensions;
@@ -17,6 +18,7 @@ namespace Rune.Avalonia;
 /// </code>
 /// 返回绑定到字号的绑定：写在 ControlTheme 的 Setter 里时优先级随 Setter，使用方的样式与本地值照常盖过它。
 /// 比写死数值慢一些（3000 个按钮的创建约多 27%），大量重复的轻量元素（表格单元格）改在代码里按字号算。
+/// 按需要选最便宜的绑定：模板里取组件根的字号用 TemplateBinding，取自己的字号用单个绑定，只有系数来自资源时才用多重绑定。
 /// </summary>
 public sealed class EmExtension
 {
@@ -54,24 +56,34 @@ public sealed class EmExtension
     /// <param name="serviceProvider">XAML 服务（不使用）。</param>
     public object ProvideValue(IServiceProvider serviceProvider)
     {
-        var fontSize = new ReflectionBinding("FontSize") { RelativeSource = new RelativeSource(Of) };
         var converter = new EmConverter(Resource is null ? factors : null, Min);
-        return Resource is null
-            ? new MultiBinding { Bindings = { fontSize }, Converter = converter }
-            : new MultiBinding { Bindings = { fontSize, new DynamicResourceExtension(Resource) }, Converter = converter };
+        if (Resource is not null)
+            return new MultiBinding { Bindings = { FontSize(), new DynamicResourceExtension(Resource) }, Converter = converter };
+        return Of == RelativeSourceMode.TemplatedParent
+            ? new TemplateBinding(TemplatedControl.FontSizeProperty) { Converter = converter }
+            : new ReflectionBinding("FontSize") { RelativeSource = new RelativeSource(Of), Converter = converter };
     }
+
+    ReflectionBinding FontSize() => new("FontSize") { RelativeSource = new RelativeSource(Of) };
 }
 
 /// <summary>字号（与资源里的系数）× 系数，按目标属性的类型产出 double、Thickness 或 CornerRadius，不低于下限。</summary>
 /// <param name="factors">系数；为 null 时取第二个绑定值（资源里的系数）。</param>
 /// <param name="min">下限（设备无关像素）。</param>
-sealed class EmConverter(double[]? factors, double min) : IMultiValueConverter
+sealed class EmConverter(double[]? factors, double min) : IMultiValueConverter, IValueConverter
 {
-    public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
+    public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture) =>
+        values[0] is double size && (factors ?? (values.Count > 1 && values[1] is double resource ? [resource] : null)) is { } f
+            ? Scale(size, f, targetType)
+            : BindingOperations.DoNothing;
+
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is double size && factors is { } f ? Scale(size, f, targetType) : BindingOperations.DoNothing;
+
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => BindingOperations.DoNothing;
+
+    object Scale(double size, double[] f, Type targetType)
     {
-        if (values[0] is not double size) return BindingOperations.DoNothing;
-        var f = factors ?? (values.Count > 1 && values[1] is double resource ? [resource] : null);
-        if (f is null) return BindingOperations.DoNothing;
         double At(int i) => Math.Max(min, f[Math.Min(i, f.Length - 1)] * size);
         if (targetType == typeof(Thickness))
             return f.Length switch

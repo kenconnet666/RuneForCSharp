@@ -28,6 +28,11 @@ public class ButtonBase : global::Avalonia.Controls.Button
     /// <summary>焦点环比外框大出的距离：outline 宽 2、偏移 2（borderWidths.sm）。</summary>
     const double FocusRingOutset = 4;
 
+    static readonly Easing Linear = new LinearEasing();
+
+    /// <summary>按（时长、缓动）共用的颜色过渡：主题与系统动画设置的组合只有几种。</summary>
+    static readonly Dictionary<(TimeSpan Duration, Easing Easing), Transitions> SharedTransitions = [];
+
     Canvas? ripples;
     Border? focusRing;
     Action? releasePointerRipple;
@@ -141,17 +146,24 @@ public class ButtonBase : global::Avalonia.Controls.Button
         focusRing.Margin = new Thickness(-FocusRingOutset);
     }
 
-    /// <summary>背景、描边、文字颜色在 durations.sm 内过渡（vue-tsx-pro 的 interactionTransitions.colors）；系统关闭动画时不过渡。</summary>
+    /// <summary>
+    /// 背景、描边、文字颜色在 durations.sm 内过渡（vue-tsx-pro 的 interactionTransitions.colors）；系统关闭动画时不过渡。
+    /// 同样的时长与缓动共用一份（过渡不存每个控件的状态，Fluent 主题也是一份 Transitions 给所有按钮），不每个按钮各建三个。
+    /// </summary>
     Transitions ColorTransitions()
     {
         var duration = Motion.Duration(this.TryFindResource("Rune.Duration.Sm", ActualThemeVariant, out var d) && d is TimeSpan t ? t : TimeSpan.FromMilliseconds(120));
-        var easing = this.TryFindResource("Rune.Easing.Standard", ActualThemeVariant, out var s) && s is Easing found ? found : new LinearEasing();
-        return
-        [
-            new BrushTransition { Property = BackgroundProperty, Duration = duration, Easing = easing },
-            new BrushTransition { Property = BorderBrushProperty, Duration = duration, Easing = easing },
-            new BrushTransition { Property = ForegroundProperty, Duration = duration, Easing = easing },
-        ];
+        var easing = this.TryFindResource("Rune.Easing.Standard", ActualThemeVariant, out var s) && s is Easing found ? found : Linear;
+        lock (SharedTransitions)
+        {
+            if (SharedTransitions.TryGetValue((duration, easing), out var shared)) return shared;
+            return SharedTransitions[(duration, easing)] =
+            [
+                new BrushTransition { Property = BackgroundProperty, Duration = duration, Easing = easing },
+                new BrushTransition { Property = BorderBrushProperty, Duration = duration, Easing = easing },
+                new BrushTransition { Property = ForegroundProperty, Duration = duration, Easing = easing },
+            ];
+        }
     }
 }
 

@@ -3,6 +3,7 @@ using global::Avalonia.Automation;
 using global::Avalonia.Automation.Peers;
 using global::Avalonia.Controls;
 using global::Avalonia.Controls.Documents;
+using global::Avalonia.Data;
 using global::Avalonia.Media;
 using LayoutSize = global::Avalonia.Size;
 
@@ -44,6 +45,7 @@ public class Icon : Control
     static readonly StyledProperty<double> ResolvedSizeProperty = AvaloniaProperty.Register<Icon, double>("ResolvedSize", double.NaN);
 
     IDisposable? sizeBinding;
+    IDisposable? toneBinding;
     IPen? pen;
 
     static Icon()
@@ -91,6 +93,10 @@ public class Icon : Control
         else if (change.Property == ToneProperty)
         {
             PseudoClasses.Swap(change.GetOldValue<Tone>().Value, change.GetNewValue<Tone>().Value);
+            // 色调的颜色按模板优先级绑定主题资源：盖过继承的文字颜色，使用方带伪类的样式仍能盖过它（同主题里的伪类样式），
+            // 但每个图标不用为 7 条色调样式各建一个激活器（图标数量大，DESIGN §9）
+            toneBinding?.Dispose();
+            toneBinding = Tone.BrushKey is { } key ? Bind(ForegroundProperty, this.GetResourceObservable(key), BindingPriority.Template) : null;
         }
         else if (change.Property == FlipInRtlProperty)
         {

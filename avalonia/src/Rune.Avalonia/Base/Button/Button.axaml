@@ -1,8 +1,8 @@
 <!--
   按钮家族的主题（vue-tsx-pro 的 ButtonBase 与 button-core）：
   - ButtonBase：没有外观，只有波纹层、内容、焦点环
-  - Rune.ButtonCore（Button、IconButton 共用，BasedOn ButtonBase）：色调样式设调色板，样式档位绑定调色板的字段（DESIGN §4 决定 11），
-    36 种组合只写 6 + 6 条加 5 条悬停；内部尺寸都是 em：内边距 1em × 0.25em、最小高度 max(2.25em, 24px)
+  - Rune.ButtonCore（Button、IconButton 共用，BasedOn ButtonBase）：色调决定调色板（代码里绑定），样式档位绑定调色板的字段（DESIGN §4 决定 11），
+    36 种组合只写 6 条加 5 条悬停；内部尺寸都是 em：内边距 1em × 0.25em、最小高度 max(2.25em, 24px)
   - Button、IconButton：BasedOn Rune.ButtonCore，只写自己的默认值与模板
   部件的外观写在嵌套样式里（DESIGN §7），使用方的 /template/ 样式排在后面能改
 -->
@@ -46,13 +46,7 @@
     <Setter Property="HorizontalContentAlignment" Value="Center" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
 
-    <!-- 色调 → 调色板 -->
-    <Style Selector="^:neutral"><Setter Property="Palette" Value="{DynamicResource Rune.Palette.Neutral}" /></Style>
-    <Style Selector="^:accent"><Setter Property="Palette" Value="{DynamicResource Rune.Palette.Accent}" /></Style>
-    <Style Selector="^:info"><Setter Property="Palette" Value="{DynamicResource Rune.Palette.Info}" /></Style>
-    <Style Selector="^:success"><Setter Property="Palette" Value="{DynamicResource Rune.Palette.Success}" /></Style>
-    <Style Selector="^:warning"><Setter Property="Palette" Value="{DynamicResource Rune.Palette.Warning}" /></Style>
-    <Style Selector="^:danger"><Setter Property="Palette" Value="{DynamicResource Rune.Palette.Danger}" /></Style>
+    <!-- 色调 → 调色板在 ButtonCore 的代码里（模板优先级），不写成 6 条伪类样式 -->
 
     <!-- 样式 → 调色板的字段；悬停只在可用时（不可用的控件收不到指针） -->
     <Style Selector="^:solid">
@@ -106,10 +100,10 @@
               <StackPanel Name="PART_Content" Orientation="Horizontal" Spacing="{rune:Em 0.5, Of=TemplatedParent}" Margin="{TemplateBinding Padding}"
                           HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
                 <rune:Icon Name="PART_Icon" Data="{TemplateBinding Icon}" VerticalAlignment="Center"
-                           IsVisible="{Binding $parent[rune:Button].Icon, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                           IsVisible="{TemplateBinding Icon, Converter={x:Static ObjectConverters.IsNotNull}}" />
                 <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" VerticalAlignment="Center" />
                 <rune:Icon Name="PART_IconEnd" Data="{TemplateBinding IconEnd}" VerticalAlignment="Center"
-                           IsVisible="{Binding $parent[rune:Button].IconEnd, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                           IsVisible="{TemplateBinding IconEnd, Converter={x:Static ObjectConverters.IsNotNull}}" />
               </StackPanel>
               <rune:Spinner Name="PART_Spinner" IsVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Panel>
