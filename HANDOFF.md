@@ -31,7 +31,7 @@
 - Release 构建零警告，37 个测试全部通过（Avalonia 4、WPF 15、WinForms 18）。
 - 前置探测都做完了，结论写进了 DESIGN（档位类型 §3、组合档位 §4、部件转发 §7、主题切换 §9、热重载 §11）。
 - 开工前要定的事都按建议定下了（ROADMAP"已定的决定" 10–18），"待定的决定"现在是空的。
-- **还没有任何组件**。下一步是阶段 1：先做 `tools/ts-inspect`（ROADMAP"信息与验证工具"），再做生成脚本。
+- **还没有任何组件**。阶段 1 的 `tools/ts-inspect` 已做好；下一步是生成脚本（token-gen 起）。
 
 ## 3. 环境
 
@@ -56,7 +56,12 @@
 | 构建 | `~/.dotnet/dotnet build RuneForCSharp.slnx -c Release` |
 | 测试（换成 avalonia / winforms 的测试工程同理） | `~/.dotnet/dotnet test --project wpf/tests/Rune.Wpf.Tests` |
 | 开 vue-tsx-pro 文档站（对照示例与交互，端口 5174） | 在 vue-tsx-pro 目录下 `pnpm dev:docs` |
-| 查 TS 组件（`ts-inspect`） | 还没做（阶段 1） |
+| 查 TS 组件：props、部件、配方逐条 token、样式表、默认值、语言包、依赖 | `node tools/ts-inspect/ts-inspect.mjs component Button` |
+| 查 token：16 套主题里的取值；不带名字列出所有组 | `node tools/ts-inspect/ts-inspect.mjs token accentHover` |
+| 一组 token，加几列主题 | `node tools/ts-inspect/ts-inspect.mjs token --group colors --themes dark,paper` |
+| 查语言包：键、说明、中英文案 | `node tools/ts-inspect/ts-inspect.mjs lang select` |
+| 依赖分层表 / 一个组件往下用到、往上被用到的 | `node tools/ts-inspect/ts-inspect.mjs deps`、`… deps Select` |
+| 以上都能加 `--json`；`--vue <路径>` 或环境变量 `VUE_TSX_PRO` 指定 vue-tsx-pro | `node tools/ts-inspect/ts-inspect.mjs --help` |
 | 取 TS 文档站的计算样式（`ts-styles`） | 还没做（阶段 2） |
 | 截图、元素树、属性来源、UIA 树（各平台的 `inspect`） | 还没做（阶段 2） |
 | 基准（`inspect bench`） | 还没做（阶段 2） |
@@ -111,7 +116,7 @@
 
 ## 5. 下一步
 
-1. 阶段 1 先做 `tools/ts-inspect`（node + vue-tsx-pro 自带的 `typescript`）：`component`、`token`、`deps`、`lang` 四个子命令，做好后写进命令表。
+1. `tools/ts-inspect` 已做好（命令表里有用法）。移植组件前先跑 `component <名字>`，比通读源码快。
 2. 阶段 1 接着做 `tools/token-gen`，从 vue-tsx-pro 的 `packages/ui/src/config/theme` 生成三种格式（Avalonia 含 16 个自定义 ThemeVariant 与色调调色板），复用 `ts-inspect` 的解析。参考 RuneForBlazor 的 `tools/theme-gen`。
 3. 阶段 2：先做 Gallery 的示例登记表和三个平台的 `inspect`（截图、元素树、属性来源、UIA 树），再做基础设施层（部件转发与合并、作用域、主题、语言、交互工具），用 Icon → Text → Spinner → Badge → Button 家族 → Field 验证。WPF 的 Provider 要递归合成嵌套的部件样式；WinForms 把 4.1 的做法写成正式的 `ElementHost`，部件属性记录的合并用源代码生成器。
 4. 阶段 3：按依赖分层从下往上做组件（ROADMAP 里有五层的清单）。

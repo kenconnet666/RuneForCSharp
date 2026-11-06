@@ -19,7 +19,8 @@
 - 前置探测都做完了，结论在 DESIGN：档位类型（§3）、Avalonia 组合档位（§4）、部件的转发与层层合并（§7）、WinForms 主题切换（§9）、Avalonia 桌面热重载（§11）。只剩 WPF 的 IDE 热重载要手动试。
 - 梳理了 vue-tsx-pro 的结构：基础设施（`utils/`、`config/`）与组件按依赖分层（阶段 2、3）。
 - 开工前要定的事都定了（"已定的决定" 10–18）。
-- 还没有任何组件。下一步：阶段 1，先做"信息与验证工具"里的 `ts-inspect`，再做 token-gen、lang-gen、icons-gen。
+- 阶段 1 的 `ts-inspect` 已做好（命令见 HANDOFF 的命令表）；C# 的 LSP 配好了（HANDOFF §3）。
+- 还没有任何组件。下一步：阶段 1 的 token-gen，然后 lang-gen、icons-gen。
 
 ## 已定的决定
 
@@ -180,7 +181,7 @@
 
 数据源都是 vue-tsx-pro。CI 里固定一个提交，生成脚本跑 `--check`，核对生成文件与源码一致。脚本怎么解析 TS 源码参考 RuneForBlazor 的 `tools/theme-gen`、`lang-gen`、`icon-gen`（读的是同一个数据源）。
 
-- [ ] `ts-inspect`（见"信息与验证工具"）：先做 `component`、`token`、`deps`、`lang` 四个子命令。下面几个生成脚本都用它的解析，不各写一份。
+- [x] `ts-inspect`（见"信息与验证工具"）：`component`、`token`、`deps`、`lang` 四个子命令（2026-11-06）。解析在 `tools/lib/`（找到 vue-tsx-pro、用它自带的 TypeScript 7 解析语法树、导入关系与分层），下面几个生成脚本都用它，不各写一份。
 
 - [ ] `token-gen`：从 `packages/ui/src/config/theme` 读 tokens 和 16 套主题：
   - Avalonia：`Tokens.axaml`（字号、em 系数、边框宽度、阴影、时长）；每套主题一个自定义 `ThemeVariant` 的 ThemeDictionary（颜色画刷 + 6 个色调的调色板）；按时长档位的 Transitions 集合（DESIGN §8）。
