@@ -22,7 +22,8 @@
 - 阶段 1 的 `ts-inspect` 已做好（命令见 HANDOFF 的命令表）；C# 的 LSP 配好了（HANDOFF §3）。
 - 阶段 1 的 token-gen 已做好：三个库都有了 16 套主题的 token。
 - 阶段 1 的 lang-gen 已做好：三个库都有了中英文的语言包。
-- 还没有任何组件。下一步：阶段 1 的 icons-gen。
+- 阶段 1 的 icons-gen 已做好：三个库都有了 Lucide 全集。
+- 还没有任何组件。下一步：阶段 1 的 parity（名字对照），然后进阶段 2。
 
 ## 已定的决定
 
@@ -189,7 +190,7 @@
   - Avalonia：`Tokens.g.axaml`（并入 RuneTheme）与 `RuneThemeVariants.g.cs`；WPF：`Tokens.g.xaml`、`Themes/<主题>.g.xaml`、`RuneTheme`（换主题）、`CubicBezierEase`；WinForms：`Tokens.g.cs`、`Themes.g.cs`（`BuiltinThemes`）、`Easing.g.cs`。各有测试。
   - 留到后面的：CI 里跑 `--check`（阶段 4 建 CI 时）；色调调色板与按时长档位的 Transitions 集合，做 Button 时再生成（角色对照表来自 Button、Badge 的配方）。
 - [x] `lang-gen`（`tools/lang-gen`，2026-11-06）：从 `config/lang` 生成三个库各自的 `Lang`（内置 ZhCn、EnUs），插值文案按语法树翻译成 C# 的 lambda，每个键带中文说明；约定见 DESIGN §6"语言包的生成"。各有测试。
-- [ ] `icons-gen`：Lucide 的路径数据。Avalonia `StreamGeometry`、WPF `Geometry`（冻结）、WinForms `GraphicsPath` 工厂；线宽取 `strokeWidths`。
+- [x] `icons-gen`（`tools/icons-gen`，2026-11-06）：Lucide 全集（2024 个）直接放进每个库的 `Lucide` 类，路径归一成 M、L、C、Z；Avalonia、WPF 解析成 Geometry（WPF 冻结），WinForms 建 GraphicsPath；许可随包分发。约定见 DESIGN §6"图标"。各有测试。
 - [ ] `parity`：用 TS 编译器 API 从 vue-tsx-pro 抽清单（组件、`css.recipe` 的 name / parts / variants、`propsXxx` 部件与它们的类型、ComponentDefaults、Lang 的键），读三个库的程序集对照，报告缺失与改名（改名要在对照表里登记，例如 `open` → `IsOpen`）。
   - 同时输出组件的依赖表与层号（阶段 3 的顺序以它为准）：vue-tsx-pro 改了组件之间的依赖时重算，不手抄。
 

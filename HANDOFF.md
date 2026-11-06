@@ -31,7 +31,7 @@
 - Release 构建零警告，37 个测试全部通过（Avalonia 4、WPF 15、WinForms 18）。
 - 前置探测都做完了，结论写进了 DESIGN（档位类型 §3、组合档位 §4、部件转发 §7、主题切换 §9、热重载 §11）。
 - 开工前要定的事都按建议定下了（ROADMAP"已定的决定" 10–18），"待定的决定"现在是空的。
-- **还没有任何组件**。阶段 1 的 `tools/ts-inspect`、`tools/token-gen`、`tools/lang-gen` 已做好（三个库都有了 16 套主题的 token 和中英文语言包）；下一步是 icons-gen。
+- **还没有任何组件**。阶段 1 的 `tools/ts-inspect`、`tools/token-gen`、`tools/lang-gen`、`tools/icons-gen` 已做好（三个库都有了 16 套主题的 token、中英文语言包和 Lucide 全集）；下一步是 parity。
 
 ## 3. 环境
 
@@ -70,6 +70,7 @@
 | 重新生成 token（改了 vue-tsx-pro 的主题后） | `node tools/token-gen/token-gen.mjs` |
 | 核对生成的 token 与 vue-tsx-pro 一致（CI 用） | `node tools/token-gen/token-gen.mjs --check` |
 | 重新生成语言包（改了 vue-tsx-pro 的语言包后）；`--check` 只核对 | `node tools/lang-gen/lang-gen.mjs` |
+| 重新生成 Lucide 图标（vue-tsx-pro 升级了 @lucide/icons 后）；`--check` 只核对 | `node tools/icons-gen/icons-gen.mjs` |
 | 对照报告（`parity`） | 还没做（阶段 1、2） |
 
 - **对照仓库**（已加进 Claude 会话的工作目录）：
@@ -122,7 +123,7 @@
 ## 5. 下一步
 
 1. `tools/ts-inspect` 已做好（命令表里有用法）。移植组件前先跑 `component <名字>`，比通读源码快。
-2. `tools/token-gen`、`tools/lang-gen` 已做好（DESIGN §6）。阶段 1 接着做 `icons-gen`：Lucide 的路径数据，Avalonia、WPF 转 Geometry，WinForms 转 GraphicsPath。
+2. `tools/token-gen`、`tools/lang-gen`、`tools/icons-gen` 已做好（DESIGN §6）。阶段 1 剩下 `parity`：用 TS 编译器 API 抽清单（组件、部件、档位、默认值、语言键），读三个库的程序集对照名字；之后进阶段 2。
 3. 阶段 2：先做 Gallery 的示例登记表和三个平台的 `inspect`（截图、元素树、属性来源、UIA 树），再做基础设施层（部件转发与合并、作用域、主题、语言、交互工具），用 Icon → Text → Spinner → Badge → Button 家族 → Field 验证。WPF 的 Provider 要递归合成嵌套的部件样式；WinForms 把 4.1 的做法写成正式的 `ElementHost`，部件属性记录的合并用源代码生成器。
 4. 阶段 3：按依赖分层从下往上做组件（ROADMAP 里有五层的清单）。
 5. WPF 的 XAML 热重载要在 Rider 2026.2 或 VS 里手动试（DESIGN §13）。
