@@ -41,7 +41,7 @@ function file(namespace, version, icons) {
     `namespace ${namespace};`,
     '',
     '/// <summary>',
-    `/// Lucide 图标全集（${icons.length} 个），名字同 Lucide 的 JS 导出名：<c>Lucide.CircleX</c>、<c>Lucide.Trash2</c>。`,
+    `/// Lucide 图标全集（${icons.length} 个），名字同 Lucide 的 JS 导出名：<c>Lucide.CircleX</c>、<c>Lucide.ArrowRight</c>。`,
     '/// 24×24 的描边路径，已归一成绝对坐标的 M、L、C、Z；少数图标另有填充的部分（<see cref="IconData.FillPath"/>）。',
     `/// 每个图标第一次用到时才创建。Lucide 改过名的 ${aliasCount} 个旧名是标了 Obsolete 的转发属性，提示新名字。`,
     '/// </summary>',
