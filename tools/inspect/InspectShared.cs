@@ -16,7 +16,9 @@ namespace Rune.Inspect;
 /// <param name="Scale">缩放（DPI / 96）。</param>
 /// <param name="Json">输出 JSON 而不是 Markdown。</param>
 /// <param name="Out">截图的路径；不写时放在 artifacts/inspect/&lt;平台&gt;/ 下。</param>
-sealed record InspectOptions(string Command, string? Key, string Theme, double Width, double Scale, bool Json, string? Out)
+/// <param name="Count">bench：每轮建几个实例。</param>
+/// <param name="Runs">bench：跑几轮（第一轮预热，不计）。</param>
+sealed record InspectOptions(string Command, string? Key, string Theme, double Width, double Scale, bool Json, string? Out, int Count, int Runs)
 {
     public const string Usage = """
         用法：inspect <命令> [组件/示例] [选项]
@@ -25,14 +27,16 @@ sealed record InspectOptions(string Command, string? Key, string Theme, double W
           tree <组件/示例>            元素树：类型、名字、类、边界
           props <组件/示例>           每个元素解析后的属性与值的来源
           uia <组件/示例>             读屏看到的 UI Automation 树
+          bench [组件]                基准：批量建组件，量创建、首次布局、渲染、换主题的耗时与内存（可只跑名字以它开头的）
         选项：--theme <主题>（默认 light） --width <像素>（默认 800） --scale <倍数>（默认 1） --json --out <路径>
+              --count <个数>（bench，默认 1000） --runs <轮数>（bench，默认 6，第一轮预热）
         """;
 
     public static InspectOptions Parse(string[] args)
     {
         if (args.Length == 0) throw new UsageException("缺少命令");
         string? key = null, theme = null, outPath = null;
-        double width = 800, scale = 1;
+        double width = 800, scale = 1, count = 1000, runs = 6;
         var json = false;
         for (var i = 1; i < args.Length; i++)
         {
@@ -42,6 +46,8 @@ sealed record InspectOptions(string Command, string? Key, string Theme, double W
                 case "--width": width = Number(ref i); break;
                 case "--scale": scale = Number(ref i); break;
                 case "--out": outPath = Value(ref i); break;
+                case "--count": count = Number(ref i); break;
+                case "--runs": runs = Number(ref i); break;
                 case "--json": json = true; break;
                 case var arg when arg.StartsWith("--", StringComparison.Ordinal): throw new UsageException($"不认识的选项 {arg}");
                 case var arg when key is null: key = arg; break;
@@ -49,9 +55,10 @@ sealed record InspectOptions(string Command, string? Key, string Theme, double W
             }
         }
         var command = args[0];
-        if (command is not ("list" or "snapshot" or "tree" or "props" or "uia")) throw new UsageException($"不认识的命令 {command}");
-        if (command != "list" && key is null) throw new UsageException($"{command} 要写示例（组件/示例名，如 Icon/basic）");
-        return new InspectOptions(command, key, theme ?? "light", width, scale, json, outPath);
+        if (command is not ("list" or "snapshot" or "tree" or "props" or "uia" or "bench")) throw new UsageException($"不认识的命令 {command}");
+        if (command is not ("list" or "bench") && key is null) throw new UsageException($"{command} 要写示例（组件/示例名，如 Icon/basic）");
+        if (runs < 2) throw new UsageException("--runs 至少 2（第一轮预热，不计）");
+        return new InspectOptions(command, key, theme ?? "light", width, scale, json, outPath, (int)count, (int)runs);
 
         string Value(ref int i) => ++i < args.Length ? args[i] : throw new UsageException($"{args[i - 1]} 后面要写值");
 
@@ -142,4 +149,66 @@ static class Report
             if (File.Exists(Path.Combine(dir.FullName, "RuneForCSharp.slnx"))) return dir.FullName;
         throw new InvalidOperationException($"从 {AppContext.BaseDirectory} 往上找不到 RuneForCSharp.slnx；用 --out 指定截图路径");
     }
+}
+
+/// <summary>
+/// 基准的结果：每个对象跑若干轮，第一轮预热（JIT、样式与资源的首次查找）不计，其余每个阶段取中位数。
+/// 耗时是挂钟时间（毫秒）；分配是这一轮里当前线程分配的字节；常驻是建完、布局完、完整回收之后多出来的托管内存，按个数平摊。
+/// </summary>
+/// <param name="phases">阶段（列名），按先后。</param>
+sealed class BenchReport(params string[] phases)
+{
+    readonly List<(string Subject, Dictionary<string, List<double>> Samples)> subjects = [];
+
+    /// <summary>记一个样本；同一对象的样本按轮累积。</summary>
+    public void Add(string subject, string phase, double value)
+    {
+        var entry = subjects.FirstOrDefault(s => s.Subject == subject);
+        if (entry.Subject is null) subjects.Add(entry = (subject, []));
+        if (!entry.Samples.TryGetValue(phase, out var list)) entry.Samples[phase] = list = [];
+        list.Add(value);
+    }
+
+    public string Render(bool json)
+    {
+        var table = new ReportTable(["组件", .. phases]);
+        foreach (var (subject, samples) in subjects)
+            table.Add([subject, .. phases.Select(phase => samples.TryGetValue(phase, out var list) ? (object)Math.Round(Median(list), 2) : null)]);
+        return table.Render(json);
+    }
+
+    static double Median(List<double> values)
+    {
+        var sorted = values.Order().ToList();
+        return sorted.Count % 2 == 1 ? sorted[sorted.Count / 2] : (sorted[sorted.Count / 2 - 1] + sorted[sorted.Count / 2]) / 2;
+    }
+}
+
+/// <summary>基准的计量：耗时、分配、常驻。</summary>
+static class Bench
+{
+    /// <summary>执行一次，返回毫秒。</summary>
+    public static double Time(Action action)
+    {
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        action();
+        return watch.Elapsed.TotalMilliseconds;
+    }
+
+    /// <summary>
+    /// 完整回收后的托管内存（字节）：量常驻用。终结器要等两遍：第二次回收又会排进新的终结（WPF 渲染留下的 MIL 句柄），
+    /// 不等完它们就和后面的计时并行，抢 WPF 查主题样式时的锁（实测把按钮的创建拖慢几十倍）。
+    /// </summary>
+    public static long Settled()
+    {
+        for (var i = 0; i < 3; i++)
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        }
+        return GC.GetTotalMemory(forceFullCollection: true);
+    }
+
+    /// <summary>当前线程到现在分配的字节。</summary>
+    public static long Allocated() => GC.GetAllocatedBytesForCurrentThread();
 }

@@ -17,7 +17,12 @@ namespace Rune.Wpf.Inspect;
 static class Program
 {
     [STAThread]
-    static int Main(string[] args) => InspectProgram.Run(args, options => options.Command == "list" ? Inspector.List(options) : Inspector.Run(options));
+    static int Main(string[] args) => InspectProgram.Run(args, options => options.Command switch
+    {
+        "list" => Inspector.List(options),
+        "bench" => BenchRunner.Run(options),
+        _ => Inspector.Run(options),
+    });
 }
 
 /// <summary>

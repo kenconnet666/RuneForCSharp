@@ -13,7 +13,7 @@ static class Program
     {
         if (options.Command == "list") return Inspector.List(options);
         ApplicationConfiguration.Initialize();
-        return Inspector.Run(options);
+        return options.Command == "bench" ? BenchRunner.Run(options) : Inspector.Run(options);
     });
 }
 

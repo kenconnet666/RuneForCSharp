@@ -28,7 +28,7 @@ static class Program
             .UseHarfBuzz()
             .UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false })
             .SetupWithoutStarting();
-        return Inspector.Run(options);
+        return options.Command == "bench" ? BenchRunner.Run(options) : Inspector.Run(options);
     });
 }
 
