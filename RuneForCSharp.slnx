@@ -38,7 +38,11 @@
     <Project Path="winforms/src/Rune.WinForms/Rune.WinForms.csproj" />
   </Folder>
   <Folder Name="/winforms/apps/">
+    <Project Path="winforms/apps/Rune.WinForms.Examples/Rune.WinForms.Examples.csproj" />
     <Project Path="winforms/apps/Rune.WinForms.Gallery/Rune.WinForms.Gallery.csproj" />
+  </Folder>
+  <Folder Name="/winforms/tools/">
+    <Project Path="winforms/tools/Rune.WinForms.Inspect/Rune.WinForms.Inspect.csproj" />
   </Folder>
   <Folder Name="/winforms/tests/">
     <Project Path="winforms/tests/Rune.WinForms.Tests/Rune.WinForms.Tests.csproj" />

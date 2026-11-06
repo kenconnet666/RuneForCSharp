@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- 组件示例与登记表：Gallery 列出它们，inspect 按"组件/示例名"渲染与检查它们。示例名同 vue-tsx-pro 文档站上那一节的 id -->
+  <PropertyGroup>
+    <RootNamespace>Rune.WinForms.Examples</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Rune.WinForms\Rune.WinForms.csproj" />
+  </ItemGroup>
+
+</Project>

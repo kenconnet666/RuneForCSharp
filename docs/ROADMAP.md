@@ -126,8 +126,8 @@
 
 ## 自主执行的规矩（用户不在时照此推进，2026-11-06 起）
 
-- **小步提交，直接落在 master**：每完成一项（一个工具、一块基础设施、一个组件或一组紧密相关的组件），跑相关测试与生成脚本的 `--check`，提交；不开 PR、不推送、不发包。整理与功能分开提交。
-- **master 不留红**：提交前 Release 构建零警告、三个测试工程全过。
+- **小步提交，直接落在 master**：每完成一项（一个工具、一块基础设施、一个组件或一组紧密相关的组件），跑相关测试与生成脚本的 `--check`，提交；不开 PR、不发包。整理与功能分开提交。
+- **本地只验证改动相关的，全量交给 CI**（2026-11-06 起）：改了哪个平台就构建、测试哪个平台，相关工具跑 `--check`；三个平台的全量测试、示例截图、生成文件核对由 `.github/workflows/ci.yml` 并行跑。不等 CI，CI 报的问题下次提交前修。本地要跑全量时在另一个 git 工作树里后台跑，主工作区继续。
 - **先查后写**：做组件前跑 `ts-inspect component <名字>` 与 `deps <名字>`，读 vue-tsx-pro 的源码与 RuneForBlazor 的同名组件；改 C# 用 LSP 查定义与引用。
 - **遇到下面的情况，这一项停下，写进"待定的决定"**（日期、项、卡在哪、要决定什么、建议），转去做下一个不依赖它的项：要加"已定的决定"之外的依赖；vue-tsx-pro 的做法在某个平台上做不到、又有多种合理的替代；要改已定的决定或公共 API 的形状。
 - **不写过程流水账**：结论进 DESIGN（取舍与坑）或本文（勾选、一行结论），过程留在提交说明里；每完成一步更新 HANDOFF 的现状与下一步，换会话也能接上。
@@ -245,8 +245,8 @@
   - [ ] 配方结果按（档位组合, 作用域）共享 `Computed`；Provider 作用域控件（主题、默认值、语言信号）。应用级的主题信号 `RuneTheme.Current` 已有。
 
 验证用的工具，第一批组件之前做好：
-- [ ] Gallery 的示例登记表（"组件 / 示例名"，示例名对齐 vue-tsx-pro 文档站的小节 id）。
-- [ ] 三个平台的 `inspect`：`snapshot`、`tree`、`props`、`uia`（见"信息与验证工具"）。
+- [x] Gallery 的示例登记表（"组件 / 示例名"，示例名对齐 vue-tsx-pro 文档站的小节 id）：各平台的 `apps/Rune.*.Examples`，Gallery 与 inspect 共用；Avalonia、WPF 的示例写 XAML，WinForms 写代码。
+- [x] 三个平台的 `inspect`：`list`、`snapshot`、`tree`、`props`、`uia`（`*/tools/Rune.*.Inspect`，命令行与表格输出共用 `tools/inspect/InspectShared.cs`）。WinForms 不支持 `--scale`（按显示器的 DPI 渲染）。
 
 用来验证这一层的第一批组件（都在阶段 3 的第 1、2 层，做完就是正式组件）：Icon → Text → Spinner → Badge → Button 家族 → Field。每个都把档位、调色板、部件转发、Provider 的默认值与样式、size 与 em、主题切换、减少动态效果、热重载、无障碍走一遍。各组件的进度以 `node tools/parity/parity.mjs` 为准。
 - [x] Icon：三个平台都做了（DESIGN §14）；描线动画 `draw` 暂缓，parity 里列为缺失。
@@ -317,7 +317,7 @@ RuneForBlazor 已经走过一遍这些组件，同一个组件先看它踩过的
 
 - [ ] 截图对照：三个库各渲染示例成图片，与 vue-tsx-pro 文档站的截图比较（亮、暗主题），差异人工确认。
 - [ ] UIA 自动化测试覆盖有键盘、焦点逻辑的组件（FlaUI，只在测试里用）。
-- [ ] CI：WPF、WinForms 在 Windows 上构建测试，Avalonia 另加 Linux；生成脚本 `--check`。
+- [~] CI（`.github/workflows/ci.yml`）：三个平台各一个 Windows 任务并行构建、测试、给每个示例截亮暗两张图（上传为 artifact）；Linux 任务核对生成文件、把 parity 报告写进摘要。还差 Avalonia 的 Linux 构建测试。
 - [ ] 打包：三个库各一个 NuGet 包，本地安装试用；发不发、发到哪由用户决定。
 
 ## 待定的决定

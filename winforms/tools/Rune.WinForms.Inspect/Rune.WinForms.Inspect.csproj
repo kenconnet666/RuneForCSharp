@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- 检查 WinForms 的组件：在屏幕外的窗体里渲染示例，输出截图、控件与元素树、属性与来源、无障碍树（命令见 HANDOFF 的命令表） -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Rune.WinForms.Inspect</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\apps\Rune.WinForms.Examples\Rune.WinForms.Examples.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\..\tools\inspect\InspectShared.cs" Link="InspectShared.cs" />
+  </ItemGroup>
+
+</Project>

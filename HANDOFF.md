@@ -31,7 +31,7 @@
 - Release 构建零警告，83 个测试全部通过（Avalonia 19、WPF 30、WinForms 34）。
 - 前置探测都做完了，结论写进了 DESIGN（档位类型 §3、组合档位 §4、部件转发 §7、主题切换 §9、热重载 §11）。
 - 开工前要定的事都按建议定下了（ROADMAP"已定的决定" 10–18），"待定的决定"现在是空的。
-- 阶段 1 已完成：`tools/ts-inspect`、`token-gen`、`lang-gen`、`icons-gen`、`parity`（三个库都有了 16 套主题的 token、中英文语言包和 Lucide 全集）。阶段 2 进行中：档位类型（`TextSize`、`Tone`）与 Icon 三个平台都做了；WinForms 有了无窗口元素的基础（`Element`、单元素宿主 `ElementControl<T>`、应用级主题信号 `RuneTheme.Current`）。接着做 Gallery 的示例登记表与三个平台的 `inspect`。用户要求无人值守持续执行，规矩见 ROADMAP"自主执行的规矩"。
+- 阶段 1 已完成：`tools/ts-inspect`、`token-gen`、`lang-gen`、`icons-gen`、`parity`（三个库都有了 16 套主题的 token、中英文语言包和 Lucide 全集）。阶段 2 进行中：档位类型（`TextSize`、`Tone`）与 Icon 三个平台都做了；WinForms 有了无窗口元素的基础（`Element`、单元素宿主 `ElementControl<T>`、应用级主题信号 `RuneTheme.Current`）。三个平台都有了示例登记表（`apps/Rune.*.Examples`，Gallery 与 inspect 共用）和 `inspect`；CI（`.github/workflows/ci.yml`）按平台并行跑全量，本仓库还没推送过，CI 还没真正跑过。接着做 Text 家族（Text、Paragraph、Strong、Em、Small），顺带补 Provider 的默认值与样式。用户要求无人值守持续执行，规矩见 ROADMAP"自主执行的规矩"。
 
 ## 3. 环境
 
@@ -69,7 +69,8 @@
 | 截图（PNG 写到 `artifacts/inspect/avalonia/`）；`--theme dark`、`--width 600`、`--scale 2` | `… Rune.Avalonia.Inspect.exe snapshot Icon/tones` |
 | 元素树（类型、类与伪类、边界、所在模板） / 属性与来源（本地值、样式、模板、继承，画刷报出 token 名） / UIA 控件视图（角色、名称、Pattern）；都能加 `--json` | `… tree Icon/basic`、`… props Icon/tones`、`… uia Icon/accessibility` |
 | WPF 的 inspect（同样的命令；tree 的"样式"列是隐式还是显式 Style，props 的来源分主题样式、样式触发器、资源引用等） | `wpf/tools/Rune.Wpf.Inspect/bin/Release/net10.0-windows/Rune.Wpf.Inspect.exe snapshot Icon/sizes` |
-| WinForms 的 inspect | 还没做（阶段 2） |
+| WinForms 的 inspect（同样的命令，没有 `--scale`；tree 里单元素宿主下面列出它的元素，uia 是 MSAA 树） | `winforms/tools/Rune.WinForms.Inspect/bin/Release/net10.0-windows/Rune.WinForms.Inspect.exe uia Icon/accessibility` |
+| 全量验证（三个平台并行构建、测试、截图；生成文件核对；parity 报告） | CI：`.github/workflows/ci.yml`（推送到 GitHub 后跑）；本地要跑全量时 `git worktree add ../RuneForCSharp-verify HEAD` 后在那边后台跑 |
 | 基准（`inspect bench`） | 还没做（阶段 2） |
 | 重新生成 token（改了 vue-tsx-pro 的主题后） | `node tools/token-gen/token-gen.mjs` |
 | 核对生成的 token 与 vue-tsx-pro 一致（CI 用） | `node tools/token-gen/token-gen.mjs --check` |
