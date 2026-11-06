@@ -28,10 +28,10 @@
 ## 2. 现在的状态
 
 - 阶段 0 骨架完成：三个平台都有组件库、示例应用和测试工程，基础设施都配了测试。DESIGN §2 有目录说明。
-- Release 构建零警告，37 个测试全部通过（Avalonia 4、WPF 15、WinForms 18）。
+- Release 构建零警告，83 个测试全部通过（Avalonia 19、WPF 30、WinForms 34）。
 - 前置探测都做完了，结论写进了 DESIGN（档位类型 §3、组合档位 §4、部件转发 §7、主题切换 §9、热重载 §11）。
 - 开工前要定的事都按建议定下了（ROADMAP"已定的决定" 10–18），"待定的决定"现在是空的。
-- **还没有任何组件**。阶段 1 已完成：`tools/ts-inspect`、`token-gen`、`lang-gen`、`icons-gen`、`parity`（三个库都有了 16 套主题的 token、中英文语言包和 Lucide 全集）。阶段 2 进行中：Avalonia、WPF 的 Icon 与档位类型（`TextSize`、`Tone`）已做；接着做 WinForms 的 ElementHost（无窗口元素的宿主）与 Icon。用户要求无人值守持续执行，规矩见 ROADMAP"自主执行的规矩"。
+- 阶段 1 已完成：`tools/ts-inspect`、`token-gen`、`lang-gen`、`icons-gen`、`parity`（三个库都有了 16 套主题的 token、中英文语言包和 Lucide 全集）。阶段 2 进行中：档位类型（`TextSize`、`Tone`）与 Icon 三个平台都做了；WinForms 有了无窗口元素的基础（`Element`、单元素宿主 `ElementControl<T>`、应用级主题信号 `RuneTheme.Current`）。接着做 Gallery 的示例登记表与三个平台的 `inspect`。用户要求无人值守持续执行，规矩见 ROADMAP"自主执行的规矩"。
 
 ## 3. 环境
 

@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Drawing.Drawing2D;
 using System.Globalization;
 
@@ -11,6 +12,7 @@ namespace Rune.WinForms;
 /// <param name="name">名字（Lucide 的图标名）。</param>
 /// <param name="path">描边的路径（只含绝对坐标的 M、L、C、Z）。</param>
 /// <param name="fillPath">要填充的部分（少数 Lucide 图标的实心点），没有时为 null。</param>
+[TypeConverter(typeof(IconDataConverter))]
 public sealed class IconData(string name, string path, string? fillPath = null)
 {
     /// <summary>画布边长：路径的坐标在 0–24 之间。</summary>

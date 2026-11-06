@@ -240,17 +240,17 @@
   - [ ] Provider 接上默认值、语言、局部主题（换合并字典）；上面"合并与配置"里的两项。
   - [ ] 在 Rider / VS 里实测改 Provider.Styles 的 XAML 热重载（DESIGN §13）。
 - WinForms：
-  - [ ] `ElementHost` 正式化：布局（Flex 的子集）、焦点、Tab、键盘、命中测试、无障碍（HANDOFF §4.1 的做法）、DPI 变化。
-  - [ ] 单元素宿主 `ElementControl<T>`：一个元素包成一个控件，能放进设计器（属性、序列化、默认值）。
-  - [ ] 配方结果按（档位组合, 作用域）共享 `Computed`；Provider 作用域控件（主题、默认值、语言信号）。
+  - [ ] `ElementHost` 正式化：布局（Flex 的子集）、焦点、Tab、键盘、命中测试、无障碍（HANDOFF §4.1 的做法）、DPI 变化。元素的基类 `Element`、`IElementHost`、`ElementContext` 已有（`Elements/`），多元素的宿主做 Button 家族时写。
+  - [x] 单元素宿主 `ElementControl<T>`：一个元素包成一个控件，能放进设计器（属性、序列化、默认值），绘制 effect 追踪主题（DESIGN §14 Icon）。
+  - [ ] 配方结果按（档位组合, 作用域）共享 `Computed`；Provider 作用域控件（主题、默认值、语言信号）。应用级的主题信号 `RuneTheme.Current` 已有。
 
 验证用的工具，第一批组件之前做好：
 - [ ] Gallery 的示例登记表（"组件 / 示例名"，示例名对齐 vue-tsx-pro 文档站的小节 id）。
 - [ ] 三个平台的 `inspect`：`snapshot`、`tree`、`props`、`uia`（见"信息与验证工具"）。
 
 用来验证这一层的第一批组件（都在阶段 3 的第 1、2 层，做完就是正式组件）：Icon → Text → Spinner → Badge → Button 家族 → Field。每个都把档位、调色板、部件转发、Provider 的默认值与样式、size 与 em、主题切换、减少动态效果、热重载、无障碍走一遍。各组件的进度以 `node tools/parity/parity.mjs` 为准。
-- [~] Icon：Avalonia、WPF 已做（DESIGN §14）；WinForms 等 ElementHost 做好后补；描线动画 `draw` 暂缓。
-- [~] 档位类型：`IVariant` / `VariantConverter` 与 `TextSize`、`Tone`，Avalonia、WPF 已做。
+- [x] Icon：三个平台都做了（DESIGN §14）；描线动画 `draw` 暂缓，parity 里列为缺失。
+- [x] 档位类型：`IVariant` / `VariantConverter` 与 `TextSize`、`Tone`，三个库都做了。
 
 ### 3. 按依赖分层移植组件
 
