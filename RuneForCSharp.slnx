@@ -1,0 +1,53 @@
+<Solution>
+  <Folder Name="/avalonia/">
+    <File Path="avalonia/Directory.Build.props" />
+  </Folder>
+  <Folder Name="/avalonia/src/">
+    <Project Path="avalonia/src/Rune.Avalonia/Rune.Avalonia.csproj" />
+  </Folder>
+  <Folder Name="/avalonia/apps/">
+    <Project Path="avalonia/apps/Rune.Avalonia.Gallery/Rune.Avalonia.Gallery.csproj" />
+  </Folder>
+  <Folder Name="/avalonia/tests/">
+    <Project Path="avalonia/tests/Rune.Avalonia.Tests/Rune.Avalonia.Tests.csproj" />
+  </Folder>
+  <Folder Name="/wpf/">
+    <File Path="wpf/Directory.Build.props" />
+  </Folder>
+  <Folder Name="/wpf/src/">
+    <Project Path="wpf/src/Rune.Wpf/Rune.Wpf.csproj" />
+  </Folder>
+  <Folder Name="/wpf/apps/">
+    <Project Path="wpf/apps/Rune.Wpf.Gallery/Rune.Wpf.Gallery.csproj" />
+  </Folder>
+  <Folder Name="/wpf/tests/">
+    <Project Path="wpf/tests/Rune.Wpf.Tests/Rune.Wpf.Tests.csproj" />
+  </Folder>
+  <Folder Name="/winforms/">
+    <File Path="winforms/Directory.Build.props" />
+  </Folder>
+  <Folder Name="/winforms/src/">
+    <Project Path="winforms/src/Rune.WinForms/Rune.WinForms.csproj" />
+  </Folder>
+  <Folder Name="/winforms/apps/">
+    <Project Path="winforms/apps/Rune.WinForms.Gallery/Rune.WinForms.Gallery.csproj" />
+  </Folder>
+  <Folder Name="/winforms/tests/">
+    <Project Path="winforms/tests/Rune.WinForms.Tests/Rune.WinForms.Tests.csproj" />
+  </Folder>
+  <Folder Name="/docs/">
+    <File Path="docs/DESIGN.md" />
+    <File Path="docs/ROADMAP.md" />
+  </Folder>
+  <Folder Name="/解决方案项/">
+    <File Path=".editorconfig" />
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+  </Folder>
+</Solution>
