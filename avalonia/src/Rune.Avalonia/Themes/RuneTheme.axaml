@@ -21,6 +21,7 @@
         <ResourceInclude Source="avares://Rune.Avalonia/Base/Link/Link.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Base/List/List.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Base/Indicator/Indicator.axaml" />
+        <ResourceInclude Source="avares://Rune.Avalonia/Layout/Separator/Separator.axaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>

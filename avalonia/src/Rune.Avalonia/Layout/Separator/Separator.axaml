@@ -1,0 +1,20 @@
+<!--
+  Separator 的主题（vue-tsx-pro 的 separatorStyles）：线色 borderMuted、线宽 borderWidths.xs；带文字时文字是次要文字色、行高 tight。
+  竖线在 Flex 里随行高拉伸（align-self: stretch），在其他面板里竖向拉伸
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:Separator}" TargetType="rune:Separator">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+    <Setter Property="Thickness" Value="{DynamicResource Rune.BorderWidth.Xs}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Tight}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Style Selector="^[Orientation=vertical]">
+      <Setter Property="VerticalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalAlignment" Value="Left" />
+      <Setter Property="rune:Flex.AlignSelf" Value="stretch" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

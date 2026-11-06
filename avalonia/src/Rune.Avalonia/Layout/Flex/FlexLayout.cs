@@ -108,7 +108,7 @@ static class FlexLayout
     }
 
     /// <summary>
-    /// 一项在行里的交叉轴位置与尺寸（align-items）：stretch 填满行，baseline 让第一行文字的基线对齐（没有基线的按底边）。
+    /// 一项在行里的交叉轴位置与尺寸（align-items，项自己的 align-self 盖过它）：stretch 填满行，baseline 让第一行文字的基线对齐（没有基线的按底边）。
     /// </summary>
     public static (double Offset, double Size) Align(double cross, double lineCross, FlexAlign align, double ascent, double lineAscent) => align.Value switch
     {
@@ -119,13 +119,13 @@ static class FlexLayout
         _ => (0, lineCross),
     };
 
-    /// <summary>一行的交叉轴尺寸：最高的项；按基线对齐时基线以上、以下分别取最大。</summary>
-    public static (double Cross, double Ascent) LineCross(IEnumerable<(double Cross, double Ascent)> items, FlexAlign align)
+    /// <summary>一行的交叉轴尺寸：最高的项；按基线对齐的项基线以上、以下分别取最大，再和其余的项比。</summary>
+    public static (double Cross, double Ascent) LineCross(IReadOnlyList<(double Cross, double Ascent, FlexAlign Align)> items)
     {
-        if (align.Value != "baseline") return (items.Select(item => item.Cross).DefaultIfEmpty().Max(), 0);
-        var ascent = items.Select(item => item.Ascent).DefaultIfEmpty().Max();
-        var descent = items.Select(item => item.Cross - item.Ascent).DefaultIfEmpty().Max();
-        return (ascent + descent, ascent);
+        var aligned = items.Where(item => item.Align.Value == "baseline").ToList();
+        var ascent = aligned.Select(item => item.Ascent).DefaultIfEmpty().Max();
+        var descent = aligned.Select(item => item.Cross - item.Ascent).DefaultIfEmpty().Max();
+        return (Math.Max(ascent + descent, items.Select(item => item.Cross).DefaultIfEmpty().Max()), ascent);
     }
 
     /// <summary>

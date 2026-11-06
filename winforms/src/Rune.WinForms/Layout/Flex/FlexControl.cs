@@ -16,10 +16,12 @@ namespace Rune.WinForms;
 /// 自己的大小同 Label：自然宽度，不超过布局给的宽度与 MaximumSize（停靠、锚定时由父容器给）。
 /// </summary>
 [ProvideProperty("Grow", typeof(Control))]
+[ProvideProperty("AlignSelf", typeof(Control))]
 public class FlexControl : Panel, IExtenderProvider
 {
     readonly FlexEngine engine;
     readonly HashSet<Control> growing = [];
+    readonly Dictionary<Control, FlexAlign> selfAligns = [];
 
     /// <summary>新建：自动大小。</summary>
     public FlexControl()
@@ -134,11 +136,32 @@ public class FlexControl : Panel, IExtenderProvider
         if (value ? growing.Add(control) : growing.Remove(control)) PerformLayout();
     }
 
+    /// <summary>子控件自己的交叉轴对齐（CSS 的 align-self），盖过 Align；没写时是控件自己带的（<see cref="IFlexItem"/>）。</summary>
+    /// <param name="control">子控件。</param>
+    [DisplayName("AlignSelf")]
+    [Category("Layout")]
+    [Description("这个子控件自己的交叉轴对齐，盖过 FlexControl 的 Align。")]
+    public FlexAlign GetAlignSelf(Control control) => selfAligns.TryGetValue(control, out var align) ? align : (control as IFlexItem)?.AlignSelf ?? default;
+
+    /// <summary>设子控件自己的交叉轴对齐。</summary>
+    /// <param name="control">子控件。</param>
+    /// <param name="value">对齐；default 时不再盖过。</param>
+    public void SetAlignSelf(Control control, FlexAlign value)
+    {
+        if (value.Value is null) selfAligns.Remove(control);
+        else selfAligns[control] = value;
+        PerformLayout();
+    }
+
+    /// <summary>一项实际的交叉轴对齐：自己的，没写时是 Align。</summary>
+    FlexAlign AlignOf(Control child) => GetAlignSelf(child) is { Value: not null } self ? self : Align;
+
     /// <inheritdoc />
     protected override void OnControlRemoved(ControlEventArgs e)
     {
         base.OnControlRemoved(e);
         growing.Remove(e.Control!);
+        selfAligns.Remove(e.Control!);
     }
 
     /// <inheritdoc />
@@ -209,15 +232,15 @@ public class FlexControl : Panel, IExtenderProvider
             var ascents = new double[children.Count];
             foreach (var line in lines)
             {
-                var crosses = new (double Cross, double Ascent)[line.Count];
+                var crosses = new (double Cross, double Ascent, FlexAlign Align)[line.Count];
                 for (var k = 0; k < line.Count; k++)
                 {
                     var i = line.Start + k;
                     sizes[i] = SizeOf(children[i], line.Main[k], cross);
                     var size = Cross(sizes[i]);
-                    crosses[k] = (size, ascents[i] = (children[i] as IBaseline)?.Baseline ?? size);
+                    crosses[k] = (size, ascents[i] = (children[i] as IBaseline)?.Baseline ?? size, owner.AlignOf(children[i]));
                 }
-                line.Cross = FlexLayout.LineCross(crosses, owner.Align).Cross;
+                line.Cross = FlexLayout.LineCross(crosses).Cross;
             }
             return (lines, sizes, ascents);
         }
@@ -254,12 +277,12 @@ public class FlexControl : Panel, IExtenderProvider
             foreach (var line in ordered)
             {
                 var positions = FlexLayout.Positions(line.Main, gaps.Main, main, owner.Justify, reverse);
-                var items = Enumerable.Range(0, line.Count).Select(k => (Cross(sizes[line.Start + k]), ascents[line.Start + k])).ToList();
-                var lineAscent = FlexLayout.LineCross(items, owner.Align).Ascent;
+                var items = Enumerable.Range(0, line.Count).Select(k => (Cross(sizes[line.Start + k]), ascents[line.Start + k], owner.AlignOf(children[line.Start + k]))).ToList();
+                var lineAscent = FlexLayout.LineCross(items).Ascent;
                 for (var k = 0; k < line.Count; k++)
                 {
                     var child = children[line.Start + k];
-                    var (offset, size) = FlexLayout.Align(items[k].Item1, line.Cross, owner.Align, items[k].Item2, lineAscent);
+                    var (offset, size) = FlexLayout.Align(items[k].Item1, line.Cross, items[k].Item3, items[k].Item2, lineAscent);
                     // 关掉 AutoSize 的子控件有自己的大小：不拉伸
                     if (!child.AutoSize && size > items[k].Item1) size = items[k].Item1;
                     var x = mirror ? main - positions[k] - line.Main[k] : positions[k];
@@ -273,6 +296,15 @@ public class FlexControl : Panel, IExtenderProvider
             return owner.AutoSize;
         }
     }
+}
+
+/// <summary>
+/// 放进 FlexControl 时自己带的 align-self（组件的样式要求，如竖向的分隔线随行高拉伸）；FlexControl 的 SetAlignSelf 盖过它。
+/// </summary>
+interface IFlexItem
+{
+    /// <summary>自己的交叉轴对齐；default 时跟随 Align。</summary>
+    FlexAlign AlignSelf { get; }
 }
 
 /// <summary>flex 布局的列表（vue-tsx-pro 的 FlexList，ul 去掉圆点）：读屏里是列表。</summary>

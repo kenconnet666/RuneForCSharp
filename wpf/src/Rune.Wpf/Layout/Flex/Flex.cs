@@ -55,6 +55,10 @@ public class Flex : Panel
     public static readonly DependencyProperty GrowProperty = DependencyProperty.RegisterAttached(
         "Grow", typeof(bool), typeof(Flex), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsParentMeasure));
 
+    /// <summary>这一项自己的交叉轴对齐（CSS 的 align-self），盖过 Flex 的 Align（附加属性：竖向的 Separator 用它随行高拉伸）。</summary>
+    public static readonly DependencyProperty AlignSelfProperty = DependencyProperty.RegisterAttached(
+        "AlignSelf", typeof(FlexAlign), typeof(Flex), new FrameworkPropertyMetadata(default(FlexAlign), FrameworkPropertyMetadataOptions.AffectsParentMeasure));
+
     static readonly DependencyProperty RowGapFactorProperty = DependencyProperty.Register(
         "RowGapFactor", typeof(double), typeof(Flex), new FrameworkPropertyMetadata(0d, FrameworkPropertyMetadataOptions.AffectsMeasure));
 
@@ -104,6 +108,15 @@ public class Flex : Panel
 
     /// <summary>写子元素的 Grow。</summary>
     public static void SetGrow(UIElement element, bool value) => element.SetValue(GrowProperty, value);
+
+    /// <summary>读子元素的 AlignSelf。</summary>
+    public static FlexAlign GetAlignSelf(UIElement element) => (FlexAlign)element.GetValue(AlignSelfProperty);
+
+    /// <summary>写子元素的 AlignSelf。</summary>
+    public static void SetAlignSelf(UIElement element, FlexAlign value) => element.SetValue(AlignSelfProperty, value);
+
+    /// <summary>一项实际的交叉轴对齐：自己的 AlignSelf，没写时是 Flex 的 Align。</summary>
+    FlexAlign AlignOf(UIElement child) => GetAlignSelf(child) is { Value: not null } self ? self : Align;
 
     bool IsRow => Direction.Value is null or "row" or "row-reverse";
 
@@ -158,15 +171,15 @@ public class Flex : Panel
         ascents = new double[children.Count];
         foreach (var line in result)
         {
-            var sizes = new (double Cross, double Ascent)[line.Count];
+            var sizes = new (double Cross, double Ascent, FlexAlign Align)[line.Count];
             for (var k = 0; k < line.Count; k++)
             {
                 var child = children[line.Start + k];
                 child.Measure(Of(line.Main[k], cross, row));
                 var size = Cross(child.DesiredSize, row);
-                sizes[k] = (size, ascents[line.Start + k] = Baseline(child) ?? size);
+                sizes[k] = (size, ascents[line.Start + k] = Baseline(child) ?? size, AlignOf(child));
             }
-            line.Cross = FlexLayout.LineCross(sizes, Align).Cross;
+            line.Cross = FlexLayout.LineCross(sizes).Cross;
         }
         return result;
     }
@@ -220,11 +233,11 @@ public class Flex : Panel
         foreach (var line in ordered)
         {
             var positions = FlexLayout.Positions(line.Main, gaps.Main, main, Justify, IsReverse);
-            var items = Enumerable.Range(0, line.Count).Select(k => (Cross(children[line.Start + k].DesiredSize, row), ascents[line.Start + k])).ToList();
-            var lineAscent = FlexLayout.LineCross(items, Align).Ascent;
+            var items = Enumerable.Range(0, line.Count).Select(k => (Cross(children[line.Start + k].DesiredSize, row), ascents[line.Start + k], AlignOf(children[line.Start + k]))).ToList();
+            var lineAscent = FlexLayout.LineCross(items).Ascent;
             for (var k = 0; k < line.Count; k++)
             {
-                var (offset, size) = FlexLayout.Align(items[k].Item1, line.Cross, Align, items[k].Item2, lineAscent);
+                var (offset, size) = FlexLayout.Align(items[k].Item1, line.Cross, items[k].Item3, items[k].Item2, lineAscent);
                 var rect = row
                     ? new Rect(positions[k], y + offset, line.Main[k], size)
                     : new Rect(y + offset, positions[k], size, line.Main[k]);
