@@ -13,6 +13,9 @@ namespace Rune.WinForms;
 /// </summary>
 public class Text : Element
 {
+    /// <summary>上一次量的输入与结果（字体是共用的实例，按引用比）。</summary>
+    (string Content, Font Font, int Width, TextFormatFlags Flags, Size Size)? measured;
+
     /// <summary>文字内容（TS 的 children）。</summary>
     public string Content
     {
@@ -140,13 +143,21 @@ public class Text : Element
     protected internal override Size Measure(ElementContext context, Size available)
     {
         var font = ResolveFont(context);
-        // 行高按 TextRenderer 量出来的算（比 Font.Height 多一两个像素），与多行文字量出来的高度一致
-        var lineHeight = TextRenderer.MeasureText("Ag", font, default(System.Drawing.Size), TextFormatFlags.NoPadding | TextFormatFlags.SingleLine).Height;
+        var lineHeight = Fonts.LineHeight(font);
         if (Content.Length == 0) return new Size(0, lineHeight);
-        var size = TextRenderer.MeasureText(Content, font, new Size(available.Width, int.MaxValue), Flags(context));
-        if (LineClamp is { } lines) size.Height = Math.Min(size.Height, lines * lineHeight);
-        if (Truncate) size.Width = Math.Min(size.Width, available.Width);
-        return size;
+        var flags = Flags(context);
+        // 同样的输入不重量：按钮这类在测量与绘制时各量一次，换主题重画时又量一次
+        if (measured is { } last && last.Content == Content && last.Font == font && last.Width == available.Width && last.Flags == flags) return Clamp(last.Size);
+        var size = TextRenderer.MeasureText(Content, font, new Size(available.Width, int.MaxValue), flags);
+        measured = (Content, font, available.Width, flags, size);
+        return Clamp(size);
+
+        Size Clamp(Size size)
+        {
+            if (LineClamp is { } lines) size.Height = Math.Min(size.Height, lines * lineHeight);
+            if (Truncate) size.Width = Math.Min(size.Width, available.Width);
+            return size;
+        }
     }
 
     /// <inheritdoc />

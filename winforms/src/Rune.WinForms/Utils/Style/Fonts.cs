@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Drawing.Text;
+using System.Runtime.CompilerServices;
 
 namespace Rune.WinForms;
 
@@ -27,4 +28,13 @@ public static class Fonts
     /// <summary>共用的字体（不要 Dispose）。</summary>
     internal static Font Get(string family, float points, FontStyle style) =>
         fonts.GetOrAdd((family, points, style), key => new Font(key.Family, key.Points, key.Style));
+
+    static readonly ConditionalWeakTable<Font, StrongBox<int>> lineHeights = [];
+
+    /// <summary>
+    /// 一行字的高度：按 TextRenderer 量出来的算（比 Font.Height 多一两个像素），与多行文字量出来的高度一致。
+    /// 按字体缓存：每个文字元素每次测量都要它，量一次要一次 GDI 调用。宿主的字体可能被释放，弱引用缓存不延长它的寿命。
+    /// </summary>
+    internal static int LineHeight(Font font) => lineHeights.GetValue(font, key =>
+        new StrongBox<int>(TextRenderer.MeasureText("Ag", key, default(System.Drawing.Size), TextFormatFlags.NoPadding | TextFormatFlags.SingleLine).Height)).Value;
 }
