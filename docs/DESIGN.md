@@ -454,9 +454,15 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 读屏：Badge 本身不是控件元素，读屏直接读里面的文字（Avalonia、WPF）；WinForms 是静态文字，名字是 Text。
 - 踩过：WPF 里使用方的隐式 `rune:Text` 样式也会套到 Badge 里面的 Text 上（示例里改成带键的样式）。Avalonia 的子选择器 `WrapPanel > rune|Text` 只选直接子元素，不受影响。
 
-### Button
+### Button 家族（ButtonBase、Button、IconButton）
 
-- 外观 = 样式（solid、soft、surface、outline、ghost、link，`ButtonVariant`）× 色调（`StatusTone`）× 字号档位 × 圆角；内部尺寸都是 em：内边距 1em × 0.25em、最小高度 max(2.25em, 24px)、图标与文字间距 0.5em、圆角取主题的 radii 系数。
+- **分层照 TS 的 ButtonBase 与 button-core**（`Base/Button/` 一个文件夹）：
+  - `ButtonBase`（Avalonia、WPF）：没有外观的按钮，波纹、焦点环、颜色过渡、加载中拦下点击；菜单项、标签页这类"长得不像按钮的按钮"以后建在它上面。模板里的 `PART_Ripples`、`PART_FocusRing` 按名字找到，换模板时照着放。
+  - `ButtonCore`（抽象）：外观（样式、色调、字号档位、圆角、图标、调色板）与加载指示防闪烁。Avalonia 的共用主题 `Rune.ButtonCore`（BasedOn ButtonBase 的主题）、WPF 的生成配方样式（TargetType 是 ButtonCore）放调色板、样式档位与状态，Button、IconButton 的主题 BasedOn 它，只写自己的默认值与模板。
+  - `Button`：文字、后置图标、占满宽度；`IconButton`：方形（宽度 max(2.25em, 24px)，左右内边距 0），默认 ghost、中性色，读屏名称写 `AutomationProperties.Name`（WinForms 是 AccessibleName；parity 把 TS 的 aria-label 对到它）。
+  - WinForms：元素 `ButtonCore` 画外框、波纹、加载指示、焦点环并算内边距，子类只排内容（`MeasureContent`、`PaintContent`）；宿主的输入、IButtonControl、无障碍在 `ButtonControlBase<T>`，`ButtonControl`、`IconButtonControl` 只加自己的属性。WinForms 的 ButtonBase 等多元素宿主（任意内容）再做。
+  - Avalonia 的 BasedOn 主题：派生主题的普通 setter 排在基主题的嵌套样式之后，会盖过基主题 `^:link` 这类状态样式；所以共有的默认值都写在 `Rune.ButtonCore`，派生主题只写不与状态样式冲突的（IconButton 的左右内边距本来就是 0）。
+- 外观 = 样式（solid、soft、surface、outline、ghost、link，`ButtonVariant`）× 色调（`StatusTone`）× 字号档位 × 圆角；内部尺寸都是 em：内边距 1em × 0.25em、最小高度 max(2.25em, 24px)、图标与文字间距 0.5em、圆角取主题的 radii 系数。链接样式只去掉左右内边距与最小高度，上下 0.25em 保留（同 TS 的配方）。WPF 的 em 宽度与 24px 下限用 `EmSize.Width`、`EmSize.MinTarget`。
 - **颜色都从一张调色板表来**（`tools/token-gen/palette.mjs`：每种色调九个字段，中性与其他色调的不规则收在表里）：
   - Avalonia：token-gen 生成每套主题六份 `TonePalette`（`Rune.Palette.Accent`……）；色调伪类设 Palette，6 条样式档位绑定字段，加 5 条悬停（决定 11），36 种组合只写 17 条嵌套样式。
   - WPF：`tools/recipe-gen` 把配方表展开成主题样式的 MultiTrigger（36 条组合 + 30 条悬停，ButtonRecipe.g.xaml），Button 的主题样式 BasedOn 它；使用方任何 setter 都能盖过。
@@ -473,4 +479,4 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   - Avalonia 的 `Rune.BorderWidth.*` 资源是 double，Thickness 属性不能直接引用（运行时类型转换异常），描边宽度写字面量。
   - WPF 的 Border 不会把过大的圆角缩回来，radii.full 画成椭圆；Button 把圆角限制在高度的一半，尺寸变了重新算。
   - WPF 没有 IsMouseOverChanged 事件，悬停相关的代码放在 OnMouseEnter / OnMouseLeave。
-- 缺口：focusableWhenDisabled（平台上不可用的控件不能聚焦，要另做"可聚焦的不可用"状态）；WinForms 的 propsContent；type（submit、reset）不移植，登记在 parity 的 PROPS_NOT_PORTED。
+- 缺口：focusableWhenDisabled（平台上不可用的控件不能聚焦，要另做"可聚焦的不可用"状态）；WinForms 的 propsContent（内容层不是元素）；ButtonBase 的示例（自定义外观的卡片要等 Flex）；type（submit、reset）不移植，登记在 parity 的 PROPS_NOT_PORTED。
