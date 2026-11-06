@@ -529,6 +529,18 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   - WinForms 的控件画不到自己外面、也盖不住兄弟控件：角标是叠在内容上面的小控件（Region 裁成胶囊形，外沿没有抗锯齿，但那一圈是页面底色），IndicatorControl 给伸出去的一半留出位置——这是和 TS 唯一的布局差别。
   - 读屏：角标是一段文字（Avalonia、WPF 的 Border 本来不进控件树，换成内部的子类给 Text 的 peer），名称是 Label 或语言包的说明，数字不念。
 
+### 布局：Flex、Grid、Separator、Container（2026-11-07）
+
+- **Flex**：CSS flexbox 的子集（方向、align-items、justify-content、wrap / wrap-reverse、gap 与行列间距、inline、grow，项自己的 align-self）。三个平台都是自定义面板；分行、伸缩、分布、对齐的计算是纯计算的 `FlexLayout`，三个库各一份、除命名空间外逐字相同（`tools/twins` 核对，CI 里跑）——三个库不共享代码（ROADMAP 决定 2），一致性靠检查。
+  - 收缩按基础尺寸加权（flex-shrink: 1）。最多缩到多小：CSS 是内容的最小宽度（最长的词）；Avalonia、WPF 的测量结果不超过给的尺寸、量不出这个值，按写了的宽度或 MinWidth（同 min-width: 0，文字换行或截断）；WinForms 的想要大小不受给的宽度限制，按几乎为 0 的宽度取，得到真正的最小内容宽度。
+  - 基线对齐：直接的文字取第一行的基线（Avalonia 的 TextLayout，WPF 按字体度量，WinForms 是元素的 `Baseline`），其余按底边（CSS 给没有基线的项合成的基线）。
+  - grow：Avalonia、WPF 是附加属性 `Flex.Grow`（Flex 自己的 Grow 是同一个属性，放进外层 Flex 时生效）；WinForms 是 IExtenderProvider（同 FlowLayoutPanel 的 FlowBreak），设计器里是"flex1 上的 Grow"。align-self 同样（`Flex.AlignSelf`；WinForms 的组件自带的用 `IFlexItem`，竖向 Separator 用它随行高拉伸）。
+  - WinForms 的 stretch 只拉伸自动大小的子控件（关掉 AutoSize 的有自己的大小，同 CSS 写了高度的项）。
+- **Grid**：CSS grid 的子集（等宽列、minItemWidth 自动换列 + auto-fit 收起空列、行列间距、逐行 / 逐列放置与 dense 回填、跨列跨行、align / justify-items）。计算是孪生文件 `GridLayout`。`Length` 类型认 CSS 长度（px、em、rem，rem 按浏览器的 16px）。WinForms 的跨度既能用 GridItemControl 包一层（同 TS），也能用 GridControl 的扩展属性 `SetSpan` / `SetRowSpan`（同 TableLayoutPanel）。
+- **Separator**：自绘的线（DESIGN §9 的轻量组件），带文字时文字与两段线是代码组合的子元素；两段线都叫 PART_Line（代码建的元素不登记名字，重名没关系），一条部件样式同时作用于两段（同 TS 的 propsLine）。
+- **Container**：Avalonia 从 Control 派生（Decorator 的 Padding 是 Thickness，和 TS 的 padding 档位撞名），WPF 从 Decorator 派生（没有 Padding）；WinForms 是 `ContainerPanel`（WinForms 自己有 ContainerControl），重写 DisplayRectangle 成居中的一栏，停靠、锚定都在里面；属性叫 ContainerSize、InlinePadding（Size、Padding 被控件占了）。WPF 原来的容器查询档位改名 `Breakpoint`（它是断点，不是容器宽度）。
+- 撞名：Rune 的 Grid、Separator 和 Avalonia、WPF 自带的同名。XAML 里有前缀不受影响；C# 里同时引用两个命名空间时写全名（同 Button）。
+
 ### Spinner
 
 - 第一个带部件的组件（`propsIcon`），三个平台按 §7 的写法各落地一次：
