@@ -10,24 +10,36 @@ namespace Rune.WinForms.Tests;
 static class WinFormsUi
 {
     static readonly Control marshal = Start();
+    static readonly SemaphoreSlim gate = new(1, 1);
 
-    /// <summary>在 UI 线程上执行测试体；测试体里的异常原样抛给测试。</summary>
-    public static Task Run(Action body)
+    /// <summary>
+    /// 在 UI 线程上执行测试体；测试体里的异常原样抛给测试。一次只投递一个测试体：测试体里的 <see cref="Pump"/>
+    /// 会处理排队的消息，别的测试体若已经排在队里就会在里面重入执行，改全局状态（RuneTheme.Current）的测试互相干扰（CI 上踩过）。
+    /// </summary>
+    public static async Task Run(Action body)
     {
-        var done = new TaskCompletionSource();
-        marshal.BeginInvoke(() =>
+        await gate.WaitAsync();
+        try
         {
-            try
+            var done = new TaskCompletionSource();
+            marshal.BeginInvoke(() =>
             {
-                body();
-                done.SetResult();
-            }
-            catch (Exception e)
-            {
-                done.SetException(e);
-            }
-        });
-        return done.Task;
+                try
+                {
+                    body();
+                    done.SetResult();
+                }
+                catch (Exception e)
+                {
+                    done.SetException(e);
+                }
+            });
+            await done.Task;
+        }
+        finally
+        {
+            gate.Release();
+        }
     }
 
     /// <summary>放进屏幕外的窗口并画一次（登记绘制依赖）。</summary>

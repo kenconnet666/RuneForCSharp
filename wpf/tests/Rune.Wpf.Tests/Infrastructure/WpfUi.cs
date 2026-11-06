@@ -14,8 +14,24 @@ static class WpfUi
 {
     static readonly Dispatcher dispatcher = StartDispatcher();
 
-    /// <summary>在 UI 线程上执行测试体；测试体里的异常原样抛给测试。</summary>
-    public static Task Run(Action body) => dispatcher.InvokeAsync(body).Task;
+    static readonly SemaphoreSlim gate = new(1, 1);
+
+    /// <summary>
+    /// 在 UI 线程上执行测试体；测试体里的异常原样抛给测试。一次只投递一个测试体：测试体里的 <see cref="Flush"/>、
+    /// <see cref="Wait"/> 会推消息帧，别的测试体若已经排在队里就会在里面重入执行，改共享状态的测试互相干扰。
+    /// </summary>
+    public static async Task Run(Action body)
+    {
+        await gate.WaitAsync();
+        try
+        {
+            await dispatcher.InvokeAsync(body).Task;
+        }
+        finally
+        {
+            gate.Release();
+        }
+    }
 
     /// <summary>放进屏幕外的窗口并完成样式、模板与布局。</summary>
     public static Window Show(UIElement content)
