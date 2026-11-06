@@ -90,6 +90,8 @@ function compare(theirs, ours) {
 }
 
 function same(prop, a, b, props, mine) {
+  // 行内元素没有高度（auto）：不比
+  if (prop === 'Height' && a === 'auto') return true;
   // CSS 的 min-width / min-height 没写时是 auto、letter-spacing 是 normal，平台上是 0
   if (a === 'auto' || (prop === 'LetterSpacing' && a === 'normal')) a = 0;
   // 自绘的组件在测量里保证最小尺寸，没有 MinHeight 属性：实际高度够了就算一样

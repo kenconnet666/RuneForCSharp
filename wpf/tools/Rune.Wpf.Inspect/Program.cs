@@ -173,7 +173,7 @@ static class Inspector
             if (node is FrameworkElement element)
             {
                 // 组件在代码里组合的子组件（Badge 里的文字）不单独记：TS 里那是组件自己的文字节点
-                var composed = VisualTreeHelper.GetParent(element) is FrameworkElement parent && IsComponent(parent);
+                var composed = element is TextBlock && VisualTreeHelper.GetParent(element) is FrameworkElement parent && IsComponent(parent) && parent is not TextBlock;
                 var name = element.Name is { Length: > 0 } part && Owner(element) is { } owner && DeclaredParts(owner.GetType()).Contains(part)
                     ? StyleReport.Name(owner.GetType().Name, part)
                     : IsComponent(element) && !composed ? StyleReport.Name(element.GetType().Name, null) : null;
