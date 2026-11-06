@@ -18,7 +18,7 @@
 - 阶段 0 骨架完成：三个平台各有组件库、示例应用、测试工程，基础设施都配了测试（37 个，全部通过）。
 - 前置探测都做完了，结论在 DESIGN：档位类型（§3）、Avalonia 组合档位（§4）、部件的转发与层层合并（§7）、WinForms 主题切换（§9）、Avalonia 桌面热重载（§11）。只剩 WPF 的 IDE 热重载要手动试。
 - 梳理了 vue-tsx-pro 的结构：基础设施（`utils/`、`config/`）与组件按依赖分层（阶段 2、3）。
-- 开工前要定的事都定了（"已定的决定" 10–18）。
+- 开工前要定的事都定了（"已定的决定" 10–18），之后定下的见 19 起。
 - 阶段 1 的 `ts-inspect` 已做好（命令见 HANDOFF 的命令表）；C# 的 LSP 配好了（HANDOFF §3）。
 - 阶段 1 的 token-gen 已做好：三个库都有了 16 套主题的 token。
 - 阶段 1 的 lang-gen 已做好：三个库都有了中英文的语言包。
@@ -48,6 +48,7 @@
 | 16 | 对照粒度 | parity 比对名字与配方取值（每个部件在各档位下用哪个 token）；截图比对放在阶段 4 |
 | 17 | 工具的语言 | 读 vue-tsx-pro 的工具用 node，只依赖内置模块与 vue-tsx-pro 自带的 `typescript`；要加载三个库的工具用 C# |
 | 18 | 测试与工具的依赖 | Playwright、FlaUI 只用在测试与工具里，不进组件库的依赖 |
+| 19 | WPF 的 Text 家族 | 从 TextBlock 派生（行内内容、截断、读屏现成）；模板里的 Text 给部件样式键，Provider 合成部件键时叠在同一组件的类型键结果上，"所有实例"的样式就能进模板（2026-11-06 用户确认） |
 
 ## 平台化的约定
 
@@ -251,7 +252,7 @@
 用来验证这一层的第一批组件（都在阶段 3 的第 1、2 层，做完就是正式组件）：Icon → Text → Spinner → Badge → Button 家族 → Field。每个都把档位、调色板、部件转发、Provider 的默认值与样式、size 与 em、主题切换、减少动态效果、热重载、无障碍走一遍。各组件的进度以 `node tools/parity/parity.mjs` 为准。
 - [x] Icon：三个平台都做了（DESIGN §14）；描线动画 `draw` 暂缓，parity 里列为缺失。
 - [x] 档位类型：`IVariant` / `VariantConverter` 与 `TextSize`、`Tone`，三个库都做了。
-- [x] Text 家族（Text、Paragraph、Strong、Em、Small）：三个平台都做了（DESIGN §14）；WPF 按"待定的决定"的建议 A 从 TextBlock 派生，等确认。示例做了 scale、tones、numeric、overflow，inline、links、headings 等 Kbd、Link、Heading。
+- [x] Text 家族（Text、Paragraph、Strong、Em、Small）：三个平台都做了（DESIGN §14）；WPF 从 TextBlock 派生（决定 19）。示例做了 scale、tones、numeric、overflow，inline、links、headings 等 Kbd、Link、Heading。
 
 ### 3. 按依赖分层移植组件
 
@@ -323,11 +324,4 @@ RuneForBlazor 已经走过一遍这些组件，同一个组件先看它踩过的
 
 ## 待定的决定
 
-新的待定项写在这里：日期、事项、卡在哪、要决定什么，附上建议。
-
-- **2026-11-06 WPF 的 Text 家族从哪派生**（Avalonia 已做；WinForms 是无窗口元素，不受影响）。
-  - 卡在哪：Text 会被别的组件当部件放进模板（Field 的说明、Empty 的描述……）。WPF 外层的隐式样式只进得了 Control 派生元素的模板（DESIGN §7），从 TextBlock 派生的 Text 在模板里收不到 Provider 按类型写的样式。
-  - 选项：
-    - A. 从 TextBlock 派生：行内内容（Run、Bold、InlineUIContainer）、换行、截断、选择、读屏都现成，开销最小。模板里的 Text 一律给部件样式键；Provider 合成部件键时让它 BasedOn 同一组件的类型键结果，"所有实例"就能进模板。
-    - B. 从 Control 派生、OnRender 里画 FormattedText（MaxTextWidth、MaxLineCount、Trimming 都有）：隐式样式直接进模板；但只能放纯文字，没有行内内容，读屏、选择要自己做。
-  - 建议 A（Provider 的部件键本来就要按类型键叠，代价在 Provider 一处）。已按 A 做了（2026-11-06），Provider 那一步做部件转发时把"部件键叠类型键"一起实现；要改成 B 时只动 WPF 的 Text.cs。
+暂无。新的待定项写在这里：日期、事项、卡在哪、要决定什么，附上建议。
