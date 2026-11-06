@@ -192,4 +192,24 @@ public class ButtonTests
         Assert.True(soft.IsDisabled);
         Assert.False(soft.IsEnabled);
     });
+
+    [Upstream("Button", "组件默认值")]
+    [Upstream("Button", "使用方的 sx")]
+    [Fact]
+    public Task Provider_defaults_and_user_styles_beat_the_component_look() => WpfUi.Run(() =>
+    {
+        // Provider 的样式改默认外观，显式写的属性优先；使用方普通的 setter 盖过档位的颜色（主题样式的触发器整体在下面）
+        var byDefault = new Rune.Wpf.Button { Content = "默认" };
+        var explicitly = new Rune.Wpf.Button { Content = "显式", Variant = ButtonVariant.Solid };
+        var styled = new Rune.Wpf.Button { Content = "定制", Style = new Style(typeof(Rune.Wpf.Button)) { Setters = { new Setter(Control.BackgroundProperty, Brushes.Teal) } } };
+        var fragment = new Style(typeof(Rune.Wpf.Button)) { Setters = { new Setter(ButtonCore.VariantProperty, ButtonVariant.Soft), new Setter(ButtonCore.ToneProperty, StatusTone.Neutral) } };
+        var provider = new Provider { Styles = new ResourceDictionary { [typeof(Rune.Wpf.Button)] = fragment }, Child = new StackPanel { Children = { byDefault, explicitly } } };
+        var (host, _) = Host(provider, styled);
+        WpfUi.Show(host);
+
+        Assert.Equal((ButtonVariant.Soft, StatusTone.Neutral), (byDefault.Variant, byDefault.Tone));
+        Assert.Equal(BrushColor((Brush)host.FindResource("Rune.Brush.Fill")), BrushColor(byDefault.Background));
+        Assert.Equal(ButtonVariant.Solid, explicitly.Variant);
+        Assert.Equal(Colors.Teal, BrushColor(styled.Background));
+    });
 }
