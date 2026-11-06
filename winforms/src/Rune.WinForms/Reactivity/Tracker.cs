@@ -21,6 +21,17 @@ public abstract class ReactiveSource
         foreach (var subscriber in subscribers.ToArray()) subscriber.OnSourceChanged();
     }
 
+    /// <summary>
+    /// 通知后清空订阅：只管一次的源（逐帧的时钟）用它。下一次读时重新登记，不再读的（隐藏、移出视口而没重画的控件）自然退出。
+    /// </summary>
+    protected void NotifySubscribersOnce()
+    {
+        if (subscribers.Count == 0) return;
+        var notified = subscribers.ToArray();
+        subscribers.Clear();
+        foreach (var subscriber in notified) subscriber.OnSourceChanged();
+    }
+
     internal void Subscribe(Tracker tracker) => subscribers.Add(tracker);
 
     internal void Unsubscribe(Tracker tracker) => subscribers.Remove(tracker);

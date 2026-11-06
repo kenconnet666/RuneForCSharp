@@ -429,3 +429,12 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   - TextBlock 没有最大行数：LineClamp 按行高限 MaxHeight（`FontFamily.LineSpacing × FontSize`，或 LineHeight），加 Wrap 与 CharacterEllipsis，最后一行放不下的部分变成省略号。字号、字体、行高变了要重算：TextBlock 的 `OnPropertyChanged` 是密封的，改成覆盖这几个属性的元数据、加变化回调（与基类的回调合并）。
   - Numeric 是 `Typography.NumeralAlignment = Tabular`；Align 的 Start、End 对应 TextAlignment 的 Left、Right（随 FlowDirection 镜像）。
   - WPF 的字重比 GDI 全：medium、semibold 都画得出来。
+
+### Spinner
+
+- 第一个带部件的组件（`propsIcon`），三个平台按 §7 的写法各落地一次：
+  - **Avalonia**：TemplatedControl，模板里只有 `rune:Icon#PART_Icon`（`SpinnerParts.Icon` 是部件名常量）。图标、从 Spinner 转来的大小（`{Binding $parent[rune:Spinner].Size}`）、旋转动画都写在 ControlTheme 的嵌套样式 `^ /template/ rune|Icon#PART_Icon` 里，使用方的 `/template/` 样式逐个属性盖过它（测试覆盖）。旋转用样式动画（`RotateTransform.Angle`，Avalonia 自动补上 RenderTransform）。Avalonia 还没有"系统关闭动画"的开关，暂时不减速。
+  - **WPF**：Control，模板里的图标套部件样式键 `SpinnerParts.Icon`（ComponentResourceKey）；主题的部件样式给图标与大小（`{Binding Size, RelativeSource={RelativeSource TemplatedParent}}`），Provider.Styles 里同键的样式叠在上面（测试覆盖）。旋转在 OnApplyTemplate 里开（DoubleAnimation 无限循环），系统关闭动画时转慢一半（1.6 秒一圈，同 TS 的 _reducedMotion）。RenderTargetBitmap 截到的是动画的第一帧。
+  - **WinForms**：元素 `Spinner` 里有一个 Icon 元素；部件属性记录 `IconProps`（字段可空），Spinner 给的在下、`PropsIcon` 在上逐字段合并（`Merge`），合并结果套到新建的 Icon 上（没写的字段回到 Icon 自己的默认）。记录先手写，第三个用到部件记录的组件出现时再做源代码生成器。
+- **逐帧的时钟（WinForms）**：一直在动的东西读 `FrameClock.Shared.Now`，订阅只管一帧（`ReactiveSource.NotifySubscribersOnce`）：不再重画的（隐藏、离屏）自然退出，没人订阅时定时器停下（测试覆盖）。Animator 的补间用于"从 A 到 B"，FrameClock 用于"一直转"。
+- **无障碍**：有 Label 时是进度条（不确定进度），名字是 Label；没有时 Avalonia、WPF 不进控件树，WinForms 是没有名字的 Animation。TS 是 role="status"，桌面上没有对应的"状态"角色，用进度条（读屏会念"忙"）。peer 的 *Core 方法里不能再调公开的 GetName（WPF 报递归调用），直接读 Label。
