@@ -10,7 +10,7 @@ import { langMembers } from '../lib/lang.mjs';
 import { code, table } from '../lib/markdown.mjs';
 import { openVue, repoRoot } from '../lib/vue.mjs';
 import { component as inspectComponent } from '../ts-inspect/component.mjs';
-import { EXCLUDED, PLATFORM_PROPS, PROP_RENAMES } from './registry.mjs';
+import { COMPONENT_PROP_RENAMES, EXCLUDED, PLATFORM_PROPS, PROP_RENAMES } from './registry.mjs';
 
 const LIBRARIES = [
   { name: 'Avalonia', dir: 'avalonia/src/Rune.Avalonia' },
@@ -19,7 +19,7 @@ const LIBRARIES = [
 ];
 
 const pascal = (name) => name.replace(/^_/, '').replace(/^\w/, (c) => c.toUpperCase());
-const csName = (prop) => PROP_RENAMES[prop] ?? pascal(prop);
+const csName = (component, prop) => COMPONENT_PROP_RENAMES[component]?.[prop] ?? PROP_RENAMES[prop] ?? pascal(prop);
 
 /** vue-tsx-pro 的组件：`export const 名字 = _component(…)` 或工厂（createText、createFlex……，createContext 不算） */
 function vueComponents(vue) {
@@ -59,7 +59,7 @@ function csharpTypes(dir) {
 
 function compareProps(vue, name, members) {
   const data = inspectComponent(vue, name).data;
-  const expected = [...data.props, ...data.parts].map((prop) => ({ prop: prop.name, cs: csName(prop.name) }));
+  const expected = [...data.props, ...data.parts].map((prop) => ({ prop: prop.name, cs: csName(name, prop.name) }));
   const missing = expected.filter(({ cs }) => !members.has(cs) && !PLATFORM_PROPS.has(cs));
   const known = new Set(expected.map(({ cs }) => cs));
   return { missing, expected: expected.length, extra: [...members].filter((member) => !known.has(member)) };

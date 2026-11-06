@@ -1,0 +1,97 @@
+using System.ComponentModel;
+using System.Globalization;
+
+namespace Rune.Avalonia;
+
+/// <summary>
+/// 字号档位（vue-tsx-pro 的 TextSize）：xs–xl 对应主题的 fontSizes（<c>Rune.FontSize.Md</c>），也可以直接写像素数（<c>Size="18"</c>）。
+/// </summary>
+/// <param name="Value">档位名（xs…xl）或像素数的文字。</param>
+[TypeConverter(typeof(VariantConverter<TextSize>))]
+public readonly record struct TextSize(string Value) : IVariant<TextSize>
+{
+    /// <summary>12px：辅助说明、标签。</summary>
+    public static readonly TextSize Xs = new("xs");
+
+    /// <summary>13px：紧凑控件。</summary>
+    public static readonly TextSize Sm = new("sm");
+
+    /// <summary>14px：正文与默认控件。</summary>
+    public static readonly TextSize Md = new("md");
+
+    /// <summary>16px：宽松控件、小标题。</summary>
+    public static readonly TextSize Lg = new("lg");
+
+    /// <summary>18px：强调文字、卡片标题。</summary>
+    public static readonly TextSize Xl = new("xl");
+
+    /// <inheritdoc />
+    public static IReadOnlyList<TextSize> Known { get; } = [Xs, Sm, Md, Lg, Xl];
+
+    /// <summary>直接给像素数时的值；是档位名时为 null。</summary>
+    public double? Pixels => double.TryParse(Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var pixels) ? pixels : null;
+
+    /// <summary>档位名对应的字号资源键（<c>Rune.FontSize.Md</c>）；是像素数时为 null。</summary>
+    public string? ResourceKey => Value is null || Pixels is not null ? null : $"Rune.FontSize.{char.ToUpperInvariant(Value[0])}{Value[1..]}";
+
+    /// <inheritdoc />
+    public static TextSize Parse(string value)
+    {
+        var size = new TextSize(value);
+        if (size.Pixels is null) Variants.WarnIfUnknown(size);
+        return size;
+    }
+
+    /// <summary>像素数。</summary>
+    /// <param name="pixels">设备无关像素。</param>
+    public static implicit operator TextSize(double pixels) => new(pixels.ToString(CultureInfo.InvariantCulture));
+
+    /// <inheritdoc />
+    public override string ToString() => Value;
+}
+
+/// <summary>
+/// 文字色调（vue-tsx-pro 的 Tone）：图标、文字按状态着色；inherit 跟随外面的文字颜色。
+/// </summary>
+/// <param name="Value">取值（neutral、muted、accent……）。</param>
+[TypeConverter(typeof(VariantConverter<Tone>))]
+public readonly record struct Tone(string Value) : IVariant<Tone>
+{
+    /// <summary>正文色。</summary>
+    public static readonly Tone Neutral = new("neutral");
+
+    /// <summary>次要说明。</summary>
+    public static readonly Tone Muted = new("muted");
+
+    /// <summary>品牌色的文字。</summary>
+    public static readonly Tone Accent = new("accent");
+
+    /// <summary>危险、错误。</summary>
+    public static readonly Tone Danger = new("danger");
+
+    /// <summary>成功、正常。</summary>
+    public static readonly Tone Success = new("success");
+
+    /// <summary>警告、需要注意。</summary>
+    public static readonly Tone Warning = new("warning");
+
+    /// <summary>信息、提示。</summary>
+    public static readonly Tone Info = new("info");
+
+    /// <summary>跟随外面的文字颜色。</summary>
+    public static readonly Tone Inherit = new("inherit");
+
+    /// <inheritdoc />
+    public static IReadOnlyList<Tone> Known { get; } = [Neutral, Muted, Accent, Danger, Success, Warning, Info, Inherit];
+
+    /// <inheritdoc />
+    public static Tone Parse(string value)
+    {
+        var tone = new Tone(value);
+        Variants.WarnIfUnknown(tone);
+        return tone;
+    }
+
+    /// <inheritdoc />
+    public override string ToString() => Value;
+}

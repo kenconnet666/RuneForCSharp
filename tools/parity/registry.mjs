@@ -18,6 +18,11 @@ export const PROP_RENAMES = {
   _value: 'Value',
 };
 
+/** 只对某个组件的改名（C# 的成员不能与类同名：Icon 的 icon 叫 Data） */
+export const COMPONENT_PROP_RENAMES = {
+  Icon: { icon: 'Data' },
+};
+
 /** 平台控件自带、不用组件自己声明的属性（基类里已经有） */
 export const PLATFORM_PROPS = new Set(['IsEnabled', 'Content', 'Tag']);
 

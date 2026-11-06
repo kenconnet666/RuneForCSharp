@@ -9,6 +9,7 @@
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
         <ResourceInclude Source="avares://Rune.Avalonia/Config/Generated/Tokens.g.axaml" />
+        <ResourceInclude Source="avares://Rune.Avalonia/Base/Icon/Icon.axaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>
