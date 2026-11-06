@@ -1,0 +1,17 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/avalonia"
+             x:Class="Rune.Avalonia.Examples.TextInline">
+  <!-- Code、Mark 是行内文字（跟着段落换行），Kbd 是控件、放进 InlineUIContainer；段落里的加粗、斜体、小字用行内的 Span -->
+  <StackPanel Spacing="16">
+    <rune:Paragraph>
+      在任意页面按 <InlineUIContainer BaselineAlignment="Center"><rune:Kbd>Ctrl</rune:Kbd></InlineUIContainer> + <InlineUIContainer BaselineAlignment="Center"><rune:Kbd>K</rune:Kbd></InlineUIContainer> 打开搜索，输入 <rune:Code>button</rune:Code> 就能找到<rune:Mark>Button 按钮</rune:Mark>与它的全部示例。<Span FontWeight="{DynamicResource Rune.FontWeight.Semibold}">Strong</Span> 表示重要，<Italic>Em</Italic> 表示语气上的强调，<Span FontSize="{DynamicResource Rune.FontSize.Xs}">Small 用于附注与版权信息</Span>。
+    </rune:Paragraph>
+    <rune:Blockquote>
+      <StackPanel>
+        <rune:Paragraph>渐进式框架：可以只在页面的一小块里用它，也可以用它搭建完整的单页应用。</rune:Paragraph>
+        <rune:Small Tone="muted">—— Vue 文档</rune:Small>
+      </StackPanel>
+    </rune:Blockquote>
+  </StackPanel>
+</UserControl>

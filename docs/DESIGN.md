@@ -505,6 +505,12 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 开销：1000 个 Text 多分配约 0.8 MB（+7%），常驻每个多约 0.2 KB。
 - WinForms 还没做：TextRenderer 不能设行距，多行文字要自己断行才能按 1.5 排；单行的高度可以直接按 1.5em 算，做多行文字的组件时一起做。
 
+### Kbd、Code、Mark、Blockquote（2026-11-07）
+
+- TS 里 Kbd 是 inline-block（一个小盒子），Code、Mark 是 inline（跟着段落换行、底色贴着文字）。所以 Kbd 做成控件（放进段落时用 InlineUIContainer），Code、Mark 做成行内文字 `Span`（Avalonia、WPF）：跟着段落换行，但行内文字没有盒子，TS 的左右内边距（Code 的 space.xs、Mark 的 0.15em）与圆角画不出来，底色就是文字的底色。WinForms 的 Text 是整段画出来的，没有行内元素：Code、Mark 做成单独的元素（像 Kbd），不能嵌在一段文字里。
+- 相对字号（CSS 的 `font-size: 0.85em`）：Avalonia 绑定到外面的字号再乘倍数（`FontScale`，Kbd 按视觉父元素、Code 按逻辑父元素）；WPF 由 `EmSize.Register(…, fontScale)` 把继承来的字号强制成倍数。
+- Avalonia 的行内文字照样能用 ControlTheme（按类型找到主题）。示例里段落中的加粗、斜体、小字用行内的 Span，不用 Strong、Em、Small 控件：控件放进 InlineUIContainer 后行高与基线和段落对不齐。
+
 ### Spinner
 
 - 第一个带部件的组件（`propsIcon`），三个平台按 §7 的写法各落地一次：

@@ -1,10 +1,6 @@
 using global::Avalonia;
 using global::Avalonia.Automation.Peers;
 using global::Avalonia.Controls;
-using global::Avalonia.Controls.Documents;
-using global::Avalonia.Data;
-using global::Avalonia.Data.Converters;
-using global::Avalonia.Markup.Xaml.MarkupExtensions.CompiledBindings;
 using global::Avalonia.VisualTree;
 
 namespace Rune.Avalonia;
@@ -21,7 +17,7 @@ namespace Rune.Avalonia;
 public class Kbd : ContentControl
 {
     /// <summary>字号相对外面的倍数。</summary>
-    const double FontScale = 0.85;
+    const double Scale = 0.85;
 
     IDisposable? fontSize;
 
@@ -29,14 +25,7 @@ public class Kbd : ContentControl
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
-        // 字号随外面变：绑定到父元素的（继承的）字号 × 0.85，按模板优先级，使用方带类或伪类的样式盖得过
-        if (this.GetVisualParent() is { } parent)
-            fontSize = Bind(FontSizeProperty, new CompiledBinding(new CompiledBindingPathBuilder().Property(TextElement.FontSizeProperty, PropertyInfoAccessorFactory.CreateAvaloniaPropertyAccessor).Build())
-            {
-                Source = parent,
-                Converter = new FuncValueConverter<double, double>(size => size * FontScale),
-                Priority = BindingPriority.Template,
-            });
+        if (this.GetVisualParent() is { } parent) fontSize = FontScale.Bind(this, parent, Scale);
     }
 
     /// <inheritdoc />
