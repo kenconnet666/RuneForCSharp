@@ -1,0 +1,248 @@
+using System.ComponentModel;
+
+namespace Rune.WinForms;
+
+/// <summary>
+/// 放进窗体、设计器里用的 <see cref="Button"/>：文字内容就是控件的 <see cref="Control.Text"/>，字号档位叫 <see cref="TextSize"/>。
+/// 宿主处理输入：悬停、按下（波纹）、键盘（Enter 按下就点击、空格松开点击，同 Windows 按钮）、焦点（只在键盘提示开着时显示焦点环）。
+/// 实现 <see cref="IButtonControl"/>，能当窗体的 AcceptButton、CancelButton。加载中点击无效（Click 不触发），焦点保留。
+/// 默认留 4 像素的 Padding：焦点环画在按钮外面一圈（CSS 的 outline 不占位，WinForms 的控件画不出自己的边界）。
+/// </summary>
+[ToolboxItem(true)]
+[DefaultEvent(nameof(Click))]
+[DefaultProperty(nameof(Text))]
+[Description("按钮：样式 × 色调 × 字号档位 × 圆角，按下有波纹。")]
+public class ButtonControl : ElementControl<Button>, IButtonControl
+{
+    Action? releasePointerRipple;
+    Action? releaseKeyRipple;
+
+    /// <summary>新建按钮：能获得焦点、进 Tab 顺序。</summary>
+    public ButtonControl()
+    {
+        SetStyle(ControlStyles.Selectable | ControlStyles.StandardClick, true);
+        SetStyle(ControlStyles.StandardDoubleClick, false);
+        Padding = new Padding(LogicalToDeviceUnits(4));
+        Cursor = Cursors.Hand;
+    }
+
+    /// <summary>样式。</summary>
+    [Category("Appearance")]
+    [Description("样式：solid、soft、surface、outline、ghost、link。")]
+    public ButtonVariant Variant { get => Element.Variant; set => Element.Variant = value; }
+
+    /// <summary>色调。</summary>
+    [Category("Appearance")]
+    [Description("色调：neutral、accent、info、success、warning、danger。")]
+    public StatusTone Tone { get => Element.Tone; set => Element.Tone = value; }
+
+    /// <summary>字号档位。</summary>
+    [Category("Appearance")]
+    [Description("字号：xs–xl 或像素数；空着时跟随字体。")]
+    public TextSize TextSize { get => Element.Size; set => Element.Size = value; }
+
+    /// <summary>圆角。</summary>
+    [Category("Appearance")]
+    [Description("圆角：none、xs、sm、md、lg、xl、full，默认 md。")]
+    public Radius Radius { get => Element.Radius; set => Element.Radius = value; }
+
+    /// <summary>文字前的图标。</summary>
+    [Category("Appearance")]
+    [Description("文字前的图标：Lucide 的图标名。")]
+    [DefaultValue(null)]
+    public IconData? Icon { get => Element.Icon; set => Element.Icon = value; }
+
+    /// <summary>文字后的图标。</summary>
+    [Category("Appearance")]
+    [Description("文字后的图标：Lucide 的图标名。")]
+    [DefaultValue(null)]
+    public IconData? IconEnd { get => Element.IconEnd; set => Element.IconEnd = value; }
+
+    /// <summary>加载中。</summary>
+    [Category("Behavior")]
+    [Description("加载中：显示旋转指示，宽度不变，点击无效。")]
+    [DefaultValue(false)]
+    public bool IsLoading { get => Element.IsLoading; set => Element.IsLoading = value; }
+
+    /// <summary>按下时的波纹；不写时沿用全局开关。</summary>
+    [Category("Behavior")]
+    [Description("按下时的波纹；空着时沿用 Ripple.Enabled。")]
+    [DefaultValue(null)]
+    public bool? Ripple { get => Element.Ripple; set => Element.Ripple = value; }
+
+    /// <summary>占满宽度（AutoSize 时按父控件给的宽度）。</summary>
+    [Category("Layout")]
+    [Description("占满宽度。")]
+    [DefaultValue(false)]
+    public bool FullWidth { get => Element.FullWidth; set => Element.FullWidth = value; }
+
+    /// <summary>前置图标部件的属性（代码里设）。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public IconProps? PropsIcon { get => Element.PropsIcon; set => Element.PropsIcon = value; }
+
+    /// <summary>后置图标部件的属性（代码里设）。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public IconProps? PropsIconEnd { get => Element.PropsIconEnd; set => Element.PropsIconEnd = value; }
+
+    /// <summary>加载指示部件的属性（代码里设）。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public IconProps? PropsSpinner { get => Element.PropsSpinner; set => Element.PropsSpinner = value; }
+
+    /// <summary>当窗体的 AcceptButton、CancelButton 时，点击后窗体的 DialogResult。</summary>
+    [Category("Behavior")]
+    [DefaultValue(DialogResult.None)]
+    public DialogResult DialogResult { get; set; }
+
+    bool ShouldSerializeVariant() => Variant != ButtonVariant.Solid;
+
+    void ResetVariant() => Variant = default;
+
+    bool ShouldSerializeTone() => Tone != StatusTone.Accent;
+
+    void ResetTone() => Tone = default;
+
+    bool ShouldSerializeTextSize() => TextSize != default;
+
+    void ResetTextSize() => TextSize = default;
+
+    bool ShouldSerializeRadius() => Radius != Radius.Md;
+
+    void ResetRadius() => Radius = default;
+
+    /// <summary>窗体把它设成或取消默认按钮时调用（同 WinForms 的 Button）。</summary>
+    public void NotifyDefault(bool value) => Invalidate();
+
+    /// <summary>代码里点击（加载中、不可用时无效，由 OnClick 拦下）。</summary>
+    public void PerformClick() => OnClick(EventArgs.Empty);
+
+    /// <summary>加载中、不可用时点击无效；当窗体的默认按钮时设窗体的 DialogResult。</summary>
+    protected override void OnClick(EventArgs e)
+    {
+        if (Element.IsLoading || !Enabled) return;
+        if (DialogResult != DialogResult.None && FindForm() is { } form) form.DialogResult = DialogResult;
+        base.OnClick(e);
+    }
+
+    /// <inheritdoc />
+    protected override void OnTextChanged(EventArgs e)
+    {
+        base.OnTextChanged(e);
+        Element.Content = Text;
+    }
+
+    /// <inheritdoc />
+    protected override void OnEnabledChanged(EventArgs e)
+    {
+        base.OnEnabledChanged(e);
+        Element.IsEnabled = Enabled;
+    }
+
+    /// <inheritdoc />
+    protected override void OnMouseEnter(EventArgs e)
+    {
+        base.OnMouseEnter(e);
+        Element.IsHovered = true;
+    }
+
+    /// <inheritdoc />
+    protected override void OnMouseLeave(EventArgs e)
+    {
+        base.OnMouseLeave(e);
+        Element.IsHovered = false;
+        ReleasePointerRipple();
+    }
+
+    /// <inheritdoc />
+    protected override void OnMouseDown(MouseEventArgs e)
+    {
+        base.OnMouseDown(e);
+        if (e.Button != MouseButtons.Left) return;
+        Focus();
+        if (Element.RippleOn)
+        {
+            releasePointerRipple?.Invoke();
+            releasePointerRipple = Element.StartRipple(new PointF(e.X - Element.Bounds.X, e.Y - Element.Bounds.Y));
+        }
+    }
+
+    /// <inheritdoc />
+    protected override void OnMouseUp(MouseEventArgs e)
+    {
+        base.OnMouseUp(e);
+        ReleasePointerRipple();
+    }
+
+    /// <inheritdoc />
+    protected override bool IsInputKey(Keys keyData) => keyData is Keys.Enter or Keys.Space || base.IsInputKey(keyData);
+
+    /// <summary>Enter 按下就点击；空格按下出波纹、松开点击。从中心扩散，按住不放的重复按键不再出新的波纹。</summary>
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+        if (e.KeyCode is not (Keys.Enter or Keys.Space)) return;
+        if (Element.RippleOn && releaseKeyRipple is null)
+            releaseKeyRipple = Element.StartRipple(new PointF(Element.Bounds.Width / 2f, Element.Bounds.Height / 2f));
+        if (e.KeyCode == Keys.Enter) PerformClick();
+        e.Handled = true;
+    }
+
+    /// <inheritdoc />
+    protected override void OnKeyUp(KeyEventArgs e)
+    {
+        base.OnKeyUp(e);
+        ReleaseKeyRipple();
+        if (e.KeyCode == Keys.Space) PerformClick();
+    }
+
+    /// <summary>焦点环只在键盘提示开着时显示（用鼠标点出来的焦点不显示，同 :focus-visible）。</summary>
+    protected override void OnGotFocus(EventArgs e)
+    {
+        base.OnGotFocus(e);
+        Element.IsFocusVisible = ShowFocusCues;
+    }
+
+    /// <inheritdoc />
+    protected override void OnLostFocus(EventArgs e)
+    {
+        base.OnLostFocus(e);
+        Element.IsFocusVisible = false;
+        ReleaseKeyRipple();
+    }
+
+    /// <inheritdoc />
+    protected override void OnChangeUICues(UICuesEventArgs e)
+    {
+        base.OnChangeUICues(e);
+        Element.IsFocusVisible = Focused && ShowFocusCues;
+    }
+
+    void ReleasePointerRipple()
+    {
+        releasePointerRipple?.Invoke();
+        releasePointerRipple = null;
+    }
+
+    void ReleaseKeyRipple()
+    {
+        releaseKeyRipple?.Invoke();
+        releaseKeyRipple = null;
+    }
+
+    /// <inheritdoc />
+    protected override AccessibleObject CreateAccessibilityInstance() => new ButtonAccessibleObject(this);
+
+    /// <summary>读屏里是按钮：默认动作是按下；加载中状态里带"忙"。</summary>
+    sealed class ButtonAccessibleObject(ButtonControl owner) : ControlAccessibleObject(owner)
+    {
+        public override AccessibleRole Role => Owner is { AccessibleRole: not AccessibleRole.Default } control ? control.AccessibleRole : AccessibleRole.PushButton;
+
+        public override string DefaultAction => "按下";
+
+        public override AccessibleStates State => Owner is ButtonControl { IsLoading: true } ? base.State | AccessibleStates.Busy : base.State;
+
+        public override void DoDefaultAction() => (Owner as ButtonControl)?.PerformClick();
+    }
+}
