@@ -16,7 +16,7 @@ public class EmptyControl : Panel, IElementHost
 {
     readonly EmptyEngine engine;
     readonly Effect paint;
-    readonly Icon icon = new() { Data = Lucide.Inbox, Tone = TextTone.Muted };
+    Icon icon = new();
     readonly Text title = new() { Weight = TextWeight.Medium, Align = TextAlign.Center };
     readonly Text description = new() { Tone = TextTone.Muted, Align = TextAlign.Center };
 
@@ -29,13 +29,27 @@ public class EmptyControl : Panel, IElementHost
         AccessibleRole = AccessibleRole.Grouping;
         engine = new EmptyEngine(this);
         paint = new Effect(Invalidate);
-        foreach (var element in new Element[] { icon, title, description }) element.Host = this;
+        title.Host = description.Host = this;
+        RebuildIcon();
     }
 
     /// <summary>图标，默认 Inbox；null 不显示。</summary>
     [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public IconData? Icon { get => icon.Data; set { icon.Data = value; Relayout(); } }
+    public IconData? Icon { get; set { field = value; RebuildIcon(); } } = Lucide.Inbox;
+
+    /// <summary>图标的部件属性（TS 的 propsIcon），逐字段盖在默认的次要文字色上。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public IconProps? PropsIcon { get; set { field = value; RebuildIcon(); } }
+
+    /// <summary>新建图标元素，套上合并后的部件属性（没写的字段回到 Icon 自己的默认）。</summary>
+    void RebuildIcon()
+    {
+        icon = new Icon { Host = this };
+        new IconProps { Data = Icon, Tone = TextTone.Muted, StrokeWidth = Tokens.StrokeWidth.Sm }.Merge(PropsIcon).ApplyTo(icon);
+        Relayout();
+    }
 
     /// <summary>标题；读屏里是这一组的名称。</summary>
     [Category("Appearance")]
