@@ -1,24 +1,19 @@
 <!--
-  Button 的主题（vue-tsx-pro 的 button-core）：色调样式设调色板，样式档位绑定调色板的字段（DESIGN §4 决定 11），
-  36 种组合只写 6 + 6 条加 5 条悬停。内部尺寸都是 em：内边距 1em × 0.25em、最小高度 max(2.25em, 24px)、图标与文字间距 0.5em。
+  按钮家族的主题（vue-tsx-pro 的 ButtonBase 与 button-core）：
+  - ButtonBase：没有外观，只有波纹层、内容、焦点环
+  - Rune.ButtonCore（Button、IconButton 共用，BasedOn ButtonBase）：色调样式设调色板，样式档位绑定调色板的字段（DESIGN §4 决定 11），
+    36 种组合只写 6 + 6 条加 5 条悬停；内部尺寸都是 em：内边距 1em × 0.25em、最小高度 max(2.25em, 24px)
+  - Button、IconButton：BasedOn Rune.ButtonCore，只写自己的默认值与模板
   部件的外观写在嵌套样式里（DESIGN §7），使用方的 /template/ 样式排在后面能改
 -->
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:rune="clr-namespace:Rune.Avalonia">
-  <ControlTheme x:Key="{x:Type rune:Button}" TargetType="rune:Button">
-    <Setter Property="Variant" Value="solid" />
-    <Setter Property="Tone" Value="accent" />
-    <Setter Property="Radius" Value="md" />
-    <Setter Property="Padding" Value="{rune:Em 1, 0.25}" />
-    <Setter Property="MinHeight" Value="{rune:Em 2.25, Min=24}" />
-    <!-- borderWidths.xs、sm 是不随主题变的像素 token（资源是 double，Thickness 不能直接引用） -->
-    <Setter Property="BorderThickness" Value="1" />
-    <Setter Property="BorderBrush" Value="Transparent" />
+  <ControlTheme x:Key="{x:Type rune:ButtonBase}" TargetType="rune:ButtonBase">
     <Setter Property="Background" Value="Transparent" />
-    <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Semibold}" />
-    <Setter Property="HorizontalContentAlignment" Value="Center" />
-    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="0" />
     <Setter Property="Cursor" Value="Hand" />
     <Setter Property="Template">
       <ControlTemplate>
@@ -27,15 +22,10 @@
                   BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" ClipToBounds="True">
             <Panel>
               <Canvas Name="PART_Ripples" IsHitTestVisible="False" />
-              <StackPanel Name="PART_Content" Orientation="Horizontal" Spacing="{rune:Em 0.5, Of=TemplatedParent}" Margin="{TemplateBinding Padding}"
-                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
-                <rune:Icon Name="PART_Icon" Data="{TemplateBinding Icon}" VerticalAlignment="Center"
-                           IsVisible="{Binding $parent[rune:Button].Icon, Converter={x:Static ObjectConverters.IsNotNull}}" />
-                <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" VerticalAlignment="Center" />
-                <rune:Icon Name="PART_IconEnd" Data="{TemplateBinding IconEnd}" VerticalAlignment="Center"
-                           IsVisible="{Binding $parent[rune:Button].IconEnd, Converter={x:Static ObjectConverters.IsNotNull}}" />
-              </StackPanel>
-              <rune:Spinner Name="PART_Spinner" IsVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center" />
+              <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
+                                Padding="{TemplateBinding Padding}"
+                                HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
             </Panel>
           </Border>
           <Border Name="PART_FocusRing" IsVisible="False" IsHitTestVisible="False"
@@ -43,6 +33,18 @@
         </Panel>
       </ControlTemplate>
     </Setter>
+    <Style Selector="^:focus-visible /template/ Border#PART_FocusRing"><Setter Property="IsVisible" Value="True" /></Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="Rune.ButtonCore" TargetType="rune:ButtonCore" BasedOn="{StaticResource {x:Type rune:ButtonBase}}">
+    <Setter Property="Radius" Value="md" />
+    <Setter Property="Padding" Value="{rune:Em 1, 0.25}" />
+    <Setter Property="MinHeight" Value="{rune:Em 2.25, Min=24}" />
+    <!-- borderWidths.xs、sm 是不随主题变的像素 token（资源是 double，Thickness 不能直接引用）；没有描边色时也占位，各样式等高 -->
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Semibold}" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
 
     <!-- 色调 → 调色板 -->
     <Style Selector="^:neutral"><Setter Property="Palette" Value="{DynamicResource Rune.Palette.Neutral}" /></Style>
@@ -76,19 +78,73 @@
     <Style Selector="^:outline:pointerover"><Setter Property="Background" Value="{Binding $self.Palette.SubtleHover}" /></Style>
     <Style Selector="^:ghost"><Setter Property="Foreground" Value="{Binding $self.Palette.Text}" /></Style>
     <Style Selector="^:ghost:pointerover"><Setter Property="Background" Value="{Binding $self.Palette.SubtleHover}" /></Style>
-    <!-- 链接样式：无底、无内边距、最小高度 0、字重 medium，悬停下划线 -->
+    <!-- 链接样式：无底、左右内边距 0（上下 0.25em 保留）、最小高度 0、字重 medium，悬停下划线 -->
     <Style Selector="^:link">
       <Setter Property="Foreground" Value="{Binding $self.Palette.Text}" />
-      <Setter Property="Padding" Value="0" />
+      <Setter Property="Padding" Value="{rune:Em 0, 0.25}" />
       <Setter Property="MinHeight" Value="0" />
       <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
     </Style>
     <Style Selector="^:link:pointerover /template/ TextBlock"><Setter Property="TextDecorations" Value="Underline" /></Style>
 
     <Style Selector="^:disabled"><Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" /></Style>
-    <Style Selector="^:focus-visible /template/ Border#PART_FocusRing"><Setter Property="IsVisible" Value="True" /></Style>
     <!-- 加载中：内容透明（保留宽度与读屏名称），旋转指示盖在中间 -->
     <Style Selector="^:spinner /template/ StackPanel#PART_Content"><Setter Property="Opacity" Value="0" /></Style>
     <Style Selector="^:spinner /template/ rune|Spinner#PART_Spinner"><Setter Property="IsVisible" Value="True" /></Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type rune:Button}" TargetType="rune:Button" BasedOn="{StaticResource Rune.ButtonCore}">
+    <Setter Property="Variant" Value="solid" />
+    <Setter Property="Tone" Value="accent" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border Name="PART_Root" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" ClipToBounds="True">
+            <Panel>
+              <Canvas Name="PART_Ripples" IsHitTestVisible="False" />
+              <StackPanel Name="PART_Content" Orientation="Horizontal" Spacing="{rune:Em 0.5, Of=TemplatedParent}" Margin="{TemplateBinding Padding}"
+                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
+                <rune:Icon Name="PART_Icon" Data="{TemplateBinding Icon}" VerticalAlignment="Center"
+                           IsVisible="{Binding $parent[rune:Button].Icon, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" VerticalAlignment="Center" />
+                <rune:Icon Name="PART_IconEnd" Data="{TemplateBinding IconEnd}" VerticalAlignment="Center"
+                           IsVisible="{Binding $parent[rune:Button].IconEnd, Converter={x:Static ObjectConverters.IsNotNull}}" />
+              </StackPanel>
+              <rune:Spinner Name="PART_Spinner" IsVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Panel>
+          </Border>
+          <Border Name="PART_FocusRing" IsVisible="False" IsHitTestVisible="False"
+                  BorderThickness="2" BorderBrush="{DynamicResource Rune.Brush.FocusRing}" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <!-- 图标按钮：宽高相等（宽度 = 最小高度 max(2.25em, 24px)，左右内边距 0），默认 ghost、中性色 -->
+  <ControlTheme x:Key="{x:Type rune:IconButton}" TargetType="rune:IconButton" BasedOn="{StaticResource Rune.ButtonCore}">
+    <Setter Property="Variant" Value="ghost" />
+    <Setter Property="Tone" Value="neutral" />
+    <Setter Property="Padding" Value="{rune:Em 0, 0.25}" />
+    <Setter Property="Width" Value="{rune:Em 2.25, Min=24}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border Name="PART_Root" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" ClipToBounds="True">
+            <Panel>
+              <Canvas Name="PART_Ripples" IsHitTestVisible="False" />
+              <StackPanel Name="PART_Content" Orientation="Horizontal" Margin="{TemplateBinding Padding}"
+                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
+                <rune:Icon Name="PART_Icon" Data="{TemplateBinding Icon}" VerticalAlignment="Center" />
+              </StackPanel>
+              <rune:Spinner Name="PART_Spinner" IsVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Panel>
+          </Border>
+          <Border Name="PART_FocusRing" IsVisible="False" IsHitTestVisible="False"
+                  BorderThickness="2" BorderBrush="{DynamicResource Rune.Brush.FocusRing}" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
   </ControlTheme>
 </ResourceDictionary>
