@@ -20,6 +20,7 @@
 - 组件：Icon、Text 家族（5 个）、Spinner、Badge、Button 家族（Button、IconButton、CloseButton、ClearButton、LinkButton、IconLinkButton，Avalonia、WPF 另有 ButtonBase）三个平台都做了，162 个测试。
 - 做过一轮性能（DESIGN §9"组件基准"）：Avalonia 按钮首次布局快 36%、WinForms 快 4 倍。
 - 上游 vue-tsx-pro 做完了样式体系改造（0.11，分支 feat/style-overhaul，等合入 master），对照与要跟进的在 [UPSTREAM.md](UPSTREAM.md)。
+- M1 进行中（2026-11-07）：Kbd、Code、Mark、Blockquote 三个平台都做了（Text/inline 示例）。进度以 `node tools/parity/parity.mjs` 为准；每个组件跑 `tools/parity/styles.mjs`（取值）与 `behavior.mjs`（行为）。
 - 生成文件锁定上游的开发线（`tools/vue-tsx-pro.ref`，现在是 45c2ad90 = 0.12.0-dev 的开头，与 0.11.0 的组件库相同）。下一步：里程碑 M0。
 
 ## 已定的决定
