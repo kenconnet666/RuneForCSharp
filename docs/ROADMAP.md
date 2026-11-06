@@ -206,7 +206,7 @@
 - [ ] 截图核对新的页面底色、白卡片、状态文字（ts-styles 做好后）。
 - [x] 工作包 1：`Tone` → `TextTone`（三个平台，不留旧名；属性名 `Tone` 不变）。
 - [x] 工作包 2：档位的值放到使用方盖得过的一层（DESIGN §4"档位的优先级"）：WPF 全部改成主题样式的触发器；Avalonia 不继承的（调色板、圆角）走主题 setter（`Resolved`），继承的（字号、字重、文字颜色）按模板优先级（Avalonia 的绑定回不到继承的值）。
-- [ ] DESIGN 写明各平台的定制入口与不稳定的资源键（随工作包 3）。
+- [x] DESIGN 写明各平台的定制入口与不稳定的资源键（§4"定制入口"）。
 - [~] 工作包 3：Provider 合成照上游的分段语义。WPF 做了（`StyleCloner` 把外层的条件值带进内层的普通值，150 组随机分层对参考模型）；Avalonia 见"待定的决定"。
 - [x] 工作包 4：Badge 色调取共用色表（Avalonia 取调色板对象，WPF、WinForms 由 recipe-gen 生成 Badge 配方；`StatusColors` 删掉）。
 - [ ] 工作包 5：WinForms 的定制入口：并进 M1 的 WinForms Provider（作用域控件、默认值信号、`Sx` 记录，"平台化的约定"已定的形状），一开始就按上游语义逐属性合并。

@@ -173,6 +173,20 @@ WPF 没有这个问题：主题样式（DefaultStyleKey）的触发器整体低�
 - **后段带入前段的条件值**（vue-tsx-pro 的分段语义，2026-11-07）：WPF 里样式触发器总是胜过样式 setter，外层 Provider"悬停时红"会盖过内层的普通"绿"；上游是内层的普通值整体替换外层的取值（连条件值）。合成时（`StyleCloner.Rebase`）片段每个普通 setter 的属性，外层链里每条设了它的触发器照原条件补一条、值换成片段的，排在片段自己的触发器前面（片段自己的条件值仍然优先）。随机生成 1–4 层、各带普通值与条件值的 150 组，与"合成一个"的参考模型逐个状态比对（`ProviderTests.Random_layers_match_the_merged_as_one_model`）。主题样式整体低于任何样式，不用补。
 - 组合档位直接照 TS 写成主题样式里的 `MultiTrigger`（36 条）：WPF 的触发器条数对创建开销没有明显影响（第 9 节），不需要调色板这一层；绑定在 WPF 上反而更慢（第 6 节 em 的数字）。
 
+### 定制入口（2026-11-07，对应 vue-tsx-pro 0.11 的 `components.Xxx` 与 propsXxx.sx）
+
+上游 0.11 把外观定制收到一个入口（`components.Xxx = { defaults, styles, variants }` 与部件的 `propsXxx.sx`），组件内部的样式表不再导出。三个库对应的入口与"哪些名字保证稳定"：
+
+| | Avalonia | WPF | WinForms |
+|---|---|---|---|
+| 默认值（defaults） | 应用或 `rune:Provider` 的 Styles 里按类型写 Setter（`rune\|Button` 设 Variant、Tone、Size） | `Provider.Styles` 里按类型写 Style（合成 BasedOn 链） | 做 WinForms Provider 时定（M1，工作包 5） |
+| 外观（styles） | 同上；要盖过档位给的颜色时选择器带类或伪类（"待定的决定"里的做法 A）；整片换色调设 `Palette` | 同上；任何 setter 都盖过主题样式的档位，内层普通值连外层条件值一起替换 | 同上 |
+| 部件（propsXxx） | `/template/` 选择器、代码组合部件的子选择器（第 7 节） | 部件样式键 `ButtonParts.Icon`（`PartKey`） | 部件属性记录 `PropsIcon` |
+| 单个实例（sx） | 实例的 Styles、Classes | 实例的 Style | `Sx` 记录（M1） |
+
+稳定的名字：组件的公开属性、部件名常量与部件样式键（`ButtonParts.*`、`*Parts`）、token 资源键（`Rune.Brush.*`、`Rune.FontSize.*`……，由 token-gen 按上游生成）、`Rune.Palette.*`。
+**不保证稳定**的组装用资源键：Avalonia 的 `Rune.ButtonCore`（按钮家族共用的 ControlTheme）、WPF 的 `Rune.ButtonCore` 与 `Rune.Recipe.*`（生成的配方触发器）。XAML 的资源键藏不住，所以写在这里；要改按钮家族的外观，写类型键的样式，不要 BasedOn 这些键。
+
 ### WinForms：分层解析
 
 - 没有样式系统。外观是一个"字段可空"的记录，按"Sx > 内层作用域 > 外层作用域 > 配方"逐字段取第一个非空值（已实测）。
