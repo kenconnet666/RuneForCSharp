@@ -82,7 +82,7 @@ function themeList(model) {
     '    /// <summary>全部内置主题，顺序同 vue-tsx-pro 的 builtinThemes（主题切换器按这个顺序列出）。</summary>',
     '    public static IReadOnlyList<BuiltinTheme> BuiltinThemes { get; } =',
     '    [',
-    ...model.themes.map((theme) => `        new("${theme.name}", "${theme.label}", ${theme.colorScheme === 'dark'}, new("pack://application:,,,/Rune.Wpf;component/Config/Generated/Themes/${theme.id}.g.xaml")),`),
+    ...model.themes.map((theme) => `        new("${theme.name}", "${theme.label}", ${theme.colorScheme === 'dark'}, new("/Rune.Wpf;component/Config/Generated/Themes/${theme.id}.g.xaml", UriKind.Relative)),`),
     '    ];',
     '}',
     '',

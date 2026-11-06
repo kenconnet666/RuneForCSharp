@@ -55,6 +55,8 @@ public class RuneThemeTests
         Assert.Equal(colors.Count, colors.Distinct().Count());
         Assert.Equal(["dark", "midnight", "cyberpunk", "big-screen", "ember"], RuneTheme.BuiltinThemes.Where(t => t.IsDark).Select(t => t.Name));
         Assert.Throws<ArgumentException>(() => new RuneTheme { Theme = "nope" });
+        // 相对的组件 URI：Application 建好之前（pack 协议还没注册）读 BuiltinThemes 也不抛异常
+        Assert.DoesNotContain(RuneTheme.BuiltinThemes, entry => entry.Source.IsAbsoluteUri);
     });
 
     [Fact]

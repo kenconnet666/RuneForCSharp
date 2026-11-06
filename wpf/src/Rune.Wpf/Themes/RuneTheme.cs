@@ -14,7 +14,8 @@ namespace Rune.Wpf;
 /// </summary>
 public partial class RuneTheme : ResourceDictionary
 {
-    static readonly Uri TokensSource = new("pack://application:,,,/Rune.Wpf;component/Config/Generated/Tokens.g.xaml");
+    // 相对的组件 URI 不依赖 pack 协议：Application 建好之前读 BuiltinThemes 也不会抛异常
+    static readonly Uri TokensSource = new("/Rune.Wpf;component/Config/Generated/Tokens.g.xaml", UriKind.Relative);
 
     ResourceDictionary? current;
     string theme = "";
