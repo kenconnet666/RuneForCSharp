@@ -53,17 +53,17 @@
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="BorderBrush" Value="Transparent" />
     <Setter Property="Background" Value="Transparent" />
-    <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Semibold}" />
+    <!-- 界面文字用 medium：600 在微软雅黑上落成粗体（vue-tsx-pro 0.11 S4） -->
+    <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
     <Setter Property="HorizontalContentAlignment" Value="Center" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="Cursor" Value="Hand" />
     <Setter Property="FocusVisualStyle" Value="{x:Null}" />
     <Style.Triggers>
-      <!-- 链接样式：无底、左右内边距 0（上下 0.25em 保留）、最小高度 0、字重 medium（颜色在配方里，悬停下划线在代码里） -->
+      <!-- 链接样式：无底、左右内边距 0（上下 0.25em 保留）、最小高度 0（颜色在配方里，悬停下划线在代码里） -->
       <Trigger Property="Variant" Value="link">
         <Setter Property="rune:EmSize.Padding" Value="0,0.25" />
         <Setter Property="rune:EmSize.MinHeight" Value="{x:Null}" />
-        <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
       </Trigger>
       <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" /></Trigger>
     </Style.Triggers>

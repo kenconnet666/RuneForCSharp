@@ -125,13 +125,13 @@ public abstract class ButtonCore : Element
         else background.Value = back;
     }
 
-    /// <summary>按钮里面的环境：字号换成档位的、字重 semibold（链接 medium），文字颜色换成配方的前景色。</summary>
+    /// <summary>按钮里面的环境：字号换成档位的、字重 medium，文字颜色换成配方的前景色。</summary>
     ElementContext Inner(ElementContext context, Color fore)
     {
         var host = context.Font;
         var points = Size.Pixels is { } pixels ? pixels * 72 / 96 : host.SizeInPoints;
-        // GDI 只有常规与粗体：semibold 画成粗体，链接的 medium 画成常规
-        var style = Variant == ButtonVariant.Link ? host.Style & ~FontStyle.Bold : host.Style | FontStyle.Bold;
+        // GDI 只有常规与粗体：medium 画成常规（外面是粗体也不继承，同 TS 的 fontWeight: medium）
+        var style = host.Style & ~FontStyle.Bold;
         return context with { Font = Fonts.Get(host.FontFamily.Name, points, style), ForeColor = fore };
     }
 
