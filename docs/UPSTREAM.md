@@ -105,8 +105,27 @@ vue-tsx-pro 那边的会话改了设计时会发通知过来（每完成一个�
 4. Badge 的颜色从调色板表生成，与 Button 同一张表。
 5. WinForms 的定制入口与 Provider：按 `components` 的形状、按上游语义逐属性合并。
 
+### 阶段 3 完成（合入 master 9d5af3f3）、阶段 4 进行中（2026-11-06 通知，PR #4）
+
+- 阶段 3 补充：Table 与 DataTable 共用表格配方（我们还没做表格，做时一套配方）；新增颜色 token scrim、scrimStrong、onScrim（**已按 9d5af3f3 重新生成**，三个库都有了；以后做 Upload、Lightbox 的遮罩用它们，不写裸色）。
+- 我们的 CI 核对的是上游的 master：上游合入后 `--check` 会失败，要按上游 master 重新生成。上游的工作目录常在别的分支上，生成时用 scratchpad 里检出 master 的副本（`git clone --shared` 本地仓库，node_modules 用目录联接指过去），`VUE_TSX_PRO` 指向它，不碰对方的工作区。
+- token-gen 现在会删掉上游已经没有的主题文件（`--check` 报"多余"）：阶段 4 去掉 ocean 时 `Themes/Ocean.g.xaml` 跟着删。
+
+阶段 4 已做的，对我们的影响：
+
+| 上游 | 跟进 |
+|---|---|
+| 去掉 ocean，加高对比暗色（纯黑底白字、文字 7:1、阴影换成 1px 浅色描边、黄色焦点环 #ffd60a），仍是 16 套 | 合入后重新生成（主题登记表、语言包的 themeOcean 都是生成的）；Gallery、inspect 的主题列表读登记表，不用手改。WPF 的阴影取一层做 DropShadowEffect（DESIGN §6），"阴影换成描边"要看生成结果是不是落到边框上，到时核对 |
+| 两套高对比的文字都到 7:1；占位文字改用次要文字色；亮色 successText / warningText / infoText 改中间调 | token 取值，重新生成即可 |
+| 跟随系统时，系统要求增强对比度就用高对比的亮、暗两套（builtinSystemThemes） | 桌面的对应：Windows 的对比度主题（WPF `SystemParameters.HighContrast`、WinForms `SystemInformation.HighContrast`、Avalonia 平台设置的对比度偏好）。我们还没做"跟随系统"的主题切换，做 ThemeSwitcher / 应用级主题时一起做 |
+| ButtonBase 继承字重 | 我们的 ButtonBase（Avalonia、WPF）主题不设 FontWeight，本来就继承；WinForms 的 ButtonBase 还没做 |
+| elevated 卡片加 borderMuted 边框 | Card 还没做，做时照做 |
+| 删掉 Figma 设计资源；点击波纹保持默认开启 | 不涉及；`Ripple.Enabled` 默认值不变 |
+| 接下来：控件高度 24/28/32/36/40、中文字重（600 只给 H1–H4）、着色页面 + 白卡片、标题阶梯 | 控件高度：先把按钮家族里的 max(2.25em, 24px) 收成一处（三个平台各一处），表定了换成按档位查表；字重、页面底色、标题阶梯多半是 token，重新生成后核对按钮的字重设置 |
+
 ### 进度
 
 - 2026-11-06：收到计划草案，完成上面的评估。同日上游获批，方向见"已定的方向"。代码未动，等上游各阶段的通知；还没做的组件直接按已定的词表与规则做（新名字、控件高度收成一处、浮层阴影按新规则）。
 - 2026-11-06：收到阶段 1 完成的通知，对照三个平台写了上面"阶段 1"的差别与实现计划。按用户的安排（这阶段先做性能），代码等阶段 2 的通知到了再一起动。
 - 2026-11-06：收到阶段 2 完成、阶段 3 进行中的通知，列出上面 5 个工作包。其中第 3 包是跨模块的重构（Provider 合成），开工前先请用户确认。
+- 2026-11-06：收到阶段 3 合入、阶段 4 进行中的通知。按上游 master 9d5af3f3 重新生成了 token（新增 scrim 三个）；token-gen 能删掉上游没有了的主题文件。Icon 的 `draw`（描线动画）parity 报缺，是早就记下的暂缓项。
