@@ -5,7 +5,7 @@ namespace Rune.Wpf;
 
 /// <summary>
 /// em 尺寸：值 = 系数 × 字号，字号变了跟着变（对应 vue-tsx-pro 里组件内部一律用 em）。
-/// 主题样式只设系数，控件用属性强制（coerce）算出实际值：
+/// 主题样式只设系数，控件用属性强制（coerce）算出实际值（Padding、MinHeight 与登记的圆角属性）：
 /// <code>
 /// // 控件的静态构造里接上：Padding、FontSize 的元数据，以及自己的 CornerRadius
 /// static Button() => EmSize.Register(typeof(Button), CornerRadiusProperty);
@@ -29,7 +29,27 @@ public static class EmSize
     public static readonly DependencyProperty CornerRadiusProperty = DependencyProperty.RegisterAttached(
         "CornerRadius", typeof(double?), typeof(EmSize), new PropertyMetadata(null, (d, _) => Refresh(d)));
 
+    /// <summary>最小高度的 em 系数（按钮这类控件的行高：CSS 的 <c>max(2.25em, 24px)</c> 写成系数 2.25 加 <see cref="MinHeightFloorProperty"/> 24）。</summary>
+    public static readonly DependencyProperty MinHeightProperty = DependencyProperty.RegisterAttached(
+        "MinHeight", typeof(double?), typeof(EmSize), new PropertyMetadata(null, (d, _) => d.CoerceValue(FrameworkElement.MinHeightProperty)));
+
+    /// <summary>最小高度的下限（设备无关像素，不随字号）：触控目标的最小尺寸 sizes.minTarget。</summary>
+    public static readonly DependencyProperty MinHeightFloorProperty = DependencyProperty.RegisterAttached(
+        "MinHeightFloor", typeof(double), typeof(EmSize), new PropertyMetadata(0d, (d, _) => d.CoerceValue(FrameworkElement.MinHeightProperty)));
+
     static readonly Dictionary<Type, DependencyProperty> cornerRadiusByType = [];
+
+    /// <summary>读最小高度系数。</summary>
+    public static double? GetMinHeight(DependencyObject d) => (double?)d.GetValue(MinHeightProperty);
+
+    /// <summary>设最小高度系数。</summary>
+    public static void SetMinHeight(DependencyObject d, double? value) => d.SetValue(MinHeightProperty, value);
+
+    /// <summary>读最小高度的下限。</summary>
+    public static double GetMinHeightFloor(DependencyObject d) => (double)d.GetValue(MinHeightFloorProperty);
+
+    /// <summary>设最小高度的下限。</summary>
+    public static void SetMinHeightFloor(DependencyObject d, double value) => d.SetValue(MinHeightFloorProperty, value);
 
     /// <summary>读内边距系数。</summary>
     public static Thickness? GetPadding(DependencyObject d) => (Thickness?)d.GetValue(PaddingProperty);
@@ -51,6 +71,7 @@ public static class EmSize
     public static void Register(Type controlType, DependencyProperty? cornerRadiusProperty = null)
     {
         Control.PaddingProperty.OverrideMetadata(controlType, new FrameworkPropertyMetadata(default(Thickness), null, CoercePadding));
+        FrameworkElement.MinHeightProperty.OverrideMetadata(controlType, new FrameworkPropertyMetadata(0d, null, CoerceMinHeight));
         Control.FontSizeProperty.OverrideMetadata(controlType, new FrameworkPropertyMetadata(
             SystemFonts.MessageFontSize, FrameworkPropertyMetadataOptions.Inherits, (d, _) => Refresh(d)));
         if (cornerRadiusProperty is not null) cornerRadiusByType[controlType] = cornerRadiusProperty;
@@ -70,9 +91,16 @@ public static class EmSize
         return new Thickness(f.Left * size, f.Top * size, f.Right * size, f.Bottom * size);
     }
 
+    static object CoerceMinHeight(DependencyObject d, object baseValue)
+    {
+        if (GetMinHeight(d) is not { } f || !FromLibrary(d, FrameworkElement.MinHeightProperty, baseValue)) return baseValue;
+        return Math.Max(f * FontSize(d), GetMinHeightFloor(d));
+    }
+
     static void Refresh(DependencyObject d)
     {
         d.CoerceValue(Control.PaddingProperty);
+        d.CoerceValue(FrameworkElement.MinHeightProperty);
         if (CornerRadiusFor(d.GetType()) is { } property) d.CoerceValue(property);
     }
 
