@@ -14,6 +14,7 @@ static class TextExamples
         new("Text", "numeric", "编号与数字", "Mono 用等宽字体（编号、件号），Numeric 用等宽数字（金额、计数）：上下对齐、变化时不跳动。", () => new TextNumeric()),
         new("Text", "inline", "行内元素", "Kbd 写按键，Code 写行内代码，Mark 标出要强调的词；Strong、Em、Small 是重要、语气强调与附注。整段引用用 Blockquote。", () => new TextInline()),
         new("Text", "headings", "标题", "H1–H6 各是一个组件，读屏念出级别；默认字号按级别递减，Size 能单独改：视觉层级与文档结构分开。WPF 的 TextBlock 不能调字间距。", () => new TextHeadings()),
+        new("Text", "links", "链接", "Link 默认带下划线：正文里的链接不能只靠颜色区分。External 加外链图标并告诉读屏在新窗口打开；Underline 的 hover、none 用在一眼看得出是链接的地方。", () => new TextLinks()),
         new("Text", "overflow", "截断与换行", "Truncate 单行省略，LineClamp 限制行数；Wrap 的 Pretty、Balance 是浏览器的排版优化，桌面上按普通换行。", () => new TextOverflow()),
     ];
 }
@@ -61,4 +62,11 @@ public partial class TextHeadings : UserControl
 {
     /// <summary>加载示例。</summary>
     public TextHeadings() => InitializeComponent();
+}
+
+/// <summary>Text/links。</summary>
+public partial class TextLinks : UserControl
+{
+    /// <summary>加载示例。</summary>
+    public TextLinks() => InitializeComponent();
 }

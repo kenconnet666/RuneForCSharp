@@ -1,0 +1,14 @@
+<UserControl x:Class="Rune.Wpf.Examples.TextLinks"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/wpf">
+  <!-- 桌面没有站内地址：链接都是绝对地址，用系统打开。Link 是行内的超链接，跟着段落换行 -->
+  <StackPanel>
+    <rune:Paragraph Margin="0,0,0,16">正文里的链接默认带下划线：<rune:Link Href="https://example.com/components/button">按钮</rune:Link>、<rune:Link Href="https://example.com/guide/theming">主题定制</rune:Link>，不只靠颜色和周围的文字区分。去别的站点写 <rune:Link Href="https://vuejs.org" External="True">Vue 文档</rune:Link>：带图标，读屏会念出“在新窗口打开”。</rune:Paragraph>
+    <WrapPanel>
+      <rune:Text Size="sm" Margin="0,0,16,0"><rune:Link Href="https://example.com/components/text" Underline="hover">悬停时才有下划线</rune:Link></rune:Text>
+      <rune:Text Size="sm" Margin="0,0,16,0"><rune:Link Href="https://example.com/components/text" Underline="none" Tone="muted">导航里的次要链接</rune:Link></rune:Text>
+      <rune:Text Size="sm"><rune:Link Href="https://example.com/account" Tone="danger">注销账户</rune:Link></rune:Text>
+    </WrapPanel>
+  </StackPanel>
+</UserControl>

@@ -1,0 +1,130 @@
+using System.ComponentModel;
+using System.Windows;
+using System.Windows.Automation.Peers;
+using System.Windows.Documents;
+
+namespace Rune.Wpf;
+
+/// <summary>
+/// 文字链接（vue-tsx-pro 的 Link）：默认带下划线，正文里的链接不能只靠颜色区分（WCAG 1.4.1）。是一段行内文字（Hyperlink），
+/// 跟着段落换行，能用 Tab 聚焦、读屏念"链接"：
+/// <code>
+/// &lt;rune:Paragraph&gt;去 &lt;rune:Link Href="https://vuejs.org" External="True"&gt;Vue 文档&lt;/rune:Link&gt; 看看&lt;/rune:Paragraph&gt;
+/// </code>
+/// 同 <see cref="LinkButton"/>：<see cref="Href"/> 是绝对地址，点击后用系统打开；外部链接末尾一个外链图标、读屏名称后补"在新窗口打开"。
+/// 色调（默认 accent）、下划线（always / hover / none）是主题样式的触发器。
+/// </summary>
+public class Link : Hyperlink
+{
+    /// <summary>链接地址（绝对地址，如 https://、mailto:）。</summary>
+    public static readonly DependencyProperty HrefProperty = DependencyProperty.Register(nameof(Href), typeof(Uri), typeof(Link));
+
+    /// <summary>外部链接：末尾显示外链图标，读屏名称后补上"在新窗口打开"。</summary>
+    public static readonly DependencyProperty ExternalProperty = DependencyProperty.Register(
+        nameof(External), typeof(bool), typeof(Link), new FrameworkPropertyMetadata(false, (d, _) => ((Link)d).UpdateIcon()));
+
+    /// <summary>色调；主题里默认 accent（品牌色文字）。</summary>
+    public static readonly DependencyProperty ToneProperty = DependencyProperty.Register(nameof(Tone), typeof(TextTone), typeof(Link));
+
+    /// <summary>下划线，主题里默认 always。</summary>
+    public static readonly DependencyProperty UnderlineProperty = DependencyProperty.Register(nameof(Underline), typeof(LinkUnderline), typeof(Link));
+
+    InlineUIContainer? icon;
+
+    static Link() => DefaultStyleKeyProperty.OverrideMetadata(typeof(Link), new FrameworkPropertyMetadata(typeof(Link)));
+
+    /// <summary>新建链接：载入后把外链图标挪到最后（XAML 里 External 先于文字赋值，图标会排在前面）。</summary>
+    public Link() => Loaded += (_, _) =>
+    {
+        if (icon is null || Inlines.LastInline == icon) return;
+        Inlines.Remove(icon);
+        Inlines.Add(icon);
+    };
+
+    /// <summary>链接地址。</summary>
+    public Uri? Href { get => (Uri?)GetValue(HrefProperty); set => SetValue(HrefProperty, value); }
+
+    /// <summary>外部链接。</summary>
+    public bool External { get => (bool)GetValue(ExternalProperty); set => SetValue(ExternalProperty, value); }
+
+    /// <summary>色调。</summary>
+    public TextTone Tone { get => (TextTone)GetValue(ToneProperty); set => SetValue(ToneProperty, value); }
+
+    /// <summary>下划线。</summary>
+    public LinkUnderline Underline { get => (LinkUnderline)GetValue(UnderlineProperty); set => SetValue(UnderlineProperty, value); }
+
+    /// <summary>外链图标（TS 的 propsIcon）：部件样式键 <see cref="LinkParts.Icon"/>。</summary>
+    internal Icon? IconPart => icon?.Child as Icon;
+
+    /// <summary>先触发 Click、Command，再打开链接。</summary>
+    protected override void OnClick()
+    {
+        base.OnClick();
+        if (Href is { IsAbsoluteUri: true } href) Navigate(href);
+    }
+
+    /// <summary>用系统打开链接（浏览器、邮件……）。</summary>
+    /// <param name="href">绝对地址。</param>
+    protected virtual void Navigate(Uri href) => LinkLauncher.Open(href);
+
+    /// <summary>外部链接末尾 0.1em 外一个外链图标（行内的图标容器，跟着文字）。</summary>
+    void UpdateIcon()
+    {
+        if (External && icon is null)
+        {
+            var part = new Icon { Data = Lucide.ArrowUpRight };
+            part.SetResourceReference(FrameworkElement.StyleProperty, LinkParts.Icon);
+            Inlines.Add(icon = new InlineUIContainer(part) { BaselineAlignment = BaselineAlignment.Center });
+        }
+        else if (!External && icon is not null)
+        {
+            Inlines.Remove(icon);
+            icon = null;
+        }
+    }
+
+    /// <inheritdoc />
+    protected override AutomationPeer OnCreateAutomationPeer() => new LinkPeer(this);
+
+    /// <summary>外部链接的名称后补上语言包的"在新窗口打开"。</summary>
+    sealed class LinkPeer(Link owner) : HyperlinkAutomationPeer(owner)
+    {
+        protected override string GetNameCore() => owner.External ? base.GetNameCore() + Provider.GetLang(owner).LinkNewWindow : base.GetNameCore();
+    }
+}
+
+/// <summary>Link 的部件样式键。</summary>
+public static class LinkParts
+{
+    /// <summary>外链图标（TS 的 propsIcon）。</summary>
+    public static readonly PartKey Icon = new(typeof(Link), nameof(Icon), typeof(Icon));
+}
+
+/// <summary>链接的下划线（vue-tsx-pro 的 LinkUnderlines）。</summary>
+/// <param name="Value">取值（always、hover、none）。</param>
+[TypeConverter(typeof(VariantConverter<LinkUnderline>))]
+public readonly record struct LinkUnderline(string Value) : IVariant<LinkUnderline>
+{
+    /// <summary>总是有：正文里的链接（默认）。</summary>
+    public static readonly LinkUnderline Always = new("always");
+
+    /// <summary>悬停时才有：卡片、列表里一眼看得出是链接的地方。</summary>
+    public static readonly LinkUnderline Hover = new("hover");
+
+    /// <summary>没有：导航里的次要链接。</summary>
+    public static readonly LinkUnderline None = new("none");
+
+    /// <inheritdoc />
+    public static IReadOnlyList<LinkUnderline> Known { get; } = [Always, Hover, None];
+
+    /// <inheritdoc />
+    public static LinkUnderline Parse(string value)
+    {
+        var underline = new LinkUnderline(value);
+        Variants.WarnIfUnknown(underline);
+        return underline;
+    }
+
+    /// <inheritdoc />
+    public override string ToString() => Value;
+}
