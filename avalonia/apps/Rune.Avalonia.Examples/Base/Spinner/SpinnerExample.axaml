@@ -1,0 +1,26 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/avalonia"
+             x:Class="Rune.Avalonia.Examples.SpinnerExample">
+  <StackPanel Spacing="24">
+    <WrapPanel ItemSpacing="24" LineSpacing="16">
+      <rune:Spinner Size="xs" VerticalAlignment="Center" />
+      <rune:Spinner Size="sm" VerticalAlignment="Center" />
+      <rune:Spinner Size="md" VerticalAlignment="Center" />
+      <rune:Spinner Size="lg" VerticalAlignment="Center" />
+      <rune:Spinner Size="xl" VerticalAlignment="Center" />
+      <!-- 放在文字里：大小、颜色跟随文字 -->
+      <rune:Text Tone="accent" VerticalAlignment="Center"><InlineUIContainer BaselineAlignment="Center"><rune:Spinner /></InlineUIContainer><Run Text=" 跟随文字颜色" /></rune:Text>
+      <rune:Text Tone="success" Size="sm" VerticalAlignment="Center"><InlineUIContainer BaselineAlignment="Center"><rune:Spinner /></InlineUIContainer><Run Text=" 同步中" /></rune:Text>
+    </WrapPanel>
+    <!-- Card、Button 做出来后换掉 -->
+    <Border Padding="16" CornerRadius="8" BorderThickness="1" HorizontalAlignment="Left" Width="420"
+            BorderBrush="{DynamicResource Rune.Brush.Border}" Background="{DynamicResource Rune.Brush.Surface}">
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <!-- 单独出现、旁边没有文字时写 Label：读屏当作进度条念出来 -->
+        <rune:Spinner Label="正在生成报表" VerticalAlignment="Center" />
+        <rune:Small Tone="muted" VerticalAlignment="Center">正在生成报表，大约需要 30 秒</rune:Small>
+      </StackPanel>
+    </Border>
+  </StackPanel>
+</UserControl>

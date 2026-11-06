@@ -1,0 +1,26 @@
+<!--
+  Spinner 的主题：模板里只有一个图标部件；图标、大小、旋转写在嵌套样式里（不是模板属性），
+  使用方的 /template/ 样式排在后面，能逐个属性改（DESIGN §7）。
+  旋转本身就是"还在加载"的信息，不随时长 token 变为 0
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:Spinner}" TargetType="rune:Spinner">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <rune:Icon Name="PART_Icon" />
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^ /template/ rune|Icon#PART_Icon">
+      <Setter Property="Data" Value="{x:Static rune:Lucide.LoaderCircle}" />
+      <Setter Property="Size" Value="{Binding $parent[rune:Spinner].Size}" />
+      <Style.Animations>
+        <Animation Duration="0:0:0.8" IterationCount="Infinite">
+          <KeyFrame Cue="0%"><Setter Property="RotateTransform.Angle" Value="0" /></KeyFrame>
+          <KeyFrame Cue="100%"><Setter Property="RotateTransform.Angle" Value="360" /></KeyFrame>
+        </Animation>
+      </Style.Animations>
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>
