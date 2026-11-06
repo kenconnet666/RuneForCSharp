@@ -207,9 +207,9 @@
 - [x] 工作包 1：`Tone` → `TextTone`（三个平台，不留旧名；属性名 `Tone` 不变）。
 - [x] 工作包 2：档位的值放到使用方盖得过的一层（DESIGN §4"档位的优先级"）：WPF 全部改成主题样式的触发器；Avalonia 不继承的（调色板、圆角）走主题 setter（`Resolved`），继承的（字号、字重、文字颜色）按模板优先级（Avalonia 的绑定回不到继承的值）。
 - [ ] DESIGN 写明各平台的定制入口与不稳定的资源键（随工作包 3）。
-- [ ] 工作包 3：Provider 合成照上游的分段语义（WPF 先、Avalonia 后，随机组合测试）。
+- [~] 工作包 3：Provider 合成照上游的分段语义。WPF 做了（`StyleCloner` 把外层的条件值带进内层的普通值，150 组随机分层对参考模型）；Avalonia 见"待定的决定"。
 - [x] 工作包 4：Badge 色调取共用色表（Avalonia 取调色板对象，WPF、WinForms 由 recipe-gen 生成 Badge 配方；`StatusColors` 删掉）。
-- [ ] 工作包 5：WinForms 的定制入口。
+- [ ] 工作包 5：WinForms 的定制入口：并进 M1 的 WinForms Provider（作用域控件、默认值信号、`Sx` 记录，"平台化的约定"已定的形状），一开始就按上游语义逐属性合并。
 - [x] 按钮字重 600 → 500。
 - [x] 控件高度收成每个平台一处 `ControlHeight`（`max(round(系数 × 字号 ÷ 4) × 4, 24)`，xs 档系数 2，Avalonia、WPF 的系数继承；DESIGN §14 Button 家族）。
 - [x] `ts-styles`（文档站每个示例、每个部件的计算样式，亮暗、悬停 / 聚焦 / 按下）与 `inspect styles`（Avalonia、WPF，同一种格式），`tools/parity/styles.mjs` 逐项比对。Button 的 variants、tones、sizes、radius 两个平台在亮暗主题下都一致（顺手修了按钮文字的行高与竖直对齐）。
@@ -366,5 +366,10 @@ RuneForBlazor 已经走过一遍这些组件，同一个组件先看它踩过的
 
 ## 待定的决定
 
-暂无。新的待定项写在这里：日期、事项、卡在哪、要决定什么，附上建议。
+新的待定项写在这里：日期、事项、卡在哪、要决定什么，附上建议。
+
+- **2026-11-07 Avalonia 的分段语义（工作包 3）**：上游是"使用方 / Provider 的普通值整体替换组件档位的取值，连条件值"。Avalonia 里带伪类的样式（主题里的 `^:solid`、`^:solid:pointerover`）属于"样式触发器"一级，任何不带伪类的使用方样式都盖不过；档位解析出的不继承属性已经放到主题这一层（`Resolved`），但颜色这类由伪类样式按档位给的值仍然盖不过。
+  - 做法 A（现在的）：沿用 DESIGN §4 的平台规则"要覆盖档位样式，选择器里至少带一个类或伪类"，写进文档与示例。没有运行时开销。
+  - 做法 B：Provider 的样式按上游语义合成——给 Provider 里不带伪类的样式，照主题里设了同一属性的每条伪类样式补一条同条件、同值的样式（要在运行时改写选择器，Avalonia 的选择器解析器不公开，得自己按选择器对象重建）；补出来的样式各带激活器，开销随定制的属性数涨。
+  - 建议：先 A；等做 ThemeSwitcher / 主题定制（M5 的 theme-customize）时，那里要的就是"整体换掉某个属性"，到时按 B 做并量开销。
 
