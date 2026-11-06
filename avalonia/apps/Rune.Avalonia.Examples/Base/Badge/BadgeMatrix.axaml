@@ -1,0 +1,36 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/avalonia"
+             x:Class="Rune.Avalonia.Examples.BadgeMatrix">
+  <!-- 一行一种样式、一列一种色调：第一列是样式名 -->
+  <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="8" HorizontalAlignment="Left">
+    <rune:Text Size="xs" Tone="muted" VerticalAlignment="Center">solid</rune:Text>
+    <rune:Badge Grid.Column="1" Variant="solid" Tone="neutral">草稿</rune:Badge>
+    <rune:Badge Grid.Column="2" Variant="solid" Tone="accent">新功能</rune:Badge>
+    <rune:Badge Grid.Column="3" Variant="solid" Tone="info">处理中</rune:Badge>
+    <rune:Badge Grid.Column="4" Variant="solid" Tone="success">已完成</rune:Badge>
+    <rune:Badge Grid.Column="5" Variant="solid" Tone="warning">即将到期</rune:Badge>
+    <rune:Badge Grid.Column="6" Variant="solid" Tone="danger">已失败</rune:Badge>
+    <rune:Text Grid.Row="1" Size="xs" Tone="muted" VerticalAlignment="Center">soft</rune:Text>
+    <rune:Badge Grid.Row="1" Grid.Column="1" Variant="soft" Tone="neutral">草稿</rune:Badge>
+    <rune:Badge Grid.Row="1" Grid.Column="2" Variant="soft" Tone="accent">新功能</rune:Badge>
+    <rune:Badge Grid.Row="1" Grid.Column="3" Variant="soft" Tone="info">处理中</rune:Badge>
+    <rune:Badge Grid.Row="1" Grid.Column="4" Variant="soft" Tone="success">已完成</rune:Badge>
+    <rune:Badge Grid.Row="1" Grid.Column="5" Variant="soft" Tone="warning">即将到期</rune:Badge>
+    <rune:Badge Grid.Row="1" Grid.Column="6" Variant="soft" Tone="danger">已失败</rune:Badge>
+    <rune:Text Grid.Row="2" Size="xs" Tone="muted" VerticalAlignment="Center">surface</rune:Text>
+    <rune:Badge Grid.Row="2" Grid.Column="1" Variant="surface" Tone="neutral">草稿</rune:Badge>
+    <rune:Badge Grid.Row="2" Grid.Column="2" Variant="surface" Tone="accent">新功能</rune:Badge>
+    <rune:Badge Grid.Row="2" Grid.Column="3" Variant="surface" Tone="info">处理中</rune:Badge>
+    <rune:Badge Grid.Row="2" Grid.Column="4" Variant="surface" Tone="success">已完成</rune:Badge>
+    <rune:Badge Grid.Row="2" Grid.Column="5" Variant="surface" Tone="warning">即将到期</rune:Badge>
+    <rune:Badge Grid.Row="2" Grid.Column="6" Variant="surface" Tone="danger">已失败</rune:Badge>
+    <rune:Text Grid.Row="3" Size="xs" Tone="muted" VerticalAlignment="Center">outline</rune:Text>
+    <rune:Badge Grid.Row="3" Grid.Column="1" Variant="outline" Tone="neutral">草稿</rune:Badge>
+    <rune:Badge Grid.Row="3" Grid.Column="2" Variant="outline" Tone="accent">新功能</rune:Badge>
+    <rune:Badge Grid.Row="3" Grid.Column="3" Variant="outline" Tone="info">处理中</rune:Badge>
+    <rune:Badge Grid.Row="3" Grid.Column="4" Variant="outline" Tone="success">已完成</rune:Badge>
+    <rune:Badge Grid.Row="3" Grid.Column="5" Variant="outline" Tone="warning">即将到期</rune:Badge>
+    <rune:Badge Grid.Row="3" Grid.Column="6" Variant="outline" Tone="danger">已失败</rune:Badge>
+  </Grid>
+</UserControl>

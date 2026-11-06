@@ -1,0 +1,16 @@
+<!--
+  Badge 的主题：只放默认值（vue-tsx-pro 的 badgeRecipe.defaults 与 BadgeOptions 的默认），Provider 的样式能改。
+  样式 × 色调的颜色、em 尺寸在 Badge.cs 里（自绘组件，不用模板与嵌套样式，DESIGN §9）
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:Badge}" TargetType="rune:Badge">
+    <Setter Property="Variant" Value="soft" />
+    <Setter Property="Tone" Value="neutral" />
+    <Setter Property="Size" Value="xs" />
+    <Setter Property="Radius" Value="sm" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+  </ControlTheme>
+</ResourceDictionary>

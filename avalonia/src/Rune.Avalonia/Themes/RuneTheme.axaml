@@ -12,6 +12,7 @@
         <ResourceInclude Source="avares://Rune.Avalonia/Base/Icon/Icon.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Base/Text/Text.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Base/Spinner/Spinner.axaml" />
+        <ResourceInclude Source="avares://Rune.Avalonia/Base/Badge/Badge.axaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>

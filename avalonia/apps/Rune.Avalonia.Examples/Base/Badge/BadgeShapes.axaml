@@ -1,0 +1,42 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/avalonia"
+             x:Class="Rune.Avalonia.Examples.BadgeShapes">
+  <UserControl.Styles>
+    <Style Selector="WrapPanel > rune|Text">
+      <Setter Property="Size" Value="xs" />
+      <Setter Property="Tone" Value="muted" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+  </UserControl.Styles>
+  <StackPanel Spacing="24">
+    <WrapPanel ItemSpacing="8" LineSpacing="8">
+      <rune:Text>字号</rune:Text>
+      <rune:Badge Size="xs" Tone="accent">size=xs</rune:Badge>
+      <rune:Badge Size="sm" Tone="accent">size=sm</rune:Badge>
+      <rune:Badge Size="md" Tone="accent">size=md</rune:Badge>
+      <rune:Badge Size="lg" Tone="accent">size=lg</rune:Badge>
+    </WrapPanel>
+    <WrapPanel ItemSpacing="8" LineSpacing="8">
+      <rune:Text>胶囊与计数</rune:Text>
+      <rune:Badge Radius="full" Variant="solid" Tone="danger">12</rune:Badge>
+      <rune:Badge Radius="full" Variant="solid">99+</rune:Badge>
+      <rune:Badge Radius="full" Tone="success">在线</rune:Badge>
+      <rune:Badge Radius="full" Variant="outline">v2.4.0</rune:Badge>
+    </WrapPanel>
+    <WrapPanel ItemSpacing="8" LineSpacing="8">
+      <rune:Text>图标</rune:Text>
+      <rune:Badge Icon="{x:Static rune:Lucide.CircleCheck}" Tone="success">已通过</rune:Badge>
+      <rune:Badge Icon="{x:Static rune:Lucide.Clock}" Tone="warning">待审核</rune:Badge>
+      <rune:Badge Icon="{x:Static rune:Lucide.TriangleExclamationPoint}" Tone="danger" Variant="surface">3 个错误</rune:Badge>
+      <rune:Badge Icon="{x:Static rune:Lucide.Sparkles}" Tone="accent" Variant="solid">Beta</rune:Badge>
+      <rune:Badge Icon="{x:Static rune:Lucide.Flame}" Tone="warning" Variant="outline" Radius="full">热门</rune:Badge>
+    </WrapPanel>
+    <WrapPanel ItemSpacing="8" LineSpacing="8">
+      <rune:Text>圆点</rune:Text>
+      <rune:Badge Dot="True" Tone="success" Radius="none">运行中</rune:Badge>
+      <rune:Badge Dot="True" Tone="warning" Radius="none">待审核</rune:Badge>
+      <rune:Badge Dot="True" Tone="danger" Variant="outline">已停止</rune:Badge>
+    </WrapPanel>
+  </StackPanel>
+</UserControl>
