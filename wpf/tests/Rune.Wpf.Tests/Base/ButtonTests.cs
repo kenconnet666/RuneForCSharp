@@ -1,0 +1,128 @@
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Markup;
+using System.Windows.Media;
+using System.Windows.Shapes;
+
+namespace Rune.Wpf.Tests;
+
+/// <summary>
+/// Button：生成的配方触发器给颜色、尺寸按 em、胶囊圆角不超过高度的一半、加载中点击无效且指示防闪烁、
+/// 按下出波纹、Provider 的部件样式（含给所有 Icon 的样式）进得了模板里的图标。
+/// </summary>
+public class ButtonTests
+{
+    static (StackPanel Host, RuneTheme Theme) Host(params UIElement[] children)
+    {
+        var host = new StackPanel();
+        var theme = new RuneTheme();
+        host.Resources.MergedDictionaries.Add(theme);
+        foreach (var child in children) host.Children.Add(child);
+        return (host, theme);
+    }
+
+    static Color BrushColor(Brush? brush) => Assert.IsType<SolidColorBrush>(brush, exactMatch: false).Color;
+
+    static T Part<T>(Rune.Wpf.Button button, string name) => (T)button.Template.FindName(name, button);
+
+    [Fact]
+    public Task Recipe_triggers_give_variant_and_tone_colors() => WpfUi.Run(() =>
+    {
+        var solid = new Rune.Wpf.Button { Content = "确定" };
+        var outline = new Rune.Wpf.Button { Content = "取消", Variant = ButtonVariant.Outline, Tone = StatusTone.Neutral };
+        var (host, _) = Host(solid, outline);
+        WpfUi.Show(host);
+
+        Assert.Equal((ButtonVariant.Solid, StatusTone.Accent, Radius.Md), (solid.Variant, solid.Tone, solid.Radius));
+        Assert.Equal(BrushColor((Brush)host.FindResource("Rune.Brush.Accent")), BrushColor(solid.Background));
+        Assert.Equal(BrushColor((Brush)host.FindResource("Rune.Brush.AccentContrast")), BrushColor(solid.Foreground));
+        Assert.Equal(BrushColor((Brush)host.FindResource("Rune.Brush.Border")), BrushColor(outline.BorderBrush));
+        Assert.Equal(BaseValueSource.DefaultStyleTrigger, DependencyPropertyHelper.GetValueSource(solid, Control.BackgroundProperty).BaseValueSource);
+    });
+
+    [Fact]
+    public Task Sizes_are_em_and_full_radius_is_a_pill() => WpfUi.Run(() =>
+    {
+        var large = new Rune.Wpf.Button { Content = "lg", Size = TextSize.Lg };
+        var pill = new Rune.Wpf.Button { Content = "full", Radius = Radius.Full };
+        WpfUi.Show(Host(large, pill).Host);
+
+        Assert.Equal(16, large.FontSize);
+        Assert.Equal(new Thickness(16, 4, 16, 4), large.Padding); // 1em × 0.25em
+        Assert.Equal(36, large.MinHeight);                         // max(2.25em, 24px)
+        Assert.Equal(new CornerRadius(0.4 * 16), large.CornerRadius);
+        Assert.Equal(pill.ActualHeight / 2, pill.CornerRadius.TopLeft, 3);
+    });
+
+    [Fact]
+    public Task Loading_blocks_clicks_and_shows_the_spinner_after_a_delay() => WpfUi.Run(() =>
+    {
+        var clicks = 0;
+        var button = new Rune.Wpf.Button { Content = "保存" };
+        button.Click += (_, _) => clicks++;
+        WpfUi.Show(Host(button).Host);
+        var invoke = (System.Windows.Automation.Provider.IInvokeProvider)new System.Windows.Automation.Peers.ButtonAutomationPeer(button).GetPattern(System.Windows.Automation.Peers.PatternInterface.Invoke);
+
+        button.IsLoading = true;
+        invoke.Invoke();
+        WpfUi.Flush();
+        Assert.Equal(0, clicks);
+        Assert.False(button.ShowsSpinner); // 200 毫秒内不出现
+
+        WpfUi.Wait(TimeSpan.FromMilliseconds(350));
+        Assert.True(button.ShowsSpinner);
+        Assert.Equal(0, Part<StackPanel>(button, "PART_Content").Opacity);
+        Assert.Equal(Visibility.Visible, Part<Spinner>(button, "PART_Spinner").Visibility);
+
+        button.IsLoading = false;
+        invoke.Invoke();
+        WpfUi.Flush();
+        Assert.Equal(1, clicks);
+        Assert.True(button.ShowsSpinner); // 出现了至少显示 0.5 秒
+        WpfUi.Wait(TimeSpan.FromMilliseconds(600));
+        Assert.False(button.ShowsSpinner);
+    });
+
+    [Fact]
+    public Task Pressing_starts_a_ripple_of_the_text_color() => WpfUi.Run(() =>
+    {
+        var button = new Rune.Wpf.Button { Content = "发布", Width = 120 };
+        WpfUi.Show(Host(button).Host);
+        var layer = Part<Canvas>(button, "PART_Ripples");
+
+        button.RaiseEvent(new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left) { RoutedEvent = Mouse.MouseDownEvent });
+        var ripple = Assert.IsType<Ellipse>(Assert.Single(layer.Children.OfType<Ellipse>()));
+        var fill = Assert.IsType<SolidColorBrush>(ripple.Fill);
+        Assert.Equal((BrushColor(button.Foreground), 0.22), (fill.Color, fill.Opacity));
+        Assert.NotNull(layer.Clip); // 裁成按钮的圆角
+    });
+
+    [Fact]
+    public Task Provider_styles_reach_template_icons() => WpfUi.Run(() =>
+    {
+        const string Xaml = """
+            <StackPanel xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                        xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/wpf">
+              <StackPanel.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><rune:RuneTheme /></ResourceDictionary.MergedDictionaries></ResourceDictionary></StackPanel.Resources>
+              <rune:Provider>
+                <rune:Provider.Styles>
+                  <ResourceDictionary>
+                    <Style TargetType="rune:Icon"><Setter Property="StrokeWidth" Value="3" /></Style>
+                    <Style x:Key="{x:Static rune:ButtonParts.IconEnd}" TargetType="rune:Icon"><Setter Property="StrokeWidth" Value="1" /></Style>
+                  </ResourceDictionary>
+                </rune:Provider.Styles>
+                <rune:Button x:Name="button" Icon="{x:Static rune:Lucide.Plus}" IconEnd="{x:Static rune:Lucide.ChevronDown}">新建</rune:Button>
+              </rune:Provider>
+            </StackPanel>
+            """;
+        var root = (FrameworkElement)XamlReader.Parse(Xaml);
+        WpfUi.Show(root);
+        var button = (Rune.Wpf.Button)root.FindName("button");
+
+        Assert.Equal(3, Part<Icon>(button, "PART_Icon").StrokeWidth);
+        Assert.Equal(1, Part<Icon>(button, "PART_IconEnd").StrokeWidth);
+        Assert.Equal(Lucide.Plus, Part<Icon>(button, "PART_Icon").Data);
+    });
+}

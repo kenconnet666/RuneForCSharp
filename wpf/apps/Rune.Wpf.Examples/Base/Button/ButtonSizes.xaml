@@ -1,0 +1,12 @@
+<UserControl x:Class="Rune.Wpf.Examples.ButtonSizes"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/wpf">
+  <UserControl.Resources>
+    <Style TargetType="rune:Button"><Setter Property="Margin" Value="0,0,8,8" /><Setter Property="VerticalAlignment" Value="Center" /></Style>
+  </UserControl.Resources>
+  <StackPanel>
+    <WrapPanel><rune:Button Size="xs" Icon="{x:Static rune:Lucide.Plus}">xs</rune:Button><rune:Button Size="sm" Icon="{x:Static rune:Lucide.Plus}">sm</rune:Button><rune:Button Size="md" Icon="{x:Static rune:Lucide.Plus}">md</rune:Button><rune:Button Size="lg" Icon="{x:Static rune:Lucide.Plus}">lg</rune:Button><rune:Button Size="xl" Icon="{x:Static rune:Lucide.Plus}">xl</rune:Button></WrapPanel>
+    <WrapPanel><rune:Button Size="xs" Variant="outline" Tone="neutral">xs</rune:Button><rune:Button Size="sm" Variant="outline" Tone="neutral">sm</rune:Button><rune:Button Size="md" Variant="outline" Tone="neutral">md</rune:Button><rune:Button Size="lg" Variant="outline" Tone="neutral">lg</rune:Button><rune:Button Size="xl" Variant="outline" Tone="neutral">xl</rune:Button></WrapPanel>
+  </StackPanel>
+</UserControl>
