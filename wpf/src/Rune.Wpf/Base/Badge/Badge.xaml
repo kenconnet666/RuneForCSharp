@@ -1,16 +1,27 @@
 <!--
   Badge 的主题样式：只放默认值（vue-tsx-pro 的 badgeRecipe.defaults 与 BadgeOptions 的默认），Provider 的样式能改。
-  样式 × 色调的颜色、em 尺寸在 Badge.cs 里（自绘组件，不用模板与触发器，DESIGN §9）
+  样式 × 色调的颜色是生成的 BadgeRecipe.g.xaml（与按钮同一张调色板表），字号档位是这里的触发器：都在主题这一层，使用方的样式盖得过。
+  em 尺寸在 Badge.cs 里（自绘组件，不用模板，DESIGN §9）
 -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:rune="clr-namespace:Rune.Wpf">
-  <Style TargetType="rune:Badge">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Rune.Wpf;component/Base/Badge/BadgeRecipe.g.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <Style TargetType="rune:Badge" BasedOn="{StaticResource Rune.Recipe.Badge}">
     <Setter Property="Variant" Value="soft" />
     <Setter Property="Tone" Value="neutral" />
     <Setter Property="Size" Value="xs" />
     <Setter Property="Radius" Value="sm" />
     <Setter Property="VerticalAlignment" Value="Center" />
     <Setter Property="HorizontalAlignment" Value="Left" />
+    <Style.Triggers>
+      <Trigger Property="Size" Value="xs"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xs}" /></Trigger>
+      <Trigger Property="Size" Value="sm"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" /></Trigger>
+      <Trigger Property="Size" Value="md"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Md}" /></Trigger>
+      <Trigger Property="Size" Value="lg"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Lg}" /></Trigger>
+      <Trigger Property="Size" Value="xl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xl}" /></Trigger>
+    </Style.Triggers>
   </Style>
 </ResourceDictionary>

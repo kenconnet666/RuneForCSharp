@@ -28,7 +28,7 @@ public abstract class ButtonCore : ButtonBase
 
     /// <summary>圆角，主题里默认 md。</summary>
     public static readonly DependencyProperty RadiusProperty = DependencyProperty.Register(
-        nameof(Radius), typeof(Radius), typeof(ButtonCore), new FrameworkPropertyMetadata(default(Radius), OnRadiusChanged));
+        nameof(Radius), typeof(Radius), typeof(ButtonCore), new FrameworkPropertyMetadata(default(Radius)));
 
     /// <summary>图标（Button 里在文字前）。</summary>
     public static readonly DependencyProperty IconProperty = DependencyProperty.Register(nameof(Icon), typeof(IconData), typeof(ButtonCore));
@@ -74,19 +74,11 @@ public abstract class ButtonCore : ButtonBase
         presenter = GetTemplateChild("PART_ContentPresenter") as ContentPresenter;
     }
 
+    /// <summary>档位的字号、圆角在主题样式的触发器里；字号写成像素数时是本地值（同 TS 的行内样式）。</summary>
     static void OnSizeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        var button = (ButtonCore)d;
-        if (button.Size.ResourceKey is { } key) button.SetResourceReference(FontSizeProperty, key);
-        else button.ClearValue(FontSizeProperty);
-        if (button.Size.Pixels is { } pixels) button.SetValue(FontSizeProperty, pixels);
-    }
-
-    static void OnRadiusChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    {
-        var button = (ButtonCore)d;
-        if (button.Radius.ResourceKey is { } key) button.SetResourceReference(EmSize.CornerRadiusProperty, key);
-        else button.ClearValue(EmSize.CornerRadiusProperty);
+        if (((TextSize)e.NewValue).Pixels is { } pixels) d.SetValue(FontSizeProperty, pixels);
+        else if (((TextSize)e.OldValue).Pixels is not null) d.ClearValue(FontSizeProperty);
     }
 
     /// <inheritdoc />

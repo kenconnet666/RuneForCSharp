@@ -60,6 +60,19 @@
     <Setter Property="Cursor" Value="Hand" />
     <Setter Property="FocusVisualStyle" Value="{x:Null}" />
     <Style.Triggers>
+      <!-- 字号、圆角档位：主题样式的触发器，使用方任何样式都盖得过（DESIGN §4"档位的优先级"）；字号写成像素数时是本地值 -->
+      <Trigger Property="Size" Value="xs"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xs}" /></Trigger>
+      <Trigger Property="Size" Value="sm"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" /></Trigger>
+      <Trigger Property="Size" Value="md"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Md}" /></Trigger>
+      <Trigger Property="Size" Value="lg"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Lg}" /></Trigger>
+      <Trigger Property="Size" Value="xl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xl}" /></Trigger>
+      <Trigger Property="Radius" Value="none"><Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.None}" /></Trigger>
+      <Trigger Property="Radius" Value="xs"><Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.Xs}" /></Trigger>
+      <Trigger Property="Radius" Value="sm"><Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.Sm}" /></Trigger>
+      <Trigger Property="Radius" Value="md"><Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.Md}" /></Trigger>
+      <Trigger Property="Radius" Value="lg"><Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.Lg}" /></Trigger>
+      <Trigger Property="Radius" Value="xl"><Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.Xl}" /></Trigger>
+      <Trigger Property="Radius" Value="full"><Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.Full}" /></Trigger>
       <!-- 链接样式：无底、左右内边距 0（上下 0.25em 保留）、最小高度 0（颜色在配方里，悬停下划线在代码里） -->
       <Trigger Property="Variant" Value="link">
         <Setter Property="rune:EmSize.Padding" Value="0,0.25" />

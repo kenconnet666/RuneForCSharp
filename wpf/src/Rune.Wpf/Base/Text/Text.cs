@@ -14,7 +14,7 @@ namespace Rune.Wpf;
 /// &lt;rune:Text Numeric="True" Tone="danger"&gt;超时 3 天&lt;/rune:Text&gt;  金额、计数：等宽数字
 /// </code>
 /// 从 TextBlock 派生（ROADMAP 决定 19）：行内内容、换行、截断、读屏都现成。不写的属性都继承外面；
-/// 写了的档位在代码里设成主题资源的引用（本地值，同 DynamicResource），清掉时回到继承。换某个色调的颜色改主题资源。
+/// 档位是主题样式的触发器（Text.xaml），使用方任何样式都盖得过；字号写成像素数时是本地值。换某个色调的颜色改主题资源。
 /// </summary>
 public class Text : TextBlock
 {
@@ -24,11 +24,11 @@ public class Text : TextBlock
 
     /// <summary>字重档位；不写时继承。</summary>
     public static readonly DependencyProperty WeightProperty = DependencyProperty.Register(
-        nameof(Weight), typeof(TextWeight), typeof(Text), new FrameworkPropertyMetadata(default(TextWeight), (d, _) => ((Text)d).ReferenceResource(FontWeightProperty, ((Text)d).Weight.ResourceKey)));
+        nameof(Weight), typeof(TextWeight), typeof(Text), new FrameworkPropertyMetadata(default(TextWeight)));
 
     /// <summary>色调；不写时继承外面的文字颜色。</summary>
     public static readonly DependencyProperty ToneProperty = DependencyProperty.Register(
-        nameof(Tone), typeof(TextTone), typeof(Text), new FrameworkPropertyMetadata(default(TextTone), (d, _) => ((Text)d).ReferenceResource(ForegroundProperty, ((Text)d).Tone.BrushKey)));
+        nameof(Tone), typeof(TextTone), typeof(Text), new FrameworkPropertyMetadata(default(TextTone)));
 
     /// <summary>水平对齐（按书写方向）；不写时继承。</summary>
     public static readonly DependencyProperty AlignProperty = DependencyProperty.Register(
@@ -52,7 +52,7 @@ public class Text : TextBlock
 
     /// <summary>等宽字体（主题的 fonts.mono）：编号、件号、代码片段。</summary>
     public static readonly DependencyProperty MonoProperty = DependencyProperty.Register(
-        nameof(Mono), typeof(bool), typeof(Text), new FrameworkPropertyMetadata(false, (d, _) => ((Text)d).ReferenceResource(FontFamilyProperty, ((Text)d).Mono ? "Rune.Font.Mono" : null)));
+        nameof(Mono), typeof(bool), typeof(Text), new FrameworkPropertyMetadata(false));
 
     static Text()
     {
@@ -96,22 +96,14 @@ public class Text : TextBlock
 
     static void OnSizeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        var text = (Text)d;
-        text.ReferenceResource(FontSizeProperty, text.Size.ResourceKey);
-        if (text.Size.Pixels is { } pixels) text.SetValue(FontSizeProperty, pixels);
+        if (((TextSize)e.NewValue).Pixels is { } pixels) d.SetValue(FontSizeProperty, pixels);
+        else if (((TextSize)e.OldValue).Pixels is not null) d.ClearValue(FontSizeProperty);
     }
 
     static void OnNumericChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if ((bool)e.NewValue) d.SetValue(Typography.NumeralAlignmentProperty, FontNumeralAlignment.Tabular);
         else d.ClearValue(Typography.NumeralAlignmentProperty);
-    }
-
-    /// <summary>设成主题资源的引用；key 为 null 时清掉本地值，回到继承或样式里的值。</summary>
-    void ReferenceResource(DependencyProperty property, string? key)
-    {
-        if (key is null) ClearValue(property);
-        else SetResourceReference(property, key);
     }
 
     /// <summary>TextAlignment 的 Left、Right 跟着 FlowDirection 镜像，就是起始边、结束边。</summary>

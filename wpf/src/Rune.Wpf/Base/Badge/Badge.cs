@@ -16,7 +16,8 @@ namespace Rune.Wpf;
 /// </code>
 /// 数量大的轻量部件（DESIGN §9）：不用模板，底色、描边、圆角在 OnRender 里画，图标、圆点、文字是代码里组合的子元素
 /// （ROADMAP 决定 20）。图标部件引用部件样式键 <see cref="BadgeParts.Icon"/>，
-/// Provider.Styles 里同键的样式照常叠上去。样式 × 色调的颜色（<see cref="StatusColors"/>）是主题资源的引用（本地值，受管）；
+/// Provider.Styles 里同键的样式照常叠上去。样式 × 色调的颜色与按钮同一张调色板表（生成的 BadgeRecipe.g.xaml 的 MultiTrigger），
+/// 字号档位也是主题样式的触发器：都在主题这一层，使用方任何样式都盖得过（DESIGN §4"档位的优先级"）。
 /// 默认的样式、色调、字号、圆角在主题样式里。尺寸都是 em：内边距 0.5em、间距 0.25em、最小高度 1.75em、圆点 0.5em。
 /// </summary>
 [ContentProperty(nameof(Content))]
@@ -24,11 +25,11 @@ public class Badge : Control
 {
     /// <summary>样式，主题里默认 soft。</summary>
     public static readonly DependencyProperty VariantProperty = DependencyProperty.Register(
-        nameof(Variant), typeof(StatusVariant), typeof(Badge), new FrameworkPropertyMetadata(default(StatusVariant), OnColorsChanged));
+        nameof(Variant), typeof(StatusVariant), typeof(Badge), new FrameworkPropertyMetadata(default(StatusVariant)));
 
     /// <summary>色调，主题里默认 neutral。</summary>
     public static readonly DependencyProperty ToneProperty = DependencyProperty.Register(
-        nameof(Tone), typeof(StatusTone), typeof(Badge), new FrameworkPropertyMetadata(default(StatusTone), OnColorsChanged));
+        nameof(Tone), typeof(StatusTone), typeof(Badge), new FrameworkPropertyMetadata(default(StatusTone)));
 
     /// <summary>字号档位，主题里默认 xs。</summary>
     public static readonly DependencyProperty SizeProperty = DependencyProperty.Register(
@@ -101,20 +102,11 @@ public class Badge : Control
     /// <inheritdoc />
     protected override Visual GetVisualChild(int index) => parts[index];
 
-    static void OnColorsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    {
-        var badge = (Badge)d;
-        var colors = StatusColors.Of(badge.Variant, badge.Tone);
-        badge.ReferenceResource(ForegroundProperty, colors.Foreground);
-        badge.ReferenceResource(BackgroundProperty, colors.Background);
-        badge.ReferenceResource(BorderBrushProperty, colors.Border);
-    }
-
+    /// <summary>档位的字号在主题样式的触发器里；写成像素数时是本地值（同 TS 的行内样式）。</summary>
     static void OnSizeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        var badge = (Badge)d;
-        badge.ReferenceResource(FontSizeProperty, badge.Size.ResourceKey);
-        if (badge.Size.Pixels is { } pixels) badge.SetValue(FontSizeProperty, pixels);
+        if (((TextSize)e.NewValue).Pixels is { } pixels) d.SetValue(FontSizeProperty, pixels);
+        else if (((TextSize)e.OldValue).Pixels is not null) d.ClearValue(FontSizeProperty);
     }
 
     static void OnRadiusChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) =>

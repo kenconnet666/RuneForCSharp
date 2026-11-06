@@ -97,4 +97,18 @@ public class BadgeTests
         Assert.False(peer.IsControlElement());
         Assert.Contains(peer.GetChildren(), child => child.GetName() == "已发货");
     });
+
+    [Fact]
+    public Task Styles_beat_the_variant_colors_and_size_step() => WpfUi.Run(() =>
+    {
+        // 样式 × 色调、字号档位都是主题样式的触发器：使用方普通的 setter 也盖得过（vue-tsx-pro 的"定制段盖过组件段"）
+        var badge = new Badge { Content = "3", Variant = StatusVariant.Solid, Tone = StatusTone.Danger, Size = TextSize.Lg };
+        var (host, _) = Host(badge);
+        badge.Style = new Style(typeof(Badge)) { Setters = { new Setter(Control.BackgroundProperty, Brushes.Teal), new Setter(Control.FontSizeProperty, 20d) } };
+        WpfUi.Show(host);
+
+        Assert.Equal(Colors.Teal, BrushColor(badge.Background));
+        Assert.Equal(20, badge.FontSize);
+        Assert.Equal(BrushColor((Brush)host.FindResource("Rune.Brush.DangerContrast")), BrushColor(badge.Foreground));
+    });
 }

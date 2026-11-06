@@ -58,9 +58,9 @@ public class Badge : Element
     }
 
     /// <summary>Badge 里面的环境：字体换成 Badge 的字号，文字颜色换成样式 × 色调的前景色。</summary>
-    (ElementContext Inner, StatusColors Colors) Resolve(ElementContext context)
+    (ElementContext Inner, (Color? Background, Color Foreground, Color? Border) Colors) Resolve(ElementContext context)
     {
-        var colors = StatusColors.Of(Variant, Tone, context.Theme.Colors);
+        var colors = BadgeRecipe.Colors(Variant.Value, Tone.Value, hover: false, context.Theme.Colors);
         var points = (Size.Pixels ?? Tokens.FontSize.Xs) * 72 / 96;
         var font = Fonts.Get(context.Font.FontFamily.Name, points, context.Font.Style);
         return (context with { Font = font, ForeColor = colors.Foreground }, colors);

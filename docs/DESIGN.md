@@ -151,6 +151,8 @@ TS 的 Button 是 6 种样式 × 6 种色调，配方里 36 条组合，每条�
 | 不继承的属性：色调 → `Palette`、圆角档位 → `CornerRadius`（Badge 的 `Palette`） | 代码存进 `Resolved` 的附加属性，组件主题里一条 setter 绑过来（`{rune:Resolved Palette}`、`{rune:Em Resolved=Radius}`），落在主题这一层 | 使用方、Provider 的任何样式，**与上游一致** |
 | 继承的属性：字号档位 → `FontSize`，Text 的字重、字体、色调，Icon 的色调颜色；Badge 由调色板取出的文字色、底色、描边 | 代码按模板优先级绑定（`TemplateResources`） | 带类或伪类的样式、本地值；只按类型选的样式盖不过 |
 
+WPF 没有这个问题：主题样式（DefaultStyleKey）的触发器整体低于任何样式的 setter，没命中时回到继承，所以字号、圆角档位与 Badge 的样式 × 色调都写成主题样式的触发器（`Trigger Property="Size" Value="lg"`），与上游一致；只有字号写成像素数时是本地值（同 TS 的行内样式）。使用方自己扩展的档位名不在触发器里，要在样式里补一条同样的触发器。
+
 继承属性走不了主题 setter：Avalonia 的绑定没有值时给属性的**默认值**，回不到继承的值（`UntypedBindingExpressionBase.GetValueOrDefault`、`BindingEntryBase.SetValue`），档位没写时字号就成了 12 而不是外面的字号。只有清掉绑定才回到继承，所以这类值留在代码里，没写档位时解绑。代码按样式优先级绑定也不行：同一优先级里后建的 frame 赢，档位在样式之后才第一次写（数据绑定晚到）时会盖过使用方的样式，顺序不可靠。使用方要盖过这类档位，选择器带一个类（`rune|Text.title`）或伪类即可。
 
 开销（1000 个，`inspect bench`，同一台机器上前后两版交替跑三轮）：布局、换主题的耗时差别在噪声内（机器负载让同一版本也差到 1.6 倍）；分配 Button 115.5 → 117.0 MB、Badge 25.05 → 25.08 MB，常驻每个按钮多约 1 KB。Text、Icon 没有变化。
@@ -467,7 +469,7 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   - GDI+ 的字体只有常规与粗体：semibold、bold 画成粗体，light、medium 画成常规。Numeric 不用处理（界面字体的数字默认等宽，GDI 也开不了 OpenType 特性）。
   - 字体共用（`Fonts`）：同样的（字体、磅值、样式）一个 Font，元素不持有、不释放。主题的字体是一串候选，`Fonts.Installed` 取第一个装了的（Mono 用它；宿主、Gallery 也用它设主题的 Sans）。
   - 只有写了 Tone、Mono 的文字才读主题，换主题时其余文字不重画（实测：带色调的失效 1 次，跟随 ForeColor 的 0 次）。
-- **WPF**：从 TextBlock 派生（ROADMAP 决定 19）。写法同 Avalonia：档位写了才 `SetResourceReference`（本地的资源引用），清掉时 `ClearValue`；默认值在 Generic.xaml 的主题样式里（DefaultStyleKey 每个子类各设一次），`DependencyPropertyHelper` 报 DefaultStyle。
+- **WPF**：从 TextBlock 派生（ROADMAP 决定 19）。档位（字号、字重、色调、等宽）是 Generic.xaml 主题样式里的触发器，在主题这一层，使用方任何样式都盖得过（第 4 节"档位的优先级"）；没写档位时继承外面，字号写成像素数时是本地值。默认值也在主题样式里（DefaultStyleKey 每个子类各设一次），`DependencyPropertyHelper` 报 DefaultStyle。
   - TextBlock 没有最大行数：LineClamp 按行高限 MaxHeight（`FontFamily.LineSpacing × FontSize`，或 LineHeight），加 Wrap 与 CharacterEllipsis，最后一行放不下的部分变成省略号。字号、字体、行高变了要重算：TextBlock 的 `OnPropertyChanged` 是密封的，改成覆盖这几个属性的元数据、加变化回调（与基类的回调合并）。
   - Numeric 是 `Typography.NumeralAlignment = Tabular`；Align 的 Start、End 对应 TextAlignment 的 Left、Right（随 FlowDirection 镜像）。
   - WPF 的字重比 GDI 全：medium、semibold 都画得出来。
@@ -484,7 +486,7 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 ### Badge
 
 - 第一个自绘、带配方（样式 × 色调 24 条组合）与默认值（`useDefaults("Badge")`）的组件。新的档位类型：`StatusVariant`（solid、soft、surface、outline）、`StatusTone`（六种状态色调）、`Radius`（none–full），三个库都有。
-- 配方的颜色收在 `StatusColors.Of(样式, 色调)`：非中性色调按 `{色调}`、`{色调}Contrast`、`{色调}Soft`、`{色调}Text`、`{色调}Border` 的规律取 token，中性用反色、填充、表面等另一组。Avalonia、WPF 返回画刷的资源键，WinForms 返回当前主题的颜色。TS 的配方表是 parity 以后做取值对照的数据源。
+- 颜色与按钮同一张调色板表（`tools/token-gen/palette.mjs`，vue-tsx-pro 0.11 的 `statusToneCompound`）：非中性色调按 `{色调}`、`{色调}Contrast`、`{色调}Soft`、`{色调}Text`、`{色调}Border` 的规律取 token，中性用反色、填充、表面等另一组。Avalonia 取调色板对象的字段（代码里按样式档位选），WPF 是 recipe-gen 生成的 `BadgeRecipe.g.xaml`（24 条 MultiTrigger，主题样式 BasedOn 它），WinForms 是生成的 `BadgeRecipe.Colors`。
 - 自绘（DESIGN §9），部件按 ROADMAP 决定 20：底色、描边、圆角自己画；图标、圆点、文字是代码里组合的子元素。
   - **Avalonia**：子元素加进 LogicalChildren、VisualChildren；部件名 `PART_Icon`、`PART_Dot`（`BadgeParts`），样式用子选择器 `rune|Badge > rune|Icon#PART_Icon`（测试覆盖）。
   - **WPF**：AddVisualChild、AddLogicalChild，覆盖 VisualChildrenCount、GetVisualChild、LogicalChildren；图标、圆点在代码里 `SetResourceReference(StyleProperty, BadgeParts.Icon)`，Provider 的部件样式照常叠上去（测试覆盖）。Control 的 Background、BorderBrush 元数据补上 AffectsRender。

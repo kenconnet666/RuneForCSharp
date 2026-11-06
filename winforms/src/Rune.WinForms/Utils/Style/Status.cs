@@ -74,41 +74,6 @@ public readonly record struct StatusVariant(string Value) : IVariant<StatusVaria
     public override string ToString() => Value;
 }
 
-/// <summary>样式 × 色调的颜色（vue-tsx-pro 的 badgeRecipe 的 24 条组合；中性色调用反色、填充等另一组 token）。</summary>
-/// <param name="Foreground">文字与图标。</param>
-/// <param name="Background">底色；没有时为 null。</param>
-/// <param name="Border">描边；没有时为 null。</param>
-public readonly record struct StatusColors(Color Foreground, Color? Background, Color? Border)
-{
-    /// <summary>取一种组合在主题里的颜色；使用方扩展的取值按浅色底、中性处理。</summary>
-    /// <param name="variant">样式。</param>
-    /// <param name="tone">色调。</param>
-    /// <param name="colors">当前主题的颜色。</param>
-    public static StatusColors Of(StatusVariant variant, StatusTone tone, ThemeColors colors)
-    {
-        (Color Solid, Color Contrast, Color Soft, Color Text, Color Border)? shades = tone.Value switch
-        {
-            "accent" => (colors.Accent, colors.AccentContrast, colors.AccentSoft, colors.AccentText, colors.AccentBorder),
-            "info" => (colors.Info, colors.InfoContrast, colors.InfoSoft, colors.InfoText, colors.InfoBorder),
-            "success" => (colors.Success, colors.SuccessContrast, colors.SuccessSoft, colors.SuccessText, colors.SuccessBorder),
-            "warning" => (colors.Warning, colors.WarningContrast, colors.WarningSoft, colors.WarningText, colors.WarningBorder),
-            "danger" => (colors.Danger, colors.DangerContrast, colors.DangerSoft, colors.DangerText, colors.DangerBorder),
-            _ => null,
-        };
-        return (variant.Value, shades) switch
-        {
-            ("solid", null) => new(colors.InverseText, colors.InverseSurface, null),
-            ("solid", { } s) => new(s.Contrast, s.Solid, null),
-            ("surface", null) => new(colors.Text, colors.Surface, colors.Border),
-            ("surface", { } s) => new(s.Text, s.Soft, s.Border),
-            ("outline", null) => new(colors.Text, null, colors.Border),
-            ("outline", { } s) => new(s.Text, null, s.Border),
-            (_, null) => new(colors.Text, colors.Fill, null),
-            (_, { } s) => new(s.Text, s.Soft, null),
-        };
-    }
-}
-
 /// <summary>圆角档位（vue-tsx-pro 的 Radius，对应主题的 radii，em，随字号缩放）。</summary>
 /// <param name="Value">取值（none、xs、sm、md、lg、xl、full）。</param>
 [TypeConverter(typeof(VariantConverter<Radius>))]

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// 组件配方的生成：样式档位 × 色调的组合（vue-tsx-pro 的 css.recipe compound），按调色板表（token-gen/palette.mjs）展开。
+// 组件配方的生成：样式档位 × 色调的组合（vue-tsx-pro 的 css.recipe compound），按调色板表（token-gen/palette.mjs）展开（按钮家族、Badge）。
 // Avalonia 用调色板对象，样式里只写 6 条档位（手写在组件的 axaml 里）；WPF 用主题样式的 MultiTrigger（DESIGN §4），
 // 36 条组合加悬停逐条写容易错，这里生成。用法：node tools/recipe-gen/recipe-gen.mjs [--check]
 import { parseArgs } from 'node:util';
@@ -23,6 +23,17 @@ export const RECIPES = {
       outline: { Foreground: 'text', BorderBrush: 'border', hover: { Background: 'subtleHover' } },
       ghost: { Foreground: 'text', hover: { Background: 'subtleHover' } },
       link: { Foreground: 'text' },
+    },
+  },
+  Badge: {
+    // 标记与提示（Badge，以后的 Tag、Alert）：vue-tsx-pro 的 statusToneStyles / statusToneCompound，与按钮同一张调色板表
+    file: 'wpf/src/Rune.Wpf/Base/Badge/BadgeRecipe.g.xaml',
+    winforms: 'winforms/src/Rune.WinForms/Base/Badge/BadgeRecipe.g.cs',
+    variants: {
+      solid: { Background: 'solid', Foreground: 'contrast' },
+      soft: { Background: 'soft', Foreground: 'text' },
+      surface: { Background: 'surface', Foreground: 'text', BorderBrush: 'border' },
+      outline: { Foreground: 'text', BorderBrush: 'border' },
     },
   },
 };
