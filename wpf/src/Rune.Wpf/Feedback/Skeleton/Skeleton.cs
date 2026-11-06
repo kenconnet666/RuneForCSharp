@@ -12,7 +12,7 @@ namespace Rune.Wpf;
 /// 骨架屏（vue-tsx-pro 的 Skeleton）：内容加载时的占位，一道光带从起始边扫过。包着真实内容时，内容照常排版但不可见、不可交互，
 /// 占位正好是内容的大小，加载完换成内容时布局不跳；不包内容时用 <see cref="Shape"/> 选常用形状。
 /// <code>
-/// &lt;rune:Skeleton Loading="{Binding Loading}"&gt;&lt;rune:Text Text="{Binding Name}" /&gt;&lt;/rune:Skeleton&gt;
+/// &lt;rune:Skeleton IsLoading="{Binding Loading}"&gt;&lt;rune:Text Text="{Binding Name}" /&gt;&lt;/rune:Skeleton&gt;
 /// &lt;rune:Skeleton Shape="circle" /&gt;
 /// &lt;rune:Skeleton Shape="heading" Delay="120" /&gt;     &lt;!-- 几块骨架依次扫过 --&gt;
 /// </code>
@@ -24,8 +24,8 @@ namespace Rune.Wpf;
 public class Skeleton : FrameworkElement
 {
     /// <summary>是否在加载（默认 true）；false 时直接显示内容。</summary>
-    public static readonly DependencyProperty LoadingProperty = DependencyProperty.Register(
-        nameof(Loading), typeof(bool), typeof(Skeleton), new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender, (d, _) => ((Skeleton)d).UpdateLoading()));
+    public static readonly DependencyProperty IsLoadingProperty = DependencyProperty.Register(
+        nameof(IsLoading), typeof(bool), typeof(Skeleton), new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender, (d, _) => ((Skeleton)d).UpdateLoading()));
 
     /// <summary>形状；不写时大小由内容决定。</summary>
     public static readonly DependencyProperty ShapeProperty = DependencyProperty.Register(
@@ -66,7 +66,7 @@ public class Skeleton : FrameworkElement
     }
 
     /// <summary>是否在加载。</summary>
-    public bool Loading { get => (bool)GetValue(LoadingProperty); set => SetValue(LoadingProperty, value); }
+    public bool IsLoading { get => (bool)GetValue(IsLoadingProperty); set => SetValue(IsLoadingProperty, value); }
 
     /// <summary>形状。</summary>
     public SkeletonShape Shape { get => (SkeletonShape)GetValue(ShapeProperty); set => SetValue(ShapeProperty, value); }
@@ -98,16 +98,16 @@ public class Skeleton : FrameworkElement
     /// <summary>加载时内容不可见、不可交互；加载完内容照常显示。</summary>
     void UpdateLoading()
     {
-        holder.Opacity = Loading ? 0 : 1;
-        holder.IsEnabled = !Loading;
-        holder.IsHitTestVisible = !Loading;
+        holder.Opacity = IsLoading ? 0 : 1;
+        holder.IsEnabled = !IsLoading;
+        holder.IsHitTestVisible = !IsLoading;
         Sweep();
     }
 
     /// <summary>扫光：加载中、可见、系统没关动画时一直扫（-1 → 1 用 1.4 秒，再停 0.6 秒）。</summary>
     void Sweep()
     {
-        if (!Loading || !IsVisible || !Motion.Enabled)
+        if (!IsLoading || !IsVisible || !Motion.Enabled)
         {
             BeginAnimation(PhaseProperty, null);
             return;
@@ -142,7 +142,7 @@ public class Skeleton : FrameworkElement
     protected override Size MeasureOverride(Size availableSize)
     {
         holder.Measure(availableSize);
-        return Loading && ShapeSize(availableSize) is { } shape ? shape : holder.DesiredSize;
+        return IsLoading && ShapeSize(availableSize) is { } shape ? shape : holder.DesiredSize;
     }
 
     /// <inheritdoc />
@@ -155,7 +155,7 @@ public class Skeleton : FrameworkElement
     /// <inheritdoc />
     protected override void OnRender(DrawingContext drawingContext)
     {
-        if (!Loading || RenderSize.Width <= 0 || RenderSize.Height <= 0) return;
+        if (!IsLoading || RenderSize.Width <= 0 || RenderSize.Height <= 0) return;
         var bounds = new Rect(RenderSize);
         var radius = Shape.Value == "circle" ? bounds.Height / 2 : Math.Min((double)GetValue(RadiusFactorProperty) * Em, bounds.Height / 2);
         var text = (Color)GetValue(TextColorProperty);
@@ -182,7 +182,7 @@ public class Skeleton : FrameworkElement
 
         protected override bool IsControlElementCore() => false;
 
-        protected override List<AutomationPeer>? GetChildrenCore() => owner.Loading ? null : base.GetChildrenCore();
+        protected override List<AutomationPeer>? GetChildrenCore() => owner.IsLoading ? null : base.GetChildrenCore();
     }
 }
 

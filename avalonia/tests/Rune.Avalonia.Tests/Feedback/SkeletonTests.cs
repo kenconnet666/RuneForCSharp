@@ -23,7 +23,7 @@ public class SkeletonTests
         Assert.False(button.IsEffectivelyEnabled); // 包着的按钮不能聚焦、点击
         Assert.Equal(AccessibilityView.Raw, AutomationProperties.GetAccessibilityView(skeleton));
 
-        skeleton.Loading = false;
+        skeleton.IsLoading = false;
         Assert.Equal(1, Holder(skeleton).Opacity);
         Assert.True(button.IsEffectivelyEnabled);
         Assert.Equal(AccessibilityView.Default, AutomationProperties.GetAccessibilityView(skeleton));

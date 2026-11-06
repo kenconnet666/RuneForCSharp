@@ -26,7 +26,7 @@ public class SkeletonTests
         Assert.False(button.IsEnabled); // 包着的按钮不能聚焦、点击
         Assert.Null(UIElementAutomationPeer.CreatePeerForElement(skeleton).GetChildren());
 
-        skeleton.Loading = false;
+        skeleton.IsLoading = false;
         Assert.True(button.IsEnabled);
         var peer = UIElementAutomationPeer.CreatePeerForElement(skeleton);
         peer.ResetChildrenCache();

@@ -16,7 +16,7 @@ public class SkeletonTests
         Assert.False(button.Enabled); // 包着的按钮不能聚焦、点击
         Assert.Equal(AccessibleRole.None, skeleton.AccessibilityObject.Role);
 
-        skeleton.Loading = false;
+        skeleton.IsLoading = false;
         Assert.True(button.Visible);
         Assert.True(button.Enabled);
     });

@@ -16,7 +16,7 @@ namespace Rune.Avalonia;
 /// 骨架屏（vue-tsx-pro 的 Skeleton）：内容加载时的占位，一道光带从起始边扫过。包着真实内容时，内容照常排版但不可见、不可交互，
 /// 占位正好是内容的大小，加载完换成内容时布局不跳；不包内容时用 <see cref="Shape"/> 选常用形状。
 /// <code>
-/// &lt;rune:Skeleton Loading="{Binding Loading}"&gt;&lt;rune:Text Text="{Binding Name}" /&gt;&lt;/rune:Skeleton&gt;
+/// &lt;rune:Skeleton IsLoading="{Binding Loading}"&gt;&lt;rune:Text Text="{Binding Name}" /&gt;&lt;/rune:Skeleton&gt;
 /// &lt;rune:Skeleton Shape="circle" /&gt;
 /// &lt;rune:Skeleton Shape="heading" Delay="120" /&gt;     &lt;!-- 几块骨架依次扫过 --&gt;
 /// </code>
@@ -27,7 +27,7 @@ namespace Rune.Avalonia;
 public class Skeleton : Control
 {
     /// <summary>是否在加载（默认 true）；false 时直接显示内容。</summary>
-    public static readonly StyledProperty<bool> LoadingProperty = AvaloniaProperty.Register<Skeleton, bool>(nameof(Loading), true);
+    public static readonly StyledProperty<bool> IsLoadingProperty = AvaloniaProperty.Register<Skeleton, bool>(nameof(IsLoading), true);
 
     /// <summary>形状；不写时大小由内容决定。</summary>
     public static readonly StyledProperty<SkeletonShape> ShapeProperty = AvaloniaProperty.Register<Skeleton, SkeletonShape>(nameof(Shape));
@@ -53,7 +53,7 @@ public class Skeleton : Control
 
     static Skeleton()
     {
-        AffectsMeasure<Skeleton>(ShapeProperty, LoadingProperty, FontSizeProperty);
+        AffectsMeasure<Skeleton>(ShapeProperty, IsLoadingProperty, FontSizeProperty);
         AffectsRender<Skeleton>(PhaseProperty, TextColorProperty, RadiusFactorProperty);
     }
 
@@ -69,7 +69,7 @@ public class Skeleton : Control
     }
 
     /// <summary>是否在加载。</summary>
-    public bool Loading { get => GetValue(LoadingProperty); set => SetValue(LoadingProperty, value); }
+    public bool IsLoading { get => GetValue(IsLoadingProperty); set => SetValue(IsLoadingProperty, value); }
 
     /// <summary>形状。</summary>
     public SkeletonShape Shape { get => GetValue(ShapeProperty); set => SetValue(ShapeProperty, value); }
@@ -91,7 +91,7 @@ public class Skeleton : Control
     {
         base.OnPropertyChanged(change);
         if (change.Property == ContentProperty) holder.Child = Content;
-        else if (change.Property == LoadingProperty) UpdateLoading();
+        else if (change.Property == IsLoadingProperty) UpdateLoading();
         else if (change.Property == ShapeProperty) BindRadius();
         else if (change.Property == DelayProperty) Restart();
     }
@@ -107,11 +107,11 @@ public class Skeleton : Control
     /// <summary>加载时内容不可见、不可交互，占位对读屏隐藏；加载完内容照常显示。</summary>
     void UpdateLoading()
     {
-        holder.Opacity = Loading ? 0 : 1;
-        holder.IsEnabled = !Loading;
-        holder.IsHitTestVisible = !Loading;
-        AutomationProperties.SetAccessibilityView(this, Loading ? AccessibilityView.Raw : AccessibilityView.Default);
-        AutomationProperties.SetAccessibilityView(holder, Loading ? AccessibilityView.Raw : AccessibilityView.Default);
+        holder.Opacity = IsLoading ? 0 : 1;
+        holder.IsEnabled = !IsLoading;
+        holder.IsHitTestVisible = !IsLoading;
+        AutomationProperties.SetAccessibilityView(this, IsLoading ? AccessibilityView.Raw : AccessibilityView.Default);
+        AutomationProperties.SetAccessibilityView(holder, IsLoading ? AccessibilityView.Raw : AccessibilityView.Default);
         Restart();
         InvalidateVisual();
     }
@@ -136,7 +136,7 @@ public class Skeleton : Control
     {
         sweep?.Cancel();
         sweep = null;
-        if (!Loading || VisualRoot is null) return;
+        if (!IsLoading || VisualRoot is null) return;
         sweep = new CancellationTokenSource();
         var animation = new Animation
         {
@@ -169,7 +169,7 @@ public class Skeleton : Control
     protected override LayoutSize MeasureOverride(LayoutSize availableSize)
     {
         holder.Measure(availableSize);
-        return Loading && ShapeSize(availableSize) is { } shape ? shape : holder.DesiredSize;
+        return IsLoading && ShapeSize(availableSize) is { } shape ? shape : holder.DesiredSize;
     }
 
     /// <inheritdoc />
@@ -182,7 +182,7 @@ public class Skeleton : Control
     /// <inheritdoc />
     public override void Render(DrawingContext context)
     {
-        if (!Loading || Bounds.Width <= 0 || Bounds.Height <= 0) return;
+        if (!IsLoading || Bounds.Width <= 0 || Bounds.Height <= 0) return;
         var bounds = new Rect(Bounds.Size);
         var radius = Shape.Value == "circle" ? bounds.Height / 2 : Math.Min(GetValue(RadiusFactorProperty) * Em, bounds.Height / 2);
         var text = GetValue(TextColorProperty);

@@ -10,7 +10,7 @@ namespace Rune.WinForms;
 /// <code>
 /// var name = new SkeletonControl();
 /// name.Controls.Add(new TextControl { Text = user.Name });
-/// // 加载完：name.Loading = false;
+/// // 加载完：name.IsLoading = false;
 /// </code>
 /// 底色与光带都是半透明（9%）的正文色；圆角 radii.sm（圆 full，按钮、图片 md）。扫光 2 秒一轮（1.4 秒扫过、0.6 秒停顿，先慢后快再慢），
 /// 读 <see cref="FrameClock"/>：只在画的时候扫，隐藏了就停；系统关闭动画时不扫。从右到左时反向。加载时读屏里没有角色。
@@ -35,7 +35,7 @@ public class SkeletonControl : Panel
     [Category("Behavior")]
     [Description("是否在加载；false 时显示被占位的子控件。")]
     [DefaultValue(true)]
-    public bool Loading { get; set { field = value; UpdateLoading(); } } = true;
+    public bool IsLoading { get; set { field = value; UpdateLoading(); } } = true;
 
     /// <summary>形状；没有子控件时用它决定大小。</summary>
     [Category("Appearance")]
@@ -61,10 +61,10 @@ public class SkeletonControl : Panel
     {
         foreach (Control child in Controls)
         {
-            child.Visible = !Loading;
-            child.Enabled = !Loading;
+            child.Visible = !IsLoading;
+            child.Enabled = !IsLoading;
         }
-        AccessibleRole = Loading ? AccessibleRole.None : AccessibleRole.Default;
+        AccessibleRole = IsLoading ? AccessibleRole.None : AccessibleRole.Default;
         Invalidate();
     }
 
@@ -72,8 +72,8 @@ public class SkeletonControl : Panel
     protected override void OnControlAdded(ControlEventArgs e)
     {
         base.OnControlAdded(e);
-        e.Control!.Visible = !Loading;
-        e.Control.Enabled = !Loading;
+        e.Control!.Visible = !IsLoading;
+        e.Control.Enabled = !IsLoading;
     }
 
     /// <summary>形状决定的大小；没有形状时为 null（跟着子控件）。</summary>
@@ -104,7 +104,7 @@ public class SkeletonControl : Panel
     protected override void OnPaint(PaintEventArgs e)
     {
         base.OnPaint(e);
-        if (!Loading || Width <= 0 || Height <= 0) return;
+        if (!IsLoading || Width <= 0 || Height <= 0) return;
         using var _ = paint.Track();
         var theme = RuneTheme.Current.Value;
         var tint = Color.FromArgb((int)Math.Round(255 * 0.09), theme.Colors.Text);
@@ -147,7 +147,7 @@ public class SkeletonControl : Panel
         public Size Measure(Size proposed)
         {
             var width = proposed.Width is > 1 and < int.MaxValue ? proposed.Width : owner.Width;
-            if (owner.Loading && owner.ShapeSize(width) is { } shape) return shape;
+            if (owner.IsLoading && owner.ShapeSize(width) is { } shape) return shape;
             var child = owner.Controls.Count > 0 ? owner.Controls[0] : null;
             return child is null ? Size.Empty : child.AutoSize ? child.GetPreferredSize(proposed) : child.Size;
         }
