@@ -12,6 +12,7 @@
     <ResourceDictionary Source="/Rune.Wpf;component/Base/Text/Text.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Base/Spinner/Spinner.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Base/Badge/Badge.xaml" />
+    <ResourceDictionary Source="/Rune.Wpf;component/Base/Kbd/Kbd.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Base/Button/Button.xaml" />
   </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>

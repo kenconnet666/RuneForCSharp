@@ -29,11 +29,21 @@ public static class EmSize
     public static readonly DependencyProperty CornerRadiusProperty = DependencyProperty.RegisterAttached(
         "CornerRadius", typeof(double?), typeof(EmSize), new PropertyMetadata(null, (d, _) => Refresh(d)));
 
+    /// <summary>最小宽度的 em 系数（按键这类至少一个方块宽的元素）。</summary>
+    public static readonly DependencyProperty MinWidthProperty = DependencyProperty.RegisterAttached(
+        "MinWidth", typeof(double?), typeof(EmSize), new PropertyMetadata(null, (d, _) => d.CoerceValue(FrameworkElement.MinWidthProperty)));
+
     /// <summary>行高的 em 系数（按钮这类控件里文字的行盒：TS 的 lineHeight: tight），作用在继承的 TextBlock.LineHeight 上。</summary>
     public static readonly DependencyProperty LineHeightProperty = DependencyProperty.RegisterAttached(
         "LineHeight", typeof(double?), typeof(EmSize), new PropertyMetadata(null, (d, _) => d.CoerceValue(TextBlock.LineHeightProperty)));
 
     static readonly Dictionary<Type, DependencyProperty> cornerRadiusByType = [];
+
+    /// <summary>读最小宽度系数。</summary>
+    public static double? GetMinWidth(DependencyObject d) => (double?)d.GetValue(MinWidthProperty);
+
+    /// <summary>设最小宽度系数。</summary>
+    public static void SetMinWidth(DependencyObject d, double? value) => d.SetValue(MinWidthProperty, value);
 
     /// <summary>读行高系数。</summary>
     public static double? GetLineHeight(DependencyObject d) => (double?)d.GetValue(LineHeightProperty);
@@ -58,7 +68,8 @@ public static class EmSize
     /// </summary>
     /// <param name="controlType">控件类型。</param>
     /// <param name="cornerRadiusProperty">控件自己的圆角属性（注册时 coerce 回调写 <see cref="CoerceCornerRadius"/>）；没有就不传。</param>
-    public static void Register(Type controlType, DependencyProperty? cornerRadiusProperty = null)
+    /// <param name="fontScale">字号是外面的几倍（CSS 的 <c>font-size: 0.85em</c>）：继承来的字号乘上它，里面的 em 都按缩放后的算。</param>
+    public static void Register(Type controlType, DependencyProperty? cornerRadiusProperty = null, double fontScale = 1)
     {
         Control.PaddingProperty.OverrideMetadata(controlType, new FrameworkPropertyMetadata(default(Thickness), null, CoercePadding));
         FrameworkElement.MinHeightProperty.OverrideMetadata(controlType, new FrameworkPropertyMetadata(0d, null, CoerceMinHeight));
@@ -66,8 +77,15 @@ public static class EmSize
         // 行高是继承属性：外面传进来的值也按自己的字号重算；基础值变了时 WPF 先调强制、后记新来源，回调里再强制一次
         TextBlock.LineHeightProperty.OverrideMetadata(controlType, new FrameworkPropertyMetadata(
             double.NaN, FrameworkPropertyMetadataOptions.Inherits, (d, _) => d.CoerceValue(TextBlock.LineHeightProperty), CoerceLineHeight));
-        Control.FontSizeProperty.OverrideMetadata(controlType, new FrameworkPropertyMetadata(
-            SystemFonts.MessageFontSize, FrameworkPropertyMetadataOptions.Inherits, (d, _) => Refresh(d)));
+        FrameworkElement.MinWidthProperty.OverrideMetadata(controlType, new FrameworkPropertyMetadata(0d, null, CoerceMinWidth));
+        Control.FontSizeProperty.OverrideMetadata(controlType, fontScale == 1
+            ? new FrameworkPropertyMetadata(SystemFonts.MessageFontSize, FrameworkPropertyMetadataOptions.Inherits, (d, _) => Refresh(d))
+            // 基础值变了时 WPF 先调强制、后记新来源，回调里再强制一次（同行高）
+            : new FrameworkPropertyMetadata(SystemFonts.MessageFontSize, FrameworkPropertyMetadataOptions.Inherits, (d, _) =>
+            {
+                d.CoerceValue(Control.FontSizeProperty);
+                Refresh(d);
+            }, (d, baseValue) => ScaleFontSize(d, baseValue, fontScale)));
         if (cornerRadiusProperty is not null) cornerRadiusByType[controlType] = cornerRadiusProperty;
     }
 
@@ -83,6 +101,21 @@ public static class EmSize
         if (GetPadding(d) is not { } f || !FromLibrary(d, Control.PaddingProperty, baseValue)) return baseValue;
         var size = FontSize(d);
         return new Thickness(f.Left * size, f.Top * size, f.Right * size, f.Bottom * size);
+    }
+
+    static object CoerceMinWidth(DependencyObject d, object baseValue)
+    {
+        if (GetMinWidth(d) is not { } f || !FromLibrary(d, FrameworkElement.MinWidthProperty, baseValue)) return baseValue;
+        return f * FontSize(d);
+    }
+
+    /// <summary>继承来的（或默认的）字号乘上倍数；本地值、样式写的字号照用。</summary>
+    static object ScaleFontSize(DependencyObject d, object baseValue, double scale)
+    {
+        if (d.ReadLocalValue(Control.FontSizeProperty) != DependencyProperty.UnsetValue) return baseValue;
+        return DependencyPropertyHelper.GetValueSource(d, Control.FontSizeProperty).BaseValueSource is BaseValueSource.Default or BaseValueSource.Inherited
+            ? (double)baseValue * scale
+            : baseValue;
     }
 
     static object CoerceMinHeight(DependencyObject d, object baseValue)
@@ -111,6 +144,7 @@ public static class EmSize
         d.CoerceValue(TextBlock.LineHeightProperty);
         d.CoerceValue(Control.PaddingProperty);
         d.CoerceValue(FrameworkElement.MinHeightProperty);
+        d.CoerceValue(FrameworkElement.MinWidthProperty);
         d.CoerceValue(FrameworkElement.WidthProperty);
         if (CornerRadiusFor(d.GetType()) is { } property) d.CoerceValue(property);
     }
