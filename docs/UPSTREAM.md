@@ -82,7 +82,31 @@ vue-tsx-pro 那边的会话改了设计时会发通知过来（每完成一个�
 
 **阶段 2 已落的部分**（上游说等阶段 2 完成再统一通知）：components 配置入口合一、组件侧 `useComponent`、字号 / 圆角 / 色调进配方档位（正是上面第 2 步要对齐的）、引擎 API 收口（浏览器专用，不涉及）。
 
+### 阶段 2 完成、阶段 3 进行中（2026-11-06 通知）
+
+| 上游 | 三个库 | 跟进 |
+|---|---|---|
+| 定制入口合一 `components.Xxx = { defaults, styles, variants }`（登记表由 `UiComponents` 推出类型） | XAML 本来就是一个入口：一条 `Style` / `ControlTheme` 同时写默认值、外观，档位是伪类 / 触发器 | Avalonia、WPF 不改入口；WinForms 做定制入口时用这个形状 |
+| 配方直接引用共用片段：字号、圆角、色调进档位（`variantOf`），不再排在配方之后 | 对应上面"阶段 1"实现计划的第 2 步 | 组件这一段改成主题里的 setter 绑定 |
+| 按钮家族的部件：root、content、icon、iconEnd、spinner | 已经有（`ButtonParts`、`IconButtonParts`）；WinForms 缺 content（内容层不是元素） | WinForms 的 propsContent 仍是缺口 |
+| 词表：Text、Icon 的色调类型 `Tone` → `TextTone`；Skeleton 的形状用 `shape`；Sparkline、TimelineChart、WaveGrid 的画法用 `type` | 三个库的 `Tone`（Text 家族、Icon 用，8 个值）同样改名 `TextTone`；prop 名 `tone` 不变，parity 不受影响 | C# 不能给类型留旧名的别名（record struct 不能继承，using 别名不出程序集），而且还没有外部使用方，**直接改名不留旧名**。Skeleton、图表还没做，做时直接用新名字 |
+| 每层定制、使用方的 sx 各进一层 | 见"阶段 1" | 同上 |
+| 阶段 3：条件一律写别名（`_hover`……） | 浏览器专用的写法 | 不涉及 |
+| 阶段 3：焦点环新增 inset（画在里面）、virtual（aria-activedescendant 的当前项常亮） | 我们的焦点环在 ButtonBase 里，只有外扩一种 | 做 Listbox、Menu 时照做（桌面上"当前项"对应 UIA 的选中项 / 焦点项，不是真焦点）；ButtonBase 加 inset 变体 |
+| 阶段 3：展开箭头 flip（朝上）、turn（朝行尾，RTL 下反向转），修了 RTL 下箭头朝上 | Icon 有 FlipInRtl | 做 Accordion、Select、Tree 时照做 |
+| 阶段 3：`statusToneCompound` 让 Badge、Alert 的组合档位直接引用共用色表 | 我们也是两张表：Button 用调色板表（`palette.mjs` 生成），Badge 用手写的 `StatusColors` | 合成一张：Badge（以后的 Alert）的颜色也从调色板表生成 |
+| 阶段 3：OtpField 用输入框配方；Popover、HoverCard、Menu 面板统一 `anchoredPanelSx` | 还没做 | 做的时候照做（浮层表面一个共用件） |
+
+**跟进的工作包**（按先后；都要先跑 `inspect bench` 与 `inspect props` 的前后对比，外观与开销不能变差）：
+
+1. `Tone` → `TextTone` 改名（三个库，小改动，公开 API）。
+2. 组件这一段只用主题的 setter（阶段 1 计划第 2 步）：Avalonia 的 Size、Radius、色调 → 调色板、Icon 与 Text 的色调颜色改成主题里一条 setter 的绑定；WPF 的 Size 同理。加"定制段盖得过组件档位"的测试。
+3. Provider 合成时后段带入前段的条件值（阶段 1 计划第 1 步）：先 WPF（`Provider.Compose`），再 Avalonia（Provider 改成合成派生的 ControlTheme）；随机分段的比对测试。
+4. Badge 的颜色从调色板表生成，与 Button 同一张表。
+5. WinForms 的定制入口与 Provider：按 `components` 的形状、按上游语义逐属性合并。
+
 ### 进度
 
 - 2026-11-06：收到计划草案，完成上面的评估。同日上游获批，方向见"已定的方向"。代码未动，等上游各阶段的通知；还没做的组件直接按已定的词表与规则做（新名字、控件高度收成一处、浮层阴影按新规则）。
 - 2026-11-06：收到阶段 1 完成的通知，对照三个平台写了上面"阶段 1"的差别与实现计划。按用户的安排（这阶段先做性能），代码等阶段 2 的通知到了再一起动。
+- 2026-11-06：收到阶段 2 完成、阶段 3 进行中的通知，列出上面 5 个工作包。其中第 3 包是跨模块的重构（Provider 合成），开工前先请用户确认。
