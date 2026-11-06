@@ -37,6 +37,14 @@ export const RECIPES = {
       outline: { Foreground: 'text', BorderBrush: 'border' },
     },
   },
+  Avatar: {
+    // 头像的后备内容（首字母、图标）：vue-tsx-pro 的 statusToneStyles 的 soft、solid。WinForms 直接用 BadgeRecipe 的这两档
+    file: 'wpf/src/Rune.Wpf/Display/Avatar/AvatarRecipe.g.xaml',
+    variants: {
+      soft: { Background: 'soft', Foreground: 'text' },
+      solid: { Background: 'solid', Foreground: 'contrast' },
+    },
+  },
   Indicator: {
     // 角标只有实底一种（vue-tsx-pro 的 statusToneSx('solid', tone)）：设到 Indicator 自己的角标颜色上，不碰继承的文字颜色。
     // WinForms 直接用 BadgeRecipe 的 solid

@@ -1,0 +1,31 @@
+<!--
+  Avatar 的主题样式：只放默认值（vue-tsx-pro 的 AvatarOptions：圆形、soft、accent），Provider 的样式能改。
+  后备内容的颜色是生成的 AvatarRecipe.g.xaml；字号档位是触发器；后备文字中等字重、行高 1（avatarRecipe 的 fallback）
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Rune.Wpf;component/Display/Avatar/AvatarRecipe.g.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <Style TargetType="rune:Avatar" BasedOn="{StaticResource Rune.Recipe.Avatar}">
+    <Setter Property="Radius" Value="full" />
+    <Setter Property="Variant" Value="soft" />
+    <Setter Property="Tone" Value="accent" />
+    <Setter Property="rune:Leading.Factor" Value="1" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Style.Triggers>
+      <Trigger Property="Size" Value="xs"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xs}" /></Trigger>
+      <Trigger Property="Size" Value="sm"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" /></Trigger>
+      <Trigger Property="Size" Value="md"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Md}" /></Trigger>
+      <Trigger Property="Size" Value="lg"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Lg}" /></Trigger>
+      <Trigger Property="Size" Value="xl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xl}" /></Trigger>
+      <Trigger Property="Size" Value="xxl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xxl}" /></Trigger>
+      <Trigger Property="Size" Value="xxxl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xxxl}" /></Trigger>
+    </Style.Triggers>
+  </Style>
+  <!-- 部件样式键总要有一个样式（同 SpinnerParts.Icon），使用方同键的样式叠在上面 -->
+  <Style x:Key="{x:Static rune:AvatarParts.Image}" TargetType="Image" />
+  <Style x:Key="{x:Static rune:AvatarParts.Fallback}" TargetType="ContentPresenter" />
+</ResourceDictionary>

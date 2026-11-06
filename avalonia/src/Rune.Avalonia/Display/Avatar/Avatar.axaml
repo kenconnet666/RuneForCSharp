@@ -1,0 +1,17 @@
+<!--
+  Avatar 的主题：只放默认值（vue-tsx-pro 的 AvatarOptions：圆形、soft、accent），Provider 的样式能改；
+  后备内容的文字中等字重、行高 1（avatarRecipe 的 fallback）。色调解析出的调色板在这里绑过来
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:Avatar}" TargetType="rune:Avatar">
+    <Setter Property="Radius" Value="full" />
+    <Setter Property="Variant" Value="soft" />
+    <Setter Property="Tone" Value="accent" />
+    <Setter Property="Palette" Value="{rune:Resolved Palette}" />
+    <Setter Property="rune:Leading.Factor" Value="1" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+  </ControlTheme>
+</ResourceDictionary>

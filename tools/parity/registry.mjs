@@ -27,6 +27,8 @@ export const COMPONENT_PROP_RENAMES = {
   CodeText: { text: 'Source' },
   // Measure 是布局的方法
   Prose: { measure: 'LimitLineLength' },
+  // Name 是控件名；图片给平台的图片对象
+  Avatar: { name: 'DisplayName', src: 'Source' },
 };
 
 /** 某个平台上统一改了名的 prop：WinForms 的控件自己有 Size（大小），字号档位叫 TextSize */

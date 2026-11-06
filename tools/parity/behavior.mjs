@@ -51,7 +51,8 @@ function upstreamTests(src) {
         describes.push({ indent, names: describe[2].split('、').map((name) => name.trim()).filter((name) => /^[A-Z]\w*$/.test(name)) });
         continue;
       }
-      const test = /^\s*(?:it|test)\(\s*(['"`])((?:(?!\1).)*)\1/.exec(line);
+      // it('名字', …)，以及 it.each([...])('名字', …) 的最后一行
+      const test = /^\s*(?:(?:it|test)\(|\]\)\()\s*(['"`])((?:(?!\1).)*)\1/.exec(line);
       if (!test) continue;
       const names = describes.findLast((d) => d.names.length)?.names ?? [];
       add(names.find((name) => test[2].startsWith(name)) ?? names[0] ?? fileComponent, test[2]);
