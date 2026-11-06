@@ -4,7 +4,8 @@
         Title="Rune.Avalonia 组件示例" Width="1200" Height="800"
         Background="{DynamicResource Rune.Brush.Background}"
         Foreground="{DynamicResource Rune.Brush.Text}"
-        FontSize="{DynamicResource Rune.FontSize.Md}">
+        FontSize="{DynamicResource Rune.FontSize.Md}"
+        FontFamily="{DynamicResource Rune.Font.Sans}">
   <!-- 左侧：主题与示例列表（Examples 项目的登记表，inspect 用同一张）；右侧：选中的示例。组件做出来后换成组件库自己的导航 -->
   <DockPanel>
     <Border DockPanel.Dock="Left" Width="260" BorderThickness="0,0,1,0" BorderBrush="{DynamicResource Rune.Brush.Border}">

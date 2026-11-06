@@ -21,7 +21,7 @@ static class Program
 }
 
 /// <summary>
-/// 把示例放进屏幕外的窗口（背景、文字颜色、字号取主题，同一个区域的 Provider），再按命令输出。
+/// 把示例放进屏幕外的窗口（背景、文字颜色、字号、字体取主题，同一个区域的 Provider），再按命令输出。
 /// 元素在 tree、props、uia 里用同一个称呼：有 Name 用 Name，否则"类型[序号]"（按元素树的先后数）。
 /// </summary>
 static class Inspector
@@ -68,6 +68,7 @@ static class Inspector
         root.SetResourceReference(Border.BackgroundProperty, "Rune.Brush.Background");
         root.SetResourceReference(TextElement.ForegroundProperty, "Rune.Brush.Text");
         root.SetResourceReference(TextElement.FontSizeProperty, "Rune.FontSize.Md");
+        root.SetResourceReference(TextElement.FontFamilyProperty, "Rune.Font.Sans");
         var window = new Window
         {
             Content = root, Width = options.Width, SizeToContent = SizeToContent.Height, Left = -20000, Top = -20000,

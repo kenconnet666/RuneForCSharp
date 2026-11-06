@@ -43,7 +43,7 @@ sealed class InspectApp : Application
 }
 
 /// <summary>
-/// 把示例放进 headless 窗口（背景、文字颜色、字号取主题，同一个区域的 Provider），再按命令输出。
+/// 把示例放进 headless 窗口（背景、文字颜色、字号、字体取主题，同一个区域的 Provider），再按命令输出。
 /// 元素在 tree、props、uia 里用同一个称呼：有 Name 用 Name，否则"类型[序号]"（按元素树的先后数）。
 /// </summary>
 static class Inspector
@@ -89,6 +89,7 @@ static class Inspector
         root.Bind(Border.BackgroundProperty, root.GetResourceObservable("Rune.Brush.Background"));
         root.Bind(TextElement.ForegroundProperty, root.GetResourceObservable("Rune.Brush.Text"));
         root.Bind(TextElement.FontSizeProperty, root.GetResourceObservable("Rune.FontSize.Md"));
+        root.Bind(TextElement.FontFamilyProperty, root.GetResourceObservable("Rune.Font.Sans"));
         var window = new Window { Width = options.Width, SizeToContent = SizeToContent.Height, Content = root };
         window.Show();
         window.SetRenderScaling(options.Scale);
