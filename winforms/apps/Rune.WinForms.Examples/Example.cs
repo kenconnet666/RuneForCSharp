@@ -16,7 +16,7 @@ public sealed record Example(string Component, string Id, string Title, string D
 public static class ExampleCatalog
 {
     /// <summary>全部示例。</summary>
-    public static IReadOnlyList<Example> All { get; } = [.. IconExamples.All, .. TextExamples.All, .. SpinnerExamples.All];
+    public static IReadOnlyList<Example> All { get; } = [.. IconExamples.All, .. TextExamples.All, .. SpinnerExamples.All, .. BadgeExamples.All];
 
     /// <summary>按"组件/示例名"找（不分大小写）；没有时为 null。</summary>
     /// <param name="key">如 <c>Icon/basic</c>。</param>

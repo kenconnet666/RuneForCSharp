@@ -438,3 +438,16 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   - **WinForms**：元素 `Spinner` 里有一个 Icon 元素；部件属性记录 `IconProps`（字段可空），Spinner 给的在下、`PropsIcon` 在上逐字段合并（`Merge`），合并结果套到新建的 Icon 上（没写的字段回到 Icon 自己的默认）。记录先手写，第三个用到部件记录的组件出现时再做源代码生成器。
 - **逐帧的时钟（WinForms）**：一直在动的东西读 `FrameClock.Shared.Now`，订阅只管一帧（`ReactiveSource.NotifySubscribersOnce`）：不再重画的（隐藏、离屏）自然退出，没人订阅时定时器停下（测试覆盖）。Animator 的补间用于"从 A 到 B"，FrameClock 用于"一直转"。
 - **无障碍**：有 Label 时是进度条（不确定进度），名字是 Label；没有时 Avalonia、WPF 不进控件树，WinForms 是没有名字的 Animation。TS 是 role="status"，桌面上没有对应的"状态"角色，用进度条（读屏会念"忙"）。peer 的 *Core 方法里不能再调公开的 GetName（WPF 报递归调用），直接读 Label。
+
+### Badge
+
+- 第一个自绘、带配方（样式 × 色调 24 条组合）与默认值（`useDefaults("Badge")`）的组件。新的档位类型：`StatusVariant`（solid、soft、surface、outline）、`StatusTone`（六种状态色调）、`Radius`（none–full），三个库都有。
+- 配方的颜色收在 `StatusColors.Of(样式, 色调)`：非中性色调按 `{色调}`、`{色调}Contrast`、`{色调}Soft`、`{色调}Text`、`{色调}Border` 的规律取 token，中性用反色、填充、表面等另一组。Avalonia、WPF 返回画刷的资源键，WinForms 返回当前主题的颜色。TS 的配方表是 parity 以后做取值对照的数据源。
+- 自绘（DESIGN §9），部件按 ROADMAP"待定的决定"的建议 A：底色、描边、圆角自己画；图标、圆点、文字是代码里组合的子元素。
+  - **Avalonia**：子元素加进 LogicalChildren、VisualChildren；部件名 `PART_Icon`、`PART_Dot`（`BadgeParts`），样式用子选择器 `rune|Badge > rune|Icon#PART_Icon`（测试覆盖）。
+  - **WPF**：AddVisualChild、AddLogicalChild，覆盖 VisualChildrenCount、GetVisualChild、LogicalChildren；图标、圆点在代码里 `SetResourceReference(StyleProperty, BadgeParts.Icon)`，Provider 的部件样式照常叠上去（测试覆盖）。Control 的 Background、BorderBrush 元数据补上 AffectsRender。
+  - **WinForms**：元素里组合 Icon、Text 元素，画的时候换成 Badge 的环境（`context with { Font, ForeColor }`）；图标部件 `PropsIcon`（IconProps），圆点是画的，`PropsDot`（`DotProps`：颜色、大小）。
+- 颜色是受管的（档位决定、本地值），换颜色走档位、Provider 的默认值或主题 token；默认值（soft、neutral、xs、sm）在主题里（Avalonia、WPF）或元素的默认（WinForms），Provider 的样式能改。
+- 尺寸都是 em，按 Badge 自己的字号算：内边距 0.5em、间距 0.25em、最小高度 1.75em、圆点 0.5em；圆角取主题的 radii 系数，full 按高度的一半画成胶囊；描边 1 像素，没有描边色时也占位，各样式等高。
+- 读屏：Badge 本身不是控件元素，读屏直接读里面的文字（Avalonia、WPF）；WinForms 是静态文字，名字是 Text。
+- 踩过：WPF 里使用方的隐式 `rune:Text` 样式也会套到 Badge 里面的 Text 上（示例里改成带键的样式）。Avalonia 的子选择器 `WrapPanel > rune|Text` 只选直接子元素，不受影响。

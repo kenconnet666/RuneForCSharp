@@ -254,6 +254,7 @@
 - [x] 档位类型：`IVariant` / `VariantConverter` 与 `TextSize`、`Tone`，三个库都做了。
 - [x] Text 家族（Text、Paragraph、Strong、Em、Small）：三个平台都做了（DESIGN §14）；WPF 从 TextBlock 派生（决定 19）。示例做了 scale、tones、numeric、overflow，inline、links、headings 等 Kbd、Link、Heading。
 - [x] Spinner（第一个带部件的组件，`propsIcon`）：三个平台都做了，部件转发按 DESIGN §7 的三种写法落地（DESIGN §14）；parity 认部件名常量与 `PropsXxx`。
+- [x] Badge（第一个自绘、带配方与组合档位的组件）：三个平台都做了，部件按"待定的决定"的建议 A（代码里组合真的子组件）；示例做了 matrix、shapes，in-context、statuses、tag 等 Table、StatusBadge、Tag。
 
 ### 3. 按依赖分层移植组件
 
