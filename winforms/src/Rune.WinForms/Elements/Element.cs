@@ -15,7 +15,8 @@ public abstract class Element
 
     /// <summary>想要的大小（设备像素）。</summary>
     /// <param name="context">宿主的环境：DPI、字体、颜色、方向。</param>
-    protected internal abstract Size Measure(ElementContext context);
+    /// <param name="available">可用的大小（设备像素）；不限时是 <see cref="int.MaxValue"/>。文字按可用的宽度换行。</param>
+    protected internal abstract Size Measure(ElementContext context, Size available);
 
     /// <summary>画在 <see cref="Bounds"/> 里。</summary>
     /// <param name="graphics">宿主的 Graphics。</param>

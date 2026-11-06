@@ -74,7 +74,7 @@ public class Icon : Element
     }
 
     /// <inheritdoc />
-    protected internal override Size Measure(ElementContext context)
+    protected internal override Size Measure(ElementContext context, Size available)
     {
         var size = (int)MathF.Ceiling(ActualSize(context));
         return new Size(size, size);

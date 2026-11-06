@@ -38,8 +38,15 @@ public abstract class ElementControl<T> : Control, IElementHost where T : Elemen
 
     ElementContext Context => new(DeviceDpi, Font, ForeColor, RightToLeft == RightToLeft.Yes);
 
-    /// <inheritdoc />
-    public override Size GetPreferredSize(Size proposedSize) => Element.Measure(Context) + Padding.Size;
+    /// <summary>元素想要的大小加上 Padding。宽度受布局给的建议宽度与 MaximumSize 限制（同 Label：要换行就设 MaximumSize 或关掉 AutoSize）。</summary>
+    public override Size GetPreferredSize(Size proposedSize)
+    {
+        // 布局引擎用 0、1 或 int.MaxValue 表示"不限"
+        var width = proposedSize.Width is > 1 and < int.MaxValue ? proposedSize.Width : int.MaxValue;
+        if (MaximumSize.Width > 0) width = Math.Min(width, MaximumSize.Width);
+        var available = new Size(width == int.MaxValue ? width : Math.Max(0, width - Padding.Horizontal), int.MaxValue);
+        return Element.Measure(Context, available) + Padding.Size;
+    }
 
     /// <inheritdoc />
     protected override void OnLayout(LayoutEventArgs levent)
