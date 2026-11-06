@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- 检查 WPF 的组件：在屏幕外的窗口里渲染示例，输出截图、元素树、属性与来源、UIA 树（命令见 HANDOFF 的命令表） -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Rune.Wpf.Inspect</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\apps\Rune.Wpf.Examples\Rune.Wpf.Examples.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\..\tools\inspect\InspectShared.cs" Link="InspectShared.cs" />
+  </ItemGroup>
+
+</Project>

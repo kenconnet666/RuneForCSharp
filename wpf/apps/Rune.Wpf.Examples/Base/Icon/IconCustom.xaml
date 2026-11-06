@@ -1,0 +1,11 @@
+<UserControl x:Class="Rune.Wpf.Examples.IconCustom"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/wpf"
+             xmlns:local="clr-namespace:Rune.Wpf.Examples">
+  <StackPanel Orientation="Horizontal">
+    <rune:Icon Data="{x:Static local:IconCustom.Logo}" Size="40" Margin="0,0,32,0" AutomationProperties.Name="站点标志" />
+    <rune:Icon Data="{x:Static local:IconCustom.Verified}" Size="40" Tone="accent" Margin="0,0,32,0" AutomationProperties.Name="已认证" />
+    <rune:Icon Data="{x:Static local:IconCustom.Wave}" Size="40" Tone="info" AutomationProperties.Name="信号" />
+  </StackPanel>
+</UserControl>

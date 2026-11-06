@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Rune.Wpf\Rune.Wpf.csproj" />
+    <ProjectReference Include="..\Rune.Wpf.Examples\Rune.Wpf.Examples.csproj" />
   </ItemGroup>
 
 </Project>

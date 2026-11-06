@@ -1,5 +1,6 @@
 // 三个平台的 inspect 共用的命令行、表格输出与产物路径（各平台的 inspect 项目以链接方式编译本文件，不做成库）
 using System.Globalization;
+using System.IO;
 using System.Text;
 using System.Text.Json;
 
@@ -89,7 +90,7 @@ static class InspectProgram
 
 /// <summary>一张表：默认输出 Markdown 表，<c>--json</c> 时输出对象数组（列名作键）。</summary>
 /// <param name="columns">列名。</param>
-sealed class Table(params string[] columns)
+sealed class ReportTable(params string[] columns)
 {
     readonly List<string[]> rows = [];
 

@@ -53,7 +53,7 @@ static class Inspector
 
     public static string List(InspectOptions options)
     {
-        var table = new Table("示例", "标题", "说明");
+        var table = new ReportTable("示例", "标题", "说明");
         foreach (var example in ExampleCatalog.All) table.Add(example.Key, example.Title, example.Description);
         return table.Render(options.Json);
     }
@@ -107,9 +107,9 @@ static class Inspector
         return $"{path}（{frame.PixelSize.Width}×{frame.PixelSize.Height}）{Environment.NewLine}";
     }
 
-    static Table Tree(Control root, Dictionary<Visual, string> labels)
+    static ReportTable Tree(Control root, Dictionary<Visual, string> labels)
     {
-        var table = new Table("元素", "类型", "类与伪类", "边界", "所在模板");
+        var table = new ReportTable("元素", "类型", "类与伪类", "边界", "所在模板");
         Walk(root, 0);
         return table;
 
@@ -127,10 +127,10 @@ static class Inspector
         }
     }
 
-    static Table Props(Control root, Dictionary<Visual, string> labels, ThemeVariant theme)
+    static ReportTable Props(Control root, Dictionary<Visual, string> labels, ThemeVariant theme)
     {
         var resourceKeys = BrushKeys(theme);
-        var table = new Table("元素", "属性", "值", "来源");
+        var table = new ReportTable("元素", "属性", "值", "来源");
         foreach (var element in root.GetSelfAndVisualDescendants().OfType<StyledElement>())
         {
             var ownNamespace = typeof(RuneTheme).Namespace;
@@ -146,10 +146,10 @@ static class Inspector
         return table;
     }
 
-    static Table Uia(Control root, Dictionary<Visual, string> labels)
+    static ReportTable Uia(Control root, Dictionary<Visual, string> labels)
     {
         // 只列控件视图（IsControlElement）：读屏看到的就是这些；不在控件视图里的节点，它的子节点上提一层
-        var table = new Table("节点", "角色", "名称", "元素", "可聚焦", "Pattern");
+        var table = new ReportTable("节点", "角色", "名称", "元素", "可聚焦", "Pattern");
         Walk(ControlAutomationPeer.CreatePeerForElement(root), 0);
         return table;
 
