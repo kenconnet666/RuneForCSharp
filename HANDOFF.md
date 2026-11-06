@@ -72,7 +72,8 @@
 | WPF 的 inspect（同样的命令；tree 的"样式"列是隐式还是显式 Style，props 的来源分主题样式、样式触发器、资源引用等） | `wpf/tools/Rune.Wpf.Inspect/bin/Release/net10.0-windows/Rune.Wpf.Inspect.exe snapshot Icon/sizes` |
 | WinForms 的 inspect（同样的命令，没有 `--scale`；tree 里单元素宿主下面列出它的元素，uia 是 MSAA 树） | `winforms/tools/Rune.WinForms.Inspect/bin/Release/net10.0-windows/Rune.WinForms.Inspect.exe uia Icon/accessibility` |
 | 全量验证（三个平台并行构建、测试、截图；生成文件核对；parity 报告） | CI：`.github/workflows/ci.yml`（推送到 GitHub 后跑）；本地要跑全量时 `git worktree add ../RuneForCSharp-verify HEAD` 后在那边后台跑 |
-| 基准（`inspect bench`） | 还没做（阶段 2） |
+| 基准：每个组件建 N 个，量创建、首次布局、渲染、换主题的耗时与分配、常驻内存（多轮中位数，平台自带的 Button 作对照）；`bench Button` 只跑名字以它开头的；`--count`、`--runs` | `… Rune.Avalonia.Inspect.exe bench --count 1000 --runs 6`（WPF、WinForms 的 inspect 同样） |
+| 采样分析（找热点的调用链）：先 collect（exe 写绝对路径），再转 speedscope，再按帧汇总调用链 | `dotnet tool run dotnet-trace -- collect --output a.nettrace -- <exe 绝对路径> bench Button`；`dotnet tool run dotnet-trace -- convert a.nettrace --format speedscope -o a`；`node tools/trace/callers.mjs a.speedscope.json Monitor.Enter 8` |
 | 重新生成 token（改了 vue-tsx-pro 的主题后） | `node tools/token-gen/token-gen.mjs` |
 | 核对生成的 token 与 vue-tsx-pro 一致（CI 用） | `node tools/token-gen/token-gen.mjs --check` |
 | 重新生成语言包（改了 vue-tsx-pro 的语言包后）；`--check` 只核对 | `node tools/lang-gen/lang-gen.mjs` |

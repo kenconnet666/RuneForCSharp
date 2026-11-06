@@ -171,7 +171,7 @@
   1. `ts-inspect` 最先，token-gen、lang-gen、parity 都用它的解析；
   2. 三个平台的 `inspect`（snapshot、tree、props、uia）在阶段 2 的第一个组件之前做好；
   3. `ts-styles` 与 parity 的取值比对，在做 Button 时接上；
-  4. `bench` 在用真实 Button 复测调色板开销时建立。
+  4. `bench` 在用真实 Button 复测调色板开销时建立（2026-11-06 建好：`inspect bench`，三个平台；结论见 DESIGN §9"组件基准"）。
 
 已经有、不用自己做的：
 - Rider 的 MCP：符号、引用、编译问题、运行配置；
