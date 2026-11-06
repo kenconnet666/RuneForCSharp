@@ -28,7 +28,7 @@ public class TokensTests
     [Fact]
     public Task Themed_tokens_follow_the_theme_variant() => HeadlessUi.Run(() =>
     {
-        Assert.Equal(Color.Parse("#fcfcfd"), Find("Rune.Color.Background", ThemeVariant.Light));
+        Assert.Equal(Color.Parse("#f9f9fb"), Find("Rune.Color.Background", ThemeVariant.Light));
         Assert.Equal(Color.Parse("#111113"), Find("Rune.Color.Background", ThemeVariant.Dark));
         Assert.Equal(Color.Parse("#f5efdf"), Assert.IsAssignableFrom<ISolidColorBrush>(Find("Rune.Brush.Background", RuneThemeVariants.Paper)).Color);
         Assert.Equal(0.4d, Find("Rune.Radius.Md", ThemeVariant.Light));
@@ -62,7 +62,7 @@ public class TokensTests
 
         scope.RequestedThemeVariant = ThemeVariant.Light;
         HeadlessUi.Flush(window);
-        Assert.Equal(Color.Parse("#fcfcfd"), Assert.IsAssignableFrom<ISolidColorBrush>(border.Background).Color);
+        Assert.Equal(Color.Parse("#f9f9fb"), Assert.IsAssignableFrom<ISolidColorBrush>(border.Background).Color);
     });
 
     [Fact]

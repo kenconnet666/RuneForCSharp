@@ -9,16 +9,16 @@
                     mc:Ignorable="po">
 
   <!-- colors -->
-  <!-- background = #f5efdf：页面背景。slate 1：亮色 `#fcfcfd`，暗色 `#111113` -->
+  <!-- background = #f5efdf：页面背景。亮色 slate 2 `#f9f9fb`（着一点色，白色的卡片、输入框浮在上面），暗色 slate 1 `#111113` -->
   <Color x:Key="Rune.Color.Background">#FFF5EFDF</Color>
   <SolidColorBrush x:Key="Rune.Brush.Background" po:Freeze="True" Color="#FFF5EFDF" />
-  <!-- surface = #faf5e8：卡片、输入框等表面。亮色 slate 1 `#fcfcfd`，暗色 slate 2 `#18191b` -->
+  <!-- surface = #faf5e8：卡片、输入框等表面。亮色白 `#ffffff`，暗色 slate 2 `#18191b`：都比页面亮一层 -->
   <Color x:Key="Rune.Color.Surface">#FFFAF5E8</Color>
   <SolidColorBrush x:Key="Rune.Brush.Surface" po:Freeze="True" Color="#FFFAF5E8" />
-  <!-- surfaceMuted = #efe7d3：弱化的区域背景：表头、侧栏、代码块。slate 2：亮色 `#f9f9fb`，暗色 `#18191b` -->
+  <!-- surfaceMuted = #efe7d3：弱化的区域背景：表头、侧栏、代码块。亮色取 slate 2 与 3 的中间 `#f4f4f7`（放在页面上也看得出），暗色 slate 2 `#18191b` -->
   <Color x:Key="Rune.Color.SurfaceMuted">#FFEFE7D3</Color>
   <SolidColorBrush x:Key="Rune.Brush.SurfaceMuted" po:Freeze="True" Color="#FFEFE7D3" />
-  <!-- surfaceRaised = #fbf8ee：浮层（弹出框、菜单、对话框）表面，靠描边与阴影区分层级。亮色 slate 1 `#fcfcfd`，暗色 slate 2 `#18191b` （不取第 3 级：那是 fill，浮层里的填充会看不见） -->
+  <!-- surfaceRaised = #fbf8ee：浮层（弹出框、菜单、对话框）表面，靠描边与阴影区分层级。亮色白 `#ffffff`，暗色 slate 2 `#18191b` （暗色不取第 3 级：那是 fill，浮层里的填充会看不见） -->
   <Color x:Key="Rune.Color.SurfaceRaised">#FFFBF8EE</Color>
   <SolidColorBrush x:Key="Rune.Brush.SurfaceRaised" po:Freeze="True" Color="#FFFBF8EE" />
   <!-- fill = #ebe2cb：填充：标签、开关关闭态、弱按钮。slate 3：亮色 `#f0f0f3`，暗色 `#212225` -->
@@ -36,9 +36,9 @@
   <!-- textMuted = #6b5a43：次要文字、说明、图标。slate 11：亮色 `#60646c`，暗色 `#b0b4ba` -->
   <Color x:Key="Rune.Color.TextMuted">#FF6B5A43</Color>
   <SolidColorBrush x:Key="Rune.Brush.TextMuted" po:Freeze="True" Color="#FF6B5A43" />
-  <!-- textPlaceholder = #76644a：输入框占位文字。slate 10：亮色 `#80838d`，暗色 `#777b84` -->
-  <Color x:Key="Rune.Color.TextPlaceholder">#FF76644A</Color>
-  <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" po:Freeze="True" Color="#FF76644A" />
+  <!-- textPlaceholder = #6b5a43：输入框占位文字。slate 11（同 textMuted）：亮色 `#60646c`，暗色 `#b0b4ba`。 不用 10 级：在输入框的浅底上只有 3.3:1，占位文字也是要读的文字（WCAG 1.4.3），按 4.5:1；同 GitHub Primer 的做法 -->
+  <Color x:Key="Rune.Color.TextPlaceholder">#FF6B5A43</Color>
+  <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" po:Freeze="True" Color="#FF6B5A43" />
   <!-- textDisabled = #b3a383：不可用的文字。slate 8：亮色 `#b9bbc6`，暗色 `#5a6169` -->
   <Color x:Key="Rune.Color.TextDisabled">#FFB3A383</Color>
   <SolidColorBrush x:Key="Rune.Brush.TextDisabled" po:Freeze="True" Color="#FFB3A383" />
@@ -93,7 +93,7 @@
   <!-- dangerBorder = #d39c84：危险边框：校验失败的输入框。red 7：亮色 `#f4a9aa`，暗色 `#8c333a` -->
   <Color x:Key="Rune.Color.DangerBorder">#FFD39C84</Color>
   <SolidColorBrush x:Key="Rune.Brush.DangerBorder" po:Freeze="True" Color="#FFD39C84" />
-  <!-- successText = #2f4a17：成功文字与图标。亮色 green 12 `#193b2d`，暗色 green 11 `#3dd68c`。 亮色不用 11 级：green 11 在 successSoft（green 3）上只有 4.21:1，标记、提示条里的文字不到 4.5 -->
+  <!-- successText = #2f4a17：成功文字与图标。亮色 `#17714a`（green 11 与 12 之间），暗色 green 11 `#3dd68c`。 亮色不用 11 级：green 11 在 successSoft（green 3）上只有 4.21:1，标记、提示条里的文字不到 4.5； 也不用 12 级：近黑色与正文分不出（同 dangerText 取中间调），在浅底、浅底悬停、表面上都到 5:1 -->
   <Color x:Key="Rune.Color.SuccessText">#FF2F4A17</Color>
   <SolidColorBrush x:Key="Rune.Brush.SuccessText" po:Freeze="True" Color="#FF2F4A17" />
   <!-- successSoft = #e3e6c6：成功浅底。green 3：亮色 `#e6f6eb`，暗色 `#132d21` -->
@@ -114,7 +114,7 @@
   <!-- successSoftHover = #d6dbb5：成功浅底悬停。green 4：亮色 `#d6f1df`，暗色 `#113b29` -->
   <Color x:Key="Rune.Color.SuccessSoftHover">#FFD6DBB5</Color>
   <SolidColorBrush x:Key="Rune.Brush.SuccessSoftHover" po:Freeze="True" Color="#FFD6DBB5" />
-  <!-- warningText = #5a3a12：警告文字与图标。亮色 amber 12 `#4f3422`，暗色 amber 11 `#ffca16`。 亮色不用 11 级：amber 11（`#ab6400`）在页面背景上对比度 4.49，不到 WCAG AA 的 4.5 -->
+  <!-- warningText = #5a3a12：警告文字与图标。亮色 `#8a5300`（amber 11 与 12 之间），暗色 amber 11 `#ffca16`。 亮色不用 11 级：amber 11（`#ab6400`）在页面背景上对比度 4.49，不到 WCAG AA 的 4.5； 也不用 12 级：近黑色与正文分不出，在浅底、浅底悬停、表面上都到 5:1 -->
   <Color x:Key="Rune.Color.WarningText">#FF5A3A12</Color>
   <SolidColorBrush x:Key="Rune.Brush.WarningText" po:Freeze="True" Color="#FF5A3A12" />
   <!-- warningSoft = #f3e2b0：警告浅底。amber 3：亮色 `#fff7c2`，暗色 `#302008` -->
@@ -135,7 +135,7 @@
   <!-- warningSoftHover = #ecd7a0：警告浅底悬停。amber 4：亮色 `#ffee9c`，暗色 `#3f2700` -->
   <Color x:Key="Rune.Color.WarningSoftHover">#FFECD7A0</Color>
   <SolidColorBrush x:Key="Rune.Brush.WarningSoftHover" po:Freeze="True" Color="#FFECD7A0" />
-  <!-- infoText = #1f3b63：信息文字与图标。亮色 blue 12 `#113264`，暗色 blue 11 `#70b8ff`。 亮色不用 11 级：blue 11 在 infoSoft（blue 3）上只有 4.25:1 -->
+  <!-- infoText = #1f3b63：信息文字与图标。亮色 `#0c64b3`（blue 11 与 12 之间），暗色 blue 11 `#70b8ff`。 亮色不用 11 级：blue 11 在 infoSoft（blue 3）上只有 4.25:1；也不用 12 级：近黑色与正文分不出， 在浅底、浅底悬停、表面上都到 5:1 -->
   <Color x:Key="Rune.Color.InfoText">#FF1F3B63</Color>
   <SolidColorBrush x:Key="Rune.Brush.InfoText" po:Freeze="True" Color="#FF1F3B63" />
   <!-- infoSoft = #dfe3db：信息浅底。blue 3：亮色 `#e6f4fe`，暗色 `#0d2847` -->

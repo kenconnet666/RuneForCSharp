@@ -92,8 +92,10 @@ public static class Tokens
     /// <summary>sizes（7 个）。</summary>
     public static class Size
     {
-        /// <summary>control = 2.25em（em 系数）：`2.25em`：单行控件（按钮、输入框、下拉框）的高度</summary>
+        /// <summary>control = round(nearest, 2.25em, 4px)（em 系数）：`round(nearest, 2.25em, 4px)`：单行控件（按钮、输入框、下拉框）的高度。字号的 2.25 倍取整到 4px： 13 / 14 / 16 / 18px 的字号是 28 / 32 / 36 / 40px，整数像素的边框在 1 倍屏上不发虚； 字号档位 xs 另给 2 倍（12px → 24px，见 fontSizeStyles），不与 sm 同高</summary>
         public const float Control = 2.25f;
+        /// <summary>Control 取整的步长（设备无关像素）：按字号算出的值取整到它的倍数。</summary>
+        public const float ControlRound = 4f;
         /// <summary>minTarget = 24px（设备无关像素）：`24px`：可点击区域的最小尺寸（WCAG 2.2 目标尺寸 24×24），与 control 取较大值</summary>
         public const float MinTarget = 24f;
         /// <summary>xs = 30rem（设备无关像素）：`30rem`（480px）：窄内容，如登录表单</summary>
@@ -136,7 +138,7 @@ public static class Tokens
         public static readonly TimeSpan Sm = TimeSpan.FromMilliseconds(120);
         /// <summary>md = { default=200ms; [reduce]=0ms }：`200ms`：展开、淡入、浮层出现</summary>
         public static readonly TimeSpan Md = TimeSpan.FromMilliseconds(200);
-        /// <summary>lg = { default=300ms; [reduce]=0ms }：`300ms`：对话框、抽屉</summary>
+        /// <summary>lg = { default=300ms; [reduce]=0ms }：`300ms`：抽屉滑入、图表的进场、主题切换的展开、波纹与骨架的扫光</summary>
         public static readonly TimeSpan Lg = TimeSpan.FromMilliseconds(300);
         /// <summary>xl = { default=500ms; [reduce]=0ms }：`500ms`：大面积的页面切换</summary>
         public static readonly TimeSpan Xl = TimeSpan.FromMilliseconds(500);

@@ -32,7 +32,7 @@ public class RuneThemeTests
         host.Resources.MergedDictionaries.Add(theme);
         WpfUi.Show(host);
 
-        Assert.Equal((Color)ColorConverter.ConvertFromString("#fcfcfd"), ((SolidColorBrush)border.Background).Color);
+        Assert.Equal((Color)ColorConverter.ConvertFromString("#f9f9fb"), ((SolidColorBrush)border.Background).Color);
         Assert.True(border.Background.IsFrozen);
 
         theme.Theme = "dark";
@@ -53,7 +53,7 @@ public class RuneThemeTests
         Assert.DoesNotContain(colors, pair => pair.Item1 is null || pair.Item2 is null);
         // high-contrast 与 mono 的底色都是白：比（底色, 品牌色）这一对
         Assert.Equal(colors.Count, colors.Distinct().Count());
-        Assert.Equal(["dark", "midnight", "cyberpunk", "big-screen", "ember"], RuneTheme.BuiltinThemes.Where(t => t.IsDark).Select(t => t.Name));
+        Assert.Equal(["dark", "midnight", "high-contrast-dark", "cyberpunk", "big-screen", "ember"], RuneTheme.BuiltinThemes.Where(t => t.IsDark).Select(t => t.Name));
         Assert.Throws<ArgumentException>(() => new RuneTheme { Theme = "nope" });
         // 相对的组件 URI：Application 建好之前（pack 协议还没注册）读 BuiltinThemes 也不抛异常
         Assert.DoesNotContain(RuneTheme.BuiltinThemes, entry => entry.Source.IsAbsoluteUri);

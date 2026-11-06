@@ -5,16 +5,16 @@ namespace Rune.WinForms;
 /// <summary>一套主题的 colors（78 个）。</summary>
 public sealed class ThemeColors
 {
-    /// <summary>background = #fcfcfd：页面背景。slate 1：亮色 `#fcfcfd`，暗色 `#111113`</summary>
+    /// <summary>background = #f9f9fb：页面背景。亮色 slate 2 `#f9f9fb`（着一点色，白色的卡片、输入框浮在上面），暗色 slate 1 `#111113`</summary>
     public required Color Background { get; init; }
 
-    /// <summary>surface = #fcfcfd：卡片、输入框等表面。亮色 slate 1 `#fcfcfd`，暗色 slate 2 `#18191b`</summary>
+    /// <summary>surface = #ffffff：卡片、输入框等表面。亮色白 `#ffffff`，暗色 slate 2 `#18191b`：都比页面亮一层</summary>
     public required Color Surface { get; init; }
 
-    /// <summary>surfaceMuted = #f9f9fb：弱化的区域背景：表头、侧栏、代码块。slate 2：亮色 `#f9f9fb`，暗色 `#18191b`</summary>
+    /// <summary>surfaceMuted = #f4f4f7：弱化的区域背景：表头、侧栏、代码块。亮色取 slate 2 与 3 的中间 `#f4f4f7`（放在页面上也看得出），暗色 slate 2 `#18191b`</summary>
     public required Color SurfaceMuted { get; init; }
 
-    /// <summary>surfaceRaised = #fcfcfd：浮层（弹出框、菜单、对话框）表面，靠描边与阴影区分层级。亮色 slate 1 `#fcfcfd`，暗色 slate 2 `#18191b` （不取第 3 级：那是 fill，浮层里的填充会看不见）</summary>
+    /// <summary>surfaceRaised = #ffffff：浮层（弹出框、菜单、对话框）表面，靠描边与阴影区分层级。亮色白 `#ffffff`，暗色 slate 2 `#18191b` （暗色不取第 3 级：那是 fill，浮层里的填充会看不见）</summary>
     public required Color SurfaceRaised { get; init; }
 
     /// <summary>fill = #f0f0f3：填充：标签、开关关闭态、弱按钮。slate 3：亮色 `#f0f0f3`，暗色 `#212225`</summary>
@@ -32,7 +32,7 @@ public sealed class ThemeColors
     /// <summary>textMuted = #60646c：次要文字、说明、图标。slate 11：亮色 `#60646c`，暗色 `#b0b4ba`</summary>
     public required Color TextMuted { get; init; }
 
-    /// <summary>textPlaceholder = #80838d：输入框占位文字。slate 10：亮色 `#80838d`，暗色 `#777b84`</summary>
+    /// <summary>textPlaceholder = #60646c：输入框占位文字。slate 11（同 textMuted）：亮色 `#60646c`，暗色 `#b0b4ba`。 不用 10 级：在输入框的浅底上只有 3.3:1，占位文字也是要读的文字（WCAG 1.4.3），按 4.5:1；同 GitHub Primer 的做法</summary>
     public required Color TextPlaceholder { get; init; }
 
     /// <summary>textDisabled = #b9bbc6：不可用的文字。slate 8：亮色 `#b9bbc6`，暗色 `#5a6169`</summary>
@@ -89,7 +89,7 @@ public sealed class ThemeColors
     /// <summary>dangerBorder = #f4a9aa：危险边框：校验失败的输入框。red 7：亮色 `#f4a9aa`，暗色 `#8c333a`</summary>
     public required Color DangerBorder { get; init; }
 
-    /// <summary>successText = #193b2d：成功文字与图标。亮色 green 12 `#193b2d`，暗色 green 11 `#3dd68c`。 亮色不用 11 级：green 11 在 successSoft（green 3）上只有 4.21:1，标记、提示条里的文字不到 4.5</summary>
+    /// <summary>successText = #17714a：成功文字与图标。亮色 `#17714a`（green 11 与 12 之间），暗色 green 11 `#3dd68c`。 亮色不用 11 级：green 11 在 successSoft（green 3）上只有 4.21:1，标记、提示条里的文字不到 4.5； 也不用 12 级：近黑色与正文分不出（同 dangerText 取中间调），在浅底、浅底悬停、表面上都到 5:1</summary>
     public required Color SuccessText { get; init; }
 
     /// <summary>successSoft = #e6f6eb：成功浅底。green 3：亮色 `#e6f6eb`，暗色 `#132d21`</summary>
@@ -110,7 +110,7 @@ public sealed class ThemeColors
     /// <summary>successSoftHover = #d6f1df：成功浅底悬停。green 4：亮色 `#d6f1df`，暗色 `#113b29`</summary>
     public required Color SuccessSoftHover { get; init; }
 
-    /// <summary>warningText = #4f3422：警告文字与图标。亮色 amber 12 `#4f3422`，暗色 amber 11 `#ffca16`。 亮色不用 11 级：amber 11（`#ab6400`）在页面背景上对比度 4.49，不到 WCAG AA 的 4.5</summary>
+    /// <summary>warningText = #8a5300：警告文字与图标。亮色 `#8a5300`（amber 11 与 12 之间），暗色 amber 11 `#ffca16`。 亮色不用 11 级：amber 11（`#ab6400`）在页面背景上对比度 4.49，不到 WCAG AA 的 4.5； 也不用 12 级：近黑色与正文分不出，在浅底、浅底悬停、表面上都到 5:1</summary>
     public required Color WarningText { get; init; }
 
     /// <summary>warningSoft = #fff7c2：警告浅底。amber 3：亮色 `#fff7c2`，暗色 `#302008`</summary>
@@ -131,7 +131,7 @@ public sealed class ThemeColors
     /// <summary>warningSoftHover = #ffee9c：警告浅底悬停。amber 4：亮色 `#ffee9c`，暗色 `#3f2700`</summary>
     public required Color WarningSoftHover { get; init; }
 
-    /// <summary>infoText = #113264：信息文字与图标。亮色 blue 12 `#113264`，暗色 blue 11 `#70b8ff`。 亮色不用 11 级：blue 11 在 infoSoft（blue 3）上只有 4.25:1</summary>
+    /// <summary>infoText = #0c64b3：信息文字与图标。亮色 `#0c64b3`（blue 11 与 12 之间），暗色 blue 11 `#70b8ff`。 亮色不用 11 级：blue 11 在 infoSoft（blue 3）上只有 4.25:1；也不用 12 级：近黑色与正文分不出， 在浅底、浅底悬停、表面上都到 5:1</summary>
     public required Color InfoText { get; init; }
 
     /// <summary>infoSoft = #e6f4fe：信息浅底。blue 3：亮色 `#e6f4fe`，暗色 `#0d2847`</summary>
@@ -179,7 +179,7 @@ public sealed class ThemeColors
     /// <summary>highlight = #ffee9c：高亮标记：搜索命中、`&lt;mark>`。amber 4：亮色 `#ffee9c`，暗色 `#3f2700`</summary>
     public required Color Highlight { get; init; }
 
-    /// <summary>surfaceTranslucent = rgba(252, 252, 253, 0.8)：半透明表面：吸顶的顶栏（配合背景模糊）。页面背景加 80% 不透明</summary>
+    /// <summary>surfaceTranslucent = rgba(249, 249, 251, 0.8)：半透明表面：吸顶的顶栏（配合背景模糊）。页面背景加 80% 不透明</summary>
     public required Color SurfaceTranslucent { get; init; }
 
     /// <summary>codeKeyword = #3a5bc7：关键字。indigo 11：亮色 `#3a5bc7`，暗色 `#9eb1ff`</summary>
@@ -339,16 +339,16 @@ public static class BuiltinThemes
         IsDark = false,
         Colors = new()
         {
-            Background = Color.FromArgb(255, 252, 252, 253),
-            Surface = Color.FromArgb(255, 252, 252, 253),
-            SurfaceMuted = Color.FromArgb(255, 249, 249, 251),
-            SurfaceRaised = Color.FromArgb(255, 252, 252, 253),
+            Background = Color.FromArgb(255, 249, 249, 251),
+            Surface = Color.FromArgb(255, 255, 255, 255),
+            SurfaceMuted = Color.FromArgb(255, 244, 244, 247),
+            SurfaceRaised = Color.FromArgb(255, 255, 255, 255),
             Fill = Color.FromArgb(255, 240, 240, 243),
             FillHover = Color.FromArgb(255, 232, 232, 236),
             FillActive = Color.FromArgb(255, 224, 225, 230),
             Text = Color.FromArgb(255, 28, 32, 36),
             TextMuted = Color.FromArgb(255, 96, 100, 108),
-            TextPlaceholder = Color.FromArgb(255, 128, 131, 141),
+            TextPlaceholder = Color.FromArgb(255, 96, 100, 108),
             TextDisabled = Color.FromArgb(255, 185, 187, 198),
             BorderMuted = Color.FromArgb(255, 217, 217, 224),
             Border = Color.FromArgb(255, 205, 206, 214),
@@ -367,21 +367,21 @@ public static class BuiltinThemes
             DangerSoft = Color.FromArgb(255, 254, 235, 236),
             DangerSoftHover = Color.FromArgb(255, 255, 219, 220),
             DangerBorder = Color.FromArgb(255, 244, 169, 170),
-            SuccessText = Color.FromArgb(255, 25, 59, 45),
+            SuccessText = Color.FromArgb(255, 23, 113, 74),
             SuccessSoft = Color.FromArgb(255, 230, 246, 235),
             SuccessBorder = Color.FromArgb(255, 142, 206, 170),
             Success = Color.FromArgb(255, 0, 135, 81),
             SuccessHover = Color.FromArgb(255, 0, 113, 67),
             SuccessContrast = Color.FromArgb(255, 255, 255, 255),
             SuccessSoftHover = Color.FromArgb(255, 214, 241, 223),
-            WarningText = Color.FromArgb(255, 79, 52, 34),
+            WarningText = Color.FromArgb(255, 138, 83, 0),
             WarningSoft = Color.FromArgb(255, 255, 247, 194),
             WarningBorder = Color.FromArgb(255, 233, 193, 98),
             Warning = Color.FromArgb(255, 255, 197, 61),
             WarningHover = Color.FromArgb(255, 255, 205, 95),
             WarningContrast = Color.FromArgb(255, 79, 52, 34),
             WarningSoftHover = Color.FromArgb(255, 255, 238, 156),
-            InfoText = Color.FromArgb(255, 17, 50, 100),
+            InfoText = Color.FromArgb(255, 12, 100, 179),
             InfoSoft = Color.FromArgb(255, 230, 244, 254),
             InfoBorder = Color.FromArgb(255, 142, 200, 246),
             Info = Color.FromArgb(255, 0, 115, 224),
@@ -397,7 +397,7 @@ public static class BuiltinThemes
             OnScrim = Color.FromArgb(255, 255, 255, 255),
             Selection = Color.FromArgb(255, 210, 222, 255),
             Highlight = Color.FromArgb(255, 255, 238, 156),
-            SurfaceTranslucent = Color.FromArgb(204, 252, 252, 253),
+            SurfaceTranslucent = Color.FromArgb(204, 249, 249, 251),
             CodeKeyword = Color.FromArgb(255, 58, 91, 199),
             CodeString = Color.FromArgb(255, 28, 122, 81),
             CodeNumber = Color.FromArgb(255, 187, 69, 0),
@@ -463,7 +463,7 @@ public static class BuiltinThemes
             FillActive = Color.FromArgb(255, 46, 49, 53),
             Text = Color.FromArgb(255, 237, 238, 240),
             TextMuted = Color.FromArgb(255, 176, 180, 186),
-            TextPlaceholder = Color.FromArgb(255, 119, 123, 132),
+            TextPlaceholder = Color.FromArgb(255, 176, 180, 186),
             TextDisabled = Color.FromArgb(255, 90, 97, 105),
             BorderMuted = Color.FromArgb(255, 54, 58, 63),
             Border = Color.FromArgb(255, 67, 72, 78),
@@ -578,7 +578,7 @@ public static class BuiltinThemes
             FillActive = Color.FromArgb(255, 220, 207, 176),
             Text = Color.FromArgb(255, 59, 47, 32),
             TextMuted = Color.FromArgb(255, 107, 90, 67),
-            TextPlaceholder = Color.FromArgb(255, 118, 100, 74),
+            TextPlaceholder = Color.FromArgb(255, 107, 90, 67),
             TextDisabled = Color.FromArgb(255, 179, 163, 131),
             BorderMuted = Color.FromArgb(255, 221, 208, 178),
             Border = Color.FromArgb(255, 207, 191, 155),
@@ -693,7 +693,7 @@ public static class BuiltinThemes
             FillActive = Color.FromArgb(255, 40, 51, 77),
             Text = Color.FromArgb(255, 238, 242, 250),
             TextMuted = Color.FromArgb(255, 174, 184, 203),
-            TextPlaceholder = Color.FromArgb(255, 115, 127, 151),
+            TextPlaceholder = Color.FromArgb(255, 174, 184, 203),
             TextDisabled = Color.FromArgb(255, 86, 99, 129),
             BorderMuted = Color.FromArgb(255, 48, 60, 87),
             Border = Color.FromArgb(255, 61, 74, 103),
@@ -808,7 +808,7 @@ public static class BuiltinThemes
             FillActive = Color.FromArgb(255, 209, 209, 209),
             Text = Color.FromArgb(255, 0, 0, 0),
             TextMuted = Color.FromArgb(255, 51, 51, 51),
-            TextPlaceholder = Color.FromArgb(255, 87, 87, 87),
+            TextPlaceholder = Color.FromArgb(255, 51, 51, 51),
             TextDisabled = Color.FromArgb(255, 138, 138, 138),
             BorderMuted = Color.FromArgb(255, 143, 143, 143),
             Border = Color.FromArgb(255, 102, 102, 102),
@@ -827,14 +827,14 @@ public static class BuiltinThemes
             DangerSoft = Color.FromArgb(255, 252, 235, 238),
             DangerSoftHover = Color.FromArgb(255, 248, 216, 222),
             DangerBorder = Color.FromArgb(255, 201, 65, 87),
-            SuccessText = Color.FromArgb(255, 10, 85, 32),
+            SuccessText = Color.FromArgb(255, 8, 74, 27),
             SuccessSoft = Color.FromArgb(255, 228, 244, 232),
             SuccessBorder = Color.FromArgb(255, 63, 138, 82),
             Success = Color.FromArgb(255, 10, 85, 32),
             SuccessHover = Color.FromArgb(255, 7, 70, 25),
             SuccessContrast = Color.FromArgb(255, 255, 255, 255),
             SuccessSoftHover = Color.FromArgb(255, 192, 220, 198),
-            WarningText = Color.FromArgb(255, 102, 56, 0),
+            WarningText = Color.FromArgb(255, 92, 50, 0),
             WarningSoft = Color.FromArgb(255, 255, 242, 217),
             WarningBorder = Color.FromArgb(255, 168, 109, 20),
             Warning = Color.FromArgb(255, 102, 56, 0),
@@ -852,17 +852,17 @@ public static class BuiltinThemes
             InverseText = Color.FromArgb(255, 255, 255, 255),
             FocusRing = Color.FromArgb(255, 0, 54, 163),
             Overlay = Color.FromArgb(153, 0, 0, 0),
-            Scrim = Color.FromArgb(140, 0, 0, 0),
+            Scrim = Color.FromArgb(179, 0, 0, 0),
             ScrimStrong = Color.FromArgb(219, 0, 0, 0),
             OnScrim = Color.FromArgb(255, 255, 255, 255),
             Selection = Color.FromArgb(255, 188, 208, 245),
             Highlight = Color.FromArgb(255, 255, 224, 102),
             SurfaceTranslucent = Color.FromArgb(235, 255, 255, 255),
             CodeKeyword = Color.FromArgb(255, 0, 54, 163),
-            CodeString = Color.FromArgb(255, 10, 85, 32),
-            CodeNumber = Color.FromArgb(255, 133, 54, 0),
+            CodeString = Color.FromArgb(255, 8, 74, 27),
+            CodeNumber = Color.FromArgb(255, 122, 49, 0),
             CodeFunction = Color.FromArgb(255, 95, 26, 143),
-            CodeType = Color.FromArgb(255, 0, 82, 94),
+            CodeType = Color.FromArgb(255, 0, 74, 85),
             CodeComment = Color.FromArgb(255, 69, 69, 69),
             CodeTag = Color.FromArgb(255, 143, 0, 24),
             CodeAttribute = Color.FromArgb(255, 102, 56, 0),
@@ -906,101 +906,101 @@ public static class BuiltinThemes
         },
     };
 
-    /// <summary>海洋（亮色）。</summary>
-    public static readonly ThemeTokens Ocean = new()
+    /// <summary>高对比暗色（暗色）。</summary>
+    public static readonly ThemeTokens HighContrastDark = new()
     {
-        Name = "ocean",
-        Label = "海洋",
-        IsDark = false,
+        Name = "high-contrast-dark",
+        Label = "高对比暗色",
+        IsDark = true,
         Colors = new()
         {
-            Background = Color.FromArgb(255, 247, 253, 255),
-            Surface = Color.FromArgb(255, 247, 253, 255),
-            SurfaceMuted = Color.FromArgb(255, 244, 250, 254),
-            SurfaceRaised = Color.FromArgb(255, 247, 253, 255),
-            Fill = Color.FromArgb(255, 231, 242, 250),
-            FillHover = Color.FromArgb(255, 223, 235, 242),
-            FillActive = Color.FromArgb(255, 216, 227, 235),
-            Text = Color.FromArgb(255, 16, 34, 44),
-            TextMuted = Color.FromArgb(255, 84, 103, 115),
-            TextPlaceholder = Color.FromArgb(255, 115, 135, 147),
-            TextDisabled = Color.FromArgb(255, 178, 190, 197),
-            BorderMuted = Color.FromArgb(255, 208, 220, 227),
-            Border = Color.FromArgb(255, 197, 209, 216),
-            BorderStrong = Color.FromArgb(255, 178, 190, 197),
-            Accent = Color.FromArgb(255, 11, 92, 173),
-            AccentHover = Color.FromArgb(255, 8, 76, 145),
-            AccentContrast = Color.FromArgb(255, 255, 255, 255),
-            AccentText = Color.FromArgb(255, 0, 105, 194),
-            AccentSoft = Color.FromArgb(255, 230, 244, 254),
-            AccentSoftHover = Color.FromArgb(255, 213, 239, 255),
-            AccentBorder = Color.FromArgb(255, 142, 200, 246),
-            Danger = Color.FromArgb(255, 216, 58, 63),
-            DangerHover = Color.FromArgb(255, 182, 47, 52),
-            DangerContrast = Color.FromArgb(255, 255, 255, 255),
-            DangerText = Color.FromArgb(255, 195, 30, 40),
-            DangerSoft = Color.FromArgb(255, 254, 235, 236),
-            DangerSoftHover = Color.FromArgb(255, 255, 219, 220),
-            DangerBorder = Color.FromArgb(255, 244, 169, 170),
-            SuccessText = Color.FromArgb(255, 25, 59, 45),
-            SuccessSoft = Color.FromArgb(255, 230, 246, 235),
-            SuccessBorder = Color.FromArgb(255, 142, 206, 170),
-            Success = Color.FromArgb(255, 0, 135, 81),
-            SuccessHover = Color.FromArgb(255, 0, 113, 67),
-            SuccessContrast = Color.FromArgb(255, 255, 255, 255),
-            SuccessSoftHover = Color.FromArgb(255, 214, 241, 223),
-            WarningText = Color.FromArgb(255, 79, 52, 34),
-            WarningSoft = Color.FromArgb(255, 255, 247, 194),
-            WarningBorder = Color.FromArgb(255, 233, 193, 98),
-            Warning = Color.FromArgb(255, 255, 197, 61),
-            WarningHover = Color.FromArgb(255, 255, 205, 95),
-            WarningContrast = Color.FromArgb(255, 79, 52, 34),
-            WarningSoftHover = Color.FromArgb(255, 255, 238, 156),
-            InfoText = Color.FromArgb(255, 29, 62, 86),
-            InfoSoft = Color.FromArgb(255, 225, 246, 253),
-            InfoBorder = Color.FromArgb(255, 141, 202, 227),
-            Info = Color.FromArgb(255, 124, 226, 254),
-            InfoHover = Color.FromArgb(255, 143, 230, 254),
-            InfoContrast = Color.FromArgb(255, 29, 62, 86),
-            InfoSoftHover = Color.FromArgb(255, 209, 240, 250),
-            InverseSurface = Color.FromArgb(255, 16, 34, 44),
-            InverseText = Color.FromArgb(255, 247, 253, 255),
-            FocusRing = Color.FromArgb(255, 11, 92, 173),
-            Overlay = Color.FromArgb(102, 16, 34, 44),
+            Background = Color.FromArgb(255, 0, 0, 0),
+            Surface = Color.FromArgb(255, 0, 0, 0),
+            SurfaceMuted = Color.FromArgb(255, 13, 13, 13),
+            SurfaceRaised = Color.FromArgb(255, 13, 13, 13),
+            Fill = Color.FromArgb(255, 31, 31, 31),
+            FillHover = Color.FromArgb(255, 46, 46, 46),
+            FillActive = Color.FromArgb(255, 61, 61, 61),
+            Text = Color.FromArgb(255, 255, 255, 255),
+            TextMuted = Color.FromArgb(255, 224, 224, 224),
+            TextPlaceholder = Color.FromArgb(255, 224, 224, 224),
+            TextDisabled = Color.FromArgb(255, 138, 138, 138),
+            BorderMuted = Color.FromArgb(255, 143, 143, 143),
+            Border = Color.FromArgb(255, 184, 184, 184),
+            BorderStrong = Color.FromArgb(255, 235, 235, 235),
+            Accent = Color.FromArgb(255, 158, 188, 255),
+            AccentHover = Color.FromArgb(255, 188, 207, 255),
+            AccentContrast = Color.FromArgb(255, 0, 0, 0),
+            AccentText = Color.FromArgb(255, 168, 195, 255),
+            AccentSoft = Color.FromArgb(255, 15, 31, 69),
+            AccentSoftHover = Color.FromArgb(255, 24, 44, 94),
+            AccentBorder = Color.FromArgb(255, 115, 150, 234),
+            Danger = Color.FromArgb(255, 255, 143, 143),
+            DangerHover = Color.FromArgb(255, 255, 173, 173),
+            DangerContrast = Color.FromArgb(255, 0, 0, 0),
+            DangerText = Color.FromArgb(255, 255, 163, 163),
+            DangerSoft = Color.FromArgb(255, 61, 10, 16),
+            DangerSoftHover = Color.FromArgb(255, 84, 16, 25),
+            DangerBorder = Color.FromArgb(255, 232, 96, 111),
+            SuccessText = Color.FromArgb(255, 127, 229, 163),
+            SuccessSoft = Color.FromArgb(255, 10, 46, 23),
+            SuccessBorder = Color.FromArgb(255, 63, 178, 107),
+            Success = Color.FromArgb(255, 98, 218, 143),
+            SuccessHover = Color.FromArgb(255, 134, 231, 169),
+            SuccessContrast = Color.FromArgb(255, 0, 0, 0),
+            SuccessSoftHover = Color.FromArgb(255, 15, 64, 33),
+            WarningText = Color.FromArgb(255, 255, 217, 112),
+            WarningSoft = Color.FromArgb(255, 51, 36, 0),
+            WarningBorder = Color.FromArgb(255, 204, 156, 31),
+            Warning = Color.FromArgb(255, 255, 210, 95),
+            WarningHover = Color.FromArgb(255, 255, 223, 138),
+            WarningContrast = Color.FromArgb(255, 0, 0, 0),
+            WarningSoftHover = Color.FromArgb(255, 71, 51, 0),
+            InfoText = Color.FromArgb(255, 143, 208, 255),
+            InfoSoft = Color.FromArgb(255, 6, 34, 61),
+            InfoBorder = Color.FromArgb(255, 65, 148, 219),
+            Info = Color.FromArgb(255, 124, 196, 255),
+            InfoHover = Color.FromArgb(255, 161, 212, 255),
+            InfoContrast = Color.FromArgb(255, 0, 0, 0),
+            InfoSoftHover = Color.FromArgb(255, 11, 50, 87),
+            InverseSurface = Color.FromArgb(255, 255, 255, 255),
+            InverseText = Color.FromArgb(255, 0, 0, 0),
+            FocusRing = Color.FromArgb(255, 255, 214, 10),
+            Overlay = Color.FromArgb(191, 0, 0, 0),
             Scrim = Color.FromArgb(140, 0, 0, 0),
             ScrimStrong = Color.FromArgb(219, 0, 0, 0),
             OnScrim = Color.FromArgb(255, 255, 255, 255),
-            Selection = Color.FromArgb(255, 194, 229, 255),
-            Highlight = Color.FromArgb(255, 255, 238, 156),
-            SurfaceTranslucent = Color.FromArgb(204, 247, 253, 255),
-            CodeKeyword = Color.FromArgb(255, 0, 105, 194),
-            CodeString = Color.FromArgb(255, 20, 122, 81),
-            CodeNumber = Color.FromArgb(255, 191, 65, 0),
-            CodeFunction = Color.FromArgb(255, 101, 80, 185),
-            CodeType = Color.FromArgb(255, 0, 117, 144),
-            CodeComment = Color.FromArgb(255, 84, 103, 115),
-            CodeTag = Color.FromArgb(255, 203, 29, 99),
-            CodeAttribute = Color.FromArgb(255, 129, 94, 70),
-            CodeInserted = Color.FromArgb(255, 230, 246, 235),
-            CodeDeleted = Color.FromArgb(255, 254, 235, 236),
-            Chart1 = Color.FromArgb(255, 11, 92, 173),
-            Chart2 = Color.FromArgb(255, 7, 151, 185),
-            Chart3 = Color.FromArgb(255, 51, 88, 212),
-            Chart4 = Color.FromArgb(255, 13, 155, 138),
-            Chart5 = Color.FromArgb(255, 48, 157, 186),
-            Chart6 = Color.FromArgb(255, 101, 77, 196),
-            Chart7 = Color.FromArgb(255, 38, 153, 123),
-            Chart8 = Color.FromArgb(255, 198, 132, 0),
-            InverseSurfaceHover = Color.FromArgb(255, 46, 62, 72),
+            Selection = Color.FromArgb(255, 38, 74, 160),
+            Highlight = Color.FromArgb(255, 92, 69, 0),
+            SurfaceTranslucent = Color.FromArgb(235, 0, 0, 0),
+            CodeKeyword = Color.FromArgb(255, 168, 195, 255),
+            CodeString = Color.FromArgb(255, 127, 229, 163),
+            CodeNumber = Color.FromArgb(255, 255, 178, 122),
+            CodeFunction = Color.FromArgb(255, 212, 188, 255),
+            CodeType = Color.FromArgb(255, 128, 226, 242),
+            CodeComment = Color.FromArgb(255, 209, 209, 209),
+            CodeTag = Color.FromArgb(255, 255, 163, 196),
+            CodeAttribute = Color.FromArgb(255, 242, 204, 158),
+            CodeInserted = Color.FromArgb(255, 13, 51, 25),
+            CodeDeleted = Color.FromArgb(255, 74, 15, 24),
+            Chart1 = Color.FromArgb(255, 158, 188, 255),
+            Chart2 = Color.FromArgb(255, 79, 224, 201),
+            Chart3 = Color.FromArgb(255, 255, 160, 102),
+            Chart4 = Color.FromArgb(255, 255, 133, 184),
+            Chart5 = Color.FromArgb(255, 196, 171, 255),
+            Chart6 = Color.FromArgb(255, 90, 216, 242),
+            Chart7 = Color.FromArgb(255, 143, 226, 147),
+            Chart8 = Color.FromArgb(255, 255, 210, 95),
+            InverseSurfaceHover = Color.FromArgb(255, 206, 206, 206),
         },
         Shadows = new()
         {
             None = [],
-            Xs = [new(0f, 1f, 1f, 0f, Color.FromArgb(10, 12, 42, 84)), new(0f, 2f, 1f, -1f, Color.FromArgb(13, 12, 42, 84)), new(0f, 1f, 3f, 0f, Color.FromArgb(13, 12, 42, 84))],
-            Sm = [new(0f, 2f, 3f, -2f, Color.FromArgb(15, 12, 42, 84)), new(0f, 3f, 12f, -4f, Color.FromArgb(26, 12, 42, 84)), new(0f, 4f, 16f, -8f, Color.FromArgb(26, 12, 42, 84))],
-            Md = [new(0f, 8f, 40f, 0f, Color.FromArgb(13, 12, 42, 84)), new(0f, 12f, 32f, -16f, Color.FromArgb(20, 12, 42, 84))],
-            Lg = [new(0f, 12f, 60f, 0f, Color.FromArgb(38, 12, 42, 84)), new(0f, 12f, 32f, -16f, Color.FromArgb(31, 12, 42, 84))],
-            Xl = [new(0f, 12f, 60f, 0f, Color.FromArgb(38, 12, 42, 84)), new(0f, 16f, 64f, 0f, Color.FromArgb(10, 12, 42, 84)), new(0f, 16f, 36f, -20f, Color.FromArgb(51, 12, 42, 84))],
+            Xs = [new(0f, 0f, 0f, 1f, Color.FromArgb(102, 255, 255, 255))],
+            Sm = [new(0f, 0f, 0f, 1f, Color.FromArgb(128, 255, 255, 255))],
+            Md = [new(0f, 0f, 0f, 1f, Color.FromArgb(153, 255, 255, 255))],
+            Lg = [new(0f, 0f, 0f, 1f, Color.FromArgb(153, 255, 255, 255))],
+            Xl = [new(0f, 0f, 0f, 1f, Color.FromArgb(179, 255, 255, 255))],
         },
         Fonts = new()
         {
@@ -1012,11 +1012,11 @@ public static class BuiltinThemes
         Radii = new()
         {
             None = 0f,
-            Xs = 0.2f,
-            Sm = 0.35f,
-            Md = 0.6f,
-            Lg = 0.9f,
-            Xl = 1.25f,
+            Xs = 0.15f,
+            Sm = 0.25f,
+            Md = 0.4f,
+            Lg = 0.7f,
+            Xl = 1f,
             Full = 9999f,
         },
     };
@@ -1029,16 +1029,16 @@ public static class BuiltinThemes
         IsDark = false,
         Colors = new()
         {
-            Background = Color.FromArgb(255, 249, 254, 249),
-            Surface = Color.FromArgb(255, 249, 254, 249),
-            SurfaceMuted = Color.FromArgb(255, 246, 251, 246),
-            SurfaceRaised = Color.FromArgb(255, 249, 254, 249),
+            Background = Color.FromArgb(255, 246, 251, 246),
+            Surface = Color.FromArgb(255, 255, 255, 255),
+            SurfaceMuted = Color.FromArgb(255, 241, 247, 241),
+            SurfaceRaised = Color.FromArgb(255, 255, 255, 255),
             Fill = Color.FromArgb(255, 235, 243, 235),
             FillHover = Color.FromArgb(255, 227, 235, 227),
             FillActive = Color.FromArgb(255, 220, 228, 220),
             Text = Color.FromArgb(255, 24, 35, 24),
             TextMuted = Color.FromArgb(255, 91, 104, 91),
-            TextPlaceholder = Color.FromArgb(255, 122, 136, 122),
+            TextPlaceholder = Color.FromArgb(255, 91, 104, 91),
             TextDisabled = Color.FromArgb(255, 182, 190, 182),
             BorderMuted = Color.FromArgb(255, 212, 220, 212),
             Border = Color.FromArgb(255, 201, 209, 201),
@@ -1087,7 +1087,7 @@ public static class BuiltinThemes
             OnScrim = Color.FromArgb(255, 255, 255, 255),
             Selection = Color.FromArgb(255, 201, 232, 202),
             Highlight = Color.FromArgb(255, 255, 238, 156),
-            SurfaceTranslucent = Color.FromArgb(204, 249, 254, 249),
+            SurfaceTranslucent = Color.FromArgb(204, 246, 251, 246),
             CodeKeyword = Color.FromArgb(255, 35, 120, 53),
             CodeString = Color.FromArgb(255, 20, 122, 81),
             CodeNumber = Color.FromArgb(255, 191, 65, 0),
@@ -1100,8 +1100,8 @@ public static class BuiltinThemes
             CodeDeleted = Color.FromArgb(255, 254, 235, 236),
             Chart1 = Color.FromArgb(255, 43, 122, 59),
             Chart2 = Color.FromArgb(255, 38, 153, 123),
-            Chart3 = Color.FromArgb(255, 111, 160, 0),
-            Chart4 = Color.FromArgb(255, 198, 132, 0),
+            Chart3 = Color.FromArgb(255, 110, 158, 0),
+            Chart4 = Color.FromArgb(255, 196, 131, 0),
             Chart5 = Color.FromArgb(255, 160, 117, 83),
             Chart6 = Color.FromArgb(255, 13, 155, 138),
             Chart7 = Color.FromArgb(255, 239, 95, 0),
@@ -1144,16 +1144,16 @@ public static class BuiltinThemes
         IsDark = false,
         Colors = new()
         {
-            Background = Color.FromArgb(255, 254, 253, 242),
-            Surface = Color.FromArgb(255, 254, 253, 242),
-            SurfaceMuted = Color.FromArgb(255, 251, 250, 239),
-            SurfaceRaised = Color.FromArgb(255, 254, 253, 242),
+            Background = Color.FromArgb(255, 251, 250, 239),
+            Surface = Color.FromArgb(255, 255, 255, 255),
+            SurfaceMuted = Color.FromArgb(255, 247, 245, 233),
+            SurfaceRaised = Color.FromArgb(255, 255, 255, 255),
             Fill = Color.FromArgb(255, 243, 241, 226),
             FillHover = Color.FromArgb(255, 235, 233, 218),
             FillActive = Color.FromArgb(255, 228, 226, 211),
             Text = Color.FromArgb(255, 35, 32, 16),
             TextMuted = Color.FromArgb(255, 103, 101, 82),
-            TextPlaceholder = Color.FromArgb(255, 135, 132, 113),
+            TextPlaceholder = Color.FromArgb(255, 103, 101, 82),
             TextDisabled = Color.FromArgb(255, 190, 188, 174),
             BorderMuted = Color.FromArgb(255, 221, 218, 204),
             Border = Color.FromArgb(255, 209, 207, 193),
@@ -1202,7 +1202,7 @@ public static class BuiltinThemes
             OnScrim = Color.FromArgb(255, 255, 255, 255),
             Selection = Color.FromArgb(255, 255, 231, 112),
             Highlight = Color.FromArgb(255, 226, 240, 189),
-            SurfaceTranslucent = Color.FromArgb(204, 254, 253, 242),
+            SurfaceTranslucent = Color.FromArgb(204, 251, 250, 239),
             CodeKeyword = Color.FromArgb(255, 149, 99, 0),
             CodeString = Color.FromArgb(255, 20, 122, 81),
             CodeNumber = Color.FromArgb(255, 191, 65, 0),
@@ -1214,13 +1214,13 @@ public static class BuiltinThemes
             CodeInserted = Color.FromArgb(255, 230, 246, 235),
             CodeDeleted = Color.FromArgb(255, 254, 235, 236),
             Chart1 = Color.FromArgb(255, 159, 135, 0),
-            Chart2 = Color.FromArgb(255, 111, 160, 0),
+            Chart2 = Color.FromArgb(255, 110, 158, 0),
             Chart3 = Color.FromArgb(255, 62, 155, 79),
             Chart4 = Color.FromArgb(255, 239, 95, 0),
             Chart5 = Color.FromArgb(255, 7, 151, 185),
             Chart6 = Color.FromArgb(255, 207, 56, 151),
             Chart7 = Color.FromArgb(255, 13, 155, 138),
-            Chart8 = Color.FromArgb(255, 198, 132, 0),
+            Chart8 = Color.FromArgb(255, 196, 131, 0),
             InverseSurfaceHover = Color.FromArgb(255, 63, 60, 44),
         },
         Shadows = new()
@@ -1259,16 +1259,16 @@ public static class BuiltinThemes
         IsDark = false,
         Colors = new()
         {
-            Background = Color.FromArgb(255, 255, 250, 252),
-            Surface = Color.FromArgb(255, 255, 250, 252),
-            SurfaceMuted = Color.FromArgb(255, 254, 247, 249),
-            SurfaceRaised = Color.FromArgb(255, 255, 250, 252),
+            Background = Color.FromArgb(255, 254, 247, 249),
+            Surface = Color.FromArgb(255, 255, 255, 255),
+            SurfaceMuted = Color.FromArgb(255, 252, 242, 245),
+            SurfaceRaised = Color.FromArgb(255, 255, 255, 255),
             Fill = Color.FromArgb(255, 249, 237, 241),
             FillHover = Color.FromArgb(255, 241, 229, 233),
             FillActive = Color.FromArgb(255, 234, 222, 226),
             Text = Color.FromArgb(255, 40, 27, 32),
             TextMuted = Color.FromArgb(255, 111, 95, 100),
-            TextPlaceholder = Color.FromArgb(255, 143, 126, 132),
+            TextPlaceholder = Color.FromArgb(255, 111, 95, 100),
             TextDisabled = Color.FromArgb(255, 196, 184, 188),
             BorderMuted = Color.FromArgb(255, 226, 214, 218),
             Border = Color.FromArgb(255, 215, 203, 207),
@@ -1317,7 +1317,7 @@ public static class BuiltinThemes
             OnScrim = Color.FromArgb(255, 255, 255, 255),
             Selection = Color.FromArgb(255, 246, 206, 231),
             Highlight = Color.FromArgb(255, 255, 238, 156),
-            SurfaceTranslucent = Color.FromArgb(204, 255, 250, 252),
+            SurfaceTranslucent = Color.FromArgb(204, 254, 247, 249),
             CodeKeyword = Color.FromArgb(255, 185, 30, 130),
             CodeString = Color.FromArgb(255, 20, 122, 81),
             CodeNumber = Color.FromArgb(255, 191, 65, 0),
@@ -1334,7 +1334,7 @@ public static class BuiltinThemes
             Chart4 = Color.FromArgb(255, 101, 77, 196),
             Chart5 = Color.FromArgb(255, 13, 155, 138),
             Chart6 = Color.FromArgb(255, 239, 95, 0),
-            Chart7 = Color.FromArgb(255, 48, 157, 186),
+            Chart7 = Color.FromArgb(255, 48, 155, 184),
             Chart8 = Color.FromArgb(255, 62, 155, 79),
             InverseSurfaceHover = Color.FromArgb(255, 68, 55, 60),
         },
@@ -1374,16 +1374,16 @@ public static class BuiltinThemes
         IsDark = false,
         Colors = new()
         {
-            Background = Color.FromArgb(255, 255, 250, 246),
-            Surface = Color.FromArgb(255, 255, 250, 246),
-            SurfaceMuted = Color.FromArgb(255, 255, 247, 243),
-            SurfaceRaised = Color.FromArgb(255, 255, 250, 246),
+            Background = Color.FromArgb(255, 255, 247, 243),
+            Surface = Color.FromArgb(255, 255, 255, 255),
+            SurfaceMuted = Color.FromArgb(255, 254, 242, 237),
+            SurfaceRaised = Color.FromArgb(255, 255, 255, 255),
             Fill = Color.FromArgb(255, 253, 237, 230),
             FillHover = Color.FromArgb(255, 245, 229, 222),
             FillActive = Color.FromArgb(255, 238, 222, 215),
             Text = Color.FromArgb(255, 44, 27, 19),
             TextMuted = Color.FromArgb(255, 115, 95, 86),
-            TextPlaceholder = Color.FromArgb(255, 148, 126, 117),
+            TextPlaceholder = Color.FromArgb(255, 115, 95, 86),
             TextDisabled = Color.FromArgb(255, 199, 184, 177),
             BorderMuted = Color.FromArgb(255, 230, 214, 207),
             Border = Color.FromArgb(255, 219, 203, 196),
@@ -1432,7 +1432,7 @@ public static class BuiltinThemes
             OnScrim = Color.FromArgb(255, 255, 255, 255),
             Selection = Color.FromArgb(255, 248, 224, 168),
             Highlight = Color.FromArgb(255, 251, 230, 162),
-            SurfaceTranslucent = Color.FromArgb(204, 255, 250, 246),
+            SurfaceTranslucent = Color.FromArgb(204, 255, 247, 243),
             CodeKeyword = Color.FromArgb(255, 179, 38, 26),
             CodeString = Color.FromArgb(255, 20, 122, 81),
             CodeNumber = Color.FromArgb(255, 191, 65, 0),
@@ -1498,7 +1498,7 @@ public static class BuiltinThemes
             FillActive = Color.FromArgb(255, 49, 43, 77),
             Text = Color.FromArgb(255, 237, 233, 255),
             TextMuted = Color.FromArgb(255, 179, 175, 210),
-            TextPlaceholder = Color.FromArgb(255, 122, 118, 151),
+            TextPlaceholder = Color.FromArgb(255, 179, 175, 210),
             TextDisabled = Color.FromArgb(255, 95, 91, 128),
             BorderMuted = Color.FromArgb(255, 57, 52, 87),
             Border = Color.FromArgb(255, 71, 66, 102),
@@ -1613,7 +1613,7 @@ public static class BuiltinThemes
             FillActive = Color.FromArgb(255, 31, 62, 126),
             Text = Color.FromArgb(255, 240, 246, 255),
             TextMuted = Color.FromArgb(255, 180, 199, 230),
-            TextPlaceholder = Color.FromArgb(255, 127, 150, 189),
+            TextPlaceholder = Color.FromArgb(255, 180, 199, 230),
             TextDisabled = Color.FromArgb(255, 92, 116, 159),
             BorderMuted = Color.FromArgb(255, 31, 59, 115),
             Border = Color.FromArgb(255, 44, 76, 140),
@@ -1719,16 +1719,16 @@ public static class BuiltinThemes
         IsDark = false,
         Colors = new()
         {
-            Background = Color.FromArgb(255, 251, 249, 255),
-            Surface = Color.FromArgb(255, 251, 249, 255),
-            SurfaceMuted = Color.FromArgb(255, 247, 244, 252),
-            SurfaceRaised = Color.FromArgb(255, 251, 249, 255),
+            Background = Color.FromArgb(255, 247, 244, 252),
+            Surface = Color.FromArgb(255, 255, 255, 255),
+            SurfaceMuted = Color.FromArgb(255, 243, 240, 250),
+            SurfaceRaised = Color.FromArgb(255, 255, 255, 255),
             Fill = Color.FromArgb(255, 239, 235, 247),
             FillHover = Color.FromArgb(255, 232, 227, 241),
             FillActive = Color.FromArgb(255, 225, 219, 235),
             Text = Color.FromArgb(255, 33, 27, 48),
             TextMuted = Color.FromArgb(255, 95, 87, 112),
-            TextPlaceholder = Color.FromArgb(255, 124, 116, 141),
+            TextPlaceholder = Color.FromArgb(255, 95, 87, 112),
             TextDisabled = Color.FromArgb(255, 187, 181, 200),
             BorderMuted = Color.FromArgb(255, 220, 214, 231),
             Border = Color.FromArgb(255, 208, 201, 221),
@@ -1777,7 +1777,7 @@ public static class BuiltinThemes
             OnScrim = Color.FromArgb(255, 255, 255, 255),
             Selection = Color.FromArgb(255, 225, 217, 255),
             Highlight = Color.FromArgb(255, 255, 238, 156),
-            SurfaceTranslucent = Color.FromArgb(204, 251, 249, 255),
+            SurfaceTranslucent = Color.FromArgb(204, 247, 244, 252),
             CodeKeyword = Color.FromArgb(255, 95, 73, 189),
             CodeString = Color.FromArgb(255, 20, 122, 81),
             CodeNumber = Color.FromArgb(255, 191, 65, 0),
@@ -1796,7 +1796,7 @@ public static class BuiltinThemes
             Chart6 = Color.FromArgb(255, 13, 155, 138),
             Chart7 = Color.FromArgb(255, 229, 72, 77),
             Chart8 = Color.FromArgb(255, 142, 78, 198),
-            InverseSurfaceHover = Color.FromArgb(255, 61, 55, 75),
+            InverseSurfaceHover = Color.FromArgb(255, 60, 55, 75),
         },
         Shadows = new()
         {
@@ -1843,7 +1843,7 @@ public static class BuiltinThemes
             FillActive = Color.FromArgb(255, 60, 52, 44),
             Text = Color.FromArgb(255, 245, 237, 228),
             TextMuted = Color.FromArgb(255, 191, 179, 166),
-            TextPlaceholder = Color.FromArgb(255, 136, 124, 112),
+            TextPlaceholder = Color.FromArgb(255, 191, 179, 166),
             TextDisabled = Color.FromArgb(255, 102, 92, 82),
             BorderMuted = Color.FromArgb(255, 63, 55, 47),
             Border = Color.FromArgb(255, 79, 70, 60),
@@ -1949,16 +1949,16 @@ public static class BuiltinThemes
         IsDark = false,
         Colors = new()
         {
-            Background = Color.FromArgb(255, 255, 255, 255),
+            Background = Color.FromArgb(255, 250, 250, 250),
             Surface = Color.FromArgb(255, 255, 255, 255),
-            SurfaceMuted = Color.FromArgb(255, 250, 250, 250),
+            SurfaceMuted = Color.FromArgb(255, 247, 247, 247),
             SurfaceRaised = Color.FromArgb(255, 255, 255, 255),
             Fill = Color.FromArgb(255, 244, 244, 244),
             FillHover = Color.FromArgb(255, 236, 236, 236),
             FillActive = Color.FromArgb(255, 227, 227, 227),
             Text = Color.FromArgb(255, 23, 23, 23),
             TextMuted = Color.FromArgb(255, 92, 92, 92),
-            TextPlaceholder = Color.FromArgb(255, 119, 119, 119),
+            TextPlaceholder = Color.FromArgb(255, 92, 92, 92),
             TextDisabled = Color.FromArgb(255, 184, 184, 184),
             BorderMuted = Color.FromArgb(255, 227, 227, 227),
             Border = Color.FromArgb(255, 212, 212, 212),
@@ -2007,7 +2007,7 @@ public static class BuiltinThemes
             OnScrim = Color.FromArgb(255, 255, 255, 255),
             Selection = Color.FromArgb(255, 212, 212, 212),
             Highlight = Color.FromArgb(255, 255, 238, 156),
-            SurfaceTranslucent = Color.FromArgb(204, 255, 255, 255),
+            SurfaceTranslucent = Color.FromArgb(204, 250, 250, 250),
             CodeKeyword = Color.FromArgb(255, 23, 23, 23),
             CodeString = Color.FromArgb(255, 20, 122, 81),
             CodeNumber = Color.FromArgb(255, 191, 65, 0),
@@ -2026,7 +2026,7 @@ public static class BuiltinThemes
             Chart6 = Color.FromArgb(255, 142, 78, 198),
             Chart7 = Color.FromArgb(255, 7, 151, 185),
             Chart8 = Color.FromArgb(255, 119, 119, 119),
-            InverseSurfaceHover = Color.FromArgb(255, 52, 52, 52),
+            InverseSurfaceHover = Color.FromArgb(255, 51, 51, 51),
         },
         Shadows = new()
         {
@@ -2064,16 +2064,16 @@ public static class BuiltinThemes
         IsDark = false,
         Colors = new()
         {
-            Background = Color.FromArgb(255, 245, 249, 247),
-            Surface = Color.FromArgb(255, 245, 249, 247),
-            SurfaceMuted = Color.FromArgb(255, 240, 246, 243),
-            SurfaceRaised = Color.FromArgb(255, 245, 249, 247),
+            Background = Color.FromArgb(255, 240, 246, 243),
+            Surface = Color.FromArgb(255, 255, 255, 255),
+            SurfaceMuted = Color.FromArgb(255, 235, 243, 239),
+            SurfaceRaised = Color.FromArgb(255, 255, 255, 255),
             Fill = Color.FromArgb(255, 230, 239, 235),
             FillHover = Color.FromArgb(255, 221, 232, 227),
             FillActive = Color.FromArgb(255, 211, 225, 219),
             Text = Color.FromArgb(255, 22, 48, 42),
             TextMuted = Color.FromArgb(255, 76, 100, 94),
-            TextPlaceholder = Color.FromArgb(255, 107, 129, 123),
+            TextPlaceholder = Color.FromArgb(255, 76, 100, 94),
             TextDisabled = Color.FromArgb(255, 176, 193, 187),
             BorderMuted = Color.FromArgb(255, 211, 224, 219),
             Border = Color.FromArgb(255, 196, 212, 206),
@@ -2122,7 +2122,7 @@ public static class BuiltinThemes
             OnScrim = Color.FromArgb(255, 255, 255, 255),
             Selection = Color.FromArgb(255, 199, 232, 222),
             Highlight = Color.FromArgb(255, 251, 238, 176),
-            SurfaceTranslucent = Color.FromArgb(204, 245, 249, 247),
+            SurfaceTranslucent = Color.FromArgb(204, 240, 246, 243),
             CodeKeyword = Color.FromArgb(255, 24, 105, 93),
             CodeString = Color.FromArgb(255, 58, 114, 41),
             CodeNumber = Color.FromArgb(255, 163, 72, 31),
@@ -2141,7 +2141,7 @@ public static class BuiltinThemes
             Chart6 = Color.FromArgb(255, 63, 138, 76),
             Chart7 = Color.FromArgb(255, 184, 50, 90),
             Chart8 = Color.FromArgb(255, 93, 122, 134),
-            InverseSurfaceHover = Color.FromArgb(255, 52, 74, 69),
+            InverseSurfaceHover = Color.FromArgb(255, 51, 74, 68),
         },
         Shadows = new()
         {
@@ -2172,5 +2172,5 @@ public static class BuiltinThemes
     };
 
     /// <summary>全部内置主题，顺序同 vue-tsx-pro 的 builtinThemes（主题切换器按这个顺序列出）。</summary>
-    public static IReadOnlyList<ThemeTokens> All { get; } = [Light, Dark, Paper, Midnight, HighContrast, Ocean, Forest, Lemon, Sakura, Festive, Cyberpunk, BigScreen, Lavender, Ember, Mono, Celadon];
+    public static IReadOnlyList<ThemeTokens> All { get; } = [Light, Dark, Paper, Midnight, HighContrast, HighContrastDark, Forest, Lemon, Sakura, Festive, Cyberpunk, BigScreen, Lavender, Ember, Mono, Celadon];
 }

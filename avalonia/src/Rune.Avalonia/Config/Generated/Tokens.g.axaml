@@ -73,8 +73,9 @@
   <x:Double x:Key="Rune.Space.Xl">1.5</x:Double>
 
   <!-- sizes -->
-  <!-- control = 2.25em（em 系数）：`2.25em`：单行控件（按钮、输入框、下拉框）的高度 -->
+  <!-- control = round(nearest, 2.25em, 4px)（em 系数）：`round(nearest, 2.25em, 4px)`：单行控件（按钮、输入框、下拉框）的高度。字号的 2.25 倍取整到 4px： 13 / 14 / 16 / 18px 的字号是 28 / 32 / 36 / 40px，整数像素的边框在 1 倍屏上不发虚； 字号档位 xs 另给 2 倍（12px → 24px，见 fontSizeStyles），不与 sm 同高 -->
   <x:Double x:Key="Rune.Size.Control">2.25</x:Double>
+  <x:Double x:Key="Rune.Size.ControlRound">4</x:Double>
   <!-- minTarget = 24px（设备无关像素）：`24px`：可点击区域的最小尺寸（WCAG 2.2 目标尺寸 24×24），与 control 取较大值 -->
   <x:Double x:Key="Rune.Size.MinTarget">24</x:Double>
   <!-- xs = 30rem（设备无关像素）：`30rem`（480px）：窄内容，如登录表单 -->
@@ -111,7 +112,7 @@
   <sys:TimeSpan x:Key="Rune.Duration.Sm">00:00:00.12</sys:TimeSpan>
   <!-- md = { default=200ms; [reduce]=0ms }：`200ms`：展开、淡入、浮层出现 -->
   <sys:TimeSpan x:Key="Rune.Duration.Md">00:00:00.2</sys:TimeSpan>
-  <!-- lg = { default=300ms; [reduce]=0ms }：`300ms`：对话框、抽屉 -->
+  <!-- lg = { default=300ms; [reduce]=0ms }：`300ms`：抽屉滑入、图表的进场、主题切换的展开、波纹与骨架的扫光 -->
   <sys:TimeSpan x:Key="Rune.Duration.Lg">00:00:00.3</sys:TimeSpan>
   <!-- xl = { default=500ms; [reduce]=0ms }：`500ms`：大面积的页面切换 -->
   <sys:TimeSpan x:Key="Rune.Duration.Xl">00:00:00.5</sys:TimeSpan>
@@ -145,18 +146,18 @@
     <!-- 亮色（light） -->
     <ResourceDictionary x:Key="Light">
       <!-- colors -->
-      <!-- background = #fcfcfd：页面背景。slate 1：亮色 `#fcfcfd`，暗色 `#111113` -->
-      <Color x:Key="Rune.Color.Background">#FFFCFCFD</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Background" Color="#FFFCFCFD" />
-      <!-- surface = #fcfcfd：卡片、输入框等表面。亮色 slate 1 `#fcfcfd`，暗色 slate 2 `#18191b` -->
-      <Color x:Key="Rune.Color.Surface">#FFFCFCFD</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Surface" Color="#FFFCFCFD" />
-      <!-- surfaceMuted = #f9f9fb：弱化的区域背景：表头、侧栏、代码块。slate 2：亮色 `#f9f9fb`，暗色 `#18191b` -->
-      <Color x:Key="Rune.Color.SurfaceMuted">#FFF9F9FB</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SurfaceMuted" Color="#FFF9F9FB" />
-      <!-- surfaceRaised = #fcfcfd：浮层（弹出框、菜单、对话框）表面，靠描边与阴影区分层级。亮色 slate 1 `#fcfcfd`，暗色 slate 2 `#18191b` （不取第 3 级：那是 fill，浮层里的填充会看不见） -->
-      <Color x:Key="Rune.Color.SurfaceRaised">#FFFCFCFD</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SurfaceRaised" Color="#FFFCFCFD" />
+      <!-- background = #f9f9fb：页面背景。亮色 slate 2 `#f9f9fb`（着一点色，白色的卡片、输入框浮在上面），暗色 slate 1 `#111113` -->
+      <Color x:Key="Rune.Color.Background">#FFF9F9FB</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Background" Color="#FFF9F9FB" />
+      <!-- surface = #ffffff：卡片、输入框等表面。亮色白 `#ffffff`，暗色 slate 2 `#18191b`：都比页面亮一层 -->
+      <Color x:Key="Rune.Color.Surface">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Surface" Color="#FFFFFFFF" />
+      <!-- surfaceMuted = #f4f4f7：弱化的区域背景：表头、侧栏、代码块。亮色取 slate 2 与 3 的中间 `#f4f4f7`（放在页面上也看得出），暗色 slate 2 `#18191b` -->
+      <Color x:Key="Rune.Color.SurfaceMuted">#FFF4F4F7</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SurfaceMuted" Color="#FFF4F4F7" />
+      <!-- surfaceRaised = #ffffff：浮层（弹出框、菜单、对话框）表面，靠描边与阴影区分层级。亮色白 `#ffffff`，暗色 slate 2 `#18191b` （暗色不取第 3 级：那是 fill，浮层里的填充会看不见） -->
+      <Color x:Key="Rune.Color.SurfaceRaised">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SurfaceRaised" Color="#FFFFFFFF" />
       <!-- fill = #f0f0f3：填充：标签、开关关闭态、弱按钮。slate 3：亮色 `#f0f0f3`，暗色 `#212225` -->
       <Color x:Key="Rune.Color.Fill">#FFF0F0F3</Color>
       <SolidColorBrush x:Key="Rune.Brush.Fill" Color="#FFF0F0F3" />
@@ -172,9 +173,9 @@
       <!-- textMuted = #60646c：次要文字、说明、图标。slate 11：亮色 `#60646c`，暗色 `#b0b4ba` -->
       <Color x:Key="Rune.Color.TextMuted">#FF60646C</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextMuted" Color="#FF60646C" />
-      <!-- textPlaceholder = #80838d：输入框占位文字。slate 10：亮色 `#80838d`，暗色 `#777b84` -->
-      <Color x:Key="Rune.Color.TextPlaceholder">#FF80838D</Color>
-      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FF80838D" />
+      <!-- textPlaceholder = #60646c：输入框占位文字。slate 11（同 textMuted）：亮色 `#60646c`，暗色 `#b0b4ba`。 不用 10 级：在输入框的浅底上只有 3.3:1，占位文字也是要读的文字（WCAG 1.4.3），按 4.5:1；同 GitHub Primer 的做法 -->
+      <Color x:Key="Rune.Color.TextPlaceholder">#FF60646C</Color>
+      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FF60646C" />
       <!-- textDisabled = #b9bbc6：不可用的文字。slate 8：亮色 `#b9bbc6`，暗色 `#5a6169` -->
       <Color x:Key="Rune.Color.TextDisabled">#FFB9BBC6</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextDisabled" Color="#FFB9BBC6" />
@@ -229,9 +230,9 @@
       <!-- dangerBorder = #f4a9aa：危险边框：校验失败的输入框。red 7：亮色 `#f4a9aa`，暗色 `#8c333a` -->
       <Color x:Key="Rune.Color.DangerBorder">#FFF4A9AA</Color>
       <SolidColorBrush x:Key="Rune.Brush.DangerBorder" Color="#FFF4A9AA" />
-      <!-- successText = #193b2d：成功文字与图标。亮色 green 12 `#193b2d`，暗色 green 11 `#3dd68c`。 亮色不用 11 级：green 11 在 successSoft（green 3）上只有 4.21:1，标记、提示条里的文字不到 4.5 -->
-      <Color x:Key="Rune.Color.SuccessText">#FF193B2D</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SuccessText" Color="#FF193B2D" />
+      <!-- successText = #17714a：成功文字与图标。亮色 `#17714a`（green 11 与 12 之间），暗色 green 11 `#3dd68c`。 亮色不用 11 级：green 11 在 successSoft（green 3）上只有 4.21:1，标记、提示条里的文字不到 4.5； 也不用 12 级：近黑色与正文分不出（同 dangerText 取中间调），在浅底、浅底悬停、表面上都到 5:1 -->
+      <Color x:Key="Rune.Color.SuccessText">#FF17714A</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SuccessText" Color="#FF17714A" />
       <!-- successSoft = #e6f6eb：成功浅底。green 3：亮色 `#e6f6eb`，暗色 `#132d21` -->
       <Color x:Key="Rune.Color.SuccessSoft">#FFE6F6EB</Color>
       <SolidColorBrush x:Key="Rune.Brush.SuccessSoft" Color="#FFE6F6EB" />
@@ -250,9 +251,9 @@
       <!-- successSoftHover = #d6f1df：成功浅底悬停。green 4：亮色 `#d6f1df`，暗色 `#113b29` -->
       <Color x:Key="Rune.Color.SuccessSoftHover">#FFD6F1DF</Color>
       <SolidColorBrush x:Key="Rune.Brush.SuccessSoftHover" Color="#FFD6F1DF" />
-      <!-- warningText = #4f3422：警告文字与图标。亮色 amber 12 `#4f3422`，暗色 amber 11 `#ffca16`。 亮色不用 11 级：amber 11（`#ab6400`）在页面背景上对比度 4.49，不到 WCAG AA 的 4.5 -->
-      <Color x:Key="Rune.Color.WarningText">#FF4F3422</Color>
-      <SolidColorBrush x:Key="Rune.Brush.WarningText" Color="#FF4F3422" />
+      <!-- warningText = #8a5300：警告文字与图标。亮色 `#8a5300`（amber 11 与 12 之间），暗色 amber 11 `#ffca16`。 亮色不用 11 级：amber 11（`#ab6400`）在页面背景上对比度 4.49，不到 WCAG AA 的 4.5； 也不用 12 级：近黑色与正文分不出，在浅底、浅底悬停、表面上都到 5:1 -->
+      <Color x:Key="Rune.Color.WarningText">#FF8A5300</Color>
+      <SolidColorBrush x:Key="Rune.Brush.WarningText" Color="#FF8A5300" />
       <!-- warningSoft = #fff7c2：警告浅底。amber 3：亮色 `#fff7c2`，暗色 `#302008` -->
       <Color x:Key="Rune.Color.WarningSoft">#FFFFF7C2</Color>
       <SolidColorBrush x:Key="Rune.Brush.WarningSoft" Color="#FFFFF7C2" />
@@ -271,9 +272,9 @@
       <!-- warningSoftHover = #ffee9c：警告浅底悬停。amber 4：亮色 `#ffee9c`，暗色 `#3f2700` -->
       <Color x:Key="Rune.Color.WarningSoftHover">#FFFFEE9C</Color>
       <SolidColorBrush x:Key="Rune.Brush.WarningSoftHover" Color="#FFFFEE9C" />
-      <!-- infoText = #113264：信息文字与图标。亮色 blue 12 `#113264`，暗色 blue 11 `#70b8ff`。 亮色不用 11 级：blue 11 在 infoSoft（blue 3）上只有 4.25:1 -->
-      <Color x:Key="Rune.Color.InfoText">#FF113264</Color>
-      <SolidColorBrush x:Key="Rune.Brush.InfoText" Color="#FF113264" />
+      <!-- infoText = #0c64b3：信息文字与图标。亮色 `#0c64b3`（blue 11 与 12 之间），暗色 blue 11 `#70b8ff`。 亮色不用 11 级：blue 11 在 infoSoft（blue 3）上只有 4.25:1；也不用 12 级：近黑色与正文分不出， 在浅底、浅底悬停、表面上都到 5:1 -->
+      <Color x:Key="Rune.Color.InfoText">#FF0C64B3</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InfoText" Color="#FF0C64B3" />
       <!-- infoSoft = #e6f4fe：信息浅底。blue 3：亮色 `#e6f4fe`，暗色 `#0d2847` -->
       <Color x:Key="Rune.Color.InfoSoft">#FFE6F4FE</Color>
       <SolidColorBrush x:Key="Rune.Brush.InfoSoft" Color="#FFE6F4FE" />
@@ -319,9 +320,9 @@
       <!-- highlight = #ffee9c：高亮标记：搜索命中、`<mark>`。amber 4：亮色 `#ffee9c`，暗色 `#3f2700` -->
       <Color x:Key="Rune.Color.Highlight">#FFFFEE9C</Color>
       <SolidColorBrush x:Key="Rune.Brush.Highlight" Color="#FFFFEE9C" />
-      <!-- surfaceTranslucent = rgba(252, 252, 253, 0.8)：半透明表面：吸顶的顶栏（配合背景模糊）。页面背景加 80% 不透明 -->
-      <Color x:Key="Rune.Color.SurfaceTranslucent">#CCFCFCFD</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SurfaceTranslucent" Color="#CCFCFCFD" />
+      <!-- surfaceTranslucent = rgba(249, 249, 251, 0.8)：半透明表面：吸顶的顶栏（配合背景模糊）。页面背景加 80% 不透明 -->
+      <Color x:Key="Rune.Color.SurfaceTranslucent">#CCF9F9FB</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SurfaceTranslucent" Color="#CCF9F9FB" />
       <!-- codeKeyword = #3a5bc7：关键字。indigo 11：亮色 `#3a5bc7`，暗色 `#9eb1ff` -->
       <Color x:Key="Rune.Color.CodeKeyword">#FF3A5BC7</Color>
       <SolidColorBrush x:Key="Rune.Brush.CodeKeyword" Color="#FF3A5BC7" />
@@ -449,8 +450,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Text" Color="#FFEDEEF0" />
       <Color x:Key="Rune.Color.TextMuted">#FFB0B4BA</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextMuted" Color="#FFB0B4BA" />
-      <Color x:Key="Rune.Color.TextPlaceholder">#FF777B84</Color>
-      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FF777B84" />
+      <Color x:Key="Rune.Color.TextPlaceholder">#FFB0B4BA</Color>
+      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FFB0B4BA" />
       <Color x:Key="Rune.Color.TextDisabled">#FF5A6169</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextDisabled" Color="#FF5A6169" />
       <Color x:Key="Rune.Color.BorderMuted">#FF363A3F</Color>
@@ -640,8 +641,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Text" Color="#FF3B2F20" />
       <Color x:Key="Rune.Color.TextMuted">#FF6B5A43</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextMuted" Color="#FF6B5A43" />
-      <Color x:Key="Rune.Color.TextPlaceholder">#FF76644A</Color>
-      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FF76644A" />
+      <Color x:Key="Rune.Color.TextPlaceholder">#FF6B5A43</Color>
+      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FF6B5A43" />
       <Color x:Key="Rune.Color.TextDisabled">#FFB3A383</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextDisabled" Color="#FFB3A383" />
       <Color x:Key="Rune.Color.BorderMuted">#FFDDD0B2</Color>
@@ -831,8 +832,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Text" Color="#FFEEF2FA" />
       <Color x:Key="Rune.Color.TextMuted">#FFAEB8CB</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextMuted" Color="#FFAEB8CB" />
-      <Color x:Key="Rune.Color.TextPlaceholder">#FF737F97</Color>
-      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FF737F97" />
+      <Color x:Key="Rune.Color.TextPlaceholder">#FFAEB8CB</Color>
+      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FFAEB8CB" />
       <Color x:Key="Rune.Color.TextDisabled">#FF566381</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextDisabled" Color="#FF566381" />
       <Color x:Key="Rune.Color.BorderMuted">#FF303C57</Color>
@@ -1022,8 +1023,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Text" Color="#FF000000" />
       <Color x:Key="Rune.Color.TextMuted">#FF333333</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextMuted" Color="#FF333333" />
-      <Color x:Key="Rune.Color.TextPlaceholder">#FF575757</Color>
-      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FF575757" />
+      <Color x:Key="Rune.Color.TextPlaceholder">#FF333333</Color>
+      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FF333333" />
       <Color x:Key="Rune.Color.TextDisabled">#FF8A8A8A</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextDisabled" Color="#FF8A8A8A" />
       <Color x:Key="Rune.Color.BorderMuted">#FF8F8F8F</Color>
@@ -1060,8 +1061,8 @@
       <SolidColorBrush x:Key="Rune.Brush.DangerSoftHover" Color="#FFF8D8DE" />
       <Color x:Key="Rune.Color.DangerBorder">#FFC94157</Color>
       <SolidColorBrush x:Key="Rune.Brush.DangerBorder" Color="#FFC94157" />
-      <Color x:Key="Rune.Color.SuccessText">#FF0A5520</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SuccessText" Color="#FF0A5520" />
+      <Color x:Key="Rune.Color.SuccessText">#FF084A1B</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SuccessText" Color="#FF084A1B" />
       <Color x:Key="Rune.Color.SuccessSoft">#FFE4F4E8</Color>
       <SolidColorBrush x:Key="Rune.Brush.SuccessSoft" Color="#FFE4F4E8" />
       <Color x:Key="Rune.Color.SuccessBorder">#FF3F8A52</Color>
@@ -1074,8 +1075,8 @@
       <SolidColorBrush x:Key="Rune.Brush.SuccessContrast" Color="#FFFFFFFF" />
       <Color x:Key="Rune.Color.SuccessSoftHover">#FFC0DCC6</Color>
       <SolidColorBrush x:Key="Rune.Brush.SuccessSoftHover" Color="#FFC0DCC6" />
-      <Color x:Key="Rune.Color.WarningText">#FF663800</Color>
-      <SolidColorBrush x:Key="Rune.Brush.WarningText" Color="#FF663800" />
+      <Color x:Key="Rune.Color.WarningText">#FF5C3200</Color>
+      <SolidColorBrush x:Key="Rune.Brush.WarningText" Color="#FF5C3200" />
       <Color x:Key="Rune.Color.WarningSoft">#FFFFF2D9</Color>
       <SolidColorBrush x:Key="Rune.Brush.WarningSoft" Color="#FFFFF2D9" />
       <Color x:Key="Rune.Color.WarningBorder">#FFA86D14</Color>
@@ -1110,8 +1111,8 @@
       <SolidColorBrush x:Key="Rune.Brush.FocusRing" Color="#FF0036A3" />
       <Color x:Key="Rune.Color.Overlay">#99000000</Color>
       <SolidColorBrush x:Key="Rune.Brush.Overlay" Color="#99000000" />
-      <Color x:Key="Rune.Color.Scrim">#8C000000</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Scrim" Color="#8C000000" />
+      <Color x:Key="Rune.Color.Scrim">#B3000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Scrim" Color="#B3000000" />
       <Color x:Key="Rune.Color.ScrimStrong">#DB000000</Color>
       <SolidColorBrush x:Key="Rune.Brush.ScrimStrong" Color="#DB000000" />
       <Color x:Key="Rune.Color.OnScrim">#FFFFFFFF</Color>
@@ -1124,14 +1125,14 @@
       <SolidColorBrush x:Key="Rune.Brush.SurfaceTranslucent" Color="#EBFFFFFF" />
       <Color x:Key="Rune.Color.CodeKeyword">#FF0036A3</Color>
       <SolidColorBrush x:Key="Rune.Brush.CodeKeyword" Color="#FF0036A3" />
-      <Color x:Key="Rune.Color.CodeString">#FF0A5520</Color>
-      <SolidColorBrush x:Key="Rune.Brush.CodeString" Color="#FF0A5520" />
-      <Color x:Key="Rune.Color.CodeNumber">#FF853600</Color>
-      <SolidColorBrush x:Key="Rune.Brush.CodeNumber" Color="#FF853600" />
+      <Color x:Key="Rune.Color.CodeString">#FF084A1B</Color>
+      <SolidColorBrush x:Key="Rune.Brush.CodeString" Color="#FF084A1B" />
+      <Color x:Key="Rune.Color.CodeNumber">#FF7A3100</Color>
+      <SolidColorBrush x:Key="Rune.Brush.CodeNumber" Color="#FF7A3100" />
       <Color x:Key="Rune.Color.CodeFunction">#FF5F1A8F</Color>
       <SolidColorBrush x:Key="Rune.Brush.CodeFunction" Color="#FF5F1A8F" />
-      <Color x:Key="Rune.Color.CodeType">#FF00525E</Color>
-      <SolidColorBrush x:Key="Rune.Brush.CodeType" Color="#FF00525E" />
+      <Color x:Key="Rune.Color.CodeType">#FF004A55</Color>
+      <SolidColorBrush x:Key="Rune.Brush.CodeType" Color="#FF004A55" />
       <Color x:Key="Rune.Color.CodeComment">#FF454545</Color>
       <SolidColorBrush x:Key="Rune.Brush.CodeComment" Color="#FF454545" />
       <Color x:Key="Rune.Color.CodeTag">#FF8F0018</Color>
@@ -1192,173 +1193,173 @@
       <rune:TonePalette x:Key="Rune.Palette.Warning" Solid="{StaticResource Rune.Brush.Warning}" SolidHover="{StaticResource Rune.Brush.WarningHover}" Contrast="{StaticResource Rune.Brush.WarningContrast}" Soft="{StaticResource Rune.Brush.WarningSoft}" SoftHover="{StaticResource Rune.Brush.WarningSoftHover}" Surface="{StaticResource Rune.Brush.WarningSoft}" SubtleHover="{StaticResource Rune.Brush.WarningSoft}" Text="{StaticResource Rune.Brush.WarningText}" Border="{StaticResource Rune.Brush.WarningBorder}" />
       <rune:TonePalette x:Key="Rune.Palette.Danger" Solid="{StaticResource Rune.Brush.Danger}" SolidHover="{StaticResource Rune.Brush.DangerHover}" Contrast="{StaticResource Rune.Brush.DangerContrast}" Soft="{StaticResource Rune.Brush.DangerSoft}" SoftHover="{StaticResource Rune.Brush.DangerSoftHover}" Surface="{StaticResource Rune.Brush.DangerSoft}" SubtleHover="{StaticResource Rune.Brush.DangerSoft}" Text="{StaticResource Rune.Brush.DangerText}" Border="{StaticResource Rune.Brush.DangerBorder}" />
     </ResourceDictionary>
-    <!-- 海洋（ocean，亮色） -->
-    <ResourceDictionary x:Key="{x:Static rune:RuneThemeVariants.Ocean}">
+    <!-- 高对比暗色（high-contrast-dark，暗色） -->
+    <ResourceDictionary x:Key="{x:Static rune:RuneThemeVariants.HighContrastDark}">
       <!-- colors -->
-      <Color x:Key="Rune.Color.Background">#FFF7FDFF</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Background" Color="#FFF7FDFF" />
-      <Color x:Key="Rune.Color.Surface">#FFF7FDFF</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Surface" Color="#FFF7FDFF" />
-      <Color x:Key="Rune.Color.SurfaceMuted">#FFF4FAFE</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SurfaceMuted" Color="#FFF4FAFE" />
-      <Color x:Key="Rune.Color.SurfaceRaised">#FFF7FDFF</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SurfaceRaised" Color="#FFF7FDFF" />
-      <Color x:Key="Rune.Color.Fill">#FFE7F2FA</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Fill" Color="#FFE7F2FA" />
-      <Color x:Key="Rune.Color.FillHover">#FFDFEBF2</Color>
-      <SolidColorBrush x:Key="Rune.Brush.FillHover" Color="#FFDFEBF2" />
-      <Color x:Key="Rune.Color.FillActive">#FFD8E3EB</Color>
-      <SolidColorBrush x:Key="Rune.Brush.FillActive" Color="#FFD8E3EB" />
-      <Color x:Key="Rune.Color.Text">#FF10222C</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Text" Color="#FF10222C" />
-      <Color x:Key="Rune.Color.TextMuted">#FF546773</Color>
-      <SolidColorBrush x:Key="Rune.Brush.TextMuted" Color="#FF546773" />
-      <Color x:Key="Rune.Color.TextPlaceholder">#FF738793</Color>
-      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FF738793" />
-      <Color x:Key="Rune.Color.TextDisabled">#FFB2BEC5</Color>
-      <SolidColorBrush x:Key="Rune.Brush.TextDisabled" Color="#FFB2BEC5" />
-      <Color x:Key="Rune.Color.BorderMuted">#FFD0DCE3</Color>
-      <SolidColorBrush x:Key="Rune.Brush.BorderMuted" Color="#FFD0DCE3" />
-      <Color x:Key="Rune.Color.Border">#FFC5D1D8</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Border" Color="#FFC5D1D8" />
-      <Color x:Key="Rune.Color.BorderStrong">#FFB2BEC5</Color>
-      <SolidColorBrush x:Key="Rune.Brush.BorderStrong" Color="#FFB2BEC5" />
-      <Color x:Key="Rune.Color.Accent">#FF0B5CAD</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Accent" Color="#FF0B5CAD" />
-      <Color x:Key="Rune.Color.AccentHover">#FF084C91</Color>
-      <SolidColorBrush x:Key="Rune.Brush.AccentHover" Color="#FF084C91" />
-      <Color x:Key="Rune.Color.AccentContrast">#FFFFFFFF</Color>
-      <SolidColorBrush x:Key="Rune.Brush.AccentContrast" Color="#FFFFFFFF" />
-      <Color x:Key="Rune.Color.AccentText">#FF0069C2</Color>
-      <SolidColorBrush x:Key="Rune.Brush.AccentText" Color="#FF0069C2" />
-      <Color x:Key="Rune.Color.AccentSoft">#FFE6F4FE</Color>
-      <SolidColorBrush x:Key="Rune.Brush.AccentSoft" Color="#FFE6F4FE" />
-      <Color x:Key="Rune.Color.AccentSoftHover">#FFD5EFFF</Color>
-      <SolidColorBrush x:Key="Rune.Brush.AccentSoftHover" Color="#FFD5EFFF" />
-      <Color x:Key="Rune.Color.AccentBorder">#FF8EC8F6</Color>
-      <SolidColorBrush x:Key="Rune.Brush.AccentBorder" Color="#FF8EC8F6" />
-      <Color x:Key="Rune.Color.Danger">#FFD83A3F</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Danger" Color="#FFD83A3F" />
-      <Color x:Key="Rune.Color.DangerHover">#FFB62F34</Color>
-      <SolidColorBrush x:Key="Rune.Brush.DangerHover" Color="#FFB62F34" />
-      <Color x:Key="Rune.Color.DangerContrast">#FFFFFFFF</Color>
-      <SolidColorBrush x:Key="Rune.Brush.DangerContrast" Color="#FFFFFFFF" />
-      <Color x:Key="Rune.Color.DangerText">#FFC31E28</Color>
-      <SolidColorBrush x:Key="Rune.Brush.DangerText" Color="#FFC31E28" />
-      <Color x:Key="Rune.Color.DangerSoft">#FFFEEBEC</Color>
-      <SolidColorBrush x:Key="Rune.Brush.DangerSoft" Color="#FFFEEBEC" />
-      <Color x:Key="Rune.Color.DangerSoftHover">#FFFFDBDC</Color>
-      <SolidColorBrush x:Key="Rune.Brush.DangerSoftHover" Color="#FFFFDBDC" />
-      <Color x:Key="Rune.Color.DangerBorder">#FFF4A9AA</Color>
-      <SolidColorBrush x:Key="Rune.Brush.DangerBorder" Color="#FFF4A9AA" />
-      <Color x:Key="Rune.Color.SuccessText">#FF193B2D</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SuccessText" Color="#FF193B2D" />
-      <Color x:Key="Rune.Color.SuccessSoft">#FFE6F6EB</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SuccessSoft" Color="#FFE6F6EB" />
-      <Color x:Key="Rune.Color.SuccessBorder">#FF8ECEAA</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SuccessBorder" Color="#FF8ECEAA" />
-      <Color x:Key="Rune.Color.Success">#FF008751</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Success" Color="#FF008751" />
-      <Color x:Key="Rune.Color.SuccessHover">#FF007143</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SuccessHover" Color="#FF007143" />
-      <Color x:Key="Rune.Color.SuccessContrast">#FFFFFFFF</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SuccessContrast" Color="#FFFFFFFF" />
-      <Color x:Key="Rune.Color.SuccessSoftHover">#FFD6F1DF</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SuccessSoftHover" Color="#FFD6F1DF" />
-      <Color x:Key="Rune.Color.WarningText">#FF4F3422</Color>
-      <SolidColorBrush x:Key="Rune.Brush.WarningText" Color="#FF4F3422" />
-      <Color x:Key="Rune.Color.WarningSoft">#FFFFF7C2</Color>
-      <SolidColorBrush x:Key="Rune.Brush.WarningSoft" Color="#FFFFF7C2" />
-      <Color x:Key="Rune.Color.WarningBorder">#FFE9C162</Color>
-      <SolidColorBrush x:Key="Rune.Brush.WarningBorder" Color="#FFE9C162" />
-      <Color x:Key="Rune.Color.Warning">#FFFFC53D</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Warning" Color="#FFFFC53D" />
-      <Color x:Key="Rune.Color.WarningHover">#FFFFCD5F</Color>
-      <SolidColorBrush x:Key="Rune.Brush.WarningHover" Color="#FFFFCD5F" />
-      <Color x:Key="Rune.Color.WarningContrast">#FF4F3422</Color>
-      <SolidColorBrush x:Key="Rune.Brush.WarningContrast" Color="#FF4F3422" />
-      <Color x:Key="Rune.Color.WarningSoftHover">#FFFFEE9C</Color>
-      <SolidColorBrush x:Key="Rune.Brush.WarningSoftHover" Color="#FFFFEE9C" />
-      <Color x:Key="Rune.Color.InfoText">#FF1D3E56</Color>
-      <SolidColorBrush x:Key="Rune.Brush.InfoText" Color="#FF1D3E56" />
-      <Color x:Key="Rune.Color.InfoSoft">#FFE1F6FD</Color>
-      <SolidColorBrush x:Key="Rune.Brush.InfoSoft" Color="#FFE1F6FD" />
-      <Color x:Key="Rune.Color.InfoBorder">#FF8DCAE3</Color>
-      <SolidColorBrush x:Key="Rune.Brush.InfoBorder" Color="#FF8DCAE3" />
-      <Color x:Key="Rune.Color.Info">#FF7CE2FE</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Info" Color="#FF7CE2FE" />
-      <Color x:Key="Rune.Color.InfoHover">#FF8FE6FE</Color>
-      <SolidColorBrush x:Key="Rune.Brush.InfoHover" Color="#FF8FE6FE" />
-      <Color x:Key="Rune.Color.InfoContrast">#FF1D3E56</Color>
-      <SolidColorBrush x:Key="Rune.Brush.InfoContrast" Color="#FF1D3E56" />
-      <Color x:Key="Rune.Color.InfoSoftHover">#FFD1F0FA</Color>
-      <SolidColorBrush x:Key="Rune.Brush.InfoSoftHover" Color="#FFD1F0FA" />
-      <Color x:Key="Rune.Color.InverseSurface">#FF10222C</Color>
-      <SolidColorBrush x:Key="Rune.Brush.InverseSurface" Color="#FF10222C" />
-      <Color x:Key="Rune.Color.InverseText">#FFF7FDFF</Color>
-      <SolidColorBrush x:Key="Rune.Brush.InverseText" Color="#FFF7FDFF" />
-      <Color x:Key="Rune.Color.FocusRing">#FF0B5CAD</Color>
-      <SolidColorBrush x:Key="Rune.Brush.FocusRing" Color="#FF0B5CAD" />
-      <Color x:Key="Rune.Color.Overlay">#6610222C</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Overlay" Color="#6610222C" />
+      <Color x:Key="Rune.Color.Background">#FF000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Background" Color="#FF000000" />
+      <Color x:Key="Rune.Color.Surface">#FF000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Surface" Color="#FF000000" />
+      <Color x:Key="Rune.Color.SurfaceMuted">#FF0D0D0D</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SurfaceMuted" Color="#FF0D0D0D" />
+      <Color x:Key="Rune.Color.SurfaceRaised">#FF0D0D0D</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SurfaceRaised" Color="#FF0D0D0D" />
+      <Color x:Key="Rune.Color.Fill">#FF1F1F1F</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Fill" Color="#FF1F1F1F" />
+      <Color x:Key="Rune.Color.FillHover">#FF2E2E2E</Color>
+      <SolidColorBrush x:Key="Rune.Brush.FillHover" Color="#FF2E2E2E" />
+      <Color x:Key="Rune.Color.FillActive">#FF3D3D3D</Color>
+      <SolidColorBrush x:Key="Rune.Brush.FillActive" Color="#FF3D3D3D" />
+      <Color x:Key="Rune.Color.Text">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Text" Color="#FFFFFFFF" />
+      <Color x:Key="Rune.Color.TextMuted">#FFE0E0E0</Color>
+      <SolidColorBrush x:Key="Rune.Brush.TextMuted" Color="#FFE0E0E0" />
+      <Color x:Key="Rune.Color.TextPlaceholder">#FFE0E0E0</Color>
+      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FFE0E0E0" />
+      <Color x:Key="Rune.Color.TextDisabled">#FF8A8A8A</Color>
+      <SolidColorBrush x:Key="Rune.Brush.TextDisabled" Color="#FF8A8A8A" />
+      <Color x:Key="Rune.Color.BorderMuted">#FF8F8F8F</Color>
+      <SolidColorBrush x:Key="Rune.Brush.BorderMuted" Color="#FF8F8F8F" />
+      <Color x:Key="Rune.Color.Border">#FFB8B8B8</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Border" Color="#FFB8B8B8" />
+      <Color x:Key="Rune.Color.BorderStrong">#FFEBEBEB</Color>
+      <SolidColorBrush x:Key="Rune.Brush.BorderStrong" Color="#FFEBEBEB" />
+      <Color x:Key="Rune.Color.Accent">#FF9EBCFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Accent" Color="#FF9EBCFF" />
+      <Color x:Key="Rune.Color.AccentHover">#FFBCCFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.AccentHover" Color="#FFBCCFFF" />
+      <Color x:Key="Rune.Color.AccentContrast">#FF000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.AccentContrast" Color="#FF000000" />
+      <Color x:Key="Rune.Color.AccentText">#FFA8C3FF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.AccentText" Color="#FFA8C3FF" />
+      <Color x:Key="Rune.Color.AccentSoft">#FF0F1F45</Color>
+      <SolidColorBrush x:Key="Rune.Brush.AccentSoft" Color="#FF0F1F45" />
+      <Color x:Key="Rune.Color.AccentSoftHover">#FF182C5E</Color>
+      <SolidColorBrush x:Key="Rune.Brush.AccentSoftHover" Color="#FF182C5E" />
+      <Color x:Key="Rune.Color.AccentBorder">#FF7396EA</Color>
+      <SolidColorBrush x:Key="Rune.Brush.AccentBorder" Color="#FF7396EA" />
+      <Color x:Key="Rune.Color.Danger">#FFFF8F8F</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Danger" Color="#FFFF8F8F" />
+      <Color x:Key="Rune.Color.DangerHover">#FFFFADAD</Color>
+      <SolidColorBrush x:Key="Rune.Brush.DangerHover" Color="#FFFFADAD" />
+      <Color x:Key="Rune.Color.DangerContrast">#FF000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.DangerContrast" Color="#FF000000" />
+      <Color x:Key="Rune.Color.DangerText">#FFFFA3A3</Color>
+      <SolidColorBrush x:Key="Rune.Brush.DangerText" Color="#FFFFA3A3" />
+      <Color x:Key="Rune.Color.DangerSoft">#FF3D0A10</Color>
+      <SolidColorBrush x:Key="Rune.Brush.DangerSoft" Color="#FF3D0A10" />
+      <Color x:Key="Rune.Color.DangerSoftHover">#FF541019</Color>
+      <SolidColorBrush x:Key="Rune.Brush.DangerSoftHover" Color="#FF541019" />
+      <Color x:Key="Rune.Color.DangerBorder">#FFE8606F</Color>
+      <SolidColorBrush x:Key="Rune.Brush.DangerBorder" Color="#FFE8606F" />
+      <Color x:Key="Rune.Color.SuccessText">#FF7FE5A3</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SuccessText" Color="#FF7FE5A3" />
+      <Color x:Key="Rune.Color.SuccessSoft">#FF0A2E17</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SuccessSoft" Color="#FF0A2E17" />
+      <Color x:Key="Rune.Color.SuccessBorder">#FF3FB26B</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SuccessBorder" Color="#FF3FB26B" />
+      <Color x:Key="Rune.Color.Success">#FF62DA8F</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Success" Color="#FF62DA8F" />
+      <Color x:Key="Rune.Color.SuccessHover">#FF86E7A9</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SuccessHover" Color="#FF86E7A9" />
+      <Color x:Key="Rune.Color.SuccessContrast">#FF000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SuccessContrast" Color="#FF000000" />
+      <Color x:Key="Rune.Color.SuccessSoftHover">#FF0F4021</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SuccessSoftHover" Color="#FF0F4021" />
+      <Color x:Key="Rune.Color.WarningText">#FFFFD970</Color>
+      <SolidColorBrush x:Key="Rune.Brush.WarningText" Color="#FFFFD970" />
+      <Color x:Key="Rune.Color.WarningSoft">#FF332400</Color>
+      <SolidColorBrush x:Key="Rune.Brush.WarningSoft" Color="#FF332400" />
+      <Color x:Key="Rune.Color.WarningBorder">#FFCC9C1F</Color>
+      <SolidColorBrush x:Key="Rune.Brush.WarningBorder" Color="#FFCC9C1F" />
+      <Color x:Key="Rune.Color.Warning">#FFFFD25F</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Warning" Color="#FFFFD25F" />
+      <Color x:Key="Rune.Color.WarningHover">#FFFFDF8A</Color>
+      <SolidColorBrush x:Key="Rune.Brush.WarningHover" Color="#FFFFDF8A" />
+      <Color x:Key="Rune.Color.WarningContrast">#FF000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.WarningContrast" Color="#FF000000" />
+      <Color x:Key="Rune.Color.WarningSoftHover">#FF473300</Color>
+      <SolidColorBrush x:Key="Rune.Brush.WarningSoftHover" Color="#FF473300" />
+      <Color x:Key="Rune.Color.InfoText">#FF8FD0FF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InfoText" Color="#FF8FD0FF" />
+      <Color x:Key="Rune.Color.InfoSoft">#FF06223D</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InfoSoft" Color="#FF06223D" />
+      <Color x:Key="Rune.Color.InfoBorder">#FF4194DB</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InfoBorder" Color="#FF4194DB" />
+      <Color x:Key="Rune.Color.Info">#FF7CC4FF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Info" Color="#FF7CC4FF" />
+      <Color x:Key="Rune.Color.InfoHover">#FFA1D4FF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InfoHover" Color="#FFA1D4FF" />
+      <Color x:Key="Rune.Color.InfoContrast">#FF000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InfoContrast" Color="#FF000000" />
+      <Color x:Key="Rune.Color.InfoSoftHover">#FF0B3257</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InfoSoftHover" Color="#FF0B3257" />
+      <Color x:Key="Rune.Color.InverseSurface">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InverseSurface" Color="#FFFFFFFF" />
+      <Color x:Key="Rune.Color.InverseText">#FF000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InverseText" Color="#FF000000" />
+      <Color x:Key="Rune.Color.FocusRing">#FFFFD60A</Color>
+      <SolidColorBrush x:Key="Rune.Brush.FocusRing" Color="#FFFFD60A" />
+      <Color x:Key="Rune.Color.Overlay">#BF000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Overlay" Color="#BF000000" />
       <Color x:Key="Rune.Color.Scrim">#8C000000</Color>
       <SolidColorBrush x:Key="Rune.Brush.Scrim" Color="#8C000000" />
       <Color x:Key="Rune.Color.ScrimStrong">#DB000000</Color>
       <SolidColorBrush x:Key="Rune.Brush.ScrimStrong" Color="#DB000000" />
       <Color x:Key="Rune.Color.OnScrim">#FFFFFFFF</Color>
       <SolidColorBrush x:Key="Rune.Brush.OnScrim" Color="#FFFFFFFF" />
-      <Color x:Key="Rune.Color.Selection">#FFC2E5FF</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Selection" Color="#FFC2E5FF" />
-      <Color x:Key="Rune.Color.Highlight">#FFFFEE9C</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Highlight" Color="#FFFFEE9C" />
-      <Color x:Key="Rune.Color.SurfaceTranslucent">#CCF7FDFF</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SurfaceTranslucent" Color="#CCF7FDFF" />
-      <Color x:Key="Rune.Color.CodeKeyword">#FF0069C2</Color>
-      <SolidColorBrush x:Key="Rune.Brush.CodeKeyword" Color="#FF0069C2" />
-      <Color x:Key="Rune.Color.CodeString">#FF147A51</Color>
-      <SolidColorBrush x:Key="Rune.Brush.CodeString" Color="#FF147A51" />
-      <Color x:Key="Rune.Color.CodeNumber">#FFBF4100</Color>
-      <SolidColorBrush x:Key="Rune.Brush.CodeNumber" Color="#FFBF4100" />
-      <Color x:Key="Rune.Color.CodeFunction">#FF6550B9</Color>
-      <SolidColorBrush x:Key="Rune.Brush.CodeFunction" Color="#FF6550B9" />
-      <Color x:Key="Rune.Color.CodeType">#FF007590</Color>
-      <SolidColorBrush x:Key="Rune.Brush.CodeType" Color="#FF007590" />
-      <Color x:Key="Rune.Color.CodeComment">#FF546773</Color>
-      <SolidColorBrush x:Key="Rune.Brush.CodeComment" Color="#FF546773" />
-      <Color x:Key="Rune.Color.CodeTag">#FFCB1D63</Color>
-      <SolidColorBrush x:Key="Rune.Brush.CodeTag" Color="#FFCB1D63" />
-      <Color x:Key="Rune.Color.CodeAttribute">#FF815E46</Color>
-      <SolidColorBrush x:Key="Rune.Brush.CodeAttribute" Color="#FF815E46" />
-      <Color x:Key="Rune.Color.CodeInserted">#FFE6F6EB</Color>
-      <SolidColorBrush x:Key="Rune.Brush.CodeInserted" Color="#FFE6F6EB" />
-      <Color x:Key="Rune.Color.CodeDeleted">#FFFEEBEC</Color>
-      <SolidColorBrush x:Key="Rune.Brush.CodeDeleted" Color="#FFFEEBEC" />
-      <Color x:Key="Rune.Color.Chart1">#FF0B5CAD</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Chart1" Color="#FF0B5CAD" />
-      <Color x:Key="Rune.Color.Chart2">#FF0797B9</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Chart2" Color="#FF0797B9" />
-      <Color x:Key="Rune.Color.Chart3">#FF3358D4</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Chart3" Color="#FF3358D4" />
-      <Color x:Key="Rune.Color.Chart4">#FF0D9B8A</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Chart4" Color="#FF0D9B8A" />
-      <Color x:Key="Rune.Color.Chart5">#FF309DBA</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Chart5" Color="#FF309DBA" />
-      <Color x:Key="Rune.Color.Chart6">#FF654DC4</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Chart6" Color="#FF654DC4" />
-      <Color x:Key="Rune.Color.Chart7">#FF26997B</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Chart7" Color="#FF26997B" />
-      <Color x:Key="Rune.Color.Chart8">#FFC68400</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Chart8" Color="#FFC68400" />
-      <Color x:Key="Rune.Color.InverseSurfaceHover">#FF2E3E48</Color>
-      <SolidColorBrush x:Key="Rune.Brush.InverseSurfaceHover" Color="#FF2E3E48" />
+      <Color x:Key="Rune.Color.Selection">#FF264AA0</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Selection" Color="#FF264AA0" />
+      <Color x:Key="Rune.Color.Highlight">#FF5C4500</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Highlight" Color="#FF5C4500" />
+      <Color x:Key="Rune.Color.SurfaceTranslucent">#EB000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SurfaceTranslucent" Color="#EB000000" />
+      <Color x:Key="Rune.Color.CodeKeyword">#FFA8C3FF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.CodeKeyword" Color="#FFA8C3FF" />
+      <Color x:Key="Rune.Color.CodeString">#FF7FE5A3</Color>
+      <SolidColorBrush x:Key="Rune.Brush.CodeString" Color="#FF7FE5A3" />
+      <Color x:Key="Rune.Color.CodeNumber">#FFFFB27A</Color>
+      <SolidColorBrush x:Key="Rune.Brush.CodeNumber" Color="#FFFFB27A" />
+      <Color x:Key="Rune.Color.CodeFunction">#FFD4BCFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.CodeFunction" Color="#FFD4BCFF" />
+      <Color x:Key="Rune.Color.CodeType">#FF80E2F2</Color>
+      <SolidColorBrush x:Key="Rune.Brush.CodeType" Color="#FF80E2F2" />
+      <Color x:Key="Rune.Color.CodeComment">#FFD1D1D1</Color>
+      <SolidColorBrush x:Key="Rune.Brush.CodeComment" Color="#FFD1D1D1" />
+      <Color x:Key="Rune.Color.CodeTag">#FFFFA3C4</Color>
+      <SolidColorBrush x:Key="Rune.Brush.CodeTag" Color="#FFFFA3C4" />
+      <Color x:Key="Rune.Color.CodeAttribute">#FFF2CC9E</Color>
+      <SolidColorBrush x:Key="Rune.Brush.CodeAttribute" Color="#FFF2CC9E" />
+      <Color x:Key="Rune.Color.CodeInserted">#FF0D3319</Color>
+      <SolidColorBrush x:Key="Rune.Brush.CodeInserted" Color="#FF0D3319" />
+      <Color x:Key="Rune.Color.CodeDeleted">#FF4A0F18</Color>
+      <SolidColorBrush x:Key="Rune.Brush.CodeDeleted" Color="#FF4A0F18" />
+      <Color x:Key="Rune.Color.Chart1">#FF9EBCFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Chart1" Color="#FF9EBCFF" />
+      <Color x:Key="Rune.Color.Chart2">#FF4FE0C9</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Chart2" Color="#FF4FE0C9" />
+      <Color x:Key="Rune.Color.Chart3">#FFFFA066</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Chart3" Color="#FFFFA066" />
+      <Color x:Key="Rune.Color.Chart4">#FFFF85B8</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Chart4" Color="#FFFF85B8" />
+      <Color x:Key="Rune.Color.Chart5">#FFC4ABFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Chart5" Color="#FFC4ABFF" />
+      <Color x:Key="Rune.Color.Chart6">#FF5AD8F2</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Chart6" Color="#FF5AD8F2" />
+      <Color x:Key="Rune.Color.Chart7">#FF8FE293</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Chart7" Color="#FF8FE293" />
+      <Color x:Key="Rune.Color.Chart8">#FFFFD25F</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Chart8" Color="#FFFFD25F" />
+      <Color x:Key="Rune.Color.InverseSurfaceHover">#FFCECECE</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InverseSurfaceHover" Color="#FFCECECE" />
 
       <!-- shadows -->
       <BoxShadows x:Key="Rune.Shadow.None">none</BoxShadows>
-      <BoxShadows x:Key="Rune.Shadow.Xs">0 1 1 0 #0A0C2A54, 0 2 1 -1 #0D0C2A54, 0 1 3 0 #0D0C2A54</BoxShadows>
-      <BoxShadows x:Key="Rune.Shadow.Sm">0 2 3 -2 #0F0C2A54, 0 3 12 -4 #1A0C2A54, 0 4 16 -8 #1A0C2A54</BoxShadows>
-      <BoxShadows x:Key="Rune.Shadow.Md">0 8 40 0 #0D0C2A54, 0 12 32 -16 #140C2A54</BoxShadows>
-      <BoxShadows x:Key="Rune.Shadow.Lg">0 12 60 0 #260C2A54, 0 12 32 -16 #1F0C2A54</BoxShadows>
-      <BoxShadows x:Key="Rune.Shadow.Xl">0 12 60 0 #260C2A54, 0 16 64 0 #0A0C2A54, 0 16 36 -20 #330C2A54</BoxShadows>
+      <BoxShadows x:Key="Rune.Shadow.Xs">0 0 0 1 #66FFFFFF</BoxShadows>
+      <BoxShadows x:Key="Rune.Shadow.Sm">0 0 0 1 #80FFFFFF</BoxShadows>
+      <BoxShadows x:Key="Rune.Shadow.Md">0 0 0 1 #99FFFFFF</BoxShadows>
+      <BoxShadows x:Key="Rune.Shadow.Lg">0 0 0 1 #99FFFFFF</BoxShadows>
+      <BoxShadows x:Key="Rune.Shadow.Xl">0 0 0 1 #B3FFFFFF</BoxShadows>
 
       <!-- fonts -->
       <FontFamily x:Key="Rune.Font.Sans">Segoe UI, PingFang SC, Hiragino Sans GB, Microsoft YaHei UI, Microsoft YaHei, Noto Sans SC, Source Han Sans SC</FontFamily>
@@ -1368,11 +1369,11 @@
 
       <!-- radii -->
       <x:Double x:Key="Rune.Radius.None">0</x:Double>
-      <x:Double x:Key="Rune.Radius.Xs">0.2</x:Double>
-      <x:Double x:Key="Rune.Radius.Sm">0.35</x:Double>
-      <x:Double x:Key="Rune.Radius.Md">0.6</x:Double>
-      <x:Double x:Key="Rune.Radius.Lg">0.9</x:Double>
-      <x:Double x:Key="Rune.Radius.Xl">1.25</x:Double>
+      <x:Double x:Key="Rune.Radius.Xs">0.15</x:Double>
+      <x:Double x:Key="Rune.Radius.Sm">0.25</x:Double>
+      <x:Double x:Key="Rune.Radius.Md">0.4</x:Double>
+      <x:Double x:Key="Rune.Radius.Lg">0.7</x:Double>
+      <x:Double x:Key="Rune.Radius.Xl">1</x:Double>
       <x:Double x:Key="Rune.Radius.Full">9999</x:Double>
 
       <!-- 色调调色板（DESIGN §4）：组件的样式档位引用它的字段 -->
@@ -1386,14 +1387,14 @@
     <!-- 森林（forest，亮色） -->
     <ResourceDictionary x:Key="{x:Static rune:RuneThemeVariants.Forest}">
       <!-- colors -->
-      <Color x:Key="Rune.Color.Background">#FFF9FEF9</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Background" Color="#FFF9FEF9" />
-      <Color x:Key="Rune.Color.Surface">#FFF9FEF9</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Surface" Color="#FFF9FEF9" />
-      <Color x:Key="Rune.Color.SurfaceMuted">#FFF6FBF6</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SurfaceMuted" Color="#FFF6FBF6" />
-      <Color x:Key="Rune.Color.SurfaceRaised">#FFF9FEF9</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SurfaceRaised" Color="#FFF9FEF9" />
+      <Color x:Key="Rune.Color.Background">#FFF6FBF6</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Background" Color="#FFF6FBF6" />
+      <Color x:Key="Rune.Color.Surface">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Surface" Color="#FFFFFFFF" />
+      <Color x:Key="Rune.Color.SurfaceMuted">#FFF1F7F1</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SurfaceMuted" Color="#FFF1F7F1" />
+      <Color x:Key="Rune.Color.SurfaceRaised">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SurfaceRaised" Color="#FFFFFFFF" />
       <Color x:Key="Rune.Color.Fill">#FFEBF3EB</Color>
       <SolidColorBrush x:Key="Rune.Brush.Fill" Color="#FFEBF3EB" />
       <Color x:Key="Rune.Color.FillHover">#FFE3EBE3</Color>
@@ -1404,8 +1405,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Text" Color="#FF182318" />
       <Color x:Key="Rune.Color.TextMuted">#FF5B685B</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextMuted" Color="#FF5B685B" />
-      <Color x:Key="Rune.Color.TextPlaceholder">#FF7A887A</Color>
-      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FF7A887A" />
+      <Color x:Key="Rune.Color.TextPlaceholder">#FF5B685B</Color>
+      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FF5B685B" />
       <Color x:Key="Rune.Color.TextDisabled">#FFB6BEB6</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextDisabled" Color="#FFB6BEB6" />
       <Color x:Key="Rune.Color.BorderMuted">#FFD4DCD4</Color>
@@ -1502,8 +1503,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Selection" Color="#FFC9E8CA" />
       <Color x:Key="Rune.Color.Highlight">#FFFFEE9C</Color>
       <SolidColorBrush x:Key="Rune.Brush.Highlight" Color="#FFFFEE9C" />
-      <Color x:Key="Rune.Color.SurfaceTranslucent">#CCF9FEF9</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SurfaceTranslucent" Color="#CCF9FEF9" />
+      <Color x:Key="Rune.Color.SurfaceTranslucent">#CCF6FBF6</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SurfaceTranslucent" Color="#CCF6FBF6" />
       <Color x:Key="Rune.Color.CodeKeyword">#FF237835</Color>
       <SolidColorBrush x:Key="Rune.Brush.CodeKeyword" Color="#FF237835" />
       <Color x:Key="Rune.Color.CodeString">#FF147A51</Color>
@@ -1528,10 +1529,10 @@
       <SolidColorBrush x:Key="Rune.Brush.Chart1" Color="#FF2B7A3B" />
       <Color x:Key="Rune.Color.Chart2">#FF26997B</Color>
       <SolidColorBrush x:Key="Rune.Brush.Chart2" Color="#FF26997B" />
-      <Color x:Key="Rune.Color.Chart3">#FF6FA000</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Chart3" Color="#FF6FA000" />
-      <Color x:Key="Rune.Color.Chart4">#FFC68400</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Chart4" Color="#FFC68400" />
+      <Color x:Key="Rune.Color.Chart3">#FF6E9E00</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Chart3" Color="#FF6E9E00" />
+      <Color x:Key="Rune.Color.Chart4">#FFC48300</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Chart4" Color="#FFC48300" />
       <Color x:Key="Rune.Color.Chart5">#FFA07553</Color>
       <SolidColorBrush x:Key="Rune.Brush.Chart5" Color="#FFA07553" />
       <Color x:Key="Rune.Color.Chart6">#FF0D9B8A</Color>
@@ -1577,14 +1578,14 @@
     <!-- 柠檬（lemon，亮色） -->
     <ResourceDictionary x:Key="{x:Static rune:RuneThemeVariants.Lemon}">
       <!-- colors -->
-      <Color x:Key="Rune.Color.Background">#FFFEFDF2</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Background" Color="#FFFEFDF2" />
-      <Color x:Key="Rune.Color.Surface">#FFFEFDF2</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Surface" Color="#FFFEFDF2" />
-      <Color x:Key="Rune.Color.SurfaceMuted">#FFFBFAEF</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SurfaceMuted" Color="#FFFBFAEF" />
-      <Color x:Key="Rune.Color.SurfaceRaised">#FFFEFDF2</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SurfaceRaised" Color="#FFFEFDF2" />
+      <Color x:Key="Rune.Color.Background">#FFFBFAEF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Background" Color="#FFFBFAEF" />
+      <Color x:Key="Rune.Color.Surface">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Surface" Color="#FFFFFFFF" />
+      <Color x:Key="Rune.Color.SurfaceMuted">#FFF7F5E9</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SurfaceMuted" Color="#FFF7F5E9" />
+      <Color x:Key="Rune.Color.SurfaceRaised">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SurfaceRaised" Color="#FFFFFFFF" />
       <Color x:Key="Rune.Color.Fill">#FFF3F1E2</Color>
       <SolidColorBrush x:Key="Rune.Brush.Fill" Color="#FFF3F1E2" />
       <Color x:Key="Rune.Color.FillHover">#FFEBE9DA</Color>
@@ -1595,8 +1596,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Text" Color="#FF232010" />
       <Color x:Key="Rune.Color.TextMuted">#FF676552</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextMuted" Color="#FF676552" />
-      <Color x:Key="Rune.Color.TextPlaceholder">#FF878471</Color>
-      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FF878471" />
+      <Color x:Key="Rune.Color.TextPlaceholder">#FF676552</Color>
+      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FF676552" />
       <Color x:Key="Rune.Color.TextDisabled">#FFBEBCAE</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextDisabled" Color="#FFBEBCAE" />
       <Color x:Key="Rune.Color.BorderMuted">#FFDDDACC</Color>
@@ -1693,8 +1694,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Selection" Color="#FFFFE770" />
       <Color x:Key="Rune.Color.Highlight">#FFE2F0BD</Color>
       <SolidColorBrush x:Key="Rune.Brush.Highlight" Color="#FFE2F0BD" />
-      <Color x:Key="Rune.Color.SurfaceTranslucent">#CCFEFDF2</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SurfaceTranslucent" Color="#CCFEFDF2" />
+      <Color x:Key="Rune.Color.SurfaceTranslucent">#CCFBFAEF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SurfaceTranslucent" Color="#CCFBFAEF" />
       <Color x:Key="Rune.Color.CodeKeyword">#FF956300</Color>
       <SolidColorBrush x:Key="Rune.Brush.CodeKeyword" Color="#FF956300" />
       <Color x:Key="Rune.Color.CodeString">#FF147A51</Color>
@@ -1717,8 +1718,8 @@
       <SolidColorBrush x:Key="Rune.Brush.CodeDeleted" Color="#FFFEEBEC" />
       <Color x:Key="Rune.Color.Chart1">#FF9F8700</Color>
       <SolidColorBrush x:Key="Rune.Brush.Chart1" Color="#FF9F8700" />
-      <Color x:Key="Rune.Color.Chart2">#FF6FA000</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Chart2" Color="#FF6FA000" />
+      <Color x:Key="Rune.Color.Chart2">#FF6E9E00</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Chart2" Color="#FF6E9E00" />
       <Color x:Key="Rune.Color.Chart3">#FF3E9B4F</Color>
       <SolidColorBrush x:Key="Rune.Brush.Chart3" Color="#FF3E9B4F" />
       <Color x:Key="Rune.Color.Chart4">#FFEF5F00</Color>
@@ -1729,8 +1730,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Chart6" Color="#FFCF3897" />
       <Color x:Key="Rune.Color.Chart7">#FF0D9B8A</Color>
       <SolidColorBrush x:Key="Rune.Brush.Chart7" Color="#FF0D9B8A" />
-      <Color x:Key="Rune.Color.Chart8">#FFC68400</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Chart8" Color="#FFC68400" />
+      <Color x:Key="Rune.Color.Chart8">#FFC48300</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Chart8" Color="#FFC48300" />
       <Color x:Key="Rune.Color.InverseSurfaceHover">#FF3F3C2C</Color>
       <SolidColorBrush x:Key="Rune.Brush.InverseSurfaceHover" Color="#FF3F3C2C" />
 
@@ -1768,14 +1769,14 @@
     <!-- 樱花（sakura，亮色） -->
     <ResourceDictionary x:Key="{x:Static rune:RuneThemeVariants.Sakura}">
       <!-- colors -->
-      <Color x:Key="Rune.Color.Background">#FFFFFAFC</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Background" Color="#FFFFFAFC" />
-      <Color x:Key="Rune.Color.Surface">#FFFFFAFC</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Surface" Color="#FFFFFAFC" />
-      <Color x:Key="Rune.Color.SurfaceMuted">#FFFEF7F9</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SurfaceMuted" Color="#FFFEF7F9" />
-      <Color x:Key="Rune.Color.SurfaceRaised">#FFFFFAFC</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SurfaceRaised" Color="#FFFFFAFC" />
+      <Color x:Key="Rune.Color.Background">#FFFEF7F9</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Background" Color="#FFFEF7F9" />
+      <Color x:Key="Rune.Color.Surface">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Surface" Color="#FFFFFFFF" />
+      <Color x:Key="Rune.Color.SurfaceMuted">#FFFCF2F5</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SurfaceMuted" Color="#FFFCF2F5" />
+      <Color x:Key="Rune.Color.SurfaceRaised">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SurfaceRaised" Color="#FFFFFFFF" />
       <Color x:Key="Rune.Color.Fill">#FFF9EDF1</Color>
       <SolidColorBrush x:Key="Rune.Brush.Fill" Color="#FFF9EDF1" />
       <Color x:Key="Rune.Color.FillHover">#FFF1E5E9</Color>
@@ -1786,8 +1787,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Text" Color="#FF281B20" />
       <Color x:Key="Rune.Color.TextMuted">#FF6F5F64</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextMuted" Color="#FF6F5F64" />
-      <Color x:Key="Rune.Color.TextPlaceholder">#FF8F7E84</Color>
-      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FF8F7E84" />
+      <Color x:Key="Rune.Color.TextPlaceholder">#FF6F5F64</Color>
+      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FF6F5F64" />
       <Color x:Key="Rune.Color.TextDisabled">#FFC4B8BC</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextDisabled" Color="#FFC4B8BC" />
       <Color x:Key="Rune.Color.BorderMuted">#FFE2D6DA</Color>
@@ -1884,8 +1885,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Selection" Color="#FFF6CEE7" />
       <Color x:Key="Rune.Color.Highlight">#FFFFEE9C</Color>
       <SolidColorBrush x:Key="Rune.Brush.Highlight" Color="#FFFFEE9C" />
-      <Color x:Key="Rune.Color.SurfaceTranslucent">#CCFFFAFC</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SurfaceTranslucent" Color="#CCFFFAFC" />
+      <Color x:Key="Rune.Color.SurfaceTranslucent">#CCFEF7F9</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SurfaceTranslucent" Color="#CCFEF7F9" />
       <Color x:Key="Rune.Color.CodeKeyword">#FFB91E82</Color>
       <SolidColorBrush x:Key="Rune.Brush.CodeKeyword" Color="#FFB91E82" />
       <Color x:Key="Rune.Color.CodeString">#FF147A51</Color>
@@ -1918,8 +1919,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Chart5" Color="#FF0D9B8A" />
       <Color x:Key="Rune.Color.Chart6">#FFEF5F00</Color>
       <SolidColorBrush x:Key="Rune.Brush.Chart6" Color="#FFEF5F00" />
-      <Color x:Key="Rune.Color.Chart7">#FF309DBA</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Chart7" Color="#FF309DBA" />
+      <Color x:Key="Rune.Color.Chart7">#FF309BB8</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Chart7" Color="#FF309BB8" />
       <Color x:Key="Rune.Color.Chart8">#FF3E9B4F</Color>
       <SolidColorBrush x:Key="Rune.Brush.Chart8" Color="#FF3E9B4F" />
       <Color x:Key="Rune.Color.InverseSurfaceHover">#FF44373C</Color>
@@ -1959,14 +1960,14 @@
     <!-- 喜庆（festive，亮色） -->
     <ResourceDictionary x:Key="{x:Static rune:RuneThemeVariants.Festive}">
       <!-- colors -->
-      <Color x:Key="Rune.Color.Background">#FFFFFAF6</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Background" Color="#FFFFFAF6" />
-      <Color x:Key="Rune.Color.Surface">#FFFFFAF6</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Surface" Color="#FFFFFAF6" />
-      <Color x:Key="Rune.Color.SurfaceMuted">#FFFFF7F3</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SurfaceMuted" Color="#FFFFF7F3" />
-      <Color x:Key="Rune.Color.SurfaceRaised">#FFFFFAF6</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SurfaceRaised" Color="#FFFFFAF6" />
+      <Color x:Key="Rune.Color.Background">#FFFFF7F3</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Background" Color="#FFFFF7F3" />
+      <Color x:Key="Rune.Color.Surface">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Surface" Color="#FFFFFFFF" />
+      <Color x:Key="Rune.Color.SurfaceMuted">#FFFEF2ED</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SurfaceMuted" Color="#FFFEF2ED" />
+      <Color x:Key="Rune.Color.SurfaceRaised">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SurfaceRaised" Color="#FFFFFFFF" />
       <Color x:Key="Rune.Color.Fill">#FFFDEDE6</Color>
       <SolidColorBrush x:Key="Rune.Brush.Fill" Color="#FFFDEDE6" />
       <Color x:Key="Rune.Color.FillHover">#FFF5E5DE</Color>
@@ -1977,8 +1978,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Text" Color="#FF2C1B13" />
       <Color x:Key="Rune.Color.TextMuted">#FF735F56</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextMuted" Color="#FF735F56" />
-      <Color x:Key="Rune.Color.TextPlaceholder">#FF947E75</Color>
-      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FF947E75" />
+      <Color x:Key="Rune.Color.TextPlaceholder">#FF735F56</Color>
+      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FF735F56" />
       <Color x:Key="Rune.Color.TextDisabled">#FFC7B8B1</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextDisabled" Color="#FFC7B8B1" />
       <Color x:Key="Rune.Color.BorderMuted">#FFE6D6CF</Color>
@@ -2075,8 +2076,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Selection" Color="#FFF8E0A8" />
       <Color x:Key="Rune.Color.Highlight">#FFFBE6A2</Color>
       <SolidColorBrush x:Key="Rune.Brush.Highlight" Color="#FFFBE6A2" />
-      <Color x:Key="Rune.Color.SurfaceTranslucent">#CCFFFAF6</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SurfaceTranslucent" Color="#CCFFFAF6" />
+      <Color x:Key="Rune.Color.SurfaceTranslucent">#CCFFF7F3</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SurfaceTranslucent" Color="#CCFFF7F3" />
       <Color x:Key="Rune.Color.CodeKeyword">#FFB3261A</Color>
       <SolidColorBrush x:Key="Rune.Brush.CodeKeyword" Color="#FFB3261A" />
       <Color x:Key="Rune.Color.CodeString">#FF147A51</Color>
@@ -2168,8 +2169,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Text" Color="#FFEDE9FF" />
       <Color x:Key="Rune.Color.TextMuted">#FFB3AFD2</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextMuted" Color="#FFB3AFD2" />
-      <Color x:Key="Rune.Color.TextPlaceholder">#FF7A7697</Color>
-      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FF7A7697" />
+      <Color x:Key="Rune.Color.TextPlaceholder">#FFB3AFD2</Color>
+      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FFB3AFD2" />
       <Color x:Key="Rune.Color.TextDisabled">#FF5F5B80</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextDisabled" Color="#FF5F5B80" />
       <Color x:Key="Rune.Color.BorderMuted">#FF393457</Color>
@@ -2359,8 +2360,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Text" Color="#FFF0F6FF" />
       <Color x:Key="Rune.Color.TextMuted">#FFB4C7E6</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextMuted" Color="#FFB4C7E6" />
-      <Color x:Key="Rune.Color.TextPlaceholder">#FF7F96BD</Color>
-      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FF7F96BD" />
+      <Color x:Key="Rune.Color.TextPlaceholder">#FFB4C7E6</Color>
+      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FFB4C7E6" />
       <Color x:Key="Rune.Color.TextDisabled">#FF5C749F</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextDisabled" Color="#FF5C749F" />
       <Color x:Key="Rune.Color.BorderMuted">#FF1F3B73</Color>
@@ -2532,14 +2533,14 @@
     <!-- 薰衣草（lavender，亮色） -->
     <ResourceDictionary x:Key="{x:Static rune:RuneThemeVariants.Lavender}">
       <!-- colors -->
-      <Color x:Key="Rune.Color.Background">#FFFBF9FF</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Background" Color="#FFFBF9FF" />
-      <Color x:Key="Rune.Color.Surface">#FFFBF9FF</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Surface" Color="#FFFBF9FF" />
-      <Color x:Key="Rune.Color.SurfaceMuted">#FFF7F4FC</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SurfaceMuted" Color="#FFF7F4FC" />
-      <Color x:Key="Rune.Color.SurfaceRaised">#FFFBF9FF</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SurfaceRaised" Color="#FFFBF9FF" />
+      <Color x:Key="Rune.Color.Background">#FFF7F4FC</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Background" Color="#FFF7F4FC" />
+      <Color x:Key="Rune.Color.Surface">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Surface" Color="#FFFFFFFF" />
+      <Color x:Key="Rune.Color.SurfaceMuted">#FFF3F0FA</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SurfaceMuted" Color="#FFF3F0FA" />
+      <Color x:Key="Rune.Color.SurfaceRaised">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SurfaceRaised" Color="#FFFFFFFF" />
       <Color x:Key="Rune.Color.Fill">#FFEFEBF7</Color>
       <SolidColorBrush x:Key="Rune.Brush.Fill" Color="#FFEFEBF7" />
       <Color x:Key="Rune.Color.FillHover">#FFE8E3F1</Color>
@@ -2550,8 +2551,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Text" Color="#FF211B30" />
       <Color x:Key="Rune.Color.TextMuted">#FF5F5770</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextMuted" Color="#FF5F5770" />
-      <Color x:Key="Rune.Color.TextPlaceholder">#FF7C748D</Color>
-      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FF7C748D" />
+      <Color x:Key="Rune.Color.TextPlaceholder">#FF5F5770</Color>
+      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FF5F5770" />
       <Color x:Key="Rune.Color.TextDisabled">#FFBBB5C8</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextDisabled" Color="#FFBBB5C8" />
       <Color x:Key="Rune.Color.BorderMuted">#FFDCD6E7</Color>
@@ -2648,8 +2649,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Selection" Color="#FFE1D9FF" />
       <Color x:Key="Rune.Color.Highlight">#FFFFEE9C</Color>
       <SolidColorBrush x:Key="Rune.Brush.Highlight" Color="#FFFFEE9C" />
-      <Color x:Key="Rune.Color.SurfaceTranslucent">#CCFBF9FF</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SurfaceTranslucent" Color="#CCFBF9FF" />
+      <Color x:Key="Rune.Color.SurfaceTranslucent">#CCF7F4FC</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SurfaceTranslucent" Color="#CCF7F4FC" />
       <Color x:Key="Rune.Color.CodeKeyword">#FF5F49BD</Color>
       <SolidColorBrush x:Key="Rune.Brush.CodeKeyword" Color="#FF5F49BD" />
       <Color x:Key="Rune.Color.CodeString">#FF147A51</Color>
@@ -2686,8 +2687,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Chart7" Color="#FFE5484D" />
       <Color x:Key="Rune.Color.Chart8">#FF8E4EC6</Color>
       <SolidColorBrush x:Key="Rune.Brush.Chart8" Color="#FF8E4EC6" />
-      <Color x:Key="Rune.Color.InverseSurfaceHover">#FF3D374B</Color>
-      <SolidColorBrush x:Key="Rune.Brush.InverseSurfaceHover" Color="#FF3D374B" />
+      <Color x:Key="Rune.Color.InverseSurfaceHover">#FF3C374B</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InverseSurfaceHover" Color="#FF3C374B" />
 
       <!-- shadows -->
       <BoxShadows x:Key="Rune.Shadow.None">none</BoxShadows>
@@ -2741,8 +2742,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Text" Color="#FFF5EDE4" />
       <Color x:Key="Rune.Color.TextMuted">#FFBFB3A6</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextMuted" Color="#FFBFB3A6" />
-      <Color x:Key="Rune.Color.TextPlaceholder">#FF887C70</Color>
-      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FF887C70" />
+      <Color x:Key="Rune.Color.TextPlaceholder">#FFBFB3A6</Color>
+      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FFBFB3A6" />
       <Color x:Key="Rune.Color.TextDisabled">#FF665C52</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextDisabled" Color="#FF665C52" />
       <Color x:Key="Rune.Color.BorderMuted">#FF3F372F</Color>
@@ -2914,12 +2915,12 @@
     <!-- 墨白（mono，亮色） -->
     <ResourceDictionary x:Key="{x:Static rune:RuneThemeVariants.Mono}">
       <!-- colors -->
-      <Color x:Key="Rune.Color.Background">#FFFFFFFF</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Background" Color="#FFFFFFFF" />
+      <Color x:Key="Rune.Color.Background">#FFFAFAFA</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Background" Color="#FFFAFAFA" />
       <Color x:Key="Rune.Color.Surface">#FFFFFFFF</Color>
       <SolidColorBrush x:Key="Rune.Brush.Surface" Color="#FFFFFFFF" />
-      <Color x:Key="Rune.Color.SurfaceMuted">#FFFAFAFA</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SurfaceMuted" Color="#FFFAFAFA" />
+      <Color x:Key="Rune.Color.SurfaceMuted">#FFF7F7F7</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SurfaceMuted" Color="#FFF7F7F7" />
       <Color x:Key="Rune.Color.SurfaceRaised">#FFFFFFFF</Color>
       <SolidColorBrush x:Key="Rune.Brush.SurfaceRaised" Color="#FFFFFFFF" />
       <Color x:Key="Rune.Color.Fill">#FFF4F4F4</Color>
@@ -2932,8 +2933,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Text" Color="#FF171717" />
       <Color x:Key="Rune.Color.TextMuted">#FF5C5C5C</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextMuted" Color="#FF5C5C5C" />
-      <Color x:Key="Rune.Color.TextPlaceholder">#FF777777</Color>
-      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FF777777" />
+      <Color x:Key="Rune.Color.TextPlaceholder">#FF5C5C5C</Color>
+      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FF5C5C5C" />
       <Color x:Key="Rune.Color.TextDisabled">#FFB8B8B8</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextDisabled" Color="#FFB8B8B8" />
       <Color x:Key="Rune.Color.BorderMuted">#FFE3E3E3</Color>
@@ -3030,8 +3031,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Selection" Color="#FFD4D4D4" />
       <Color x:Key="Rune.Color.Highlight">#FFFFEE9C</Color>
       <SolidColorBrush x:Key="Rune.Brush.Highlight" Color="#FFFFEE9C" />
-      <Color x:Key="Rune.Color.SurfaceTranslucent">#CCFFFFFF</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SurfaceTranslucent" Color="#CCFFFFFF" />
+      <Color x:Key="Rune.Color.SurfaceTranslucent">#CCFAFAFA</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SurfaceTranslucent" Color="#CCFAFAFA" />
       <Color x:Key="Rune.Color.CodeKeyword">#FF171717</Color>
       <SolidColorBrush x:Key="Rune.Brush.CodeKeyword" Color="#FF171717" />
       <Color x:Key="Rune.Color.CodeString">#FF147A51</Color>
@@ -3068,8 +3069,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Chart7" Color="#FF0797B9" />
       <Color x:Key="Rune.Color.Chart8">#FF777777</Color>
       <SolidColorBrush x:Key="Rune.Brush.Chart8" Color="#FF777777" />
-      <Color x:Key="Rune.Color.InverseSurfaceHover">#FF343434</Color>
-      <SolidColorBrush x:Key="Rune.Brush.InverseSurfaceHover" Color="#FF343434" />
+      <Color x:Key="Rune.Color.InverseSurfaceHover">#FF333333</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InverseSurfaceHover" Color="#FF333333" />
 
       <!-- shadows -->
       <BoxShadows x:Key="Rune.Shadow.None">none</BoxShadows>
@@ -3105,14 +3106,14 @@
     <!-- 青瓷（celadon，亮色） -->
     <ResourceDictionary x:Key="{x:Static rune:RuneThemeVariants.Celadon}">
       <!-- colors -->
-      <Color x:Key="Rune.Color.Background">#FFF5F9F7</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Background" Color="#FFF5F9F7" />
-      <Color x:Key="Rune.Color.Surface">#FFF5F9F7</Color>
-      <SolidColorBrush x:Key="Rune.Brush.Surface" Color="#FFF5F9F7" />
-      <Color x:Key="Rune.Color.SurfaceMuted">#FFF0F6F3</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SurfaceMuted" Color="#FFF0F6F3" />
-      <Color x:Key="Rune.Color.SurfaceRaised">#FFF5F9F7</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SurfaceRaised" Color="#FFF5F9F7" />
+      <Color x:Key="Rune.Color.Background">#FFF0F6F3</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Background" Color="#FFF0F6F3" />
+      <Color x:Key="Rune.Color.Surface">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Surface" Color="#FFFFFFFF" />
+      <Color x:Key="Rune.Color.SurfaceMuted">#FFEBF3EF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SurfaceMuted" Color="#FFEBF3EF" />
+      <Color x:Key="Rune.Color.SurfaceRaised">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SurfaceRaised" Color="#FFFFFFFF" />
       <Color x:Key="Rune.Color.Fill">#FFE6EFEB</Color>
       <SolidColorBrush x:Key="Rune.Brush.Fill" Color="#FFE6EFEB" />
       <Color x:Key="Rune.Color.FillHover">#FFDDE8E3</Color>
@@ -3123,8 +3124,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Text" Color="#FF16302A" />
       <Color x:Key="Rune.Color.TextMuted">#FF4C645E</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextMuted" Color="#FF4C645E" />
-      <Color x:Key="Rune.Color.TextPlaceholder">#FF6B817B</Color>
-      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FF6B817B" />
+      <Color x:Key="Rune.Color.TextPlaceholder">#FF4C645E</Color>
+      <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" Color="#FF4C645E" />
       <Color x:Key="Rune.Color.TextDisabled">#FFB0C1BB</Color>
       <SolidColorBrush x:Key="Rune.Brush.TextDisabled" Color="#FFB0C1BB" />
       <Color x:Key="Rune.Color.BorderMuted">#FFD3E0DB</Color>
@@ -3221,8 +3222,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Selection" Color="#FFC7E8DE" />
       <Color x:Key="Rune.Color.Highlight">#FFFBEEB0</Color>
       <SolidColorBrush x:Key="Rune.Brush.Highlight" Color="#FFFBEEB0" />
-      <Color x:Key="Rune.Color.SurfaceTranslucent">#CCF5F9F7</Color>
-      <SolidColorBrush x:Key="Rune.Brush.SurfaceTranslucent" Color="#CCF5F9F7" />
+      <Color x:Key="Rune.Color.SurfaceTranslucent">#CCF0F6F3</Color>
+      <SolidColorBrush x:Key="Rune.Brush.SurfaceTranslucent" Color="#CCF0F6F3" />
       <Color x:Key="Rune.Color.CodeKeyword">#FF18695D</Color>
       <SolidColorBrush x:Key="Rune.Brush.CodeKeyword" Color="#FF18695D" />
       <Color x:Key="Rune.Color.CodeString">#FF3A7229</Color>
@@ -3259,8 +3260,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Chart7" Color="#FFB8325A" />
       <Color x:Key="Rune.Color.Chart8">#FF5D7A86</Color>
       <SolidColorBrush x:Key="Rune.Brush.Chart8" Color="#FF5D7A86" />
-      <Color x:Key="Rune.Color.InverseSurfaceHover">#FF344A45</Color>
-      <SolidColorBrush x:Key="Rune.Brush.InverseSurfaceHover" Color="#FF344A45" />
+      <Color x:Key="Rune.Color.InverseSurfaceHover">#FF334A44</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InverseSurfaceHover" Color="#FF334A44" />
 
       <!-- shadows -->
       <BoxShadows x:Key="Rune.Shadow.None">none</BoxShadows>

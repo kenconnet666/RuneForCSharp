@@ -861,8 +861,8 @@ public sealed partial record Lang
     /// <summary>主题：高对比，默认“高对比”</summary>
     public required string ThemeHighContrast { get; init; }
 
-    /// <summary>主题：海洋，默认“海洋”</summary>
-    public required string ThemeOcean { get; init; }
+    /// <summary>主题：高对比暗色，默认“高对比暗色”</summary>
+    public required string ThemeHighContrastDark { get; init; }
 
     /// <summary>主题：森林，默认“森林”</summary>
     public required string ThemeForest { get; init; }
@@ -1267,7 +1267,7 @@ public sealed partial record Lang
         ThemePaper = "纸张",
         ThemeMidnight = "午夜",
         ThemeHighContrast = "高对比",
-        ThemeOcean = "海洋",
+        ThemeHighContrastDark = "高对比暗色",
         ThemeForest = "森林",
         ThemeLemon = "柠檬",
         ThemeSakura = "樱花",
@@ -1645,7 +1645,7 @@ public sealed partial record Lang
         ThemePaper = "Paper",
         ThemeMidnight = "Midnight",
         ThemeHighContrast = "High contrast",
-        ThemeOcean = "Ocean",
+        ThemeHighContrastDark = "High contrast dark",
         ThemeForest = "Forest",
         ThemeLemon = "Lemon",
         ThemeSakura = "Sakura",

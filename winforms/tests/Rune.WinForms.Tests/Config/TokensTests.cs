@@ -19,13 +19,13 @@ public class TokensTests
     public void Every_built_in_theme_has_its_own_values()
     {
         Assert.Equal(16, BuiltinThemes.All.Count);
-        Assert.Equal(ColorTranslator.FromHtml("#fcfcfd").ToArgb(), BuiltinThemes.Light.Colors.Background.ToArgb());
+        Assert.Equal(ColorTranslator.FromHtml("#f9f9fb").ToArgb(), BuiltinThemes.Light.Colors.Background.ToArgb());
         Assert.Equal(ColorTranslator.FromHtml("#111113").ToArgb(), BuiltinThemes.Dark.Colors.Background.ToArgb());
         Assert.Equal(0.25f, BuiltinThemes.HighContrast.Radii.Md);
         // high-contrast 与 mono 的底色都是白：比（底色, 品牌色）这一对
         var pairs = BuiltinThemes.All.Select(theme => (theme.Colors.Background, theme.Colors.Accent)).ToList();
         Assert.Equal(pairs.Count, pairs.Distinct().Count());
-        Assert.Equal(["dark", "midnight", "cyberpunk", "big-screen", "ember"], BuiltinThemes.All.Where(t => t.IsDark).Select(t => t.Name));
+        Assert.Equal(["dark", "midnight", "high-contrast-dark", "cyberpunk", "big-screen", "ember"], BuiltinThemes.All.Where(t => t.IsDark).Select(t => t.Name));
     }
 
     [Fact]

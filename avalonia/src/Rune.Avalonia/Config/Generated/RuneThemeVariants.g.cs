@@ -20,8 +20,8 @@ public static class RuneThemeVariants
     /// <summary>高对比（亮色）。</summary>
     public static readonly ThemeVariant HighContrast = new("high-contrast", ThemeVariant.Light);
 
-    /// <summary>海洋（亮色）。</summary>
-    public static readonly ThemeVariant Ocean = new("ocean", ThemeVariant.Light);
+    /// <summary>高对比暗色（暗色）。</summary>
+    public static readonly ThemeVariant HighContrastDark = new("high-contrast-dark", ThemeVariant.Dark);
 
     /// <summary>森林（亮色）。</summary>
     public static readonly ThemeVariant Forest = new("forest", ThemeVariant.Light);
@@ -54,5 +54,5 @@ public static class RuneThemeVariants
     public static readonly ThemeVariant Celadon = new("celadon", ThemeVariant.Light);
 
     /// <summary>全部内置主题，顺序同 vue-tsx-pro 的 builtinThemes（主题切换器按这个顺序列出）。</summary>
-    public static IReadOnlyList<ThemeVariant> All { get; } = [ThemeVariant.Light, ThemeVariant.Dark, Paper, Midnight, HighContrast, Ocean, Forest, Lemon, Sakura, Festive, Cyberpunk, BigScreen, Lavender, Ember, Mono, Celadon];
+    public static IReadOnlyList<ThemeVariant> All { get; } = [ThemeVariant.Light, ThemeVariant.Dark, Paper, Midnight, HighContrast, HighContrastDark, Forest, Lemon, Sakura, Festive, Cyberpunk, BigScreen, Lavender, Ember, Mono, Celadon];
 }

@@ -75,8 +75,9 @@
   <sys:Double x:Key="Rune.Space.Xl">1.5</sys:Double>
 
   <!-- sizes -->
-  <!-- control = 2.25em（em 系数）：`2.25em`：单行控件（按钮、输入框、下拉框）的高度 -->
+  <!-- control = round(nearest, 2.25em, 4px)（em 系数）：`round(nearest, 2.25em, 4px)`：单行控件（按钮、输入框、下拉框）的高度。字号的 2.25 倍取整到 4px： 13 / 14 / 16 / 18px 的字号是 28 / 32 / 36 / 40px，整数像素的边框在 1 倍屏上不发虚； 字号档位 xs 另给 2 倍（12px → 24px，见 fontSizeStyles），不与 sm 同高 -->
   <sys:Double x:Key="Rune.Size.Control">2.25</sys:Double>
+  <sys:Double x:Key="Rune.Size.ControlRound">4</sys:Double>
   <!-- minTarget = 24px（设备无关像素）：`24px`：可点击区域的最小尺寸（WCAG 2.2 目标尺寸 24×24），与 control 取较大值 -->
   <sys:Double x:Key="Rune.Size.MinTarget">24</sys:Double>
   <!-- xs = 30rem（设备无关像素）：`30rem`（480px）：窄内容，如登录表单 -->
@@ -113,7 +114,7 @@
   <sys:TimeSpan x:Key="Rune.Duration.Sm">00:00:00.12</sys:TimeSpan>
   <!-- md = { default=200ms; [reduce]=0ms }：`200ms`：展开、淡入、浮层出现 -->
   <sys:TimeSpan x:Key="Rune.Duration.Md">00:00:00.2</sys:TimeSpan>
-  <!-- lg = { default=300ms; [reduce]=0ms }：`300ms`：对话框、抽屉 -->
+  <!-- lg = { default=300ms; [reduce]=0ms }：`300ms`：抽屉滑入、图表的进场、主题切换的展开、波纹与骨架的扫光 -->
   <sys:TimeSpan x:Key="Rune.Duration.Lg">00:00:00.3</sys:TimeSpan>
   <!-- xl = { default=500ms; [reduce]=0ms }：`500ms`：大面积的页面切换 -->
   <sys:TimeSpan x:Key="Rune.Duration.Xl">00:00:00.5</sys:TimeSpan>

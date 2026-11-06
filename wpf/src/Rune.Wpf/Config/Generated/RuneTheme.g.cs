@@ -12,7 +12,7 @@ public partial class RuneTheme
         new("paper", "纸张", false, new("/Rune.Wpf;component/Config/Generated/Themes/Paper.g.xaml", UriKind.Relative)),
         new("midnight", "午夜", true, new("/Rune.Wpf;component/Config/Generated/Themes/Midnight.g.xaml", UriKind.Relative)),
         new("high-contrast", "高对比", false, new("/Rune.Wpf;component/Config/Generated/Themes/HighContrast.g.xaml", UriKind.Relative)),
-        new("ocean", "海洋", false, new("/Rune.Wpf;component/Config/Generated/Themes/Ocean.g.xaml", UriKind.Relative)),
+        new("high-contrast-dark", "高对比暗色", true, new("/Rune.Wpf;component/Config/Generated/Themes/HighContrastDark.g.xaml", UriKind.Relative)),
         new("forest", "森林", false, new("/Rune.Wpf;component/Config/Generated/Themes/Forest.g.xaml", UriKind.Relative)),
         new("lemon", "柠檬", false, new("/Rune.Wpf;component/Config/Generated/Themes/Lemon.g.xaml", UriKind.Relative)),
         new("sakura", "樱花", false, new("/Rune.Wpf;component/Config/Generated/Themes/Sakura.g.xaml", UriKind.Relative)),
