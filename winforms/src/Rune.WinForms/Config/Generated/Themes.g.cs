@@ -2,7 +2,7 @@
 // 由 tools/token-gen 从 vue-tsx-pro 的 packages/ui/src/config/theme 生成，不要手改；改了那边的 token 后运行 node tools/token-gen/token-gen.mjs
 namespace Rune.WinForms;
 
-/// <summary>一套主题的 colors（74 个）。</summary>
+/// <summary>一套主题的 colors（75 个）。</summary>
 public sealed class ThemeColors
 {
     /// <summary>background = #fcfcfd：页面背景。slate 1：亮色 `#fcfcfd`，暗色 `#111113`</summary>
@@ -226,6 +226,9 @@ public sealed class ThemeColors
 
     /// <summary>chart8 = #ab6400：第 8 个系列。amber：亮色 11 级 `#ab6400`（9、10 级在浅色背景上不到 2:1），暗色 9 级 `#ffc53d`</summary>
     public required Color Chart8 { get; init; }
+
+    /// <summary>inverseSurfaceHover = color-mix(in oklab, inverseSurface 85%, background)：中性实底按钮的悬停底色（button-core 的 color-mix(in oklab, inverseSurface 85%, background)）（token-gen 算出）</summary>
+    public required Color InverseSurfaceHover { get; init; }
 }
 
 /// <summary>一套主题的 shadows（6 个）。</summary>
@@ -401,6 +404,7 @@ public static class BuiltinThemes
             Chart6 = Color.FromArgb(255, 7, 151, 185),
             Chart7 = Color.FromArgb(255, 62, 155, 79),
             Chart8 = Color.FromArgb(255, 171, 100, 0),
+            InverseSurfaceHover = Color.FromArgb(255, 56, 60, 64),
         },
         Shadows = new()
         {
@@ -512,6 +516,7 @@ public static class BuiltinThemes
             Chart6 = Color.FromArgb(255, 0, 162, 199),
             Chart7 = Color.FromArgb(255, 70, 167, 88),
             Chart8 = Color.FromArgb(255, 255, 197, 61),
+            InverseSurfaceHover = Color.FromArgb(255, 199, 200, 202),
         },
         Shadows = new()
         {
@@ -623,6 +628,7 @@ public static class BuiltinThemes
             Chart6 = Color.FromArgb(255, 16, 125, 152),
             Chart7 = Color.FromArgb(255, 62, 155, 79),
             Chart8 = Color.FromArgb(255, 171, 100, 0),
+            InverseSurfaceHover = Color.FromArgb(255, 84, 72, 57),
         },
         Shadows = new()
         {
@@ -734,6 +740,7 @@ public static class BuiltinThemes
             Chart6 = Color.FromArgb(255, 18, 165, 148),
             Chart7 = Color.FromArgb(255, 70, 167, 88),
             Chart8 = Color.FromArgb(255, 255, 197, 61),
+            InverseSurfaceHover = Color.FromArgb(255, 199, 204, 214),
         },
         Shadows = new()
         {
@@ -845,6 +852,7 @@ public static class BuiltinThemes
             Chart6 = Color.FromArgb(255, 0, 121, 138),
             Chart7 = Color.FromArgb(255, 46, 125, 50),
             Chart8 = Color.FromArgb(255, 138, 101, 0),
+            InverseSurfaceHover = Color.FromArgb(255, 11, 11, 11),
         },
         Shadows = new()
         {
@@ -956,6 +964,7 @@ public static class BuiltinThemes
             Chart6 = Color.FromArgb(255, 101, 77, 196),
             Chart7 = Color.FromArgb(255, 38, 153, 123),
             Chart8 = Color.FromArgb(255, 198, 132, 0),
+            InverseSurfaceHover = Color.FromArgb(255, 46, 62, 72),
         },
         Shadows = new()
         {
@@ -1067,6 +1076,7 @@ public static class BuiltinThemes
             Chart6 = Color.FromArgb(255, 13, 155, 138),
             Chart7 = Color.FromArgb(255, 239, 95, 0),
             Chart8 = Color.FromArgb(255, 127, 132, 125),
+            InverseSurfaceHover = Color.FromArgb(255, 52, 63, 52),
         },
         Shadows = new()
         {
@@ -1178,6 +1188,7 @@ public static class BuiltinThemes
             Chart6 = Color.FromArgb(255, 207, 56, 151),
             Chart7 = Color.FromArgb(255, 13, 155, 138),
             Chart8 = Color.FromArgb(255, 198, 132, 0),
+            InverseSurfaceHover = Color.FromArgb(255, 63, 60, 44),
         },
         Shadows = new()
         {
@@ -1289,6 +1300,7 @@ public static class BuiltinThemes
             Chart6 = Color.FromArgb(255, 239, 95, 0),
             Chart7 = Color.FromArgb(255, 48, 157, 186),
             Chart8 = Color.FromArgb(255, 62, 155, 79),
+            InverseSurfaceHover = Color.FromArgb(255, 68, 55, 60),
         },
         Shadows = new()
         {
@@ -1400,6 +1412,7 @@ public static class BuiltinThemes
             Chart6 = Color.FromArgb(255, 142, 59, 107),
             Chart7 = Color.FromArgb(255, 217, 102, 26),
             Chart8 = Color.FromArgb(255, 154, 118, 86),
+            InverseSurfaceHover = Color.FromArgb(255, 72, 55, 47),
         },
         Shadows = new()
         {
@@ -1511,6 +1524,7 @@ public static class BuiltinThemes
             Chart6 = Color.FromArgb(255, 179, 136, 255),
             Chart7 = Color.FromArgb(255, 0, 255, 163),
             Chart8 = Color.FromArgb(255, 255, 56, 100),
+            InverseSurfaceHover = Color.FromArgb(255, 199, 196, 218),
         },
         Shadows = new()
         {
@@ -1622,6 +1636,7 @@ public static class BuiltinThemes
             Chart6 = Color.FromArgb(255, 90, 155, 255),
             Chart7 = Color.FromArgb(255, 255, 119, 200),
             Chart8 = Color.FromArgb(255, 155, 225, 93),
+            InverseSurfaceHover = Color.FromArgb(255, 200, 208, 222),
         },
         Shadows = new()
         {
@@ -1733,6 +1748,7 @@ public static class BuiltinThemes
             Chart6 = Color.FromArgb(255, 13, 155, 138),
             Chart7 = Color.FromArgb(255, 229, 72, 77),
             Chart8 = Color.FromArgb(255, 142, 78, 198),
+            InverseSurfaceHover = Color.FromArgb(255, 61, 55, 75),
         },
         Shadows = new()
         {
@@ -1844,6 +1860,7 @@ public static class BuiltinThemes
             Chart6 = Color.FromArgb(255, 167, 139, 255),
             Chart7 = Color.FromArgb(255, 70, 167, 88),
             Chart8 = Color.FromArgb(255, 214, 167, 122),
+            InverseSurfaceHover = Color.FromArgb(255, 207, 200, 192),
         },
         Shadows = new()
         {
@@ -1955,6 +1972,7 @@ public static class BuiltinThemes
             Chart6 = Color.FromArgb(255, 142, 78, 198),
             Chart7 = Color.FromArgb(255, 7, 151, 185),
             Chart8 = Color.FromArgb(255, 119, 119, 119),
+            InverseSurfaceHover = Color.FromArgb(255, 52, 52, 52),
         },
         Shadows = new()
         {
@@ -2066,6 +2084,7 @@ public static class BuiltinThemes
             Chart6 = Color.FromArgb(255, 63, 138, 76),
             Chart7 = Color.FromArgb(255, 184, 50, 90),
             Chart8 = Color.FromArgb(255, 93, 122, 134),
+            InverseSurfaceHover = Color.FromArgb(255, 52, 74, 69),
         },
         Shadows = new()
         {

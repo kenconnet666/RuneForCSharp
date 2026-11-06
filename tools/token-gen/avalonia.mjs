@@ -1,5 +1,6 @@
 // Avalonia 的输出：Tokens.g.axaml（不随主题变的 token + 每套内置主题一个 ThemeDictionary）与 RuneThemeVariants.g.cs
 import { argbHex } from '../lib/css.mjs';
+import { cap, checkPalettes, paletteOf, TONES } from "./palette.mjs";
 import { comment, customThemes, describe, escape, FONT_WEIGHTS, HEADER, number, themeTitle, timeSpan } from './format.mjs';
 
 const DIR = 'avalonia/src/Rune.Avalonia/Config/Generated';
@@ -78,10 +79,22 @@ function axaml(model) {
     lines.push(`    ${comment(themeTitle(theme))}`);
     lines.push(`    <ResourceDictionary x:Key="${themeKey(theme)}">`);
     lines.push(...block(theme.entries, '      ', theme.name === 'light').filter((line, i) => i > 0 || line));
+    lines.push(...palettes(theme, '      '));
     lines.push('    </ResourceDictionary>');
   }
   lines.push('  </ResourceDictionary.ThemeDictionaries>', '</ResourceDictionary>', '');
   return lines.join('\n');
+}
+
+/** 色调调色板（palette.mjs）：每套主题六份，字段引用同一个主题字典里的画刷 */
+function palettes(theme, indent) {
+  checkPalettes(theme);
+  const lines = ["", `${indent}${comment("色调调色板（DESIGN §4）：组件的样式档位引用它的字段")}`];
+  for (const tone of TONES) {
+    const fields = Object.entries(paletteOf(tone)).map(([field, token]) => `${cap(field)}="{StaticResource Rune.Brush.${cap(token)}}"`);
+    lines.push(`${indent}<rune:TonePalette x:Key="Rune.Palette.${cap(tone)}" ${fields.join(" ")} />`);
+  }
+  return lines;
 }
 
 function variants(model) {

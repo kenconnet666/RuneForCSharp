@@ -231,6 +231,9 @@
   <!-- chart8 = #7f847d：第 8 个系列。amber：亮色 11 级 `#ab6400`（9、10 级在浅色背景上不到 2:1），暗色 9 级 `#ffc53d` -->
   <Color x:Key="Rune.Color.Chart8">#FF7F847D</Color>
   <SolidColorBrush x:Key="Rune.Brush.Chart8" po:Freeze="True" Color="#FF7F847D" />
+  <!-- inverseSurfaceHover = color-mix(in oklab, inverseSurface 85%, background)：中性实底按钮的悬停底色（button-core 的 color-mix(in oklab, inverseSurface 85%, background)）（token-gen 算出） -->
+  <Color x:Key="Rune.Color.InverseSurfaceHover">#FF343F34</Color>
+  <SolidColorBrush x:Key="Rune.Brush.InverseSurfaceHover" po:Freeze="True" Color="#FF343F34" />
 
   <!-- shadows -->
   <!-- none = none：无阴影 -->

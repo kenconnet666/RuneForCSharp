@@ -1,5 +1,5 @@
 // 与平台无关的 token 模型：每个 token 解析成颜色、字体族、长度、阴影、时长、缓动等结构，三个平台的输出都从这里取
-import { defaultOf, parseColor, parseCubicBezier, parseDuration, parseFonts, parseLength, parseShadows } from '../lib/css.mjs';
+import { defaultOf, mixOklab, parseColor, parseCubicBezier, parseDuration, parseFonts, parseLength, parseShadows } from '../lib/css.mjs';
 import { builtinThemes, themedGroups, themeValue, tokenGroups } from '../lib/theme.mjs';
 
 /**
@@ -27,6 +27,17 @@ export const GROUPS = {
 /** 平台上用不了的 token：生成时跳过，原因写进生成的文件 */
 export const SKIPPED = {
   'sizes.full': '100%：平台上用拉伸（Stretch）',
+};
+
+/**
+ * 派生的颜色：vue-tsx-pro 在组件样式里用 color-mix 现算、没有对应 token 的颜色，按主题算好补进 colors 组，
+ * 三个平台当普通 token 用。key 是生成的 token 名，mix 给出（颜色甲, 颜色乙, 甲的比例）
+ */
+export const DERIVED_COLORS = {
+  inverseSurfaceHover: {
+    doc: "中性实底按钮的悬停底色（button-core 的 color-mix(in oklab, inverseSurface 85%, background)）",
+    mix: ["inverseSurface", "background", 0.85],
+  },
 };
 
 /** rem 按浏览器默认的根字号换算成设备无关像素；整体缩放由运行时负责（DESIGN §6） */
@@ -99,8 +110,24 @@ export function buildModel(vue) {
     id: pascal(theme.name),
     colorScheme: theme.colorScheme,
     label: labels.get(pascal(theme.name)) ?? theme.name,
-    entries: [...themed].flatMap((group) => tokens(group).map(([key, { doc }]) => entry(group, key, themeValue(vue, theme, group, key), doc))),
+    entries: derive([...themed].flatMap((group) => tokens(group).map(([key, { doc }]) => entry(group, key, themeValue(vue, theme, group, key), doc)))),
   }));
   return { groups: [...groups.keys()], themed: [...themed], base, themes, skipped: SKIPPED };
+
+  /** 在 colors 组的最后补上派生的颜色（DERIVED_COLORS） */
+  function derive(entries) {
+    const colors = new Map(entries.filter((e) => e.group === "colors").map((e) => [e.key, e.value]));
+    const derived = Object.entries(DERIVED_COLORS).map(([key, { doc, mix: [a, b, weight] }]) => ({
+      group: "colors",
+      key,
+      name: `Color.${pascal(key)}`,
+      kind: "color",
+      raw: `color-mix(in oklab, ${a} ${weight * 100}%, ${b})`,
+      value: mixOklab(colors.get(a), colors.get(b), weight),
+      doc: `${doc}（token-gen 算出）`,
+    }));
+    const last = entries.findLastIndex((e) => e.group === "colors");
+    return [...entries.slice(0, last + 1), ...derived, ...entries.slice(last + 1)];
+  }
 }
 

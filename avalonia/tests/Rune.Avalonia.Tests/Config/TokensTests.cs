@@ -64,4 +64,19 @@ public class TokensTests
         HeadlessUi.Flush(window);
         Assert.Equal(Color.Parse("#fcfcfd"), Assert.IsAssignableFrom<ISolidColorBrush>(border.Background).Color);
     });
+
+    [Fact]
+    public Task Palettes_point_at_their_own_theme_brushes() => HeadlessUi.Run(() =>
+    {
+        foreach (var theme in RuneThemeVariants.All)
+        {
+            var accent = Assert.IsType<TonePalette>(Find("Rune.Palette.Accent", theme));
+            var neutral = Assert.IsType<TonePalette>(Find("Rune.Palette.Neutral", theme));
+            Assert.Same(Find("Rune.Brush.Accent", theme), accent.Solid);
+            Assert.Same(Find("Rune.Brush.AccentText", theme), accent.Text);
+            Assert.Same(Find("Rune.Brush.InverseSurfaceHover", theme), neutral.SolidHover);
+        }
+        // 派生色：中性实底悬停 = oklab 里反色表面 85% + 背景 15%（button-core 的 color-mix）
+        Assert.Equal(Color.Parse("#383c40"), ((ISolidColorBrush)Find("Rune.Brush.InverseSurfaceHover", ThemeVariant.Light)!).Color);
+    });
 }

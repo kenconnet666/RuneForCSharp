@@ -96,3 +96,30 @@ export function parseCubicBezier(text) {
   if (!points || points.length !== 4 || !points.every(Number.isFinite)) throw new Error(`认不出的缓动：${text}`);
   return points;
 }
+
+const toLinear = (c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+const toGamma = (c) => (c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055);
+
+/** sRGB（0–255）→ oklab（Björn Ottosson 的矩阵，同 CSS Color 4） */
+function oklab({ r, g, b }) {
+  const [lr, lg, lb] = [r, g, b].map((c) => toLinear(c / 255));
+  const l = Math.cbrt(0.4122214708 * lr + 0.5363325363 * lg + 0.0514459929 * lb);
+  const m = Math.cbrt(0.2119034982 * lr + 0.6806995451 * lg + 0.1073969566 * lb);
+  const s = Math.cbrt(0.0883024619 * lr + 0.2817188376 * lg + 0.6299787005 * lb);
+  return [0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s, 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s, 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s];
+}
+
+function fromOklab([L, A, B]) {
+  const l = (L + 0.3963377774 * A + 0.2158037573 * B) ** 3;
+  const m = (L - 0.1055613458 * A - 0.0638541728 * B) ** 3;
+  const s = (L - 0.0894841775 * A - 1.291485548 * B) ** 3;
+  const linear = [4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s, -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s, -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s];
+  const [r, g, b] = linear.map((c) => Math.round(Math.min(1, Math.max(0, toGamma(c))) * 255));
+  return { r, g, b };
+}
+
+/** CSS 的 `color-mix(in oklab, a weight, b)`：两个不透明的颜色在 oklab 里按比例混合（vue-tsx-pro 里几处悬停色这样算） */
+export function mixOklab(a, b, weight) {
+  const [x, y] = [oklab(a), oklab(b)];
+  return { ...fromOklab(x.map((v, i) => v * weight + y[i] * (1 - weight))), a: a.a * weight + b.a * (1 - weight) };
+}

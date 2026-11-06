@@ -367,6 +367,9 @@
       <!-- chart8 = #ab6400：第 8 个系列。amber：亮色 11 级 `#ab6400`（9、10 级在浅色背景上不到 2:1），暗色 9 级 `#ffc53d` -->
       <Color x:Key="Rune.Color.Chart8">#FFAB6400</Color>
       <SolidColorBrush x:Key="Rune.Brush.Chart8" Color="#FFAB6400" />
+      <!-- inverseSurfaceHover = color-mix(in oklab, inverseSurface 85%, background)：中性实底按钮的悬停底色（button-core 的 color-mix(in oklab, inverseSurface 85%, background)）（token-gen 算出） -->
+      <Color x:Key="Rune.Color.InverseSurfaceHover">#FF383C40</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InverseSurfaceHover" Color="#FF383C40" />
 
       <!-- shadows -->
       <!-- none = none：无阴影 -->
@@ -407,6 +410,14 @@
       <x:Double x:Key="Rune.Radius.Xl">1</x:Double>
       <!-- full = 9999px（设备无关像素）：全圆：胶囊按钮、头像、开关 -->
       <x:Double x:Key="Rune.Radius.Full">9999</x:Double>
+
+      <!-- 色调调色板（DESIGN §4）：组件的样式档位引用它的字段 -->
+      <rune:TonePalette x:Key="Rune.Palette.Neutral" Solid="{StaticResource Rune.Brush.InverseSurface}" SolidHover="{StaticResource Rune.Brush.InverseSurfaceHover}" Contrast="{StaticResource Rune.Brush.InverseText}" Soft="{StaticResource Rune.Brush.Fill}" SoftHover="{StaticResource Rune.Brush.FillHover}" Surface="{StaticResource Rune.Brush.Surface}" SubtleHover="{StaticResource Rune.Brush.FillHover}" Text="{StaticResource Rune.Brush.Text}" Border="{StaticResource Rune.Brush.Border}" />
+      <rune:TonePalette x:Key="Rune.Palette.Accent" Solid="{StaticResource Rune.Brush.Accent}" SolidHover="{StaticResource Rune.Brush.AccentHover}" Contrast="{StaticResource Rune.Brush.AccentContrast}" Soft="{StaticResource Rune.Brush.AccentSoft}" SoftHover="{StaticResource Rune.Brush.AccentSoftHover}" Surface="{StaticResource Rune.Brush.AccentSoft}" SubtleHover="{StaticResource Rune.Brush.AccentSoft}" Text="{StaticResource Rune.Brush.AccentText}" Border="{StaticResource Rune.Brush.AccentBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Info" Solid="{StaticResource Rune.Brush.Info}" SolidHover="{StaticResource Rune.Brush.InfoHover}" Contrast="{StaticResource Rune.Brush.InfoContrast}" Soft="{StaticResource Rune.Brush.InfoSoft}" SoftHover="{StaticResource Rune.Brush.InfoSoftHover}" Surface="{StaticResource Rune.Brush.InfoSoft}" SubtleHover="{StaticResource Rune.Brush.InfoSoft}" Text="{StaticResource Rune.Brush.InfoText}" Border="{StaticResource Rune.Brush.InfoBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Success" Solid="{StaticResource Rune.Brush.Success}" SolidHover="{StaticResource Rune.Brush.SuccessHover}" Contrast="{StaticResource Rune.Brush.SuccessContrast}" Soft="{StaticResource Rune.Brush.SuccessSoft}" SoftHover="{StaticResource Rune.Brush.SuccessSoftHover}" Surface="{StaticResource Rune.Brush.SuccessSoft}" SubtleHover="{StaticResource Rune.Brush.SuccessSoft}" Text="{StaticResource Rune.Brush.SuccessText}" Border="{StaticResource Rune.Brush.SuccessBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Warning" Solid="{StaticResource Rune.Brush.Warning}" SolidHover="{StaticResource Rune.Brush.WarningHover}" Contrast="{StaticResource Rune.Brush.WarningContrast}" Soft="{StaticResource Rune.Brush.WarningSoft}" SoftHover="{StaticResource Rune.Brush.WarningSoftHover}" Surface="{StaticResource Rune.Brush.WarningSoft}" SubtleHover="{StaticResource Rune.Brush.WarningSoft}" Text="{StaticResource Rune.Brush.WarningText}" Border="{StaticResource Rune.Brush.WarningBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Danger" Solid="{StaticResource Rune.Brush.Danger}" SolidHover="{StaticResource Rune.Brush.DangerHover}" Contrast="{StaticResource Rune.Brush.DangerContrast}" Soft="{StaticResource Rune.Brush.DangerSoft}" SoftHover="{StaticResource Rune.Brush.DangerSoftHover}" Surface="{StaticResource Rune.Brush.DangerSoft}" SubtleHover="{StaticResource Rune.Brush.DangerSoft}" Text="{StaticResource Rune.Brush.DangerText}" Border="{StaticResource Rune.Brush.DangerBorder}" />
     </ResourceDictionary>
     <!-- 暗色（dark） -->
     <ResourceDictionary x:Key="Dark">
@@ -559,6 +570,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Chart7" Color="#FF46A758" />
       <Color x:Key="Rune.Color.Chart8">#FFFFC53D</Color>
       <SolidColorBrush x:Key="Rune.Brush.Chart8" Color="#FFFFC53D" />
+      <Color x:Key="Rune.Color.InverseSurfaceHover">#FFC7C8CA</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InverseSurfaceHover" Color="#FFC7C8CA" />
 
       <!-- shadows -->
       <BoxShadows x:Key="Rune.Shadow.None">none</BoxShadows>
@@ -582,6 +595,14 @@
       <x:Double x:Key="Rune.Radius.Lg">0.7</x:Double>
       <x:Double x:Key="Rune.Radius.Xl">1</x:Double>
       <x:Double x:Key="Rune.Radius.Full">9999</x:Double>
+
+      <!-- 色调调色板（DESIGN §4）：组件的样式档位引用它的字段 -->
+      <rune:TonePalette x:Key="Rune.Palette.Neutral" Solid="{StaticResource Rune.Brush.InverseSurface}" SolidHover="{StaticResource Rune.Brush.InverseSurfaceHover}" Contrast="{StaticResource Rune.Brush.InverseText}" Soft="{StaticResource Rune.Brush.Fill}" SoftHover="{StaticResource Rune.Brush.FillHover}" Surface="{StaticResource Rune.Brush.Surface}" SubtleHover="{StaticResource Rune.Brush.FillHover}" Text="{StaticResource Rune.Brush.Text}" Border="{StaticResource Rune.Brush.Border}" />
+      <rune:TonePalette x:Key="Rune.Palette.Accent" Solid="{StaticResource Rune.Brush.Accent}" SolidHover="{StaticResource Rune.Brush.AccentHover}" Contrast="{StaticResource Rune.Brush.AccentContrast}" Soft="{StaticResource Rune.Brush.AccentSoft}" SoftHover="{StaticResource Rune.Brush.AccentSoftHover}" Surface="{StaticResource Rune.Brush.AccentSoft}" SubtleHover="{StaticResource Rune.Brush.AccentSoft}" Text="{StaticResource Rune.Brush.AccentText}" Border="{StaticResource Rune.Brush.AccentBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Info" Solid="{StaticResource Rune.Brush.Info}" SolidHover="{StaticResource Rune.Brush.InfoHover}" Contrast="{StaticResource Rune.Brush.InfoContrast}" Soft="{StaticResource Rune.Brush.InfoSoft}" SoftHover="{StaticResource Rune.Brush.InfoSoftHover}" Surface="{StaticResource Rune.Brush.InfoSoft}" SubtleHover="{StaticResource Rune.Brush.InfoSoft}" Text="{StaticResource Rune.Brush.InfoText}" Border="{StaticResource Rune.Brush.InfoBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Success" Solid="{StaticResource Rune.Brush.Success}" SolidHover="{StaticResource Rune.Brush.SuccessHover}" Contrast="{StaticResource Rune.Brush.SuccessContrast}" Soft="{StaticResource Rune.Brush.SuccessSoft}" SoftHover="{StaticResource Rune.Brush.SuccessSoftHover}" Surface="{StaticResource Rune.Brush.SuccessSoft}" SubtleHover="{StaticResource Rune.Brush.SuccessSoft}" Text="{StaticResource Rune.Brush.SuccessText}" Border="{StaticResource Rune.Brush.SuccessBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Warning" Solid="{StaticResource Rune.Brush.Warning}" SolidHover="{StaticResource Rune.Brush.WarningHover}" Contrast="{StaticResource Rune.Brush.WarningContrast}" Soft="{StaticResource Rune.Brush.WarningSoft}" SoftHover="{StaticResource Rune.Brush.WarningSoftHover}" Surface="{StaticResource Rune.Brush.WarningSoft}" SubtleHover="{StaticResource Rune.Brush.WarningSoft}" Text="{StaticResource Rune.Brush.WarningText}" Border="{StaticResource Rune.Brush.WarningBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Danger" Solid="{StaticResource Rune.Brush.Danger}" SolidHover="{StaticResource Rune.Brush.DangerHover}" Contrast="{StaticResource Rune.Brush.DangerContrast}" Soft="{StaticResource Rune.Brush.DangerSoft}" SoftHover="{StaticResource Rune.Brush.DangerSoftHover}" Surface="{StaticResource Rune.Brush.DangerSoft}" SubtleHover="{StaticResource Rune.Brush.DangerSoft}" Text="{StaticResource Rune.Brush.DangerText}" Border="{StaticResource Rune.Brush.DangerBorder}" />
     </ResourceDictionary>
     <!-- 纸张（paper，亮色） -->
     <ResourceDictionary x:Key="{x:Static rune:RuneThemeVariants.Paper}">
@@ -734,6 +755,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Chart7" Color="#FF3E9B4F" />
       <Color x:Key="Rune.Color.Chart8">#FFAB6400</Color>
       <SolidColorBrush x:Key="Rune.Brush.Chart8" Color="#FFAB6400" />
+      <Color x:Key="Rune.Color.InverseSurfaceHover">#FF544839</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InverseSurfaceHover" Color="#FF544839" />
 
       <!-- shadows -->
       <BoxShadows x:Key="Rune.Shadow.None">none</BoxShadows>
@@ -757,6 +780,14 @@
       <x:Double x:Key="Rune.Radius.Lg">0.7</x:Double>
       <x:Double x:Key="Rune.Radius.Xl">1</x:Double>
       <x:Double x:Key="Rune.Radius.Full">9999</x:Double>
+
+      <!-- 色调调色板（DESIGN §4）：组件的样式档位引用它的字段 -->
+      <rune:TonePalette x:Key="Rune.Palette.Neutral" Solid="{StaticResource Rune.Brush.InverseSurface}" SolidHover="{StaticResource Rune.Brush.InverseSurfaceHover}" Contrast="{StaticResource Rune.Brush.InverseText}" Soft="{StaticResource Rune.Brush.Fill}" SoftHover="{StaticResource Rune.Brush.FillHover}" Surface="{StaticResource Rune.Brush.Surface}" SubtleHover="{StaticResource Rune.Brush.FillHover}" Text="{StaticResource Rune.Brush.Text}" Border="{StaticResource Rune.Brush.Border}" />
+      <rune:TonePalette x:Key="Rune.Palette.Accent" Solid="{StaticResource Rune.Brush.Accent}" SolidHover="{StaticResource Rune.Brush.AccentHover}" Contrast="{StaticResource Rune.Brush.AccentContrast}" Soft="{StaticResource Rune.Brush.AccentSoft}" SoftHover="{StaticResource Rune.Brush.AccentSoftHover}" Surface="{StaticResource Rune.Brush.AccentSoft}" SubtleHover="{StaticResource Rune.Brush.AccentSoft}" Text="{StaticResource Rune.Brush.AccentText}" Border="{StaticResource Rune.Brush.AccentBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Info" Solid="{StaticResource Rune.Brush.Info}" SolidHover="{StaticResource Rune.Brush.InfoHover}" Contrast="{StaticResource Rune.Brush.InfoContrast}" Soft="{StaticResource Rune.Brush.InfoSoft}" SoftHover="{StaticResource Rune.Brush.InfoSoftHover}" Surface="{StaticResource Rune.Brush.InfoSoft}" SubtleHover="{StaticResource Rune.Brush.InfoSoft}" Text="{StaticResource Rune.Brush.InfoText}" Border="{StaticResource Rune.Brush.InfoBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Success" Solid="{StaticResource Rune.Brush.Success}" SolidHover="{StaticResource Rune.Brush.SuccessHover}" Contrast="{StaticResource Rune.Brush.SuccessContrast}" Soft="{StaticResource Rune.Brush.SuccessSoft}" SoftHover="{StaticResource Rune.Brush.SuccessSoftHover}" Surface="{StaticResource Rune.Brush.SuccessSoft}" SubtleHover="{StaticResource Rune.Brush.SuccessSoft}" Text="{StaticResource Rune.Brush.SuccessText}" Border="{StaticResource Rune.Brush.SuccessBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Warning" Solid="{StaticResource Rune.Brush.Warning}" SolidHover="{StaticResource Rune.Brush.WarningHover}" Contrast="{StaticResource Rune.Brush.WarningContrast}" Soft="{StaticResource Rune.Brush.WarningSoft}" SoftHover="{StaticResource Rune.Brush.WarningSoftHover}" Surface="{StaticResource Rune.Brush.WarningSoft}" SubtleHover="{StaticResource Rune.Brush.WarningSoft}" Text="{StaticResource Rune.Brush.WarningText}" Border="{StaticResource Rune.Brush.WarningBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Danger" Solid="{StaticResource Rune.Brush.Danger}" SolidHover="{StaticResource Rune.Brush.DangerHover}" Contrast="{StaticResource Rune.Brush.DangerContrast}" Soft="{StaticResource Rune.Brush.DangerSoft}" SoftHover="{StaticResource Rune.Brush.DangerSoftHover}" Surface="{StaticResource Rune.Brush.DangerSoft}" SubtleHover="{StaticResource Rune.Brush.DangerSoft}" Text="{StaticResource Rune.Brush.DangerText}" Border="{StaticResource Rune.Brush.DangerBorder}" />
     </ResourceDictionary>
     <!-- 午夜（midnight，暗色） -->
     <ResourceDictionary x:Key="{x:Static rune:RuneThemeVariants.Midnight}">
@@ -909,6 +940,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Chart7" Color="#FF46A758" />
       <Color x:Key="Rune.Color.Chart8">#FFFFC53D</Color>
       <SolidColorBrush x:Key="Rune.Brush.Chart8" Color="#FFFFC53D" />
+      <Color x:Key="Rune.Color.InverseSurfaceHover">#FFC7CCD6</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InverseSurfaceHover" Color="#FFC7CCD6" />
 
       <!-- shadows -->
       <BoxShadows x:Key="Rune.Shadow.None">none</BoxShadows>
@@ -932,6 +965,14 @@
       <x:Double x:Key="Rune.Radius.Lg">0.7</x:Double>
       <x:Double x:Key="Rune.Radius.Xl">1</x:Double>
       <x:Double x:Key="Rune.Radius.Full">9999</x:Double>
+
+      <!-- 色调调色板（DESIGN §4）：组件的样式档位引用它的字段 -->
+      <rune:TonePalette x:Key="Rune.Palette.Neutral" Solid="{StaticResource Rune.Brush.InverseSurface}" SolidHover="{StaticResource Rune.Brush.InverseSurfaceHover}" Contrast="{StaticResource Rune.Brush.InverseText}" Soft="{StaticResource Rune.Brush.Fill}" SoftHover="{StaticResource Rune.Brush.FillHover}" Surface="{StaticResource Rune.Brush.Surface}" SubtleHover="{StaticResource Rune.Brush.FillHover}" Text="{StaticResource Rune.Brush.Text}" Border="{StaticResource Rune.Brush.Border}" />
+      <rune:TonePalette x:Key="Rune.Palette.Accent" Solid="{StaticResource Rune.Brush.Accent}" SolidHover="{StaticResource Rune.Brush.AccentHover}" Contrast="{StaticResource Rune.Brush.AccentContrast}" Soft="{StaticResource Rune.Brush.AccentSoft}" SoftHover="{StaticResource Rune.Brush.AccentSoftHover}" Surface="{StaticResource Rune.Brush.AccentSoft}" SubtleHover="{StaticResource Rune.Brush.AccentSoft}" Text="{StaticResource Rune.Brush.AccentText}" Border="{StaticResource Rune.Brush.AccentBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Info" Solid="{StaticResource Rune.Brush.Info}" SolidHover="{StaticResource Rune.Brush.InfoHover}" Contrast="{StaticResource Rune.Brush.InfoContrast}" Soft="{StaticResource Rune.Brush.InfoSoft}" SoftHover="{StaticResource Rune.Brush.InfoSoftHover}" Surface="{StaticResource Rune.Brush.InfoSoft}" SubtleHover="{StaticResource Rune.Brush.InfoSoft}" Text="{StaticResource Rune.Brush.InfoText}" Border="{StaticResource Rune.Brush.InfoBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Success" Solid="{StaticResource Rune.Brush.Success}" SolidHover="{StaticResource Rune.Brush.SuccessHover}" Contrast="{StaticResource Rune.Brush.SuccessContrast}" Soft="{StaticResource Rune.Brush.SuccessSoft}" SoftHover="{StaticResource Rune.Brush.SuccessSoftHover}" Surface="{StaticResource Rune.Brush.SuccessSoft}" SubtleHover="{StaticResource Rune.Brush.SuccessSoft}" Text="{StaticResource Rune.Brush.SuccessText}" Border="{StaticResource Rune.Brush.SuccessBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Warning" Solid="{StaticResource Rune.Brush.Warning}" SolidHover="{StaticResource Rune.Brush.WarningHover}" Contrast="{StaticResource Rune.Brush.WarningContrast}" Soft="{StaticResource Rune.Brush.WarningSoft}" SoftHover="{StaticResource Rune.Brush.WarningSoftHover}" Surface="{StaticResource Rune.Brush.WarningSoft}" SubtleHover="{StaticResource Rune.Brush.WarningSoft}" Text="{StaticResource Rune.Brush.WarningText}" Border="{StaticResource Rune.Brush.WarningBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Danger" Solid="{StaticResource Rune.Brush.Danger}" SolidHover="{StaticResource Rune.Brush.DangerHover}" Contrast="{StaticResource Rune.Brush.DangerContrast}" Soft="{StaticResource Rune.Brush.DangerSoft}" SoftHover="{StaticResource Rune.Brush.DangerSoftHover}" Surface="{StaticResource Rune.Brush.DangerSoft}" SubtleHover="{StaticResource Rune.Brush.DangerSoft}" Text="{StaticResource Rune.Brush.DangerText}" Border="{StaticResource Rune.Brush.DangerBorder}" />
     </ResourceDictionary>
     <!-- 高对比（high-contrast，亮色） -->
     <ResourceDictionary x:Key="{x:Static rune:RuneThemeVariants.HighContrast}">
@@ -1084,6 +1125,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Chart7" Color="#FF2E7D32" />
       <Color x:Key="Rune.Color.Chart8">#FF8A6500</Color>
       <SolidColorBrush x:Key="Rune.Brush.Chart8" Color="#FF8A6500" />
+      <Color x:Key="Rune.Color.InverseSurfaceHover">#FF0B0B0B</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InverseSurfaceHover" Color="#FF0B0B0B" />
 
       <!-- shadows -->
       <BoxShadows x:Key="Rune.Shadow.None">none</BoxShadows>
@@ -1107,6 +1150,14 @@
       <x:Double x:Key="Rune.Radius.Lg">0.4</x:Double>
       <x:Double x:Key="Rune.Radius.Xl">0.6</x:Double>
       <x:Double x:Key="Rune.Radius.Full">9999</x:Double>
+
+      <!-- 色调调色板（DESIGN §4）：组件的样式档位引用它的字段 -->
+      <rune:TonePalette x:Key="Rune.Palette.Neutral" Solid="{StaticResource Rune.Brush.InverseSurface}" SolidHover="{StaticResource Rune.Brush.InverseSurfaceHover}" Contrast="{StaticResource Rune.Brush.InverseText}" Soft="{StaticResource Rune.Brush.Fill}" SoftHover="{StaticResource Rune.Brush.FillHover}" Surface="{StaticResource Rune.Brush.Surface}" SubtleHover="{StaticResource Rune.Brush.FillHover}" Text="{StaticResource Rune.Brush.Text}" Border="{StaticResource Rune.Brush.Border}" />
+      <rune:TonePalette x:Key="Rune.Palette.Accent" Solid="{StaticResource Rune.Brush.Accent}" SolidHover="{StaticResource Rune.Brush.AccentHover}" Contrast="{StaticResource Rune.Brush.AccentContrast}" Soft="{StaticResource Rune.Brush.AccentSoft}" SoftHover="{StaticResource Rune.Brush.AccentSoftHover}" Surface="{StaticResource Rune.Brush.AccentSoft}" SubtleHover="{StaticResource Rune.Brush.AccentSoft}" Text="{StaticResource Rune.Brush.AccentText}" Border="{StaticResource Rune.Brush.AccentBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Info" Solid="{StaticResource Rune.Brush.Info}" SolidHover="{StaticResource Rune.Brush.InfoHover}" Contrast="{StaticResource Rune.Brush.InfoContrast}" Soft="{StaticResource Rune.Brush.InfoSoft}" SoftHover="{StaticResource Rune.Brush.InfoSoftHover}" Surface="{StaticResource Rune.Brush.InfoSoft}" SubtleHover="{StaticResource Rune.Brush.InfoSoft}" Text="{StaticResource Rune.Brush.InfoText}" Border="{StaticResource Rune.Brush.InfoBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Success" Solid="{StaticResource Rune.Brush.Success}" SolidHover="{StaticResource Rune.Brush.SuccessHover}" Contrast="{StaticResource Rune.Brush.SuccessContrast}" Soft="{StaticResource Rune.Brush.SuccessSoft}" SoftHover="{StaticResource Rune.Brush.SuccessSoftHover}" Surface="{StaticResource Rune.Brush.SuccessSoft}" SubtleHover="{StaticResource Rune.Brush.SuccessSoft}" Text="{StaticResource Rune.Brush.SuccessText}" Border="{StaticResource Rune.Brush.SuccessBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Warning" Solid="{StaticResource Rune.Brush.Warning}" SolidHover="{StaticResource Rune.Brush.WarningHover}" Contrast="{StaticResource Rune.Brush.WarningContrast}" Soft="{StaticResource Rune.Brush.WarningSoft}" SoftHover="{StaticResource Rune.Brush.WarningSoftHover}" Surface="{StaticResource Rune.Brush.WarningSoft}" SubtleHover="{StaticResource Rune.Brush.WarningSoft}" Text="{StaticResource Rune.Brush.WarningText}" Border="{StaticResource Rune.Brush.WarningBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Danger" Solid="{StaticResource Rune.Brush.Danger}" SolidHover="{StaticResource Rune.Brush.DangerHover}" Contrast="{StaticResource Rune.Brush.DangerContrast}" Soft="{StaticResource Rune.Brush.DangerSoft}" SoftHover="{StaticResource Rune.Brush.DangerSoftHover}" Surface="{StaticResource Rune.Brush.DangerSoft}" SubtleHover="{StaticResource Rune.Brush.DangerSoft}" Text="{StaticResource Rune.Brush.DangerText}" Border="{StaticResource Rune.Brush.DangerBorder}" />
     </ResourceDictionary>
     <!-- 海洋（ocean，亮色） -->
     <ResourceDictionary x:Key="{x:Static rune:RuneThemeVariants.Ocean}">
@@ -1259,6 +1310,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Chart7" Color="#FF26997B" />
       <Color x:Key="Rune.Color.Chart8">#FFC68400</Color>
       <SolidColorBrush x:Key="Rune.Brush.Chart8" Color="#FFC68400" />
+      <Color x:Key="Rune.Color.InverseSurfaceHover">#FF2E3E48</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InverseSurfaceHover" Color="#FF2E3E48" />
 
       <!-- shadows -->
       <BoxShadows x:Key="Rune.Shadow.None">none</BoxShadows>
@@ -1282,6 +1335,14 @@
       <x:Double x:Key="Rune.Radius.Lg">0.9</x:Double>
       <x:Double x:Key="Rune.Radius.Xl">1.25</x:Double>
       <x:Double x:Key="Rune.Radius.Full">9999</x:Double>
+
+      <!-- 色调调色板（DESIGN §4）：组件的样式档位引用它的字段 -->
+      <rune:TonePalette x:Key="Rune.Palette.Neutral" Solid="{StaticResource Rune.Brush.InverseSurface}" SolidHover="{StaticResource Rune.Brush.InverseSurfaceHover}" Contrast="{StaticResource Rune.Brush.InverseText}" Soft="{StaticResource Rune.Brush.Fill}" SoftHover="{StaticResource Rune.Brush.FillHover}" Surface="{StaticResource Rune.Brush.Surface}" SubtleHover="{StaticResource Rune.Brush.FillHover}" Text="{StaticResource Rune.Brush.Text}" Border="{StaticResource Rune.Brush.Border}" />
+      <rune:TonePalette x:Key="Rune.Palette.Accent" Solid="{StaticResource Rune.Brush.Accent}" SolidHover="{StaticResource Rune.Brush.AccentHover}" Contrast="{StaticResource Rune.Brush.AccentContrast}" Soft="{StaticResource Rune.Brush.AccentSoft}" SoftHover="{StaticResource Rune.Brush.AccentSoftHover}" Surface="{StaticResource Rune.Brush.AccentSoft}" SubtleHover="{StaticResource Rune.Brush.AccentSoft}" Text="{StaticResource Rune.Brush.AccentText}" Border="{StaticResource Rune.Brush.AccentBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Info" Solid="{StaticResource Rune.Brush.Info}" SolidHover="{StaticResource Rune.Brush.InfoHover}" Contrast="{StaticResource Rune.Brush.InfoContrast}" Soft="{StaticResource Rune.Brush.InfoSoft}" SoftHover="{StaticResource Rune.Brush.InfoSoftHover}" Surface="{StaticResource Rune.Brush.InfoSoft}" SubtleHover="{StaticResource Rune.Brush.InfoSoft}" Text="{StaticResource Rune.Brush.InfoText}" Border="{StaticResource Rune.Brush.InfoBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Success" Solid="{StaticResource Rune.Brush.Success}" SolidHover="{StaticResource Rune.Brush.SuccessHover}" Contrast="{StaticResource Rune.Brush.SuccessContrast}" Soft="{StaticResource Rune.Brush.SuccessSoft}" SoftHover="{StaticResource Rune.Brush.SuccessSoftHover}" Surface="{StaticResource Rune.Brush.SuccessSoft}" SubtleHover="{StaticResource Rune.Brush.SuccessSoft}" Text="{StaticResource Rune.Brush.SuccessText}" Border="{StaticResource Rune.Brush.SuccessBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Warning" Solid="{StaticResource Rune.Brush.Warning}" SolidHover="{StaticResource Rune.Brush.WarningHover}" Contrast="{StaticResource Rune.Brush.WarningContrast}" Soft="{StaticResource Rune.Brush.WarningSoft}" SoftHover="{StaticResource Rune.Brush.WarningSoftHover}" Surface="{StaticResource Rune.Brush.WarningSoft}" SubtleHover="{StaticResource Rune.Brush.WarningSoft}" Text="{StaticResource Rune.Brush.WarningText}" Border="{StaticResource Rune.Brush.WarningBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Danger" Solid="{StaticResource Rune.Brush.Danger}" SolidHover="{StaticResource Rune.Brush.DangerHover}" Contrast="{StaticResource Rune.Brush.DangerContrast}" Soft="{StaticResource Rune.Brush.DangerSoft}" SoftHover="{StaticResource Rune.Brush.DangerSoftHover}" Surface="{StaticResource Rune.Brush.DangerSoft}" SubtleHover="{StaticResource Rune.Brush.DangerSoft}" Text="{StaticResource Rune.Brush.DangerText}" Border="{StaticResource Rune.Brush.DangerBorder}" />
     </ResourceDictionary>
     <!-- 森林（forest，亮色） -->
     <ResourceDictionary x:Key="{x:Static rune:RuneThemeVariants.Forest}">
@@ -1434,6 +1495,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Chart7" Color="#FFEF5F00" />
       <Color x:Key="Rune.Color.Chart8">#FF7F847D</Color>
       <SolidColorBrush x:Key="Rune.Brush.Chart8" Color="#FF7F847D" />
+      <Color x:Key="Rune.Color.InverseSurfaceHover">#FF343F34</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InverseSurfaceHover" Color="#FF343F34" />
 
       <!-- shadows -->
       <BoxShadows x:Key="Rune.Shadow.None">none</BoxShadows>
@@ -1457,6 +1520,14 @@
       <x:Double x:Key="Rune.Radius.Lg">0.7</x:Double>
       <x:Double x:Key="Rune.Radius.Xl">1</x:Double>
       <x:Double x:Key="Rune.Radius.Full">9999</x:Double>
+
+      <!-- 色调调色板（DESIGN §4）：组件的样式档位引用它的字段 -->
+      <rune:TonePalette x:Key="Rune.Palette.Neutral" Solid="{StaticResource Rune.Brush.InverseSurface}" SolidHover="{StaticResource Rune.Brush.InverseSurfaceHover}" Contrast="{StaticResource Rune.Brush.InverseText}" Soft="{StaticResource Rune.Brush.Fill}" SoftHover="{StaticResource Rune.Brush.FillHover}" Surface="{StaticResource Rune.Brush.Surface}" SubtleHover="{StaticResource Rune.Brush.FillHover}" Text="{StaticResource Rune.Brush.Text}" Border="{StaticResource Rune.Brush.Border}" />
+      <rune:TonePalette x:Key="Rune.Palette.Accent" Solid="{StaticResource Rune.Brush.Accent}" SolidHover="{StaticResource Rune.Brush.AccentHover}" Contrast="{StaticResource Rune.Brush.AccentContrast}" Soft="{StaticResource Rune.Brush.AccentSoft}" SoftHover="{StaticResource Rune.Brush.AccentSoftHover}" Surface="{StaticResource Rune.Brush.AccentSoft}" SubtleHover="{StaticResource Rune.Brush.AccentSoft}" Text="{StaticResource Rune.Brush.AccentText}" Border="{StaticResource Rune.Brush.AccentBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Info" Solid="{StaticResource Rune.Brush.Info}" SolidHover="{StaticResource Rune.Brush.InfoHover}" Contrast="{StaticResource Rune.Brush.InfoContrast}" Soft="{StaticResource Rune.Brush.InfoSoft}" SoftHover="{StaticResource Rune.Brush.InfoSoftHover}" Surface="{StaticResource Rune.Brush.InfoSoft}" SubtleHover="{StaticResource Rune.Brush.InfoSoft}" Text="{StaticResource Rune.Brush.InfoText}" Border="{StaticResource Rune.Brush.InfoBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Success" Solid="{StaticResource Rune.Brush.Success}" SolidHover="{StaticResource Rune.Brush.SuccessHover}" Contrast="{StaticResource Rune.Brush.SuccessContrast}" Soft="{StaticResource Rune.Brush.SuccessSoft}" SoftHover="{StaticResource Rune.Brush.SuccessSoftHover}" Surface="{StaticResource Rune.Brush.SuccessSoft}" SubtleHover="{StaticResource Rune.Brush.SuccessSoft}" Text="{StaticResource Rune.Brush.SuccessText}" Border="{StaticResource Rune.Brush.SuccessBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Warning" Solid="{StaticResource Rune.Brush.Warning}" SolidHover="{StaticResource Rune.Brush.WarningHover}" Contrast="{StaticResource Rune.Brush.WarningContrast}" Soft="{StaticResource Rune.Brush.WarningSoft}" SoftHover="{StaticResource Rune.Brush.WarningSoftHover}" Surface="{StaticResource Rune.Brush.WarningSoft}" SubtleHover="{StaticResource Rune.Brush.WarningSoft}" Text="{StaticResource Rune.Brush.WarningText}" Border="{StaticResource Rune.Brush.WarningBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Danger" Solid="{StaticResource Rune.Brush.Danger}" SolidHover="{StaticResource Rune.Brush.DangerHover}" Contrast="{StaticResource Rune.Brush.DangerContrast}" Soft="{StaticResource Rune.Brush.DangerSoft}" SoftHover="{StaticResource Rune.Brush.DangerSoftHover}" Surface="{StaticResource Rune.Brush.DangerSoft}" SubtleHover="{StaticResource Rune.Brush.DangerSoft}" Text="{StaticResource Rune.Brush.DangerText}" Border="{StaticResource Rune.Brush.DangerBorder}" />
     </ResourceDictionary>
     <!-- 柠檬（lemon，亮色） -->
     <ResourceDictionary x:Key="{x:Static rune:RuneThemeVariants.Lemon}">
@@ -1609,6 +1680,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Chart7" Color="#FF0D9B8A" />
       <Color x:Key="Rune.Color.Chart8">#FFC68400</Color>
       <SolidColorBrush x:Key="Rune.Brush.Chart8" Color="#FFC68400" />
+      <Color x:Key="Rune.Color.InverseSurfaceHover">#FF3F3C2C</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InverseSurfaceHover" Color="#FF3F3C2C" />
 
       <!-- shadows -->
       <BoxShadows x:Key="Rune.Shadow.None">none</BoxShadows>
@@ -1632,6 +1705,14 @@
       <x:Double x:Key="Rune.Radius.Lg">1.1</x:Double>
       <x:Double x:Key="Rune.Radius.Xl">1.5</x:Double>
       <x:Double x:Key="Rune.Radius.Full">9999</x:Double>
+
+      <!-- 色调调色板（DESIGN §4）：组件的样式档位引用它的字段 -->
+      <rune:TonePalette x:Key="Rune.Palette.Neutral" Solid="{StaticResource Rune.Brush.InverseSurface}" SolidHover="{StaticResource Rune.Brush.InverseSurfaceHover}" Contrast="{StaticResource Rune.Brush.InverseText}" Soft="{StaticResource Rune.Brush.Fill}" SoftHover="{StaticResource Rune.Brush.FillHover}" Surface="{StaticResource Rune.Brush.Surface}" SubtleHover="{StaticResource Rune.Brush.FillHover}" Text="{StaticResource Rune.Brush.Text}" Border="{StaticResource Rune.Brush.Border}" />
+      <rune:TonePalette x:Key="Rune.Palette.Accent" Solid="{StaticResource Rune.Brush.Accent}" SolidHover="{StaticResource Rune.Brush.AccentHover}" Contrast="{StaticResource Rune.Brush.AccentContrast}" Soft="{StaticResource Rune.Brush.AccentSoft}" SoftHover="{StaticResource Rune.Brush.AccentSoftHover}" Surface="{StaticResource Rune.Brush.AccentSoft}" SubtleHover="{StaticResource Rune.Brush.AccentSoft}" Text="{StaticResource Rune.Brush.AccentText}" Border="{StaticResource Rune.Brush.AccentBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Info" Solid="{StaticResource Rune.Brush.Info}" SolidHover="{StaticResource Rune.Brush.InfoHover}" Contrast="{StaticResource Rune.Brush.InfoContrast}" Soft="{StaticResource Rune.Brush.InfoSoft}" SoftHover="{StaticResource Rune.Brush.InfoSoftHover}" Surface="{StaticResource Rune.Brush.InfoSoft}" SubtleHover="{StaticResource Rune.Brush.InfoSoft}" Text="{StaticResource Rune.Brush.InfoText}" Border="{StaticResource Rune.Brush.InfoBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Success" Solid="{StaticResource Rune.Brush.Success}" SolidHover="{StaticResource Rune.Brush.SuccessHover}" Contrast="{StaticResource Rune.Brush.SuccessContrast}" Soft="{StaticResource Rune.Brush.SuccessSoft}" SoftHover="{StaticResource Rune.Brush.SuccessSoftHover}" Surface="{StaticResource Rune.Brush.SuccessSoft}" SubtleHover="{StaticResource Rune.Brush.SuccessSoft}" Text="{StaticResource Rune.Brush.SuccessText}" Border="{StaticResource Rune.Brush.SuccessBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Warning" Solid="{StaticResource Rune.Brush.Warning}" SolidHover="{StaticResource Rune.Brush.WarningHover}" Contrast="{StaticResource Rune.Brush.WarningContrast}" Soft="{StaticResource Rune.Brush.WarningSoft}" SoftHover="{StaticResource Rune.Brush.WarningSoftHover}" Surface="{StaticResource Rune.Brush.WarningSoft}" SubtleHover="{StaticResource Rune.Brush.WarningSoft}" Text="{StaticResource Rune.Brush.WarningText}" Border="{StaticResource Rune.Brush.WarningBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Danger" Solid="{StaticResource Rune.Brush.Danger}" SolidHover="{StaticResource Rune.Brush.DangerHover}" Contrast="{StaticResource Rune.Brush.DangerContrast}" Soft="{StaticResource Rune.Brush.DangerSoft}" SoftHover="{StaticResource Rune.Brush.DangerSoftHover}" Surface="{StaticResource Rune.Brush.DangerSoft}" SubtleHover="{StaticResource Rune.Brush.DangerSoft}" Text="{StaticResource Rune.Brush.DangerText}" Border="{StaticResource Rune.Brush.DangerBorder}" />
     </ResourceDictionary>
     <!-- 樱花（sakura，亮色） -->
     <ResourceDictionary x:Key="{x:Static rune:RuneThemeVariants.Sakura}">
@@ -1784,6 +1865,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Chart7" Color="#FF309DBA" />
       <Color x:Key="Rune.Color.Chart8">#FF3E9B4F</Color>
       <SolidColorBrush x:Key="Rune.Brush.Chart8" Color="#FF3E9B4F" />
+      <Color x:Key="Rune.Color.InverseSurfaceHover">#FF44373C</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InverseSurfaceHover" Color="#FF44373C" />
 
       <!-- shadows -->
       <BoxShadows x:Key="Rune.Shadow.None">none</BoxShadows>
@@ -1807,6 +1890,14 @@
       <x:Double x:Key="Rune.Radius.Lg">0.85</x:Double>
       <x:Double x:Key="Rune.Radius.Xl">1.2</x:Double>
       <x:Double x:Key="Rune.Radius.Full">9999</x:Double>
+
+      <!-- 色调调色板（DESIGN §4）：组件的样式档位引用它的字段 -->
+      <rune:TonePalette x:Key="Rune.Palette.Neutral" Solid="{StaticResource Rune.Brush.InverseSurface}" SolidHover="{StaticResource Rune.Brush.InverseSurfaceHover}" Contrast="{StaticResource Rune.Brush.InverseText}" Soft="{StaticResource Rune.Brush.Fill}" SoftHover="{StaticResource Rune.Brush.FillHover}" Surface="{StaticResource Rune.Brush.Surface}" SubtleHover="{StaticResource Rune.Brush.FillHover}" Text="{StaticResource Rune.Brush.Text}" Border="{StaticResource Rune.Brush.Border}" />
+      <rune:TonePalette x:Key="Rune.Palette.Accent" Solid="{StaticResource Rune.Brush.Accent}" SolidHover="{StaticResource Rune.Brush.AccentHover}" Contrast="{StaticResource Rune.Brush.AccentContrast}" Soft="{StaticResource Rune.Brush.AccentSoft}" SoftHover="{StaticResource Rune.Brush.AccentSoftHover}" Surface="{StaticResource Rune.Brush.AccentSoft}" SubtleHover="{StaticResource Rune.Brush.AccentSoft}" Text="{StaticResource Rune.Brush.AccentText}" Border="{StaticResource Rune.Brush.AccentBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Info" Solid="{StaticResource Rune.Brush.Info}" SolidHover="{StaticResource Rune.Brush.InfoHover}" Contrast="{StaticResource Rune.Brush.InfoContrast}" Soft="{StaticResource Rune.Brush.InfoSoft}" SoftHover="{StaticResource Rune.Brush.InfoSoftHover}" Surface="{StaticResource Rune.Brush.InfoSoft}" SubtleHover="{StaticResource Rune.Brush.InfoSoft}" Text="{StaticResource Rune.Brush.InfoText}" Border="{StaticResource Rune.Brush.InfoBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Success" Solid="{StaticResource Rune.Brush.Success}" SolidHover="{StaticResource Rune.Brush.SuccessHover}" Contrast="{StaticResource Rune.Brush.SuccessContrast}" Soft="{StaticResource Rune.Brush.SuccessSoft}" SoftHover="{StaticResource Rune.Brush.SuccessSoftHover}" Surface="{StaticResource Rune.Brush.SuccessSoft}" SubtleHover="{StaticResource Rune.Brush.SuccessSoft}" Text="{StaticResource Rune.Brush.SuccessText}" Border="{StaticResource Rune.Brush.SuccessBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Warning" Solid="{StaticResource Rune.Brush.Warning}" SolidHover="{StaticResource Rune.Brush.WarningHover}" Contrast="{StaticResource Rune.Brush.WarningContrast}" Soft="{StaticResource Rune.Brush.WarningSoft}" SoftHover="{StaticResource Rune.Brush.WarningSoftHover}" Surface="{StaticResource Rune.Brush.WarningSoft}" SubtleHover="{StaticResource Rune.Brush.WarningSoft}" Text="{StaticResource Rune.Brush.WarningText}" Border="{StaticResource Rune.Brush.WarningBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Danger" Solid="{StaticResource Rune.Brush.Danger}" SolidHover="{StaticResource Rune.Brush.DangerHover}" Contrast="{StaticResource Rune.Brush.DangerContrast}" Soft="{StaticResource Rune.Brush.DangerSoft}" SoftHover="{StaticResource Rune.Brush.DangerSoftHover}" Surface="{StaticResource Rune.Brush.DangerSoft}" SubtleHover="{StaticResource Rune.Brush.DangerSoft}" Text="{StaticResource Rune.Brush.DangerText}" Border="{StaticResource Rune.Brush.DangerBorder}" />
     </ResourceDictionary>
     <!-- 喜庆（festive，亮色） -->
     <ResourceDictionary x:Key="{x:Static rune:RuneThemeVariants.Festive}">
@@ -1959,6 +2050,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Chart7" Color="#FFD9661A" />
       <Color x:Key="Rune.Color.Chart8">#FF9A7656</Color>
       <SolidColorBrush x:Key="Rune.Brush.Chart8" Color="#FF9A7656" />
+      <Color x:Key="Rune.Color.InverseSurfaceHover">#FF48372F</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InverseSurfaceHover" Color="#FF48372F" />
 
       <!-- shadows -->
       <BoxShadows x:Key="Rune.Shadow.None">none</BoxShadows>
@@ -1982,6 +2075,14 @@
       <x:Double x:Key="Rune.Radius.Lg">0.7</x:Double>
       <x:Double x:Key="Rune.Radius.Xl">1</x:Double>
       <x:Double x:Key="Rune.Radius.Full">9999</x:Double>
+
+      <!-- 色调调色板（DESIGN §4）：组件的样式档位引用它的字段 -->
+      <rune:TonePalette x:Key="Rune.Palette.Neutral" Solid="{StaticResource Rune.Brush.InverseSurface}" SolidHover="{StaticResource Rune.Brush.InverseSurfaceHover}" Contrast="{StaticResource Rune.Brush.InverseText}" Soft="{StaticResource Rune.Brush.Fill}" SoftHover="{StaticResource Rune.Brush.FillHover}" Surface="{StaticResource Rune.Brush.Surface}" SubtleHover="{StaticResource Rune.Brush.FillHover}" Text="{StaticResource Rune.Brush.Text}" Border="{StaticResource Rune.Brush.Border}" />
+      <rune:TonePalette x:Key="Rune.Palette.Accent" Solid="{StaticResource Rune.Brush.Accent}" SolidHover="{StaticResource Rune.Brush.AccentHover}" Contrast="{StaticResource Rune.Brush.AccentContrast}" Soft="{StaticResource Rune.Brush.AccentSoft}" SoftHover="{StaticResource Rune.Brush.AccentSoftHover}" Surface="{StaticResource Rune.Brush.AccentSoft}" SubtleHover="{StaticResource Rune.Brush.AccentSoft}" Text="{StaticResource Rune.Brush.AccentText}" Border="{StaticResource Rune.Brush.AccentBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Info" Solid="{StaticResource Rune.Brush.Info}" SolidHover="{StaticResource Rune.Brush.InfoHover}" Contrast="{StaticResource Rune.Brush.InfoContrast}" Soft="{StaticResource Rune.Brush.InfoSoft}" SoftHover="{StaticResource Rune.Brush.InfoSoftHover}" Surface="{StaticResource Rune.Brush.InfoSoft}" SubtleHover="{StaticResource Rune.Brush.InfoSoft}" Text="{StaticResource Rune.Brush.InfoText}" Border="{StaticResource Rune.Brush.InfoBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Success" Solid="{StaticResource Rune.Brush.Success}" SolidHover="{StaticResource Rune.Brush.SuccessHover}" Contrast="{StaticResource Rune.Brush.SuccessContrast}" Soft="{StaticResource Rune.Brush.SuccessSoft}" SoftHover="{StaticResource Rune.Brush.SuccessSoftHover}" Surface="{StaticResource Rune.Brush.SuccessSoft}" SubtleHover="{StaticResource Rune.Brush.SuccessSoft}" Text="{StaticResource Rune.Brush.SuccessText}" Border="{StaticResource Rune.Brush.SuccessBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Warning" Solid="{StaticResource Rune.Brush.Warning}" SolidHover="{StaticResource Rune.Brush.WarningHover}" Contrast="{StaticResource Rune.Brush.WarningContrast}" Soft="{StaticResource Rune.Brush.WarningSoft}" SoftHover="{StaticResource Rune.Brush.WarningSoftHover}" Surface="{StaticResource Rune.Brush.WarningSoft}" SubtleHover="{StaticResource Rune.Brush.WarningSoft}" Text="{StaticResource Rune.Brush.WarningText}" Border="{StaticResource Rune.Brush.WarningBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Danger" Solid="{StaticResource Rune.Brush.Danger}" SolidHover="{StaticResource Rune.Brush.DangerHover}" Contrast="{StaticResource Rune.Brush.DangerContrast}" Soft="{StaticResource Rune.Brush.DangerSoft}" SoftHover="{StaticResource Rune.Brush.DangerSoftHover}" Surface="{StaticResource Rune.Brush.DangerSoft}" SubtleHover="{StaticResource Rune.Brush.DangerSoft}" Text="{StaticResource Rune.Brush.DangerText}" Border="{StaticResource Rune.Brush.DangerBorder}" />
     </ResourceDictionary>
     <!-- 赛博朋克（cyberpunk，暗色） -->
     <ResourceDictionary x:Key="{x:Static rune:RuneThemeVariants.Cyberpunk}">
@@ -2134,6 +2235,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Chart7" Color="#FF00FFA3" />
       <Color x:Key="Rune.Color.Chart8">#FFFF3864</Color>
       <SolidColorBrush x:Key="Rune.Brush.Chart8" Color="#FFFF3864" />
+      <Color x:Key="Rune.Color.InverseSurfaceHover">#FFC7C4DA</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InverseSurfaceHover" Color="#FFC7C4DA" />
 
       <!-- shadows -->
       <BoxShadows x:Key="Rune.Shadow.None">none</BoxShadows>
@@ -2157,6 +2260,14 @@
       <x:Double x:Key="Rune.Radius.Lg">0.25</x:Double>
       <x:Double x:Key="Rune.Radius.Xl">0.4</x:Double>
       <x:Double x:Key="Rune.Radius.Full">9999</x:Double>
+
+      <!-- 色调调色板（DESIGN §4）：组件的样式档位引用它的字段 -->
+      <rune:TonePalette x:Key="Rune.Palette.Neutral" Solid="{StaticResource Rune.Brush.InverseSurface}" SolidHover="{StaticResource Rune.Brush.InverseSurfaceHover}" Contrast="{StaticResource Rune.Brush.InverseText}" Soft="{StaticResource Rune.Brush.Fill}" SoftHover="{StaticResource Rune.Brush.FillHover}" Surface="{StaticResource Rune.Brush.Surface}" SubtleHover="{StaticResource Rune.Brush.FillHover}" Text="{StaticResource Rune.Brush.Text}" Border="{StaticResource Rune.Brush.Border}" />
+      <rune:TonePalette x:Key="Rune.Palette.Accent" Solid="{StaticResource Rune.Brush.Accent}" SolidHover="{StaticResource Rune.Brush.AccentHover}" Contrast="{StaticResource Rune.Brush.AccentContrast}" Soft="{StaticResource Rune.Brush.AccentSoft}" SoftHover="{StaticResource Rune.Brush.AccentSoftHover}" Surface="{StaticResource Rune.Brush.AccentSoft}" SubtleHover="{StaticResource Rune.Brush.AccentSoft}" Text="{StaticResource Rune.Brush.AccentText}" Border="{StaticResource Rune.Brush.AccentBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Info" Solid="{StaticResource Rune.Brush.Info}" SolidHover="{StaticResource Rune.Brush.InfoHover}" Contrast="{StaticResource Rune.Brush.InfoContrast}" Soft="{StaticResource Rune.Brush.InfoSoft}" SoftHover="{StaticResource Rune.Brush.InfoSoftHover}" Surface="{StaticResource Rune.Brush.InfoSoft}" SubtleHover="{StaticResource Rune.Brush.InfoSoft}" Text="{StaticResource Rune.Brush.InfoText}" Border="{StaticResource Rune.Brush.InfoBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Success" Solid="{StaticResource Rune.Brush.Success}" SolidHover="{StaticResource Rune.Brush.SuccessHover}" Contrast="{StaticResource Rune.Brush.SuccessContrast}" Soft="{StaticResource Rune.Brush.SuccessSoft}" SoftHover="{StaticResource Rune.Brush.SuccessSoftHover}" Surface="{StaticResource Rune.Brush.SuccessSoft}" SubtleHover="{StaticResource Rune.Brush.SuccessSoft}" Text="{StaticResource Rune.Brush.SuccessText}" Border="{StaticResource Rune.Brush.SuccessBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Warning" Solid="{StaticResource Rune.Brush.Warning}" SolidHover="{StaticResource Rune.Brush.WarningHover}" Contrast="{StaticResource Rune.Brush.WarningContrast}" Soft="{StaticResource Rune.Brush.WarningSoft}" SoftHover="{StaticResource Rune.Brush.WarningSoftHover}" Surface="{StaticResource Rune.Brush.WarningSoft}" SubtleHover="{StaticResource Rune.Brush.WarningSoft}" Text="{StaticResource Rune.Brush.WarningText}" Border="{StaticResource Rune.Brush.WarningBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Danger" Solid="{StaticResource Rune.Brush.Danger}" SolidHover="{StaticResource Rune.Brush.DangerHover}" Contrast="{StaticResource Rune.Brush.DangerContrast}" Soft="{StaticResource Rune.Brush.DangerSoft}" SoftHover="{StaticResource Rune.Brush.DangerSoftHover}" Surface="{StaticResource Rune.Brush.DangerSoft}" SubtleHover="{StaticResource Rune.Brush.DangerSoft}" Text="{StaticResource Rune.Brush.DangerText}" Border="{StaticResource Rune.Brush.DangerBorder}" />
     </ResourceDictionary>
     <!-- 大屏（big-screen，暗色） -->
     <ResourceDictionary x:Key="{x:Static rune:RuneThemeVariants.BigScreen}">
@@ -2309,6 +2420,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Chart7" Color="#FFFF77C8" />
       <Color x:Key="Rune.Color.Chart8">#FF9BE15D</Color>
       <SolidColorBrush x:Key="Rune.Brush.Chart8" Color="#FF9BE15D" />
+      <Color x:Key="Rune.Color.InverseSurfaceHover">#FFC8D0DE</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InverseSurfaceHover" Color="#FFC8D0DE" />
 
       <!-- shadows -->
       <BoxShadows x:Key="Rune.Shadow.None">none</BoxShadows>
@@ -2332,6 +2445,14 @@
       <x:Double x:Key="Rune.Radius.Lg">0.45</x:Double>
       <x:Double x:Key="Rune.Radius.Xl">0.65</x:Double>
       <x:Double x:Key="Rune.Radius.Full">9999</x:Double>
+
+      <!-- 色调调色板（DESIGN §4）：组件的样式档位引用它的字段 -->
+      <rune:TonePalette x:Key="Rune.Palette.Neutral" Solid="{StaticResource Rune.Brush.InverseSurface}" SolidHover="{StaticResource Rune.Brush.InverseSurfaceHover}" Contrast="{StaticResource Rune.Brush.InverseText}" Soft="{StaticResource Rune.Brush.Fill}" SoftHover="{StaticResource Rune.Brush.FillHover}" Surface="{StaticResource Rune.Brush.Surface}" SubtleHover="{StaticResource Rune.Brush.FillHover}" Text="{StaticResource Rune.Brush.Text}" Border="{StaticResource Rune.Brush.Border}" />
+      <rune:TonePalette x:Key="Rune.Palette.Accent" Solid="{StaticResource Rune.Brush.Accent}" SolidHover="{StaticResource Rune.Brush.AccentHover}" Contrast="{StaticResource Rune.Brush.AccentContrast}" Soft="{StaticResource Rune.Brush.AccentSoft}" SoftHover="{StaticResource Rune.Brush.AccentSoftHover}" Surface="{StaticResource Rune.Brush.AccentSoft}" SubtleHover="{StaticResource Rune.Brush.AccentSoft}" Text="{StaticResource Rune.Brush.AccentText}" Border="{StaticResource Rune.Brush.AccentBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Info" Solid="{StaticResource Rune.Brush.Info}" SolidHover="{StaticResource Rune.Brush.InfoHover}" Contrast="{StaticResource Rune.Brush.InfoContrast}" Soft="{StaticResource Rune.Brush.InfoSoft}" SoftHover="{StaticResource Rune.Brush.InfoSoftHover}" Surface="{StaticResource Rune.Brush.InfoSoft}" SubtleHover="{StaticResource Rune.Brush.InfoSoft}" Text="{StaticResource Rune.Brush.InfoText}" Border="{StaticResource Rune.Brush.InfoBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Success" Solid="{StaticResource Rune.Brush.Success}" SolidHover="{StaticResource Rune.Brush.SuccessHover}" Contrast="{StaticResource Rune.Brush.SuccessContrast}" Soft="{StaticResource Rune.Brush.SuccessSoft}" SoftHover="{StaticResource Rune.Brush.SuccessSoftHover}" Surface="{StaticResource Rune.Brush.SuccessSoft}" SubtleHover="{StaticResource Rune.Brush.SuccessSoft}" Text="{StaticResource Rune.Brush.SuccessText}" Border="{StaticResource Rune.Brush.SuccessBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Warning" Solid="{StaticResource Rune.Brush.Warning}" SolidHover="{StaticResource Rune.Brush.WarningHover}" Contrast="{StaticResource Rune.Brush.WarningContrast}" Soft="{StaticResource Rune.Brush.WarningSoft}" SoftHover="{StaticResource Rune.Brush.WarningSoftHover}" Surface="{StaticResource Rune.Brush.WarningSoft}" SubtleHover="{StaticResource Rune.Brush.WarningSoft}" Text="{StaticResource Rune.Brush.WarningText}" Border="{StaticResource Rune.Brush.WarningBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Danger" Solid="{StaticResource Rune.Brush.Danger}" SolidHover="{StaticResource Rune.Brush.DangerHover}" Contrast="{StaticResource Rune.Brush.DangerContrast}" Soft="{StaticResource Rune.Brush.DangerSoft}" SoftHover="{StaticResource Rune.Brush.DangerSoftHover}" Surface="{StaticResource Rune.Brush.DangerSoft}" SubtleHover="{StaticResource Rune.Brush.DangerSoft}" Text="{StaticResource Rune.Brush.DangerText}" Border="{StaticResource Rune.Brush.DangerBorder}" />
     </ResourceDictionary>
     <!-- 薰衣草（lavender，亮色） -->
     <ResourceDictionary x:Key="{x:Static rune:RuneThemeVariants.Lavender}">
@@ -2484,6 +2605,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Chart7" Color="#FFE5484D" />
       <Color x:Key="Rune.Color.Chart8">#FF8E4EC6</Color>
       <SolidColorBrush x:Key="Rune.Brush.Chart8" Color="#FF8E4EC6" />
+      <Color x:Key="Rune.Color.InverseSurfaceHover">#FF3D374B</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InverseSurfaceHover" Color="#FF3D374B" />
 
       <!-- shadows -->
       <BoxShadows x:Key="Rune.Shadow.None">none</BoxShadows>
@@ -2507,6 +2630,14 @@
       <x:Double x:Key="Rune.Radius.Lg">0.75</x:Double>
       <x:Double x:Key="Rune.Radius.Xl">1.05</x:Double>
       <x:Double x:Key="Rune.Radius.Full">9999</x:Double>
+
+      <!-- 色调调色板（DESIGN §4）：组件的样式档位引用它的字段 -->
+      <rune:TonePalette x:Key="Rune.Palette.Neutral" Solid="{StaticResource Rune.Brush.InverseSurface}" SolidHover="{StaticResource Rune.Brush.InverseSurfaceHover}" Contrast="{StaticResource Rune.Brush.InverseText}" Soft="{StaticResource Rune.Brush.Fill}" SoftHover="{StaticResource Rune.Brush.FillHover}" Surface="{StaticResource Rune.Brush.Surface}" SubtleHover="{StaticResource Rune.Brush.FillHover}" Text="{StaticResource Rune.Brush.Text}" Border="{StaticResource Rune.Brush.Border}" />
+      <rune:TonePalette x:Key="Rune.Palette.Accent" Solid="{StaticResource Rune.Brush.Accent}" SolidHover="{StaticResource Rune.Brush.AccentHover}" Contrast="{StaticResource Rune.Brush.AccentContrast}" Soft="{StaticResource Rune.Brush.AccentSoft}" SoftHover="{StaticResource Rune.Brush.AccentSoftHover}" Surface="{StaticResource Rune.Brush.AccentSoft}" SubtleHover="{StaticResource Rune.Brush.AccentSoft}" Text="{StaticResource Rune.Brush.AccentText}" Border="{StaticResource Rune.Brush.AccentBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Info" Solid="{StaticResource Rune.Brush.Info}" SolidHover="{StaticResource Rune.Brush.InfoHover}" Contrast="{StaticResource Rune.Brush.InfoContrast}" Soft="{StaticResource Rune.Brush.InfoSoft}" SoftHover="{StaticResource Rune.Brush.InfoSoftHover}" Surface="{StaticResource Rune.Brush.InfoSoft}" SubtleHover="{StaticResource Rune.Brush.InfoSoft}" Text="{StaticResource Rune.Brush.InfoText}" Border="{StaticResource Rune.Brush.InfoBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Success" Solid="{StaticResource Rune.Brush.Success}" SolidHover="{StaticResource Rune.Brush.SuccessHover}" Contrast="{StaticResource Rune.Brush.SuccessContrast}" Soft="{StaticResource Rune.Brush.SuccessSoft}" SoftHover="{StaticResource Rune.Brush.SuccessSoftHover}" Surface="{StaticResource Rune.Brush.SuccessSoft}" SubtleHover="{StaticResource Rune.Brush.SuccessSoft}" Text="{StaticResource Rune.Brush.SuccessText}" Border="{StaticResource Rune.Brush.SuccessBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Warning" Solid="{StaticResource Rune.Brush.Warning}" SolidHover="{StaticResource Rune.Brush.WarningHover}" Contrast="{StaticResource Rune.Brush.WarningContrast}" Soft="{StaticResource Rune.Brush.WarningSoft}" SoftHover="{StaticResource Rune.Brush.WarningSoftHover}" Surface="{StaticResource Rune.Brush.WarningSoft}" SubtleHover="{StaticResource Rune.Brush.WarningSoft}" Text="{StaticResource Rune.Brush.WarningText}" Border="{StaticResource Rune.Brush.WarningBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Danger" Solid="{StaticResource Rune.Brush.Danger}" SolidHover="{StaticResource Rune.Brush.DangerHover}" Contrast="{StaticResource Rune.Brush.DangerContrast}" Soft="{StaticResource Rune.Brush.DangerSoft}" SoftHover="{StaticResource Rune.Brush.DangerSoftHover}" Surface="{StaticResource Rune.Brush.DangerSoft}" SubtleHover="{StaticResource Rune.Brush.DangerSoft}" Text="{StaticResource Rune.Brush.DangerText}" Border="{StaticResource Rune.Brush.DangerBorder}" />
     </ResourceDictionary>
     <!-- 余烬（ember，暗色） -->
     <ResourceDictionary x:Key="{x:Static rune:RuneThemeVariants.Ember}">
@@ -2659,6 +2790,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Chart7" Color="#FF46A758" />
       <Color x:Key="Rune.Color.Chart8">#FFD6A77A</Color>
       <SolidColorBrush x:Key="Rune.Brush.Chart8" Color="#FFD6A77A" />
+      <Color x:Key="Rune.Color.InverseSurfaceHover">#FFCFC8C0</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InverseSurfaceHover" Color="#FFCFC8C0" />
 
       <!-- shadows -->
       <BoxShadows x:Key="Rune.Shadow.None">none</BoxShadows>
@@ -2682,6 +2815,14 @@
       <x:Double x:Key="Rune.Radius.Lg">0.7</x:Double>
       <x:Double x:Key="Rune.Radius.Xl">1</x:Double>
       <x:Double x:Key="Rune.Radius.Full">9999</x:Double>
+
+      <!-- 色调调色板（DESIGN §4）：组件的样式档位引用它的字段 -->
+      <rune:TonePalette x:Key="Rune.Palette.Neutral" Solid="{StaticResource Rune.Brush.InverseSurface}" SolidHover="{StaticResource Rune.Brush.InverseSurfaceHover}" Contrast="{StaticResource Rune.Brush.InverseText}" Soft="{StaticResource Rune.Brush.Fill}" SoftHover="{StaticResource Rune.Brush.FillHover}" Surface="{StaticResource Rune.Brush.Surface}" SubtleHover="{StaticResource Rune.Brush.FillHover}" Text="{StaticResource Rune.Brush.Text}" Border="{StaticResource Rune.Brush.Border}" />
+      <rune:TonePalette x:Key="Rune.Palette.Accent" Solid="{StaticResource Rune.Brush.Accent}" SolidHover="{StaticResource Rune.Brush.AccentHover}" Contrast="{StaticResource Rune.Brush.AccentContrast}" Soft="{StaticResource Rune.Brush.AccentSoft}" SoftHover="{StaticResource Rune.Brush.AccentSoftHover}" Surface="{StaticResource Rune.Brush.AccentSoft}" SubtleHover="{StaticResource Rune.Brush.AccentSoft}" Text="{StaticResource Rune.Brush.AccentText}" Border="{StaticResource Rune.Brush.AccentBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Info" Solid="{StaticResource Rune.Brush.Info}" SolidHover="{StaticResource Rune.Brush.InfoHover}" Contrast="{StaticResource Rune.Brush.InfoContrast}" Soft="{StaticResource Rune.Brush.InfoSoft}" SoftHover="{StaticResource Rune.Brush.InfoSoftHover}" Surface="{StaticResource Rune.Brush.InfoSoft}" SubtleHover="{StaticResource Rune.Brush.InfoSoft}" Text="{StaticResource Rune.Brush.InfoText}" Border="{StaticResource Rune.Brush.InfoBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Success" Solid="{StaticResource Rune.Brush.Success}" SolidHover="{StaticResource Rune.Brush.SuccessHover}" Contrast="{StaticResource Rune.Brush.SuccessContrast}" Soft="{StaticResource Rune.Brush.SuccessSoft}" SoftHover="{StaticResource Rune.Brush.SuccessSoftHover}" Surface="{StaticResource Rune.Brush.SuccessSoft}" SubtleHover="{StaticResource Rune.Brush.SuccessSoft}" Text="{StaticResource Rune.Brush.SuccessText}" Border="{StaticResource Rune.Brush.SuccessBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Warning" Solid="{StaticResource Rune.Brush.Warning}" SolidHover="{StaticResource Rune.Brush.WarningHover}" Contrast="{StaticResource Rune.Brush.WarningContrast}" Soft="{StaticResource Rune.Brush.WarningSoft}" SoftHover="{StaticResource Rune.Brush.WarningSoftHover}" Surface="{StaticResource Rune.Brush.WarningSoft}" SubtleHover="{StaticResource Rune.Brush.WarningSoft}" Text="{StaticResource Rune.Brush.WarningText}" Border="{StaticResource Rune.Brush.WarningBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Danger" Solid="{StaticResource Rune.Brush.Danger}" SolidHover="{StaticResource Rune.Brush.DangerHover}" Contrast="{StaticResource Rune.Brush.DangerContrast}" Soft="{StaticResource Rune.Brush.DangerSoft}" SoftHover="{StaticResource Rune.Brush.DangerSoftHover}" Surface="{StaticResource Rune.Brush.DangerSoft}" SubtleHover="{StaticResource Rune.Brush.DangerSoft}" Text="{StaticResource Rune.Brush.DangerText}" Border="{StaticResource Rune.Brush.DangerBorder}" />
     </ResourceDictionary>
     <!-- 墨白（mono，亮色） -->
     <ResourceDictionary x:Key="{x:Static rune:RuneThemeVariants.Mono}">
@@ -2834,6 +2975,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Chart7" Color="#FF0797B9" />
       <Color x:Key="Rune.Color.Chart8">#FF777777</Color>
       <SolidColorBrush x:Key="Rune.Brush.Chart8" Color="#FF777777" />
+      <Color x:Key="Rune.Color.InverseSurfaceHover">#FF343434</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InverseSurfaceHover" Color="#FF343434" />
 
       <!-- shadows -->
       <BoxShadows x:Key="Rune.Shadow.None">none</BoxShadows>
@@ -2857,6 +3000,14 @@
       <x:Double x:Key="Rune.Radius.Lg">0.45</x:Double>
       <x:Double x:Key="Rune.Radius.Xl">0.6</x:Double>
       <x:Double x:Key="Rune.Radius.Full">9999</x:Double>
+
+      <!-- 色调调色板（DESIGN §4）：组件的样式档位引用它的字段 -->
+      <rune:TonePalette x:Key="Rune.Palette.Neutral" Solid="{StaticResource Rune.Brush.InverseSurface}" SolidHover="{StaticResource Rune.Brush.InverseSurfaceHover}" Contrast="{StaticResource Rune.Brush.InverseText}" Soft="{StaticResource Rune.Brush.Fill}" SoftHover="{StaticResource Rune.Brush.FillHover}" Surface="{StaticResource Rune.Brush.Surface}" SubtleHover="{StaticResource Rune.Brush.FillHover}" Text="{StaticResource Rune.Brush.Text}" Border="{StaticResource Rune.Brush.Border}" />
+      <rune:TonePalette x:Key="Rune.Palette.Accent" Solid="{StaticResource Rune.Brush.Accent}" SolidHover="{StaticResource Rune.Brush.AccentHover}" Contrast="{StaticResource Rune.Brush.AccentContrast}" Soft="{StaticResource Rune.Brush.AccentSoft}" SoftHover="{StaticResource Rune.Brush.AccentSoftHover}" Surface="{StaticResource Rune.Brush.AccentSoft}" SubtleHover="{StaticResource Rune.Brush.AccentSoft}" Text="{StaticResource Rune.Brush.AccentText}" Border="{StaticResource Rune.Brush.AccentBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Info" Solid="{StaticResource Rune.Brush.Info}" SolidHover="{StaticResource Rune.Brush.InfoHover}" Contrast="{StaticResource Rune.Brush.InfoContrast}" Soft="{StaticResource Rune.Brush.InfoSoft}" SoftHover="{StaticResource Rune.Brush.InfoSoftHover}" Surface="{StaticResource Rune.Brush.InfoSoft}" SubtleHover="{StaticResource Rune.Brush.InfoSoft}" Text="{StaticResource Rune.Brush.InfoText}" Border="{StaticResource Rune.Brush.InfoBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Success" Solid="{StaticResource Rune.Brush.Success}" SolidHover="{StaticResource Rune.Brush.SuccessHover}" Contrast="{StaticResource Rune.Brush.SuccessContrast}" Soft="{StaticResource Rune.Brush.SuccessSoft}" SoftHover="{StaticResource Rune.Brush.SuccessSoftHover}" Surface="{StaticResource Rune.Brush.SuccessSoft}" SubtleHover="{StaticResource Rune.Brush.SuccessSoft}" Text="{StaticResource Rune.Brush.SuccessText}" Border="{StaticResource Rune.Brush.SuccessBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Warning" Solid="{StaticResource Rune.Brush.Warning}" SolidHover="{StaticResource Rune.Brush.WarningHover}" Contrast="{StaticResource Rune.Brush.WarningContrast}" Soft="{StaticResource Rune.Brush.WarningSoft}" SoftHover="{StaticResource Rune.Brush.WarningSoftHover}" Surface="{StaticResource Rune.Brush.WarningSoft}" SubtleHover="{StaticResource Rune.Brush.WarningSoft}" Text="{StaticResource Rune.Brush.WarningText}" Border="{StaticResource Rune.Brush.WarningBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Danger" Solid="{StaticResource Rune.Brush.Danger}" SolidHover="{StaticResource Rune.Brush.DangerHover}" Contrast="{StaticResource Rune.Brush.DangerContrast}" Soft="{StaticResource Rune.Brush.DangerSoft}" SoftHover="{StaticResource Rune.Brush.DangerSoftHover}" Surface="{StaticResource Rune.Brush.DangerSoft}" SubtleHover="{StaticResource Rune.Brush.DangerSoft}" Text="{StaticResource Rune.Brush.DangerText}" Border="{StaticResource Rune.Brush.DangerBorder}" />
     </ResourceDictionary>
     <!-- 青瓷（celadon，亮色） -->
     <ResourceDictionary x:Key="{x:Static rune:RuneThemeVariants.Celadon}">
@@ -3009,6 +3160,8 @@
       <SolidColorBrush x:Key="Rune.Brush.Chart7" Color="#FFB8325A" />
       <Color x:Key="Rune.Color.Chart8">#FF5D7A86</Color>
       <SolidColorBrush x:Key="Rune.Brush.Chart8" Color="#FF5D7A86" />
+      <Color x:Key="Rune.Color.InverseSurfaceHover">#FF344A45</Color>
+      <SolidColorBrush x:Key="Rune.Brush.InverseSurfaceHover" Color="#FF344A45" />
 
       <!-- shadows -->
       <BoxShadows x:Key="Rune.Shadow.None">none</BoxShadows>
@@ -3032,6 +3185,14 @@
       <x:Double x:Key="Rune.Radius.Lg">0.7</x:Double>
       <x:Double x:Key="Rune.Radius.Xl">1</x:Double>
       <x:Double x:Key="Rune.Radius.Full">9999</x:Double>
+
+      <!-- 色调调色板（DESIGN §4）：组件的样式档位引用它的字段 -->
+      <rune:TonePalette x:Key="Rune.Palette.Neutral" Solid="{StaticResource Rune.Brush.InverseSurface}" SolidHover="{StaticResource Rune.Brush.InverseSurfaceHover}" Contrast="{StaticResource Rune.Brush.InverseText}" Soft="{StaticResource Rune.Brush.Fill}" SoftHover="{StaticResource Rune.Brush.FillHover}" Surface="{StaticResource Rune.Brush.Surface}" SubtleHover="{StaticResource Rune.Brush.FillHover}" Text="{StaticResource Rune.Brush.Text}" Border="{StaticResource Rune.Brush.Border}" />
+      <rune:TonePalette x:Key="Rune.Palette.Accent" Solid="{StaticResource Rune.Brush.Accent}" SolidHover="{StaticResource Rune.Brush.AccentHover}" Contrast="{StaticResource Rune.Brush.AccentContrast}" Soft="{StaticResource Rune.Brush.AccentSoft}" SoftHover="{StaticResource Rune.Brush.AccentSoftHover}" Surface="{StaticResource Rune.Brush.AccentSoft}" SubtleHover="{StaticResource Rune.Brush.AccentSoft}" Text="{StaticResource Rune.Brush.AccentText}" Border="{StaticResource Rune.Brush.AccentBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Info" Solid="{StaticResource Rune.Brush.Info}" SolidHover="{StaticResource Rune.Brush.InfoHover}" Contrast="{StaticResource Rune.Brush.InfoContrast}" Soft="{StaticResource Rune.Brush.InfoSoft}" SoftHover="{StaticResource Rune.Brush.InfoSoftHover}" Surface="{StaticResource Rune.Brush.InfoSoft}" SubtleHover="{StaticResource Rune.Brush.InfoSoft}" Text="{StaticResource Rune.Brush.InfoText}" Border="{StaticResource Rune.Brush.InfoBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Success" Solid="{StaticResource Rune.Brush.Success}" SolidHover="{StaticResource Rune.Brush.SuccessHover}" Contrast="{StaticResource Rune.Brush.SuccessContrast}" Soft="{StaticResource Rune.Brush.SuccessSoft}" SoftHover="{StaticResource Rune.Brush.SuccessSoftHover}" Surface="{StaticResource Rune.Brush.SuccessSoft}" SubtleHover="{StaticResource Rune.Brush.SuccessSoft}" Text="{StaticResource Rune.Brush.SuccessText}" Border="{StaticResource Rune.Brush.SuccessBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Warning" Solid="{StaticResource Rune.Brush.Warning}" SolidHover="{StaticResource Rune.Brush.WarningHover}" Contrast="{StaticResource Rune.Brush.WarningContrast}" Soft="{StaticResource Rune.Brush.WarningSoft}" SoftHover="{StaticResource Rune.Brush.WarningSoftHover}" Surface="{StaticResource Rune.Brush.WarningSoft}" SubtleHover="{StaticResource Rune.Brush.WarningSoft}" Text="{StaticResource Rune.Brush.WarningText}" Border="{StaticResource Rune.Brush.WarningBorder}" />
+      <rune:TonePalette x:Key="Rune.Palette.Danger" Solid="{StaticResource Rune.Brush.Danger}" SolidHover="{StaticResource Rune.Brush.DangerHover}" Contrast="{StaticResource Rune.Brush.DangerContrast}" Soft="{StaticResource Rune.Brush.DangerSoft}" SoftHover="{StaticResource Rune.Brush.DangerSoftHover}" Surface="{StaticResource Rune.Brush.DangerSoft}" SubtleHover="{StaticResource Rune.Brush.DangerSoft}" Text="{StaticResource Rune.Brush.DangerText}" Border="{StaticResource Rune.Brush.DangerBorder}" />
     </ResourceDictionary>
   </ResourceDictionary.ThemeDictionaries>
 </ResourceDictionary>
