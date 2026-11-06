@@ -1,0 +1,32 @@
+<UserControl x:Class="Rune.Wpf.Examples.SpinnerExample"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/wpf">
+  <StackPanel>
+    <WrapPanel Margin="0,0,0,24">
+      <WrapPanel.Resources>
+        <Style TargetType="rune:Spinner">
+          <Setter Property="Margin" Value="0,0,24,0" />
+          <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+      </WrapPanel.Resources>
+      <rune:Spinner Size="xs" />
+      <rune:Spinner Size="sm" />
+      <rune:Spinner Size="md" />
+      <rune:Spinner Size="lg" />
+      <rune:Spinner Size="xl" />
+      <!-- 放在文字里：大小、颜色跟随文字 -->
+      <rune:Text Tone="accent" VerticalAlignment="Center" Margin="0,0,24,0"><InlineUIContainer BaselineAlignment="Center"><rune:Spinner Margin="0" /></InlineUIContainer><Run Text=" 跟随文字颜色" /></rune:Text>
+      <rune:Text Tone="success" Size="sm" VerticalAlignment="Center"><InlineUIContainer BaselineAlignment="Center"><rune:Spinner Margin="0" /></InlineUIContainer><Run Text=" 同步中" /></rune:Text>
+    </WrapPanel>
+    <!-- Card、Button 做出来后换掉 -->
+    <Border Padding="16" CornerRadius="8" BorderThickness="1" HorizontalAlignment="Left" Width="420"
+            BorderBrush="{DynamicResource Rune.Brush.Border}" Background="{DynamicResource Rune.Brush.Surface}">
+      <StackPanel Orientation="Horizontal">
+        <!-- 单独出现、旁边没有文字时写 Label：读屏当作进度条念出来 -->
+        <rune:Spinner Label="正在生成报表" VerticalAlignment="Center" Margin="0,0,8,0" />
+        <rune:Small Tone="muted" VerticalAlignment="Center" Text="正在生成报表，大约需要 30 秒" />
+      </StackPanel>
+    </Border>
+  </StackPanel>
+</UserControl>

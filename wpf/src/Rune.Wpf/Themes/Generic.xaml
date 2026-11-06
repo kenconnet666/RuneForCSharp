@@ -10,5 +10,6 @@
   <ResourceDictionary.MergedDictionaries>
     <ResourceDictionary Source="/Rune.Wpf;component/Base/Icon/Icon.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Base/Text/Text.xaml" />
+    <ResourceDictionary Source="/Rune.Wpf;component/Base/Spinner/Spinner.xaml" />
   </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>

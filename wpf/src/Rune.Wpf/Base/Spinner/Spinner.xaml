@@ -1,0 +1,21 @@
+<!--
+  Spinner 的主题样式：模板里只有一个图标，它的外观（图标、从 Spinner 转来的大小）写在部件样式里，不写成模板属性：
+  Provider.Styles 里同键的样式叠在这上面，使用方能逐个 setter 改（DESIGN §7）。旋转在 Spinner.cs 里开
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <Style x:Key="{x:Static rune:SpinnerParts.Icon}" TargetType="rune:Icon">
+    <Setter Property="Data" Value="{x:Static rune:Lucide.LoaderCircle}" />
+    <Setter Property="Size" Value="{Binding Size, RelativeSource={RelativeSource TemplatedParent}}" />
+  </Style>
+  <Style TargetType="rune:Spinner">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="rune:Spinner">
+          <rune:Icon x:Name="PART_Icon" Style="{DynamicResource {x:Static rune:SpinnerParts.Icon}}" />
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+</ResourceDictionary>
