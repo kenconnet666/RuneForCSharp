@@ -1,0 +1,36 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/wpf"
+                    xmlns:t="clr-namespace:Rune.Wpf.Tests">
+  <Style x:Key="{x:Static t:ProbeParts.Label}" TargetType="TextBlock">
+    <Setter Property="FontWeight" Value="Bold" />
+  </Style>
+
+  <Style TargetType="{x:Type t:ProbeButton}">
+    <Setter Property="Background" Value="Gray" />
+    <Setter Property="rune:Em.Padding" Value="1,0.25" />
+    <Setter Property="rune:Em.CornerRadius" Value="0.4" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="t:ProbeButton">
+          <Border x:Name="PART_Root" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}"
+                  CornerRadius="{TemplateBinding CornerRadius}" rune:BrushTransition.Enabled="True">
+            <TextBlock x:Name="PART_Label" Text="probe" Style="{DynamicResource {x:Static t:ProbeParts.Label}}" />
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <Style.Triggers>
+      <Trigger Property="Variant" Value="solid"><Setter Property="Background" Value="Blue" /></Trigger>
+      <Trigger Property="Variant" Value="outline"><Setter Property="Background" Value="Transparent" /></Trigger>
+      <Trigger Property="Variant" Value="ghost"><Setter Property="Background" Value="Silver" /></Trigger>
+      <MultiTrigger>
+        <MultiTrigger.Conditions>
+          <Condition Property="Variant" Value="solid" />
+          <Condition Property="rune:Container.Size" Value="Xs" />
+        </MultiTrigger.Conditions>
+        <Setter Property="Background" Value="Orange" />
+      </MultiTrigger>
+    </Style.Triggers>
+  </Style>
+</ResourceDictionary>

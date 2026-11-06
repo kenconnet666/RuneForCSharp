@@ -1,0 +1,75 @@
+using System.Windows;
+using System.Windows.Threading;
+
+namespace Rune.Wpf.Tests;
+
+/// <summary>
+/// WPF 测试的宿主：一个常驻的 STA 线程跑 Dispatcher 与 Application，测试体排到它上面执行。
+/// <code>
+/// [Fact] public Task Foo() => WpfUi.Run(() => { var window = WpfUi.Show(element); … });
+/// </code>
+/// 窗口放在屏幕外：WPF 照常渲染与播放动画（WinForms 离屏收不到 WM_PAINT，这里不受影响）。
+/// </summary>
+static class WpfUi
+{
+    static readonly Dispatcher dispatcher = StartDispatcher();
+
+    /// <summary>在 UI 线程上执行测试体；测试体里的异常原样抛给测试。</summary>
+    public static Task Run(Action body) => dispatcher.InvokeAsync(body).Task;
+
+    /// <summary>放进屏幕外的窗口并完成样式、模板与布局。</summary>
+    public static Window Show(UIElement content)
+    {
+        var window = new Window
+        {
+            Content = content, Width = 800, Height = 600, Left = -20000, Top = -20000,
+            ShowActivated = false, ShowInTaskbar = false, WindowStyle = WindowStyle.None,
+        };
+        window.Show();
+        Flush();
+        return window;
+    }
+
+    /// <summary>处理完排队的工作（布局、数据绑定、渲染之后的空闲）。</summary>
+    public static void Flush()
+    {
+        var frame = new DispatcherFrame();
+        Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.ContextIdle, () => frame.Continue = false);
+        Dispatcher.PushFrame(frame);
+    }
+
+    /// <summary>边处理消息边等一段真实时间（动画按真实时间推进）。</summary>
+    public static void Wait(TimeSpan duration)
+    {
+        var frame = new DispatcherFrame();
+        var timer = new DispatcherTimer(DispatcherPriority.Background) { Interval = duration };
+        timer.Tick += (_, _) =>
+        {
+            timer.Stop();
+            frame.Continue = false;
+        };
+        timer.Start();
+        Dispatcher.PushFrame(frame);
+    }
+
+    static Dispatcher StartDispatcher()
+    {
+        Dispatcher? result = null;
+        using var ready = new ManualResetEventSlim();
+        var thread = new Thread(() =>
+        {
+            _ = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+            result = Dispatcher.CurrentDispatcher;
+            ready.Set();
+            Dispatcher.Run();
+        })
+        {
+            IsBackground = true,
+            Name = "WPF 测试 UI 线程",
+        };
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        ready.Wait();
+        return result!;
+    }
+}

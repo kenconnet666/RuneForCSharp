@@ -1,0 +1,10 @@
+<Window x:Class="Rune.Wpf.Gallery.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/wpf"
+        Title="Rune.Wpf 组件示例" Width="1200" Height="800">
+  <!-- 组件做出来后按 vue-tsx-pro 的分类（base、display、feedback……）列在左侧导航里 -->
+  <rune:Provider>
+    <TextBlock Margin="24" Text="Rune.Wpf" FontSize="24" />
+  </rune:Provider>
+</Window>

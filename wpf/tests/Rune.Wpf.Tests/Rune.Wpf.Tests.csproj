@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- 组件库的测试：在专用的 STA 线程上建真实的控件树（窗口放在屏幕外），检查合并结果、优先级与更新次数。xunit v3 的测试项目是可执行程序 -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Rune.Wpf.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Rune.Wpf\Rune.Wpf.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,100 @@
+using System.Windows;
+using System.Windows.Controls;
+
+namespace Rune.Wpf;
+
+/// <summary>
+/// em 尺寸：值 = 系数 × 字号，字号变了跟着变（对应 vue-tsx-pro 里组件内部一律用 em）。
+/// 主题样式只设系数，控件用属性强制（coerce）算出实际值：
+/// <code>
+/// // 控件的静态构造里接上：Padding、FontSize 的元数据，以及自己的 CornerRadius
+/// static Button() => Em.Register(typeof(Button), CornerRadiusProperty);
+/// public static readonly DependencyProperty CornerRadiusProperty = DependencyProperty.Register(
+///     nameof(CornerRadius), typeof(CornerRadius), typeof(Button), new FrameworkPropertyMetadata(default(CornerRadius), null, Em.CoerceCornerRadius));
+/// </code>
+/// <code>
+/// &lt;Setter Property="rune:Em.Padding" Value="1,0.25" /&gt;   &lt;!-- Generic.xaml：水平 1em、垂直 0.25em --&gt;
+/// &lt;Setter Property="rune:Em.CornerRadius" Value="0.4" /&gt;
+/// </code>
+/// 只有基础值来自默认值、继承或主题样式时才按字号算；使用方的样式与本地值照常生效。
+/// 不用绑定：3000 个按钮实测创建 430 ms，绑定到字号的写法 878 ms，写死数值 273 ms。
+/// </summary>
+public static class Em
+{
+    /// <summary>内边距的 em 系数（Thickness 的四个值都是系数）。</summary>
+    public static readonly DependencyProperty PaddingProperty = DependencyProperty.RegisterAttached(
+        "Padding", typeof(Thickness?), typeof(Em), new PropertyMetadata(null, (d, _) => d.CoerceValue(Control.PaddingProperty)));
+
+    /// <summary>圆角的 em 系数，作用在 <see cref="Register"/> 登记的圆角属性上。</summary>
+    public static readonly DependencyProperty CornerRadiusProperty = DependencyProperty.RegisterAttached(
+        "CornerRadius", typeof(double?), typeof(Em), new PropertyMetadata(null, (d, _) => Refresh(d)));
+
+    static readonly Dictionary<Type, DependencyProperty> cornerRadiusByType = [];
+
+    /// <summary>读内边距系数。</summary>
+    public static Thickness? GetPadding(DependencyObject d) => (Thickness?)d.GetValue(PaddingProperty);
+
+    /// <summary>设内边距系数。</summary>
+    public static void SetPadding(DependencyObject d, Thickness? value) => d.SetValue(PaddingProperty, value);
+
+    /// <summary>读圆角系数。</summary>
+    public static double? GetCornerRadius(DependencyObject d) => (double?)d.GetValue(CornerRadiusProperty);
+
+    /// <summary>设圆角系数。</summary>
+    public static void SetCornerRadius(DependencyObject d, double? value) => d.SetValue(CornerRadiusProperty, value);
+
+    /// <summary>
+    /// 在控件的静态构造里调用：Padding 按系数计算，字号变化时重新计算 Padding 与圆角。
+    /// </summary>
+    /// <param name="controlType">控件类型。</param>
+    /// <param name="cornerRadiusProperty">控件自己的圆角属性（注册时 coerce 回调写 <see cref="CoerceCornerRadius"/>）；没有就不传。</param>
+    public static void Register(Type controlType, DependencyProperty? cornerRadiusProperty = null)
+    {
+        Control.PaddingProperty.OverrideMetadata(controlType, new FrameworkPropertyMetadata(default(Thickness), null, CoercePadding));
+        Control.FontSizeProperty.OverrideMetadata(controlType, new FrameworkPropertyMetadata(
+            SystemFonts.MessageFontSize, FrameworkPropertyMetadataOptions.Inherits, (d, _) => Refresh(d)));
+        if (cornerRadiusProperty is not null) cornerRadiusByType[controlType] = cornerRadiusProperty;
+    }
+
+    /// <summary>圆角属性的 coerce 回调。</summary>
+    public static object CoerceCornerRadius(DependencyObject d, object baseValue)
+    {
+        if (GetCornerRadius(d) is not { } f || CornerRadiusFor(d.GetType()) is not { } property) return baseValue;
+        return FromLibrary(d, property, baseValue) ? new CornerRadius(f * FontSize(d)) : baseValue;
+    }
+
+    static object CoercePadding(DependencyObject d, object baseValue)
+    {
+        if (GetPadding(d) is not { } f || !FromLibrary(d, Control.PaddingProperty, baseValue)) return baseValue;
+        var size = FontSize(d);
+        return new Thickness(f.Left * size, f.Top * size, f.Right * size, f.Bottom * size);
+    }
+
+    static void Refresh(DependencyObject d)
+    {
+        d.CoerceValue(Control.PaddingProperty);
+        if (CornerRadiusFor(d.GetType()) is { } property) d.CoerceValue(property);
+    }
+
+    static DependencyProperty? CornerRadiusFor(Type? type)
+    {
+        for (; type is not null; type = type.BaseType)
+            if (cornerRadiusByType.TryGetValue(type, out var property)) return property;
+        return null;
+    }
+
+    static double FontSize(DependencyObject d) => (double)d.GetValue(Control.FontSizeProperty);
+
+    /// <summary>
+    /// 基础值是不是库给的（可以按 em 算）。库自己从不直接设这些属性、只设系数，所以基础值不是默认值就一定来自使用方。
+    /// 不能只看值来源：基础值变化时 WPF 先调 coerce、后记录新来源，回调里读到的还是旧来源（实测：使用方样式的
+    /// Padding=3 生效时这里读到 Default）。基础值等于默认值时再看来源与本地值，区分“没人设”与“使用方显式设成默认值”。
+    /// </summary>
+    static bool FromLibrary(DependencyObject d, DependencyProperty p, object baseValue)
+    {
+        if (!Equals(baseValue, p.GetMetadata(d).DefaultValue)) return false;
+        if (d.ReadLocalValue(p) != DependencyProperty.UnsetValue) return false;
+        return DependencyPropertyHelper.GetValueSource(d, p).BaseValueSource
+            is BaseValueSource.Default or BaseValueSource.Inherited or BaseValueSource.DefaultStyle or BaseValueSource.DefaultStyleTrigger;
+    }
+}

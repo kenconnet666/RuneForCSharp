@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- WPF 组件库：主题 tokens、组件与它们的主题样式（Themes/Generic.xaml） -->
+  <PropertyGroup>
+    <IsLibrary>true</IsLibrary>
+    <!-- 公开成员必须写文档注释（CS1591 视为错误） -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <RootNamespace>Rune.Wpf</RootNamespace>
+    <Description>对标 vue-tsx-pro 的 WPF 组件库：主题 tokens、可层层合并的组件样式与默认值（Provider）、组件。</Description>
+    <PackageTags>wpf;components;ui;design-system</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Rune.Wpf.Tests" />
+  </ItemGroup>
+
+</Project>
