@@ -38,7 +38,7 @@ public class Spinner : TemplatedControl
 
         protected override string? GetNameCore() => ((Spinner)Owner).Label is { Length: > 0 } label ? label : base.GetNameCore();
 
-        protected override bool IsControlElementCore() => !string.IsNullOrEmpty(GetName());
+        protected override bool IsControlElementCore() => !string.IsNullOrEmpty(((Spinner)Owner).Label);
 
         protected override bool IsContentElementCore() => IsControlElementCore();
     }
