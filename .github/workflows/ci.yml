@@ -102,7 +102,7 @@ jobs:
         working-directory: vue-tsx-pro
         run: pnpm install --frozen-lockfile --ignore-scripts
 
-      # token、语言包、Lucide 图标与 vue-tsx-pro 一致；对照报告写进任务摘要
+      # token、语言包、Lucide 图标与 vue-tsx-pro 一致，三个库的孪生文件一致；对照报告写进任务摘要
       - name: Check generated files
         env:
           VUE_TSX_PRO: ${{ github.workspace }}/vue-tsx-pro
@@ -111,4 +111,5 @@ jobs:
           node tools/lang-gen/lang-gen.mjs --check
           node tools/icons-gen/icons-gen.mjs --check
           node tools/recipe-gen/recipe-gen.mjs --check
+          node tools/twins/twins.mjs
           node tools/parity/parity.mjs >> "$GITHUB_STEP_SUMMARY"

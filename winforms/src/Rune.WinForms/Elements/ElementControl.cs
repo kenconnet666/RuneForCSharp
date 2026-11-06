@@ -10,7 +10,7 @@ namespace Rune.WinForms;
 /// </summary>
 /// <typeparam name="T">元素的类型。</typeparam>
 [ToolboxItem(false)]
-public abstract class ElementControl<T> : Control, IElementHost where T : Element, new()
+public abstract class ElementControl<T> : Control, IElementHost, IBaseline where T : Element, new()
 {
     readonly Effect paint;
 
@@ -98,6 +98,8 @@ public abstract class ElementControl<T> : Control, IElementHost where T : Elemen
         Invalidate();
     }
 
+    int? IBaseline.Baseline => Element.Baseline(Context) is { } baseline ? Padding.Top + baseline : null;
+
     void IElementHost.InvalidateElement(Element element) => Invalidate(element.Bounds);
 
     void IElementHost.InvalidateLayout(Element element) => RefreshLayout();
@@ -115,4 +117,11 @@ public abstract class ElementControl<T> : Control, IElementHost where T : Elemen
         if (disposing) paint.Dispose();
         base.Dispose(disposing);
     }
+}
+
+/// <summary>控件里第一行文字的基线离控件上边多远（Flex 按基线对齐时用）。</summary>
+interface IBaseline
+{
+    /// <summary>设备像素；没有文字时为 null。</summary>
+    int? Baseline { get; }
 }

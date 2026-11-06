@@ -167,6 +167,14 @@ public class Text : Element
     protected internal override void Paint(Graphics graphics, ElementContext context) =>
         TextRenderer.DrawText(graphics, Content, ResolveFont(context), Bounds, Tone.ColorIn(context), Flags(context));
 
+    /// <summary>字体的上伸部（GDI 从行顶画起，基线在上伸部的底下）。</summary>
+    protected internal override int? Baseline(ElementContext context)
+    {
+        var font = ResolveFont(context);
+        var family = font.FontFamily;
+        return (int)MathF.Round(font.SizeInPoints * context.Dpi / 72f * family.GetCellAscent(font.Style) / family.GetEmHeight(font.Style));
+    }
+
     /// <summary>宿主的字体按字号、字重、等宽、斜体改过之后的字体（共用，不要释放）。</summary>
     Font ResolveFont(ElementContext context)
     {

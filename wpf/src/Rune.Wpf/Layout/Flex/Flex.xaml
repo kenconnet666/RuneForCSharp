@@ -1,0 +1,10 @@
+<!-- Flex 的主题样式（FlexList、FlexOrderedList 的默认样式键也是 Flex）：行内 flex（inline-flex）宽度跟着内容，是触发器（使用方的样式盖得过） -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <Style TargetType="rune:Flex">
+    <Style.Triggers>
+      <Trigger Property="Inline" Value="True"><Setter Property="HorizontalAlignment" Value="Left" /></Trigger>
+    </Style.Triggers>
+  </Style>
+</ResourceDictionary>

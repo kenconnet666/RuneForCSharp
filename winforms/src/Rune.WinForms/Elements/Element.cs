@@ -23,6 +23,10 @@ public abstract class Element
     /// <param name="context">宿主的环境。</param>
     protected internal abstract void Paint(Graphics graphics, ElementContext context);
 
+    /// <summary>第一行文字的基线离上边多远（设备像素）；没有文字的元素为 null（Flex 按基线对齐时按底边）。</summary>
+    /// <param name="context">宿主的环境。</param>
+    protected internal virtual int? Baseline(ElementContext context) => null;
+
     /// <summary>外观变了：重画自己的区域。</summary>
     protected void Invalidate() => Host?.InvalidateElement(this);
 
