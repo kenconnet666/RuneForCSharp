@@ -28,7 +28,7 @@ sealed class MainForm : Form
     {
         Text = "Rune.WinForms 组件示例";
         ClientSize = LogicalToDeviceUnits(new Size(1200, 800));
-        Font = new Font(SystemFonts.MessageBoxFont!.FontFamily, Tokens.FontSize.Md * 72 / 96);
+        Font = new Font(Fonts.Installed(RuneTheme.Current.Peek().Fonts.Sans), Tokens.FontSize.Md * 72 / 96);
         title.Font = new Font(Font.FontFamily, Tokens.FontSize.Xxl * 72 / 96, FontStyle.Bold);
 
         var content = new Panel { Dock = DockStyle.Fill, AutoScroll = true, Padding = new Padding(LogicalToDeviceUnits(32)) };

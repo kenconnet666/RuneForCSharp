@@ -16,7 +16,7 @@ public sealed record Example(string Component, string Id, string Title, string D
 public static class ExampleCatalog
 {
     /// <summary>全部示例。</summary>
-    public static IReadOnlyList<Example> All { get; } = [.. IconExamples.All];
+    public static IReadOnlyList<Example> All { get; } = [.. IconExamples.All, .. TextExamples.All];
 
     /// <summary>按"组件/示例名"找（不分大小写）；没有时为 null。</summary>
     /// <param name="key">如 <c>Icon/basic</c>。</param>
@@ -29,6 +29,19 @@ public static class ExampleCatalog
 /// </summary>
 static class Layout
 {
+    /// <summary>设备无关像素 → 主显示器上的设备像素（宽度、内边距这类写死的尺寸用它）。</summary>
+    public static int Dip(int value) => (int)Math.Round(value * SystemDpi / 96f);
+
+    static int SystemDpi
+    {
+        get
+        {
+            if (field != 0) return field;
+            using var probe = new Control();
+            return field = probe.DeviceDpi;
+        }
+    }
+
     /// <summary>一行，放不下时换行（停靠在宿主顶部，宽度随宿主）。</summary>
     public static FlowLayoutPanel Wrap(int gap, params Control[] children) => Flow(FlowDirection.LeftToRight, true, gap, children);
 
@@ -57,7 +70,7 @@ static class Layout
     public static Label Text(string text, float? size = null) => new()
     {
         Text = text, AutoSize = true, Margin = Padding.Empty,
-        Font = size is { } pixels ? new Font(SystemFonts.MessageBoxFont!.FontFamily, pixels * 72 / 96) : null,
+        Font = size is { } pixels ? new Font(Fonts.Installed(RuneTheme.Current.Peek().Fonts.Sans), pixels * 72 / 96) : null,
     };
 
     /// <summary>说明文字：次要文字的颜色（取当前主题，换主题时 Gallery 重建示例）、sm 字号。</summary>

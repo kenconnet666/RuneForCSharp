@@ -1,0 +1,30 @@
+using System.Collections.Concurrent;
+using System.Drawing.Text;
+
+namespace Rune.WinForms;
+
+/// <summary>
+/// 主题的字体是一串候选（同 CSS 的 font-family），<see cref="Installed"/> 取第一个装了的：
+/// <code>
+/// form.Font = new Font(Fonts.Installed(RuneTheme.Current.Value.Fonts.Sans), Tokens.FontSize.Md * 72 / 96);
+/// </code>
+/// 元素绘制用的字体按（字体、磅值、样式）共用一个 Font，不随元素创建与释放（数量有限：几种字体 × 几档字号 × 几种样式）。
+/// </summary>
+public static class Fonts
+{
+    static readonly ConcurrentDictionary<(string Family, float Points, FontStyle Style), Font> fonts = new();
+    static readonly ConcurrentDictionary<IReadOnlyList<string>, string> installed = new();
+
+    /// <summary>候选里第一个装了的字体；都没装时用系统的界面字体。</summary>
+    /// <param name="candidates">主题里的一串字体（<see cref="ThemeFonts.Sans"/>、<see cref="ThemeFonts.Mono"/>……）。</param>
+    public static string Installed(IReadOnlyList<string> candidates) => installed.GetOrAdd(candidates, list =>
+    {
+        using var collection = new InstalledFontCollection();
+        var names = collection.Families.Select(family => family.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        return list.FirstOrDefault(names.Contains) ?? SystemFonts.MessageBoxFont!.FontFamily.Name;
+    });
+
+    /// <summary>共用的字体（不要 Dispose）。</summary>
+    internal static Font Get(string family, float points, FontStyle style) =>
+        fonts.GetOrAdd((family, points, style), key => new Font(key.Family, key.Points, key.Style));
+}

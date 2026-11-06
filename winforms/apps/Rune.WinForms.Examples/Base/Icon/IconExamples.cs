@@ -32,7 +32,7 @@ static class IconExamples
     static Control Sizes()
     {
         var followText = Row(4, new IconControl { Data = Lucide.Star, Anchor = AnchorStyles.None }, Text("星标"));
-        followText.Font = new Font(SystemFonts.MessageBoxFont!.FontFamily, Tokens.FontSize.Xl * 72 / 96);
+        followText.Font = new Font(Fonts.Installed(RuneTheme.Current.Peek().Fonts.Sans), Tokens.FontSize.Xl * 72 / 96);
         var sizes = Wrap(24,
         [
             .. TextSize.Known.Select(size => Cell(new IconControl { Data = Lucide.Star, IconSize = size }, size.Value)),

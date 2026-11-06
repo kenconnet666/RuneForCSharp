@@ -18,7 +18,7 @@ static class Program
 }
 
 /// <summary>
-/// 把示例放进屏幕外的窗体（背景、文字颜色取当前主题，字号取 md），再按命令输出。
+/// 把示例放进屏幕外的窗体（背景、文字颜色、字体取当前主题，字号取 md），再按命令输出。
 /// 控件与元素在 tree、props、uia 里用同一个称呼：有 Name 用 Name，否则"类型[序号]"（按控件树的先后数）。
 /// WinForms 按显示器的 DPI 渲染，不支持 --scale。
 /// </summary>
@@ -59,7 +59,7 @@ static class Inspector
         {
             StartPosition = FormStartPosition.Manual, Location = new Point(-20000, -20000), FormBorderStyle = FormBorderStyle.None, ShowInTaskbar = false,
             BackColor = theme.Colors.Background, ForeColor = theme.Colors.Text,
-            Font = new Font(SystemFonts.MessageBoxFont!.FontFamily, Tokens.FontSize.Md * 72 / 96),
+            Font = new Font(Fonts.Installed(theme.Fonts.Sans), Tokens.FontSize.Md * 72 / 96),
         };
         form.Show();
         var scale = form.DeviceDpi / 96f;

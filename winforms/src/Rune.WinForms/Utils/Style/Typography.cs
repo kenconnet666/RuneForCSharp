@@ -118,3 +118,80 @@ public readonly record struct Tone(string Value) : IVariant<Tone>
     /// <inheritdoc />
     public override string ToString() => Value;
 }
+
+/// <summary>
+/// 字重档位（vue-tsx-pro 的 FontWeight，对应主题的 fontWeights）。C# 里叫 TextWeight，免得与平台的字重类型重名。
+/// </summary>
+/// <param name="Value">取值（light、normal、medium、semibold、bold）。</param>
+[TypeConverter(typeof(VariantConverter<TextWeight>))]
+public readonly record struct TextWeight(string Value) : IVariant<TextWeight>
+{
+    /// <summary>300：细。</summary>
+    public static readonly TextWeight Light = new("light");
+
+    /// <summary>400：正文。</summary>
+    public static readonly TextWeight Normal = new("normal");
+
+    /// <summary>500：标签、表头。</summary>
+    public static readonly TextWeight Medium = new("medium");
+
+    /// <summary>600：按钮、标题。</summary>
+    public static readonly TextWeight Semibold = new("semibold");
+
+    /// <summary>700：粗。</summary>
+    public static readonly TextWeight Bold = new("bold");
+
+    /// <inheritdoc />
+    public static IReadOnlyList<TextWeight> Known { get; } = [Light, Normal, Medium, Semibold, Bold];
+
+    /// <summary>主题里的字重数值（<see cref="Tokens.FontWeight"/>）；default 或使用方扩展的取值为 null。</summary>
+    public int? Number => Value switch
+    {
+        "light" => Tokens.FontWeight.Light,
+        "normal" => Tokens.FontWeight.Normal,
+        "medium" => Tokens.FontWeight.Medium,
+        "semibold" => Tokens.FontWeight.Semibold,
+        "bold" => Tokens.FontWeight.Bold,
+        _ => null,
+    };
+
+    /// <inheritdoc />
+    public static TextWeight Parse(string value)
+    {
+        var weight = new TextWeight(value);
+        Variants.WarnIfUnknown(weight);
+        return weight;
+    }
+
+    /// <inheritdoc />
+    public override string ToString() => Value;
+}
+
+/// <summary>文字的水平对齐（vue-tsx-pro 的 TextAlign），按书写方向。</summary>
+public enum TextAlign
+{
+    /// <summary>对齐起始边：从左到右排版时靠左。</summary>
+    Start,
+
+    /// <summary>居中。</summary>
+    Center,
+
+    /// <summary>对齐结束边：从左到右排版时靠右。</summary>
+    End,
+}
+
+/// <summary>换行方式（vue-tsx-pro 的 TextWrap）。balance、pretty 是浏览器的排版优化，桌面上按普通换行处理。</summary>
+public enum TextWrap
+{
+    /// <summary>正常换行。</summary>
+    Wrap,
+
+    /// <summary>不换行，超出时溢出（配合 Truncate 省略）。</summary>
+    NoWrap,
+
+    /// <summary>各行长度尽量均衡（标题、短文本）；桌面上同 Wrap。</summary>
+    Balance,
+
+    /// <summary>避免最后一行只剩一个字（段落）；桌面上同 Wrap。</summary>
+    Pretty,
+}

@@ -251,6 +251,7 @@
 用来验证这一层的第一批组件（都在阶段 3 的第 1、2 层，做完就是正式组件）：Icon → Text → Spinner → Badge → Button 家族 → Field。每个都把档位、调色板、部件转发、Provider 的默认值与样式、size 与 em、主题切换、减少动态效果、热重载、无障碍走一遍。各组件的进度以 `node tools/parity/parity.mjs` 为准。
 - [x] Icon：三个平台都做了（DESIGN §14）；描线动画 `draw` 暂缓，parity 里列为缺失。
 - [x] 档位类型：`IVariant` / `VariantConverter` 与 `TextSize`、`Tone`，三个库都做了。
+- [~] Text 家族（Text、Paragraph、Strong、Em、Small）：Avalonia、WinForms 已做（DESIGN §14）；WPF 的基类见"待定的决定"，没有回复前按建议 A 做。示例做了 scale、tones、numeric、overflow，inline、links、headings 等 Kbd、Link、Heading。
 
 ### 3. 按依赖分层移植组件
 
