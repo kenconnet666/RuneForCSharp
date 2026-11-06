@@ -10,6 +10,12 @@
     <Setter Property="Tone" Value="neutral" />
     <Setter Property="Size" Value="xs" />
     <Setter Property="Radius" Value="sm" />
+    <Setter Property="Padding" Value="{rune:Em 0.5, 0}" />
+    <!-- borderWidths.xs：没有描边色时也占位，各样式等高 -->
+    <Setter Property="BorderThickness" Value="1" />
+    <!-- 文字中等字重、行高 lineHeights.tight（vue-tsx-pro 的 badgeRecipe 的 root） -->
+    <Setter Property="TextElement.FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
+    <Setter Property="TextBlock.LineHeight" Value="{rune:Em Resource=Rune.LineHeight.Tight}" />
     <Setter Property="Palette" Value="{rune:Resolved Palette}" />
     <Setter Property="VerticalAlignment" Value="Center" />
     <Setter Property="HorizontalAlignment" Value="Left" />

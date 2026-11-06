@@ -20,8 +20,8 @@ namespace Rune.Avalonia;
 /// <c>rune|Badge &gt; Border#PART_Dot</c> 的样式能改它们。
 /// 颜色与按钮同一张色表（vue-tsx-pro 的 statusToneCompound）：色调解析成调色板（<see cref="Resolved"/>，主题里的 setter 绑到
 /// <see cref="Palette"/>，样式能换），样式档位取调色板的字段，按模板优先级设到文字色、底色、描边上（带类或伪类的样式盖得过）。
-/// 默认的样式、色调、字号、圆角在主题里，Provider 的样式能改。尺寸都是 em：内边距 0.5em、间距 0.25em、最小高度 1.75em、
-/// 圆点 0.5em，圆角取主题的 radii。
+/// 默认的样式、色调、字号、圆角在主题里，Provider 的样式能改。尺寸都是 em：内边距 0.5em（主题里的 Padding）、间距 0.25em、最小高度 1.75em、
+/// 圆点 0.5em，圆角取主题的 radii；描边宽度在主题里（BorderThickness）。
 /// </summary>
 public class Badge : Control
 {
@@ -58,6 +58,12 @@ public class Badge : Control
     /// <summary>描边色（样式档位从调色板取，没有描边的样式为 null，边框仍占位）。</summary>
     public static readonly StyledProperty<IBrush?> BorderBrushProperty = AvaloniaProperty.Register<Badge, IBrush?>(nameof(BorderBrush));
 
+    /// <summary>内边距（主题里 0.5em × 0）。</summary>
+    public static readonly StyledProperty<Thickness> PaddingProperty = Decorator.PaddingProperty.AddOwner<Badge>();
+
+    /// <summary>描边宽度（主题里 borderWidths.xs 的 1px；没有描边色时也占位，各样式等高）。</summary>
+    public static readonly StyledProperty<Thickness> BorderThicknessProperty = Border.BorderThicknessProperty.AddOwner<Badge>();
+
     /// <summary>色调的调色板：主题里的 setter 按 <see cref="Tone"/> 绑定（<c>Rune.Palette.*</c>），样式档位取它的字段。</summary>
     public static readonly StyledProperty<TonePalette?> PaletteProperty = AvaloniaProperty.Register<Badge, TonePalette?>(nameof(Palette));
 
@@ -74,8 +80,8 @@ public class Badge : Control
 
     static Badge()
     {
-        AffectsRender<Badge>(BackgroundProperty, BorderBrushProperty, RadiusCoefficientProperty);
-        AffectsMeasure<Badge>(FontSizeProperty);
+        AffectsRender<Badge>(BackgroundProperty, BorderBrushProperty, RadiusCoefficientProperty, BorderThicknessProperty);
+        AffectsMeasure<Badge>(FontSizeProperty, PaddingProperty, BorderThicknessProperty);
     }
 
     /// <summary>样式。</summary>
@@ -105,6 +111,12 @@ public class Badge : Control
 
     /// <summary>字号。</summary>
     public double FontSize { get => GetValue(FontSizeProperty); set => SetValue(FontSizeProperty, value); }
+
+    /// <summary>内边距。</summary>
+    public Thickness Padding { get => GetValue(PaddingProperty); set => SetValue(PaddingProperty, value); }
+
+    /// <summary>描边宽度。</summary>
+    public Thickness BorderThickness { get => GetValue(BorderThicknessProperty); set => SetValue(BorderThicknessProperty, value); }
 
     /// <summary>底色。</summary>
     public IBrush? Background { get => GetValue(BackgroundProperty); set => SetValue(BackgroundProperty, value); }
@@ -219,13 +231,16 @@ public class Badge : Control
             height = Math.Max(height, part.DesiredSize.Height);
         }
         var gaps = Math.Max(0, Parts().Count() - 1) * 0.25 * Em;
-        return new LayoutSize(width + gaps + 2 * (0.5 * Em + BorderWidth), Math.Max(1.75 * Em, height + 2 * BorderWidth));
+        var (padding, border) = (Padding, BorderThickness);
+        return new LayoutSize(
+            width + gaps + padding.Left + padding.Right + border.Left + border.Right,
+            Math.Max(1.75 * Em, height + padding.Top + padding.Bottom + border.Top + border.Bottom));
     }
 
     /// <inheritdoc />
     protected override LayoutSize ArrangeOverride(LayoutSize finalSize)
     {
-        var x = 0.5 * Em + BorderWidth;
+        var x = Padding.Left + BorderThickness.Left;
         foreach (var part in Parts())
         {
             var size = part.DesiredSize;
@@ -238,14 +253,12 @@ public class Badge : Control
     /// <inheritdoc />
     public override void Render(DrawingContext context)
     {
-        var bounds = new Rect(Bounds.Size).Deflate(BorderWidth / 2);
+        var width = BorderThickness.Left;
+        var bounds = new Rect(Bounds.Size).Deflate(width / 2);
         var radius = Math.Min(GetValue(RadiusCoefficientProperty) * Em, bounds.Height / 2);
-        var pen = GetValue(BorderBrushProperty) is { } border ? new Pen(border, BorderWidth) : null;
+        var pen = GetValue(BorderBrushProperty) is { } border && width > 0 ? new Pen(border, width) : null;
         context.DrawRectangle(GetValue(BackgroundProperty), pen, bounds, radius, radius);
     }
-
-    /// <summary>描边宽度：borderWidths.xs（设备无关像素，不随字号）。没有描边色时边框透明，同样占位，各样式等高。</summary>
-    const double BorderWidth = 1;
 
     /// <inheritdoc />
     protected override AutomationPeer OnCreateAutomationPeer() => new BadgeAutomationPeer(this);

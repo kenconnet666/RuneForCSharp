@@ -18,7 +18,7 @@ namespace Rune.Wpf;
 /// （ROADMAP 决定 20）。图标部件引用部件样式键 <see cref="BadgeParts.Icon"/>，
 /// Provider.Styles 里同键的样式照常叠上去。样式 × 色调的颜色与按钮同一张调色板表（生成的 BadgeRecipe.g.xaml 的 MultiTrigger），
 /// 字号档位也是主题样式的触发器：都在主题这一层，使用方任何样式都盖得过（DESIGN §4"档位的优先级"）。
-/// 默认的样式、色调、字号、圆角在主题样式里。尺寸都是 em：内边距 0.5em、间距 0.25em、最小高度 1.75em、圆点 0.5em。
+/// 默认的样式、色调、字号、圆角在主题样式里。尺寸都是 em：内边距 0.5em（主题里的 EmSize.Padding）、间距 0.25em、最小高度 1.75em、圆点 0.5em；描边 borderWidths.xs（主题里的 BorderThickness，没有描边色时也占位，各样式等高）。
 /// </summary>
 [ContentProperty(nameof(Content))]
 public class Badge : Control
@@ -55,8 +55,6 @@ public class Badge : Control
     static readonly DependencyProperty RadiusCoefficientProperty = DependencyProperty.Register(
         "RadiusCoefficient", typeof(double), typeof(Badge), new FrameworkPropertyMetadata(0d, FrameworkPropertyMetadataOptions.AffectsRender));
 
-    /// <summary>描边宽度：borderWidths.xs（设备无关像素，不随字号）。没有描边色时边框透明，同样占位，各样式等高。</summary>
-    const double BorderWidth = 1;
 
     readonly List<UIElement> parts = [];
     Icon? iconPart;
@@ -66,6 +64,8 @@ public class Badge : Control
     static Badge()
     {
         DefaultStyleKeyProperty.OverrideMetadata(typeof(Badge), new FrameworkPropertyMetadata(typeof(Badge)));
+        EmSize.Register(typeof(Badge));
+        BorderThicknessProperty.OverrideMetadata(typeof(Badge), new FrameworkPropertyMetadata(default(Thickness), FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender));
         FocusableProperty.OverrideMetadata(typeof(Badge), new FrameworkPropertyMetadata(false));
         IsTabStopProperty.OverrideMetadata(typeof(Badge), new FrameworkPropertyMetadata(false));
         // 底色、描边是自己画的：Control 的这两个属性元数据里不带 AffectsRender
@@ -193,13 +193,16 @@ public class Badge : Control
             height = Math.Max(height, part.DesiredSize.Height);
         }
         var gaps = Math.Max(0, parts.Count - 1) * 0.25 * Em;
-        return new Size(width + gaps + 2 * (0.5 * Em + BorderWidth), Math.Max(1.75 * Em, height + 2 * BorderWidth));
+        var (padding, border) = (Padding, BorderThickness);
+        return new Size(
+            width + gaps + padding.Left + padding.Right + border.Left + border.Right,
+            Math.Max(1.75 * Em, height + padding.Top + padding.Bottom + border.Top + border.Bottom));
     }
 
     /// <inheritdoc />
     protected override Size ArrangeOverride(Size arrangeBounds)
     {
-        var x = 0.5 * Em + BorderWidth;
+        var x = Padding.Left + BorderThickness.Left;
         foreach (var part in parts)
         {
             var size = part.DesiredSize;
@@ -212,11 +215,12 @@ public class Badge : Control
     /// <inheritdoc />
     protected override void OnRender(DrawingContext drawingContext)
     {
+        var width = BorderThickness.Left;
         var bounds = new Rect(RenderSize);
-        bounds.Inflate(-BorderWidth / 2, -BorderWidth / 2);
+        bounds.Inflate(-width / 2, -width / 2);
         if (bounds.Width <= 0 || bounds.Height <= 0) return;
         var radius = Math.Min((double)GetValue(RadiusCoefficientProperty) * Em, bounds.Height / 2);
-        var pen = BorderBrush is { } border ? new Pen(border, BorderWidth) : null;
+        var pen = BorderBrush is { } border && width > 0 ? new Pen(border, width) : null;
         drawingContext.DrawRoundedRectangle(Background, pen, bounds, radius, radius);
     }
 
