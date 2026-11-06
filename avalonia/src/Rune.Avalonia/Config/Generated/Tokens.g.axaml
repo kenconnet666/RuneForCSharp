@@ -304,6 +304,15 @@
       <!-- overlay = rgba(0, 0, 0, 0.4)：模态遮罩。亮色 blackA 6 `rgba(0, 0, 0, 0.4)`，暗色 blackA 8 `rgba(0, 0, 0, 0.6)` -->
       <Color x:Key="Rune.Color.Overlay">#66000000</Color>
       <SolidColorBrush x:Key="Rune.Brush.Overlay" Color="#66000000" />
+      <!-- scrim = rgba(0, 0, 0, 0.55)：图片、视频上的深色遮罩，上面放 onScrim 的文字（上传的进度与文件名）。 盖在任意图片上，不跟主题变：`rgba(0, 0, 0, 0.55)` -->
+      <Color x:Key="Rune.Color.Scrim">#8C000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Scrim" Color="#8C000000" />
+      <!-- scrimStrong = rgba(0, 0, 0, 0.86)：看图时铺满的深色背景（Lightbox）：`rgba(0, 0, 0, 0.86)` -->
+      <Color x:Key="Rune.Color.ScrimStrong">#DB000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.ScrimStrong" Color="#DB000000" />
+      <!-- onScrim = #ffffff：遮罩上的文字与图标：`#ffffff` -->
+      <Color x:Key="Rune.Color.OnScrim">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.OnScrim" Color="#FFFFFFFF" />
       <!-- selection = #d2deff：选中文字的底色（::selection）。indigo 5：亮色 `#d2deff`，暗色 `#253974` -->
       <Color x:Key="Rune.Color.Selection">#FFD2DEFF</Color>
       <SolidColorBrush x:Key="Rune.Brush.Selection" Color="#FFD2DEFF" />
@@ -528,6 +537,12 @@
       <SolidColorBrush x:Key="Rune.Brush.FocusRing" Color="#FF3E63DD" />
       <Color x:Key="Rune.Color.Overlay">#99000000</Color>
       <SolidColorBrush x:Key="Rune.Brush.Overlay" Color="#99000000" />
+      <Color x:Key="Rune.Color.Scrim">#8C000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Scrim" Color="#8C000000" />
+      <Color x:Key="Rune.Color.ScrimStrong">#DB000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.ScrimStrong" Color="#DB000000" />
+      <Color x:Key="Rune.Color.OnScrim">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.OnScrim" Color="#FFFFFFFF" />
       <Color x:Key="Rune.Color.Selection">#FF253974</Color>
       <SolidColorBrush x:Key="Rune.Brush.Selection" Color="#FF253974" />
       <Color x:Key="Rune.Color.Highlight">#FF3F2700</Color>
@@ -713,6 +728,12 @@
       <SolidColorBrush x:Key="Rune.Brush.FocusRing" Color="#FF2F4B8F" />
       <Color x:Key="Rune.Color.Overlay">#593B2F20</Color>
       <SolidColorBrush x:Key="Rune.Brush.Overlay" Color="#593B2F20" />
+      <Color x:Key="Rune.Color.Scrim">#8C000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Scrim" Color="#8C000000" />
+      <Color x:Key="Rune.Color.ScrimStrong">#DB000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.ScrimStrong" Color="#DB000000" />
+      <Color x:Key="Rune.Color.OnScrim">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.OnScrim" Color="#FFFFFFFF" />
       <Color x:Key="Rune.Color.Selection">#FFDCD3B4</Color>
       <SolidColorBrush x:Key="Rune.Brush.Selection" Color="#FFDCD3B4" />
       <Color x:Key="Rune.Color.Highlight">#FFF2D98A</Color>
@@ -898,6 +919,12 @@
       <SolidColorBrush x:Key="Rune.Brush.FocusRing" Color="#FF11809C" />
       <Color x:Key="Rune.Color.Overlay">#A603060F</Color>
       <SolidColorBrush x:Key="Rune.Brush.Overlay" Color="#A603060F" />
+      <Color x:Key="Rune.Color.Scrim">#8C000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Scrim" Color="#8C000000" />
+      <Color x:Key="Rune.Color.ScrimStrong">#DB000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.ScrimStrong" Color="#DB000000" />
+      <Color x:Key="Rune.Color.OnScrim">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.OnScrim" Color="#FFFFFFFF" />
       <Color x:Key="Rune.Color.Selection">#FF004558</Color>
       <SolidColorBrush x:Key="Rune.Brush.Selection" Color="#FF004558" />
       <Color x:Key="Rune.Color.Highlight">#FF3F2700</Color>
@@ -1083,6 +1110,12 @@
       <SolidColorBrush x:Key="Rune.Brush.FocusRing" Color="#FF0036A3" />
       <Color x:Key="Rune.Color.Overlay">#99000000</Color>
       <SolidColorBrush x:Key="Rune.Brush.Overlay" Color="#99000000" />
+      <Color x:Key="Rune.Color.Scrim">#8C000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Scrim" Color="#8C000000" />
+      <Color x:Key="Rune.Color.ScrimStrong">#DB000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.ScrimStrong" Color="#DB000000" />
+      <Color x:Key="Rune.Color.OnScrim">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.OnScrim" Color="#FFFFFFFF" />
       <Color x:Key="Rune.Color.Selection">#FFBCD0F5</Color>
       <SolidColorBrush x:Key="Rune.Brush.Selection" Color="#FFBCD0F5" />
       <Color x:Key="Rune.Color.Highlight">#FFFFE066</Color>
@@ -1268,6 +1301,12 @@
       <SolidColorBrush x:Key="Rune.Brush.FocusRing" Color="#FF0B5CAD" />
       <Color x:Key="Rune.Color.Overlay">#6610222C</Color>
       <SolidColorBrush x:Key="Rune.Brush.Overlay" Color="#6610222C" />
+      <Color x:Key="Rune.Color.Scrim">#8C000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Scrim" Color="#8C000000" />
+      <Color x:Key="Rune.Color.ScrimStrong">#DB000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.ScrimStrong" Color="#DB000000" />
+      <Color x:Key="Rune.Color.OnScrim">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.OnScrim" Color="#FFFFFFFF" />
       <Color x:Key="Rune.Color.Selection">#FFC2E5FF</Color>
       <SolidColorBrush x:Key="Rune.Brush.Selection" Color="#FFC2E5FF" />
       <Color x:Key="Rune.Color.Highlight">#FFFFEE9C</Color>
@@ -1453,6 +1492,12 @@
       <SolidColorBrush x:Key="Rune.Brush.FocusRing" Color="#FF2B7A3B" />
       <Color x:Key="Rune.Color.Overlay">#66182318</Color>
       <SolidColorBrush x:Key="Rune.Brush.Overlay" Color="#66182318" />
+      <Color x:Key="Rune.Color.Scrim">#8C000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Scrim" Color="#8C000000" />
+      <Color x:Key="Rune.Color.ScrimStrong">#DB000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.ScrimStrong" Color="#DB000000" />
+      <Color x:Key="Rune.Color.OnScrim">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.OnScrim" Color="#FFFFFFFF" />
       <Color x:Key="Rune.Color.Selection">#FFC9E8CA</Color>
       <SolidColorBrush x:Key="Rune.Brush.Selection" Color="#FFC9E8CA" />
       <Color x:Key="Rune.Color.Highlight">#FFFFEE9C</Color>
@@ -1638,6 +1683,12 @@
       <SolidColorBrush x:Key="Rune.Brush.FocusRing" Color="#FF9F8700" />
       <Color x:Key="Rune.Color.Overlay">#66232010</Color>
       <SolidColorBrush x:Key="Rune.Brush.Overlay" Color="#66232010" />
+      <Color x:Key="Rune.Color.Scrim">#8C000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Scrim" Color="#8C000000" />
+      <Color x:Key="Rune.Color.ScrimStrong">#DB000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.ScrimStrong" Color="#DB000000" />
+      <Color x:Key="Rune.Color.OnScrim">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.OnScrim" Color="#FFFFFFFF" />
       <Color x:Key="Rune.Color.Selection">#FFFFE770</Color>
       <SolidColorBrush x:Key="Rune.Brush.Selection" Color="#FFFFE770" />
       <Color x:Key="Rune.Color.Highlight">#FFE2F0BD</Color>
@@ -1823,6 +1874,12 @@
       <SolidColorBrush x:Key="Rune.Brush.FocusRing" Color="#FFCD3797" />
       <Color x:Key="Rune.Color.Overlay">#66281B20</Color>
       <SolidColorBrush x:Key="Rune.Brush.Overlay" Color="#66281B20" />
+      <Color x:Key="Rune.Color.Scrim">#8C000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Scrim" Color="#8C000000" />
+      <Color x:Key="Rune.Color.ScrimStrong">#DB000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.ScrimStrong" Color="#DB000000" />
+      <Color x:Key="Rune.Color.OnScrim">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.OnScrim" Color="#FFFFFFFF" />
       <Color x:Key="Rune.Color.Selection">#FFF6CEE7</Color>
       <SolidColorBrush x:Key="Rune.Brush.Selection" Color="#FFF6CEE7" />
       <Color x:Key="Rune.Color.Highlight">#FFFFEE9C</Color>
@@ -2008,6 +2065,12 @@
       <SolidColorBrush x:Key="Rune.Brush.FocusRing" Color="#FFA8760C" />
       <Color x:Key="Rune.Color.Overlay">#662C1B13</Color>
       <SolidColorBrush x:Key="Rune.Brush.Overlay" Color="#662C1B13" />
+      <Color x:Key="Rune.Color.Scrim">#8C000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Scrim" Color="#8C000000" />
+      <Color x:Key="Rune.Color.ScrimStrong">#DB000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.ScrimStrong" Color="#DB000000" />
+      <Color x:Key="Rune.Color.OnScrim">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.OnScrim" Color="#FFFFFFFF" />
       <Color x:Key="Rune.Color.Selection">#FFF8E0A8</Color>
       <SolidColorBrush x:Key="Rune.Brush.Selection" Color="#FFF8E0A8" />
       <Color x:Key="Rune.Color.Highlight">#FFFBE6A2</Color>
@@ -2193,6 +2256,12 @@
       <SolidColorBrush x:Key="Rune.Brush.FocusRing" Color="#FF00E5FF" />
       <Color x:Key="Rune.Color.Overlay">#99000000</Color>
       <SolidColorBrush x:Key="Rune.Brush.Overlay" Color="#99000000" />
+      <Color x:Key="Rune.Color.Scrim">#8C000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Scrim" Color="#8C000000" />
+      <Color x:Key="Rune.Color.ScrimStrong">#DB000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.ScrimStrong" Color="#DB000000" />
+      <Color x:Key="Rune.Color.OnScrim">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.OnScrim" Color="#FFFFFFFF" />
       <Color x:Key="Rune.Color.Selection">#FF591C47</Color>
       <SolidColorBrush x:Key="Rune.Brush.Selection" Color="#FF591C47" />
       <Color x:Key="Rune.Color.Highlight">#FF302008</Color>
@@ -2378,6 +2447,12 @@
       <SolidColorBrush x:Key="Rune.Brush.FocusRing" Color="#FF22B8FF" />
       <Color x:Key="Rune.Color.Overlay">#B302081A</Color>
       <SolidColorBrush x:Key="Rune.Brush.Overlay" Color="#B302081A" />
+      <Color x:Key="Rune.Color.Scrim">#8C000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Scrim" Color="#8C000000" />
+      <Color x:Key="Rune.Color.ScrimStrong">#DB000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.ScrimStrong" Color="#DB000000" />
+      <Color x:Key="Rune.Color.OnScrim">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.OnScrim" Color="#FFFFFFFF" />
       <Color x:Key="Rune.Color.Selection">#FF14508F</Color>
       <SolidColorBrush x:Key="Rune.Brush.Selection" Color="#FF14508F" />
       <Color x:Key="Rune.Color.Highlight">#FF4A3C12</Color>
@@ -2563,6 +2638,12 @@
       <SolidColorBrush x:Key="Rune.Brush.FocusRing" Color="#FF6E56CF" />
       <Color x:Key="Rune.Color.Overlay">#66211B30</Color>
       <SolidColorBrush x:Key="Rune.Brush.Overlay" Color="#66211B30" />
+      <Color x:Key="Rune.Color.Scrim">#8C000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Scrim" Color="#8C000000" />
+      <Color x:Key="Rune.Color.ScrimStrong">#DB000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.ScrimStrong" Color="#DB000000" />
+      <Color x:Key="Rune.Color.OnScrim">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.OnScrim" Color="#FFFFFFFF" />
       <Color x:Key="Rune.Color.Selection">#FFE1D9FF</Color>
       <SolidColorBrush x:Key="Rune.Brush.Selection" Color="#FFE1D9FF" />
       <Color x:Key="Rune.Color.Highlight">#FFFFEE9C</Color>
@@ -2748,6 +2829,12 @@
       <SolidColorBrush x:Key="Rune.Brush.FocusRing" Color="#FFF76B15" />
       <Color x:Key="Rune.Color.Overlay">#A60A0704</Color>
       <SolidColorBrush x:Key="Rune.Brush.Overlay" Color="#A60A0704" />
+      <Color x:Key="Rune.Color.Scrim">#8C000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Scrim" Color="#8C000000" />
+      <Color x:Key="Rune.Color.ScrimStrong">#DB000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.ScrimStrong" Color="#DB000000" />
+      <Color x:Key="Rune.Color.OnScrim">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.OnScrim" Color="#FFFFFFFF" />
       <Color x:Key="Rune.Color.Selection">#FF562800</Color>
       <SolidColorBrush x:Key="Rune.Brush.Selection" Color="#FF562800" />
       <Color x:Key="Rune.Color.Highlight">#FF3F2700</Color>
@@ -2933,6 +3020,12 @@
       <SolidColorBrush x:Key="Rune.Brush.FocusRing" Color="#FF171717" />
       <Color x:Key="Rune.Color.Overlay">#66000000</Color>
       <SolidColorBrush x:Key="Rune.Brush.Overlay" Color="#66000000" />
+      <Color x:Key="Rune.Color.Scrim">#8C000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Scrim" Color="#8C000000" />
+      <Color x:Key="Rune.Color.ScrimStrong">#DB000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.ScrimStrong" Color="#DB000000" />
+      <Color x:Key="Rune.Color.OnScrim">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.OnScrim" Color="#FFFFFFFF" />
       <Color x:Key="Rune.Color.Selection">#FFD4D4D4</Color>
       <SolidColorBrush x:Key="Rune.Brush.Selection" Color="#FFD4D4D4" />
       <Color x:Key="Rune.Color.Highlight">#FFFFEE9C</Color>
@@ -3118,6 +3211,12 @@
       <SolidColorBrush x:Key="Rune.Brush.FocusRing" Color="#FF1D7568" />
       <Color x:Key="Rune.Color.Overlay">#6616302A</Color>
       <SolidColorBrush x:Key="Rune.Brush.Overlay" Color="#6616302A" />
+      <Color x:Key="Rune.Color.Scrim">#8C000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.Scrim" Color="#8C000000" />
+      <Color x:Key="Rune.Color.ScrimStrong">#DB000000</Color>
+      <SolidColorBrush x:Key="Rune.Brush.ScrimStrong" Color="#DB000000" />
+      <Color x:Key="Rune.Color.OnScrim">#FFFFFFFF</Color>
+      <SolidColorBrush x:Key="Rune.Brush.OnScrim" Color="#FFFFFFFF" />
       <Color x:Key="Rune.Color.Selection">#FFC7E8DE</Color>
       <SolidColorBrush x:Key="Rune.Brush.Selection" Color="#FFC7E8DE" />
       <Color x:Key="Rune.Color.Highlight">#FFFBEEB0</Color>

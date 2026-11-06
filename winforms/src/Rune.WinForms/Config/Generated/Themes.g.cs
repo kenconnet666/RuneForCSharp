@@ -2,7 +2,7 @@
 // 由 tools/token-gen 从 vue-tsx-pro 的 packages/ui/src/config/theme 生成，不要手改；改了那边的 token 后运行 node tools/token-gen/token-gen.mjs
 namespace Rune.WinForms;
 
-/// <summary>一套主题的 colors（75 个）。</summary>
+/// <summary>一套主题的 colors（78 个）。</summary>
 public sealed class ThemeColors
 {
     /// <summary>background = #fcfcfd：页面背景。slate 1：亮色 `#fcfcfd`，暗色 `#111113`</summary>
@@ -163,6 +163,15 @@ public sealed class ThemeColors
 
     /// <summary>overlay = rgba(0, 0, 0, 0.4)：模态遮罩。亮色 blackA 6 `rgba(0, 0, 0, 0.4)`，暗色 blackA 8 `rgba(0, 0, 0, 0.6)`</summary>
     public required Color Overlay { get; init; }
+
+    /// <summary>scrim = rgba(0, 0, 0, 0.55)：图片、视频上的深色遮罩，上面放 onScrim 的文字（上传的进度与文件名）。 盖在任意图片上，不跟主题变：`rgba(0, 0, 0, 0.55)`</summary>
+    public required Color Scrim { get; init; }
+
+    /// <summary>scrimStrong = rgba(0, 0, 0, 0.86)：看图时铺满的深色背景（Lightbox）：`rgba(0, 0, 0, 0.86)`</summary>
+    public required Color ScrimStrong { get; init; }
+
+    /// <summary>onScrim = #ffffff：遮罩上的文字与图标：`#ffffff`</summary>
+    public required Color OnScrim { get; init; }
 
     /// <summary>selection = #d2deff：选中文字的底色（::selection）。indigo 5：亮色 `#d2deff`，暗色 `#253974`</summary>
     public required Color Selection { get; init; }
@@ -383,6 +392,9 @@ public static class BuiltinThemes
             InverseText = Color.FromArgb(255, 252, 252, 253),
             FocusRing = Color.FromArgb(255, 62, 99, 221),
             Overlay = Color.FromArgb(102, 0, 0, 0),
+            Scrim = Color.FromArgb(140, 0, 0, 0),
+            ScrimStrong = Color.FromArgb(219, 0, 0, 0),
+            OnScrim = Color.FromArgb(255, 255, 255, 255),
             Selection = Color.FromArgb(255, 210, 222, 255),
             Highlight = Color.FromArgb(255, 255, 238, 156),
             SurfaceTranslucent = Color.FromArgb(204, 252, 252, 253),
@@ -495,6 +507,9 @@ public static class BuiltinThemes
             InverseText = Color.FromArgb(255, 17, 17, 19),
             FocusRing = Color.FromArgb(255, 62, 99, 221),
             Overlay = Color.FromArgb(153, 0, 0, 0),
+            Scrim = Color.FromArgb(140, 0, 0, 0),
+            ScrimStrong = Color.FromArgb(219, 0, 0, 0),
+            OnScrim = Color.FromArgb(255, 255, 255, 255),
             Selection = Color.FromArgb(255, 37, 57, 116),
             Highlight = Color.FromArgb(255, 63, 39, 0),
             SurfaceTranslucent = Color.FromArgb(204, 17, 17, 19),
@@ -607,6 +622,9 @@ public static class BuiltinThemes
             InverseText = Color.FromArgb(255, 251, 247, 236),
             FocusRing = Color.FromArgb(255, 47, 75, 143),
             Overlay = Color.FromArgb(89, 59, 47, 32),
+            Scrim = Color.FromArgb(140, 0, 0, 0),
+            ScrimStrong = Color.FromArgb(219, 0, 0, 0),
+            OnScrim = Color.FromArgb(255, 255, 255, 255),
             Selection = Color.FromArgb(255, 220, 211, 180),
             Highlight = Color.FromArgb(255, 242, 217, 138),
             SurfaceTranslucent = Color.FromArgb(209, 245, 239, 223),
@@ -719,6 +737,9 @@ public static class BuiltinThemes
             InverseText = Color.FromArgb(255, 13, 19, 33),
             FocusRing = Color.FromArgb(255, 17, 128, 156),
             Overlay = Color.FromArgb(166, 3, 6, 15),
+            Scrim = Color.FromArgb(140, 0, 0, 0),
+            ScrimStrong = Color.FromArgb(219, 0, 0, 0),
+            OnScrim = Color.FromArgb(255, 255, 255, 255),
             Selection = Color.FromArgb(255, 0, 69, 88),
             Highlight = Color.FromArgb(255, 63, 39, 0),
             SurfaceTranslucent = Color.FromArgb(204, 13, 19, 33),
@@ -831,6 +852,9 @@ public static class BuiltinThemes
             InverseText = Color.FromArgb(255, 255, 255, 255),
             FocusRing = Color.FromArgb(255, 0, 54, 163),
             Overlay = Color.FromArgb(153, 0, 0, 0),
+            Scrim = Color.FromArgb(140, 0, 0, 0),
+            ScrimStrong = Color.FromArgb(219, 0, 0, 0),
+            OnScrim = Color.FromArgb(255, 255, 255, 255),
             Selection = Color.FromArgb(255, 188, 208, 245),
             Highlight = Color.FromArgb(255, 255, 224, 102),
             SurfaceTranslucent = Color.FromArgb(235, 255, 255, 255),
@@ -943,6 +967,9 @@ public static class BuiltinThemes
             InverseText = Color.FromArgb(255, 247, 253, 255),
             FocusRing = Color.FromArgb(255, 11, 92, 173),
             Overlay = Color.FromArgb(102, 16, 34, 44),
+            Scrim = Color.FromArgb(140, 0, 0, 0),
+            ScrimStrong = Color.FromArgb(219, 0, 0, 0),
+            OnScrim = Color.FromArgb(255, 255, 255, 255),
             Selection = Color.FromArgb(255, 194, 229, 255),
             Highlight = Color.FromArgb(255, 255, 238, 156),
             SurfaceTranslucent = Color.FromArgb(204, 247, 253, 255),
@@ -1055,6 +1082,9 @@ public static class BuiltinThemes
             InverseText = Color.FromArgb(255, 249, 254, 249),
             FocusRing = Color.FromArgb(255, 43, 122, 59),
             Overlay = Color.FromArgb(102, 24, 35, 24),
+            Scrim = Color.FromArgb(140, 0, 0, 0),
+            ScrimStrong = Color.FromArgb(219, 0, 0, 0),
+            OnScrim = Color.FromArgb(255, 255, 255, 255),
             Selection = Color.FromArgb(255, 201, 232, 202),
             Highlight = Color.FromArgb(255, 255, 238, 156),
             SurfaceTranslucent = Color.FromArgb(204, 249, 254, 249),
@@ -1167,6 +1197,9 @@ public static class BuiltinThemes
             InverseText = Color.FromArgb(255, 254, 253, 242),
             FocusRing = Color.FromArgb(255, 159, 135, 0),
             Overlay = Color.FromArgb(102, 35, 32, 16),
+            Scrim = Color.FromArgb(140, 0, 0, 0),
+            ScrimStrong = Color.FromArgb(219, 0, 0, 0),
+            OnScrim = Color.FromArgb(255, 255, 255, 255),
             Selection = Color.FromArgb(255, 255, 231, 112),
             Highlight = Color.FromArgb(255, 226, 240, 189),
             SurfaceTranslucent = Color.FromArgb(204, 254, 253, 242),
@@ -1279,6 +1312,9 @@ public static class BuiltinThemes
             InverseText = Color.FromArgb(255, 255, 250, 252),
             FocusRing = Color.FromArgb(255, 205, 55, 151),
             Overlay = Color.FromArgb(102, 40, 27, 32),
+            Scrim = Color.FromArgb(140, 0, 0, 0),
+            ScrimStrong = Color.FromArgb(219, 0, 0, 0),
+            OnScrim = Color.FromArgb(255, 255, 255, 255),
             Selection = Color.FromArgb(255, 246, 206, 231),
             Highlight = Color.FromArgb(255, 255, 238, 156),
             SurfaceTranslucent = Color.FromArgb(204, 255, 250, 252),
@@ -1391,6 +1427,9 @@ public static class BuiltinThemes
             InverseText = Color.FromArgb(255, 255, 250, 246),
             FocusRing = Color.FromArgb(255, 168, 118, 12),
             Overlay = Color.FromArgb(102, 44, 27, 19),
+            Scrim = Color.FromArgb(140, 0, 0, 0),
+            ScrimStrong = Color.FromArgb(219, 0, 0, 0),
+            OnScrim = Color.FromArgb(255, 255, 255, 255),
             Selection = Color.FromArgb(255, 248, 224, 168),
             Highlight = Color.FromArgb(255, 251, 230, 162),
             SurfaceTranslucent = Color.FromArgb(204, 255, 250, 246),
@@ -1503,6 +1542,9 @@ public static class BuiltinThemes
             InverseText = Color.FromArgb(255, 17, 14, 32),
             FocusRing = Color.FromArgb(255, 0, 229, 255),
             Overlay = Color.FromArgb(153, 0, 0, 0),
+            Scrim = Color.FromArgb(140, 0, 0, 0),
+            ScrimStrong = Color.FromArgb(219, 0, 0, 0),
+            OnScrim = Color.FromArgb(255, 255, 255, 255),
             Selection = Color.FromArgb(255, 89, 28, 71),
             Highlight = Color.FromArgb(255, 48, 32, 8),
             SurfaceTranslucent = Color.FromArgb(204, 17, 14, 32),
@@ -1615,6 +1657,9 @@ public static class BuiltinThemes
             InverseText = Color.FromArgb(255, 6, 19, 50),
             FocusRing = Color.FromArgb(255, 34, 184, 255),
             Overlay = Color.FromArgb(179, 2, 8, 26),
+            Scrim = Color.FromArgb(140, 0, 0, 0),
+            ScrimStrong = Color.FromArgb(219, 0, 0, 0),
+            OnScrim = Color.FromArgb(255, 255, 255, 255),
             Selection = Color.FromArgb(255, 20, 80, 143),
             Highlight = Color.FromArgb(255, 74, 60, 18),
             SurfaceTranslucent = Color.FromArgb(204, 6, 19, 50),
@@ -1727,6 +1772,9 @@ public static class BuiltinThemes
             InverseText = Color.FromArgb(255, 251, 249, 255),
             FocusRing = Color.FromArgb(255, 110, 86, 207),
             Overlay = Color.FromArgb(102, 33, 27, 48),
+            Scrim = Color.FromArgb(140, 0, 0, 0),
+            ScrimStrong = Color.FromArgb(219, 0, 0, 0),
+            OnScrim = Color.FromArgb(255, 255, 255, 255),
             Selection = Color.FromArgb(255, 225, 217, 255),
             Highlight = Color.FromArgb(255, 255, 238, 156),
             SurfaceTranslucent = Color.FromArgb(204, 251, 249, 255),
@@ -1839,6 +1887,9 @@ public static class BuiltinThemes
             InverseText = Color.FromArgb(255, 23, 19, 16),
             FocusRing = Color.FromArgb(255, 247, 107, 21),
             Overlay = Color.FromArgb(166, 10, 7, 4),
+            Scrim = Color.FromArgb(140, 0, 0, 0),
+            ScrimStrong = Color.FromArgb(219, 0, 0, 0),
+            OnScrim = Color.FromArgb(255, 255, 255, 255),
             Selection = Color.FromArgb(255, 86, 40, 0),
             Highlight = Color.FromArgb(255, 63, 39, 0),
             SurfaceTranslucent = Color.FromArgb(204, 23, 19, 16),
@@ -1951,6 +2002,9 @@ public static class BuiltinThemes
             InverseText = Color.FromArgb(255, 255, 255, 255),
             FocusRing = Color.FromArgb(255, 23, 23, 23),
             Overlay = Color.FromArgb(102, 0, 0, 0),
+            Scrim = Color.FromArgb(140, 0, 0, 0),
+            ScrimStrong = Color.FromArgb(219, 0, 0, 0),
+            OnScrim = Color.FromArgb(255, 255, 255, 255),
             Selection = Color.FromArgb(255, 212, 212, 212),
             Highlight = Color.FromArgb(255, 255, 238, 156),
             SurfaceTranslucent = Color.FromArgb(204, 255, 255, 255),
@@ -2063,6 +2117,9 @@ public static class BuiltinThemes
             InverseText = Color.FromArgb(255, 245, 249, 247),
             FocusRing = Color.FromArgb(255, 29, 117, 104),
             Overlay = Color.FromArgb(102, 22, 48, 42),
+            Scrim = Color.FromArgb(140, 0, 0, 0),
+            ScrimStrong = Color.FromArgb(219, 0, 0, 0),
+            OnScrim = Color.FromArgb(255, 255, 255, 255),
             Selection = Color.FromArgb(255, 199, 232, 222),
             Highlight = Color.FromArgb(255, 251, 238, 176),
             SurfaceTranslucent = Color.FromArgb(204, 245, 249, 247),

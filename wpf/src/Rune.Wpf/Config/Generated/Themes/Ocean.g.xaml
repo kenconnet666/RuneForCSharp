@@ -168,6 +168,15 @@
   <!-- overlay = rgba(16, 34, 44, 0.4)：模态遮罩。亮色 blackA 6 `rgba(0, 0, 0, 0.4)`，暗色 blackA 8 `rgba(0, 0, 0, 0.6)` -->
   <Color x:Key="Rune.Color.Overlay">#6610222C</Color>
   <SolidColorBrush x:Key="Rune.Brush.Overlay" po:Freeze="True" Color="#6610222C" />
+  <!-- scrim = rgba(0, 0, 0, 0.55)：图片、视频上的深色遮罩，上面放 onScrim 的文字（上传的进度与文件名）。 盖在任意图片上，不跟主题变：`rgba(0, 0, 0, 0.55)` -->
+  <Color x:Key="Rune.Color.Scrim">#8C000000</Color>
+  <SolidColorBrush x:Key="Rune.Brush.Scrim" po:Freeze="True" Color="#8C000000" />
+  <!-- scrimStrong = rgba(0, 0, 0, 0.86)：看图时铺满的深色背景（Lightbox）：`rgba(0, 0, 0, 0.86)` -->
+  <Color x:Key="Rune.Color.ScrimStrong">#DB000000</Color>
+  <SolidColorBrush x:Key="Rune.Brush.ScrimStrong" po:Freeze="True" Color="#DB000000" />
+  <!-- onScrim = #ffffff：遮罩上的文字与图标：`#ffffff` -->
+  <Color x:Key="Rune.Color.OnScrim">#FFFFFFFF</Color>
+  <SolidColorBrush x:Key="Rune.Brush.OnScrim" po:Freeze="True" Color="#FFFFFFFF" />
   <!-- selection = #c2e5ff：选中文字的底色（::selection）。indigo 5：亮色 `#d2deff`，暗色 `#253974` -->
   <Color x:Key="Rune.Color.Selection">#FFC2E5FF</Color>
   <SolidColorBrush x:Key="Rune.Brush.Selection" po:Freeze="True" Color="#FFC2E5FF" />
