@@ -54,9 +54,20 @@ public class IconControl : ElementControl<Icon>
     /// <inheritdoc />
     protected override AccessibleObject CreateAccessibilityInstance() => new IconAccessibleObject(this);
 
-    /// <summary>没有另设 AccessibleRole 时是图片。</summary>
+    /// <summary>
+    /// 没有另设 AccessibleRole 时是图片。名字只取 AccessibleName：系统会给没名字的窗口借用前面那个 Label 的文字，
+    /// 装饰性的图标就会被读成上一行的内容（inspect uia 查出来的）。图片不能获得焦点，去掉窗口带的 Focusable。
+    /// </summary>
     sealed class IconAccessibleObject(IconControl owner) : ControlAccessibleObject(owner)
     {
         public override AccessibleRole Role => owner.AccessibleRole is AccessibleRole.Default ? AccessibleRole.Graphic : owner.AccessibleRole;
+
+        public override string? Name
+        {
+            get => owner.AccessibleName;
+            set => owner.AccessibleName = value;
+        }
+
+        public override AccessibleStates State => base.State & ~AccessibleStates.Focusable;
     }
 }

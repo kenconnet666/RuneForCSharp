@@ -87,10 +87,15 @@ public class IconTests
     public Task Screen_readers_see_a_graphic_that_cannot_take_focus() => WinFormsUi.Run(() =>
     {
         var named = new IconControl { Data = Lucide.Trash, AccessibleName = "删除" };
-        using var form = WinFormsUi.Show(named);
+        // 前面有个 Label：系统会把它的文字借给没名字的窗口，装饰性的图标不能被读成"已保存"
+        var label = new Label { Text = "已保存", Top = 40 };
+        var decorative = new IconControl { Data = Lucide.CircleCheck, Top = 40, Left = 120 };
+        using var form = WinFormsUi.Show(named, label, decorative);
 
         Assert.Equal(AccessibleRole.Graphic, named.AccessibilityObject.Role);
         Assert.Equal("删除", named.AccessibilityObject.Name);
+        Assert.Null(decorative.AccessibilityObject.Name);
+        Assert.False(named.AccessibilityObject.State.HasFlag(AccessibleStates.Focusable));
         Assert.False(named.CanSelect);
     });
 
