@@ -55,6 +55,7 @@ export const PROPS_NOT_PORTED = {
   CloseButton: { type: BUTTON_TYPE },
   ClearButton: { type: BUTTON_TYPE },
   Toolbar: { items: '桌面上没有 CSS 选择器：参与方向键移动的固定是按钮与链接' },
+  Skeleton: { variant: '上游已废弃（改名为 shape），新库不带' },
 };
 
 /** 平台控件自带、不用组件自己声明的属性（基类里已经有） */
