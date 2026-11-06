@@ -57,6 +57,11 @@
     <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
     <Setter Property="HorizontalContentAlignment" Value="Center" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
+    <!-- 一行里与别的控件居中对齐，不被拉高（链接样式没有最小高度，高度是行高加内边距） -->
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <!-- 行高 lineHeights.tight（1.25em）：文字的行盒与 TS 一样高 -->
+    <Setter Property="rune:EmSize.LineHeight" Value="{DynamicResource Rune.LineHeight.Tight}" />
+    <Setter Property="TextBlock.LineStackingStrategy" Value="BlockLineHeight" />
     <Setter Property="Cursor" Value="Hand" />
     <Setter Property="FocusVisualStyle" Value="{x:Null}" />
     <Style.Triggers>

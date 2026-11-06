@@ -5,7 +5,7 @@ namespace Rune.Wpf;
 
 /// <summary>
 /// em 尺寸：值 = 系数 × 字号，字号变了跟着变（对应 vue-tsx-pro 里组件内部一律用 em）。
-/// 主题样式只设系数，控件用属性强制（coerce）算出实际值（Padding、登记的圆角属性，以及 <see cref="ControlHeight"/> 的最小高度、宽度）：
+/// 主题样式只设系数，控件用属性强制（coerce）算出实际值（Padding、行高、登记的圆角属性，以及 <see cref="ControlHeight"/> 的最小高度、宽度）：
 /// <code>
 /// // 控件的静态构造里接上：Padding、MinHeight、Width、FontSize 的元数据，以及自己的 CornerRadius
 /// static Button() => EmSize.Register(typeof(Button), CornerRadiusProperty);
@@ -29,7 +29,17 @@ public static class EmSize
     public static readonly DependencyProperty CornerRadiusProperty = DependencyProperty.RegisterAttached(
         "CornerRadius", typeof(double?), typeof(EmSize), new PropertyMetadata(null, (d, _) => Refresh(d)));
 
+    /// <summary>行高的 em 系数（按钮这类控件里文字的行盒：TS 的 lineHeight: tight），作用在继承的 TextBlock.LineHeight 上。</summary>
+    public static readonly DependencyProperty LineHeightProperty = DependencyProperty.RegisterAttached(
+        "LineHeight", typeof(double?), typeof(EmSize), new PropertyMetadata(null, (d, _) => d.CoerceValue(TextBlock.LineHeightProperty)));
+
     static readonly Dictionary<Type, DependencyProperty> cornerRadiusByType = [];
+
+    /// <summary>读行高系数。</summary>
+    public static double? GetLineHeight(DependencyObject d) => (double?)d.GetValue(LineHeightProperty);
+
+    /// <summary>设行高系数。</summary>
+    public static void SetLineHeight(DependencyObject d, double? value) => d.SetValue(LineHeightProperty, value);
 
     /// <summary>读内边距系数。</summary>
     public static Thickness? GetPadding(DependencyObject d) => (Thickness?)d.GetValue(PaddingProperty);
@@ -53,6 +63,7 @@ public static class EmSize
         Control.PaddingProperty.OverrideMetadata(controlType, new FrameworkPropertyMetadata(default(Thickness), null, CoercePadding));
         FrameworkElement.MinHeightProperty.OverrideMetadata(controlType, new FrameworkPropertyMetadata(0d, null, CoerceMinHeight));
         FrameworkElement.WidthProperty.OverrideMetadata(controlType, new FrameworkPropertyMetadata(double.NaN, null, CoerceWidth));
+        TextBlock.LineHeightProperty.OverrideMetadata(controlType, new FrameworkPropertyMetadata(double.NaN, FrameworkPropertyMetadataOptions.Inherits, null, CoerceLineHeight));
         Control.FontSizeProperty.OverrideMetadata(controlType, new FrameworkPropertyMetadata(
             SystemFonts.MessageFontSize, FrameworkPropertyMetadataOptions.Inherits, (d, _) => Refresh(d)));
         if (cornerRadiusProperty is not null) cornerRadiusByType[controlType] = cornerRadiusProperty;
@@ -84,8 +95,15 @@ public static class EmSize
         return ControlHeight.Of(FontSize(d), ControlHeight.GetFactor(d));
     }
 
+    static object CoerceLineHeight(DependencyObject d, object baseValue)
+    {
+        if (GetLineHeight(d) is not { } f || !FromLibrary(d, TextBlock.LineHeightProperty, baseValue)) return baseValue;
+        return f * FontSize(d);
+    }
+
     internal static void Refresh(DependencyObject d)
     {
+        d.CoerceValue(TextBlock.LineHeightProperty);
         d.CoerceValue(Control.PaddingProperty);
         d.CoerceValue(FrameworkElement.MinHeightProperty);
         d.CoerceValue(FrameworkElement.WidthProperty);
