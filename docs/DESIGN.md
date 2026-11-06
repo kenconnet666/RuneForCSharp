@@ -453,3 +453,24 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 尺寸都是 em，按 Badge 自己的字号算：内边距 0.5em、间距 0.25em、最小高度 1.75em、圆点 0.5em；圆角取主题的 radii 系数，full 按高度的一半画成胶囊；描边 1 像素，没有描边色时也占位，各样式等高。
 - 读屏：Badge 本身不是控件元素，读屏直接读里面的文字（Avalonia、WPF）；WinForms 是静态文字，名字是 Text。
 - 踩过：WPF 里使用方的隐式 `rune:Text` 样式也会套到 Badge 里面的 Text 上（示例里改成带键的样式）。Avalonia 的子选择器 `WrapPanel > rune|Text` 只选直接子元素，不受影响。
+
+### Button
+
+- 外观 = 样式（solid、soft、surface、outline、ghost、link，`ButtonVariant`）× 色调（`StatusTone`）× 字号档位 × 圆角；内部尺寸都是 em：内边距 1em × 0.25em、最小高度 max(2.25em, 24px)、图标与文字间距 0.5em、圆角取主题的 radii 系数。
+- **颜色都从一张调色板表来**（`tools/token-gen/palette.mjs`：每种色调九个字段，中性与其他色调的不规则收在表里）：
+  - Avalonia：token-gen 生成每套主题六份 `TonePalette`（`Rune.Palette.Accent`……）；色调伪类设 Palette，6 条样式档位绑定字段，加 5 条悬停（决定 11），36 种组合只写 17 条嵌套样式。
+  - WPF：`tools/recipe-gen` 把配方表展开成主题样式的 MultiTrigger（36 条组合 + 30 条悬停，ButtonRecipe.g.xaml），Button 的主题样式 BasedOn 它；使用方任何 setter 都能盖过。
+  - WinForms：recipe-gen 同时生成 `ButtonRecipe.Colors(样式, 色调, 悬停, 主题颜色)`。
+  - 中性实底的悬停色在 TS 里是 `color-mix(in oklab, inverseSurface 85%, background)`，token-gen 按主题在 oklab 里算好，作为派生 token `inverseSurfaceHover` 补进 colors 组。
+- **效果照 TS**：
+  - 波纹（`Ripple`）：从按下的位置扩散（键盘 Enter、空格从中心），半径到最远的角；颜色是文字色的 22%；扩散 durations.lg + 标准缓动，松开、移出、失去焦点时淡出 durations.md + 离场缓动；裁在圆角里；系统关闭动画时直接盖满、直接消失。全局开关 `Ripple.Enabled`，组件的 Ripple 属性单独覆盖。
+  - 颜色过渡：底色（Avalonia 还有描边、文字）在 durations.sm 内过渡（Avalonia 的 BrushTransition、WPF 的 rune:BrushTransition、WinForms 的 Animator）。
+  - 焦点环：只在键盘聚焦时（:focus-visible）；2 像素、外扩 2 像素，圆角跟着按钮外扩。Avalonia 用 :focus-visible 伪类；WPF 看 InputManager 的最近输入设备是不是键盘（不用 FocusVisualStyle，它取不到按钮的圆角）；WinForms 用 ShowFocusCues，并默认留 4 像素 Padding（控件画不出自己的边界）。
+  - 加载：点击立即无效（Command 也不执行），指示防闪烁（`DelayedLoading`：200 毫秒后才出现，出现了至少 500 毫秒）；内容透明保留宽度，旋转指示盖在中间。DelayedLoading 用 Task.Delay 再回 UI 线程，不用平台的计时器（Avalonia headless 测试的调度器不走计时器）。
+  - 链接样式悬停下划线；不可用时整体 opacities.disabled。
+- 从平台的 Button 派生（Avalonia、WPF）：Click、Command、键盘、读屏的 Invoke 都现成。WinForms 的 ButtonControl 实现 IButtonControl（能当 AcceptButton），读屏是 PushButton，加载中状态带 Busy。
+- 踩过：
+  - Avalonia 的 `Rune.BorderWidth.*` 资源是 double，Thickness 属性不能直接引用（运行时类型转换异常），描边宽度写字面量。
+  - WPF 的 Border 不会把过大的圆角缩回来，radii.full 画成椭圆；Button 把圆角限制在高度的一半，尺寸变了重新算。
+  - WPF 没有 IsMouseOverChanged 事件，悬停相关的代码放在 OnMouseEnter / OnMouseLeave。
+- 缺口：focusableWhenDisabled（平台上不可用的控件不能聚焦，要另做"可聚焦的不可用"状态）；WinForms 的 propsContent；type（submit、reset）不移植，登记在 parity 的 PROPS_NOT_PORTED。

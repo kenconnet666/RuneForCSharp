@@ -28,10 +28,10 @@
 ## 2. 现在的状态
 
 - 阶段 0 骨架完成：三个平台都有组件库、示例应用和测试工程，基础设施都配了测试。DESIGN §2 有目录说明。
-- Release 构建零警告，135 个测试全部通过（Avalonia 39、WPF 49、WinForms 47）。
+- Release 构建零警告，141 个测试全部通过（Avalonia 39、WPF 49、WinForms 53）。
 - 前置探测都做完了，结论写进了 DESIGN（档位类型 §3、组合档位 §4、部件转发 §7、主题切换 §9、热重载 §11）。
 - 要定的事都定下了（ROADMAP"已定的决定" 10–20），"待定的决定"现在是空的。
-- 阶段 1 已完成：`tools/ts-inspect`、`token-gen`、`lang-gen`、`icons-gen`、`parity`（三个库都有了 16 套主题的 token、中英文语言包和 Lucide 全集）。阶段 2 进行中：档位类型（`TextSize`、`Tone`）与 Icon 三个平台都做了；WinForms 有了无窗口元素的基础（`Element`、单元素宿主 `ElementControl<T>`、应用级主题信号 `RuneTheme.Current`）。三个平台都有了示例登记表（`apps/Rune.*.Examples`，Gallery 与 inspect 共用）和 `inspect`；CI（`.github/workflows/ci.yml`）按平台并行跑全量，推送到 GitHub 后跑（2026-11-06 第一次推送）。Text 家族（Text、Paragraph、Strong、Em、Small）三个平台都做了；WPF 从 TextBlock 派生（决定 19）。Spinner（第一个带部件的组件）三个平台都做了，部件转发的三种写法都落地了。Badge（第一个自绘、带配方的组件）三个平台都做了，自绘组件的部件转发见决定 20。WPF Provider 的"部件键叠类型键"（决定 19，`PartKey`）与 Style.Resources 的递归合成都做了。Button 家族进行中：Avalonia、WPF 的 Button 已做（调色板 / 生成的配方触发器、波纹、颜色过渡、焦点环、加载指示防闪烁，效果照 TS）。`tools/recipe-gen` 按调色板表（`tools/token-gen/palette.mjs`）生成 WPF 的 36 条组合 + 30 条悬停触发器。接着做 WinForms 的 Button：recipe-gen 加一份 C# 的配方（样式 × 色调 × 悬停 → 颜色），元素用 Animator 做颜色过渡与波纹、FrameClock 转加载指示、DelayedLoading；ButtonControl 处理鼠标、键盘、焦点（Selectable、TabStop、IButtonControl），读屏是 PushButton。之后 IconButton、LinkButton、ButtonGroup、CloseButton。已知缺口：focusableWhenDisabled 还没做（平台上 IsEnabled=false 不能聚焦）。用户要求无人值守持续执行，规矩见 ROADMAP"自主执行的规矩"。
+- 阶段 1 已完成：`tools/ts-inspect`、`token-gen`、`lang-gen`、`icons-gen`、`parity`（三个库都有了 16 套主题的 token、中英文语言包和 Lucide 全集）。阶段 2 进行中：档位类型（`TextSize`、`Tone`）与 Icon 三个平台都做了；WinForms 有了无窗口元素的基础（`Element`、单元素宿主 `ElementControl<T>`、应用级主题信号 `RuneTheme.Current`）。三个平台都有了示例登记表（`apps/Rune.*.Examples`，Gallery 与 inspect 共用）和 `inspect`；CI（`.github/workflows/ci.yml`）按平台并行跑全量，推送到 GitHub 后跑（2026-11-06 第一次推送）。Text 家族（Text、Paragraph、Strong、Em、Small）三个平台都做了；WPF 从 TextBlock 派生（决定 19）。Spinner（第一个带部件的组件）三个平台都做了，部件转发的三种写法都落地了。Badge（第一个自绘、带配方的组件）三个平台都做了，自绘组件的部件转发见决定 20。WPF Provider 的"部件键叠类型键"（决定 19，`PartKey`）与 Style.Resources 的递归合成都做了。Button 三个平台都做了（调色板 / 生成的配方、波纹、颜色过渡、焦点环、加载指示防闪烁，效果照 TS；DESIGN §14）。接着做 IconButton、LinkButton、ButtonGroup、CloseButton。已知缺口：三个平台的 focusableWhenDisabled（平台上 IsEnabled=false 不能聚焦，要另做"可聚焦的不可用"）、WinForms 的 propsContent。用户要求无人值守持续执行，规矩见 ROADMAP"自主执行的规矩"。
 
 ## 3. 环境
 
@@ -76,6 +76,7 @@
 | 核对生成的 token 与 vue-tsx-pro 一致（CI 用） | `node tools/token-gen/token-gen.mjs --check` |
 | 重新生成语言包（改了 vue-tsx-pro 的语言包后）；`--check` 只核对 | `node tools/lang-gen/lang-gen.mjs` |
 | 重新生成 Lucide 图标（vue-tsx-pro 升级了 @lucide/icons 后）；`--check` 只核对 | `node tools/icons-gen/icons-gen.mjs` |
+| 重新生成组件配方（改了调色板表 `tools/token-gen/palette.mjs` 或配方表后）：WPF 的 MultiTrigger、WinForms 的颜色方法；`--check` 只核对 | `node tools/recipe-gen/recipe-gen.mjs` |
 | 进度与名字对照：组件按层、三个库做了没有、缺哪些 props；语言包的键 | `node tools/parity/parity.mjs`（`--component Button` 只看一个，`--json`） |
 
 - **对照仓库**（已加进 Claude 会话的工作目录）：
