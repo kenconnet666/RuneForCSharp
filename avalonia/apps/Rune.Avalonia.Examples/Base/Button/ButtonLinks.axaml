@@ -1,0 +1,17 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/avalonia"
+             x:Class="Rune.Avalonia.Examples.ButtonLinks">
+  <!-- Card 做出来后包一层卡片；桌面没有站内地址，链接都是绝对地址，用系统打开 -->
+  <StackPanel Spacing="16">
+    <StackPanel Spacing="4">
+      <rune:Strong>还没有订单</rune:Strong>
+      <rune:Paragraph Size="sm" Tone="muted">新建第一张订单，或者先看看怎么批量导入。</rune:Paragraph>
+    </StackPanel>
+    <WrapPanel ItemSpacing="8" LineSpacing="8">
+      <rune:LinkButton Href="https://example.com/orders/new" Icon="{x:Static rune:Lucide.Plus}">新建订单</rune:LinkButton>
+      <rune:LinkButton Href="https://example.com/guide/import" Variant="soft" Icon="{x:Static rune:Lucide.BookOpen}">导入指南</rune:LinkButton>
+      <rune:LinkButton Href="https://vuejs.org" External="True" Variant="ghost" IconEnd="{x:Static rune:Lucide.ArrowRight}">Vue 文档</rune:LinkButton>
+    </WrapPanel>
+  </StackPanel>
+</UserControl>
