@@ -16,6 +16,8 @@ export const PROP_RENAMES = {
   disabled: 'IsEnabled',
   children: 'Content',
   _value: 'Value',
+  // 读屏名称：Avalonia、WPF 的附加属性，WinForms 的 AccessibleName
+  'aria-label': 'AutomationProperties.Name',
 };
 
 /** 只对某个组件的改名（C# 的成员不能与类同名：Icon 的 icon 叫 Data） */
@@ -23,13 +25,17 @@ export const COMPONENT_PROP_RENAMES = {
   Icon: { icon: 'Data' },
 };
 
+const BUTTON_TYPE = '表单提交是浏览器的概念；对话框的默认、取消按钮用平台的 IsDefault、IsCancel';
+
 /** 某个组件不移植的 prop 与原因（平台上没有对应的概念）：parity 不报缺 */
 export const PROPS_NOT_PORTED = {
-  Button: { type: "表单提交是浏览器的概念；对话框的默认、取消按钮用平台的 IsDefault、IsCancel" },
+  Button: { type: BUTTON_TYPE },
+  IconButton: { type: BUTTON_TYPE },
+  ButtonBase: { type: BUTTON_TYPE },
 };
 
 /** 平台控件自带、不用组件自己声明的属性（基类里已经有） */
-export const PLATFORM_PROPS = new Set(['IsEnabled', 'Content', 'Tag']);
+export const PLATFORM_PROPS = new Set(['IsEnabled', 'Content', 'Tag', 'AutomationProperties.Name']);
 
 /** 桌面上不做的组件与原因（ROADMAP 阶段 3） */
 export const EXCLUDED = {

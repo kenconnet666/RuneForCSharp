@@ -36,9 +36,13 @@ function vueComponents(vue) {
     .sort((a, b) => a.level - b.level || a.file.localeCompare(b.file) || a.name.localeCompare(b.name));
 }
 
-/** 一个库的 C# 源码：公开的类 → 它的公开属性（按文件读，一个文件里的属性算给文件里声明的类） */
+/**
+ * 一个库的 C# 源码：公开的类 → 它的公开属性（按文件读，一个文件里的属性算给文件里声明的类），
+ * 加上库里基类的（IconButton 的 Variant 在 ButtonCore 里）。限定名的基类（global::Avalonia.Controls.Button）是平台的，不展开
+ */
 function csharpTypes(dir) {
   const types = new Map();
+  const bases = new Map();
   const walk = (path) => {
     for (const name of readdirSync(path)) {
       const full = join(path, name);
@@ -46,7 +50,9 @@ function csharpTypes(dir) {
       if (statSync(full).isDirectory()) walk(full);
       else if (name.endsWith('.cs')) {
         const text = readFileSync(full, 'utf8');
-        const classes = [...text.matchAll(/public\s+(?:(?:sealed|partial|abstract|static)\s+)*(?:class|record)\s+(\w+)/g)].map((m) => m[1]);
+        const declarations = [...text.matchAll(/public\s+(?:(?:sealed|partial|abstract|static)\s+)*(?:class|record)\s+(\w+)(?:<[^>{]*>)?(?:\([^)]*\))?(?:\s*:\s*([\w.:]+))?/g)];
+        for (const [, type, base] of declarations) if (base && !/[.:]/.test(base)) bases.set(type, base);
+        const classes = declarations.map((m) => m[1]);
         // 类型可以带空格（Func<string, string>、值元组），按行匹配：修饰符、类型、名字，后面是 { 或 =>
         const props = [...text.matchAll(/public\s+(?:(?:static|required|override|virtual|new)\s+)*[^\n=;]*?\S\s+(\w+)\s*(?:\{|=>)/g)].map((m) => m[1]);
         // 部件名常量（Avalonia 的 `SpinnerParts.Icon = "PART_Icon"`、WPF 的部件样式键）：按字段收进所在的类
@@ -56,7 +62,9 @@ function csharpTypes(dir) {
     }
   };
   walk(join(repoRoot, dir));
-  return types;
+  const inherited = (type, seen = new Set()) =>
+    seen.has(type) ? [] : (seen.add(type), [...(types.get(type) ?? []), ...(bases.has(type) ? inherited(bases.get(type), seen) : [])]);
+  return new Map([...types.keys()].map((type) => [type, new Set(inherited(type))]));
 }
 
 /**
