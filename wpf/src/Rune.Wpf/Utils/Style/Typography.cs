@@ -6,7 +6,7 @@ namespace Rune.Wpf;
 /// <summary>
 /// 字号档位（vue-tsx-pro 的 TextSize）：xs–xl 对应主题的 fontSizes（<c>Rune.FontSize.Md</c>），也可以直接写像素数（<c>Size="18"</c>）。
 /// </summary>
-/// <param name="Value">档位名（xs…xl）或像素数的文字。</param>
+/// <param name="Value">档位名（xs…xxxl）或像素数的文字。</param>
 [TypeConverter(typeof(VariantConverter<TextSize>))]
 public readonly record struct TextSize(string Value) : IVariant<TextSize>
 {
@@ -25,8 +25,14 @@ public readonly record struct TextSize(string Value) : IVariant<TextSize>
     /// <summary>18px：强调文字、卡片标题。</summary>
     public static readonly TextSize Xl = new("xl");
 
+    /// <summary>24px：二级标题（H2 的默认）。</summary>
+    public static readonly TextSize Xxl = new("xxl");
+
+    /// <summary>30px：页面标题（H1 的默认）。</summary>
+    public static readonly TextSize Xxxl = new("xxxl");
+
     /// <inheritdoc />
-    public static IReadOnlyList<TextSize> Known { get; } = [Xs, Sm, Md, Lg, Xl];
+    public static IReadOnlyList<TextSize> Known { get; } = [Xs, Sm, Md, Lg, Xl, Xxl, Xxxl];
 
     /// <summary>直接给像素数时的值；是档位名时为 null。</summary>
     public double? Pixels => double.TryParse(Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var pixels) ? pixels : null;

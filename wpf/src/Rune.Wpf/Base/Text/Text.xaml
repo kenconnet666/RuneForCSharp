@@ -16,6 +16,8 @@
       <Trigger Property="Size" Value="md"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Md}" /></Trigger>
       <Trigger Property="Size" Value="lg"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Lg}" /></Trigger>
       <Trigger Property="Size" Value="xl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xl}" /></Trigger>
+      <Trigger Property="Size" Value="xxl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xxl}" /></Trigger>
+      <Trigger Property="Size" Value="xxxl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xxxl}" /></Trigger>
       <Trigger Property="Weight" Value="light"><Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Light}" /></Trigger>
       <Trigger Property="Weight" Value="normal"><Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Normal}" /></Trigger>
       <Trigger Property="Weight" Value="medium"><Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" /></Trigger>

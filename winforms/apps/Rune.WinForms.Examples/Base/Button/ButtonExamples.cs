@@ -47,9 +47,9 @@ static class ButtonExamples
     ]);
 
     static Control Sizes() => Column(4,
-        Row(0, [.. TextSize.Known.Select(size => new ButtonControl { Text = size.Value, TextSize = size, Icon = Lucide.Plus, Anchor = AnchorStyles.None })]),
-        Row(0, [.. TextSize.Known.Select(size => new ButtonControl { Text = size.Value, TextSize = size, Variant = ButtonVariant.Outline, Tone = StatusTone.Neutral, Anchor = AnchorStyles.None })]),
-        Row(0, [.. TextSize.Known.Select(size => new IconButtonControl { Icon = Lucide.Settings, TextSize = size, Variant = ButtonVariant.Soft, AccessibleName = $"设置（{size.Value}）", Anchor = AnchorStyles.None })]));
+        Row(0, [.. Steps.Select(size => new ButtonControl { Text = size.Value, TextSize = size, Icon = Lucide.Plus, Anchor = AnchorStyles.None })]),
+        Row(0, [.. Steps.Select(size => new ButtonControl { Text = size.Value, TextSize = size, Variant = ButtonVariant.Outline, Tone = StatusTone.Neutral, Anchor = AnchorStyles.None })]),
+        Row(0, [.. Steps.Select(size => new IconButtonControl { Icon = Lucide.Settings, TextSize = size, Variant = ButtonVariant.Soft, AccessibleName = $"设置（{size.Value}）", Anchor = AnchorStyles.None })]));
 
     /// <summary>圆角档位与 Badge、Card、输入框共用一套（Radius），对应主题的 radii。</summary>
     static Control RadiusExample() => Column(4,

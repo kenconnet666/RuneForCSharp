@@ -35,7 +35,7 @@ static class IconExamples
         followText.Font = new Font(Fonts.Installed(RuneTheme.Current.Peek().Fonts.Sans), Tokens.FontSize.Xl * 72 / 96);
         var sizes = Wrap(24,
         [
-            .. TextSize.Known.Select(size => Cell(new IconControl { Data = Lucide.Star, IconSize = size }, size.Value)),
+            .. Steps.Select(size => Cell(new IconControl { Data = Lucide.Star, IconSize = size }, size.Value)),
             Cell(followText, "跟随文字"),
         ]);
         var pixels = Wrap(24, [.. new[] { 16f, 24, 32, 48 }.Select(size => Cell(new IconControl { Data = Lucide.Star, IconSize = size }, $"{size}px"))]);

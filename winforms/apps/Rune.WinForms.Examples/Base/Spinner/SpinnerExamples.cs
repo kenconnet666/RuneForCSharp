@@ -14,7 +14,7 @@ static class SpinnerExamples
     {
         var sizes = Wrap(24,
         [
-            .. TextSize.Known.Select(size => new SpinnerControl { IconSize = size, Anchor = AnchorStyles.None }),
+            .. Steps.Select(size => new SpinnerControl { IconSize = size, Anchor = AnchorStyles.None }),
             FollowText(TextTone.Accent, "跟随文字颜色", null),
             FollowText(TextTone.Success, "同步中", TextSize.Sm),
         ]);

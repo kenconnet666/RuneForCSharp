@@ -1,0 +1,17 @@
+<!-- H1–H6 的主题（vue-tsx-pro 的 headingStyles 与 createHeading 的默认值）：在 Text 的主题上改字号、字重、字体、行高 -->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="Rune.Heading" TargetType="rune:Heading" BasedOn="{StaticResource {x:Type rune:Text}}">
+    <Setter Property="Weight" Value="semibold" />
+    <Setter Property="FontFamily" Value="{DynamicResource Rune.Font.Heading}" />
+    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Tight}" />
+    <Setter Property="Wrap" Value="Balance" />
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type rune:H1}" TargetType="rune:H1" BasedOn="{StaticResource Rune.Heading}"><Setter Property="Size" Value="xxxl" /></ControlTheme>
+  <ControlTheme x:Key="{x:Type rune:H2}" TargetType="rune:H2" BasedOn="{StaticResource Rune.Heading}"><Setter Property="Size" Value="xxl" /></ControlTheme>
+  <ControlTheme x:Key="{x:Type rune:H3}" TargetType="rune:H3" BasedOn="{StaticResource Rune.Heading}"><Setter Property="Size" Value="xl" /></ControlTheme>
+  <ControlTheme x:Key="{x:Type rune:H4}" TargetType="rune:H4" BasedOn="{StaticResource Rune.Heading}"><Setter Property="Size" Value="lg" /></ControlTheme>
+  <ControlTheme x:Key="{x:Type rune:H5}" TargetType="rune:H5" BasedOn="{StaticResource Rune.Heading}"><Setter Property="Size" Value="md" /></ControlTheme>
+  <ControlTheme x:Key="{x:Type rune:H6}" TargetType="rune:H6" BasedOn="{StaticResource Rune.Heading}"><Setter Property="Size" Value="sm" /></ControlTheme>
+</ResourceDictionary>

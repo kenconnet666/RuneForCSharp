@@ -30,7 +30,7 @@ static class IconButtonExamples
         Row(4,
             [
                 Label("尺寸"),
-                .. TextSize.Known.Select(size => new IconButtonControl { Icon = Lucide.Settings, TextSize = size, Variant = ButtonVariant.Surface, AccessibleName = $"设置（{size.Value}）", Anchor = AnchorStyles.None }),
+                .. Steps.Select(size => new IconButtonControl { Icon = Lucide.Settings, TextSize = size, Variant = ButtonVariant.Surface, AccessibleName = $"设置（{size.Value}）", Anchor = AnchorStyles.None }),
             ]));
 
     static IconButtonControl Icon(IconData icon, string name, ButtonVariant variant = default, StatusTone tone = default) =>

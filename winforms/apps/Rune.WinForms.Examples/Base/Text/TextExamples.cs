@@ -20,7 +20,7 @@ static class TextExamples
     ];
 
     static Control Scale() => Wrap(32,
-        Column(8, [.. TextSize.Known.Select(size => Row(12, Name($"size={size.Value}"), new TextControl { Text = "界面里的文字 Typography", TextSize = size, Anchor = AnchorStyles.Left }))]),
+        Column(8, [.. Steps.Select(size => Row(12, Name($"size={size.Value}"), new TextControl { Text = "界面里的文字 Typography", TextSize = size, Anchor = AnchorStyles.Left }))]),
         Column(8, [.. TextWeight.Known.Select(weight => Row(12, Name(weight.Value), new TextControl { Text = "季度营收 ¥1,280,000", Weight = weight, TextSize = TextSize.Lg, Anchor = AnchorStyles.Left }))]));
 
     /// <summary>左边一列的名字：xs、muted、宽 5em。</summary>

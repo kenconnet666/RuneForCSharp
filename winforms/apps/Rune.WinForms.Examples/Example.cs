@@ -29,6 +29,9 @@ public static class ExampleCatalog
 /// </summary>
 static class Layout
 {
+    /// <summary>示例里的字号档位：同 vue-tsx-pro 文档站的 xs–xl（标题才用的 xxl、xxxl 不列）。</summary>
+    public static readonly TextSize[] Steps = [TextSize.Xs, TextSize.Sm, TextSize.Md, TextSize.Lg, TextSize.Xl];
+
     /// <summary>设备无关像素 → 主显示器上的设备像素（宽度、内边距这类写死的尺寸用它）。</summary>
     public static int Dip(int value) => (int)Math.Round(value * SystemDpi / 96f);
 
