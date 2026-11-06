@@ -227,6 +227,7 @@ static class Inspector
         yield return ("Foreground", Brush(element.GetValue(TextElement.ForegroundProperty)) ?? Brush(Get("Foreground")));
         yield return ("FontSize", element.GetValue(TextElement.FontSizeProperty));
         yield return ("FontWeight", (int)element.GetValue(TextElement.FontWeightProperty));
+        if (element.GetValue(TextBlock.LineHeightProperty) is var lineHeight && !double.IsNaN(lineHeight)) yield return ("LineHeight", lineHeight);
         yield return ("Opacity", element.Opacity);
     }
 

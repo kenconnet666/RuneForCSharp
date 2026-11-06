@@ -8,6 +8,8 @@
   <!-- 浏览器里的文字放不下就换行；TextBlock 默认不换行 -->
   <Style TargetType="rune:Text">
     <Setter Property="TextWrapping" Value="Wrap" />
+    <!-- 行高就是行盒的高度（同 CSS），不按字体的行距再加（行高本身在 Text 里按 Leading 算） -->
+    <Setter Property="LineStackingStrategy" Value="BlockLineHeight" />
     <Style.Triggers>
       <Trigger Property="Size" Value="xs"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xs}" /></Trigger>
       <Trigger Property="Size" Value="sm"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" /></Trigger>

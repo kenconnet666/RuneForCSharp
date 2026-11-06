@@ -32,10 +32,10 @@ const COMPARED = [
   'MinHeight', 'PaddingTop', 'PaddingRight', 'PaddingBottom', 'PaddingLeft',
   'BorderTop', 'BorderRight', 'BorderBottom', 'BorderLeft', 'BorderColor',
   'RadiusTopLeft', 'RadiusTopRight', 'RadiusBottomRight', 'RadiusBottomLeft',
-  'Background', 'Foreground', 'FontSize', 'FontWeight', 'Opacity',
+  'Background', 'Foreground', 'FontSize', 'FontWeight', 'LineHeight', 'Opacity',
 ];
 /** 部件的宽高不取决于文字时才比：控件根的高度、图标的边长 */
-const SIZED = (key) => /\/(root|icon|iconEnd|spinner|dot)#/.test(key);
+const SIZED = (key) => /\/(root|icon|iconEnd|spinner|dot)#|^@svg#/.test(key);
 const TOLERANCE = 0.5;
 
 const INSPECT = {
@@ -74,7 +74,8 @@ function compare(theirs, ours) {
   for (const part of theirs) {
     const mine = byKey.get(part.key);
     if (!mine) continue;
-    const props = [...COMPARED, ...(SIZED(part.key) ? ['Height'] : [])];
+    // 图标只看大小与颜色：svg 上的字号、字重不影响画出来的样子
+    const props = part.key.startsWith('@svg#') ? ['Width', 'Height', 'Foreground', 'Opacity'] : [...COMPARED, ...(SIZED(part.key) ? ['Height'] : [])];
     for (const prop of props) {
       const [a, b] = [part.props[prop], mine.props[prop]];
       if (a === undefined || b === undefined || same(prop, a, b, part.props, mine.props)) continue;

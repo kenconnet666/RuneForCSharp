@@ -61,6 +61,7 @@
     <Setter Property="VerticalAlignment" Value="Center" />
     <!-- 行高 lineHeights.tight（1.25em）：文字的行盒与 TS 一样高 -->
     <Setter Property="rune:EmSize.LineHeight" Value="{DynamicResource Rune.LineHeight.Tight}" />
+    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Tight}" />
     <Setter Property="TextBlock.LineStackingStrategy" Value="BlockLineHeight" />
     <Setter Property="Cursor" Value="Hand" />
     <Setter Property="FocusVisualStyle" Value="{x:Null}" />

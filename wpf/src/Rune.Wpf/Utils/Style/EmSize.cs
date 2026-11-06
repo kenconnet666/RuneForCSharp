@@ -63,7 +63,9 @@ public static class EmSize
         Control.PaddingProperty.OverrideMetadata(controlType, new FrameworkPropertyMetadata(default(Thickness), null, CoercePadding));
         FrameworkElement.MinHeightProperty.OverrideMetadata(controlType, new FrameworkPropertyMetadata(0d, null, CoerceMinHeight));
         FrameworkElement.WidthProperty.OverrideMetadata(controlType, new FrameworkPropertyMetadata(double.NaN, null, CoerceWidth));
-        TextBlock.LineHeightProperty.OverrideMetadata(controlType, new FrameworkPropertyMetadata(double.NaN, FrameworkPropertyMetadataOptions.Inherits, null, CoerceLineHeight));
+        // 行高是继承属性：外面传进来的值也按自己的字号重算；基础值变了时 WPF 先调强制、后记新来源，回调里再强制一次
+        TextBlock.LineHeightProperty.OverrideMetadata(controlType, new FrameworkPropertyMetadata(
+            double.NaN, FrameworkPropertyMetadataOptions.Inherits, (d, _) => d.CoerceValue(TextBlock.LineHeightProperty), CoerceLineHeight));
         Control.FontSizeProperty.OverrideMetadata(controlType, new FrameworkPropertyMetadata(
             SystemFonts.MessageFontSize, FrameworkPropertyMetadataOptions.Inherits, (d, _) => Refresh(d)));
         if (cornerRadiusProperty is not null) cornerRadiusByType[controlType] = cornerRadiusProperty;
@@ -97,8 +99,11 @@ public static class EmSize
 
     static object CoerceLineHeight(DependencyObject d, object baseValue)
     {
-        if (GetLineHeight(d) is not { } f || !FromLibrary(d, TextBlock.LineHeightProperty, baseValue)) return baseValue;
-        return f * FontSize(d);
+        if (GetLineHeight(d) is not { } f || d.ReadLocalValue(TextBlock.LineHeightProperty) != DependencyProperty.UnsetValue) return baseValue;
+        return DependencyPropertyHelper.GetValueSource(d, TextBlock.LineHeightProperty).BaseValueSource
+            is BaseValueSource.Default or BaseValueSource.Inherited or BaseValueSource.DefaultStyle or BaseValueSource.DefaultStyleTrigger
+            ? f * FontSize(d)
+            : baseValue;
     }
 
     internal static void Refresh(DependencyObject d)

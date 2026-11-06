@@ -84,6 +84,8 @@ const PROPS = {
 /** 状态下比较的属性（会随悬停、聚焦、按下变的） */
 const STATE_PROPS = ['color', 'background-color', 'border-top-color', 'box-shadow', 'outline-style', 'outline-width', 'outline-color', 'opacity', 'text-decoration-line'];
 const STATES = ['hover', 'focus-visible', 'active'];
+/** 没有部件标记、按标签配对的元素（Text 家族、标题、行内代码、图标） */
+const UNMARKED = 'svg, p, span, strong, em, small, h1, h2, h3, h4, h5, h6, code, kbd, mark';
 const INTERACTIVE = 'a[href], button, input, select, textarea, summary, [tabindex], [role=button], [role=option], [role=tab], [role=menuitem], [role=switch], [role=checkbox], [role=radio]';
 
 const vue = resolve(options.vue ?? process.env.VUE_TSX_PRO ?? join(repoRoot, '../../IdeaProjects/vue-tsx-pro'));
@@ -101,7 +103,7 @@ try {
     await page.goto(`${options.origin}/components/${pageName}#top`, { waitUntil: 'networkidle' });
     await page.waitForSelector('[data-demo]');
     await page.evaluate(defineColor);
-    const examples = await page.evaluate(collect, { PROPS, only: only?.split(',') ?? null });
+    const examples = await page.evaluate(collect, { PROPS, only: only?.split(',') ?? null, UNMARKED });
     if (!Object.keys(examples).length) throw new Error(`${pageName} 页上没有找到示例${only ? `：${only}` : ''}`);
     if (options.states) await addStates(page, examples);
     for (const [id, example] of Object.entries(examples)) {
@@ -132,7 +134,7 @@ function defineColor() {
 }
 
 /** 在页面里跑：每个示例（h2[id] 与 [data-demo] 画布同在一个小节里）里带部件标记的元素，按（scope/part, 第几个）编号 */
-function collect({ PROPS, only }) {
+function collect({ PROPS, only, UNMARKED }) {
   const length = (value) => (value.endsWith('px') ? Math.round(parseFloat(value) * 100) / 100 : value);
   const convert = (kind, value) => (kind === 'length' ? length(value) : kind === 'color' ? window.tsStylesColor(value) : kind === 'number' ? Number(value) : value);
   const examples = {};
@@ -151,6 +153,21 @@ function collect({ PROPS, only }) {
       for (const [css, [prop, kind]] of Object.entries(PROPS)) props[prop] = convert(kind, style.getPropertyValue(css));
       const text = element.textContent.trim().replace(/\s+/g, ' ').slice(0, 24);
       parts.push({ key: `${name}#${index}`, tag: element.tagName.toLowerCase(), text, props });
+    }
+    // 没有部件标记的元素（用 css.create 写的组件：Text 家族、Icon）按标签与出现顺序编号：@svg#0、@p#1……
+    // 文字元素只算直接含文字的；svg 只算最外层的
+    const tagCounts = {};
+    for (const element of canvas.querySelectorAll(UNMARKED)) {
+      if (element.hasAttribute('data-part') || element.parentElement.closest('svg')) continue;
+      const tag = element.tagName.toLowerCase();
+      if (tag !== 'svg' && ![...element.childNodes].some((node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim())) continue;
+      const name = `@${tag}`;
+      const index = (tagCounts[name] = (tagCounts[name] ?? -1) + 1);
+      element.setAttribute('data-ts-styles', `${heading.id}|${name}#${index}`);
+      const style = getComputedStyle(element);
+      const props = {};
+      for (const [css, [prop, kind]] of Object.entries(PROPS)) props[prop] = convert(kind, style.getPropertyValue(css));
+      parts.push({ key: `${name}#${index}`, tag, text: element.textContent.trim().replace(/\s+/g, ' ').slice(0, 24), props });
     }
     examples[heading.id] = { title: heading.textContent.trim(), parts };
   }

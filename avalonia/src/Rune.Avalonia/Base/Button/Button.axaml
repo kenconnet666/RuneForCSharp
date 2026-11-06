@@ -54,6 +54,7 @@
     <Setter Property="VerticalAlignment" Value="Center" />
     <!-- 行高 lineHeights.tight（1.25em）：文字的行盒与 TS 一样高 -->
     <Setter Property="TextBlock.LineHeight" Value="{rune:Em Resource=Rune.LineHeight.Tight}" />
+    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Tight}" />
 
     <!-- 色调 → 调色板在 ButtonCore 的代码里解析（上面的 Palette setter），不写成 6 条伪类样式 -->
 

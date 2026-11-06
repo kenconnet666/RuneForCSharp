@@ -233,12 +233,24 @@ sealed class StyleReport
         ["ClearButton"] = "button",
     };
 
+    /// <summary>TS 里没有部件标记的组件（css.create 写的）：按渲染出的标签配对，<c>@p#0</c>，同 tools/ts-styles。</summary>
+    static readonly Dictionary<string, string> Tags = new()
+    {
+        ["Icon"] = "@svg",
+        ["Text"] = "@span",
+        ["Paragraph"] = "@p",
+        ["Strong"] = "@strong",
+        ["Em"] = "@em",
+        ["Small"] = "@small",
+    };
+
     readonly List<(string Key, string Type, Dictionary<string, object> Props)> parts = [];
     readonly Dictionary<string, int> counts = [];
 
     /// <summary>组件类型名 + 部件名（PART_Icon；组件根为 null）→ <c>button/icon</c>。</summary>
     public static string Name(string componentType, string? partName)
     {
+        if (partName is null && Tags.TryGetValue(componentType, out var tag)) return tag;
         var scope = ScopeAliases.GetValueOrDefault(componentType) ?? Kebab(componentType);
         var part = partName is null ? "root" : char.ToLowerInvariant(partName["PART_".Length]) + partName["PART_".Length..][1..];
         return $"{scope}/{part}";

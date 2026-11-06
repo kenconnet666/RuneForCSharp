@@ -93,9 +93,9 @@ public class TextTests
         text.Truncate = false;
         text.LineClamp = 2;
         Assert.Equal(TextWrapping.Wrap, text.TextWrapping);
-        Assert.Equal(Math.Ceiling(2 * text.FontFamily.LineSpacing * 20), text.MaxHeight);
+        Assert.Equal(Math.Ceiling(2 * Leading.Normal * 20), text.MaxHeight); // 两行 × 行高（1.5 × 字号）
         text.FontSize = 10;
-        Assert.Equal(Math.Ceiling(2 * text.FontFamily.LineSpacing * 10), text.MaxHeight);
+        Assert.Equal(Math.Ceiling(2 * Leading.Normal * 10), text.MaxHeight);
 
         text.LineClamp = null;
         text.Wrap = TextWrap.NoWrap;
@@ -108,5 +108,20 @@ public class TextTests
         text.Align = TextAlign.End;
         Assert.Equal(TextWrapping.Wrap, text.TextWrapping);
         Assert.Equal(TextAlignment.Right, text.TextAlignment);
+    });
+
+    [Fact]
+    public Task Line_height_is_the_inherited_factor_times_own_font_size() => WpfUi.Run(() =>
+    {
+        // CSS 不带单位的 line-height：正文 1.5（lineHeights.normal），12px 的 Small 是 18；按钮里是 tight 1.25
+        var body = new Text { Text = "正文" };
+        var small = new Small { Text = "附注" };
+        var inButton = new Text { Text = "保存" };
+        var styled = new Text { Text = "自定", Style = new Style(typeof(Text)) { Setters = { new Setter(TextBlock.LineHeightProperty, 40d) } } };
+        var (host, _) = Host(body, small, new Rune.Wpf.Button { Content = inButton }, styled);
+        WpfUi.Show(host);
+
+        Assert.Equal((30d, 1.5 * (double)host.FindResource("Rune.FontSize.Xs"), 1.25 * inButton.FontSize, 40d), (body.LineHeight, small.LineHeight, inButton.LineHeight, styled.LineHeight));
+        Assert.Equal(host.FindResource("Rune.LineHeight.Normal"), Leading.Normal);
     });
 }

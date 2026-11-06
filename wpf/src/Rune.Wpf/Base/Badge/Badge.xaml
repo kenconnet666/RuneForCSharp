@@ -20,6 +20,7 @@
     <!-- 文字中等字重、行高 lineHeights.tight（vue-tsx-pro 的 badgeRecipe 的 root） -->
     <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
     <Setter Property="rune:EmSize.LineHeight" Value="{DynamicResource Rune.LineHeight.Tight}" />
+    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Tight}" />
     <Setter Property="TextBlock.LineStackingStrategy" Value="BlockLineHeight" />
     <Setter Property="VerticalAlignment" Value="Center" />
     <Setter Property="HorizontalAlignment" Value="Left" />

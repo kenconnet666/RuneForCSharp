@@ -62,9 +62,32 @@ public class Text : TextBlock
         {
             if (((Text)d).LineClamp is not null) ((Text)d).UpdateWrapping();
         };
-        FontSizeProperty.OverrideMetadata(typeof(Text), new FrameworkPropertyMetadata(relayout));
+        FontSizeProperty.OverrideMetadata(typeof(Text), new FrameworkPropertyMetadata((d, e) =>
+        {
+            d.CoerceValue(LineHeightProperty);
+            relayout(d, e);
+        }));
         FontFamilyProperty.OverrideMetadata(typeof(Text), new FrameworkPropertyMetadata(relayout));
-        LineHeightProperty.OverrideMetadata(typeof(Text), new FrameworkPropertyMetadata(relayout));
+        // 行高 = 继承的系数 × 自己的字号（Leading）；基础值变了时 WPF 先调强制、后记新来源，回调里再强制一次，
+        // 使用方样式刚设的行高才不会被按旧来源算掉
+        LineHeightProperty.OverrideMetadata(typeof(Text), new FrameworkPropertyMetadata(double.NaN, FrameworkPropertyMetadataOptions.Inherits, (d, e) =>
+        {
+            d.CoerceValue(LineHeightProperty);
+            relayout(d, e);
+        }, CoerceLineHeight));
+    }
+
+    /// <summary>新建文字：先按默认字号算一次行高（字号一直是默认值时不会触发变化回调）。</summary>
+    public Text() => CoerceValue(LineHeightProperty);
+
+    /// <summary>行高：没有本地值、来自继承或默认值时按系数与字号算；使用方的样式照常生效。</summary>
+    static object CoerceLineHeight(DependencyObject d, object baseValue)
+    {
+        if (d.ReadLocalValue(LineHeightProperty) != DependencyProperty.UnsetValue) return baseValue;
+        var source = DependencyPropertyHelper.GetValueSource(d, LineHeightProperty).BaseValueSource;
+        return source is BaseValueSource.Default or BaseValueSource.Inherited or BaseValueSource.DefaultStyle or BaseValueSource.DefaultStyleTrigger
+            ? Leading.GetFactor(d) * ((Text)d).FontSize
+            : baseValue;
     }
 
     /// <summary>字号。</summary>

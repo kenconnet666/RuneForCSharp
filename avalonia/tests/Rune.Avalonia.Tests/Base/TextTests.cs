@@ -113,4 +113,22 @@ public class TextTests
         Assert.Equal(TextWrapping.Wrap, text.TextWrapping);
         Assert.Equal(TextAlignment.Center, text.TextAlignment);
     });
+
+    [Fact]
+    public Task Line_height_is_the_inherited_factor_times_own_font_size() => HeadlessUi.Run(() =>
+    {
+        // CSS 不带单位的 line-height：正文 1.5（lineHeights.normal），12px 的 Small 是 18；按钮里是 tight 1.25
+        var body = new Text { Text = "正文" };
+        var small = new Small { Text = "附注" };
+        var inButton = new Text { Text = "保存" };
+        var styled = new Text { Text = "自定", Classes = { "tall" } };
+        var host = Host(body, small, new Button { Content = inButton }, styled);
+        host.Styles.Add(new Style(x => x.OfType<Text>().Class("tall")) { Setters = { new Setter(TextBlock.LineHeightProperty, 40d) } });
+        HeadlessUi.Show(host);
+
+        Application.Current!.TryGetResource("Rune.FontSize.Xs", ThemeVariant.Light, out var xs);
+        Assert.Equal((30d, 1.5 * (double)xs!, 1.25 * inButton.FontSize, 40d), (body.LineHeight, small.LineHeight, inButton.LineHeight, styled.LineHeight));
+        Application.Current!.TryGetResource("Rune.LineHeight.Normal", ThemeVariant.Light, out var normal);
+        Assert.Equal(normal, Leading.Normal);
+    });
 }

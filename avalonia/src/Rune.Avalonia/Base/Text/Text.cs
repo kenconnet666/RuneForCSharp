@@ -50,6 +50,10 @@ public class Text : TextBlock
     static readonly FontFeatureCollection TabularNumbers = FontFeatureCollection.Parse("tnum");
 
     TemplateResources? resources;
+    IDisposable? lineHeight;
+
+    /// <summary>新建文字：行高按继承的系数与字号算（<see cref="Leading"/>）。</summary>
+    public Text() => UpdateLineHeight();
 
     /// <summary>字号。</summary>
     public TextSize Size { get => GetValue(SizeProperty); set => SetValue(SizeProperty, value); }
@@ -82,7 +86,8 @@ public class Text : TextBlock
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
-        if (change.Property == SizeProperty)
+        if (change.Property == FontSizeProperty || change.Property == Leading.FactorProperty) UpdateLineHeight();
+        else if (change.Property == SizeProperty)
         {
             if (Size.Pixels is { } pixels) Bindings.Set(FontSizeProperty, pixels);
             else Bindings.Bind(FontSizeProperty, Size.ResourceKey);
@@ -102,6 +107,13 @@ public class Text : TextBlock
     }
 
     TemplateResources Bindings => resources ??= new(this);
+
+    /// <summary>行高 = 继承的系数 × 自己的字号，按模板优先级（使用方带类或伪类的样式、本地值盖得过）。</summary>
+    void UpdateLineHeight()
+    {
+        lineHeight?.Dispose();
+        lineHeight = SetValue(LineHeightProperty, Leading.GetFactor(this) * FontSize, global::Avalonia.Data.BindingPriority.Template);
+    }
 
     /// <summary>truncate 优先于 lineClamp，二者都没有时看 wrap。</summary>
     void UpdateWrapping()

@@ -474,6 +474,14 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   - Numeric 是 `Typography.NumeralAlignment = Tabular`；Align 的 Start、End 对应 TextAlignment 的 Left、Right（随 FlowDirection 镜像）。
   - WPF 的字重比 GDI 全：medium、semibold 都画得出来。
 
+#### 行高（2026-11-07，取值对照查出来的）
+
+- vue-tsx-pro 的正文是不带单位的 `line-height: 1.5`（lineHeights.normal），按系数继承：12px 的 Small 放在 14px 的段落里行高是 18。按钮、标记的根是 tight（1.25）。
+- Avalonia、WPF 的 `TextBlock.LineHeight` 是像素数、按像素继承，没写时按字体的行距（约 1.33）。所以加了继承的系数 `Leading.Factor`（默认 1.5，常量由测试对 token），Text 按"系数 × 自己的字号"设行高：Avalonia 按模板优先级设（构造时与字号、系数变化时）；WPF 用属性强制，基础值来自继承或默认值时才算，构造时先强制一次（字号一直是默认值时没有变化回调），主题样式另设 `LineStackingStrategy=BlockLineHeight`，行盒就是行高（同 CSS）。
+- 按钮、标记在主题里设 `Leading.Factor` = tight，里面的 Text 跟着；ContentPresenter 生成的普通 TextBlock 直接继承按钮的行高（Avalonia `{rune:Em Resource=Rune.LineHeight.Tight}`，WPF `EmSize.LineHeight`）。WPF 的 EmSize 行高同样对继承来的值重算，标记放在按钮里也是自己的 1.25 × 字号。
+- 开销：1000 个 Text 多分配约 0.8 MB（+7%），常驻每个多约 0.2 KB。
+- WinForms 还没做：TextRenderer 不能设行距，多行文字要自己断行才能按 1.5 排；单行的高度可以直接按 1.5em 算，做多行文字的组件时一起做。
+
 ### Spinner
 
 - 第一个带部件的组件（`propsIcon`），三个平台按 §7 的写法各落地一次：
