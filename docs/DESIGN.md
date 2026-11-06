@@ -511,6 +511,13 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 相对字号（CSS 的 `font-size: 0.85em`）：Avalonia 绑定到外面的字号再乘倍数（`FontScale`，Kbd 按视觉父元素、Code 按逻辑父元素）；WPF 由 `EmSize.Register(…, fontScale)` 把继承来的字号强制成倍数。
 - Avalonia 的行内文字照样能用 ControlTheme（按类型找到主题）。示例里段落中的加粗、斜体、小字用行内的 Span，不用 Strong、Em、Small 控件：控件放进 InlineUIContainer 后行高与基线和段落对不齐。
 
+### Link（2026-11-07）
+
+- TS 的 Link 是行内的 `<a>`：跟着段落换行，Tab 能聚焦，读屏念链接。WPF 直接从行内的 `Hyperlink` 派生（全都现成；外链图标是行内的 InlineUIContainer，载入后挪到文字后面——XAML 里 External 先于文字赋值）。
+- Avalonia 的段落里没有能点的行内文字：Link 建在 ButtonBase 上（焦点环、可聚焦的不可用、点击与命令现成），放进段落时用 InlineUIContainer，`BaselineAlignment="Bottom"` 才和段落的文字在同一条基线上；链接文字本身不跨行换行。
+- WinForms 没有行内元素：LinkControl 是单独的控件（Enter 打开，空格不打开，同浏览器）。
+- 三个平台都同 LinkButton：Href 是绝对地址、用系统打开，不可用时不打开；外部链接读屏名称补"在新窗口打开"。TS 的下划线粗细与偏移（textDecorationThickness、textUnderlineOffset）三个平台都用平台默认的下划线。
+
 ### Spinner
 
 - 第一个带部件的组件（`propsIcon`），三个平台按 §7 的写法各落地一次：
