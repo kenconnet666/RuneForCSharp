@@ -8,8 +8,8 @@
 
   <Style TargetType="{x:Type t:ProbeButton}">
     <Setter Property="Background" Value="Gray" />
-    <Setter Property="rune:Em.Padding" Value="1,0.25" />
-    <Setter Property="rune:Em.CornerRadius" Value="0.4" />
+    <Setter Property="rune:EmSize.Padding" Value="1,0.25" />
+    <Setter Property="rune:EmSize.CornerRadius" Value="0.4" />
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="t:ProbeButton">

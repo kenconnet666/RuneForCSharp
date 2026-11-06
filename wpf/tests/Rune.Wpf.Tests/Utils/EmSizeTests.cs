@@ -4,7 +4,7 @@ using System.Windows.Documents;
 
 namespace Rune.Wpf.Tests;
 
-public class EmTests
+public class EmSizeTests
 {
     [Fact]
     public Task Values_follow_the_font_size() => WpfUi.Run(() =>

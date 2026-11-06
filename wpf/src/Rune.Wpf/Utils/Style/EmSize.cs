@@ -8,26 +8,26 @@ namespace Rune.Wpf;
 /// 主题样式只设系数，控件用属性强制（coerce）算出实际值：
 /// <code>
 /// // 控件的静态构造里接上：Padding、FontSize 的元数据，以及自己的 CornerRadius
-/// static Button() => Em.Register(typeof(Button), CornerRadiusProperty);
+/// static Button() => EmSize.Register(typeof(Button), CornerRadiusProperty);
 /// public static readonly DependencyProperty CornerRadiusProperty = DependencyProperty.Register(
-///     nameof(CornerRadius), typeof(CornerRadius), typeof(Button), new FrameworkPropertyMetadata(default(CornerRadius), null, Em.CoerceCornerRadius));
+///     nameof(CornerRadius), typeof(CornerRadius), typeof(Button), new FrameworkPropertyMetadata(default(CornerRadius), null, EmSize.CoerceCornerRadius));
 /// </code>
 /// <code>
-/// &lt;Setter Property="rune:Em.Padding" Value="1,0.25" /&gt;   &lt;!-- Generic.xaml：水平 1em、垂直 0.25em --&gt;
-/// &lt;Setter Property="rune:Em.CornerRadius" Value="0.4" /&gt;
+/// &lt;Setter Property="rune:EmSize.Padding" Value="1,0.25" /&gt;   &lt;!-- Generic.xaml：水平 1em、垂直 0.25em --&gt;
+/// &lt;Setter Property="rune:EmSize.CornerRadius" Value="0.4" /&gt;
 /// </code>
 /// 只有基础值来自默认值、继承或主题样式时才按字号算；使用方的样式与本地值照常生效。
 /// 不用绑定：3000 个按钮实测创建 430 ms，绑定到字号的写法 878 ms，写死数值 273 ms。
 /// </summary>
-public static class Em
+public static class EmSize
 {
     /// <summary>内边距的 em 系数（Thickness 的四个值都是系数）。</summary>
     public static readonly DependencyProperty PaddingProperty = DependencyProperty.RegisterAttached(
-        "Padding", typeof(Thickness?), typeof(Em), new PropertyMetadata(null, (d, _) => d.CoerceValue(Control.PaddingProperty)));
+        "Padding", typeof(Thickness?), typeof(EmSize), new PropertyMetadata(null, (d, _) => d.CoerceValue(Control.PaddingProperty)));
 
     /// <summary>圆角的 em 系数，作用在 <see cref="Register"/> 登记的圆角属性上。</summary>
     public static readonly DependencyProperty CornerRadiusProperty = DependencyProperty.RegisterAttached(
-        "CornerRadius", typeof(double?), typeof(Em), new PropertyMetadata(null, (d, _) => Refresh(d)));
+        "CornerRadius", typeof(double?), typeof(EmSize), new PropertyMetadata(null, (d, _) => Refresh(d)));
 
     static readonly Dictionary<Type, DependencyProperty> cornerRadiusByType = [];
 

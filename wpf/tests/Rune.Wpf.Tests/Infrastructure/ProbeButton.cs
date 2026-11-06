@@ -14,12 +14,12 @@ public class ProbeButton : Control
 
     public static readonly DependencyProperty CornerRadiusProperty = DependencyProperty.Register(
         nameof(CornerRadius), typeof(CornerRadius), typeof(ProbeButton),
-        new FrameworkPropertyMetadata(default(CornerRadius), null, Em.CoerceCornerRadius));
+        new FrameworkPropertyMetadata(default(CornerRadius), null, EmSize.CoerceCornerRadius));
 
     static ProbeButton()
     {
         DefaultStyleKeyProperty.OverrideMetadata(typeof(ProbeButton), new FrameworkPropertyMetadata(typeof(ProbeButton)));
-        Em.Register(typeof(ProbeButton), CornerRadiusProperty);
+        EmSize.Register(typeof(ProbeButton), CornerRadiusProperty);
     }
 
     public string Variant { get => (string)GetValue(VariantProperty); set => SetValue(VariantProperty, value); }
