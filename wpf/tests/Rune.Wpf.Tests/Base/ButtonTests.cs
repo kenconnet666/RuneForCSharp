@@ -56,6 +56,8 @@ public class ButtonTests
         Assert.Equal(pill.ActualHeight / 2, pill.CornerRadius.TopLeft, 3);
     });
 
+    [Upstream("Button", "loading 变为 true")]
+
     [Fact]
     public Task Loading_blocks_clicks_and_shows_the_spinner_after_a_delay() => WpfUi.Run(() =>
     {
@@ -98,6 +100,8 @@ public class ButtonTests
         Assert.Equal((BrushColor(button.Foreground), 0.22), (fill.Color, fill.Opacity));
         Assert.NotNull(layer.Clip); // 裁成按钮的圆角
     });
+
+    [Upstream("Button", "type 默认 button")]
 
     [Fact]
     public Task Provider_styles_reach_template_icons() => WpfUi.Run(() =>

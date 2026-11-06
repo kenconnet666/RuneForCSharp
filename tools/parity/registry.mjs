@@ -44,5 +44,13 @@ export const EXCLUDED = {
   VisuallyHidden: '桌面上用 AutomationProperties.Name / HelpText',
   SkipLink: '浏览器专用（跳到主内容的链接）',
   ClientOnly: '浏览器专用（服务端渲染时不输出）',
-  Can: '浏览器专用（权限由应用层决定）',
+};
+
+/**
+ * 桌面上不适用的 vue-tsx-pro 测试用例（tools/parity/behavior.mjs）：组件 → { it 名字的开头: 原因 }。
+ * 其余用例要有测试标了 [Upstream("组件", "名字开头")]
+ */
+export const BEHAVIOR_NOT_APPLICABLE = {
+  LinkButton: { '站内链接经 router 跳转': '桌面没有站内地址：Href 是绝对地址，用系统打开（ROADMAP 平台化的约定）' },
+  IconLinkButton: { '站内链接经 router 跳转': '桌面没有站内地址：Href 是绝对地址，用系统打开（ROADMAP 平台化的约定）' },
 };

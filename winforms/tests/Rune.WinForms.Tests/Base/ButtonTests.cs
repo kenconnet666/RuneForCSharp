@@ -48,6 +48,10 @@ public class ButtonTests
         Assert.True(button.Height >= (int)(2.25f * 16 * scale) + 2 * button.Padding.Top - 1);
     });
 
+    [Upstream("Button", "loading 变为 true")]
+
+    [Upstream("Button", "loading：不用 disabled")]
+
     [Fact]
     public Task Loading_blocks_clicks_and_shows_the_spinner_after_a_delay() => WinFormsUi.Run(() =>
     {

@@ -30,6 +30,10 @@ public class LinkButtonTests
         Assert.Single(link.Opened);
     });
 
+    [Upstream("LinkButton", "渲染 a")]
+
+    [Upstream("IconLinkButton", "外部链接")]
+
     [Fact]
     public Task External_links_show_the_icon_and_tell_screen_readers() => WinFormsUi.Run(() =>
     {

@@ -49,6 +49,8 @@ public class IconButtonTests
         Assert.Equal(Token("Rune.Brush.FillHover"), BrushColor(large.GetBaseValue(TemplatedControl.BackgroundProperty).Value));
     });
 
+    [Upstream("IconButton", "IconButton：名称来自 aria-label")]
+
     [Fact]
     public Task The_accessible_name_comes_from_automation_properties() => HeadlessUi.Run(() =>
     {
@@ -60,6 +62,8 @@ public class IconButtonTests
         Assert.Equal(("删除", AutomationControlType.Button), (peer.GetName(), peer.GetAutomationControlType()));
         Assert.Equal(Token("Rune.Brush.DangerText"), BrushColor(button.Foreground));
     });
+
+    [Upstream("CloseButton", "CloseButton、ClearButton")]
 
     [Fact]
     public Task Presets_take_their_icon_and_name_from_the_language_pack() => HeadlessUi.Run(() =>

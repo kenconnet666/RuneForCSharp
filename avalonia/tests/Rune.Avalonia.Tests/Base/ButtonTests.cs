@@ -47,6 +47,8 @@ public class ButtonTests
         Assert.Equal(Token("Rune.Brush.AccentHover"), BrushColor(solid.GetBaseValue(Button.BackgroundProperty).Value));
     });
 
+    [Upstream("Button", "组件默认值")]
+
     [Fact]
     public Task Sizes_are_em_and_styles_can_change_defaults() => HeadlessUi.Run(() =>
     {
@@ -62,6 +64,8 @@ public class ButtonTests
         Assert.Equal(new CornerRadius(0.4 * 16), large.CornerRadius); // radii.md = 0.4em
         Assert.Equal(ButtonVariant.Ghost, styled.Variant);
     });
+
+    [Upstream("Button", "loading 变为 true")]
 
     [Fact]
     public Task Loading_blocks_clicks_and_shows_the_spinner_after_a_delay() => HeadlessUi.Run(() =>
@@ -124,6 +128,8 @@ public class ButtonTests
         Assert.Single(layer.Children);
     });
 
+    [Upstream("Button", "type 默认 button")]
+
     [Fact]
     public Task Parts_take_template_styles() => HeadlessUi.Run(() =>
     {
@@ -138,6 +144,8 @@ public class ButtonTests
         Assert.Equal(18, icon.Bounds.Width); // 1em，跟随按钮的字号
         Assert.False(Part<Icon>(button, ButtonParts.IconEnd).IsVisible);
     });
+
+    [Upstream("Button", "使用方的 sx")]
 
     [Fact]
     public Task Plain_type_styles_override_the_tone_palette_and_radius() => HeadlessUi.Run(() =>

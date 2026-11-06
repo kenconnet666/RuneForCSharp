@@ -37,6 +37,8 @@ public class IconButtonTests
         Assert.Equal(BuiltinThemes.Light.Colors.FillHover.ToArgb(), Pixel(large, x, large.Height / 2).ToArgb());
     });
 
+    [Upstream("IconButton", "IconButton：名称来自 aria-label")]
+
     [Fact]
     public Task The_accessible_name_comes_from_accessible_name() => WinFormsUi.Run(() =>
     {
@@ -49,6 +51,8 @@ public class IconButtonTests
         button.AccessibilityObject.DoDefaultAction();
         Assert.Equal(1, clicks);
     });
+
+    [Upstream("CloseButton", "CloseButton、ClearButton")]
 
     [Fact]
     public Task Presets_take_their_icon_and_name_from_the_language_pack() => WinFormsUi.Run(() =>
