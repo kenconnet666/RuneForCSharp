@@ -16,6 +16,8 @@ jobs:
   platform:
     name: ${{ matrix.platform }}
     runs-on: windows-latest
+    # 正常 2–3 分钟；卡住（测试死锁、工具死循环）时尽早失败，不占着并发组
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -71,6 +73,7 @@ jobs:
   generated:
     name: generated files
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 

@@ -51,7 +51,8 @@ function csharpTypes(dir) {
       else if (name.endsWith('.cs')) {
         const text = readFileSync(full, 'utf8');
         const declarations = [...text.matchAll(/public\s+(?:(?:sealed|partial|abstract|static)\s+)*(?:class|record)\s+(\w+)(?:<[^>{]*>)?(?:\([^)]*\))?(?:\s*:\s*([\w.:]+))?/g)];
-        for (const [, type, base] of declarations) if (base && !/[.:]/.test(base)) bases.set(type, base);
+        // 泛型基类只取到名字（ButtonControl : ButtonControl<Button> 取到的就是自己），自己不算基类
+        for (const [, type, base] of declarations) if (base && base !== type && !/[.:]/.test(base)) bases.set(type, base);
         const classes = declarations.map((m) => m[1]);
         // 类型可以带空格（Func<string, string>、值元组），按行匹配：修饰符、类型、名字，后面是 { 或 =>
         const props = [...text.matchAll(/public\s+(?:(?:static|required|override|virtual|new)\s+)*[^\n=;]*?\S\s+(\w+)\s*(?:\{|=>)/g)].map((m) => m[1]);
@@ -66,9 +67,13 @@ function csharpTypes(dir) {
     seen.has(type) ? [] : (seen.add(type), [...(types.get(type) ?? []), ...(bases.has(type) ? inherited(bases.get(type), seen) : [])]);
   const merged = new Map([...types.keys()].map((type) => [type, new Set(inherited(type))]));
   // 沿用基类模板的组件（CloseButton 继承 IconButton）没有自己的部件名类，部件算基类的
-  for (const type of types.keys())
-    for (let base = bases.get(type); base && !merged.has(`${type}Parts`); base = bases.get(base))
+  for (const type of types.keys()) {
+    const seen = new Set([type]);
+    for (let base = bases.get(type); base && !seen.has(base) && !merged.has(`${type}Parts`); base = bases.get(base)) {
+      seen.add(base);
       if (merged.has(`${base}Parts`)) merged.set(`${type}Parts`, merged.get(`${base}Parts`));
+    }
+  }
   return merged;
 }
 
