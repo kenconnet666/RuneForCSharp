@@ -1,0 +1,31 @@
+<Project>
+  <!--
+    按项目自己声明的属性区分的设置。放在 targets 而不是 props：props 在项目文件之前导入，
+    那时项目里写的 IsLibrary 还没有值，条件永远不成立
+  -->
+
+  <!-- 只有对外发布的组件库打包；示例应用、测试都不打包 -->
+  <PropertyGroup Condition="'$(IsLibrary)' != 'true'">
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <!-- 对外发布的库：NuGet 包的信息。文档注释（GenerateDocumentationFile）写在各库的项目文件里：SDK 在导入本文件之前就按它算好了 XML 文档的路径 -->
+  <PropertyGroup Condition="'$(IsLibrary)' == 'true'">
+    <IsPackable>true</IsPackable>
+    <Authors>kenconnet666</Authors>
+    <Copyright>Copyright (c) 2026 kenconnet666</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/kenconnet666/RuneForCSharp</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/kenconnet666/RuneForCSharp</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <!-- SourceLink（SDK 自带）：调试时能跳进包的源码 -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(IsLibrary)' == 'true'">
+    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" Visible="false" />
+  </ItemGroup>
+</Project>

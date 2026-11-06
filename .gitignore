@@ -1,0 +1,13 @@
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+/.idea/
+*.DotSettings.user
+*.user
+TestResults/
+artifacts/
+
+# 生成工具临时安装的 npm 包
+node_modules/

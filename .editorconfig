@@ -1,0 +1,41 @@
+# 编辑器约定：Rider、Visual Studio、VS Code 都读这个文件。
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+
+[*.{json,yml,yaml,mjs,js,xml,csproj,props,targets,slnx,xaml,axaml}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.cs]
+# 命名：私有字段（含 static readonly）一律 camelCase，不加前缀；常量、类型、成员 PascalCase。
+# Rider 默认要求私有的 static readonly 字段用 PascalCase，与本仓库的约定不同，以这里为准。
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+dotnet_naming_symbols.private_constants.applicable_kinds = field
+dotnet_naming_symbols.private_constants.applicable_accessibilities = private
+dotnet_naming_symbols.private_constants.required_modifiers = const
+
+dotnet_naming_style.camel_case.capitalization = camel_case
+dotnet_naming_style.pascal_case.capitalization = pascal_case
+
+dotnet_naming_rule.private_constants_pascal_case.symbols = private_constants
+dotnet_naming_rule.private_constants_pascal_case.style = pascal_case
+dotnet_naming_rule.private_constants_pascal_case.severity = warning
+
+dotnet_naming_rule.private_fields_camel_case.symbols = private_fields
+dotnet_naming_rule.private_fields_camel_case.style = camel_case
+dotnet_naming_rule.private_fields_camel_case.severity = warning
+
+# 每个组件库的公开类型都放在库的根命名空间（Rune.Avalonia、Rune.Wpf、Rune.WinForms）：
+# 使用方一个 using、一个 xmlns 就够；目录只用来按模块组织文件，不对应命名空间
+dotnet_style_namespace_match_folder = false
+resharper_check_namespace_highlighting = none
