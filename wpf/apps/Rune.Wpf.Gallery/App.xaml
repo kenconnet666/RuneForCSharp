@@ -1,4 +1,9 @@
 <Application x:Class="Rune.Wpf.Gallery.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             StartupUri="MainWindow.xaml" />
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/wpf"
+             StartupUri="MainWindow.xaml">
+  <Application.Resources>
+    <rune:RuneTheme />
+  </Application.Resources>
+</Application>

@@ -31,7 +31,7 @@
 - Release 构建零警告，37 个测试全部通过（Avalonia 4、WPF 15、WinForms 18）。
 - 前置探测都做完了，结论写进了 DESIGN（档位类型 §3、组合档位 §4、部件转发 §7、主题切换 §9、热重载 §11）。
 - 开工前要定的事都按建议定下了（ROADMAP"已定的决定" 10–18），"待定的决定"现在是空的。
-- **还没有任何组件**。阶段 1 的 `tools/ts-inspect` 已做好；下一步是生成脚本（token-gen 起）。
+- **还没有任何组件**。阶段 1 的 `tools/ts-inspect` 与 `tools/token-gen` 已做好（三个库都有了 16 套主题的 token）；下一步是 lang-gen。
 
 ## 3. 环境
 
@@ -41,7 +41,9 @@
 
 ### C# 的 LSP（Claude Code 项目级插件）
 
-- `.claude/settings.json` 登记了仓库内的插件市场（`.claude/marketplace`）并启用 `rune-csharp-lsp`。新会话打开仓库时 Claude Code 会加载它（第一次可能要在 `/plugin` 里确认安装），之后 Claude 的 LSP 工具能对 `.cs` 查定义、引用、悬停，编辑后推送诊断。
+- `.claude/settings.json` 登记了仓库内的插件市场（`.claude/marketplace`）并启用 `rune-csharp-lsp`。登记只让 Claude Code 认识这个市场，**插件还要安装一次**，装好后重启会话才生效；之后 Claude 的 LSP 工具能对 `.cs` 查定义、引用、悬停，编辑后推送诊断。
+  - 有 `claude` 命令行时在交互式终端里用 `/plugin` 安装。
+  - 这台机器没有命令行（只有桌面应用），是照 Claude Code 的格式手动装的：把 `.claude/marketplace/rune-csharp-lsp` 复制到 `~/.claude/plugins/cache/rune-for-csharp/rune-csharp-lsp/1.0.0`，再在 `~/.claude/plugins/installed_plugins.json` 里加一条 `rune-csharp-lsp@rune-for-csharp`（scope 为 project，projectPath 是仓库目录），格式照抄已有的条目。改了插件的 `.lsp.json` 后要重新复制。
 - 语言服务器是 `dotnet-tools.json` 固定的 csharp-ls 0.28.0（MIT，Roslyn）。启动脚本 `tools/lsp/csharp-ls.mjs` 找到装有 global.json 所要 SDK 的 dotnet（这台机器是 `~\.dotnet`），按需 `dotnet tool restore`，再加载 `RuneForCSharp.slnx`。
 - **先 Debug 构建一次**：WPF 的 Gallery 与测试工程的 XAML 引用了 Rune.Wpf 的类型，库的 Debug 输出不存在时这两个工程在语言服务器里加载失败。
 - 自检：`~/.dotnet/dotnet tool run csharp-ls -- --diagnose -s RuneForCSharp.slnx`（要先设 `DOTNET_ROOT=~/.dotnet`），输出里没有"失败"即可。
@@ -65,6 +67,8 @@
 | 取 TS 文档站的计算样式（`ts-styles`） | 还没做（阶段 2） |
 | 截图、元素树、属性来源、UIA 树（各平台的 `inspect`） | 还没做（阶段 2） |
 | 基准（`inspect bench`） | 还没做（阶段 2） |
+| 重新生成 token（改了 vue-tsx-pro 的主题后） | `node tools/token-gen/token-gen.mjs` |
+| 核对生成的 token 与 vue-tsx-pro 一致（CI 用） | `node tools/token-gen/token-gen.mjs --check` |
 | 对照报告（`parity`） | 还没做（阶段 1、2） |
 
 - **对照仓库**（已加进 Claude 会话的工作目录）：
@@ -117,7 +121,7 @@
 ## 5. 下一步
 
 1. `tools/ts-inspect` 已做好（命令表里有用法）。移植组件前先跑 `component <名字>`，比通读源码快。
-2. 阶段 1 接着做 `tools/token-gen`，从 vue-tsx-pro 的 `packages/ui/src/config/theme` 生成三种格式（Avalonia 含 16 个自定义 ThemeVariant 与色调调色板），复用 `ts-inspect` 的解析。参考 RuneForBlazor 的 `tools/theme-gen`。
+2. `tools/token-gen` 已做好（DESIGN §6"token 的生成"）。阶段 1 接着做 `lang-gen`：从 `config/lang` 生成三个库各自的 `Lang`，复用 `tools/lib`（`ts-inspect lang` 已经能读出键、说明与中英文案）；再做 `icons-gen`。
 3. 阶段 2：先做 Gallery 的示例登记表和三个平台的 `inspect`（截图、元素树、属性来源、UIA 树），再做基础设施层（部件转发与合并、作用域、主题、语言、交互工具），用 Icon → Text → Spinner → Badge → Button 家族 → Field 验证。WPF 的 Provider 要递归合成嵌套的部件样式；WinForms 把 4.1 的做法写成正式的 `ElementHost`，部件属性记录的合并用源代码生成器。
 4. 阶段 3：按依赖分层从下往上做组件（ROADMAP 里有五层的清单）。
 5. WPF 的 XAML 热重载要在 Rider 2026.2 或 VS 里手动试（DESIGN §13）。

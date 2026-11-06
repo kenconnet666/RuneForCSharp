@@ -1,0 +1,274 @@
+<!-- 由 tools/token-gen 从 vue-tsx-pro 的 packages/ui/src/config/theme 生成，不要手改；改了那边的 token 后运行 node tools/token-gen/token-gen.mjs -->
+<!-- 薰衣草（lavender，亮色）：随主题变的 token（colors、shadows、fonts、radii）；阴影取最显眼的一层做 DropShadowEffect -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
+                    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+                    xmlns:rune="clr-namespace:Rune.Wpf"
+                    mc:Ignorable="po">
+
+  <!-- colors -->
+  <!-- background = #fbf9ff：页面背景。slate 1：亮色 `#fcfcfd`，暗色 `#111113` -->
+  <Color x:Key="Rune.Color.Background">#FFFBF9FF</Color>
+  <SolidColorBrush x:Key="Rune.Brush.Background" po:Freeze="True" Color="#FFFBF9FF" />
+  <!-- surface = #fbf9ff：卡片、输入框等表面。亮色 slate 1 `#fcfcfd`，暗色 slate 2 `#18191b` -->
+  <Color x:Key="Rune.Color.Surface">#FFFBF9FF</Color>
+  <SolidColorBrush x:Key="Rune.Brush.Surface" po:Freeze="True" Color="#FFFBF9FF" />
+  <!-- surfaceMuted = #f7f4fc：弱化的区域背景：表头、侧栏、代码块。slate 2：亮色 `#f9f9fb`，暗色 `#18191b` -->
+  <Color x:Key="Rune.Color.SurfaceMuted">#FFF7F4FC</Color>
+  <SolidColorBrush x:Key="Rune.Brush.SurfaceMuted" po:Freeze="True" Color="#FFF7F4FC" />
+  <!-- surfaceRaised = #fbf9ff：浮层（弹出框、菜单、对话框）表面，靠描边与阴影区分层级。亮色 slate 1 `#fcfcfd`，暗色 slate 2 `#18191b` （不取第 3 级：那是 fill，浮层里的填充会看不见） -->
+  <Color x:Key="Rune.Color.SurfaceRaised">#FFFBF9FF</Color>
+  <SolidColorBrush x:Key="Rune.Brush.SurfaceRaised" po:Freeze="True" Color="#FFFBF9FF" />
+  <!-- fill = #efebf7：填充：标签、开关关闭态、弱按钮。slate 3：亮色 `#f0f0f3`，暗色 `#212225` -->
+  <Color x:Key="Rune.Color.Fill">#FFEFEBF7</Color>
+  <SolidColorBrush x:Key="Rune.Brush.Fill" po:Freeze="True" Color="#FFEFEBF7" />
+  <!-- fillHover = #e8e3f1：填充悬停；也用于幽灵按钮、菜单项的悬停背景。slate 4：亮色 `#e8e8ec`，暗色 `#272a2d` -->
+  <Color x:Key="Rune.Color.FillHover">#FFE8E3F1</Color>
+  <SolidColorBrush x:Key="Rune.Brush.FillHover" po:Freeze="True" Color="#FFE8E3F1" />
+  <!-- fillActive = #e1dbeb：填充按下、选中。slate 5：亮色 `#e0e1e6`，暗色 `#2e3135` -->
+  <Color x:Key="Rune.Color.FillActive">#FFE1DBEB</Color>
+  <SolidColorBrush x:Key="Rune.Brush.FillActive" po:Freeze="True" Color="#FFE1DBEB" />
+  <!-- text = #211b30：主要文字。slate 12：亮色 `#1c2024`，暗色 `#edeef0` -->
+  <Color x:Key="Rune.Color.Text">#FF211B30</Color>
+  <SolidColorBrush x:Key="Rune.Brush.Text" po:Freeze="True" Color="#FF211B30" />
+  <!-- textMuted = #5f5770：次要文字、说明、图标。slate 11：亮色 `#60646c`，暗色 `#b0b4ba` -->
+  <Color x:Key="Rune.Color.TextMuted">#FF5F5770</Color>
+  <SolidColorBrush x:Key="Rune.Brush.TextMuted" po:Freeze="True" Color="#FF5F5770" />
+  <!-- textPlaceholder = #7c748d：输入框占位文字。slate 10：亮色 `#80838d`，暗色 `#777b84` -->
+  <Color x:Key="Rune.Color.TextPlaceholder">#FF7C748D</Color>
+  <SolidColorBrush x:Key="Rune.Brush.TextPlaceholder" po:Freeze="True" Color="#FF7C748D" />
+  <!-- textDisabled = #bbb5c8：不可用的文字。slate 8：亮色 `#b9bbc6`，暗色 `#5a6169` -->
+  <Color x:Key="Rune.Color.TextDisabled">#FFBBB5C8</Color>
+  <SolidColorBrush x:Key="Rune.Brush.TextDisabled" po:Freeze="True" Color="#FFBBB5C8" />
+  <!-- borderMuted = #dcd6e7：弱边框：分割线、表格线。slate 6：亮色 `#d9d9e0`，暗色 `#363a3f` -->
+  <Color x:Key="Rune.Color.BorderMuted">#FFDCD6E7</Color>
+  <SolidColorBrush x:Key="Rune.Brush.BorderMuted" po:Freeze="True" Color="#FFDCD6E7" />
+  <!-- border = #d0c9dd：普通边框：输入框、卡片、浮层。slate 7：亮色 `#cdced6`，暗色 `#43484e` -->
+  <Color x:Key="Rune.Color.Border">#FFD0C9DD</Color>
+  <SolidColorBrush x:Key="Rune.Brush.Border" po:Freeze="True" Color="#FFD0C9DD" />
+  <!-- borderStrong = #bbb5c8：强调边框：悬停。slate 8：亮色 `#b9bbc6`，暗色 `#5a6169` -->
+  <Color x:Key="Rune.Color.BorderStrong">#FFBBB5C8</Color>
+  <SolidColorBrush x:Key="Rune.Brush.BorderStrong" po:Freeze="True" Color="#FFBBB5C8" />
+  <!-- accent = #6e56cf：品牌色实色：主按钮、选中的复选框。indigo 9：两套主题都是 `#3e63dd` -->
+  <Color x:Key="Rune.Color.Accent">#FF6E56CF</Color>
+  <SolidColorBrush x:Key="Rune.Brush.Accent" po:Freeze="True" Color="#FF6E56CF" />
+  <!-- accentHover = #5b45b5：品牌色实色悬停。亮色 indigo 10 `#3358d4`；暗色比实色更深一点 `#3758d4`（indigo 10 `#5472e4` 配白字只有 4.28:1） -->
+  <Color x:Key="Rune.Color.AccentHover">#FF5B45B5</Color>
+  <SolidColorBrush x:Key="Rune.Brush.AccentHover" po:Freeze="True" Color="#FF5B45B5" />
+  <!-- accentContrast = #ffffff：品牌色实色上的文字与图标。Radix 规定 indigo 9 上用白字：`#ffffff` -->
+  <Color x:Key="Rune.Color.AccentContrast">#FFFFFFFF</Color>
+  <SolidColorBrush x:Key="Rune.Brush.AccentContrast" po:Freeze="True" Color="#FFFFFFFF" />
+  <!-- accentText = #5f49bd：品牌色文字：链接、选中项的文字。indigo 11：亮色 `#3a5bc7`，暗色 `#9eb1ff` -->
+  <Color x:Key="Rune.Color.AccentText">#FF5F49BD</Color>
+  <SolidColorBrush x:Key="Rune.Brush.AccentText" po:Freeze="True" Color="#FF5F49BD" />
+  <!-- accentSoft = #f4f0fe：品牌色浅底：选中行、弱主按钮。indigo 3：亮色 `#edf2fe`，暗色 `#182449` -->
+  <Color x:Key="Rune.Color.AccentSoft">#FFF4F0FE</Color>
+  <SolidColorBrush x:Key="Rune.Brush.AccentSoft" po:Freeze="True" Color="#FFF4F0FE" />
+  <!-- accentSoftHover = #ebe4ff：品牌色浅底悬停。indigo 4：亮色 `#e1e9ff`，暗色 `#1d2e62` -->
+  <Color x:Key="Rune.Color.AccentSoftHover">#FFEBE4FF</Color>
+  <SolidColorBrush x:Key="Rune.Brush.AccentSoftHover" po:Freeze="True" Color="#FFEBE4FF" />
+  <!-- accentBorder = #c2b5f5：品牌色边框：选中的卡片、弱主按钮描边。indigo 7：亮色 `#abbdf9`，暗色 `#3a4f97` -->
+  <Color x:Key="Rune.Color.AccentBorder">#FFC2B5F5</Color>
+  <SolidColorBrush x:Key="Rune.Brush.AccentBorder" po:Freeze="True" Color="#FFC2B5F5" />
+  <!-- danger = #d83a3f：危险实色：危险按钮的底色，上面放 dangerContrast（白色）文字，要满足 4.5:1。 red 9 配白字只有 3.91:1，所以亮色用 red 11 `#ce2c31`（5.21:1），暗色用 red 8 `#b54548`（5.37:1） -->
+  <Color x:Key="Rune.Color.Danger">#FFD83A3F</Color>
+  <SolidColorBrush x:Key="Rune.Brush.Danger" po:Freeze="True" Color="#FFD83A3F" />
+  <!-- dangerHover = #b62f34：危险实色悬停：比实色更深一点，白字才满足 4.5:1（red 10 只有 4.37:1）。亮色 `#b8272c`，暗色 `#a33b3e` -->
+  <Color x:Key="Rune.Color.DangerHover">#FFB62F34</Color>
+  <SolidColorBrush x:Key="Rune.Brush.DangerHover" po:Freeze="True" Color="#FFB62F34" />
+  <!-- dangerContrast = #ffffff：危险实色上的文字与图标：`#ffffff` -->
+  <Color x:Key="Rune.Color.DangerContrast">#FFFFFFFF</Color>
+  <SolidColorBrush x:Key="Rune.Brush.DangerContrast" po:Freeze="True" Color="#FFFFFFFF" />
+  <!-- dangerText = #c31e28：危险文字：错误提示。亮色比 red 11 深一点 `#b8272c`（red 11 在 dangerSoftHover 上只有 4.07:1），暗色 red 11 `#ff9592` -->
+  <Color x:Key="Rune.Color.DangerText">#FFC31E28</Color>
+  <SolidColorBrush x:Key="Rune.Brush.DangerText" po:Freeze="True" Color="#FFC31E28" />
+  <!-- dangerSoft = #feebec：危险浅底：错误提示条。red 3：亮色 `#feebec`，暗色 `#3b1219` -->
+  <Color x:Key="Rune.Color.DangerSoft">#FFFEEBEC</Color>
+  <SolidColorBrush x:Key="Rune.Brush.DangerSoft" po:Freeze="True" Color="#FFFEEBEC" />
+  <!-- dangerSoftHover = #ffdbdc：危险浅底悬停。red 4：亮色 `#ffdbdc`，暗色 `#500f1c` -->
+  <Color x:Key="Rune.Color.DangerSoftHover">#FFFFDBDC</Color>
+  <SolidColorBrush x:Key="Rune.Brush.DangerSoftHover" po:Freeze="True" Color="#FFFFDBDC" />
+  <!-- dangerBorder = #f4a9aa：危险边框：校验失败的输入框。red 7：亮色 `#f4a9aa`，暗色 `#8c333a` -->
+  <Color x:Key="Rune.Color.DangerBorder">#FFF4A9AA</Color>
+  <SolidColorBrush x:Key="Rune.Brush.DangerBorder" po:Freeze="True" Color="#FFF4A9AA" />
+  <!-- successText = #193b2d：成功文字与图标。亮色 green 12 `#193b2d`，暗色 green 11 `#3dd68c`。 亮色不用 11 级：green 11 在 successSoft（green 3）上只有 4.21:1，标记、提示条里的文字不到 4.5 -->
+  <Color x:Key="Rune.Color.SuccessText">#FF193B2D</Color>
+  <SolidColorBrush x:Key="Rune.Brush.SuccessText" po:Freeze="True" Color="#FF193B2D" />
+  <!-- successSoft = #e6f6eb：成功浅底。green 3：亮色 `#e6f6eb`，暗色 `#132d21` -->
+  <Color x:Key="Rune.Color.SuccessSoft">#FFE6F6EB</Color>
+  <SolidColorBrush x:Key="Rune.Brush.SuccessSoft" po:Freeze="True" Color="#FFE6F6EB" />
+  <!-- successBorder = #8eceaa：成功边框。green 7：亮色 `#8eceaa`，暗色 `#28684a` -->
+  <Color x:Key="Rune.Color.SuccessBorder">#FF8ECEAA</Color>
+  <SolidColorBrush x:Key="Rune.Brush.SuccessBorder" po:Freeze="True" Color="#FF8ECEAA" />
+  <!-- success = #008751：成功实色：成功按钮、实底徽标的底色，上面放 successContrast。亮色 `#008751`，暗色 green 9 `#30a46c`。 黄、绿、蓝的 9 级很亮：配白字不到 4.5:1 时亮色加深到够，暗色改配深色字。图形（勾选框、进度条）的填充仍用 successText：实色不一定在表面上到 3:1 -->
+  <Color x:Key="Rune.Color.Success">#FF008751</Color>
+  <SolidColorBrush x:Key="Rune.Brush.Success" po:Freeze="True" Color="#FF008751" />
+  <!-- successHover = #007143：成功实色悬停：与 successContrast 的对比度只升不降（白字时加深，深色字时调亮）。亮色 `#007143`，暗色 `#52af7d` -->
+  <Color x:Key="Rune.Color.SuccessHover">#FF007143</Color>
+  <SolidColorBrush x:Key="Rune.Brush.SuccessHover" po:Freeze="True" Color="#FF007143" />
+  <!-- successContrast = #ffffff：成功实色上的文字与图标。亮色 `#ffffff`，暗色 `#111113` -->
+  <Color x:Key="Rune.Color.SuccessContrast">#FFFFFFFF</Color>
+  <SolidColorBrush x:Key="Rune.Brush.SuccessContrast" po:Freeze="True" Color="#FFFFFFFF" />
+  <!-- successSoftHover = #d6f1df：成功浅底悬停。green 4：亮色 `#d6f1df`，暗色 `#113b29` -->
+  <Color x:Key="Rune.Color.SuccessSoftHover">#FFD6F1DF</Color>
+  <SolidColorBrush x:Key="Rune.Brush.SuccessSoftHover" po:Freeze="True" Color="#FFD6F1DF" />
+  <!-- warningText = #4f3422：警告文字与图标。亮色 amber 12 `#4f3422`，暗色 amber 11 `#ffca16`。 亮色不用 11 级：amber 11（`#ab6400`）在页面背景上对比度 4.49，不到 WCAG AA 的 4.5 -->
+  <Color x:Key="Rune.Color.WarningText">#FF4F3422</Color>
+  <SolidColorBrush x:Key="Rune.Brush.WarningText" po:Freeze="True" Color="#FF4F3422" />
+  <!-- warningSoft = #fff7c2：警告浅底。amber 3：亮色 `#fff7c2`，暗色 `#302008` -->
+  <Color x:Key="Rune.Color.WarningSoft">#FFFFF7C2</Color>
+  <SolidColorBrush x:Key="Rune.Brush.WarningSoft" po:Freeze="True" Color="#FFFFF7C2" />
+  <!-- warningBorder = #e9c162：警告边框。amber 7：亮色 `#e9c162`，暗色 `#714f19` -->
+  <Color x:Key="Rune.Color.WarningBorder">#FFE9C162</Color>
+  <SolidColorBrush x:Key="Rune.Brush.WarningBorder" po:Freeze="True" Color="#FFE9C162" />
+  <!-- warning = #ffc53d：警告实色：警告按钮、实底徽标的底色，上面放 warningContrast。亮色 `#ffc53d`，暗色 amber 9 `#ffc53d`。 黄、绿、蓝的 9 级很亮：配白字不到 4.5:1 时亮色加深到够，暗色改配深色字。图形（勾选框、进度条）的填充仍用 warningText：实色不一定在表面上到 3:1 -->
+  <Color x:Key="Rune.Color.Warning">#FFFFC53D</Color>
+  <SolidColorBrush x:Key="Rune.Brush.Warning" po:Freeze="True" Color="#FFFFC53D" />
+  <!-- warningHover = #ffcd5f：警告实色悬停：与 warningContrast 的对比度只升不降（白字时加深，深色字时调亮）。亮色 `#ffcd5f`，暗色 `#ffcd5f` -->
+  <Color x:Key="Rune.Color.WarningHover">#FFFFCD5F</Color>
+  <SolidColorBrush x:Key="Rune.Brush.WarningHover" po:Freeze="True" Color="#FFFFCD5F" />
+  <!-- warningContrast = #4f3422：警告实色上的文字与图标。亮色 `#4f3422`，暗色 `#111113` -->
+  <Color x:Key="Rune.Color.WarningContrast">#FF4F3422</Color>
+  <SolidColorBrush x:Key="Rune.Brush.WarningContrast" po:Freeze="True" Color="#FF4F3422" />
+  <!-- warningSoftHover = #ffee9c：警告浅底悬停。amber 4：亮色 `#ffee9c`，暗色 `#3f2700` -->
+  <Color x:Key="Rune.Color.WarningSoftHover">#FFFFEE9C</Color>
+  <SolidColorBrush x:Key="Rune.Brush.WarningSoftHover" po:Freeze="True" Color="#FFFFEE9C" />
+  <!-- infoText = #1d3e56：信息文字与图标。亮色 blue 12 `#113264`，暗色 blue 11 `#70b8ff`。 亮色不用 11 级：blue 11 在 infoSoft（blue 3）上只有 4.25:1 -->
+  <Color x:Key="Rune.Color.InfoText">#FF1D3E56</Color>
+  <SolidColorBrush x:Key="Rune.Brush.InfoText" po:Freeze="True" Color="#FF1D3E56" />
+  <!-- infoSoft = #e1f6fd：信息浅底。blue 3：亮色 `#e6f4fe`，暗色 `#0d2847` -->
+  <Color x:Key="Rune.Color.InfoSoft">#FFE1F6FD</Color>
+  <SolidColorBrush x:Key="Rune.Brush.InfoSoft" po:Freeze="True" Color="#FFE1F6FD" />
+  <!-- infoBorder = #8dcae3：信息边框。blue 7：亮色 `#8ec8f6`，暗色 `#205d9e` -->
+  <Color x:Key="Rune.Color.InfoBorder">#FF8DCAE3</Color>
+  <SolidColorBrush x:Key="Rune.Brush.InfoBorder" po:Freeze="True" Color="#FF8DCAE3" />
+  <!-- info = #7ce2fe：信息实色：信息按钮、实底徽标的底色，上面放 infoContrast。亮色 `#0073e0`，暗色 blue 9 `#0090ff`。 黄、绿、蓝的 9 级很亮：配白字不到 4.5:1 时亮色加深到够，暗色改配深色字。图形（勾选框、进度条）的填充仍用 infoText：实色不一定在表面上到 3:1 -->
+  <Color x:Key="Rune.Color.Info">#FF7CE2FE</Color>
+  <SolidColorBrush x:Key="Rune.Brush.Info" po:Freeze="True" Color="#FF7CE2FE" />
+  <!-- infoHover = #8fe6fe：信息实色悬停：与 infoContrast 的对比度只升不降（白字时加深，深色字时调亮）。亮色 `#0060bd`，暗色 `#3d9fff` -->
+  <Color x:Key="Rune.Color.InfoHover">#FF8FE6FE</Color>
+  <SolidColorBrush x:Key="Rune.Brush.InfoHover" po:Freeze="True" Color="#FF8FE6FE" />
+  <!-- infoContrast = #1d3e56：信息实色上的文字与图标。亮色 `#ffffff`，暗色 `#111113` -->
+  <Color x:Key="Rune.Color.InfoContrast">#FF1D3E56</Color>
+  <SolidColorBrush x:Key="Rune.Brush.InfoContrast" po:Freeze="True" Color="#FF1D3E56" />
+  <!-- infoSoftHover = #d1f0fa：信息浅底悬停。blue 4：亮色 `#d5efff`，暗色 `#003362` -->
+  <Color x:Key="Rune.Color.InfoSoftHover">#FFD1F0FA</Color>
+  <SolidColorBrush x:Key="Rune.Brush.InfoSoftHover" po:Freeze="True" Color="#FFD1F0FA" />
+  <!-- inverseSurface = #211b30：反色表面。slate 12：亮色 `#1c2024`，暗色 `#edeef0` -->
+  <Color x:Key="Rune.Color.InverseSurface">#FF211B30</Color>
+  <SolidColorBrush x:Key="Rune.Brush.InverseSurface" po:Freeze="True" Color="#FF211B30" />
+  <!-- inverseText = #fbf9ff：反色表面上的文字。slate 1：亮色 `#fcfcfd`，暗色 `#111113` -->
+  <Color x:Key="Rune.Color.InverseText">#FFFBF9FF</Color>
+  <SolidColorBrush x:Key="Rune.Brush.InverseText" po:Freeze="True" Color="#FFFBF9FF" />
+  <!-- focusRing = #6e56cf：焦点环（:focus-visible）。indigo 9：两套主题都是 `#3e63dd`。 Radix 建议 7–8 级，但亮色下对比度不到 3:1（WCAG 2.2 焦点外观要求），所以用 9 级 -->
+  <Color x:Key="Rune.Color.FocusRing">#FF6E56CF</Color>
+  <SolidColorBrush x:Key="Rune.Brush.FocusRing" po:Freeze="True" Color="#FF6E56CF" />
+  <!-- overlay = rgba(33, 27, 48, 0.4)：模态遮罩。亮色 blackA 6 `rgba(0, 0, 0, 0.4)`，暗色 blackA 8 `rgba(0, 0, 0, 0.6)` -->
+  <Color x:Key="Rune.Color.Overlay">#66211B30</Color>
+  <SolidColorBrush x:Key="Rune.Brush.Overlay" po:Freeze="True" Color="#66211B30" />
+  <!-- selection = #e1d9ff：选中文字的底色（::selection）。indigo 5：亮色 `#d2deff`，暗色 `#253974` -->
+  <Color x:Key="Rune.Color.Selection">#FFE1D9FF</Color>
+  <SolidColorBrush x:Key="Rune.Brush.Selection" po:Freeze="True" Color="#FFE1D9FF" />
+  <!-- highlight = #ffee9c：高亮标记：搜索命中、`<mark>`。amber 4：亮色 `#ffee9c`，暗色 `#3f2700` -->
+  <Color x:Key="Rune.Color.Highlight">#FFFFEE9C</Color>
+  <SolidColorBrush x:Key="Rune.Brush.Highlight" po:Freeze="True" Color="#FFFFEE9C" />
+  <!-- surfaceTranslucent = rgba(251, 249, 255, 0.8)：半透明表面：吸顶的顶栏（配合背景模糊）。页面背景加 80% 不透明 -->
+  <Color x:Key="Rune.Color.SurfaceTranslucent">#CCFBF9FF</Color>
+  <SolidColorBrush x:Key="Rune.Brush.SurfaceTranslucent" po:Freeze="True" Color="#CCFBF9FF" />
+  <!-- codeKeyword = #5f49bd：关键字。indigo 11：亮色 `#3a5bc7`，暗色 `#9eb1ff` -->
+  <Color x:Key="Rune.Color.CodeKeyword">#FF5F49BD</Color>
+  <SolidColorBrush x:Key="Rune.Brush.CodeKeyword" po:Freeze="True" Color="#FF5F49BD" />
+  <!-- codeString = #147a51：字符串。亮色比 green 11 深一点 `#1c7a51`（在代码块背景上 green 11 只有 4.49:1），暗色 green 11 `#3dd68c` -->
+  <Color x:Key="Rune.Color.CodeString">#FF147A51</Color>
+  <SolidColorBrush x:Key="Rune.Brush.CodeString" po:Freeze="True" Color="#FF147A51" />
+  <!-- codeNumber = #bf4100：数字、常量。亮色比 orange 11 深一点 `#bb4500`（orange 11 在代码块背景上只有 4.29:1），暗色 orange 11 `#ffa057` -->
+  <Color x:Key="Rune.Color.CodeNumber">#FFBF4100</Color>
+  <SolidColorBrush x:Key="Rune.Brush.CodeNumber" po:Freeze="True" Color="#FFBF4100" />
+  <!-- codeFunction = #0069c2：函数名。violet 11：亮色 `#6550b9`，暗色 `#baa7ff` -->
+  <Color x:Key="Rune.Color.CodeFunction">#FF0069C2</Color>
+  <SolidColorBrush x:Key="Rune.Brush.CodeFunction" po:Freeze="True" Color="#FF0069C2" />
+  <!-- codeType = #007590：类型、类名。亮色比 cyan 11 深一点 `#007590`（cyan 11 在行内代码的底色上只有 4.19:1），暗色 cyan 11 `#4ccce6` -->
+  <Color x:Key="Rune.Color.CodeType">#FF007590</Color>
+  <SolidColorBrush x:Key="Rune.Brush.CodeType" po:Freeze="True" Color="#FF007590" />
+  <!-- codeComment = #5f5770：注释、标点。slate 11：亮色 `#60646c`，暗色 `#b0b4ba` -->
+  <Color x:Key="Rune.Color.CodeComment">#FF5F5770</Color>
+  <SolidColorBrush x:Key="Rune.Brush.CodeComment" po:Freeze="True" Color="#FF5F5770" />
+  <!-- codeTag = #cb1d63：标签名（HTML、JSX）。crimson 11：亮色 `#cb1d63`，暗色 `#ff92ad` -->
+  <Color x:Key="Rune.Color.CodeTag">#FFCB1D63</Color>
+  <SolidColorBrush x:Key="Rune.Brush.CodeTag" po:Freeze="True" Color="#FFCB1D63" />
+  <!-- codeAttribute = #815e46：属性名。brown 11：亮色 `#815e46`，暗色 `#dbb594` -->
+  <Color x:Key="Rune.Color.CodeAttribute">#FF815E46</Color>
+  <SolidColorBrush x:Key="Rune.Brush.CodeAttribute" po:Freeze="True" Color="#FF815E46" />
+  <!-- codeInserted = #e6f6eb：diff 新增行的底色。green 3：亮色 `#e6f6eb`，暗色 `#132d21` -->
+  <Color x:Key="Rune.Color.CodeInserted">#FFE6F6EB</Color>
+  <SolidColorBrush x:Key="Rune.Brush.CodeInserted" po:Freeze="True" Color="#FFE6F6EB" />
+  <!-- codeDeleted = #feebec：diff 删除行的底色。red 3：亮色 `#feebec`，暗色 `#3b1219` -->
+  <Color x:Key="Rune.Color.CodeDeleted">#FFFEEBEC</Color>
+  <SolidColorBrush x:Key="Rune.Brush.CodeDeleted" po:Freeze="True" Color="#FFFEEBEC" />
+  <!-- chart1 = #6e56cf：第 1 个系列：跟随品牌色。indigo 9：两套主题都是 `#3e63dd` -->
+  <Color x:Key="Rune.Color.Chart1">#FF6E56CF</Color>
+  <SolidColorBrush x:Key="Rune.Brush.Chart1" po:Freeze="True" Color="#FF6E56CF" />
+  <!-- chart2 = #d6409f：第 2 个系列。teal：亮色 10 级 `#0d9b8a`，暗色 9 级 `#12a594` -->
+  <Color x:Key="Rune.Color.Chart2">#FFD6409F</Color>
+  <SolidColorBrush x:Key="Rune.Brush.Chart2" po:Freeze="True" Color="#FFD6409F" />
+  <!-- chart3 = #0797b9：第 3 个系列。orange：亮色 10 级 `#ef5f00`，暗色 9 级 `#f76b15` -->
+  <Color x:Key="Rune.Color.Chart3">#FF0797B9</Color>
+  <SolidColorBrush x:Key="Rune.Brush.Chart3" po:Freeze="True" Color="#FF0797B9" />
+  <!-- chart4 = #b87a00：第 4 个系列。crimson 9：两套主题都是 `#e93d82` -->
+  <Color x:Key="Rune.Color.Chart4">#FFB87A00</Color>
+  <SolidColorBrush x:Key="Rune.Brush.Chart4" po:Freeze="True" Color="#FFB87A00" />
+  <!-- chart5 = #3358d4：第 5 个系列。violet 9：两套主题都是 `#6e56cf` -->
+  <Color x:Key="Rune.Color.Chart5">#FF3358D4</Color>
+  <SolidColorBrush x:Key="Rune.Brush.Chart5" po:Freeze="True" Color="#FF3358D4" />
+  <!-- chart6 = #0d9b8a：第 6 个系列。cyan：亮色 10 级 `#0797b9`，暗色 9 级 `#00a2c7` -->
+  <Color x:Key="Rune.Color.Chart6">#FF0D9B8A</Color>
+  <SolidColorBrush x:Key="Rune.Brush.Chart6" po:Freeze="True" Color="#FF0D9B8A" />
+  <!-- chart7 = #e5484d：第 7 个系列。grass：亮色 10 级 `#3e9b4f`，暗色 9 级 `#46a758` -->
+  <Color x:Key="Rune.Color.Chart7">#FFE5484D</Color>
+  <SolidColorBrush x:Key="Rune.Brush.Chart7" po:Freeze="True" Color="#FFE5484D" />
+  <!-- chart8 = #8e4ec6：第 8 个系列。amber：亮色 11 级 `#ab6400`（9、10 级在浅色背景上不到 2:1），暗色 9 级 `#ffc53d` -->
+  <Color x:Key="Rune.Color.Chart8">#FF8E4EC6</Color>
+  <SolidColorBrush x:Key="Rune.Brush.Chart8" po:Freeze="True" Color="#FF8E4EC6" />
+
+  <!-- shadows -->
+  <!-- none = none：无阴影 -->
+  <x:Null x:Key="Rune.Shadow.None" />
+  <!-- xs = 0 1px 1px 0 rgba(47, 38, 95, 0.04), 0 2px 1px -1px rgba(47, 38, 95, 0.05), 0 1px 3px 0 rgba(47, 38, 95, 0.05)：贴近表面：卡片 -->
+  <DropShadowEffect x:Key="Rune.Shadow.Xs" po:Freeze="True" BlurRadius="3" ShadowDepth="1" Direction="270" Color="#FF2F265F" Opacity="0.05" />
+  <!-- sm = 0 2px 3px -2px rgba(47, 38, 95, 0.06), 0 3px 12px -4px rgba(47, 38, 95, 0.1), 0 4px 16px -8px rgba(47, 38, 95, 0.1)：轻微浮起：悬停的卡片 -->
+  <DropShadowEffect x:Key="Rune.Shadow.Sm" po:Freeze="True" BlurRadius="16" ShadowDepth="4" Direction="270" Color="#FF2F265F" Opacity="0.1" />
+  <!-- md = 0 8px 40px rgba(47, 38, 95, 0.05), 0 12px 32px -16px rgba(47, 38, 95, 0.08)：浮起：下拉面板 -->
+  <DropShadowEffect x:Key="Rune.Shadow.Md" po:Freeze="True" BlurRadius="40" ShadowDepth="8" Direction="270" Color="#FF2F265F" Opacity="0.05" />
+  <!-- lg = 0 12px 60px rgba(47, 38, 95, 0.15), 0 12px 32px -16px rgba(47, 38, 95, 0.12)：浮层：弹出框、菜单、提示 -->
+  <DropShadowEffect x:Key="Rune.Shadow.Lg" po:Freeze="True" BlurRadius="60" ShadowDepth="12" Direction="270" Color="#FF2F265F" Opacity="0.15" />
+  <!-- xl = 0 12px 60px rgba(47, 38, 95, 0.15), 0 16px 64px rgba(47, 38, 95, 0.04), 0 16px 36px -20px rgba(47, 38, 95, 0.2)：对话框 -->
+  <DropShadowEffect x:Key="Rune.Shadow.Xl" po:Freeze="True" BlurRadius="60" ShadowDepth="12" Direction="270" Color="#FF2F265F" Opacity="0.15" />
+
+  <!-- fonts -->
+  <!-- sans = system-ui, -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC", "Source Han Sans SC", sans-serif：正文字体：西文用系统界面字体；中文在 Windows 上优先“微软雅黑 UI”（界面字号下字距更紧凑）， Linux 上是思源黑体（Noto / Source Han Sans） -->
+  <FontFamily x:Key="Rune.Font.Sans">Segoe UI, PingFang SC, Hiragino Sans GB, Microsoft YaHei UI, Microsoft YaHei, Noto Sans SC, Source Han Sans SC</FontFamily>
+  <!-- mono = ui-monospace, "Cascadia Code", "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace：等宽字体：代码、需要数字对齐的地方。装了 Cascadia Code（Windows 11 自带）、JetBrains Mono 时优先用它们， 字形比 Consolas 清楚 -->
+  <FontFamily x:Key="Rune.Font.Mono">Cascadia Code, JetBrains Mono, SFMono-Regular, Consolas, Liberation Mono</FontFamily>
+  <!-- serif = "Noto Serif SC", "Source Han Serif SC", "Songti SC", STSong, "SimSun", Georgia, serif：衬线字体：书卷感的标题、引文（纸张主题的标题用它） -->
+  <FontFamily x:Key="Rune.Font.Serif">Noto Serif SC, Source Han Serif SC, Songti SC, STSong, SimSun, Georgia</FontFamily>
+  <!-- heading = system-ui, -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC", "Source Han Sans SC", sans-serif：标题（H1–H6）的字体：默认同正文，主题可以换成衬线 -->
+  <FontFamily x:Key="Rune.Font.Heading">Segoe UI, PingFang SC, Hiragino Sans GB, Microsoft YaHei UI, Microsoft YaHei, Noto Sans SC, Source Han Sans SC</FontFamily>
+
+  <!-- radii -->
+  <!-- none = 0（设备无关像素）：`0` -->
+  <sys:Double x:Key="Rune.Radius.None">0</sys:Double>
+  <!-- xs = 0.2em（em 系数）：`0.15em`：控件内的小元素 -->
+  <sys:Double x:Key="Rune.Radius.Xs">0.2</sys:Double>
+  <!-- sm = 0.3em（em 系数）：`0.25em`：标签、复选框 -->
+  <sys:Double x:Key="Rune.Radius.Sm">0.3</sys:Double>
+  <!-- md = 0.5em（em 系数）：`0.4em`：按钮、输入框 -->
+  <sys:Double x:Key="Rune.Radius.Md">0.5</sys:Double>
+  <!-- lg = 0.75em（em 系数）：`0.7em`：卡片、浮层 -->
+  <sys:Double x:Key="Rune.Radius.Lg">0.75</sys:Double>
+  <!-- xl = 1.05em（em 系数）：`1em`：对话框 -->
+  <sys:Double x:Key="Rune.Radius.Xl">1.05</sys:Double>
+  <!-- full = 9999px（设备无关像素）：全圆：胶囊按钮、头像、开关 -->
+  <sys:Double x:Key="Rune.Radius.Full">9999</sys:Double>
+</ResourceDictionary>

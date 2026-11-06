@@ -20,7 +20,8 @@
 - 梳理了 vue-tsx-pro 的结构：基础设施（`utils/`、`config/`）与组件按依赖分层（阶段 2、3）。
 - 开工前要定的事都定了（"已定的决定" 10–18）。
 - 阶段 1 的 `ts-inspect` 已做好（命令见 HANDOFF 的命令表）；C# 的 LSP 配好了（HANDOFF §3）。
-- 还没有任何组件。下一步：阶段 1 的 token-gen，然后 lang-gen、icons-gen。
+- 阶段 1 的 token-gen 已做好：三个库都有了 16 套主题的 token。
+- 还没有任何组件。下一步：阶段 1 的 lang-gen，然后 icons-gen。
 
 ## 已定的决定
 
@@ -183,11 +184,9 @@
 
 - [x] `ts-inspect`（见"信息与验证工具"）：`component`、`token`、`deps`、`lang` 四个子命令（2026-11-06）。解析在 `tools/lib/`（找到 vue-tsx-pro、用它自带的 TypeScript 7 解析语法树、导入关系与分层），下面几个生成脚本都用它，不各写一份。
 
-- [ ] `token-gen`：从 `packages/ui/src/config/theme` 读 tokens 和 16 套主题：
-  - Avalonia：`Tokens.axaml`（字号、em 系数、边框宽度、阴影、时长）；每套主题一个自定义 `ThemeVariant` 的 ThemeDictionary（颜色画刷 + 6 个色调的调色板）；按时长档位的 Transitions 集合（DESIGN §8）。
-  - WPF：`Tokens.xaml` + 每套主题一份 `.xaml` 合并字典；颜色、画刷、阴影（`DropShadowEffect` 参数）。
-  - WinForms：`Tokens.g.cs`（常量与 em 系数）+ `Themes.g.cs`（16 套主题的 `Palette` 记录）。
-  - em 类 token 输出成系数；px 类（边框、焦点环）输出设备无关像素，WinForms 按 `DeviceDpi` 换算。
+- [x] `token-gen`（`tools/token-gen`，2026-11-06）：从 `packages/ui/src/config/theme` 读 tokens 和 16 套主题，三个平台各输出一份，约定见 DESIGN §6"token 的生成"。
+  - Avalonia：`Tokens.g.axaml`（并入 RuneTheme）与 `RuneThemeVariants.g.cs`；WPF：`Tokens.g.xaml`、`Themes/<主题>.g.xaml`、`RuneTheme`（换主题）、`CubicBezierEase`；WinForms：`Tokens.g.cs`、`Themes.g.cs`（`BuiltinThemes`）、`Easing.g.cs`。各有测试。
+  - 留到后面的：CI 里跑 `--check`（阶段 4 建 CI 时）；色调调色板与按时长档位的 Transitions 集合，做 Button 时再生成（角色对照表来自 Button、Badge 的配方）。
 - [ ] `lang-gen`：从 `config/lang` 生成三个库各自的 `Lang` 记录（zh-CN、en-US），插值文案生成方法，每个键带中文注释。
 - [ ] `icons-gen`：Lucide 的路径数据。Avalonia `StreamGeometry`、WPF `Geometry`（冻结）、WinForms `GraphicsPath` 工厂；线宽取 `strokeWidths`。
 - [ ] `parity`：用 TS 编译器 API 从 vue-tsx-pro 抽清单（组件、`css.recipe` 的 name / parts / variants、`propsXxx` 部件与它们的类型、ComponentDefaults、Lang 的键），读三个库的程序集对照，报告缺失与改名（改名要在对照表里登记，例如 `open` → `IsOpen`）。

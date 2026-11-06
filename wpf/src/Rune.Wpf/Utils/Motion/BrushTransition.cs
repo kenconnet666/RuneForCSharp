@@ -18,14 +18,11 @@ namespace Rune.Wpf;
 /// </summary>
 public static class BrushTransition
 {
-    /// <summary>默认的时长 token：悬停、档位切换这类颜色变化。</summary>
-    public const string DefaultDurationKey = "Rune.Durations.Sm";
+    /// <summary>默认的时长 token（tools/token-gen 生成的资源键）：悬停、档位切换这类颜色变化。</summary>
+    public const string DefaultDurationKey = "Rune.Duration.Sm";
 
-    /// <summary>查不到时长 token 时用 vue-tsx-pro 的 sm 档（120ms）。</summary>
+    /// <summary>查不到时长 token（没合并 RuneTheme）时用 vue-tsx-pro 的 sm 档（120ms）。</summary>
     static readonly TimeSpan fallback = TimeSpan.FromMilliseconds(120);
-
-    /// <summary>近似 vue-tsx-pro 的 standard 缓动（先快后慢）。</summary>
-    static readonly IEasingFunction standardEasing = Frozen(new CubicEase { EasingMode = EasingMode.EaseOut });
 
     /// <summary>开启背景色过渡。</summary>
     public static readonly DependencyProperty EnabledProperty = DependencyProperty.RegisterAttached(
@@ -70,7 +67,7 @@ public static class BrushTransition
 
         // 从当前显示的颜色开始（上一次过渡没播完时也连贯）
         var brush = new SolidColorBrush(from.Color);
-        brush.BeginAnimation(SolidColorBrush.ColorProperty, new ColorAnimation(to.Color, duration) { EasingFunction = standardEasing });
+        brush.BeginAnimation(SolidColorBrush.ColorProperty, new ColorAnimation(to.Color, duration) { EasingFunction = CubicBezierEase.Standard });
         applying = true;
         try
         {
@@ -80,11 +77,5 @@ public static class BrushTransition
         {
             applying = false;
         }
-    }
-
-    static T Frozen<T>(T freezable) where T : Freezable
-    {
-        freezable.Freeze();
-        return freezable;
     }
 }

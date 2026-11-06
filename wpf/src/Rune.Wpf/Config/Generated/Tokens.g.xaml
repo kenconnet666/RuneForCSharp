@@ -1,0 +1,144 @@
+<!-- 由 tools/token-gen 从 vue-tsx-pro 的 packages/ui/src/config/theme 生成，不要手改；改了那边的 token 后运行 node tools/token-gen/token-gen.mjs -->
+<!-- 不随主题变的 token；em 类的长度是系数，px、rem 类已换成设备无关像素 -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
+                    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+                    xmlns:rune="clr-namespace:Rune.Wpf"
+                    mc:Ignorable="po">
+
+  <!-- fontSizes -->
+  <!-- xs = 12px（设备无关像素）：`12px`：辅助说明、标签 -->
+  <sys:Double x:Key="Rune.FontSize.Xs">12</sys:Double>
+  <!-- sm = 13px（设备无关像素）：`13px`：紧凑控件 -->
+  <sys:Double x:Key="Rune.FontSize.Sm">13</sys:Double>
+  <!-- md = 14px（设备无关像素）：`14px`：正文与默认控件；Provider 用它设置区域的基准字号 -->
+  <sys:Double x:Key="Rune.FontSize.Md">14</sys:Double>
+  <!-- lg = 16px（设备无关像素）：`16px`：宽松控件、小标题 -->
+  <sys:Double x:Key="Rune.FontSize.Lg">16</sys:Double>
+  <!-- xl = 18px（设备无关像素）：`18px`：强调文字、卡片标题 -->
+  <sys:Double x:Key="Rune.FontSize.Xl">18</sys:Double>
+  <!-- xxl = 24px（设备无关像素）：`24px`：页面标题 -->
+  <sys:Double x:Key="Rune.FontSize.Xxl">24</sys:Double>
+  <!-- xxxl = 30px（设备无关像素）：`30px`：大标题 -->
+  <sys:Double x:Key="Rune.FontSize.Xxxl">30</sys:Double>
+
+  <!-- fontWeights -->
+  <!-- light = 300：`300` -->
+  <FontWeight x:Key="Rune.FontWeight.Light">Light</FontWeight>
+  <!-- normal = 400：`400`：正文 -->
+  <FontWeight x:Key="Rune.FontWeight.Normal">Normal</FontWeight>
+  <!-- medium = 500：`500`：标签、表头 -->
+  <FontWeight x:Key="Rune.FontWeight.Medium">Medium</FontWeight>
+  <!-- semibold = 600：`600`：按钮、标题 -->
+  <FontWeight x:Key="Rune.FontWeight.Semibold">SemiBold</FontWeight>
+  <!-- bold = 700：`700` -->
+  <FontWeight x:Key="Rune.FontWeight.Bold">Bold</FontWeight>
+
+  <!-- lineHeights -->
+  <!-- none = 1：`1`：图标、单行徽标 -->
+  <sys:Double x:Key="Rune.LineHeight.None">1</sys:Double>
+  <!-- tight = 1.25：`1.25`：按钮等单行控件、标题 -->
+  <sys:Double x:Key="Rune.LineHeight.Tight">1.25</sys:Double>
+  <!-- snug = 1.375：`1.375`：紧凑的多行文字 -->
+  <sys:Double x:Key="Rune.LineHeight.Snug">1.375</sys:Double>
+  <!-- normal = 1.5：`1.5`：正文 -->
+  <sys:Double x:Key="Rune.LineHeight.Normal">1.5</sys:Double>
+  <!-- relaxed = 1.75：`1.75`：长文阅读 -->
+  <sys:Double x:Key="Rune.LineHeight.Relaxed">1.75</sys:Double>
+
+  <!-- letterSpacings -->
+  <!-- tighter = -0.02em（em 系数）：`-0.02em`：大标题 -->
+  <sys:Double x:Key="Rune.LetterSpacing.Tighter">-0.02</sys:Double>
+  <!-- tight = -0.01em（em 系数）：`-0.01em`：小标题 -->
+  <sys:Double x:Key="Rune.LetterSpacing.Tight">-0.01</sys:Double>
+  <!-- normal = 0（设备无关像素）：`0`：正文 -->
+  <sys:Double x:Key="Rune.LetterSpacing.Normal">0</sys:Double>
+  <!-- wide = 0.02em（em 系数）：`0.02em`：小字号的标签 -->
+  <sys:Double x:Key="Rune.LetterSpacing.Wide">0.02</sys:Double>
+  <!-- wider = 0.05em（em 系数）：`0.05em`：全大写的英文标签 -->
+  <sys:Double x:Key="Rune.LetterSpacing.Wider">0.05</sys:Double>
+
+  <!-- space -->
+  <!-- none = 0（设备无关像素）：`0` -->
+  <sys:Double x:Key="Rune.Space.None">0</sys:Double>
+  <!-- xs = 0.25em（em 系数）：`0.25em`：图标与文字之间、控件的上下内边距 -->
+  <sys:Double x:Key="Rune.Space.Xs">0.25</sys:Double>
+  <!-- sm = 0.5em（em 系数）：`0.5em`：控件内部元素之间 -->
+  <sys:Double x:Key="Rune.Space.Sm">0.5</sys:Double>
+  <!-- md = 0.75em（em 系数）：`0.75em`：输入框水平内边距、浮层内边距 -->
+  <sys:Double x:Key="Rune.Space.Md">0.75</sys:Double>
+  <!-- lg = 1em（em 系数）：`1em`：按钮水平内边距、表单项之间 -->
+  <sys:Double x:Key="Rune.Space.Lg">1</sys:Double>
+  <!-- xl = 1.5em（em 系数）：`1.5em`：卡片、对话框内边距 -->
+  <sys:Double x:Key="Rune.Space.Xl">1.5</sys:Double>
+
+  <!-- sizes -->
+  <!-- control = 2.25em（em 系数）：`2.25em`：单行控件（按钮、输入框、下拉框）的高度 -->
+  <sys:Double x:Key="Rune.Size.Control">2.25</sys:Double>
+  <!-- minTarget = 24px（设备无关像素）：`24px`：可点击区域的最小尺寸（WCAG 2.2 目标尺寸 24×24），与 control 取较大值 -->
+  <sys:Double x:Key="Rune.Size.MinTarget">24</sys:Double>
+  <!-- xs = 30rem（设备无关像素）：`30rem`（480px）：窄内容，如登录表单 -->
+  <sys:Double x:Key="Rune.Size.Xs">480</sys:Double>
+  <!-- sm = 40rem（设备无关像素）：`40rem`（640px）：表单页、设置页 -->
+  <sys:Double x:Key="Rune.Size.Sm">640</sys:Double>
+  <!-- md = 48rem（设备无关像素）：`48rem`（768px）：文章、详情页 -->
+  <sys:Double x:Key="Rune.Size.Md">768</sys:Double>
+  <!-- lg = 64rem（设备无关像素）：`64rem`（1024px）：常规页面 -->
+  <sys:Double x:Key="Rune.Size.Lg">1024</sys:Double>
+  <!-- xl = 80rem（设备无关像素）：`80rem`（1280px）：宽表格、仪表盘 -->
+  <sys:Double x:Key="Rune.Size.Xl">1280</sys:Double>
+
+  <!-- borderWidths -->
+  <!-- none = 0（设备无关像素）：`0` -->
+  <sys:Double x:Key="Rune.BorderWidth.None">0</sys:Double>
+  <!-- xs = 1px（设备无关像素）：`1px`：边框、分隔线 -->
+  <sys:Double x:Key="Rune.BorderWidth.Xs">1</sys:Double>
+  <!-- sm = 2px（设备无关像素）：`2px`：焦点环宽度与间隔、选中态的强调边框 -->
+  <sys:Double x:Key="Rune.BorderWidth.Sm">2</sys:Double>
+  <!-- md = 3px（设备无关像素）：`3px`：提示条侧边的色条 -->
+  <sys:Double x:Key="Rune.BorderWidth.Md">3</sys:Double>
+  <!-- lg = 4px（设备无关像素）：`4px` -->
+  <sys:Double x:Key="Rune.BorderWidth.Lg">4</sys:Double>
+  <!-- xl = 6px（设备无关像素）：`6px` -->
+  <sys:Double x:Key="Rune.BorderWidth.Xl">6</sys:Double>
+
+  <!-- durations -->
+  <!-- none = 0ms：`0ms` -->
+  <sys:TimeSpan x:Key="Rune.Duration.None">00:00:00</sys:TimeSpan>
+  <!-- xs = { default=75ms; [reduce]=0ms }：`75ms`：按下反馈 -->
+  <sys:TimeSpan x:Key="Rune.Duration.Xs">00:00:00.075</sys:TimeSpan>
+  <!-- sm = { default=120ms; [reduce]=0ms }：`120ms`：悬停的颜色变化 -->
+  <sys:TimeSpan x:Key="Rune.Duration.Sm">00:00:00.12</sys:TimeSpan>
+  <!-- md = { default=200ms; [reduce]=0ms }：`200ms`：展开、淡入、浮层出现 -->
+  <sys:TimeSpan x:Key="Rune.Duration.Md">00:00:00.2</sys:TimeSpan>
+  <!-- lg = { default=300ms; [reduce]=0ms }：`300ms`：对话框、抽屉 -->
+  <sys:TimeSpan x:Key="Rune.Duration.Lg">00:00:00.3</sys:TimeSpan>
+  <!-- xl = { default=500ms; [reduce]=0ms }：`500ms`：大面积的页面切换 -->
+  <sys:TimeSpan x:Key="Rune.Duration.Xl">00:00:00.5</sys:TimeSpan>
+
+  <!-- easings -->
+  <!-- standard = cubic-bezier(0.2, 0, 0, 1)：标准：位置与尺寸变化 -->
+  <x:Static x:Key="Rune.Easing.Standard" Member="rune:CubicBezierEase.Standard" />
+  <!-- enter = cubic-bezier(0.05, 0.7, 0.1, 1)：进入：元素出现（先快后慢） -->
+  <x:Static x:Key="Rune.Easing.Enter" Member="rune:CubicBezierEase.Enter" />
+  <!-- exit = cubic-bezier(0.3, 0, 0.8, 0.15)：退出：元素消失（先慢后快） -->
+  <x:Static x:Key="Rune.Easing.Exit" Member="rune:CubicBezierEase.Exit" />
+
+  <!-- opacities -->
+  <!-- disabled = 0.5：`0.5`：不可用的元素 -->
+  <sys:Double x:Key="Rune.Opacity.Disabled">0.5</sys:Double>
+
+  <!-- strokeWidths -->
+  <!-- xs = 1：`1`：细线图标 -->
+  <sys:Double x:Key="Rune.StrokeWidth.Xs">1</sys:Double>
+  <!-- sm = 1.5：`1.5` -->
+  <sys:Double x:Key="Rune.StrokeWidth.Sm">1.5</sys:Double>
+  <!-- md = 2：`2`：Lucide 的默认线宽 -->
+  <sys:Double x:Key="Rune.StrokeWidth.Md">2</sys:Double>
+  <!-- lg = 2.5：`2.5` -->
+  <sys:Double x:Key="Rune.StrokeWidth.Lg">2.5</sys:Double>
+  <!-- xl = 3：`3`：粗线图标 -->
+  <sys:Double x:Key="Rune.StrokeWidth.Xl">3</sys:Double>
+</ResourceDictionary>

@@ -1,23 +1,15 @@
 namespace Rune.WinForms;
 
 /// <summary>
-/// 缓动曲线：CSS 的 cubic-bezier(x1, y1, x2, y2)。内置的三条与 vue-tsx-pro 的 easings token 同值。
+/// 缓动曲线：CSS 的 cubic-bezier(x1, y1, x2, y2)。内置的 Standard、Enter、Exit 由 tools/token-gen 从 vue-tsx-pro 的
+/// easings token 生成（Easing.g.cs）。
 /// </summary>
 /// <param name="x1">第一个控制点的 x（0–1）。</param>
 /// <param name="y1">第一个控制点的 y。</param>
 /// <param name="x2">第二个控制点的 x（0–1）。</param>
 /// <param name="y2">第二个控制点的 y。</param>
-public sealed class Easing(double x1, double y1, double x2, double y2)
+public sealed partial class Easing(double x1, double y1, double x2, double y2)
 {
-    /// <summary>标准：位置与尺寸变化。</summary>
-    public static readonly Easing Standard = new(0.2, 0, 0, 1);
-
-    /// <summary>进入：元素出现（先快后慢）。</summary>
-    public static readonly Easing Enter = new(0.05, 0.7, 0.1, 1);
-
-    /// <summary>退出：元素消失（先慢后快）。</summary>
-    public static readonly Easing Exit = new(0.3, 0, 0.8, 0.15);
-
     /// <summary>匀速。</summary>
     public static readonly Easing Linear = new(0, 0, 1, 1);
 
