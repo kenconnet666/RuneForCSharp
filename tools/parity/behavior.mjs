@@ -31,14 +31,31 @@ function files(dir, pattern) {
   return out;
 }
 
-/** vue-tsx-pro：组件 → it 名字（顶层与 describe 里的都算） */
+/**/**
+ * vue-tsx-pro：组件 → it 名字。用例归到外层 describe 写的组件（display.test.tsx 里的 describe('Card')）；
+ * describe 里并列几个组件（'Card、Descriptions、Text'）时归到用例名开头的那个；不在 describe 里的归到文件名（Badge.test.tsx）
+ */
 function upstreamTests(src) {
   const tests = new Map();
+  const add = (component, name) => tests.set(component, [...(tests.get(component) ?? []), name]);
   for (const file of files(src, /\.test\.tsx?$/)) {
     if (!file.includes('.test')) continue;
-    const component = basename(file).replace(/\.test\.tsx?$/, '');
-    const names = [...readFileSync(file, 'utf8').matchAll(/^\s*(?:it|test)\(\s*(['"`])((?:(?!\1).)*)\1/gm)].map((m) => m[2]);
-    if (names.length) tests.set(component, [...(tests.get(component) ?? []), ...names]);
+    const fileComponent = basename(file).replace(/\.test\.tsx?$/, '');
+    const describes = [];
+    for (const line of readFileSync(file, 'utf8').split(/\r?\n/)) {
+      const indent = line.length - line.trimStart().length;
+      // 缩进不比 describe 深的非空、非收尾行：那个 describe 结束了
+      while (describes.length && describes.at(-1).indent >= indent && /^\s*\S/.test(line) && !/^\s*[)}\]]/.test(line)) describes.pop();
+      const describe = /^\s*describe\(\s*(['"`])((?:(?!\1).)*)\1/.exec(line);
+      if (describe) {
+        describes.push({ indent, names: describe[2].split('、').map((name) => name.trim()).filter((name) => /^[A-Z]\w*$/.test(name)) });
+        continue;
+      }
+      const test = /^\s*(?:it|test)\(\s*(['"`])((?:(?!\1).)*)\1/.exec(line);
+      if (!test) continue;
+      const names = describes.findLast((d) => d.names.length)?.names ?? [];
+      add(names.find((name) => test[2].startsWith(name)) ?? names[0] ?? fileComponent, test[2]);
+    }
   }
   return tests;
 }

@@ -21,7 +21,7 @@ namespace Rune.Avalonia;
 /// &lt;rune:Skeleton Shape="heading" Delay="120" /&gt;     &lt;!-- 几块骨架依次扫过 --&gt;
 /// </code>
 /// 底色与光带都是半透明（9%）的正文色，叠在任何表面上都深一档；圆角 radii.sm（圆 full，按钮、图片 md）。扫光 2 秒一轮
-/// （1.4 秒扫过、0.6 秒停顿，先慢后快再慢），从右到左时反向。占位对读屏隐藏；整块区域在加载时设读屏的"忙"状态。
+/// （1.4 秒扫过、0.6 秒停顿，先慢后快再慢），从右到左时反向；系统关闭动画时不扫。占位对读屏隐藏；整块区域在加载时设读屏的"忙"状态。
 /// 内容是部件 <see cref="SkeletonParts.Content"/>（加载时包在一层不可用、不可见的容器里）。
 /// </summary>
 public class Skeleton : Control
@@ -136,7 +136,8 @@ public class Skeleton : Control
     {
         sweep?.Cancel();
         sweep = null;
-        if (!IsLoading || VisualRoot is null) return;
+        // 系统关闭动画时不扫：静止的占位已经说明在加载
+        if (!IsLoading || VisualRoot is null || !Motion.Enabled) return;
         sweep = new CancellationTokenSource();
         var animation = new Animation
         {

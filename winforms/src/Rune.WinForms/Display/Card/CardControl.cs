@@ -1,0 +1,345 @@
+using System.ComponentModel;
+using System.Drawing.Drawing2D;
+using System.Windows.Forms.Layout;
+
+namespace Rune.WinForms;
+
+/// <summary>
+/// 卡片（vue-tsx-pro 的 Card）：把一组相关内容放在一块表面上。可选的页头、页脚与正文之间有分隔线。直接加的子控件是正文，竖着排、撑满宽度：
+/// <code>
+/// var order = new CardControl { Header = "订单 #1024", Footer = new ButtonControl { Text = "查看" }, Dock = DockStyle.Top };
+/// order.Controls.Add(new ParagraphControl { Text = "…" });
+/// </code>
+/// <see cref="Header"/> 是页头的文字，<see cref="Extra"/> 是页头结束边的控件（"全部"、按钮），<see cref="Footer"/> 是页脚里靠结束边的控件。
+/// 样式（surface、outline、elevated、ghost）、内边距（space 档位，默认 lg）、圆角（默认 lg）。加载中正文换成骨架（页头、页脚照常），
+/// 很快完成时不闪；读屏状态里带"忙"。WinForms 画不到控件外面：elevated 的阴影不画（只有抬高的表面色与弱边框）。
+/// 宽度由父容器给（停靠、锚定），高度跟着内容（AutoSize）。TS 的装饰效果（tilt、spotlight、beam）还没做。
+/// </summary>
+public class CardControl : Panel
+{
+    readonly CardEngine engine;
+    readonly Effect paint;
+    readonly Text title = new() { Weight = TextWeight.Semibold };
+    readonly SkeletonTextControl skeleton = new() { Visible = false };
+    DelayedLoading loading;
+    bool skeletonShown;
+
+    /// <summary>新建：surface、内边距 lg、圆角 lg，高度跟着内容。</summary>
+    public CardControl()
+    {
+        SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw | ControlStyles.SupportsTransparentBackColor, true);
+        BackColor = Color.Transparent;
+        AutoSize = true;
+        AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        AccessibleRole = AccessibleRole.Grouping;
+        engine = new CardEngine(this);
+        paint = new Effect(Invalidate);
+        loading = new DelayedLoading(ShowSkeleton);
+        Controls.Add(skeleton);
+    }
+
+    /// <summary>样式；不写时 surface。</summary>
+    [Category("Appearance")]
+    [Description("样式：surface（默认）、outline、elevated、ghost。")]
+    public CardVariant Variant { get => field.Value is null ? CardVariant.Surface : field; set { field = value; Invalidate(); } }
+
+    /// <summary>页头、正文、页脚的内边距档位；不写时 lg。控件自己有 Padding，TS 的 padding 在这里叫 CardPadding。</summary>
+    [Category("Layout")]
+    [Description("页头、正文、页脚的内边距档位，默认 lg。")]
+    public Space CardPadding { get => field.Value is null ? Space.Lg : field; set { field = value; PerformLayout(); Invalidate(); } }
+
+    /// <summary>圆角；不写时 lg。</summary>
+    [Category("Appearance")]
+    [Description("圆角，默认 lg。")]
+    public Radius Radius { get => field.Value is null ? Radius.Lg : field; set { field = value; Invalidate(); } }
+
+    /// <summary>页头的文字（semibold）；读屏里是卡片的名称。</summary>
+    [Category("Appearance")]
+    [Description("页头的文字。")]
+    [DefaultValue("")]
+    public string Header
+    {
+        get => title.Content;
+        set
+        {
+            title.Content = value;
+            if (string.IsNullOrEmpty(AccessibleName)) AccessibilityNotifyClients(AccessibleEvents.NameChange, -1);
+            PerformLayout();
+            Invalidate();
+        }
+    }
+
+    /// <summary>页头结束边的控件（"全部"、按钮、筛选）。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public Control? Extra { get; set => Replace(ref field, value); }
+
+    /// <summary>页脚里靠结束边的控件（按钮、一组按钮）。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public Control? Footer { get; set => Replace(ref field, value); }
+
+    /// <summary>正文加载中：换成骨架。</summary>
+    [Category("Behavior")]
+    [Description("正文加载中：换成几行扫光的骨架。")]
+    [DefaultValue(false)]
+    public bool IsLoading
+    {
+        get;
+        set
+        {
+            field = value;
+            if (value && !IsHandleCreated && !skeletonShown)
+            {
+                // 还没显示就在加载：立即显示骨架（没有内容可看，空白比骨架更糟）
+                loading.Stop();
+                loading = new DelayedLoading(ShowSkeleton, loading: true);
+                ShowSkeleton(true);
+            }
+            else loading.Update(value);
+        }
+    }
+
+    /// <summary>加载中的骨架（行数在它上面改，TS 的 propsSkeleton）。</summary>
+    [Browsable(false)]
+    public SkeletonTextControl Skeleton => skeleton;
+
+    /// <summary>骨架在显示吗（防闪烁之后的）。</summary>
+    internal bool SkeletonShown => skeletonShown;
+
+    /// <inheritdoc />
+    public override LayoutEngine LayoutEngine => engine;
+
+    bool ShouldSerializeVariant() => Variant != CardVariant.Surface;
+
+    void ResetVariant() => Variant = default;
+
+    bool ShouldSerializeCardPadding() => CardPadding != Space.Lg;
+
+    void ResetCardPadding() => CardPadding = default;
+
+    bool ShouldSerializeRadius() => Radius != Radius.Lg;
+
+    void ResetRadius() => Radius = default;
+
+    float Em => Font.SizeInPoints * DeviceDpi / 72f;
+
+    int Inset => (int)MathF.Round((CardPadding.Factor ?? 0) * Em);
+
+    int Line => Math.Max(1, (int)MathF.Round(Tokens.BorderWidth.Xs * DeviceDpi / 96f));
+
+    ElementContext Context => new(DeviceDpi, Font, ForeColor, RightToLeft == RightToLeft.Yes);
+
+    bool HasHeader => Header.Length > 0 || Extra is not null;
+
+    /// <summary>正文的子控件：除页头、页脚的控件与骨架外的。</summary>
+    List<Control> BodyControls() => [.. Controls.Cast<Control>().Where(control => control != skeleton && control != Extra && control != Footer)];
+
+    void Replace(ref Control? slot, Control? value)
+    {
+        if (slot is not null) Controls.Remove(slot);
+        slot = value;
+        if (value is not null) Controls.Add(value);
+        PerformLayout();
+        Invalidate();
+    }
+
+    void ShowSkeleton(bool shown)
+    {
+        skeletonShown = shown;
+        skeleton.Visible = shown;
+        foreach (var control in BodyControls()) control.Visible = !shown;
+        AccessibilityNotifyClients(AccessibleEvents.StateChange, -1);
+        PerformLayout();
+        Invalidate();
+    }
+
+    /// <inheritdoc />
+    protected override void OnControlAdded(ControlEventArgs e)
+    {
+        base.OnControlAdded(e);
+        if (skeletonShown && e.Control != skeleton && e.Control != Extra && e.Control != Footer) e.Control!.Visible = false;
+    }
+
+    /// <inheritdoc />
+    protected override void OnHandleDestroyed(EventArgs e)
+    {
+        loading.Stop();
+        base.OnHandleDestroyed(e);
+    }
+
+    /// <inheritdoc />
+    protected override void OnFontChanged(EventArgs e)
+    {
+        base.OnFontChanged(e);
+        PerformLayout();
+    }
+
+    /// <inheritdoc />
+    public override Size GetPreferredSize(Size proposedSize) => engine.Measure(proposedSize);
+
+    /// <inheritdoc />
+    protected override void OnPaint(PaintEventArgs e)
+    {
+        base.OnPaint(e);
+        using var _ = paint.Track();
+        var colors = RuneTheme.Current.Value.Colors;
+        var (fill, border) = Variant.Value switch
+        {
+            "outline" => ((Color?)null, (Color?)colors.Border),
+            "elevated" => (colors.SurfaceRaised, colors.BorderMuted),
+            "ghost" => (null, null),
+            _ => (colors.Surface, colors.Border),
+        };
+        var graphics = e.Graphics;
+        var line = Line;
+        var radius = Radius.Value == "full" ? Height / 2f : (Radius.In(RuneTheme.Current.Value.Radii) ?? 0) * Em;
+        var state = graphics.Save();
+        graphics.SmoothingMode = SmoothingMode.AntiAlias;
+        using (var shape = Drawing.RoundedRectangle(new RectangleF(line / 2f, line / 2f, Width - line, Height - line), radius))
+        {
+            if (fill is { } back)
+                using (var brush = new SolidBrush(back)) graphics.FillPath(brush, shape);
+            if (border is { } edge)
+                using (var pen = new Pen(edge, line)) graphics.DrawPath(pen, shape);
+        }
+        graphics.Restore(state);
+        // 分隔线：页头下面、页脚上面（borderMuted）
+        using var divider = new SolidBrush(colors.BorderMuted);
+        if (engine.HeaderBottom is { } headerBottom) graphics.FillRectangle(divider, line, headerBottom, Width - 2 * line, line);
+        if (engine.FooterTop is { } footerTop) graphics.FillRectangle(divider, line, footerTop, Width - 2 * line, line);
+        if (Header.Length > 0) title.Paint(graphics, Context with { ForeColor = colors.Text });
+    }
+
+    /// <inheritdoc />
+    protected override AccessibleObject CreateAccessibilityInstance() => new CardAccessibleObject(this);
+
+    /// <inheritdoc />
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            paint.Dispose();
+            loading.Stop();
+        }
+        base.Dispose(disposing);
+    }
+
+    /// <summary>读屏：一组内容，名称是页头的文字；加载中时状态带"忙"（TS 的 aria-busy）。</summary>
+    sealed class CardAccessibleObject(CardControl owner) : ControlAccessibleObject(owner)
+    {
+        public override string? Name { get => string.IsNullOrEmpty(owner.AccessibleName) ? owner.Header : owner.AccessibleName; set => owner.AccessibleName = value; }
+
+        public override AccessibleStates State => owner.IsLoading ? base.State | AccessibleStates.Busy : base.State;
+    }
+
+    /// <summary>排版：页头（文字在起始边、Extra 在结束边，放不下时 Extra 换到下一行）、正文（子控件竖排或骨架）、页脚（Footer 靠结束边）。</summary>
+    sealed class CardEngine(CardControl owner) : LayoutEngine
+    {
+        /// <summary>页头分隔线的位置；没有页头时为 null。</summary>
+        public int? HeaderBottom { get; private set; }
+
+        /// <summary>页脚分隔线的位置；没有页脚时为 null。</summary>
+        public int? FooterTop { get; private set; }
+
+        static Size SizeOf(Control control, int width) => control.AutoSize ? control.GetPreferredSize(new Size(width, 0)) : control.Size;
+
+        /// <summary>按宽度排一遍；arrange 为 false 时只算高度。</summary>
+        int Run(int width, bool arrange)
+        {
+            var (inset, line) = (owner.Inset, owner.Line);
+            var inner = Math.Max(0, width - 2 * line - 2 * inset);
+            var gap = (int)MathF.Round(Tokens.Space.Sm * owner.Em);
+            var rtl = owner.RightToLeft == RightToLeft.Yes;
+            int X(int left, int w) => rtl ? width - left - w : left;
+            var y = line;
+            HeaderBottom = FooterTop = null;
+            if (owner.HasHeader)
+            {
+                var context = owner.Context;
+                var text = owner.Header.Length == 0 ? Size.Empty : owner.title.Measure(context, new Size(inner, int.MaxValue));
+                var extra = owner.Extra is { } e ? SizeOf(e, inner) : Size.Empty;
+                // 文字与 Extra 一行放得下时并排、交叉轴居中；放不下时 Extra 换到下一行（flex-wrap）
+                var together = text.Width + (extra.Width > 0 ? gap + extra.Width : 0) <= inner;
+                var row = together ? Math.Max(text.Height, extra.Height) : text.Height + (extra.Height > 0 ? gap + extra.Height : 0);
+                if (arrange)
+                {
+                    var top = y + inset;
+                    owner.title.Bounds = new Rectangle(X(line + inset, text.Width), top + (together ? (row - text.Height) / 2 : 0), text.Width, text.Height);
+                    if (owner.Extra is { } control)
+                    {
+                        var ey = together ? top + (row - extra.Height) / 2 : top + text.Height + gap;
+                        var ex = together ? line + inset + inner - extra.Width : line + inset;
+                        control.SetBounds(X(ex, extra.Width), ey, extra.Width, extra.Height);
+                    }
+                }
+                y += 2 * inset + row;
+                HeaderBottom = y;
+                y += line;
+            }
+            var bodyTop = y + inset;
+            var bodyChildren = owner.skeletonShown ? [owner.skeleton] : owner.BodyControls().Where(control => control.Visible || !owner.Visible).ToList();
+            var bodyHeight = 0;
+            foreach (var child in bodyChildren)
+            {
+                var size = child == owner.skeleton ? new Size(inner, child.Height) : SizeOf(child, inner);
+                if (arrange) child.SetBounds(X(line + inset, inner), bodyTop + bodyHeight, inner, size.Height);
+                bodyHeight += size.Height;
+            }
+            y = bodyTop + bodyHeight + inset;
+            if (owner.Footer is { } footer)
+            {
+                FooterTop = y;
+                y += line;
+                var size = SizeOf(footer, inner);
+                if (arrange) footer.SetBounds(X(line + inset + inner - size.Width, size.Width), y + inset, size.Width, size.Height);
+                y += 2 * inset + size.Height;
+            }
+            return y + line;
+        }
+
+        public Size Measure(Size proposed)
+        {
+            var width = proposed.Width is > 1 and < int.MaxValue ? proposed.Width : owner.Width;
+            return new Size(width, Run(width, arrange: false));
+        }
+
+        public override bool Layout(object container, LayoutEventArgs layoutEventArgs)
+        {
+            Run(owner.ClientSize.Width, arrange: true);
+            return owner.AutoSize;
+        }
+    }
+}
+
+/// <summary>卡片样式（vue-tsx-pro 的 CardVariants）。</summary>
+/// <param name="Value">取值（surface、outline、elevated、ghost）。</param>
+[TypeConverter(typeof(VariantConverter<CardVariant>))]
+public readonly record struct CardVariant(string Value) : IVariant<CardVariant>
+{
+    /// <summary>表面色加细边框（默认）。</summary>
+    public static readonly CardVariant Surface = new("surface");
+
+    /// <summary>只有边框，底色透明。</summary>
+    public static readonly CardVariant Outline = new("outline");
+
+    /// <summary>表面色加阴影，浮在页面上（WinForms 不画阴影）。</summary>
+    public static readonly CardVariant Elevated = new("elevated");
+
+    /// <summary>没有底色与边框，只保留内边距与分区。</summary>
+    public static readonly CardVariant Ghost = new("ghost");
+
+    /// <inheritdoc />
+    public static IReadOnlyList<CardVariant> Known { get; } = [Surface, Outline, Elevated, Ghost];
+
+    /// <inheritdoc />
+    public static CardVariant Parse(string value)
+    {
+        var variant = new CardVariant(value);
+        Variants.WarnIfUnknown(variant);
+        return variant;
+    }
+
+    /// <inheritdoc />
+    public override string ToString() => Value;
+}

@@ -1,0 +1,35 @@
+<!--
+  Card 的主题样式（vue-tsx-pro 的 cardRecipe）：默认 surface、内边距 lg、圆角 lg（Provider 的样式能改）；
+  样式档位是触发器，给表面色、边框色、阴影（边框都占 1px，没有边框色时透明）
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <Style TargetType="rune:Card">
+    <Setter Property="Variant" Value="surface" />
+    <Setter Property="Padding" Value="lg" />
+    <Setter Property="Radius" Value="lg" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Style.Triggers>
+      <Trigger Property="Variant" Value="surface">
+        <Setter Property="Background" Value="{DynamicResource Rune.Brush.Surface}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+      </Trigger>
+      <Trigger Property="Variant" Value="outline">
+        <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+      </Trigger>
+      <!-- 一圈弱边框：深色主题里阴影看不见，卡片仍与页面分得开 -->
+      <Trigger Property="Variant" Value="elevated">
+        <Setter Property="Background" Value="{DynamicResource Rune.Brush.SurfaceRaised}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+        <Setter Property="Shadow" Value="{DynamicResource Rune.Shadow.Md}" />
+      </Trigger>
+    </Style.Triggers>
+  </Style>
+  <!-- 部件样式键总要有一个样式（同 SpinnerParts.Icon），使用方同键的样式叠在上面 -->
+  <Style x:Key="{x:Static rune:CardParts.Header}" TargetType="Border" />
+  <Style x:Key="{x:Static rune:CardParts.Body}" TargetType="Border" />
+  <Style x:Key="{x:Static rune:CardParts.Footer}" TargetType="Border" />
+  <Style x:Key="{x:Static rune:CardParts.Skeleton}" TargetType="rune:SkeletonText" />
+</ResourceDictionary>

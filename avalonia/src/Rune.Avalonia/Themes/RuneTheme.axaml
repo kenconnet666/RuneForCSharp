@@ -24,6 +24,7 @@
         <ResourceInclude Source="avares://Rune.Avalonia/Layout/Separator/Separator.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Layout/Prose/Prose.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Navigation/Toolbar/Toolbar.axaml" />
+        <ResourceInclude Source="avares://Rune.Avalonia/Display/Card/Card.axaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>

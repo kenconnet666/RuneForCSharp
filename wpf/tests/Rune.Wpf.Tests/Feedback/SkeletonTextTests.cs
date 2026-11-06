@@ -8,6 +8,7 @@ namespace Rune.Wpf.Tests;
 /// <summary>SkeletonText：lines 行骨架，最后一行短一些，各行扫光依次错开；整块对读屏隐藏。</summary>
 public class SkeletonTextTests
 {
+    [Upstream("SkeletonText", "lines 行骨架")]
     [Fact]
     public Task Lines_with_a_short_last_line_and_staggered_sweeps() => WpfUi.Run(() =>
     {

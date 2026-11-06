@@ -1,0 +1,28 @@
+<!--
+  Card 的主题（vue-tsx-pro 的 cardRecipe）：默认 surface、内边距 lg、圆角 lg（Provider 的样式能改）；
+  样式档位给表面色、边框色、阴影（边框都占 1px，没有边框色时透明）
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:Card}" TargetType="rune:Card">
+    <Setter Property="Variant" Value="surface" />
+    <Setter Property="Padding" Value="lg" />
+    <Setter Property="Radius" Value="lg" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Style Selector="^[Variant=surface]">
+      <Setter Property="Background" Value="{DynamicResource Rune.Brush.Surface}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+    </Style>
+    <Style Selector="^[Variant=outline]">
+      <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+    </Style>
+    <!-- 一圈弱边框：深色主题里阴影看不见，卡片仍与页面分得开 -->
+    <Style Selector="^[Variant=elevated]">
+      <Setter Property="Background" Value="{DynamicResource Rune.Brush.SurfaceRaised}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+      <Setter Property="BoxShadow" Value="{DynamicResource Rune.Shadow.Md}" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

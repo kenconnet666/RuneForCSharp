@@ -36,7 +36,7 @@ export const PLATFORM_PROP_RENAMES = {
 
 /** 某个平台上某个组件改了名的 prop（盖过 PLATFORM_PROP_RENAMES）：WinForms 的控件自己有 Size、Padding */
 export const PLATFORM_COMPONENT_PROP_RENAMES = {
-  WinForms: { Container: { size: 'ContainerSize', padding: 'InlinePadding' } },
+  WinForms: { Container: { size: 'ContainerSize', padding: 'InlinePadding' }, Card: { padding: 'CardPadding' } },
 };
 
 /** 某个平台上改了名的组件（平台自带同名类型时）：库 → { 组件: 类型名 } */
