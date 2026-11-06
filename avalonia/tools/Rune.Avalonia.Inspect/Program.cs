@@ -6,6 +6,7 @@ using Avalonia.Controls.Documents;
 using Avalonia.Data;
 using Avalonia.Diagnostics;
 using Avalonia.Headless;
+using Avalonia.Layout;
 using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
@@ -74,6 +75,7 @@ static class Inspector
                 "snapshot" => Snapshot(window, options),
                 "tree" => Tree(content, labels).Render(options.Json),
                 "props" => Props(content, labels, theme).Render(options.Json),
+                "styles" => Styles(content).Render(options.Json),
                 _ => Uia(content, labels).Render(options.Json),
             };
         }
@@ -145,6 +147,87 @@ static class Inspector
             }
         }
         return table;
+    }
+
+    /// <summary>
+    /// 部件的外观取值（同 tools/ts-styles 的格式）：组件库的组件是 <c>scope/root</c>；它在 <c>*Parts</c> 类里声明的部件
+    /// （模板里的，或代码里组合的）是 <c>scope/part</c>，部件本身是组件时只记部件（同 TS 里按钮的图标只标 button/icon）。
+    /// 看不见的元素不记（TS 里没有渲染）。
+    /// </summary>
+    static StyleReport Styles(Control root)
+    {
+        // 不按像素取整布局：浏览器里的尺寸是小数（3.5px 的内边距），取整后差出 1px 多，比不出真正的差别
+        foreach (var layoutable in root.GetSelfAndVisualDescendants().OfType<Layoutable>())
+        {
+            layoutable.UseLayoutRounding = false;
+            layoutable.InvalidateMeasure();
+        }
+        root.UpdateLayout();
+        var report = new StyleReport();
+        foreach (var element in root.GetSelfAndVisualDescendants().OfType<Control>().Where(element => element.IsEffectivelyVisible))
+        {
+            var name = element.Name is { } part && Owner(element) is { } owner && DeclaredParts(owner.GetType()).Contains(part)
+                ? StyleReport.Name(owner.GetType().Name, part)
+                : IsComponent(element) ? StyleReport.Name(element.GetType().Name, null) : null;
+            if (name is not null) report.Add(name, element.GetType().Name, Values(element));
+        }
+        return report;
+
+        static bool IsComponent(Control element) => element.GetType().Namespace == typeof(RuneTheme).Namespace;
+
+        static Control? Owner(Control element) =>
+            element.TemplatedParent as Control ?? element.GetVisualAncestors().OfType<Control>().FirstOrDefault(IsComponent);
+    }
+
+    /// <summary>组件声明的部件名：它与基类各自的 <c>&lt;类型&gt;Parts</c> 类里的常量（ButtonParts.Icon = "PART_Icon"）。</summary>
+    static HashSet<string> DeclaredParts(Type type)
+    {
+        var names = new HashSet<string>();
+        for (var t = type; t is not null; t = t.BaseType)
+            if (typeof(RuneTheme).Assembly.GetType($"{t.Namespace}.{t.Name}Parts") is { } parts)
+                foreach (var field in parts.GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static).Where(field => field.IsLiteral))
+                    names.Add((string)field.GetRawConstantValue()!);
+        return names;
+    }
+
+    static IEnumerable<(string, object?)> Values(Control element)
+    {
+        object? Get(string name) => AvaloniaPropertyRegistry.Instance.FindRegistered(element, name) is { } property ? element.GetValue(property) : null;
+        string? Brush(object? value) => value is ISolidColorBrush brush
+            ? StyleReport.Color((byte)Math.Round(brush.Color.A * brush.Opacity), brush.Color.R, brush.Color.G, brush.Color.B)
+            : null;
+
+        yield return ("Width", element.Bounds.Width);
+        yield return ("Height", element.Bounds.Height);
+        yield return ("MinWidth", element.MinWidth);
+        yield return ("MinHeight", element.MinHeight);
+        if (Get("Padding") is Thickness padding)
+        {
+            yield return ("PaddingTop", padding.Top);
+            yield return ("PaddingRight", padding.Right);
+            yield return ("PaddingBottom", padding.Bottom);
+            yield return ("PaddingLeft", padding.Left);
+        }
+        if (Get("BorderThickness") is Thickness border)
+        {
+            yield return ("BorderTop", border.Top);
+            yield return ("BorderRight", border.Right);
+            yield return ("BorderBottom", border.Bottom);
+            yield return ("BorderLeft", border.Left);
+            yield return ("BorderColor", Brush(Get("BorderBrush")) ?? "#00000000");
+        }
+        if (Get("CornerRadius") is CornerRadius radius)
+        {
+            yield return ("RadiusTopLeft", radius.TopLeft);
+            yield return ("RadiusTopRight", radius.TopRight);
+            yield return ("RadiusBottomRight", radius.BottomRight);
+            yield return ("RadiusBottomLeft", radius.BottomLeft);
+        }
+        yield return ("Background", Brush(Get("Background")) ?? "#00000000");
+        yield return ("Foreground", Brush(element.GetValue(TextElement.ForegroundProperty)) ?? Brush(Get("Foreground")));
+        yield return ("FontSize", element.GetValue(TextElement.FontSizeProperty));
+        yield return ("FontWeight", (int)element.GetValue(TextElement.FontWeightProperty));
+        yield return ("Opacity", element.Opacity);
     }
 
     static ReportTable Uia(Control root, Dictionary<Visual, string> labels)

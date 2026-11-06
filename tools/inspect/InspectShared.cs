@@ -27,6 +27,7 @@ sealed record InspectOptions(string Command, string? Key, string Theme, double W
           tree <组件/示例>            元素树：类型、名字、类、边界
           props <组件/示例>           每个元素解析后的属性与值的来源
           uia <组件/示例>             读屏看到的 UI Automation 树
+          styles <组件/示例>          每个部件的外观取值（同 tools/ts-styles 的格式：部件按 scope/part#序号，像素与 #AARRGGBB），parity 拿来比对
           bench [组件]                基准：批量建组件，量创建、首次布局、渲染、换主题的耗时与内存（可只跑名字以它开头的）
         选项：--theme <主题>（默认 light） --width <像素>（默认 800） --scale <倍数>（默认 1） --json --out <路径>
               --count <个数>（bench，默认 1000） --runs <轮数>（bench，默认 6，第一轮预热）
@@ -55,7 +56,7 @@ sealed record InspectOptions(string Command, string? Key, string Theme, double W
             }
         }
         var command = args[0];
-        if (command is not ("list" or "snapshot" or "tree" or "props" or "uia" or "bench")) throw new UsageException($"不认识的命令 {command}");
+        if (command is not ("list" or "snapshot" or "tree" or "props" or "uia" or "styles" or "bench")) throw new UsageException($"不认识的命令 {command}");
         if (command is not ("list" or "bench") && key is null) throw new UsageException($"{command} 要写示例（组件/示例名，如 Icon/basic）");
         if (runs < 2) throw new UsageException("--runs 至少 2（第一轮预热，不计）");
         return new InspectOptions(command, key, theme ?? "light", width, scale, json, outPath, (int)count, (int)runs);
@@ -211,4 +212,70 @@ static class Bench
 
     /// <summary>当前线程到现在分配的字节。</summary>
     public static long Allocated() => GC.GetAllocatedBytesForCurrentThread();
+}
+
+/// <summary>
+/// 部件的外观取值（<c>inspect styles</c>）：与 tools/ts-styles 取的 vue-tsx-pro 文档站同一种格式，parity 逐项比对。
+/// 部件的称呼同 TS 的 <c>data-scope/data-part#序号</c>：组件根是 <c>button/root</c>，模板或代码里组合的部件
+/// <c>PART_Icon</c> 是 <c>button/icon</c>；序号按元素树的先后、每种称呼各自数。长度是设备无关像素，颜色是 #AARRGGBB。
+/// </summary>
+sealed class StyleReport
+{
+    /// <summary>与 TS 的 data-scope 不同名的组件：按钮家族都用 button-core 的配方，scope 都是 button。</summary>
+    static readonly Dictionary<string, string> ScopeAliases = new()
+    {
+        ["ButtonBase"] = "button",
+        ["ButtonCore"] = "button",
+        ["IconButton"] = "button",
+        ["LinkButton"] = "button",
+        ["IconLinkButton"] = "button",
+        ["CloseButton"] = "button",
+        ["ClearButton"] = "button",
+    };
+
+    readonly List<(string Key, string Type, Dictionary<string, object> Props)> parts = [];
+    readonly Dictionary<string, int> counts = [];
+
+    /// <summary>组件类型名 + 部件名（PART_Icon；组件根为 null）→ <c>button/icon</c>。</summary>
+    public static string Name(string componentType, string? partName)
+    {
+        var scope = ScopeAliases.GetValueOrDefault(componentType) ?? Kebab(componentType);
+        var part = partName is null ? "root" : char.ToLowerInvariant(partName["PART_".Length]) + partName["PART_".Length..][1..];
+        return $"{scope}/{part}";
+    }
+
+    /// <summary>记一个部件；值为 null 的属性不记。</summary>
+    public void Add(string name, string type, IEnumerable<(string Prop, object? Value)> props)
+    {
+        var index = counts[name] = counts.GetValueOrDefault(name, -1) + 1;
+        parts.Add(($"{name}#{index}", type, props.Where(p => p.Value is not null).ToDictionary(p => p.Prop, p => Round(p.Value!))));
+    }
+
+    /// <summary>颜色：#AARRGGBB。</summary>
+    public static string Color(byte a, byte r, byte g, byte b) => $"#{a:X2}{r:X2}{g:X2}{b:X2}";
+
+    public string Render(bool json)
+    {
+        if (json)
+            return JsonSerializer.Serialize(new { parts = parts.Select(p => new { key = p.Key, type = p.Type, props = p.Props }) },
+                new JsonSerializerOptions { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
+        var table = new ReportTable("部件", "类型", "宽 × 高", "内边距", "字号 / 字重", "前景", "底色", "描边", "圆角");
+        foreach (var (key, type, p) in parts)
+            table.Add(key, type, $"{Get(p, "Width")} × {Get(p, "Height")}",
+                $"{Get(p, "PaddingTop")} {Get(p, "PaddingRight")} {Get(p, "PaddingBottom")} {Get(p, "PaddingLeft")}",
+                $"{Get(p, "FontSize")} / {Get(p, "FontWeight")}", Get(p, "Foreground"), Get(p, "Background"),
+                p.ContainsKey("BorderTop") ? $"{Get(p, "BorderTop")} {Get(p, "BorderColor")}" : null, Get(p, "RadiusTopLeft"));
+        return table.Render(false);
+    }
+
+    static string? Get(Dictionary<string, object> props, string name) => props.TryGetValue(name, out var value) ? Report.Format(value) : null;
+
+    static object Round(object value) => value switch
+    {
+        double number => Math.Round(number, 2),
+        float number => Math.Round(number, 2),
+        _ => value,
+    };
+
+    static string Kebab(string name) => string.Concat(name.Select((c, i) => char.IsUpper(c) ? (i > 0 ? "-" : "") + char.ToLowerInvariant(c) : c.ToString()));
 }
