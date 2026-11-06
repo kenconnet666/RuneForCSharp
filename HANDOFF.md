@@ -31,7 +31,7 @@
 - Release 构建零警告，108 个测试全部通过（Avalonia 27、WPF 38、WinForms 43）。
 - 前置探测都做完了，结论写进了 DESIGN（档位类型 §3、组合档位 §4、部件转发 §7、主题切换 §9、热重载 §11）。
 - 开工前要定的事都按建议定下了（ROADMAP"已定的决定" 10–18），"待定的决定"现在是空的。
-- 阶段 1 已完成：`tools/ts-inspect`、`token-gen`、`lang-gen`、`icons-gen`、`parity`（三个库都有了 16 套主题的 token、中英文语言包和 Lucide 全集）。阶段 2 进行中：档位类型（`TextSize`、`Tone`）与 Icon 三个平台都做了；WinForms 有了无窗口元素的基础（`Element`、单元素宿主 `ElementControl<T>`、应用级主题信号 `RuneTheme.Current`）。三个平台都有了示例登记表（`apps/Rune.*.Examples`，Gallery 与 inspect 共用）和 `inspect`；CI（`.github/workflows/ci.yml`）按平台并行跑全量，推送到 GitHub 后跑（2026-11-06 第一次推送）。Text 家族（Text、Paragraph、Strong、Em、Small）三个平台都做了；WPF 从 TextBlock 派生（决定 19）。Spinner（第一个带部件的组件）三个平台都做了，部件转发的三种写法都落地了。接着做 Badge，之后 Button 家族前要把 WPF Provider 的"部件键叠类型键"（决定 19）与 Style.Resources 的递归合成做掉。用户要求无人值守持续执行，规矩见 ROADMAP"自主执行的规矩"。
+- 阶段 1 已完成：`tools/ts-inspect`、`token-gen`、`lang-gen`、`icons-gen`、`parity`（三个库都有了 16 套主题的 token、中英文语言包和 Lucide 全集）。阶段 2 进行中：档位类型（`TextSize`、`Tone`）与 Icon 三个平台都做了；WinForms 有了无窗口元素的基础（`Element`、单元素宿主 `ElementControl<T>`、应用级主题信号 `RuneTheme.Current`）。三个平台都有了示例登记表（`apps/Rune.*.Examples`，Gallery 与 inspect 共用）和 `inspect`；CI（`.github/workflows/ci.yml`）按平台并行跑全量，推送到 GitHub 后跑（2026-11-06 第一次推送）。Text 家族（Text、Paragraph、Strong、Em、Small）三个平台都做了；WPF 从 TextBlock 派生（决定 19）。Spinner（第一个带部件的组件）三个平台都做了，部件转发的三种写法都落地了。接着做 Badge（自绘组件的部件转发记在 ROADMAP"待定的决定"，先按建议 A），之后 Button 家族前要把 WPF Provider 的"部件键叠类型键"（决定 19）与 Style.Resources 的递归合成做掉。用户要求无人值守持续执行，规矩见 ROADMAP"自主执行的规矩"。
 
 ## 3. 环境
 

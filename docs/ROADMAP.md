@@ -325,4 +325,12 @@ RuneForBlazor 已经走过一遍这些组件，同一个组件先看它踩过的
 
 ## 待定的决定
 
-暂无。新的待定项写在这里：日期、事项、卡在哪、要决定什么，附上建议。
+新的待定项写在这里：日期、事项、卡在哪、要决定什么，附上建议。
+
+- **2026-11-06 自绘组件怎么转发部件**（Badge 先遇到；Tag、表格单元格、列表行同理）。
+  - 卡在哪：DESIGN §9 定了数量大的轻量部件自绘、不用模板；§7 的部件转发写的是模板里的部件（Avalonia 的 `/template/`、WPF 模板里的部件样式键）。Badge 的 `propsIcon` 是本库的 Icon，自绘时没有模板可穿。
+  - 选项：
+    - A. 自绘外框（底色、描边、圆点在 Render 里画），图标与文字在代码里组合成真的子组件（有图标时一个 Icon、内容一个 Text），不建模板：部件仍是真的组件。Avalonia 用子选择器 `rune|Badge > rune|Icon`；WPF 子 Icon 在代码里引用部件样式键 `BadgeParts.Icon`，Provider 合成不变；WinForms 照旧 `PropsIcon`。比模板轻（少了 ControlTemplate 与 ContentPresenter），转发方式与模板组件接近。
+    - B. 全部自绘，部件用属性记录（三个平台都用 `IconProps` 这类记录）：最轻，但 XAML 平台上样式只能整条替换记录，Provider 的逐层合并要组件自己做。
+    - C. 照常用模板：转发最统一，但 3000 个时创建慢约 4 倍（DESIGN §9）。
+  - 建议 A。没有回复前先按 A 做 Badge；要改时只动 Badge 与这里的约定。
