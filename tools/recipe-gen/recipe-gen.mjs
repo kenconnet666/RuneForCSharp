@@ -12,6 +12,8 @@ import { cap, paletteOf, TONES } from '../token-gen/palette.mjs';
  */
 export const RECIPES = {
   Button: {
+    // 按钮家族共用：Button、IconButton 的主题样式都 BasedOn 它
+    target: 'ButtonCore',
     file: 'wpf/src/Rune.Wpf/Base/Button/ButtonRecipe.g.xaml',
     winforms: 'winforms/src/Rune.WinForms/Base/Button/ButtonRecipe.g.cs',
     variants: {
@@ -51,7 +53,7 @@ function wpf(component, recipe) {
     '<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"',
     '                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"',
     '                    xmlns:rune="clr-namespace:Rune.Wpf">',
-    `  <Style x:Key="Rune.Recipe.${component}" TargetType="rune:${component}">`,
+    `  <Style x:Key="Rune.Recipe.${component}" TargetType="rune:${recipe.target ?? component}">`,
     '    <Style.Triggers>',
     ...base,
     ...hovers,

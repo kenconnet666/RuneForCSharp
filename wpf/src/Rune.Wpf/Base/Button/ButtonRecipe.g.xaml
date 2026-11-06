@@ -3,7 +3,7 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:rune="clr-namespace:Rune.Wpf">
-  <Style x:Key="Rune.Recipe.Button" TargetType="rune:Button">
+  <Style x:Key="Rune.Recipe.Button" TargetType="rune:ButtonCore">
     <Style.Triggers>
       <MultiTrigger><MultiTrigger.Conditions><Condition Property="Variant" Value="solid" /><Condition Property="Tone" Value="neutral" /></MultiTrigger.Conditions><Setter Property="Background" Value="{DynamicResource Rune.Brush.InverseSurface}" /><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.InverseText}" /></MultiTrigger>
       <MultiTrigger><MultiTrigger.Conditions><Condition Property="Variant" Value="solid" /><Condition Property="Tone" Value="accent" /></MultiTrigger.Conditions><Setter Property="Background" Value="{DynamicResource Rune.Brush.Accent}" /><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.AccentContrast}" /></MultiTrigger>

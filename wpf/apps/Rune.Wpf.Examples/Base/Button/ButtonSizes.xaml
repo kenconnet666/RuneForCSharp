@@ -4,9 +4,11 @@
              xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/wpf">
   <UserControl.Resources>
     <Style TargetType="rune:Button"><Setter Property="Margin" Value="0,0,8,8" /><Setter Property="VerticalAlignment" Value="Center" /></Style>
+    <Style TargetType="rune:IconButton"><Setter Property="Margin" Value="0,0,8,8" /><Setter Property="VerticalAlignment" Value="Center" /></Style>
   </UserControl.Resources>
   <StackPanel>
     <WrapPanel><rune:Button Size="xs" Icon="{x:Static rune:Lucide.Plus}">xs</rune:Button><rune:Button Size="sm" Icon="{x:Static rune:Lucide.Plus}">sm</rune:Button><rune:Button Size="md" Icon="{x:Static rune:Lucide.Plus}">md</rune:Button><rune:Button Size="lg" Icon="{x:Static rune:Lucide.Plus}">lg</rune:Button><rune:Button Size="xl" Icon="{x:Static rune:Lucide.Plus}">xl</rune:Button></WrapPanel>
     <WrapPanel><rune:Button Size="xs" Variant="outline" Tone="neutral">xs</rune:Button><rune:Button Size="sm" Variant="outline" Tone="neutral">sm</rune:Button><rune:Button Size="md" Variant="outline" Tone="neutral">md</rune:Button><rune:Button Size="lg" Variant="outline" Tone="neutral">lg</rune:Button><rune:Button Size="xl" Variant="outline" Tone="neutral">xl</rune:Button></WrapPanel>
+    <WrapPanel><rune:IconButton Size="xs" Variant="soft" Icon="{x:Static rune:Lucide.Settings}" AutomationProperties.Name="设置（xs）" /><rune:IconButton Size="sm" Variant="soft" Icon="{x:Static rune:Lucide.Settings}" AutomationProperties.Name="设置（sm）" /><rune:IconButton Size="md" Variant="soft" Icon="{x:Static rune:Lucide.Settings}" AutomationProperties.Name="设置（md）" /><rune:IconButton Size="lg" Variant="soft" Icon="{x:Static rune:Lucide.Settings}" AutomationProperties.Name="设置（lg）" /><rune:IconButton Size="xl" Variant="soft" Icon="{x:Static rune:Lucide.Settings}" AutomationProperties.Name="设置（xl）" /></WrapPanel>
   </StackPanel>
 </UserControl>

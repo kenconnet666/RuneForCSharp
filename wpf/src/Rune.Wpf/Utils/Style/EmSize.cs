@@ -5,9 +5,9 @@ namespace Rune.Wpf;
 
 /// <summary>
 /// em 尺寸：值 = 系数 × 字号，字号变了跟着变（对应 vue-tsx-pro 里组件内部一律用 em）。
-/// 主题样式只设系数，控件用属性强制（coerce）算出实际值（Padding、MinHeight 与登记的圆角属性）：
+/// 主题样式只设系数，控件用属性强制（coerce）算出实际值（Padding、MinHeight、Width 与登记的圆角属性）：
 /// <code>
-/// // 控件的静态构造里接上：Padding、FontSize 的元数据，以及自己的 CornerRadius
+/// // 控件的静态构造里接上：Padding、MinHeight、Width、FontSize 的元数据，以及自己的 CornerRadius
 /// static Button() => EmSize.Register(typeof(Button), CornerRadiusProperty);
 /// public static readonly DependencyProperty CornerRadiusProperty = DependencyProperty.Register(
 ///     nameof(CornerRadius), typeof(CornerRadius), typeof(Button), new FrameworkPropertyMetadata(default(CornerRadius), null, EmSize.CoerceCornerRadius));
@@ -29,13 +29,17 @@ public static class EmSize
     public static readonly DependencyProperty CornerRadiusProperty = DependencyProperty.RegisterAttached(
         "CornerRadius", typeof(double?), typeof(EmSize), new PropertyMetadata(null, (d, _) => Refresh(d)));
 
-    /// <summary>最小高度的 em 系数（按钮这类控件的行高：CSS 的 <c>max(2.25em, 24px)</c> 写成系数 2.25 加 <see cref="MinHeightFloorProperty"/> 24）。</summary>
+    /// <summary>最小高度的 em 系数（按钮这类控件的行高：CSS 的 <c>max(2.25em, 24px)</c> 写成系数 2.25 加 <see cref="MinTargetProperty"/> 24）。</summary>
     public static readonly DependencyProperty MinHeightProperty = DependencyProperty.RegisterAttached(
         "MinHeight", typeof(double?), typeof(EmSize), new PropertyMetadata(null, (d, _) => d.CoerceValue(FrameworkElement.MinHeightProperty)));
 
-    /// <summary>最小高度的下限（设备无关像素，不随字号）：触控目标的最小尺寸 sizes.minTarget。</summary>
-    public static readonly DependencyProperty MinHeightFloorProperty = DependencyProperty.RegisterAttached(
-        "MinHeightFloor", typeof(double), typeof(EmSize), new PropertyMetadata(0d, (d, _) => d.CoerceValue(FrameworkElement.MinHeightProperty)));
+    /// <summary>宽度的 em 系数（图标按钮这类方形控件：宽度同最小高度，<c>max(2.25em, 24px)</c>）。</summary>
+    public static readonly DependencyProperty WidthProperty = DependencyProperty.RegisterAttached(
+        "Width", typeof(double?), typeof(EmSize), new PropertyMetadata(null, (d, _) => d.CoerceValue(FrameworkElement.WidthProperty)));
+
+    /// <summary>em 算出的最小高度、宽度的下限（设备无关像素，不随字号）：触控目标的最小尺寸 sizes.minTarget。</summary>
+    public static readonly DependencyProperty MinTargetProperty = DependencyProperty.RegisterAttached(
+        "MinTarget", typeof(double), typeof(EmSize), new PropertyMetadata(0d, (d, _) => Refresh(d)));
 
     static readonly Dictionary<Type, DependencyProperty> cornerRadiusByType = [];
 
@@ -45,11 +49,17 @@ public static class EmSize
     /// <summary>设最小高度系数。</summary>
     public static void SetMinHeight(DependencyObject d, double? value) => d.SetValue(MinHeightProperty, value);
 
-    /// <summary>读最小高度的下限。</summary>
-    public static double GetMinHeightFloor(DependencyObject d) => (double)d.GetValue(MinHeightFloorProperty);
+    /// <summary>读宽度系数。</summary>
+    public static double? GetWidth(DependencyObject d) => (double?)d.GetValue(WidthProperty);
 
-    /// <summary>设最小高度的下限。</summary>
-    public static void SetMinHeightFloor(DependencyObject d, double value) => d.SetValue(MinHeightFloorProperty, value);
+    /// <summary>设宽度系数。</summary>
+    public static void SetWidth(DependencyObject d, double? value) => d.SetValue(WidthProperty, value);
+
+    /// <summary>读最小高度、宽度的下限。</summary>
+    public static double GetMinTarget(DependencyObject d) => (double)d.GetValue(MinTargetProperty);
+
+    /// <summary>设最小高度、宽度的下限。</summary>
+    public static void SetMinTarget(DependencyObject d, double value) => d.SetValue(MinTargetProperty, value);
 
     /// <summary>读内边距系数。</summary>
     public static Thickness? GetPadding(DependencyObject d) => (Thickness?)d.GetValue(PaddingProperty);
@@ -64,7 +74,7 @@ public static class EmSize
     public static void SetCornerRadius(DependencyObject d, double? value) => d.SetValue(CornerRadiusProperty, value);
 
     /// <summary>
-    /// 在控件的静态构造里调用：Padding 按系数计算，字号变化时重新计算 Padding 与圆角。
+    /// 在控件的静态构造里调用：Padding、MinHeight、Width 按系数计算，字号变化时重新计算它们与圆角。
     /// </summary>
     /// <param name="controlType">控件类型。</param>
     /// <param name="cornerRadiusProperty">控件自己的圆角属性（注册时 coerce 回调写 <see cref="CoerceCornerRadius"/>）；没有就不传。</param>
@@ -72,6 +82,7 @@ public static class EmSize
     {
         Control.PaddingProperty.OverrideMetadata(controlType, new FrameworkPropertyMetadata(default(Thickness), null, CoercePadding));
         FrameworkElement.MinHeightProperty.OverrideMetadata(controlType, new FrameworkPropertyMetadata(0d, null, CoerceMinHeight));
+        FrameworkElement.WidthProperty.OverrideMetadata(controlType, new FrameworkPropertyMetadata(double.NaN, null, CoerceWidth));
         Control.FontSizeProperty.OverrideMetadata(controlType, new FrameworkPropertyMetadata(
             SystemFonts.MessageFontSize, FrameworkPropertyMetadataOptions.Inherits, (d, _) => Refresh(d)));
         if (cornerRadiusProperty is not null) cornerRadiusByType[controlType] = cornerRadiusProperty;
@@ -94,13 +105,20 @@ public static class EmSize
     static object CoerceMinHeight(DependencyObject d, object baseValue)
     {
         if (GetMinHeight(d) is not { } f || !FromLibrary(d, FrameworkElement.MinHeightProperty, baseValue)) return baseValue;
-        return Math.Max(f * FontSize(d), GetMinHeightFloor(d));
+        return Math.Max(f * FontSize(d), GetMinTarget(d));
+    }
+
+    static object CoerceWidth(DependencyObject d, object baseValue)
+    {
+        if (GetWidth(d) is not { } f || !FromLibrary(d, FrameworkElement.WidthProperty, baseValue)) return baseValue;
+        return Math.Max(f * FontSize(d), GetMinTarget(d));
     }
 
     static void Refresh(DependencyObject d)
     {
         d.CoerceValue(Control.PaddingProperty);
         d.CoerceValue(FrameworkElement.MinHeightProperty);
+        d.CoerceValue(FrameworkElement.WidthProperty);
         if (CornerRadiusFor(d.GetType()) is { } property) d.CoerceValue(property);
     }
 

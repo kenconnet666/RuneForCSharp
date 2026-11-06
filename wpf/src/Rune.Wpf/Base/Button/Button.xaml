@@ -1,6 +1,9 @@
 <!--
-  Button 的主题样式（vue-tsx-pro 的 button-core）：样式 × 色调的颜色在生成的 ButtonRecipe.g.xaml 里（BasedOn 它）；
-  这里是默认值、em 尺寸、模板与状态。内部尺寸都是 em：内边距 1em × 0.25em、最小高度 max(2.25em, 24px)
+  按钮家族的主题样式（vue-tsx-pro 的 ButtonBase 与 button-core）：
+  - ButtonBase：没有外观，只有波纹层、内容、焦点环
+  - Rune.ButtonCore（Button、IconButton 共用）：样式 × 色调的颜色在生成的 ButtonRecipe.g.xaml 里（BasedOn 它）；
+    这里是共有的默认值、em 尺寸与状态。内部尺寸都是 em：内边距 1em × 0.25em、最小高度 max(2.25em, 24px)
+  - Button、IconButton：BasedOn Rune.ButtonCore，只写自己的默认值与模板
 -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -9,13 +12,43 @@
     <ResourceDictionary Source="/Rune.Wpf;component/Base/Button/ButtonRecipe.g.xaml" />
   </ResourceDictionary.MergedDictionaries>
 
-  <Style TargetType="rune:Button" BasedOn="{StaticResource Rune.Recipe.Button}">
-    <Setter Property="Variant" Value="solid" />
-    <Setter Property="Tone" Value="accent" />
+  <Style TargetType="rune:ButtonBase">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="VerticalContentAlignment" Value="Stretch" />
+    <Setter Property="Cursor" Value="Hand" />
+    <!-- 焦点环在模板里（只在键盘聚焦时，圆角跟着按钮），不用 WPF 的焦点虚线框 -->
+    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="rune:ButtonBase">
+          <Grid>
+            <Border x:Name="PART_Root" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" rune:BrushTransition.Enabled="True">
+              <Grid>
+                <Canvas x:Name="PART_Ripples" IsHitTestVisible="False" />
+                <ContentPresenter Margin="{TemplateBinding Padding}" RecognizesAccessKey="True"
+                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+              </Grid>
+            </Border>
+            <Border x:Name="PART_FocusRing" Visibility="Collapsed" IsHitTestVisible="False" BorderThickness="2" BorderBrush="{DynamicResource Rune.Brush.FocusRing}" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsFocusVisible" Value="True"><Setter TargetName="PART_FocusRing" Property="Visibility" Value="Visible" /></Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="Rune.ButtonCore" TargetType="rune:ButtonCore" BasedOn="{StaticResource Rune.Recipe.Button}">
     <Setter Property="Radius" Value="md" />
     <Setter Property="rune:EmSize.Padding" Value="1,0.25" />
     <Setter Property="rune:EmSize.MinHeight" Value="2.25" />
-    <Setter Property="rune:EmSize.MinHeightFloor" Value="24" />
+    <Setter Property="rune:EmSize.MinTarget" Value="24" />
     <!-- borderWidths.xs：没有描边色时也占位，各样式等高 -->
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="BorderBrush" Value="Transparent" />
@@ -24,8 +57,21 @@
     <Setter Property="HorizontalContentAlignment" Value="Center" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="Cursor" Value="Hand" />
-    <!-- 焦点环在模板里（只在键盘聚焦时，圆角跟着按钮），不用 WPF 的焦点虚线框 -->
     <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+    <Style.Triggers>
+      <!-- 链接样式：无底、左右内边距 0（上下 0.25em 保留）、最小高度 0、字重 medium（颜色在配方里，悬停下划线在代码里） -->
+      <Trigger Property="Variant" Value="link">
+        <Setter Property="rune:EmSize.Padding" Value="0,0.25" />
+        <Setter Property="rune:EmSize.MinHeight" Value="{x:Null}" />
+        <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
+      </Trigger>
+      <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" /></Trigger>
+    </Style.Triggers>
+  </Style>
+
+  <Style TargetType="rune:Button" BasedOn="{StaticResource Rune.ButtonCore}">
+    <Setter Property="Variant" Value="solid" />
+    <Setter Property="Tone" Value="accent" />
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="rune:Button">
@@ -56,15 +102,40 @@
         </ControlTemplate>
       </Setter.Value>
     </Setter>
-    <Style.Triggers>
-      <!-- 链接样式：无底、无内边距、最小高度 0、字重 medium（颜色在配方里，悬停下划线在代码里） -->
-      <Trigger Property="Variant" Value="link">
-        <Setter Property="rune:EmSize.Padding" Value="0" />
-        <Setter Property="rune:EmSize.MinHeight" Value="0" />
-        <Setter Property="rune:EmSize.MinHeightFloor" Value="0" />
-        <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
-      </Trigger>
-      <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" /></Trigger>
-    </Style.Triggers>
+  </Style>
+
+  <!-- 图标按钮：宽高相等（宽度 = 最小高度 max(2.25em, 24px)，左右内边距 0），默认 ghost、中性色 -->
+  <Style TargetType="rune:IconButton" BasedOn="{StaticResource Rune.ButtonCore}">
+    <Setter Property="Variant" Value="ghost" />
+    <Setter Property="Tone" Value="neutral" />
+    <Setter Property="rune:EmSize.Padding" Value="0,0.25" />
+    <Setter Property="rune:EmSize.Width" Value="2.25" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="rune:IconButton">
+          <Grid>
+            <Border x:Name="PART_Root" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" rune:BrushTransition.Enabled="True">
+              <Grid>
+                <Canvas x:Name="PART_Ripples" IsHitTestVisible="False" />
+                <StackPanel x:Name="PART_Content" Orientation="Horizontal" Margin="{TemplateBinding Padding}" Style="{DynamicResource {x:Static rune:IconButtonParts.Content}}"
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
+                  <rune:Icon x:Name="PART_Icon" Data="{TemplateBinding Icon}" VerticalAlignment="Center" Style="{DynamicResource {x:Static rune:IconButtonParts.Icon}}" />
+                </StackPanel>
+                <rune:Spinner x:Name="PART_Spinner" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource {x:Static rune:IconButtonParts.Spinner}}" />
+              </Grid>
+            </Border>
+            <Border x:Name="PART_FocusRing" Visibility="Collapsed" IsHitTestVisible="False" BorderThickness="2" BorderBrush="{DynamicResource Rune.Brush.FocusRing}" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsFocusVisible" Value="True"><Setter TargetName="PART_FocusRing" Property="Visibility" Value="Visible" /></Trigger>
+            <Trigger Property="ShowsSpinner" Value="True">
+              <Setter TargetName="PART_Content" Property="Opacity" Value="0" />
+              <Setter TargetName="PART_Spinner" Property="Visibility" Value="Visible" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
   </Style>
 </ResourceDictionary>

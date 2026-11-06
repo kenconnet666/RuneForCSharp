@@ -4,14 +4,22 @@
              xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/wpf">
   <UserControl.Resources>
     <Style TargetType="rune:Button"><Setter Property="Margin" Value="0,0,8,8" /><Setter Property="VerticalAlignment" Value="Center" /></Style>
+    <Style TargetType="rune:IconButton"><Setter Property="Margin" Value="0,0,8,8" /><Setter Property="VerticalAlignment" Value="Center" /></Style>
   </UserControl.Resources>
-  <!-- IconButton、Kbd 做出来后补上第二行 -->
-  <WrapPanel>
-    <rune:Button Icon="{x:Static rune:Lucide.Plus}">新建</rune:Button>
-    <rune:Button Variant="soft" Icon="{x:Static rune:Lucide.Download}">下载</rune:Button>
-    <rune:Button Variant="outline" Tone="neutral" IconEnd="{x:Static rune:Lucide.ChevronDown}">更多</rune:Button>
-    <rune:Button Variant="ghost" IconEnd="{x:Static rune:Lucide.ArrowRight}">下一步</rune:Button>
-    <rune:Button Variant="link" IconEnd="{x:Static rune:Lucide.ExternalLink}">查看文档</rune:Button>
-    <rune:Button Variant="soft" Tone="neutral"><StackPanel Orientation="Horizontal"><TextBlock Text="未读消息" VerticalAlignment="Center" Margin="0,0,6,0" /><rune:Badge Variant="solid" Tone="danger" Radius="full">12</rune:Badge></StackPanel></rune:Button>
-  </WrapPanel>
+  <!-- Kbd 做出来后补上第二行的"搜索 Ctrl K" -->
+  <StackPanel>
+    <WrapPanel>
+      <rune:Button Icon="{x:Static rune:Lucide.Plus}">新建</rune:Button>
+      <rune:Button Variant="soft" Icon="{x:Static rune:Lucide.Download}">下载</rune:Button>
+      <rune:Button Variant="outline" Tone="neutral" IconEnd="{x:Static rune:Lucide.ChevronDown}">更多</rune:Button>
+      <rune:Button Variant="ghost" IconEnd="{x:Static rune:Lucide.ArrowRight}">下一步</rune:Button>
+      <rune:Button Variant="link" IconEnd="{x:Static rune:Lucide.ExternalLink}">查看文档</rune:Button>
+    </WrapPanel>
+    <WrapPanel>
+      <rune:Button Variant="soft" Tone="neutral"><StackPanel Orientation="Horizontal"><TextBlock Text="未读消息" VerticalAlignment="Center" Margin="0,0,6,0" /><rune:Badge Variant="solid" Tone="danger" Radius="full">12</rune:Badge></StackPanel></rune:Button>
+      <rune:IconButton Icon="{x:Static rune:Lucide.Pencil}" AutomationProperties.Name="编辑" />
+      <rune:IconButton Icon="{x:Static rune:Lucide.Share2}" AutomationProperties.Name="分享" />
+      <rune:IconButton Icon="{x:Static rune:Lucide.Trash}" Tone="danger" AutomationProperties.Name="删除" />
+    </WrapPanel>
+  </StackPanel>
 </UserControl>
