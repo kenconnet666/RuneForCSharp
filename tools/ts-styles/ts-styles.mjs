@@ -68,6 +68,7 @@ const PROPS = {
   'font-size': ['FontSize', 'length'],
   'font-weight': ['FontWeight', 'number'],
   'line-height': ['LineHeight', 'length'],
+  'letter-spacing': ['LetterSpacing', 'length'],
   'column-gap': ['ColumnGap', 'length'],
   'row-gap': ['RowGap', 'length'],
   opacity: ['Opacity', 'number'],

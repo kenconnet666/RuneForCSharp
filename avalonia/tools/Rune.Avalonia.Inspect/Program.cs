@@ -166,9 +166,11 @@ static class Inspector
         var report = new StyleReport();
         foreach (var element in root.GetSelfAndVisualDescendants().OfType<Control>().Where(element => element.IsEffectivelyVisible))
         {
+            // 组件在代码里组合的子组件（Badge 里的文字）不单独记：TS 里那是组件自己的文字节点
+            var composed = element.GetVisualParent() is Control parent && IsComponent(parent);
             var name = element.Name is { } part && Owner(element) is { } owner && DeclaredParts(owner.GetType()).Contains(part)
                 ? StyleReport.Name(owner.GetType().Name, part)
-                : IsComponent(element) ? StyleReport.Name(element.GetType().Name, null) : null;
+                : IsComponent(element) && !composed ? StyleReport.Name(element.GetType().Name, null) : null;
             if (name is not null) report.Add(name, element.GetType().Name, Values(element));
         }
         return report;
@@ -228,6 +230,7 @@ static class Inspector
         yield return ("FontSize", element.GetValue(TextElement.FontSizeProperty));
         yield return ("FontWeight", (int)element.GetValue(TextElement.FontWeightProperty));
         if (element.GetValue(TextBlock.LineHeightProperty) is var lineHeight && !double.IsNaN(lineHeight)) yield return ("LineHeight", lineHeight);
+        if (element is TextBlock text) yield return ("LetterSpacing", text.LetterSpacing);
         yield return ("Opacity", element.Opacity);
     }
 

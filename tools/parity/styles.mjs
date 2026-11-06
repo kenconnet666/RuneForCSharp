@@ -32,7 +32,7 @@ const COMPARED = [
   'MinHeight', 'PaddingTop', 'PaddingRight', 'PaddingBottom', 'PaddingLeft',
   'BorderTop', 'BorderRight', 'BorderBottom', 'BorderLeft', 'BorderColor',
   'RadiusTopLeft', 'RadiusTopRight', 'RadiusBottomRight', 'RadiusBottomLeft',
-  'Background', 'Foreground', 'FontSize', 'FontWeight', 'LineHeight', 'Opacity',
+  'Background', 'Foreground', 'FontSize', 'FontWeight', 'LineHeight', 'LetterSpacing', 'Opacity',
 ];
 /** 部件的宽高不取决于文字时才比：控件根的高度、图标的边长 */
 const SIZED = (key) => /\/(root|icon|iconEnd|spinner|dot)#|^@svg#/.test(key);
@@ -90,8 +90,8 @@ function compare(theirs, ours) {
 }
 
 function same(prop, a, b, props, mine) {
-  // CSS 的 min-width / min-height 没写时是 auto，平台上是 0
-  if (a === 'auto') a = 0;
+  // CSS 的 min-width / min-height 没写时是 auto、letter-spacing 是 normal，平台上是 0
+  if (a === 'auto' || (prop === 'LetterSpacing' && a === 'normal')) a = 0;
   // 自绘的组件在测量里保证最小尺寸，没有 MinHeight 属性：实际高度够了就算一样
   if (prop === 'MinHeight' && b === 0 && typeof a === 'number' && mine.Height >= a - TOLERANCE) return true;
   // 胶囊形：CSS 写 9999px；平台按 em 系数算出更大的数，或已经夹到高度的一半，画出来一样
