@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 
 namespace Rune.Wpf;
@@ -8,12 +9,24 @@ namespace Rune.Wpf;
 /// <code>
 /// &lt;rune:IconButton Icon="{x:Static rune:Lucide.Settings}" AutomationProperties.Name="设置" /&gt;
 /// </code>
-/// 没有文字，必须写 <c>AutomationProperties.Name</c>（TS 的 aria-label），读屏才知道它是做什么的。
+/// 没有文字，必须写 <c>AutomationProperties.Name</c>（TS 的 aria-label），读屏才知道它是做什么的；
+/// 预设的 <see cref="CloseButton"/>、<see cref="ClearButton"/> 不写时取语言包。
 /// 部件（<see cref="IconButtonParts"/>）引用部件样式键，Provider 的部件样式能改。
 /// </summary>
 public class IconButton : ButtonCore
 {
     static IconButton() => DefaultStyleKeyProperty.OverrideMetadata(typeof(IconButton), new FrameworkPropertyMetadata(typeof(IconButton)));
+
+    /// <summary>没写 <c>AutomationProperties.Name</c> 时的读屏名称（预设按钮取语言包）。</summary>
+    protected virtual string? DefaultAccessibleName => null;
+
+    /// <inheritdoc />
+    protected override AutomationPeer OnCreateAutomationPeer() => new IconButtonAutomationPeer(this);
+
+    sealed class IconButtonAutomationPeer(IconButton owner) : ButtonAutomationPeer(owner)
+    {
+        protected override string GetNameCore() => base.GetNameCore() is { Length: > 0 } name ? name : owner.DefaultAccessibleName ?? "";
+    }
 }
 
 /// <summary>图标按钮的部件样式键：Provider.Styles 里写 <c>&lt;Style x:Key="{x:Static rune:IconButtonParts.Icon}" TargetType="rune:Icon"&gt;</c>。</summary>

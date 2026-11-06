@@ -59,6 +59,24 @@ public class IconButtonTests
     });
 
     [Fact]
+    public Task Presets_take_their_icon_and_name_from_the_language_pack() => WpfUi.Run(() =>
+    {
+        var close = new CloseButton();
+        var clear = new ClearButton();
+        var english = new StackPanel { Children = { clear } };
+        Provider.SetLang(english, Lang.EnUs);
+        var host = Host(close, english);
+        Provider.SetLang(host, Lang.ZhCn);
+        WpfUi.Show(host);
+
+        static string Name(UIElement element) => UIElementAutomationPeer.CreatePeerForElement(element).GetName();
+        Assert.Equal((Lucide.X, "关闭"), (close.Icon, Name(close)));
+        Assert.Equal((Lucide.CircleX, "Clear"), (clear.Icon, Name(clear))); // 内层的语言包
+        AutomationProperties.SetName(close, "关闭提示");
+        Assert.Equal("关闭提示", Name(close));
+    });
+
+    [Fact]
     public Task Button_base_has_no_look_but_ripples_and_blocks_clicks_while_loading() => WpfUi.Run(() =>
     {
         var clicks = 0;

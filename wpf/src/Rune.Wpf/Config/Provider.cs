@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -22,9 +23,14 @@ namespace Rune.Wpf;
 /// 合并顺序：主题样式 &lt; 应用资源 &lt; 外层 Provider &lt; 内层 Provider &lt; 元素自己的 Style 与本地值。
 /// 类型键（隐式样式）不叠主题样式：主题样式由 DefaultStyleKey 另外生效，叠进来会把库的触发器抬到“样式”优先级；
 /// 部件键叠到主题里的部件样式之上：部件没有“默认样式”这一层，主题里的就是基础。
+/// 语言包（<see cref="LangProperty"/>）沿元素树继承，也能直接挂在任何元素上：<c>&lt;Window rune:Provider.Lang="{x:Static rune:Lang.EnUs}"&gt;</c>。
 /// </summary>
 public class Provider : Decorator
 {
+    /// <summary>语言包：沿元素树继承；哪里都没写时按界面文化取（<see cref="Rune.Wpf.Lang.ForCulture"/>）。</summary>
+    public static readonly DependencyProperty LangProperty = DependencyProperty.RegisterAttached(
+        "Lang", typeof(Lang), typeof(Provider), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits));
+
     /// <summary>合成结果按（外层, 片段）缓存：同样的组合（列表里的每一项各包一个 Provider）共用同一个 Style。</summary>
     static ConditionalWeakTable<Style, ConditionalWeakTable<Style, Style>> cache = new();
     static readonly Style noOuter = new();
@@ -52,8 +58,20 @@ public class Provider : Decorator
         }
     }
 
+    /// <summary>这片区域的语言包。</summary>
+    public Lang? Lang { get => (Lang?)GetValue(LangProperty); set => SetValue(LangProperty, value); }
+
     /// <summary>合成时实际生成了几个 Style（缓存命中不算）。测试与性能观察用。</summary>
     internal static int Compositions { get; private set; }
+
+    /// <summary>某个元素所在作用域的语言包；哪里都没写时按界面文化取。</summary>
+    /// <param name="target">元素。</param>
+    public static Lang GetLang(DependencyObject target) => (Lang?)target.GetValue(LangProperty) ?? Rune.Wpf.Lang.ForCulture(CultureInfo.CurrentUICulture);
+
+    /// <summary>给一个元素（及它里面的）设语言包。</summary>
+    /// <param name="target">元素。</param>
+    /// <param name="value">语言包；null 时沿用外面的。</param>
+    public static void SetLang(DependencyObject target, Lang? value) => target.SetValue(LangProperty, value);
 
     /// <inheritdoc />
     protected override void OnVisualParentChanged(DependencyObject oldParent)
