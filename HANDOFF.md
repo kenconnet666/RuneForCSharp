@@ -28,10 +28,10 @@
 ## 2. 现在的状态
 
 - 阶段 0 骨架完成：三个平台都有组件库、示例应用和测试工程，基础设施都配了测试。DESIGN §2 有目录说明。
-- Release 构建零警告，130 个测试全部通过（Avalonia 39、WPF 44、WinForms 47）。
+- Release 构建零警告，135 个测试全部通过（Avalonia 39、WPF 49、WinForms 47）。
 - 前置探测都做完了，结论写进了 DESIGN（档位类型 §3、组合档位 §4、部件转发 §7、主题切换 §9、热重载 §11）。
 - 要定的事都定下了（ROADMAP"已定的决定" 10–20），"待定的决定"现在是空的。
-- 阶段 1 已完成：`tools/ts-inspect`、`token-gen`、`lang-gen`、`icons-gen`、`parity`（三个库都有了 16 套主题的 token、中英文语言包和 Lucide 全集）。阶段 2 进行中：档位类型（`TextSize`、`Tone`）与 Icon 三个平台都做了；WinForms 有了无窗口元素的基础（`Element`、单元素宿主 `ElementControl<T>`、应用级主题信号 `RuneTheme.Current`）。三个平台都有了示例登记表（`apps/Rune.*.Examples`，Gallery 与 inspect 共用）和 `inspect`；CI（`.github/workflows/ci.yml`）按平台并行跑全量，推送到 GitHub 后跑（2026-11-06 第一次推送）。Text 家族（Text、Paragraph、Strong、Em、Small）三个平台都做了；WPF 从 TextBlock 派生（决定 19）。Spinner（第一个带部件的组件）三个平台都做了，部件转发的三种写法都落地了。Badge（第一个自绘、带配方的组件）三个平台都做了，自绘组件的部件转发见决定 20。WPF Provider 的"部件键叠类型键"（决定 19，`PartKey`）与 Style.Resources 的递归合成都做了。Button 家族进行中：token-gen 已生成派生色 inverseSurfaceHover 与 Avalonia 的色调调色板（`Rune.Palette.*`，`tools/token-gen/palette.mjs` 是调色板表）；Avalonia 的 Button 已做（调色板 + 伪类、波纹 `Ripple`、颜色过渡、焦点环、`DelayedLoading`，效果照 TS，见 commit 3360c99）。接着：WPF Button（主题样式的 MultiTrigger，36 条组合 + 悬停由调色板表生成而不是手写；em 用 EmSize；波纹、焦点环在模板与代码里），再 WinForms Button（元素 + 多元素宿主的焦点与键盘，HANDOFF §4.1），之后 IconButton、LinkButton、ButtonGroup、CloseButton。已知缺口：focusableWhenDisabled 还没做（平台上 IsEnabled=false 不能聚焦）。用户要求无人值守持续执行，规矩见 ROADMAP"自主执行的规矩"。
+- 阶段 1 已完成：`tools/ts-inspect`、`token-gen`、`lang-gen`、`icons-gen`、`parity`（三个库都有了 16 套主题的 token、中英文语言包和 Lucide 全集）。阶段 2 进行中：档位类型（`TextSize`、`Tone`）与 Icon 三个平台都做了；WinForms 有了无窗口元素的基础（`Element`、单元素宿主 `ElementControl<T>`、应用级主题信号 `RuneTheme.Current`）。三个平台都有了示例登记表（`apps/Rune.*.Examples`，Gallery 与 inspect 共用）和 `inspect`；CI（`.github/workflows/ci.yml`）按平台并行跑全量，推送到 GitHub 后跑（2026-11-06 第一次推送）。Text 家族（Text、Paragraph、Strong、Em、Small）三个平台都做了；WPF 从 TextBlock 派生（决定 19）。Spinner（第一个带部件的组件）三个平台都做了，部件转发的三种写法都落地了。Badge（第一个自绘、带配方的组件）三个平台都做了，自绘组件的部件转发见决定 20。WPF Provider 的"部件键叠类型键"（决定 19，`PartKey`）与 Style.Resources 的递归合成都做了。Button 家族进行中：Avalonia、WPF 的 Button 已做（调色板 / 生成的配方触发器、波纹、颜色过渡、焦点环、加载指示防闪烁，效果照 TS）。`tools/recipe-gen` 按调色板表（`tools/token-gen/palette.mjs`）生成 WPF 的 36 条组合 + 30 条悬停触发器。接着做 WinForms 的 Button：recipe-gen 加一份 C# 的配方（样式 × 色调 × 悬停 → 颜色），元素用 Animator 做颜色过渡与波纹、FrameClock 转加载指示、DelayedLoading；ButtonControl 处理鼠标、键盘、焦点（Selectable、TabStop、IButtonControl），读屏是 PushButton。之后 IconButton、LinkButton、ButtonGroup、CloseButton。已知缺口：focusableWhenDisabled 还没做（平台上 IsEnabled=false 不能聚焦）。用户要求无人值守持续执行，规矩见 ROADMAP"自主执行的规矩"。
 
 ## 3. 环境
 
