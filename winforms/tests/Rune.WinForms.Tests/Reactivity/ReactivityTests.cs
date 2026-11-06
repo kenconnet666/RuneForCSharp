@@ -56,6 +56,29 @@ public class ReactivityTests
     }
 
     [Fact]
+    public void Effect_runs_once_until_it_tracks_again()
+    {
+        // 换主题时一次写几个 token：读到它们的绘制 effect 只失效一次
+        var surface = new Signal<int>(0);
+        var text = new Signal<int>(0);
+        var ran = 0;
+        var effect = new Effect(() => ran++);
+        void Paint()
+        {
+            using (effect.Track()) _ = surface.Value + text.Value;
+        }
+        Paint();
+
+        surface.Value = 1;
+        text.Value = 1;
+        Assert.Equal(1, ran);
+
+        Paint();
+        text.Value = 2;
+        Assert.Equal(2, ran);
+    }
+
+    [Fact]
     public void Computed_is_lazy_and_cached()
     {
         var source = new Signal<int>(2);
