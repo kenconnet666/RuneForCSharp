@@ -103,11 +103,11 @@ public abstract class ButtonCore : ButtonBase
         UpdateUnderline();
     }
 
-    /// <summary>链接样式悬停时文字加下划线（ContentPresenter 生成的 TextBlock 上）。</summary>
+    /// <summary>链接样式悬停时文字加下划线（ContentPresenter 生成的 TextBlock 上）；不可用时不加。</summary>
     void UpdateUnderline()
     {
         if (presenter is null || VisualTreeHelper.GetChildrenCount(presenter) == 0 || VisualTreeHelper.GetChild(presenter, 0) is not TextBlock text) return;
-        text.TextDecorations = Variant == ButtonVariant.Link && IsMouseOver ? TextDecorations.Underline : null;
+        text.TextDecorations = Variant == ButtonVariant.Link && IsMouseOver && !IsDisabled ? TextDecorations.Underline : null;
     }
 }
 

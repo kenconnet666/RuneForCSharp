@@ -84,7 +84,7 @@ static class LinkLauncher
 }
 
 /// <summary>链接按钮在读屏里是超链接（仍能 Invoke）；外部链接的名称后补上语言包的"在新窗口打开"。</summary>
-sealed class LinkAutomationPeer(ButtonBase owner, Func<bool> external) : ButtonAutomationPeer(owner)
+sealed class LinkAutomationPeer(ButtonBase owner, Func<bool> external) : ButtonBaseAutomationPeer(owner)
 {
     protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Hyperlink;
 

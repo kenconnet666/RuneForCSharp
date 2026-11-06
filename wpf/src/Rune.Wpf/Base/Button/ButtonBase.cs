@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -22,6 +23,18 @@ public class ButtonBase : System.Windows.Controls.Button
 {
     /// <summary>加载中：点击无效（Command 也不执行），焦点保留。加载指示由使用方放进内容。</summary>
     public static readonly DependencyProperty IsLoadingProperty = DependencyProperty.Register(nameof(IsLoading), typeof(bool), typeof(ButtonBase));
+
+    /// <summary>
+    /// 不可用（IsEnabled=False）时仍可聚焦：留在 Tab 顺序里、读屏念"不可用"，点击、命令、波纹都无效，外观同不可用
+    /// （TS 的 focusableWhenDisabled，aria-disabled）。一组键盘导航里不希望焦点跳过它时用。
+    /// </summary>
+    public static readonly DependencyProperty FocusableWhenDisabledProperty = DependencyProperty.Register(
+        nameof(FocusableWhenDisabled), typeof(bool), typeof(ButtonBase), new FrameworkPropertyMetadata(false, (d, _) => d.CoerceValue(IsEnabledProperty)));
+
+    static readonly DependencyPropertyKey IsDisabledKey = DependencyProperty.RegisterReadOnly(nameof(IsDisabled), typeof(bool), typeof(ButtonBase), new PropertyMetadata(false));
+
+    /// <summary>不可用：写了 IsEnabled=False（含可聚焦的不可用），或外面不可用、命令不能执行。主题的不可用外观、悬停都看它。</summary>
+    public static readonly DependencyProperty IsDisabledProperty = IsDisabledKey.DependencyProperty;
 
     /// <summary>按下时的波纹；不写时沿用 <see cref="Wpf.Ripple.Enabled"/>（默认开启）。</summary>
     public static readonly DependencyProperty RippleProperty = DependencyProperty.Register(nameof(Ripple), typeof(bool?), typeof(ButtonBase));
@@ -48,6 +61,7 @@ public class ButtonBase : System.Windows.Controls.Button
     {
         DefaultStyleKeyProperty.OverrideMetadata(typeof(ButtonBase), new FrameworkPropertyMetadata(typeof(ButtonBase)));
         EmSize.Register(typeof(ButtonBase), CornerRadiusProperty);
+        IsEnabledProperty.OverrideMetadata(typeof(ButtonBase), new UIPropertyMetadata(true, null, CoerceIsEnabled));
     }
 
     /// <summary>新建按钮。</summary>
@@ -70,6 +84,27 @@ public class ButtonBase : System.Windows.Controls.Button
     [Browsable(false)]
     public bool IsFocusVisible => (bool)GetValue(IsFocusVisibleProperty);
 
+    /// <summary>不可用时仍可聚焦。</summary>
+    public bool FocusableWhenDisabled { get => (bool)GetValue(FocusableWhenDisabledProperty); set => SetValue(FocusableWhenDisabledProperty, value); }
+
+    /// <summary>不可用（含可聚焦的不可用）。</summary>
+    [Browsable(false)]
+    public bool IsDisabled => (bool)GetValue(IsDisabledProperty);
+
+    /// <summary>
+    /// 代替 UIElement 的 IsEnabled 强制：外面不可用、命令不能执行时不可用（同平台）；自己写了 False 时，可聚焦的不可用仍保持可用
+    /// （能聚焦、收键盘），另记下 IsDisabled，点击在 OnClick 里拦下。
+    /// </summary>
+    static object CoerceIsEnabled(DependencyObject d, object baseValue)
+    {
+        var button = (ButtonBase)d;
+        var parent = VisualTreeHelper.GetParent(d) ?? LogicalTreeHelper.GetParent(d);
+        var inherited = parent is not UIElement { IsEnabled: false } && parent is not ContentElement { IsEnabled: false } && button.IsEnabledCore;
+        var requested = (bool)baseValue;
+        button.SetValue(IsDisabledKey, !(requested && inherited));
+        return inherited && (requested || button.FocusableWhenDisabled);
+    }
+
     /// <inheritdoc />
     public override void OnApplyTemplate()
     {
@@ -90,7 +125,7 @@ public class ButtonBase : System.Windows.Controls.Button
     /// <summary>加载中点击无效（焦点保留）；Command 也不执行。</summary>
     protected override void OnClick()
     {
-        if (!IsLoading) base.OnClick();
+        if (!IsLoading && !IsDisabled) base.OnClick();
     }
 
     /// <inheritdoc />
@@ -156,7 +191,10 @@ public class ButtonBase : System.Windows.Controls.Button
     }
 
     /// <summary>不可用、加载中不出波纹。</summary>
-    bool RippleOn => (Ripple ?? Wpf.Ripple.Enabled) && IsEnabled && !IsLoading;
+    bool RippleOn => (Ripple ?? Wpf.Ripple.Enabled) && !IsDisabled && !IsLoading;
+
+    /// <inheritdoc />
+    protected override AutomationPeer OnCreateAutomationPeer() => new ButtonBaseAutomationPeer(this);
 
     void ReleasePointerRipple()
     {
@@ -181,4 +219,12 @@ public class ButtonBase : System.Windows.Controls.Button
             focusRing.Margin = new Thickness(-FocusRingOutset);
         }
     }
+}
+
+/// <summary>按钮家族的读屏对等体：可聚焦的不可用时报"不可用"（Invoke 也就无效）。</summary>
+/// <param name="owner">按钮。</param>
+public class ButtonBaseAutomationPeer(ButtonBase owner) : ButtonAutomationPeer(owner)
+{
+    /// <inheritdoc />
+    protected override bool IsEnabledCore() => !owner.IsDisabled;
 }

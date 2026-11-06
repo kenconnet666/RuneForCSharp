@@ -1,9 +1,11 @@
 using Avalonia;
+using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Controls.Shapes;
 using Avalonia.Headless;
 using Avalonia.Input;
+using Avalonia.Input.Raw;
 using Avalonia.Media;
 using Avalonia.Styling;
 using Avalonia.Threading;
@@ -48,7 +50,6 @@ public class ButtonTests
     });
 
     [Upstream("Button", "组件默认值")]
-
     [Fact]
     public Task Sizes_are_em_and_styles_can_change_defaults() => HeadlessUi.Run(() =>
     {
@@ -66,7 +67,6 @@ public class ButtonTests
     });
 
     [Upstream("Button", "loading 变为 true")]
-
     [Fact]
     public Task Loading_blocks_clicks_and_shows_the_spinner_after_a_delay() => HeadlessUi.Run(() =>
     {
@@ -129,7 +129,6 @@ public class ButtonTests
     });
 
     [Upstream("Button", "type 默认 button")]
-
     [Fact]
     public Task Parts_take_template_styles() => HeadlessUi.Run(() =>
     {
@@ -146,7 +145,6 @@ public class ButtonTests
     });
 
     [Upstream("Button", "使用方的 sx")]
-
     [Fact]
     public Task Plain_type_styles_override_the_tone_palette_and_radius() => HeadlessUi.Run(() =>
     {
@@ -205,5 +203,48 @@ public class ButtonTests
     {
         double Token(string key) => Application.Current!.TryGetResource(key, ThemeVariant.Light, out var value) ? (double)value! : double.NaN;
         Assert.Equal((Token("Rune.Size.Control"), Token("Rune.Size.ControlRound"), Token("Rune.Size.MinTarget")), (ControlHeight.DefaultFactor, ControlHeight.Step, ControlHeight.MinTarget));
+    });
+
+    [Upstream("Button", "disabled 用原生属性")]
+    [Upstream("IconButton", "三种按钮共用一套行为")]
+    [Fact]
+    public Task Focusable_when_disabled_keeps_focus_but_blocks_clicks_and_hover() => HeadlessUi.Run(() =>
+    {
+        var clicks = 0;
+        var plain = new Button { Content = "提交", IsEnabled = false };
+        var soft = new Button { Content = "注销账号", IsEnabled = false, FocusableWhenDisabled = true };
+        var icon = new IconButton { Icon = Lucide.Trash, IsEnabled = false, FocusableWhenDisabled = true };
+        var link = new LinkButton { Content = "文档", IsEnabled = false, FocusableWhenDisabled = true };
+        foreach (var button in new ButtonBase[] { plain, soft, icon, link }) button.Click += (_, _) => clicks++;
+        var window = HeadlessUi.Show(new StackPanel { Children = { plain, soft, icon, link } });
+
+        // 原生的不可用：不能聚焦；可聚焦的不可用：能聚焦（留在 Tab 顺序里），外观同不可用，读屏念不可用
+        Assert.False(plain.Focus());
+        Assert.True(soft.Focus());
+        Assert.Contains(":soft-disabled", soft.Classes);
+        Assert.Equal(plain.Opacity, soft.Opacity);
+        Assert.False(ControlAutomationPeer.CreatePeerForElement(soft).IsEnabled());
+
+        // 键盘、点击都无效（链接也不打开），悬停不变色
+        var background = soft.Background;
+        foreach (ButtonBase button in new ButtonBase[] { soft, icon, link })
+        {
+            button.Focus();
+            window.KeyPressQwerty(PhysicalKey.Enter, RawInputModifiers.None);
+            window.MouseMove(Center(button, window));
+            window.MouseDown(Center(button, window), MouseButton.Left);
+            window.MouseUp(Center(button, window), MouseButton.Left);
+        }
+        window.MouseMove(Center(soft, window));
+        HeadlessUi.Flush(window);
+        Assert.Equal(0, clicks);
+        Assert.Same(background, soft.Background);
+
+        // 恢复可用后照常
+        soft.IsEnabled = true;
+        window.MouseDown(Center(soft, window), MouseButton.Left);
+        window.MouseUp(Center(soft, window), MouseButton.Left);
+        Assert.Equal(1, clicks);
+        Assert.DoesNotContain(":soft-disabled", soft.Classes);
     });
 }

@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -57,7 +58,6 @@ public class ButtonTests
     });
 
     [Upstream("Button", "loading 变为 true")]
-
     [Fact]
     public Task Loading_blocks_clicks_and_shows_the_spinner_after_a_delay() => WpfUi.Run(() =>
     {
@@ -102,7 +102,6 @@ public class ButtonTests
     });
 
     [Upstream("Button", "type 默认 button")]
-
     [Fact]
     public Task Provider_styles_reach_template_icons() => WpfUi.Run(() =>
     {
@@ -148,5 +147,44 @@ public class ButtonTests
         Assert.Equal(24, inner.MinHeight);
         Assert.Equal((host.FindResource("Rune.Size.Control"), host.FindResource("Rune.Size.ControlRound"), host.FindResource("Rune.Size.MinTarget")),
             ((object)ControlHeight.DefaultFactor, (object)ControlHeight.Step, (object)ControlHeight.MinTarget));
+    });
+
+    [Upstream("Button", "disabled 用原生属性")]
+    [Upstream("IconButton", "三种按钮共用一套行为")]
+    [Fact]
+    public Task Focusable_when_disabled_keeps_focus_but_blocks_clicks_and_hover() => WpfUi.Run(() =>
+    {
+        var clicks = 0;
+        var plain = new Rune.Wpf.Button { Content = "提交", IsEnabled = false };
+        var soft = new Rune.Wpf.Button { Content = "注销账号", IsEnabled = false, FocusableWhenDisabled = true };
+        var icon = new IconButton { Icon = Lucide.Trash, IsEnabled = false, FocusableWhenDisabled = true };
+        var link = new LinkButton { Content = "文档", IsEnabled = false, FocusableWhenDisabled = true };
+        foreach (var button in new ButtonBase[] { plain, soft, icon, link }) button.Click += (_, _) => clicks++;
+        var (host, _) = Host(plain, soft, icon, link);
+        WpfUi.Show(host);
+
+        // 原生的不可用：不能聚焦；可聚焦的不可用：能聚焦（留在 Tab 顺序里），外观同不可用，读屏念不可用
+        Assert.False(plain.Focus());
+        Assert.True(soft.Focus());
+        Assert.True(soft.IsDisabled);
+        Assert.Equal(plain.Opacity, soft.Opacity);
+        Assert.False(UIElementAutomationPeer.CreatePeerForElement(soft).IsEnabled());
+
+        // 键盘、鼠标都经过 OnClick，在那里拦下；读屏的 Invoke 报"不可用"
+        var onClick = typeof(System.Windows.Controls.Primitives.ButtonBase).GetMethod("OnClick", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
+        foreach (var button in new ButtonBase[] { soft, icon, link })
+        {
+            onClick.Invoke(button, null);
+            var invoke = (System.Windows.Automation.Provider.IInvokeProvider)UIElementAutomationPeer.CreatePeerForElement(button).GetPattern(PatternInterface.Invoke);
+            Assert.Throws<System.Windows.Automation.ElementNotEnabledException>(invoke.Invoke);
+        }
+        Assert.Equal(0, clicks);
+
+        // 外面不可用时照样不可用；恢复可用后照常
+        soft.IsEnabled = true;
+        Assert.False(soft.IsDisabled);
+        host.IsEnabled = false;
+        Assert.True(soft.IsDisabled);
+        Assert.False(soft.IsEnabled);
     });
 }

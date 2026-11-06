@@ -1,4 +1,5 @@
 using global::Avalonia;
+using global::Avalonia.Automation.Peers;
 using global::Avalonia.Animation;
 using global::Avalonia.Animation.Easings;
 using global::Avalonia.Controls;
@@ -21,6 +22,12 @@ public class ButtonBase : global::Avalonia.Controls.Button
 {
     /// <summary>加载中：点击无效（Command 也不执行），焦点保留；伪类 <c>:loading</c>。加载指示由使用方放进内容。</summary>
     public static readonly StyledProperty<bool> IsLoadingProperty = AvaloniaProperty.Register<ButtonBase, bool>(nameof(IsLoading));
+
+    /// <summary>
+    /// 不可用（IsEnabled=False）时仍可聚焦：留在 Tab 顺序里、读屏念"不可用"，点击、命令、波纹都无效，外观同不可用
+    /// （TS 的 focusableWhenDisabled，aria-disabled）。一组键盘导航里不希望焦点跳过它时用，比如旁边要用 Tooltip 说明为什么不能点。
+    /// </summary>
+    public static readonly StyledProperty<bool> FocusableWhenDisabledProperty = AvaloniaProperty.Register<ButtonBase, bool>(nameof(FocusableWhenDisabled));
 
     /// <summary>按下时的波纹；不写时沿用 <see cref="Avalonia.Ripple.Enabled"/>（默认开启）。</summary>
     public static readonly StyledProperty<bool?> RippleProperty = AvaloniaProperty.Register<ButtonBase, bool?>(nameof(Ripple));
@@ -47,6 +54,15 @@ public class ButtonBase : global::Avalonia.Controls.Button
     /// <summary>按下时的波纹。</summary>
     public bool? Ripple { get => GetValue(RippleProperty); set => SetValue(RippleProperty, value); }
 
+    /// <summary>不可用时仍可聚焦。</summary>
+    public bool FocusableWhenDisabled { get => GetValue(FocusableWhenDisabledProperty); set => SetValue(FocusableWhenDisabledProperty, value); }
+
+    /// <summary>不可用：自己写了 IsEnabled=False，或外面不可用。可聚焦的不可用时 IsEffectivelyEnabled 仍为 true，以它为准判断能不能点。</summary>
+    public bool IsDisabled => !IsEnabled || !IsEffectivelyEnabled;
+
+    /// <summary>可聚焦的不可用时照样算"可用"（能聚焦、收键盘），点击另外拦下。</summary>
+    protected override bool IsEnabledCore => IsEnabled || FocusableWhenDisabled;
+
     /// <inheritdoc />
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
@@ -62,12 +78,16 @@ public class ButtonBase : global::Avalonia.Controls.Button
         base.OnPropertyChanged(change);
         if (change.Property == CornerRadiusProperty) UpdateFocusRing();
         else if (change.Property == IsLoadingProperty) PseudoClasses.Set(":loading", IsLoading);
+        else if (change.Property == FocusableWhenDisabledProperty) UpdateIsEffectivelyEnabled();
+        // 可聚焦的不可用另用伪类 :soft-disabled（TS 的 aria-disabled）：平台每次更新 IsEffectivelyEnabled 都会按它重设 :disabled
+        if (change.Property == IsEnabledProperty || change.Property == FocusableWhenDisabledProperty)
+            PseudoClasses.Set(":soft-disabled", FocusableWhenDisabled && !IsEnabled);
     }
 
     /// <summary>加载中点击无效（焦点保留）；Command 也不执行。</summary>
     protected override void OnClick()
     {
-        if (!IsLoading) base.OnClick();
+        if (!IsLoading && !IsDisabled) base.OnClick();
     }
 
     /// <inheritdoc />
@@ -123,7 +143,10 @@ public class ButtonBase : global::Avalonia.Controls.Button
     }
 
     /// <summary>不可用、加载中不出波纹。</summary>
-    bool RippleOn => (Ripple ?? Avalonia.Ripple.Enabled) && IsEffectivelyEnabled && !IsLoading;
+    bool RippleOn => (Ripple ?? Avalonia.Ripple.Enabled) && !IsDisabled && !IsLoading;
+
+    /// <inheritdoc />
+    protected override AutomationPeer OnCreateAutomationPeer() => new ButtonBaseAutomationPeer(this);
 
     void ReleasePointerRipple()
     {
@@ -175,4 +198,12 @@ public static class ButtonBaseParts
 
     /// <summary>键盘聚焦时的焦点环（Border，主题在 <c>:focus-visible</c> 时显示）。</summary>
     public const string FocusRing = "PART_FocusRing";
+}
+
+/// <summary>按钮家族的读屏对等体：可聚焦的不可用时报"不可用"（Invoke 也就无效）。</summary>
+/// <param name="owner">按钮。</param>
+public class ButtonBaseAutomationPeer(ButtonBase owner) : ButtonAutomationPeer(owner)
+{
+    /// <inheritdoc />
+    protected override bool IsEnabledCore() => !owner.IsDisabled;
 }

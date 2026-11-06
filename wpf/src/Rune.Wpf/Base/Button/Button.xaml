@@ -84,7 +84,11 @@
         <Setter Property="rune:EmSize.Padding" Value="0,0.25" />
         <Setter Property="rune:ControlHeight.MinHeight" Value="False" />
       </Trigger>
-      <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" /></Trigger>
+      <!-- 不可用（含可聚焦的不可用）：变淡、光标是"禁止"；配方里的悬停色也只在可用时 -->
+      <Trigger Property="IsDisabled" Value="True">
+        <Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" />
+        <Setter Property="Cursor" Value="No" />
+      </Trigger>
     </Style.Triggers>
   </Style>
 

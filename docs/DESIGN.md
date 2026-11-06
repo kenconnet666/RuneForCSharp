@@ -474,6 +474,14 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   - Numeric 是 `Typography.NumeralAlignment = Tabular`；Align 的 Start、End 对应 TextAlignment 的 Left、Right（随 FlowDirection 镜像）。
   - WPF 的字重比 GDI 全：medium、semibold 都画得出来。
 
+#### 可聚焦的不可用（focusableWhenDisabled，2026-11-07）
+
+- TS 用 `aria-disabled` 代替原生 `disabled`：留在 Tab 顺序里、读屏念"不可用"、点击无效、外观同不可用、悬停不变色。平台上 IsEnabled=False 一律不能聚焦，所以按钮家族的基类（ButtonBase）加 `FocusableWhenDisabled`：
+  - Avalonia：重写 `IsEnabledCore`（IsEnabled || FocusableWhenDisabled），控件仍"有效可用"、能聚焦；另设伪类 `:soft-disabled`（平台每次更新有效可用状态都会按它重设 `:disabled`，占不住），主题里 `^:disabled, ^:soft-disabled` 一个样子，悬停样式加 `:not(:soft-disabled)`。
+  - WPF：IsEnabled 是强制出来的，自己写了 False 就怎么都是 False；所以覆盖 IsEnabled 的强制回调，照平台的规则（外面不可用、命令不能执行时不可用）重写一遍，可聚焦的不可用时返回 True，另记只读的 `IsDisabled`。主题的不可用外观、配方的悬停（recipe-gen 加了 `IsDisabled=False` 的条件）、链接的悬停下划线都看它。
+  - 两边都在 OnClick 里拦下（键盘、鼠标、Command），读屏对等体 `ButtonBaseAutomationPeer` 报不可用（Invoke 抛 ElementNotEnabled）。
+  - WinForms 还没做：Control.Enabled=false 同样不能聚焦，又不能改强制；要么宿主自己记"不可用"、不碰 Enabled，等做 WinForms 的定制入口时一起定。
+
 #### 行高（2026-11-07，取值对照查出来的）
 
 - vue-tsx-pro 的正文是不带单位的 `line-height: 1.5`（lineHeights.normal），按系数继承：12px 的 Small 放在 14px 的段落里行高是 18。按钮、标记的根是 tight（1.25）。

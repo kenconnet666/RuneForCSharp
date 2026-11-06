@@ -63,34 +63,38 @@
       <Setter Property="Background" Value="{Binding $self.Palette.Solid}" />
       <Setter Property="Foreground" Value="{Binding $self.Palette.Contrast}" />
     </Style>
-    <Style Selector="^:solid:pointerover"><Setter Property="Background" Value="{Binding $self.Palette.SolidHover}" /></Style>
+    <Style Selector="^:solid:pointerover:not(:soft-disabled)"><Setter Property="Background" Value="{Binding $self.Palette.SolidHover}" /></Style>
     <Style Selector="^:soft">
       <Setter Property="Background" Value="{Binding $self.Palette.Soft}" />
       <Setter Property="Foreground" Value="{Binding $self.Palette.Text}" />
     </Style>
-    <Style Selector="^:soft:pointerover"><Setter Property="Background" Value="{Binding $self.Palette.SoftHover}" /></Style>
+    <Style Selector="^:soft:pointerover:not(:soft-disabled)"><Setter Property="Background" Value="{Binding $self.Palette.SoftHover}" /></Style>
     <Style Selector="^:surface">
       <Setter Property="Background" Value="{Binding $self.Palette.Surface}" />
       <Setter Property="Foreground" Value="{Binding $self.Palette.Text}" />
       <Setter Property="BorderBrush" Value="{Binding $self.Palette.Border}" />
     </Style>
-    <Style Selector="^:surface:pointerover"><Setter Property="Background" Value="{Binding $self.Palette.SoftHover}" /></Style>
+    <Style Selector="^:surface:pointerover:not(:soft-disabled)"><Setter Property="Background" Value="{Binding $self.Palette.SoftHover}" /></Style>
     <Style Selector="^:outline">
       <Setter Property="Foreground" Value="{Binding $self.Palette.Text}" />
       <Setter Property="BorderBrush" Value="{Binding $self.Palette.Border}" />
     </Style>
-    <Style Selector="^:outline:pointerover"><Setter Property="Background" Value="{Binding $self.Palette.SubtleHover}" /></Style>
+    <Style Selector="^:outline:pointerover:not(:soft-disabled)"><Setter Property="Background" Value="{Binding $self.Palette.SubtleHover}" /></Style>
     <Style Selector="^:ghost"><Setter Property="Foreground" Value="{Binding $self.Palette.Text}" /></Style>
-    <Style Selector="^:ghost:pointerover"><Setter Property="Background" Value="{Binding $self.Palette.SubtleHover}" /></Style>
+    <Style Selector="^:ghost:pointerover:not(:soft-disabled)"><Setter Property="Background" Value="{Binding $self.Palette.SubtleHover}" /></Style>
     <!-- 链接样式：无底、左右内边距 0（上下 0.25em 保留）、最小高度 0、字重 medium，悬停下划线 -->
     <Style Selector="^:link">
       <Setter Property="Foreground" Value="{Binding $self.Palette.Text}" />
       <Setter Property="Padding" Value="{rune:Em 0, 0.25}" />
       <Setter Property="MinHeight" Value="0" />
     </Style>
-    <Style Selector="^:link:pointerover /template/ TextBlock"><Setter Property="TextDecorations" Value="Underline" /></Style>
+    <Style Selector="^:link:pointerover:not(:soft-disabled) /template/ TextBlock"><Setter Property="TextDecorations" Value="Underline" /></Style>
 
-    <Style Selector="^:disabled"><Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" /></Style>
+    <!-- 不可用（:disabled）与可聚焦的不可用（:soft-disabled）一个样子，光标是"禁止"；悬停变色只在可用时（可聚焦的不可用照样收到悬停，变色会让人以为还能点） -->
+    <Style Selector="^:disabled, ^:soft-disabled">
+      <Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" />
+      <Setter Property="Cursor" Value="No" />
+    </Style>
     <!-- 加载中：内容透明（保留宽度与读屏名称），旋转指示盖在中间 -->
     <Style Selector="^:spinner /template/ StackPanel#PART_Content"><Setter Property="Opacity" Value="0" /></Style>
     <Style Selector="^:spinner /template/ rune|Spinner#PART_Spinner"><Setter Property="IsVisible" Value="True" /></Style>

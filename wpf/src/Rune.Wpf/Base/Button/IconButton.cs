@@ -23,7 +23,7 @@ public class IconButton : ButtonCore
     /// <inheritdoc />
     protected override AutomationPeer OnCreateAutomationPeer() => new IconButtonAutomationPeer(this);
 
-    sealed class IconButtonAutomationPeer(IconButton owner) : ButtonAutomationPeer(owner)
+    sealed class IconButtonAutomationPeer(IconButton owner) : ButtonBaseAutomationPeer(owner)
     {
         protected override string GetNameCore() => base.GetNameCore() is { Length: > 0 } name ? name : owner.DefaultAccessibleName ?? "";
     }

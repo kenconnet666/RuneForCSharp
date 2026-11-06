@@ -44,7 +44,8 @@ function trigger(component, variant, tone, setters, hover) {
   const conditions = [
     `<Condition Property="Variant" Value="${variant}" />`,
     `<Condition Property="Tone" Value="${tone}" />`,
-    ...(hover ? ['<Condition Property="IsMouseOver" Value="True" />'] : []),
+    // 悬停色只在可用时：可聚焦的不可用照样收到悬停（IsDisabled 见 ButtonBase）
+    ...(hover ? ['<Condition Property="IsMouseOver" Value="True" />', '<Condition Property="IsDisabled" Value="False" />'] : []),
   ];
   const values = Object.entries(setters).map(([property, field]) => `<Setter Property="${property}" Value="${brush(tone, field)}" />`);
   return `      <MultiTrigger><MultiTrigger.Conditions>${conditions.join('')}</MultiTrigger.Conditions>${values.join('')}</MultiTrigger>`;
