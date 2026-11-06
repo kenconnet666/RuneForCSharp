@@ -6,12 +6,12 @@ namespace Rune.Wpf.Tests;
 public class ContainerQueryTests
 {
     [Theory]
-    [InlineData(639.9, ContainerSize.Xs)]
-    [InlineData(640, ContainerSize.Sm)]
-    [InlineData(768, ContainerSize.Md)]
-    [InlineData(1024, ContainerSize.Lg)]
-    [InlineData(1280, ContainerSize.Xl)]
-    public void Width_maps_to_breakpoints(double width, ContainerSize expected) =>
+    [InlineData(639.9, Breakpoint.Xs)]
+    [InlineData(640, Breakpoint.Sm)]
+    [InlineData(768, Breakpoint.Md)]
+    [InlineData(1024, Breakpoint.Lg)]
+    [InlineData(1280, Breakpoint.Xl)]
+    public void Width_maps_to_breakpoints(double width, Breakpoint expected) =>
         Assert.Equal(expected, ContainerQuery.SizeFor(width));
 
     [Fact]
@@ -22,14 +22,14 @@ public class ContainerQueryTests
         ContainerQuery.SetWatch(box, true);
         WpfUi.Show(box);
 
-        Assert.Equal(ContainerSize.Sm, ContainerQuery.GetSize(probe));
+        Assert.Equal(Breakpoint.Sm, ContainerQuery.GetSize(probe));
         Assert.Equal(Colors.Blue, ((SolidColorBrush)probe.Background).Color);
 
         box.Width = 300;
         WpfUi.Flush();
 
         // 继承的 Size 变成 Xs，主题样式里按它写的触发器生效
-        Assert.Equal(ContainerSize.Xs, ContainerQuery.GetSize(probe));
+        Assert.Equal(Breakpoint.Xs, ContainerQuery.GetSize(probe));
         Assert.Equal(Colors.Orange, ((SolidColorBrush)probe.Background).Color);
     });
 }

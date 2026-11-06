@@ -2,8 +2,8 @@ using System.Windows;
 
 namespace Rune.Wpf;
 
-/// <summary>容器的宽度档位：断点同 vue-tsx-pro 的 breakpoints（40 / 48 / 64 / 80rem，按 16px 一个 rem）。</summary>
-public enum ContainerSize
+/// <summary>容器查询的宽度档位：断点同 vue-tsx-pro 的 breakpoints（40 / 48 / 64 / 80rem，按 16px 一个 rem）。</summary>
+public enum Breakpoint
 {
     /// <summary>窄于 640。</summary>
     Xs,
@@ -34,18 +34,18 @@ public static class ContainerQuery
 {
     /// <summary>最近一个被观察的容器的宽度档位（会继承）；没有被观察的容器时为 Lg。</summary>
     public static readonly DependencyProperty SizeProperty = DependencyProperty.RegisterAttached(
-        "Size", typeof(ContainerSize), typeof(ContainerQuery),
-        new FrameworkPropertyMetadata(ContainerSize.Lg, FrameworkPropertyMetadataOptions.Inherits));
+        "Size", typeof(Breakpoint), typeof(ContainerQuery),
+        new FrameworkPropertyMetadata(Breakpoint.Lg, FrameworkPropertyMetadataOptions.Inherits));
 
     /// <summary>按这个元素的宽度更新它的 Size。</summary>
     public static readonly DependencyProperty WatchProperty = DependencyProperty.RegisterAttached(
         "Watch", typeof(bool), typeof(ContainerQuery), new PropertyMetadata(false, OnWatchChanged));
 
     /// <summary>读宽度档位。</summary>
-    public static ContainerSize GetSize(DependencyObject d) => (ContainerSize)d.GetValue(SizeProperty);
+    public static Breakpoint GetSize(DependencyObject d) => (Breakpoint)d.GetValue(SizeProperty);
 
     /// <summary>设宽度档位（通常由 Watch 自动写）。</summary>
-    public static void SetSize(DependencyObject d, ContainerSize value) => d.SetValue(SizeProperty, value);
+    public static void SetSize(DependencyObject d, Breakpoint value) => d.SetValue(SizeProperty, value);
 
     /// <summary>读是否观察宽度。</summary>
     public static bool GetWatch(DependencyObject d) => (bool)d.GetValue(WatchProperty);
@@ -55,13 +55,13 @@ public static class ContainerQuery
 
     /// <summary>宽度对应的档位。</summary>
     /// <param name="width">设备无关像素。</param>
-    public static ContainerSize SizeFor(double width) => width switch
+    public static Breakpoint SizeFor(double width) => width switch
     {
-        < 640 => ContainerSize.Xs,
-        < 768 => ContainerSize.Sm,
-        < 1024 => ContainerSize.Md,
-        < 1280 => ContainerSize.Lg,
-        _ => ContainerSize.Xl,
+        < 640 => Breakpoint.Xs,
+        < 768 => Breakpoint.Sm,
+        < 1024 => Breakpoint.Md,
+        < 1280 => Breakpoint.Lg,
+        _ => Breakpoint.Xl,
     };
 
     static void OnWatchChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

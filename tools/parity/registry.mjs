@@ -32,10 +32,15 @@ export const PLATFORM_PROP_RENAMES = {
   WinForms: { size: 'TextSize' },
 };
 
+/** 某个平台上某个组件改了名的 prop（盖过 PLATFORM_PROP_RENAMES）：WinForms 的控件自己有 Size、Padding */
+export const PLATFORM_COMPONENT_PROP_RENAMES = {
+  WinForms: { Container: { size: 'ContainerSize', padding: 'InlinePadding' } },
+};
+
 /** 某个平台上改了名的组件（平台自带同名类型时）：库 → { 组件: 类型名 } */
 export const TYPE_RENAMES = {
   // WinForms 自己有 ListControl（ListBox、ComboBox 的基类）
-  WinForms: { List: 'UnorderedList' },
+  WinForms: { List: 'UnorderedList', Container: 'ContainerPanel' },
 };
 
 const BUTTON_TYPE = '表单提交是浏览器的概念；对话框的默认、取消按钮用平台的 IsDefault、IsCancel';
@@ -67,4 +72,5 @@ export const BEHAVIOR_NOT_APPLICABLE = {
   LinkButton: { '站内链接经 router 跳转': '桌面没有站内地址：Href 是绝对地址，用系统打开（ROADMAP 平台化的约定）' },
   IconLinkButton: { '站内链接经 router 跳转': '桌面没有站内地址：Href 是绝对地址，用系统打开（ROADMAP 平台化的约定）' },
   Flex: { createFlex: '桌面没有语义标签：别的语义容器从 Flex 派生、改读屏角色（FlexList、FlexOrderedList 就是这样，测试覆盖）' },
+  Container: { createContainer: '桌面没有语义标签：要别的语义时从 Container 派生' },
 };
