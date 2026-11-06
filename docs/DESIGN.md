@@ -548,6 +548,13 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - **StatusMap**：纯数据，三个库各一份孪生文件。StatusBadge 的圆点默认开着：改依赖属性的默认值不触发变化，Badge 收不到，所以构造时按模板优先级（Avalonia）/ 当前值（WPF）设，使用方写的 Dot 盖得过。
 - **Skeleton**：自绘（底色与光带都是 9% 的正文色），包着的内容照常排版但不可见、不可用、对读屏隐藏。扫光：Avalonia 用代码里的 Animation 驱动私有的 Phase 属性；WPF 用关键帧动画（可见、系统没关动画时）；WinForms 读 FrameClock（只在画的时候扫）。WinForms 的骨架大小跟着子控件，子控件保持自己的大小（反过来撑它会互相影响）。
 
+### Card、Avatar、Empty（2026-11-07）
+
+- **Card**：Avalonia、WPF 都是代码组合的子元素（页头里的标题与 Extra 是换行的 Flex，页脚是靠结束边的 Flex，正文在骨架与内容之间换），不从 TemplatedControl / Control 派生——它们的 Padding 是 Thickness，和 TS 的 padding 档位撞名（同 Container）。WPF 的阴影单独一层（DropShadowEffect 套在正文上会连文字一起投影），正文按圆角裁剪。加载：挂上时已经在加载就立即显示骨架，之后的切换走 DelayedLoading 防闪烁；出现过骨架之后互换时淡入。读屏的项状态是"加载中"（WinForms 是 Busy 状态）。WinForms 的 CardControl 自己画表面与页头文字，子控件是正文；Header 是文字，Extra、Footer 各是一个控件；TS 的 padding 叫 CardPadding。
+- **Avatar**：TS 的 name、src 叫 DisplayName、Source（Name 是控件名）；Source 是平台的图片对象，WPF 等 BitmapSource 下载完、失败时退回后备内容。首字母算法 `AvatarInitials` 是孪生文件。WPF 的 soft / solid × 色调是 recipe-gen 生成的触发器，WinForms 直接用 BadgeRecipe 的这两档。
+- **Empty**：Avalonia、WPF 代码组合；WinForms 画图标、标题、说明，子控件与 Action 排在下面。图标默认 Inbox，设成 null 不显示（TS 的 icon={false}）。
+- 上游用例归属：behavior.mjs 把用例归到外层 describe 写的组件（display.test.tsx 里的 Card、Avatar），也认 it.each。
+
 ### Spinner
 
 - 第一个带部件的组件（`propsIcon`），三个平台按 §7 的写法各落地一次：
