@@ -3,7 +3,7 @@ using System.Reflection;
 namespace Rune.WinForms.Tests;
 
 /// <summary>生成的 Lucide 全集（tools/icons-gen）：每个图标都能建成 GraphicsPath，坐标在 24 格画布里，旧名转发到新名。</summary>
-public class IconTests
+public class LucideTests
 {
     static IEnumerable<IconData> Icons() =>
         typeof(Lucide).GetProperties(BindingFlags.Public | BindingFlags.Static)
