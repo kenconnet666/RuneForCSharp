@@ -67,6 +67,7 @@ public class ButtonTests
     });
 
     [Upstream("Button", "loading 变为 true")]
+    [Upstream("Button", "loading：不用 disabled")]
     [Fact]
     public Task Loading_blocks_clicks_and_shows_the_spinner_after_a_delay() => HeadlessUi.Run(() =>
     {
@@ -76,10 +77,14 @@ public class ButtonTests
         var window = HeadlessUi.Show(new StackPanel { Children = { button } });
         var at = Center(button, window);
 
+        button.Focus();
         button.IsLoading = true;
         window.MouseDown(at, MouseButton.Left);
         window.MouseUp(at, MouseButton.Left);
         Assert.Equal(0, clicks);
+        // 不用不可用：焦点保留、读屏照常能找到它，状态念"加载中"
+        Assert.True(button.IsEnabled && button.IsFocused);
+        Assert.Equal(Provider.GetLang(button).Loading, ControlAutomationPeer.CreatePeerForElement(button).GetItemStatus());
         Assert.DoesNotContain(":spinner", button.Classes); // 200 毫秒内不出现
 
         Pump(TimeSpan.FromMilliseconds(350));

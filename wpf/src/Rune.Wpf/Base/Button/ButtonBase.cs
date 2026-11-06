@@ -221,10 +221,16 @@ public class ButtonBase : System.Windows.Controls.Button
     }
 }
 
-/// <summary>按钮家族的读屏对等体：可聚焦的不可用时报"不可用"（Invoke 也就无效）。</summary>
+/// <summary>
+/// 按钮家族的读屏对等体：可聚焦的不可用时报"不可用"（Invoke 也就无效）；加载中时状态（ItemStatus）是语言包的"加载中"
+/// （TS 的 aria-busy：UIA 的按钮没有忙碌状态，读屏念 ItemStatus）。
+/// </summary>
 /// <param name="owner">按钮。</param>
 public class ButtonBaseAutomationPeer(ButtonBase owner) : ButtonAutomationPeer(owner)
 {
     /// <inheritdoc />
     protected override bool IsEnabledCore() => !owner.IsDisabled;
+
+    /// <inheritdoc />
+    protected override string GetItemStatusCore() => owner.IsLoading ? Provider.GetLang(owner).Loading : base.GetItemStatusCore();
 }

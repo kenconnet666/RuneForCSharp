@@ -58,6 +58,7 @@ public class ButtonTests
     });
 
     [Upstream("Button", "loading 变为 true")]
+    [Upstream("Button", "loading：不用 disabled")]
     [Fact]
     public Task Loading_blocks_clicks_and_shows_the_spinner_after_a_delay() => WpfUi.Run(() =>
     {
@@ -67,10 +68,14 @@ public class ButtonTests
         WpfUi.Show(Host(button).Host);
         var invoke = (System.Windows.Automation.Provider.IInvokeProvider)new System.Windows.Automation.Peers.ButtonAutomationPeer(button).GetPattern(System.Windows.Automation.Peers.PatternInterface.Invoke);
 
+        button.Focus();
         button.IsLoading = true;
         invoke.Invoke();
         WpfUi.Flush();
         Assert.Equal(0, clicks);
+        // 不用不可用：焦点保留、读屏照常能找到它，状态念"加载中"
+        Assert.True(button.IsEnabled && button.IsFocused);
+        Assert.Equal(Provider.GetLang(button).Loading, UIElementAutomationPeer.CreatePeerForElement(button).GetItemStatus());
         Assert.False(button.ShowsSpinner); // 200 毫秒内不出现
 
         WpfUi.Wait(TimeSpan.FromMilliseconds(350));
