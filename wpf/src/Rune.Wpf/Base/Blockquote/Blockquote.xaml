@@ -1,0 +1,22 @@
+<!-- Blockquote 的主题样式（vue-tsx-pro 的 blockquoteStyles.root）：起始边的竖线跟着 FlowDirection 镜像 -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <Style TargetType="rune:Blockquote">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderStrong}" />
+    <!-- borderWidths.md -->
+    <Setter Property="BorderThickness" Value="3,0,0,0" />
+    <Setter Property="rune:EmSize.Padding" Value="1,0.25,0,0.25" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="rune:Blockquote">
+          <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
+            <ContentPresenter />
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+</ResourceDictionary>

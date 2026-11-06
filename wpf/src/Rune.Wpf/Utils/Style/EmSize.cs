@@ -110,7 +110,7 @@ public static class EmSize
     }
 
     /// <summary>继承来的（或默认的）字号乘上倍数；本地值、样式写的字号照用。</summary>
-    static object ScaleFontSize(DependencyObject d, object baseValue, double scale)
+    internal static object ScaleFontSize(DependencyObject d, object baseValue, double scale)
     {
         if (d.ReadLocalValue(Control.FontSizeProperty) != DependencyProperty.UnsetValue) return baseValue;
         return DependencyPropertyHelper.GetValueSource(d, Control.FontSizeProperty).BaseValueSource is BaseValueSource.Default or BaseValueSource.Inherited

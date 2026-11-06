@@ -1,0 +1,13 @@
+<!-- Code、Mark 的主题样式（vue-tsx-pro 的 codeStyles.root、markStyles.root）：行内文字只有字体、颜色、底色可设 -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <Style TargetType="rune:Code">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Fill}" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="FontFamily" Value="{DynamicResource Rune.Font.Mono}" />
+  </Style>
+  <Style TargetType="rune:Mark">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Highlight}" />
+  </Style>
+</ResourceDictionary>
