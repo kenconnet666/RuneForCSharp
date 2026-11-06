@@ -62,10 +62,9 @@ const isPart = (name) => /^props[A-Z]/.test(name);
 
 /** 接口名 → 声明它的文件（含不导出的） */
 function declarations(vue) {
-  vue.declarations ??= new Map(
-    vue.files.flatMap((file) => [...vue.text(file).matchAll(/^(?:export )?(?:interface|type) (\w+)/gm)].map((m) => [m[1], file])),
-  );
-  return vue.declarations;
+  if (!vue.cache.has('declarations'))
+    vue.cache.set('declarations', new Map(vue.files.flatMap((file) => [...vue.text(file).matchAll(/^(?:export )?(?:interface|type) (\w+)/gm)].map((m) => [m[1], file]))));
+  return vue.cache.get('declarations');
 }
 
 /**

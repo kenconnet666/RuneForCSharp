@@ -6,9 +6,10 @@ export function docOf(node, source, ast) {
   return parseDoc(docs.at(-1).getText(source));
 }
 
-/** 解析一段 `/** … *\/` 原文 */
+/** 解析一段 `/** … *\/` 原文（节点原文可能带着前面的行注释，只取最后一段 JSDoc） */
 export function parseDoc(raw) {
-  const lines = raw
+  const block = raw.match(/\/\*\*[\s\S]*?\*\//g)?.at(-1) ?? raw;
+  const lines = block
     .replace(/^\/\*\*/, '')
     .replace(/\*\/$/, '')
     .split(/\r?\n/)

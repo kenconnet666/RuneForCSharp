@@ -37,6 +37,9 @@ class Vue {
   #files;
   #graph;
 
+  /** 各工具按名字缓存的解析结果（token 组、主题、声明表……） */
+  cache = new Map();
+
   constructor(root, src, API, ast) {
     this.root = root;
     this.src = src;
