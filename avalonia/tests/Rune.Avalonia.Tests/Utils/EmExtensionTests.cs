@@ -2,6 +2,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Controls.Primitives;
+using Avalonia.Data;
+using Avalonia.Layout;
 using Avalonia.Styling;
 
 namespace Rune.Avalonia.Tests;
@@ -37,5 +39,23 @@ public class EmExtensionTests
 
         Assert.Equal(new Thickness(3), styled.Padding);
         Assert.Equal(new Thickness(7), local.Padding);
+    });
+
+    [Fact]
+    public Task Minimum_and_theme_resource_coefficients() => HeadlessUi.Run(() =>
+    {
+        var border = new ContentControl();
+        border.Bind(Layoutable.MinHeightProperty, (BindingBase)new EmExtension(2.25) { Min = 24 }.ProvideValue(null!));
+        border.Bind(TemplatedControl.CornerRadiusProperty, (BindingBase)new EmExtension { Resource = "Rune.Radius.Md" }.ProvideValue(null!));
+        var host = new StackPanel { Children = { border } };
+        host.SetValue(TextElement.FontSizeProperty, 8d);
+        var window = HeadlessUi.Show(host);
+
+        Assert.Equal(24, border.MinHeight); // max(2.25em, 24px)：8 × 2.25 = 18 < 24
+        Assert.Equal(new CornerRadius(0.4 * 8), border.CornerRadius); // radii.md = 0.4em
+
+        host.SetValue(TextElement.FontSizeProperty, 20d);
+        HeadlessUi.Flush(window);
+        Assert.Equal(45, border.MinHeight);
     });
 }
