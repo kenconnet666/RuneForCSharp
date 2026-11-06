@@ -8,23 +8,19 @@
 
 **三套 .NET 桌面组件库（Avalonia、WPF、WinForms），对标 vue-tsx-pro 的 `packages/ui`。**
 
-- **外观以 TS 版为准，尽量一致**：token、主题由脚本生成；组件的配方按 vue-tsx-pro 对应组件逐条移植（尺寸、内边距、圆角、颜色 token、状态、过渡），不凭印象重画；做不到的写进 DESIGN。
+- **外观和行为以 TS 版为准，尽量一致**：token、主题由脚本生成；组件的配方按 vue-tsx-pro 对应组件逐条移植（尺寸、内边距、圆角、颜色 token、状态、过渡），行为以它的测试用例为规格，不凭印象重画；做不到的写进 DESIGN。核对靠工具（"信息与验证工具"），每个组件过样式、行为、无障碍三道核对。
 - **写法是各平台地道的写法**：API 的形状按平台习惯（见"平台化的约定"），不照搬 Vue 的组合式写法。
 - **三个库各自独立**：不共享代码，一致性靠 `tools/` 生成与对照。
-- three 不做；charts、maps、diagram、code-editor、xlsx 等前面完成后再定。
+- **范围是组件库的全部内容**（决定 22、23）：核心约 180 个组件三个平台都做；扩展做 charts、diagram、theme-customize、code-editor（Avalonia、WPF），maps、xlsx 做到时再定；three 与文档站专用的（docs-kit、SkipLink、ClientOnly、VisuallyHidden、Can）不做。
+- **上游有问题就反馈**：移植时发现 vue-tsx-pro 的 bug（行为与文档不符、对比度、从右到左、键盘缺失），记进 UPSTREAM.md 的"上游问题"，发给维护 vue-tsx-pro 的会话，由那边修复发版，我们升级锁定的版本（决定 24）。
 
 ## 现状（2026-11-06）
 
-- 阶段 0 骨架完成：三个平台各有组件库、示例应用、测试工程，基础设施都配了测试（37 个，全部通过）。
-- 前置探测都做完了，结论在 DESIGN：档位类型（§3）、Avalonia 组合档位（§4）、部件的转发与层层合并（§7）、WinForms 主题切换（§9）、Avalonia 桌面热重载（§11）。只剩 WPF 的 IDE 热重载要手动试。
-- 梳理了 vue-tsx-pro 的结构：基础设施（`utils/`、`config/`）与组件按依赖分层（阶段 2、3）。
-- 开工前要定的事都定了（"已定的决定" 10–18），之后定下的见 19 起。
-- 阶段 1 的 `ts-inspect` 已做好（命令见 HANDOFF 的命令表）；C# 的 LSP 配好了（HANDOFF §3）。
-- 阶段 1 的 token-gen 已做好：三个库都有了 16 套主题的 token。
-- 阶段 1 的 lang-gen 已做好：三个库都有了中英文的语言包。
-- 阶段 1 的 icons-gen 已做好：三个库都有了 Lucide 全集。
-- 阶段 1 完成（工具与生成脚本）。parity 的报告是进度表：`node tools/parity/parity.mjs`。
-- 还没有任何组件。下一步：阶段 2。
+- 阶段 0、1 完成：三个平台的骨架、示例应用、测试工程；工具与生成脚本（ts-inspect、token-gen、lang-gen、icons-gen、recipe-gen、parity、三个平台的 inspect 与 bench）。
+- 组件：Icon、Text 家族（5 个）、Spinner、Badge、Button 家族（Button、IconButton、CloseButton、ClearButton、LinkButton、IconLinkButton，Avalonia、WPF 另有 ButtonBase）三个平台都做了，162 个测试。
+- 做过一轮性能（DESIGN §9"组件基准"）：Avalonia 按钮首次布局快 36%、WinForms 快 4 倍。
+- 上游 vue-tsx-pro 做完了样式体系改造（0.11，分支 feat/style-overhaul，等合入 master），对照与要跟进的在 [UPSTREAM.md](UPSTREAM.md)。
+- 生成文件锁定上游 9d5af3f3（`tools/vue-tsx-pro.ref`）。下一步：里程碑 M0。
 
 ## 已定的决定
 
@@ -43,13 +39,18 @@
 | 11 | Avalonia 组合档位 | 调色板对象：色调样式设 `Palette`，样式档位绑定调色板的画刷；开销成问题时退到"每种样式一个 ControlTheme"（DESIGN §4） |
 | 12 | WinForms 组件形态 | 无窗口元素是本体；每个组件另有单元素宿主，能放进设计器；数量大的地方直接用元素（DESIGN §9） |
 | 13 | 推进节奏 | 基础设施层三个库一起做；组件按层推进，每个组件先做 Avalonia、WPF 紧跟；WinForms 可以落后一层，但不跳层 |
-| 14 | WinForms 范围 | 先做到第 3 层（复合组件）；第 4、5 层等前面稳定后再定 |
+| 14 | WinForms 范围 | ~~先做到第 3 层（复合组件）；第 4、5 层等前面稳定后再定~~ 改为决定 22 |
 | 15 | Avalonia 热重载 | HotAvalonia（MIT），只在 Debug 构建里引用，不进包的依赖 |
 | 16 | 对照粒度 | parity 比对名字与配方取值（每个部件在各档位下用哪个 token）；截图比对放在阶段 4 |
 | 17 | 工具的语言 | 读 vue-tsx-pro 的工具用 node，只依赖内置模块与 vue-tsx-pro 自带的 `typescript`；要加载三个库的工具用 C# |
 | 18 | 测试与工具的依赖 | Playwright、FlaUI 只用在测试与工具里，不进组件库的依赖 |
 | 19 | WPF 的 Text 家族 | 从 TextBlock 派生（行内内容、截断、读屏现成）；模板里的 Text 给部件样式键，Provider 合成部件键时叠在同一组件的类型键结果上，"所有实例"的样式就能进模板（2026-11-06 用户确认） |
 | 20 | 自绘组件的部件 | 底色、描边、圆角自己画；图标、文字等部件是代码里组合的真组件（不建模板）：Avalonia 用子选择器 `rune\|Badge > rune\|Icon#PART_Icon`，WPF 子元素引用部件样式键，WinForms 用部件属性记录（2026-11-06 用户确认） |
+| 21 | 跟进上游 0.11 | UPSTREAM.md 的 5 个工作包都做：`Tone` 改名 `TextTone`（不留旧名）、组件段只用主题设值、Provider 合成照上游的分段语义（跨模块，WPF 先做）、Badge 色调取共用色表、WinForms 定制入口；另有按钮字重 500、控件高度收成一处（2026-11-06 用户确认按规划修订路线图） |
+| 22 | WinForms 的范围 | 改决定 14：核心五层都做；扩展只做 Avalonia、WPF（2026-11-06） |
+| 23 | 扩展 | charts、diagram、theme-customize、code-editor 在核心五层之后做；maps（要地图数据）、xlsx 做到时再定；three、docs-kit 不做（2026-11-06） |
+| 24 | 锁定上游 | 生成文件与 CI 对齐 `tools/vue-tsx-pro.ref` 锁定的提交（上游发版后改成发版的提交）。跟进新版本是一次专门的提交：改锁定、重新生成、按上游的变化清单逐条对照（UPSTREAM.md）。上游的问题发给维护 vue-tsx-pro 的会话修复发版，不直接改那边的仓库；有设计分歧时问用户（2026-11-06） |
+| 25 | 完成标准 | 每个组件过三道核对：样式（ts-styles 的计算样式对 inspect props，加截图）、行为（上游测试用例逐条对应或登记不适用）、无障碍（UIA 对 ARIA 角色与状态）；parity 报告里没有未解释的差异才勾选（2026-11-06） |
 
 ## 平台化的约定
 
@@ -131,7 +132,10 @@
 - **小步提交，直接落在 master**：每完成一项（一个工具、一块基础设施、一个组件或一组紧密相关的组件），跑相关测试与生成脚本的 `--check`，提交；不开 PR、不发包。整理与功能分开提交。
 - **本地只验证改动相关的，全量交给 CI**（2026-11-06 起）：改了哪个平台就构建、测试哪个平台，相关工具跑 `--check`；三个平台的全量测试、示例截图、生成文件核对由 `.github/workflows/ci.yml` 并行跑。不等 CI，CI 报的问题下次提交前修。本地要跑全量时在另一个 git 工作树里后台跑，主工作区继续。
 - **先查后写**：做组件前跑 `ts-inspect component <名字>` 与 `deps <名字>`，读 vue-tsx-pro 的源码与 RuneForBlazor 的同名组件；改 C# 用 LSP 查定义与引用。
-- **遇到下面的情况，这一项停下，写进"待定的决定"**（日期、项、卡在哪、要决定什么、建议），转去做下一个不依赖它的项：要加"已定的决定"之外的依赖；vue-tsx-pro 的做法在某个平台上做不到、又有多种合理的替代；要改已定的决定或公共 API 的形状。
+- **遇到下面的情况，这一项停下，写进"待定的决定"**（日期、项、卡在哪、要决定什么、建议），转去做下一个不依赖它的项：要加"已定的决定"之外的依赖；vue-tsx-pro 的做法在某个平台上做不到、又有多种合理的替代；要改已定的决定或公共 API 的形状（已定的决定里列了的除外）；和上游有设计分歧。
+- **组件的流水线**：`ts-inspect component` / `deps` 与上游的测试名 → Avalonia（组件、移植测试、inspect 对 ts-styles、截图、Gallery 示例）→ WPF 同样 → WinForms（最多落后一层，不跳层）。每个组件每个平台一次提交。上层只组合下层组件，要的能力先补进基础层。
+- **上游的通知与问题**：维护 vue-tsx-pro 的会话会发来变化通知，对照写进 UPSTREAM.md；上游合入并发版后才改锁定（决定 24）。发现上游的问题时，在 UPSTREAM.md 的"上游问题"记一行（现象、复现、建议），再发消息给那个会话；修好发版后升级锁定，勾掉这一行。
+- **并行**：耗时的构建、测试、采样挂后台；互不依赖的工具（ts-styles、截图对比）可以在 git 工作树里交给后台子代理，做完合回 master 复核。同一个组件的三个平台按顺序做，不并行改同一组文件。
 - **不写过程流水账**：结论进 DESIGN（取舍与坑）或本文（勾选、一行结论），过程留在提交说明里；每完成一步更新 HANDOFF 的现状与下一步，换会话也能接上。
 
 ## 参考源码
@@ -158,6 +162,8 @@
 | `inspect` | 三个平台各一个控制台程序，C#：`avalonia/tools/`、`wpf/tools/`、`winforms/tools/` | `snapshot <组件/示例>`：渲染成 PNG（主题、宽度、DPI、状态可选）。<br>`tree`：元素树，每个部件的名字、类型、边界。<br>`props`：每个部件解析后的属性（背景、前景、边框、内边距、字号、圆角、透明度）与值的来源（主题、Provider、使用方、本地值）。<br>`uia`：UI Automation 树（名称、角色、状态、支持的 Pattern、键盘焦点） | PNG、Markdown / JSON |
 | `bench` | `inspect bench <场景>` | 把这轮的探测做成固定场景：3000 个控件的创建与布局、亮暗切换、换档位、WinForms 的失效与重画 | Markdown 表（多轮的中位数） |
 | `parity` | `tools/parity`，node | 读上面几个工具的 JSON 做比对：名字（组件、部件、档位、默认值、语言键）与取值（部件在各档位下的 token、尺寸）；报告缺失、改名与差异 | Markdown 报告 |
+| 行为对照 | 并进 `ts-inspect` 与 `parity` | 上游一个组件的测试用例（`describe` / `it` 的名字）；我们的测试用 `[Upstream("…")]` 之类的标注对上，或在 registry 里登记"平台不适用"和原因；parity 报出没对上的 | Markdown 表 |
+| 截图对比 | `tools/` 里，node | 同一个示例在 ts-styles 与 inspect 出的图并排、算差异，CI 上传；差异人工确认后进基线 | PNG + Markdown |
 
 做法：
 - **示例登记**：Gallery 的示例按"组件 / 示例名"登记，`inspect` 与 Gallery 共用这张登记表。示例名与 vue-tsx-pro 文档站的小节 id 一致，`ts-styles` 和 `inspect props` 才能逐个配对。
@@ -178,6 +184,33 @@
 - context7：第三方库的文档；
 - `refs/` 里的平台源码；
 - 内置浏览器：打开 vue-tsx-pro 文档站（`pnpm dev:docs`，端口 5174）看示例和交互。
+
+## 里程碑（2026-11-06 重新规划）
+
+下面的阶段 0–4 是按内容分的；推进的先后按里程碑走，每个里程碑做完更新"现状"。
+
+| 里程碑 | 内容 | 对应 |
+|---|---|---|
+| **M0 对齐上游、补齐核对工具** | 见下面的清单 | 决定 21、24、25；UPSTREAM.md |
+| **M1 基础设施与第 1 层** | 阶段 2 没勾的基础设施，各自跟第一个要用它的组件一起做；第 1 层约 50 个组件 | 阶段 2、3 第 1 层 |
+| **M2 第 2 层** | 约 55 个：选择与输入原语、Tag / Alert、Menu、对话框内核、导航、Accordion / Tree、日历、静态表格 | 阶段 3 第 2 层 |
+| **M3 第 3 层** | 约 30 个：TextField 先做，选择类、Dialog / Drawer / Toast、Upload、日期输入 | 阶段 3 第 3 层 |
+| **M4 第 4、5 层** | DatePicker、DataTable、TreeDataTable、ConditionBuilder；页面组合 | 阶段 3 第 4、5 层 |
+| **M5 扩展** | charts、diagram、theme-customize、code-editor（Avalonia、WPF） | 决定 23 |
+| **M6 收尾** | UIA 自动化测试、截图基线、NuGet 包（发不发由用户定） | 阶段 4 |
+
+### M0 清单
+
+- [x] CI 与生成脚本锁定上游提交（`tools/vue-tsx-pro.ref`；读到别的提交时工具提醒）。
+- [ ] 上游 0.11 合入 master、发版后：改锁定，重新生成 token 与语言包（去 ocean、加 high-contrast-dark、着色页面、状态文字、占位文字），截图核对。
+- [ ] 工作包 1：`Tone` → `TextTone`（三个平台，不留旧名）。
+- [ ] 工作包 2：组件段只用主题设值（Avalonia 的 Size、Radius、色调 → 调色板、Icon / Text 的色调改成主题里的绑定；WPF 的 Size）；DESIGN 写明定制入口与不稳定的资源键。
+- [ ] 工作包 3：Provider 合成照上游的分段语义（WPF 先、Avalonia 后，随机组合测试）。
+- [ ] 工作包 4：Badge 色调取共用色表。
+- [ ] 工作包 5：WinForms 的定制入口。
+- [ ] 按钮字重 600 → 500；控件高度收成每个平台一处（`max(round(系数 × 字号 ÷ 步长) × 步长, minTarget)`）。
+- [ ] `ts-styles`、parity 取值比对、行为对照、截图对比（"信息与验证工具"）；拿已做的 16 个组件过一遍三道核对，补齐差异。
+- [ ] 按钮家族的缺口：focusableWhenDisabled（三个平台）、WinForms 的 propsContent 与 ButtonBase；ButtonGroup、CopyButton。
 
 ## 阶段
 
@@ -290,7 +323,7 @@
 
 **第 4 层 上层组件（TS L9–L10）**：DatePicker、DateRangePicker、PaginationBar、DataTable、TreeDataTable、ConditionBuilder。
 
-**第 5 层 页面组合（TS 的 patterns）**：ActionBar、AuthLayout、DeadlineBadge、KanbanBoard、NotificationCenter、SlideCaptcha、StepsForm、ThemeSwitcher、AppShell、FormDialog、CommentThread、DataImport、FilterBar、QueryTable。主题定制、charts 等扩展之后再定。
+**第 5 层 页面组合（TS 的 patterns）**：ActionBar、AuthLayout、DeadlineBadge、KanbanBoard、NotificationCenter、SlideCaptcha、StepsForm、ThemeSwitcher、AppShell、FormDialog、CommentThread、DataImport、FilterBar、QueryTable。扩展见决定 23（M5）。
 
 TS 里专为浏览器的不做：VisuallyHidden（桌面上用 `AutomationProperties.Name` / `HelpText`）、SkipLink、ClientOnly、Can；Ellipsis、Watermark 这类按平台能力决定。
 
@@ -312,7 +345,7 @@ TS 里专为浏览器的不做：VisuallyHidden（桌面上用 `AutomationProper
 RuneForBlazor 已经走过一遍这些组件，同一个组件先看它踩过的坑。
 
 每个组件的完成标准：
-1. 外观对齐：配方逐条移植，parity 报告没有未解释的差异（亮、暗主题）；
+1. 外观与行为对齐（决定 25）：配方逐条移植，ts-styles 的计算样式与截图对得上；上游的测试用例逐条有对应或登记了不适用；parity 报告没有未解释的差异（亮、暗主题）；
 2. API：参数、默认值、部件与 vue-tsx-pro 对应，形状符合"平台化的约定"；每个内部节点都有部件名，嵌套组件的部件能从外层转发、层层合并（DESIGN §7）；公开成员有中文文档注释；
 3. 行为测试：受控与非受控用法、主要分支、无障碍属性；
 4. 无障碍：键盘与读屏符合 WAI-ARIA 的做法（以 vue-tsx-pro 的实现为准），UIA 客户端能看到名称、角色、状态；

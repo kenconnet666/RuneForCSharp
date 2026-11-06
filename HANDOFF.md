@@ -74,6 +74,7 @@
 | 全量验证（三个平台并行构建、测试、截图；生成文件核对；parity 报告） | CI：`.github/workflows/ci.yml`（推送到 GitHub 后跑）；本地要跑全量时 `git worktree add ../RuneForCSharp-verify HEAD` 后在那边后台跑 |
 | 基准：每个组件建 N 个，量创建、首次布局、渲染、换主题的耗时与分配、常驻内存（多轮中位数，平台自带的 Button 作对照）；`bench Button` 只跑名字以它开头的；`--count`、`--runs` | `… Rune.Avalonia.Inspect.exe bench --count 1000 --runs 6`（WPF、WinForms 的 inspect 同样） |
 | 采样分析（找热点的调用链）：先 collect（exe 写绝对路径），再转 speedscope，再按帧汇总调用链 | `dotnet tool run dotnet-trace -- collect --output a.nettrace -- <exe 绝对路径> bench Button`；`dotnet tool run dotnet-trace -- convert a.nettrace --format speedscope -o a`；`node tools/trace/callers.mjs a.speedscope.json Monitor.Enter 8` |
+| 锁定的上游提交（CI 检出它；工具读到别的提交时在错误输出里提醒）；跟进上游新版本时改它再重新生成 | `tools/vue-tsx-pro.ref` |
 | 重新生成 token（改了 vue-tsx-pro 的主题后） | `node tools/token-gen/token-gen.mjs` |
 | 核对生成的 token 与 vue-tsx-pro 一致（CI 用） | `node tools/token-gen/token-gen.mjs --check` |
 | 重新生成语言包（改了 vue-tsx-pro 的语言包后）；`--check` 只核对 | `node tools/lang-gen/lang-gen.mjs` |
@@ -130,8 +131,9 @@
 
 ## 5. 下一步
 
-1. `tools/ts-inspect` 已做好（命令表里有用法）。移植组件前先跑 `component <名字>`，比通读源码快。
-2. 阶段 1 的生成脚本与 parity 都已做好（DESIGN §6，命令表）。
-3. 阶段 2：先做 Gallery 的示例登记表和三个平台的 `inspect`（截图、元素树、属性来源、UIA 树），再做基础设施层（部件转发与合并、作用域、主题、语言、交互工具），用 Icon → Text → Spinner → Badge → Button 家族 → Field 验证。WPF 的 Provider 要递归合成嵌套的部件样式；WinForms 把 4.1 的做法写成正式的 `ElementHost`，部件属性记录的合并用源代码生成器。
-4. 阶段 3：按依赖分层从下往上做组件（ROADMAP 里有五层的清单）。
-5. WPF 的 XAML 热重载要在 Rider 2026.2 或 VS 里手动试（DESIGN §13）。
+2026-11-06 用户要求无人值守做完组件库的全部内容，行为与样式尽量和 vue-tsx-pro 一致；上游有问题时通知维护 vue-tsx-pro 的会话修复发版。规划在 ROADMAP 的"里程碑"（M0–M6）与决定 21–25。
+
+1. **M0**（ROADMAP 的 M0 清单）：上游 0.11 的 5 个工作包、按钮字重与控件高度；`ts-styles`、取值比对、行为对照、截图对比；已做的 16 个组件过三道核对；按钮家族的缺口。上游 0.11 合入发版后改 `tools/vue-tsx-pro.ref` 并重新生成。
+2. **M1–M4**：按依赖分层从下往上做组件（ROADMAP 阶段 3 的五层清单，以 `parity` 的依赖表为准），每个组件按"自主执行的规矩"里的流水线走。
+3. **M5、M6**：扩展（决定 23）与收尾。
+4. WPF 的 XAML 热重载要在 Rider 2026.2 或 VS 里手动试（DESIGN §13）。
