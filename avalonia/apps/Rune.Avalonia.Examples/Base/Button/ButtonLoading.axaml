@@ -1,0 +1,11 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/avalonia"
+             x:Class="Rune.Avalonia.Examples.ButtonLoading">
+  <!-- 点击后加载 1.5 秒；很快完成的加载不出现旋转指示（DelayedLoading），宽度始终不变 -->
+  <WrapPanel ItemSpacing="8" LineSpacing="8">
+    <rune:Button Name="Save" Icon="{x:Static rune:Lucide.Save}">保存</rune:Button>
+    <rune:Button Name="Quick" Variant="outline">很快完成（0.1 秒）</rune:Button>
+    <rune:Button IsLoading="True" Variant="soft">一直在加载</rune:Button>
+  </WrapPanel>
+</UserControl>

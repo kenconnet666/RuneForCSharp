@@ -1,0 +1,14 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/avalonia"
+             x:Class="Rune.Avalonia.Examples.ButtonIcons">
+  <!-- IconButton、Kbd 做出来后补上第二行 -->
+  <WrapPanel ItemSpacing="8" LineSpacing="8">
+    <rune:Button Icon="{x:Static rune:Lucide.Plus}">新建</rune:Button>
+    <rune:Button Variant="soft" Icon="{x:Static rune:Lucide.Download}">下载</rune:Button>
+    <rune:Button Variant="outline" Tone="neutral" IconEnd="{x:Static rune:Lucide.ChevronDown}">更多</rune:Button>
+    <rune:Button Variant="ghost" IconEnd="{x:Static rune:Lucide.ArrowRight}">下一步</rune:Button>
+    <rune:Button Variant="link" IconEnd="{x:Static rune:Lucide.ExternalLink}">查看文档</rune:Button>
+    <rune:Button Variant="soft" Tone="neutral"><StackPanel Orientation="Horizontal" Spacing="6"><TextBlock Text="未读消息" VerticalAlignment="Center" /><rune:Badge Variant="solid" Tone="danger" Radius="full">12</rune:Badge></StackPanel></rune:Button>
+  </WrapPanel>
+</UserControl>

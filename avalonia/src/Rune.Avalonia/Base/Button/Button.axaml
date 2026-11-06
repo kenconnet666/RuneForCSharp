@@ -1,0 +1,94 @@
+<!--
+  Button 的主题（vue-tsx-pro 的 button-core）：色调样式设调色板，样式档位绑定调色板的字段（DESIGN §4 决定 11），
+  36 种组合只写 6 + 6 条加 5 条悬停。内部尺寸都是 em：内边距 1em × 0.25em、最小高度 max(2.25em, 24px)、图标与文字间距 0.5em。
+  部件的外观写在嵌套样式里（DESIGN §7），使用方的 /template/ 样式排在后面能改
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:Button}" TargetType="rune:Button">
+    <Setter Property="Variant" Value="solid" />
+    <Setter Property="Tone" Value="accent" />
+    <Setter Property="Radius" Value="md" />
+    <Setter Property="Padding" Value="{rune:Em 1, 0.25}" />
+    <Setter Property="MinHeight" Value="{rune:Em 2.25, Min=24}" />
+    <!-- borderWidths.xs、sm 是不随主题变的像素 token（资源是 double，Thickness 不能直接引用） -->
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Semibold}" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border Name="PART_Root" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" ClipToBounds="True">
+            <Panel>
+              <Canvas Name="PART_Ripples" IsHitTestVisible="False" />
+              <StackPanel Name="PART_Content" Orientation="Horizontal" Spacing="{rune:Em 0.5, Of=TemplatedParent}" Margin="{TemplateBinding Padding}"
+                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
+                <rune:Icon Name="PART_Icon" Data="{TemplateBinding Icon}" VerticalAlignment="Center"
+                           IsVisible="{Binding $parent[rune:Button].Icon, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" VerticalAlignment="Center" />
+                <rune:Icon Name="PART_IconEnd" Data="{TemplateBinding IconEnd}" VerticalAlignment="Center"
+                           IsVisible="{Binding $parent[rune:Button].IconEnd, Converter={x:Static ObjectConverters.IsNotNull}}" />
+              </StackPanel>
+              <rune:Spinner Name="PART_Spinner" IsVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Panel>
+          </Border>
+          <Border Name="PART_FocusRing" IsVisible="False" IsHitTestVisible="False"
+                  BorderThickness="2" BorderBrush="{DynamicResource Rune.Brush.FocusRing}" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- 色调 → 调色板 -->
+    <Style Selector="^:neutral"><Setter Property="Palette" Value="{DynamicResource Rune.Palette.Neutral}" /></Style>
+    <Style Selector="^:accent"><Setter Property="Palette" Value="{DynamicResource Rune.Palette.Accent}" /></Style>
+    <Style Selector="^:info"><Setter Property="Palette" Value="{DynamicResource Rune.Palette.Info}" /></Style>
+    <Style Selector="^:success"><Setter Property="Palette" Value="{DynamicResource Rune.Palette.Success}" /></Style>
+    <Style Selector="^:warning"><Setter Property="Palette" Value="{DynamicResource Rune.Palette.Warning}" /></Style>
+    <Style Selector="^:danger"><Setter Property="Palette" Value="{DynamicResource Rune.Palette.Danger}" /></Style>
+
+    <!-- 样式 → 调色板的字段；悬停只在可用时（不可用的控件收不到指针） -->
+    <Style Selector="^:solid">
+      <Setter Property="Background" Value="{Binding $self.Palette.Solid}" />
+      <Setter Property="Foreground" Value="{Binding $self.Palette.Contrast}" />
+    </Style>
+    <Style Selector="^:solid:pointerover"><Setter Property="Background" Value="{Binding $self.Palette.SolidHover}" /></Style>
+    <Style Selector="^:soft">
+      <Setter Property="Background" Value="{Binding $self.Palette.Soft}" />
+      <Setter Property="Foreground" Value="{Binding $self.Palette.Text}" />
+    </Style>
+    <Style Selector="^:soft:pointerover"><Setter Property="Background" Value="{Binding $self.Palette.SoftHover}" /></Style>
+    <Style Selector="^:surface">
+      <Setter Property="Background" Value="{Binding $self.Palette.Surface}" />
+      <Setter Property="Foreground" Value="{Binding $self.Palette.Text}" />
+      <Setter Property="BorderBrush" Value="{Binding $self.Palette.Border}" />
+    </Style>
+    <Style Selector="^:surface:pointerover"><Setter Property="Background" Value="{Binding $self.Palette.SoftHover}" /></Style>
+    <Style Selector="^:outline">
+      <Setter Property="Foreground" Value="{Binding $self.Palette.Text}" />
+      <Setter Property="BorderBrush" Value="{Binding $self.Palette.Border}" />
+    </Style>
+    <Style Selector="^:outline:pointerover"><Setter Property="Background" Value="{Binding $self.Palette.SubtleHover}" /></Style>
+    <Style Selector="^:ghost"><Setter Property="Foreground" Value="{Binding $self.Palette.Text}" /></Style>
+    <Style Selector="^:ghost:pointerover"><Setter Property="Background" Value="{Binding $self.Palette.SubtleHover}" /></Style>
+    <!-- 链接样式：无底、无内边距、最小高度 0、字重 medium，悬停下划线 -->
+    <Style Selector="^:link">
+      <Setter Property="Foreground" Value="{Binding $self.Palette.Text}" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="MinHeight" Value="0" />
+      <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
+    </Style>
+    <Style Selector="^:link:pointerover /template/ TextBlock"><Setter Property="TextDecorations" Value="Underline" /></Style>
+
+    <Style Selector="^:disabled"><Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" /></Style>
+    <Style Selector="^:focus-visible /template/ Border#PART_FocusRing"><Setter Property="IsVisible" Value="True" /></Style>
+    <!-- 加载中：内容透明（保留宽度与读屏名称），旋转指示盖在中间 -->
+    <Style Selector="^:spinner /template/ StackPanel#PART_Content"><Setter Property="Opacity" Value="0" /></Style>
+    <Style Selector="^:spinner /template/ rune|Spinner#PART_Spinner"><Setter Property="IsVisible" Value="True" /></Style>
+  </ControlTheme>
+</ResourceDictionary>

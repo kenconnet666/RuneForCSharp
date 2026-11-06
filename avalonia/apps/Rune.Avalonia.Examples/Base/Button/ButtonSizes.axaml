@@ -1,0 +1,9 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/avalonia"
+             x:Class="Rune.Avalonia.Examples.ButtonSizes">
+  <StackPanel Spacing="12">
+    <WrapPanel ItemSpacing="8" LineSpacing="8"><rune:Button Size="xs" Icon="{x:Static rune:Lucide.Plus}" VerticalAlignment="Center">xs</rune:Button><rune:Button Size="sm" Icon="{x:Static rune:Lucide.Plus}" VerticalAlignment="Center">sm</rune:Button><rune:Button Size="md" Icon="{x:Static rune:Lucide.Plus}" VerticalAlignment="Center">md</rune:Button><rune:Button Size="lg" Icon="{x:Static rune:Lucide.Plus}" VerticalAlignment="Center">lg</rune:Button><rune:Button Size="xl" Icon="{x:Static rune:Lucide.Plus}" VerticalAlignment="Center">xl</rune:Button></WrapPanel>
+    <WrapPanel ItemSpacing="8" LineSpacing="8"><rune:Button Size="xs" Variant="outline" Tone="neutral" VerticalAlignment="Center">xs</rune:Button><rune:Button Size="sm" Variant="outline" Tone="neutral" VerticalAlignment="Center">sm</rune:Button><rune:Button Size="md" Variant="outline" Tone="neutral" VerticalAlignment="Center">md</rune:Button><rune:Button Size="lg" Variant="outline" Tone="neutral" VerticalAlignment="Center">lg</rune:Button><rune:Button Size="xl" Variant="outline" Tone="neutral" VerticalAlignment="Center">xl</rune:Button></WrapPanel>
+  </StackPanel>
+</UserControl>

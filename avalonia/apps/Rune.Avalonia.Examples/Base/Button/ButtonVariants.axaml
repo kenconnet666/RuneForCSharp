@@ -1,0 +1,13 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/avalonia"
+             x:Class="Rune.Avalonia.Examples.ButtonVariants">
+  <WrapPanel ItemSpacing="24" LineSpacing="16">
+    <StackPanel Spacing="4" Width="144"><rune:Button Variant="solid" HorizontalAlignment="Left">solid</rune:Button><rune:Small Tone="muted">主要操作，每组最多一个</rune:Small></StackPanel>
+    <StackPanel Spacing="4" Width="144"><rune:Button Variant="soft" HorizontalAlignment="Left">soft</rune:Button><rune:Small Tone="muted">需要突出的次要操作</rune:Small></StackPanel>
+    <StackPanel Spacing="4" Width="144"><rune:Button Variant="surface" HorizontalAlignment="Left">surface</rune:Button><rune:Small Tone="muted">表单、设置页里的次要操作</rune:Small></StackPanel>
+    <StackPanel Spacing="4" Width="144"><rune:Button Variant="outline" HorizontalAlignment="Left">outline</rune:Button><rune:Small Tone="muted">次要操作</rune:Small></StackPanel>
+    <StackPanel Spacing="4" Width="144"><rune:Button Variant="ghost" HorizontalAlignment="Left">ghost</rune:Button><rune:Small Tone="muted">工具栏、行内操作</rune:Small></StackPanel>
+    <StackPanel Spacing="4" Width="144"><rune:Button Variant="link" HorizontalAlignment="Left">link</rune:Button><rune:Small Tone="muted">句子中间的操作</rune:Small></StackPanel>
+  </WrapPanel>
+</UserControl>
