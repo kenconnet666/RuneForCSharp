@@ -93,7 +93,7 @@ public class Badge : Element
         try
         {
             graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            using var outline = RoundedRectangle(bounds, radius);
+            using var outline = Drawing.RoundedRectangle(bounds, radius);
             if (colors.Background is { } background)
             {
                 using var brush = new SolidBrush(background);
@@ -128,23 +128,6 @@ public class Badge : Element
 
     /// <summary>描边宽度：borderWidths.xs（设备无关像素）。没有描边色时同样占位，各样式等高。</summary>
     static float BorderWidth(ElementContext context) => context.Scale(Tokens.BorderWidth.Xs);
-
-    static GraphicsPath RoundedRectangle(RectangleF bounds, float radius)
-    {
-        var path = new GraphicsPath();
-        if (radius <= 0)
-        {
-            path.AddRectangle(bounds);
-            return path;
-        }
-        var diameter = 2 * radius;
-        path.AddArc(bounds.X, bounds.Y, diameter, diameter, 180, 90);
-        path.AddArc(bounds.Right - diameter, bounds.Y, diameter, diameter, 270, 90);
-        path.AddArc(bounds.Right - diameter, bounds.Bottom - diameter, diameter, diameter, 0, 90);
-        path.AddArc(bounds.X, bounds.Bottom - diameter, diameter, diameter, 90, 90);
-        path.CloseFigure();
-        return path;
-    }
 }
 
 /// <summary>Badge 圆点部件的属性（TS 的 propsDot）：字段可空，null 是"不改"。圆点是画出来的，能改的只有颜色与大小。</summary>

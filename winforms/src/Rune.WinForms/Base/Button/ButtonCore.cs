@@ -170,7 +170,7 @@ public abstract class ButtonCore : Element
         try
         {
             graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            using var outline = RoundedRectangle(bounds, radius);
+            using var outline = Drawing.RoundedRectangle(bounds, radius);
             using (var fill = new SolidBrush(Fade(background.Value, dim))) graphics.FillPath(fill, outline);
             if (colors.Border is { } stroke)
             {
@@ -195,7 +195,7 @@ public abstract class ButtonCore : Element
                 // outline 宽 2、偏移 2（borderWidths.sm）：画在宿主留出的 Padding 里
                 var gap = context.Scale(Tokens.BorderWidth.Sm);
                 var ring = RectangleF.Inflate(bounds, gap + gap / 2, gap + gap / 2);
-                using var ringPath = RoundedRectangle(ring, radius + 1.5f * gap);
+                using var ringPath = Drawing.RoundedRectangle(ring, radius + 1.5f * gap);
                 using var pen = new Pen(context.Theme.Colors.FocusRing, gap);
                 graphics.DrawPath(pen, ringPath);
             }
@@ -226,23 +226,6 @@ public abstract class ButtonCore : Element
 
     /// <summary>描边宽度：borderWidths.xs；没有描边色时同样占位。</summary>
     static float Border(ElementContext context) => context.Scale(Tokens.BorderWidth.Xs);
-
-    static GraphicsPath RoundedRectangle(RectangleF bounds, float radius)
-    {
-        var path = new GraphicsPath();
-        if (radius <= 0)
-        {
-            path.AddRectangle(bounds);
-            return path;
-        }
-        var d = 2 * radius;
-        path.AddArc(bounds.X, bounds.Y, d, d, 180, 90);
-        path.AddArc(bounds.Right - d, bounds.Y, d, d, 270, 90);
-        path.AddArc(bounds.Right - d, bounds.Bottom - d, d, d, 0, 90);
-        path.AddArc(bounds.X, bounds.Bottom - d, d, d, 90, 90);
-        path.CloseFigure();
-        return path;
-    }
 
     /// <summary>一个波纹：圆心、最终半径、扩散进度与不透明度（Animator 驱动的信号，绘制时读，变了只重画这个按钮）。</summary>
     sealed record RippleState(PointF Origin, float Radius, Signal<double> Scale, Signal<double> Alpha)

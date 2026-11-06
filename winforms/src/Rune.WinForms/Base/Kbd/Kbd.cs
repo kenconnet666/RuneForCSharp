@@ -55,10 +55,10 @@ public class Kbd : Element
         {
             // 描边色铺满整个按键，再在里面画表面：底边比其余三边厚
             graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            using (var path = Rounded(outer, radius))
+            using (var path = Drawing.RoundedRectangle(outer, radius))
             using (var brush = new SolidBrush(colors.Border))
                 graphics.FillPath(brush, path);
-            using (var path = Rounded(face, Math.Max(0, radius - side)))
+            using (var path = Drawing.RoundedRectangle(face, Math.Max(0, radius - side)))
             using (var brush = new SolidBrush(colors.Surface))
                 graphics.FillPath(brush, path);
         }
@@ -69,24 +69,6 @@ public class Kbd : Element
         var size = text.Measure(inner, new Size(int.MaxValue, int.MaxValue));
         text.Bounds = new Rectangle((int)MathF.Round(face.X), (int)MathF.Round(face.Y + (face.Height - size.Height) / 2), (int)MathF.Round(face.Width), size.Height);
         text.Paint(graphics, inner);
-    }
-
-    static GraphicsPath Rounded(RectangleF bounds, float radius)
-    {
-        var path = new GraphicsPath();
-        radius = Math.Min(radius, Math.Min(bounds.Width, bounds.Height) / 2);
-        if (radius <= 0)
-        {
-            path.AddRectangle(bounds);
-            return path;
-        }
-        var diameter = 2 * radius;
-        path.AddArc(bounds.X, bounds.Y, diameter, diameter, 180, 90);
-        path.AddArc(bounds.Right - diameter, bounds.Y, diameter, diameter, 270, 90);
-        path.AddArc(bounds.Right - diameter, bounds.Bottom - diameter, diameter, diameter, 0, 90);
-        path.AddArc(bounds.X, bounds.Bottom - diameter, diameter, diameter, 90, 90);
-        path.CloseFigure();
-        return path;
     }
 }
 

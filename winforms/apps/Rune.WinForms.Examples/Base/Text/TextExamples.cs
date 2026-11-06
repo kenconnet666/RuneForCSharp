@@ -15,6 +15,7 @@ static class TextExamples
         new("Text", "scale", "字号与字重", "TextSize 对应主题的字号档位，Weight 对应字重；不写时跟随字体，SmallControl 默认 xs，StrongControl 默认 semibold。GDI 的字体只有常规与粗体。", Scale),
         new("Text", "tones", "色调", "Tone 取主题的文字色，与 Button、Badge 的色调同名：neutral 是正文色，muted 用于次要说明，其余是品牌色与提示色的文字色。", Tones),
         new("Text", "numeric", "编号与数字", "Mono 用等宽字体（编号、件号）；界面字体的数字本来就等宽，Numeric 只记下意图。", Numeric),
+        new("Text", "inline", "行内元素", "Kbd 写按键，Code 写行内代码，Mark 标出要强调的词；整段引用用 BlockquoteControl。WinForms 的文字是整段画的，Code、Mark 是单独的控件，不跟着一段文字换行。", Inline),
         new("Text", "overflow", "截断与换行", "Truncate 单行省略，LineClamp 限制行数（都要给宽度：MaximumSize 或关掉 AutoSize）；Wrap 的 Pretty、Balance 在桌面上同普通换行。", Overflow),
     ];
 
@@ -60,6 +61,22 @@ static class TextExamples
             new ParagraphControl { Text = "用更自然的 TSX 写 Vue 组件，符文让状态读写像普通变量", Wrap = TextWrap.Balance, TextSize = TextSize.Lg, Weight = TextWeight.Semibold, Align = TextAlign.Center, AutoSize = false, Size = new Size(Dip(208), Dip(72)) }));
 
     /// <summary>一张卡片（Card 做出来后换掉）。</summary>
+    /// <summary>一行一行拼出来：文字、按键、代码、标记各是一个控件。</summary>
+    static Control Inline()
+    {
+        var quote = new BlockquoteControl { Dock = DockStyle.Top };
+        quote.Controls.Add(new SmallControl { Text = "—— Vue 文档", Tone = TextTone.Muted, Dock = DockStyle.Top });
+        quote.Controls.Add(new ParagraphControl { Text = "渐进式框架：可以只在页面的一小块里用它，也可以用它搭建完整的单页应用。", Dock = DockStyle.Top });
+        return Column(16,
+            Wrap(4,
+                new TextControl { Text = "在任意页面按" }, new KbdControl { Text = "Ctrl" }, new TextControl { Text = "+" }, new KbdControl { Text = "K" },
+                new TextControl { Text = "打开搜索，输入" }, new CodeControl { Text = "button" }, new TextControl { Text = "就能找到" },
+                new MarkControl { Text = "Button 按钮" }, new TextControl { Text = "与它的全部示例。" },
+                new StrongControl { Text = "Strong" }, new TextControl { Text = "表示重要，" }, new EmControl { Text = "Em" }, new TextControl { Text = "表示语气上的强调，" },
+                new SmallControl { Text = "Small 用于附注与版权信息" }, new TextControl { Text = "。" }),
+            quote);
+    }
+
     static Control Card(params Control[] children)
     {
         var card = Column(4, children);
