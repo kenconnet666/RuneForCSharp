@@ -1,0 +1,7 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Rune.Avalonia.Gallery.MainWindow"
+        Title="Rune.Avalonia 组件示例" Width="1200" Height="800">
+  <!-- 组件做出来后按 vue-tsx-pro 的分类（base、display、feedback……）列在左侧导航里 -->
+  <TextBlock Margin="24" Text="Rune.Avalonia" FontSize="24" />
+</Window>

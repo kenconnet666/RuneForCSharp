@@ -1,0 +1,8 @@
+<!--
+  组件库的入口：使用方把它加到 Application.Styles（放在 FluentTheme 之后）。
+  主题 tokens（tools/ 从 vue-tsx-pro 生成）与各组件的 ControlTheme 都合并到这里。
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Rune.Avalonia.RuneTheme">
+</Styles>

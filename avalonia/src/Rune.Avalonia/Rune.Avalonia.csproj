@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Avalonia 组件库：主题 tokens、组件与它们的 ControlTheme -->
+  <PropertyGroup>
+    <IsLibrary>true</IsLibrary>
+    <!-- 公开成员必须写文档注释（CS1591 视为错误） -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <RootNamespace>Rune.Avalonia</RootNamespace>
+    <Description>对标 vue-tsx-pro 的 Avalonia 组件库：主题 tokens、可层层覆盖的组件样式与默认值、组件。</Description>
+    <PackageTags>avalonia;components;ui;design-system</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+    <!-- 开发期 axaml 热重载：只在 Debug 构建里生效，不进包的依赖（HotAvalonia 建议每个含控件的项目都装） -->
+    <PackageReference Include="HotAvalonia" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Rune.Avalonia.Tests" />
+  </ItemGroup>
+
+</Project>

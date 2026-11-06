@@ -1,0 +1,4 @@
+<Project>
+  <!-- Avalonia 组件库（src）、示例（apps）、测试（tests）共用：先导入仓库根的设置 -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+</Project>
