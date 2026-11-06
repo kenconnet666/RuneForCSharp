@@ -12,7 +12,7 @@ vue-tsx-pro 那边的会话改了设计时会发通知过来（每完成一个�
 ### 已定的方向（2026-11-06 上游通知）
 
 - 顺序 0 → 5，每个阶段单独合进 master；前三个阶段外观 0 差异。
-- 配置入口 ，旧的 defaults / styles 保留一个版本。
+- 配置入口 `components: { Button: { defaults, styles, variants } }`，旧的 defaults / styles 保留一个版本。
 - 外观词表按计划 §4.4 改名：tone 只用 6 个状态色、宽度用 width、variant 只表示外观、density 统一、Orientation / Placement 共用；旧名保留一个版本。
 - 主入口不再导出组件内部的样式表，只导出配方与共用件。
 - 美学：着色页面 + 白卡片；控件高度改整数、落在 4px 网格（xs 24 / sm 28 / md 32 / lg 36 / xl 40）；中文 600 只给标题，按钮、标签页用 500；波纹默认关；去掉海洋主题，加高对比暗色。
