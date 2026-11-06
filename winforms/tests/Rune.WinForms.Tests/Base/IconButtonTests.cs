@@ -51,6 +51,30 @@ public class IconButtonTests
     });
 
     [Fact]
+    public Task Presets_take_their_icon_and_name_from_the_language_pack() => WinFormsUi.Run(() =>
+    {
+        var close = new CloseButtonControl();
+        var clear = new ClearButtonControl();
+        using var form = WinFormsUi.Show(close, clear);
+        var lang = RuneLang.Current.Peek();
+        try
+        {
+            RuneLang.Current.Value = Lang.ZhCn;
+            Assert.Equal((Lucide.X, "关闭"), (close.Icon, close.AccessibilityObject.Name));
+            RuneLang.Current.Value = Lang.EnUs;
+            Assert.Equal((Lucide.CircleX, "Clear"), (clear.Icon, clear.AccessibilityObject.Name));
+            close.AccessibleName = "关闭提示";
+            Assert.Equal("关闭提示", close.AccessibilityObject.Name);
+            // 预设的图标是默认值，设计器不写
+            Assert.False(TypeDescriptor.GetProperties(close)[nameof(CloseButtonControl.Icon)]!.ShouldSerializeValue(close));
+        }
+        finally
+        {
+            RuneLang.Current.Value = lang;
+        }
+    });
+
+    [Fact]
     public Task Designer_compares_with_the_icon_button_defaults() => WinFormsUi.Run(() =>
     {
         using var button = new IconButtonControl();

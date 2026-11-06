@@ -46,10 +46,9 @@ public abstract class ButtonControlBase<T> : ElementControl<T>, IButtonControl w
     [Description("圆角：none、xs、sm、md、lg、xl、full，默认 md。")]
     public Radius Radius { get => Element.Radius; set => Element.Radius = value; }
 
-    /// <summary>图标（ButtonControl 里在文字前）。</summary>
+    /// <summary>图标（ButtonControl 里在文字前；预设按钮有自己的默认图标）。</summary>
     [Category("Appearance")]
     [Description("图标：Lucide 的图标名。")]
-    [DefaultValue(null)]
     public IconData? Icon { get => Element.Icon; set => Element.Icon = value; }
 
     /// <summary>加载中。</summary>
@@ -94,6 +93,13 @@ public abstract class ButtonControlBase<T> : ElementControl<T>, IButtonControl w
     bool ShouldSerializeRadius() => Radius != Defaults.Radius;
 
     void ResetRadius() => Radius = default;
+
+    bool ShouldSerializeIcon() => Icon != Defaults.Icon;
+
+    void ResetIcon() => Icon = Defaults.Icon;
+
+    /// <summary>没写 AccessibleName（也没有文字）时的读屏名称（预设按钮取语言包）。</summary>
+    protected virtual string? DefaultAccessibleName => null;
 
     /// <summary>窗体把它设成或取消默认按钮时调用（同 WinForms 的 Button）。</summary>
     public void NotifyDefault(bool value) => Invalidate();
@@ -210,9 +216,15 @@ public abstract class ButtonControlBase<T> : ElementControl<T>, IButtonControl w
     /// <inheritdoc />
     protected override AccessibleObject CreateAccessibilityInstance() => new ButtonAccessibleObject(this);
 
-    /// <summary>读屏里是按钮：默认动作是按下；加载中状态里带"忙"。</summary>
+    /// <summary>读屏里是按钮：默认动作是按下；加载中状态里带"忙"；没有名称时用 <see cref="DefaultAccessibleName"/>。</summary>
     sealed class ButtonAccessibleObject(ButtonControlBase<T> owner) : ControlAccessibleObject(owner)
     {
+        public override string? Name
+        {
+            get => base.Name is { Length: > 0 } name ? name : owner.DefaultAccessibleName;
+            set => base.Name = value;
+        }
+
         public override AccessibleRole Role => Owner is { AccessibleRole: not AccessibleRole.Default } control ? control.AccessibleRole : AccessibleRole.PushButton;
 
         public override string DefaultAction => "按下";
