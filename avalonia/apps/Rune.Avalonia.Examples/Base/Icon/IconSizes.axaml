@@ -1,0 +1,48 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/avalonia"
+             x:Class="Rune.Avalonia.Examples.IconSizes">
+  <!-- 一格：图标在上，说明在下，按底边对齐 -->
+  <UserControl.Styles>
+    <Style Selector="WrapPanel > StackPanel">
+      <Setter Property="Spacing" Value="4" />
+      <Setter Property="VerticalAlignment" Value="Bottom" />
+    </Style>
+    <Style Selector="WrapPanel > StackPanel > :is(Control)">
+      <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="WrapPanel > StackPanel > TextBlock">
+      <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
+      <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+    </Style>
+  </UserControl.Styles>
+  <StackPanel Spacing="24">
+    <WrapPanel ItemSpacing="24" LineSpacing="16">
+      <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="xs" /><TextBlock Text="xs" /></StackPanel>
+      <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="sm" /><TextBlock Text="sm" /></StackPanel>
+      <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="md" /><TextBlock Text="md" /></StackPanel>
+      <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="lg" /><TextBlock Text="lg" /></StackPanel>
+      <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="xl" /><TextBlock Text="xl" /></StackPanel>
+      <StackPanel>
+        <StackPanel Orientation="Horizontal" Spacing="4" TextElement.FontSize="{DynamicResource Rune.FontSize.Xl}">
+          <rune:Icon Data="{x:Static rune:Lucide.Star}" VerticalAlignment="Center" />
+          <TextBlock Text="星标" FontSize="{DynamicResource Rune.FontSize.Xl}" Foreground="{DynamicResource Rune.Brush.Text}" />
+        </StackPanel>
+        <TextBlock Text="跟随文字" />
+      </StackPanel>
+    </WrapPanel>
+    <WrapPanel ItemSpacing="24" LineSpacing="16">
+      <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="16" /><TextBlock Text="16px" /></StackPanel>
+      <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="24" /><TextBlock Text="24px" /></StackPanel>
+      <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="32" /><TextBlock Text="32px" /></StackPanel>
+      <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="48" /><TextBlock Text="48px" /></StackPanel>
+    </WrapPanel>
+    <WrapPanel ItemSpacing="24" LineSpacing="16">
+      <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="32" StrokeWidth="1" /><TextBlock Text="线宽 1" /></StackPanel>
+      <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="32" StrokeWidth="1.5" /><TextBlock Text="线宽 1.5" /></StackPanel>
+      <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="32" StrokeWidth="2" /><TextBlock Text="线宽 2" /></StackPanel>
+      <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="32" StrokeWidth="2.5" /><TextBlock Text="线宽 2.5" /></StackPanel>
+      <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="32" StrokeWidth="3" /><TextBlock Text="线宽 3" /></StackPanel>
+    </WrapPanel>
+  </StackPanel>
+</UserControl>

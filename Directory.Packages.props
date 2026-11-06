@@ -10,6 +10,9 @@
     <PackageVersion Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
     <PackageVersion Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
     <PackageVersion Include="Avalonia.Headless" Version="$(AvaloniaVersion)" />
+    <!-- inspect 在 headless 平台上出图：Skia 渲染、HarfBuzz 排字（Avalonia.Desktop 里也是这两个） -->
+    <PackageVersion Include="Avalonia.Skia" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Avalonia.HarfBuzz" Version="$(AvaloniaVersion)" />
     <!-- 开发期 axaml 热重载（只在示例应用的 Debug 构建里引用，不进组件库的依赖）：运行时 XAML 解析器要与 Avalonia 同版本 -->
     <PackageVersion Include="Avalonia.Markup.Xaml.Loader" Version="$(AvaloniaVersion)" />
     <PackageVersion Include="HotAvalonia" Version="3.1.5" />

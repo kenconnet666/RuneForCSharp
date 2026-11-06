@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Rune.Avalonia\Rune.Avalonia.csproj" />
+    <ProjectReference Include="..\Rune.Avalonia.Examples\Rune.Avalonia.Examples.csproj" />
   </ItemGroup>
 
 </Project>

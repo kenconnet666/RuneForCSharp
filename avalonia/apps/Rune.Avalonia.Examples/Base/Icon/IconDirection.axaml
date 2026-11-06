@@ -1,0 +1,47 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/avalonia"
+             x:Class="Rune.Avalonia.Examples.IconDirection">
+  <!-- 两张卡片各设 FlowDirection：有方向的图标（箭头、chevron）设 FlipInRtl，时钟、勾号不翻。Card 做出来后换成 rune:Card -->
+  <UserControl.Styles>
+    <Style Selector="WrapPanel > Border">
+      <Setter Property="Width" Value="240" />
+      <Setter Property="Padding" Value="12" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+      <Setter Property="Background" Value="{DynamicResource Rune.Brush.Surface}" />
+    </Style>
+    <Style Selector="WrapPanel > Border > StackPanel > StackPanel">
+      <Setter Property="Orientation" Value="Horizontal" />
+      <Setter Property="Spacing" Value="4" />
+    </Style>
+    <Style Selector="WrapPanel > Border > StackPanel > StackPanel > rune|Icon">
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="WrapPanel > Border > StackPanel > TextBlock">
+      <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
+      <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+    </Style>
+  </UserControl.Styles>
+  <WrapPanel ItemSpacing="12" LineSpacing="12">
+    <Border FlowDirection="LeftToRight">
+      <StackPanel Spacing="8">
+        <TextBlock Text="从左到右（中文、英文）" />
+        <StackPanel><rune:Icon Data="{x:Static rune:Lucide.ChevronLeft}" FlipInRtl="True" /><TextBlock Text="返回" /></StackPanel>
+        <StackPanel><TextBlock Text="下一步" /><rune:Icon Data="{x:Static rune:Lucide.ArrowRight}" FlipInRtl="True" /></StackPanel>
+        <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Clock}" /><TextBlock Text="刚刚更新" /></StackPanel>
+        <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Check}" /><TextBlock Text="已读" /></StackPanel>
+      </StackPanel>
+    </Border>
+    <Border FlowDirection="RightToLeft">
+      <StackPanel Spacing="8">
+        <TextBlock Text="从右到左（阿拉伯语、希伯来语）" />
+        <StackPanel><rune:Icon Data="{x:Static rune:Lucide.ChevronLeft}" FlipInRtl="True" /><TextBlock Text="返回" /></StackPanel>
+        <StackPanel><TextBlock Text="下一步" /><rune:Icon Data="{x:Static rune:Lucide.ArrowRight}" FlipInRtl="True" /></StackPanel>
+        <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Clock}" /><TextBlock Text="刚刚更新" /></StackPanel>
+        <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Check}" /><TextBlock Text="已读" /></StackPanel>
+      </StackPanel>
+    </Border>
+  </WrapPanel>
+</UserControl>

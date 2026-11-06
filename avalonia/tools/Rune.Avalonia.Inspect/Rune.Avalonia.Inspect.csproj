@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- 检查 Avalonia 的组件：headless 平台上用 Skia 渲染示例，输出截图、元素树、属性与来源、UIA 树（命令见 HANDOFF 的命令表） -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Rune.Avalonia.Inspect</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Headless" />
+    <PackageReference Include="Avalonia.Skia" />
+    <PackageReference Include="Avalonia.HarfBuzz" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\apps\Rune.Avalonia.Examples\Rune.Avalonia.Examples.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\..\tools\inspect\InspectShared.cs" Link="InspectShared.cs" />
+  </ItemGroup>
+
+</Project>

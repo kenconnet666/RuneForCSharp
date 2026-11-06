@@ -65,7 +65,10 @@
 | 依赖分层表 / 一个组件往下用到、往上被用到的 | `node tools/ts-inspect/ts-inspect.mjs deps`、`… deps Select` |
 | 以上都能加 `--json`；`--vue <路径>` 或环境变量 `VUE_TSX_PRO` 指定 vue-tsx-pro | `node tools/ts-inspect/ts-inspect.mjs --help` |
 | 取 TS 文档站的计算样式（`ts-styles`） | 还没做（阶段 2） |
-| 截图、元素树、属性来源、UIA 树（各平台的 `inspect`） | 还没做（阶段 2） |
+| 列出示例（"组件/示例名"，Gallery 与 inspect 共用的登记表） | `avalonia/tools/Rune.Avalonia.Inspect/bin/Release/net10.0/Rune.Avalonia.Inspect.exe list`（先 `export DOTNET_ROOT=~/.dotnet`） |
+| 截图（PNG 写到 `artifacts/inspect/avalonia/`）；`--theme dark`、`--width 600`、`--scale 2` | `… Rune.Avalonia.Inspect.exe snapshot Icon/tones` |
+| 元素树（类型、类与伪类、边界、所在模板） / 属性与来源（本地值、样式、模板、继承，画刷报出 token 名） / UIA 控件视图（角色、名称、Pattern）；都能加 `--json` | `… tree Icon/basic`、`… props Icon/tones`、`… uia Icon/accessibility` |
+| WPF、WinForms 的 inspect | 还没做（阶段 2） |
 | 基准（`inspect bench`） | 还没做（阶段 2） |
 | 重新生成 token（改了 vue-tsx-pro 的主题后） | `node tools/token-gen/token-gen.mjs` |
 | 核对生成的 token 与 vue-tsx-pro 一致（CI 用） | `node tools/token-gen/token-gen.mjs --check` |

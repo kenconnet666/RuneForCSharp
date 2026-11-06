@@ -6,7 +6,11 @@
     <Project Path="avalonia/src/Rune.Avalonia/Rune.Avalonia.csproj" />
   </Folder>
   <Folder Name="/avalonia/apps/">
+    <Project Path="avalonia/apps/Rune.Avalonia.Examples/Rune.Avalonia.Examples.csproj" />
     <Project Path="avalonia/apps/Rune.Avalonia.Gallery/Rune.Avalonia.Gallery.csproj" />
+  </Folder>
+  <Folder Name="/avalonia/tools/">
+    <Project Path="avalonia/tools/Rune.Avalonia.Inspect/Rune.Avalonia.Inspect.csproj" />
   </Folder>
   <Folder Name="/avalonia/tests/">
     <Project Path="avalonia/tests/Rune.Avalonia.Tests/Rune.Avalonia.Tests.csproj" />

@@ -1,0 +1,11 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/avalonia"
+             xmlns:local="using:Rune.Avalonia.Examples"
+             x:Class="Rune.Avalonia.Examples.IconCustom">
+  <StackPanel Orientation="Horizontal" Spacing="32">
+    <rune:Icon Data="{x:Static local:IconCustom.Logo}" Size="40" AutomationProperties.Name="站点标志" />
+    <rune:Icon Data="{x:Static local:IconCustom.Verified}" Size="40" Tone="accent" AutomationProperties.Name="已认证" />
+    <rune:Icon Data="{x:Static local:IconCustom.Wave}" Size="40" Tone="info" AutomationProperties.Name="信号" />
+  </StackPanel>
+</UserControl>
