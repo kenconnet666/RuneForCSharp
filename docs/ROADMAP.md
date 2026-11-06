@@ -23,7 +23,8 @@
 - 阶段 1 的 token-gen 已做好：三个库都有了 16 套主题的 token。
 - 阶段 1 的 lang-gen 已做好：三个库都有了中英文的语言包。
 - 阶段 1 的 icons-gen 已做好：三个库都有了 Lucide 全集。
-- 还没有任何组件。下一步：阶段 1 的 parity（名字对照），然后进阶段 2。
+- 阶段 1 完成（工具与生成脚本）。parity 的报告是进度表：`node tools/parity/parity.mjs`。
+- 还没有任何组件。下一步：阶段 2。
 
 ## 已定的决定
 
@@ -123,6 +124,14 @@
 | 热重载 | HotAvalonia（DESIGN §11） | IDE 的 XAML 热重载 + `MetadataUpdateHandler` | `MetadataUpdateHandler` + `HotReload.CodeVersion` |
 | 测试 | headless（DESIGN §12） | STA + 离屏窗口 | STA + 消息循环 |
 
+## 自主执行的规矩（用户不在时照此推进，2026-11-06 起）
+
+- **小步提交，直接落在 master**：每完成一项（一个工具、一块基础设施、一个组件或一组紧密相关的组件），跑相关测试与生成脚本的 `--check`，提交；不开 PR、不推送、不发包。整理与功能分开提交。
+- **master 不留红**：提交前 Release 构建零警告、三个测试工程全过。
+- **先查后写**：做组件前跑 `ts-inspect component <名字>` 与 `deps <名字>`，读 vue-tsx-pro 的源码与 RuneForBlazor 的同名组件；改 C# 用 LSP 查定义与引用。
+- **遇到下面的情况，这一项停下，写进"待定的决定"**（日期、项、卡在哪、要决定什么、建议），转去做下一个不依赖它的项：要加"已定的决定"之外的依赖；vue-tsx-pro 的做法在某个平台上做不到、又有多种合理的替代；要改已定的决定或公共 API 的形状。
+- **不写过程流水账**：结论进 DESIGN（取舍与坑）或本文（勾选、一行结论），过程留在提交说明里；每完成一步更新 HANDOFF 的现状与下一步，换会话也能接上。
+
 ## 参考源码
 
 本地浅克隆在 `C:\Users\Administrator\RiderProjects\refs\`（不进仓库，只读）：Avalonia（12.1.5）、Semi.Avalonia 与 Ursa.Avalonia（Avalonia 组件库）、HotAvalonia、dotnet/wpf 与 dotnet/winforms（release/10.0）、HandyControl（WPF 组件库）、AntdUI（全自绘的 WinForms 组件库）。查平台行为先读源码，参考别人的做法时写清出处与取舍。
@@ -175,7 +184,7 @@
 - [x] 仓库结构：按平台分目录，每个平台有 src、apps、tests；集中的构建设置与包版本（DESIGN §2）。
 - [x] 已验证的基础设施，都配了测试：
   - Avalonia：`EmExtension`、`PseudoClassesExtensions`、`RuneTheme` 入口。
-  - WPF：`Provider`（分层合并）、`Em`、`Container`、`BrushTransition`、`Motion`、`HotReload`。
+  - WPF：`Provider`（分层合并）、`EmSize`、`ContainerQuery`、`BrushTransition`、`Motion`、`HotReload`。
   - WinForms：`Signal` / `Computed` / `Effect`、`Easing`、`Animator`、`Motion`、`HotReload`。
 - [x] 三个示例应用：Avalonia 的 Debug 构建带 HotAvalonia。
 - [x] 前置探测（2026-11-06）：档位类型、组合档位、部件的转发与层层合并、三个平台的主题切换、Avalonia 桌面热重载、WinForms 无窗口元素的焦点与无障碍。
@@ -191,7 +200,9 @@
   - 留到后面的：CI 里跑 `--check`（阶段 4 建 CI 时）；色调调色板与按时长档位的 Transitions 集合，做 Button 时再生成（角色对照表来自 Button、Badge 的配方）。
 - [x] `lang-gen`（`tools/lang-gen`，2026-11-06）：从 `config/lang` 生成三个库各自的 `Lang`（内置 ZhCn、EnUs），插值文案按语法树翻译成 C# 的 lambda，每个键带中文说明；约定见 DESIGN §6"语言包的生成"。各有测试。
 - [x] `icons-gen`（`tools/icons-gen`，2026-11-06）：Lucide 全集（2024 个）直接放进每个库的 `Lucide` 类，路径归一成 M、L、C、Z；Avalonia、WPF 解析成 Geometry（WPF 冻结），WinForms 建 GraphicsPath；许可随包分发。约定见 DESIGN §6"图标"。各有测试。
-- [ ] `parity`：用 TS 编译器 API 从 vue-tsx-pro 抽清单（组件、`css.recipe` 的 name / parts / variants、`propsXxx` 部件与它们的类型、ComponentDefaults、Lang 的键），读三个库的程序集对照，报告缺失与改名（改名要在对照表里登记，例如 `open` → `IsOpen`）。
+- [x] `parity`（`tools/parity`，2026-11-06，名字对照）：vue-tsx-pro 的组件按依赖分层列出，三个库各做了没有；已做的组件比对 props 与部件属性（TS 名字 → C# 名字，改名与不做的组件登记在 `registry.mjs`）；语言包的键。C# 一侧读源码，不用先构建。
+  - 顺手查出两处撞名：WPF 的容器查询 `Container` 与 em 尺寸 `Em` 和 TS 的组件同名，已改成 `ContainerQuery`、`EmSize`。
+  - 取值对照（部件在各档位下的 token）等组件做出来、有 `inspect props` 之后再接。
   - 同时输出组件的依赖表与层号（阶段 3 的顺序以它为准）：vue-tsx-pro 改了组件之间的依赖时重算，不手抄。
 
 ### 2. 基础设施层
@@ -281,7 +292,7 @@ TS 里专为浏览器的不做：VisuallyHidden（桌面上用 `AutomationProper
 |---|---|
 | 文字 | Avalonia / WPF 的 Text 系列派生自 `TextBlock`（一个元素一个组件，各自的默认字号与字重） |
 | 轻量标记 | Icon、Badge、Tag、StatusDot、Skeleton 自绘（DESIGN §9） |
-| 布局 | Flex、Grid 是自定义面板（gap、align、justify、wrap、`minItemWidth` 自动换列）；Container 的断点用容器查询（Avalonia `ContainerQuery`、WPF `Container`）；ScrollArea 是平台 ScrollViewer 换主题（浮层滚动条，Avalonia `AllowAutoHide`） |
+| 布局 | Flex、Grid 是自定义面板（gap、align、justify、wrap、`minItemWidth` 自动换列）；Container 的断点用容器查询（Avalonia `ContainerQuery`、WPF `ContainerQuery`）；ScrollArea 是平台 ScrollViewer 换主题（浮层滚动条，Avalonia `AllowAutoHide`） |
 | 展开收起 | Collapse 测量内容高度后动画 Height，收起后不参与布局、不进 Tab 顺序 |
 | 选择类 | Tabs、NavList、Listbox 建在平台的选择类基类上；勾选、单选、开关建在 `ToggleButton` 上（三态、UIA 的 Toggle 平台自带） |
 | 浮层 | Tooltip、ContextMenu 先看平台自带的能否换主题做到；对话框走窗口内遮罩；关闭原因、焦点还回照 TS；Toast 走窗口里的宿主 |

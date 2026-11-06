@@ -6,14 +6,8 @@ import { parseArgs } from 'node:util';
 import { LANG_PACKS, langMembers, langValues } from '../lib/lang.mjs';
 import { writeOutputs } from '../lib/output.mjs';
 import { openVue } from '../lib/vue.mjs';
+import { SKIPPED } from './skipped.mjs';
 import { pascal, Translator } from './translate.mjs';
-
-/** 不移植的键：所在的能力不移植，或由别的机制负责 */
-const SKIPPED = {
-  errorCodes: '接口错误码的文案：桌面库不内置请求客户端（ROADMAP"平台化的约定"），应用自己的请求层按需要定义',
-  formIssues: 'zod 的校验文案：三个库的校验走 INotifyDataErrorInfo / DataAnnotations，用它们自己的文案',
-  messages: '页面级组件（主题编辑器、文档站组件）自带的文案表：做到这些组件时再定',
-};
 
 /** 三个库：命名空间与输出位置 */
 const LIBRARIES = [
