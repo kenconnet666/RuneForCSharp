@@ -66,6 +66,8 @@ function csharpTypes(dir) {
   const inherited = (type, seen = new Set()) =>
     seen.has(type) ? [] : (seen.add(type), [...(types.get(type) ?? []), ...(bases.has(type) ? inherited(bases.get(type), seen) : [])]);
   const merged = new Map([...types.keys()].map((type) => [type, new Set(inherited(type))]));
+  // WinForms 里只有控件、没有元素的组件（容器类：BlockquoteControl）按控件名对上
+  for (const [type, props] of [...merged]) if (type.endsWith('Control') && !merged.has(type.slice(0, -'Control'.length))) merged.set(type.slice(0, -'Control'.length), props);
   // 沿用基类模板的组件（CloseButton 继承 IconButton）没有自己的部件名类，部件算基类的
   for (const type of types.keys()) {
     const seen = new Set([type]);
