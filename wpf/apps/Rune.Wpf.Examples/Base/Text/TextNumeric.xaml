@@ -1,0 +1,24 @@
+<UserControl x:Class="Rune.Wpf.Examples.TextNumeric"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/wpf">
+  <!-- 编号左对齐、金额右对齐（Flex 的 justify="between" 做出来后换掉 Grid） -->
+  <StackPanel HorizontalAlignment="Left" Width="320">
+    <Grid Margin="0,0,0,4">
+      <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+      <rune:Text Mono="True" Size="sm" Text="PO-2026-0276" />
+      <rune:Text Grid.Column="1" Numeric="True" Text="1,117.48 万元" />
+    </Grid>
+    <Grid Margin="0,0,0,4">
+      <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+      <rune:Text Mono="True" Size="sm" Text="PO-2026-0233" />
+      <rune:Text Grid.Column="1" Numeric="True" Text="9.10 万元" />
+    </Grid>
+    <Grid Margin="0,0,0,4">
+      <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+      <rune:Text Mono="True" Size="sm" Text="PO-2026-02114" />
+      <rune:Text Grid.Column="1" Numeric="True" Text="211.06 万元" />
+    </Grid>
+    <rune:Text Numeric="True" Tone="danger" Weight="semibold" Text="超时 11 天" />
+  </StackPanel>
+</UserControl>

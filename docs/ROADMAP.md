@@ -251,7 +251,7 @@
 用来验证这一层的第一批组件（都在阶段 3 的第 1、2 层，做完就是正式组件）：Icon → Text → Spinner → Badge → Button 家族 → Field。每个都把档位、调色板、部件转发、Provider 的默认值与样式、size 与 em、主题切换、减少动态效果、热重载、无障碍走一遍。各组件的进度以 `node tools/parity/parity.mjs` 为准。
 - [x] Icon：三个平台都做了（DESIGN §14）；描线动画 `draw` 暂缓，parity 里列为缺失。
 - [x] 档位类型：`IVariant` / `VariantConverter` 与 `TextSize`、`Tone`，三个库都做了。
-- [~] Text 家族（Text、Paragraph、Strong、Em、Small）：Avalonia、WinForms 已做（DESIGN §14）；WPF 的基类见"待定的决定"，没有回复前按建议 A 做。示例做了 scale、tones、numeric、overflow，inline、links、headings 等 Kbd、Link、Heading。
+- [x] Text 家族（Text、Paragraph、Strong、Em、Small）：三个平台都做了（DESIGN §14）；WPF 按"待定的决定"的建议 A 从 TextBlock 派生，等确认。示例做了 scale、tones、numeric、overflow，inline、links、headings 等 Kbd、Link、Heading。
 
 ### 3. 按依赖分层移植组件
 
@@ -330,4 +330,4 @@ RuneForBlazor 已经走过一遍这些组件，同一个组件先看它踩过的
   - 选项：
     - A. 从 TextBlock 派生：行内内容（Run、Bold、InlineUIContainer）、换行、截断、选择、读屏都现成，开销最小。模板里的 Text 一律给部件样式键；Provider 合成部件键时让它 BasedOn 同一组件的类型键结果，"所有实例"就能进模板。
     - B. 从 Control 派生、OnRender 里画 FormattedText（MaxTextWidth、MaxLineCount、Trimming 都有）：隐式样式直接进模板；但只能放纯文字，没有行内内容，读屏、选择要自己做。
-  - 建议 A（Provider 的部件键本来就要按类型键叠，代价在 Provider 一处）。没有回复前先按 A 做，Provider 那一步做部件转发时一起实现。
+  - 建议 A（Provider 的部件键本来就要按类型键叠，代价在 Provider 一处）。已按 A 做了（2026-11-06），Provider 那一步做部件转发时把"部件键叠类型键"一起实现；要改成 B 时只动 WPF 的 Text.cs。

@@ -1,0 +1,35 @@
+<UserControl x:Class="Rune.Wpf.Examples.TextScale"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/wpf">
+  <!-- 左列：size 档位；右列：weight 档位。名字一列宽 5em -->
+  <UserControl.Resources>
+    <Style x:Key="Row" TargetType="StackPanel">
+      <Setter Property="Orientation" Value="Horizontal" />
+      <Setter Property="Margin" Value="0,0,0,8" />
+    </Style>
+    <Style x:Key="Name" TargetType="rune:Text">
+      <Setter Property="Width" Value="70" />
+      <Setter Property="Margin" Value="0,0,12,0" />
+      <Setter Property="Size" Value="xs" />
+      <Setter Property="Tone" Value="muted" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+  </UserControl.Resources>
+  <WrapPanel>
+    <StackPanel Margin="0,0,32,16">
+      <StackPanel Style="{StaticResource Row}"><rune:Text Style="{StaticResource Name}" Text="size=xs" /><rune:Text Size="xs" Text="界面里的文字 Typography" /></StackPanel>
+      <StackPanel Style="{StaticResource Row}"><rune:Text Style="{StaticResource Name}" Text="size=sm" /><rune:Text Size="sm" Text="界面里的文字 Typography" /></StackPanel>
+      <StackPanel Style="{StaticResource Row}"><rune:Text Style="{StaticResource Name}" Text="size=md" /><rune:Text Size="md" Text="界面里的文字 Typography" /></StackPanel>
+      <StackPanel Style="{StaticResource Row}"><rune:Text Style="{StaticResource Name}" Text="size=lg" /><rune:Text Size="lg" Text="界面里的文字 Typography" /></StackPanel>
+      <StackPanel Style="{StaticResource Row}"><rune:Text Style="{StaticResource Name}" Text="size=xl" /><rune:Text Size="xl" Text="界面里的文字 Typography" /></StackPanel>
+    </StackPanel>
+    <StackPanel Margin="0,0,0,16">
+      <StackPanel Style="{StaticResource Row}"><rune:Text Style="{StaticResource Name}" Text="light" /><rune:Text Weight="light" Size="lg" Text="季度营收 ¥1,280,000" /></StackPanel>
+      <StackPanel Style="{StaticResource Row}"><rune:Text Style="{StaticResource Name}" Text="normal" /><rune:Text Weight="normal" Size="lg" Text="季度营收 ¥1,280,000" /></StackPanel>
+      <StackPanel Style="{StaticResource Row}"><rune:Text Style="{StaticResource Name}" Text="medium" /><rune:Text Weight="medium" Size="lg" Text="季度营收 ¥1,280,000" /></StackPanel>
+      <StackPanel Style="{StaticResource Row}"><rune:Text Style="{StaticResource Name}" Text="semibold" /><rune:Text Weight="semibold" Size="lg" Text="季度营收 ¥1,280,000" /></StackPanel>
+      <StackPanel Style="{StaticResource Row}"><rune:Text Style="{StaticResource Name}" Text="bold" /><rune:Text Weight="bold" Size="lg" Text="季度营收 ¥1,280,000" /></StackPanel>
+    </StackPanel>
+  </WrapPanel>
+</UserControl>

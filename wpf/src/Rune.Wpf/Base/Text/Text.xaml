@@ -1,0 +1,24 @@
+<!--
+  Text 家族的主题样式：只放各组件自己的默认值（vue-tsx-pro 的 createText 的 defaults），使用方的样式能改。
+  档位不写成触发器：Text 在代码里按档位设主题资源的引用（见 Text.cs）
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <!-- 浏览器里的文字放不下就换行；TextBlock 默认不换行 -->
+  <Style TargetType="rune:Text">
+    <Setter Property="TextWrapping" Value="Wrap" />
+  </Style>
+  <Style TargetType="rune:Paragraph" BasedOn="{StaticResource {x:Type rune:Text}}">
+    <Setter Property="Wrap" Value="Pretty" />
+  </Style>
+  <Style TargetType="rune:Strong" BasedOn="{StaticResource {x:Type rune:Text}}">
+    <Setter Property="Weight" Value="semibold" />
+  </Style>
+  <Style TargetType="rune:Em" BasedOn="{StaticResource {x:Type rune:Text}}">
+    <Setter Property="FontStyle" Value="Italic" />
+  </Style>
+  <Style TargetType="rune:Small" BasedOn="{StaticResource {x:Type rune:Text}}">
+    <Setter Property="Size" Value="xs" />
+  </Style>
+</ResourceDictionary>
