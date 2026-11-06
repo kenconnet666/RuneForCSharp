@@ -9,13 +9,35 @@ namespace Rune.Wpf;
 /// </summary>
 static class StyleCloner
 {
-    public static Style Rebase(Style fragment, Style? basedOn)
+    /// <summary>
+    /// 叠到 <paramref name="basedOn"/> 上。片段的 Style.Resources 里按部件键写的嵌套样式（外层部件里的内层部件，DESIGN §7）
+    /// 也递归叠上去：基础取 BasedOn 链里同键的嵌套样式，没有时取 <paramref name="resolve"/> 给的同键结果。
+    /// WPF 原生是内层整个替换外层（主题与外层 Provider 的设置都丢了）。
+    /// </summary>
+    public static Style Rebase(Style fragment, Style? basedOn, Func<object, Style?> resolve)
     {
         var style = new Style(fragment.TargetType, basedOn);
         foreach (var setter in fragment.Setters) style.Setters.Add(Clone(setter));
         foreach (var trigger in fragment.Triggers) style.Triggers.Add(Clone(trigger));
-        foreach (var key in fragment.Resources.Keys) style.Resources[key] = fragment.Resources[key];
+        foreach (var key in fragment.Resources.Keys)
+        {
+            style.Resources[key] = fragment.Resources[key] is Style nested && key is ComponentResourceKey
+                ? Rebase(nested, Nested(basedOn, key) ?? resolve(key), resolve)
+                : fragment.Resources[key];
+        }
         return style;
+    }
+
+    /// <summary>片段里有没有按部件键写的嵌套样式。</summary>
+    public static bool HasNestedStyles(Style fragment) =>
+        fragment.Resources.Keys.OfType<ComponentResourceKey>().Any(key => fragment.Resources[key] is Style);
+
+    /// <summary>BasedOn 链里同键的嵌套样式（WPF 查 Style.Resources 时也沿着 BasedOn 往上找）。</summary>
+    static Style? Nested(Style? style, object key)
+    {
+        for (; style is not null; style = style.BasedOn)
+            if (style.Resources.Contains(key) && style.Resources[key] is Style found) return found;
+        return null;
     }
 
     static SetterBase Clone(SetterBase setter) => setter switch

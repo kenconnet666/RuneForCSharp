@@ -82,14 +82,31 @@ public class Provider : Decorator
         for (var node = ParentOf(this); node != null; node = ParentOf(node))
             if (node is Provider { IsInitialized: false }) return;
 
+        // 这一层写了类型键的类型：同类型的部件键也要合成（决定 19），即使这一层没写那个部件键
+        var typeFragments = styles.Keys.OfType<Type>().Where(type => styles[type] is Style).ToDictionary(type => type, type => (Style)styles[type]);
+        var keys = styles.Keys.Cast<object>().Where(key => styles[key] is Style)
+            .Concat(typeFragments.Keys.SelectMany(PartKey.For))
+            .Distinct();
+        var resolved = new Dictionary<object, Style?>();
         var result = new Dictionary<object, Style>();
-        foreach (var key in styles.Keys)
-        {
-            if (styles[key] is not Style fragment) continue;
-            var outer = FindOuter(key);
-            result[key] = cache.GetValue(outer ?? noOuter, _ => new()).GetValue(fragment, f => Rebase(f, outer));
-        }
+        foreach (var key in keys)
+            if (Resolve(key) is { } style) result[key] = style;
         composed = result;
+
+        // 这一层看到的某个键：外层的结果，部件键先叠这一层同类型的类型键样式，再叠这一层自己的片段
+        Style? Resolve(object key)
+        {
+            if (resolved.TryGetValue(key, out var done)) return done;
+            var style = FindOuter(key);
+            if (key is PartKey part && typeFragments.TryGetValue(part.TargetType, out var typeFragment)) style = Layer(typeFragment, style);
+            if (styles.Contains(key) && styles[key] is Style own) style = Layer(own, style);
+            return resolved[key] = style;
+        }
+
+        // 片段叠到外层上；片段里的嵌套部件样式（Style.Resources 里按部件键写的）也叠到同键的结果上，这种片段的结果依赖位置，不进缓存
+        Style Layer(Style fragment, Style? outer) => StyleCloner.HasNestedStyles(fragment)
+            ? Rebase(fragment, outer, Resolve)
+            : cache.GetValue(outer ?? noOuter, _ => new()).GetValue(fragment, f => Rebase(f, outer, Resolve));
 
         foreach (var inner in InnerProviders(this)) inner.Compose();
         foreach (var (key, style) in result)
@@ -108,10 +125,10 @@ public class Provider : Decorator
         return key is ComponentResourceKey ? app?.TryFindResource(key) as Style : null;
     }
 
-    static Style Rebase(Style fragment, Style? outer)
+    static Style Rebase(Style fragment, Style? outer, Func<object, Style?> resolve)
     {
         Compositions++;
-        return StyleCloner.Rebase(fragment, outer);
+        return StyleCloner.Rebase(fragment, outer, resolve);
     }
 
     static IEnumerable<Provider> InnerProviders(DependencyObject node)

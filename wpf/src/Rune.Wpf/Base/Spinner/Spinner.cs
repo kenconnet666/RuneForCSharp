@@ -74,5 +74,5 @@ public class Spinner : Control
 public static class SpinnerParts
 {
     /// <summary>旋转的图标（TS 的 propsIcon）。</summary>
-    public static readonly ComponentResourceKey Icon = new(typeof(Spinner), nameof(Icon));
+    public static readonly PartKey Icon = new(typeof(Spinner), nameof(Icon), typeof(Icon));
 }

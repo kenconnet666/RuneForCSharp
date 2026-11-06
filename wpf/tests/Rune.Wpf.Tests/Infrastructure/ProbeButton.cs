@@ -43,3 +43,17 @@ public static class ProbeParts
 {
     public static readonly ComponentResourceKey Label = new(typeof(ProbeButton), "Label");
 }
+
+/// <summary>测试嵌套部件的探针：模板里有一个 ProbeButton 作部件（部件里还有部件 ProbeParts.Label）。</summary>
+public class ProbeCard : Control
+{
+    static ProbeCard() => DefaultStyleKeyProperty.OverrideMetadata(typeof(ProbeCard), new FrameworkPropertyMetadata(typeof(ProbeCard)));
+
+    public ProbeButton Button => (ProbeButton)Template.FindName("PART_Button", this);
+}
+
+/// <summary>探针卡片的部件样式键。</summary>
+public static class ProbeCardParts
+{
+    public static readonly PartKey Button = new(typeof(ProbeCard), nameof(Button), typeof(ProbeButton));
+}

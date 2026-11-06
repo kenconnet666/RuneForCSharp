@@ -244,8 +244,8 @@ public class Badge : Control
 public static class BadgeParts
 {
     /// <summary>文字前的图标（TS 的 propsIcon）。</summary>
-    public static readonly ComponentResourceKey Icon = new(typeof(Badge), nameof(Icon));
+    public static readonly PartKey Icon = new(typeof(Badge), nameof(Icon), typeof(Icon));
 
     /// <summary>文字前的圆点（TS 的 propsDot），名字是 PART_Dot 的 Border。</summary>
-    public static readonly ComponentResourceKey Dot = new(typeof(Badge), nameof(Dot));
+    public static readonly PartKey Dot = new(typeof(Badge), nameof(Dot), typeof(Border));
 }

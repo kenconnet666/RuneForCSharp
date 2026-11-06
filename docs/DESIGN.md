@@ -148,6 +148,8 @@ TS 的 Button 是 6 种样式 × 6 种色调，配方里 36 条组合，每条�
 - WPF 原生的嵌套隐式样式是**内层整个替换外层**：外层设的 Padding 在内层直接丢失（已实测）。`Provider` 把每一层串成 BasedOn 链：
   - 按资源键合成，结果按 (外层, 片段) 缓存；
   - 类型键不叠主题样式，部件键叠到主题里的部件样式上。
+  - 部件键用 `PartKey`（ComponentResourceKey 加部件元素的类型）。某一层写了类型键（给所有 `rune:Icon`）时，这一层也合成同类型的所有部件键：外层结果 < 这一层的类型键片段 < 这一层的部件键片段（决定 19）。这样"所有实例"的样式也进得了模板里、代码组合的部件（Spinner、Badge 的图标），部件样式仍然更具体。库里的部件键在第一次合成时统一建出来（各 *Parts 类的静态构造），使用方的部件键随建随登记。
+  - 片段的 `Style.Resources` 里按部件键写的嵌套样式递归叠上去：基础取 BasedOn 链里同键的嵌套样式（WPF 查资源时也沿 BasedOn 往上），没有时取这一层看到的同键结果。带嵌套样式的片段，结果依赖所在位置，不进缓存。
 - 合成时机踩到三个坑，都由测试覆盖：
   1. FrameworkElement 在 XAML 里是自上而下构造的，挂到父级时 `Styles` 还没赋值；
   2. `Styles` 赋值时，片段里 Setter 的值还没做完类型转换；
@@ -252,7 +254,7 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 
 实测结果：
 - **Avalonia**：两层 `/template/` 只命中 Outer 里那个 Inner 的图标，单独的 Inner 不受影响；外层作用域设 StrokeWidth、内层作用域对同一路径只设 Foreground，结果两个都在；实例自己的 Styles 能覆盖作用域；`AutomationProperties.Name` 这样的附加属性也能经样式转发。
-- **WPF**：部件键经 Provider 逐层合并（主题的 Bold + 外层的 Red + 内层的 FontSize=20）。外层部件样式的 `Style.Resources` 里给内层部件键，查找能定位到 Outer 里的 Inner，但会**整个替换**这个部件样式（主题的 Bold、外层的 Red 都丢了）。所以 Provider 合成时要递归进部件样式的 `Style.Resources`，让嵌套的部件样式也叠在外层同键的结果上（阶段 2）。
+- **WPF**：部件键经 Provider 逐层合并（主题的 Bold + 外层的 Red + 内层的 FontSize=20）。外层部件样式的 `Style.Resources` 里给内层部件键，查找能定位到 Outer 里的 Inner，但会**整个替换**这个部件样式（主题的 Bold、外层的 Red 都丢了）。Provider 合成时递归进部件样式的 `Style.Resources`，嵌套的部件样式叠在外层同键的结果上（已做，测试覆盖：卡片里按钮的标签 = 主题 Bold < 这一层 Light < 嵌套的 Red）。
 - **WinForms**：记录的逐字段合并在 §4 已实测过一层；嵌套记录的递归合并、事件委托的"使用方先执行"由源代码生成器生成，不手写（阶段 2）。
 
 写组件时的约定：

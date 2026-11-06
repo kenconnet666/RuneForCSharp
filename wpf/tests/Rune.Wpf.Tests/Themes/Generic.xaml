@@ -33,4 +33,14 @@
       </MultiTrigger>
     </Style.Triggers>
   </Style>
+
+  <Style TargetType="{x:Type t:ProbeCard}">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="t:ProbeCard">
+          <t:ProbeButton x:Name="PART_Button" Style="{DynamicResource {x:Static t:ProbeCardParts.Button}}" />
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
 </ResourceDictionary>
