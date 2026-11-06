@@ -12,7 +12,7 @@ namespace Rune.Wpf;
 /// &lt;rune:SkeletonText /&gt;
 /// &lt;rune:SkeletonText Lines="5" Delay="240" /&gt;   &lt;!-- 接在前面的骨架（标题、头像）后面扫 --&gt;
 /// </code>
-/// 整块对读屏隐藏。
+/// 整块对读屏隐藏。各行引用部件样式键 <see cref="SkeletonTextParts.Line"/>（TS 的 propsLine）。
 /// </summary>
 public class SkeletonText : Panel
 {
@@ -44,7 +44,12 @@ public class SkeletonText : Panel
     void Rebuild()
     {
         InternalChildren.Clear();
-        for (var i = 0; i < Math.Max(0, Lines); i++) InternalChildren.Add(new Skeleton { Shape = SkeletonShape.Text, Delay = Delay + i * Stagger });
+        for (var i = 0; i < Math.Max(0, Lines); i++)
+        {
+            var line = new Skeleton { Shape = SkeletonShape.Text, Delay = Delay + i * Stagger };
+            line.SetResourceReference(StyleProperty, SkeletonTextParts.Line);
+            InternalChildren.Add(line);
+        }
     }
 
     /// <inheritdoc />
@@ -82,4 +87,11 @@ public class SkeletonText : Panel
 
         protected override List<AutomationPeer>? GetChildrenCore() => null;
     }
+}
+
+/// <summary>SkeletonText 的部件样式键：Provider.Styles 里写 <c>&lt;Style x:Key="{x:Static rune:SkeletonTextParts.Line}" TargetType="rune:Skeleton"&gt;</c>。</summary>
+public static class SkeletonTextParts
+{
+    /// <summary>每一行（TS 的 propsLine）。</summary>
+    public static readonly PartKey Line = new(typeof(SkeletonText), nameof(Line), typeof(Skeleton));
 }

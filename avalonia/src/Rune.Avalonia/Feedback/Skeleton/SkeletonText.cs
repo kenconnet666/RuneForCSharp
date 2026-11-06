@@ -13,7 +13,7 @@ namespace Rune.Avalonia;
 /// &lt;rune:SkeletonText /&gt;
 /// &lt;rune:SkeletonText Lines="5" Delay="240" /&gt;   &lt;!-- 接在前面的骨架（标题、头像）后面扫 --&gt;
 /// </code>
-/// 整块对读屏隐藏。各行是部件：<c>rune|SkeletonText &gt; rune|Skeleton</c>（TS 的 propsLine）。
+/// 整块对读屏隐藏。各行是部件：<c>rune|SkeletonText &gt; rune|Skeleton#PART_Line</c>（TS 的 propsLine）。
 /// </summary>
 public class SkeletonText : Panel
 {
@@ -53,7 +53,7 @@ public class SkeletonText : Panel
     void Rebuild()
     {
         Children.Clear();
-        for (var i = 0; i < Math.Max(0, Lines); i++) Children.Add(new Skeleton { Shape = SkeletonShape.Text, Delay = Delay + i * Stagger });
+        for (var i = 0; i < Math.Max(0, Lines); i++) Children.Add(new Skeleton { Name = SkeletonTextParts.Line, Shape = SkeletonShape.Text, Delay = Delay + i * Stagger });
     }
 
     /// <inheritdoc />
@@ -79,4 +79,11 @@ public class SkeletonText : Panel
         }
         return finalSize;
     }
+}
+
+/// <summary>SkeletonText 的部件名。</summary>
+public static class SkeletonTextParts
+{
+    /// <summary>每一行（TS 的 propsLine），各行都叫这个名字。</summary>
+    public const string Line = "PART_Line";
 }
