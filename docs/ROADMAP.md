@@ -11,7 +11,7 @@
 - **外观和行为以 TS 版为准，尽量一致**：token、主题由脚本生成；组件的配方按 vue-tsx-pro 对应组件逐条移植（尺寸、内边距、圆角、颜色 token、状态、过渡），行为以它的测试用例为规格，不凭印象重画；做不到的写进 DESIGN。核对靠工具（"信息与验证工具"），每个组件过样式、行为、无障碍三道核对。
 - **写法是各平台地道的写法**：API 的形状按平台习惯（见"平台化的约定"），不照搬 Vue 的组合式写法。
 - **三个库各自独立**：不共享代码，一致性靠 `tools/` 生成与对照。
-- **范围是组件库的全部内容**（决定 22、23）：核心约 180 个组件三个平台都做；扩展做 charts、diagram、theme-customize、code-editor（Avalonia、WPF），maps、xlsx 做到时再定；three 与文档站专用的（docs-kit、SkipLink、ClientOnly、VisuallyHidden、Can）不做。
+- **范围是组件库的全部内容，只有发布暂时不做**（决定 22、23）：核心约 180 个组件与全部扩展（charts、maps、diagram、code-editor、xlsx、theme-customize、three）三个平台都尽量做，平台上做不到的写清原因；docs-kit 用来做 Gallery 的示例页；只对浏览器有意义的（SkipLink、ClientOnly、VisuallyHidden）登记为不适用。
 - **上游有问题就反馈**：移植时发现 vue-tsx-pro 的 bug（行为与文档不符、对比度、从右到左、键盘缺失），记进 UPSTREAM.md 的"上游问题"，发给维护 vue-tsx-pro 的会话，由那边修复发版，我们升级锁定的版本（决定 24）。
 
 ## 现状（2026-11-06）
@@ -47,8 +47,8 @@
 | 19 | WPF 的 Text 家族 | 从 TextBlock 派生（行内内容、截断、读屏现成）；模板里的 Text 给部件样式键，Provider 合成部件键时叠在同一组件的类型键结果上，"所有实例"的样式就能进模板（2026-11-06 用户确认） |
 | 20 | 自绘组件的部件 | 底色、描边、圆角自己画；图标、文字等部件是代码里组合的真组件（不建模板）：Avalonia 用子选择器 `rune\|Badge > rune\|Icon#PART_Icon`，WPF 子元素引用部件样式键，WinForms 用部件属性记录（2026-11-06 用户确认） |
 | 21 | 跟进上游 0.11 | UPSTREAM.md 的 5 个工作包都做：`Tone` 改名 `TextTone`（不留旧名）、组件段只用主题设值、Provider 合成照上游的分段语义（跨模块，WPF 先做）、Badge 色调取共用色表、WinForms 定制入口；另有按钮字重 500、控件高度收成一处（2026-11-06 用户确认按规划修订路线图） |
-| 22 | WinForms 的范围 | 改决定 14：核心五层都做；扩展只做 Avalonia、WPF（2026-11-06） |
-| 23 | 扩展 | charts、diagram、theme-customize、code-editor 在核心五层之后做；maps（要地图数据）、xlsx 做到时再定；three、docs-kit 不做（2026-11-06） |
+| 22 | WinForms 的范围 | 改决定 14：核心五层与扩展都做，和另外两个平台一样（2026-11-06 用户：除了发布，其他都尽量做） |
+| 23 | 扩展与发布 | 核心五层之后依次做 theme-customize、charts、maps、diagram、code-editor、xlsx、three，三个平台都尽量做（three 先评估各平台的 3D 能力，做不到的写进 DESIGN）；docs-kit 做成 Gallery 的示例页（代码预览、属性表）。NuGet 包本地能打出来、能装上试用，但不发布（2026-11-06 用户：发布暂时不做） |
 | 24 | 锁定上游 | 生成文件与 CI 对齐 `tools/vue-tsx-pro.ref` 锁定的提交（上游发版后改成发版的提交）。跟进新版本是一次专门的提交：改锁定、重新生成、按上游的变化清单逐条对照（UPSTREAM.md）。上游的问题发给维护 vue-tsx-pro 的会话修复发版，不直接改那边的仓库；有设计分歧时问用户（2026-11-06） |
 | 25 | 完成标准 | 每个组件过三道核对：样式（ts-styles 的计算样式对 inspect props，加截图）、行为（上游测试用例逐条对应或登记不适用）、无障碍（UIA 对 ARIA 角色与状态）；parity 报告里没有未解释的差异才勾选（2026-11-06） |
 
@@ -196,8 +196,8 @@
 | **M2 第 2 层** | 约 55 个：选择与输入原语、Tag / Alert、Menu、对话框内核、导航、Accordion / Tree、日历、静态表格 | 阶段 3 第 2 层 |
 | **M3 第 3 层** | 约 30 个：TextField 先做，选择类、Dialog / Drawer / Toast、Upload、日期输入 | 阶段 3 第 3 层 |
 | **M4 第 4、5 层** | DatePicker、DataTable、TreeDataTable、ConditionBuilder；页面组合 | 阶段 3 第 4、5 层 |
-| **M5 扩展** | charts、diagram、theme-customize、code-editor（Avalonia、WPF） | 决定 23 |
-| **M6 收尾** | UIA 自动化测试、截图基线、NuGet 包（发不发由用户定） | 阶段 4 |
+| **M5 扩展** | theme-customize、charts、maps、diagram、code-editor、xlsx、three（三个平台）；docs-kit 做 Gallery 的示例页 | 决定 23 |
+| **M6 收尾** | UIA 自动化测试、截图基线、NuGet 包本地打包试装（不发布） | 阶段 4 |
 
 ### M0 清单
 
@@ -325,7 +325,7 @@
 
 **第 5 层 页面组合（TS 的 patterns）**：ActionBar、AuthLayout、DeadlineBadge、KanbanBoard、NotificationCenter、SlideCaptcha、StepsForm、ThemeSwitcher、AppShell、FormDialog、CommentThread、DataImport、FilterBar、QueryTable。扩展见决定 23（M5）。
 
-TS 里专为浏览器的不做：VisuallyHidden（桌面上用 `AutomationProperties.Name` / `HelpText`）、SkipLink、ClientOnly、Can；Ellipsis、Watermark 这类按平台能力决定。
+TS 里专为浏览器的登记为不适用：VisuallyHidden（桌面上用 `AutomationProperties.Name` / `HelpText`）、SkipLink、ClientOnly。Can（按权限显示内容）是逻辑组件，照做；Ellipsis、Watermark 照做，写法按平台能力。
 
 同一层里按 COMPONENTS.md §10.6 的分类先后做；文本输入（TextField）是平台差异最大的地方，第 3 层先做它。各类组件的平台要点：
 
@@ -357,7 +357,7 @@ RuneForBlazor 已经走过一遍这些组件，同一个组件先看它踩过的
 - [ ] 截图对照：三个库各渲染示例成图片，与 vue-tsx-pro 文档站的截图比较（亮、暗主题），差异人工确认。
 - [ ] UIA 自动化测试覆盖有键盘、焦点逻辑的组件（FlaUI，只在测试里用）。
 - [~] CI（`.github/workflows/ci.yml`）：三个平台各一个 Windows 任务并行构建、测试、给每个示例截亮暗两张图（上传为 artifact）；Linux 任务核对生成文件、把 parity 报告写进摘要。还差 Avalonia 的 Linux 构建测试。
-- [ ] 打包：三个库各一个 NuGet 包，本地安装试用；发不发、发到哪由用户决定。
+- [ ] 打包：三个库各一个 NuGet 包，本地安装试用；暂不发布（决定 23）。
 
 ## 待定的决定
 
