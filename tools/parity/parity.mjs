@@ -10,7 +10,7 @@ import { langMembers } from '../lib/lang.mjs';
 import { code, table } from '../lib/markdown.mjs';
 import { openVue, repoRoot } from '../lib/vue.mjs';
 import { component as inspectComponent } from '../ts-inspect/component.mjs';
-import { COMPONENT_PROP_RENAMES, EXCLUDED, PLATFORM_PROPS, PROP_RENAMES, PROPS_NOT_PORTED } from './registry.mjs';
+import { COMPONENT_PROP_RENAMES, EXCLUDED, PLATFORM_PROPS, PROP_RENAMES, PLATFORM_PROP_RENAMES, PROPS_NOT_PORTED, TYPE_RENAMES } from './registry.mjs';
 
 const LIBRARIES = [
   { name: 'Avalonia', dir: 'avalonia/src/Rune.Avalonia' },
@@ -83,12 +83,14 @@ function csharpTypes(dir) {
  * props 与部件。部件（`propsIcon`）有两种写法都算有：WinForms 的部件属性记录（`PropsIcon`），
  * Avalonia、WPF 的部件名常量（`SpinnerParts.Icon`，DESIGN §7）
  */
-function compareProps(vue, name, members, parts) {
+function compareProps(vue, name, members, parts, library) {
   const data = inspectComponent(vue, name).data;
-  const expected = [...data.props, ...data.parts].filter((prop) => !PROPS_NOT_PORTED[name]?.[prop.name]).map((prop) => ({ prop: prop.name, cs: csName(name, prop.name) }));
+  const expected = [...data.props, ...data.parts]
+    .filter((prop) => !PROPS_NOT_PORTED[name]?.[prop.name])
+    .map((prop) => ({ prop: prop.name, cs: csName(name, prop.name), alias: PLATFORM_PROP_RENAMES[library]?.[prop.name] }));
   const isPart = (cs) => cs.startsWith('Props') && parts?.has(cs.slice('Props'.length));
-  const missing = expected.filter(({ cs }) => !members.has(cs) && !PLATFORM_PROPS.has(cs) && !isPart(cs));
-  const known = new Set(expected.map(({ cs }) => cs));
+  const missing = expected.filter(({ cs, alias }) => !members.has(cs) && !members.has(alias) && !PLATFORM_PROPS.has(cs) && !isPart(cs));
+  const known = new Set(expected.flatMap(({ cs, alias }) => (alias ? [cs, alias] : [cs])));
   return { missing, expected: expected.length, extra: [...members].filter((member) => !known.has(member)) };
 }
 
@@ -109,8 +111,9 @@ try {
     excluded: EXCLUDED[c.name],
     platforms: Object.fromEntries(
       libraries.map((library) => {
-        const members = library.types.get(c.name);
-        return [library.name, members ? compareProps(vue, c.name, members, library.types.get(`${c.name}Parts`)) : null];
+        const type = TYPE_RENAMES[library.name]?.[c.name] ?? c.name;
+        const members = library.types.get(type);
+        return [library.name, members ? compareProps(vue, c.name, members, library.types.get(`${type}Parts`), library.name) : null];
       }),
     ),
   }));

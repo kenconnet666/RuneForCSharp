@@ -1,0 +1,40 @@
+<!--
+  ListItem 的主题（vue-tsx-pro 的 listStylesProse）：记号在起始边 1.5em 里靠末端（CSS 的 outside 记号），
+  文字与它隔 space.xs；:icon 时图标在前（上边距 0.2em，与第一行文字对齐），文字隔 space.sm
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:ListItem}" TargetType="rune:ListItem">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <DockPanel>
+          <rune:Text Name="PART_Marker" DockPanel.Dock="Left" Width="{rune:Em 1.5, Of=TemplatedParent}" TextAlignment="End"
+                     Padding="{rune:Em 0, 0, 0.3, 0, Of=TemplatedParent}" AutomationProperties.AccessibilityView="Raw" />
+          <rune:Icon Name="PART_Icon" DockPanel.Dock="Left" IsVisible="False" VerticalAlignment="Top"
+                     Margin="{rune:Em 0, 0.2, 0, 0, Of=TemplatedParent}" />
+          <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Margin="{rune:Em 0.25, 0, 0, 0, Of=TemplatedParent}">
+            <!-- 文字项按 rune:Text 排（行高随 Leading），与记号在同一条基线上 -->
+            <ContentPresenter.DataTemplates>
+              <DataTemplate DataType="x:String">
+                <rune:Text Text="{Binding}" />
+              </DataTemplate>
+            </ContentPresenter.DataTemplates>
+          </ContentPresenter>
+        </DockPanel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:icon">
+      <Style Selector="^ /template/ rune|Text#PART_Marker">
+        <Setter Property="IsVisible" Value="False" />
+      </Style>
+      <Style Selector="^ /template/ rune|Icon#PART_Icon">
+        <Setter Property="IsVisible" Value="True" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Margin" Value="{rune:Em 0.5, 0, 0, 0, Of=TemplatedParent}" />
+      </Style>
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

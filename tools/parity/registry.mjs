@@ -27,6 +27,17 @@ export const COMPONENT_PROP_RENAMES = {
   CodeText: { text: 'Source' },
 };
 
+/** 某个平台上统一改了名的 prop：WinForms 的控件自己有 Size（大小），字号档位叫 TextSize */
+export const PLATFORM_PROP_RENAMES = {
+  WinForms: { size: 'TextSize' },
+};
+
+/** 某个平台上改了名的组件（平台自带同名类型时）：库 → { 组件: 类型名 } */
+export const TYPE_RENAMES = {
+  // WinForms 自己有 ListControl（ListBox、ComboBox 的基类）
+  WinForms: { List: 'UnorderedList' },
+};
+
 const BUTTON_TYPE = '表单提交是浏览器的概念；对话框的默认、取消按钮用平台的 IsDefault、IsCancel';
 
 /** 某个组件不移植的 prop 与原因（平台上没有对应的概念）：parity 不报缺 */

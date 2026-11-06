@@ -1,0 +1,30 @@
+<UserControl x:Class="Rune.Wpf.Examples.ListBasic"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/wpf">
+  <!-- TS 的 Grid minItemWidth="16rem" gap="lg"：Grid 做出来前用换行的 WrapPanel、每列 256 宽，间距写在 Margin 上 -->
+  <WrapPanel>
+    <rune:List Width="256" Margin="0,0,16,16">
+      <rune:ListItem>支持亮色、暗色与纸张主题</rune:ListItem>
+      <rune:ListItem>
+        <StackPanel>
+          <rune:Text>组件按需引入，打包时只带用到的</rune:Text>
+          <rune:List>
+            <rune:ListItem>图标单个引入</rune:ListItem>
+            <rune:ListItem>图表、3D 在子路径</rune:ListItem>
+          </rune:List>
+        </StackPanel>
+      </rune:ListItem>
+      <rune:ListItem>键盘、读屏都可用</rune:ListItem>
+    </rune:List>
+    <rune:OrderedList Width="256" Margin="0,0,16,16">
+      <rune:ListItem><rune:Text>安装 <rune:Code>@zerodep-dev/vue-tsx-pro-ui</rune:Code></rune:Text></rune:ListItem>
+      <rune:ListItem><rune:Text>在 Vite 配置里加上 <rune:Code>vueTsxPro()</rune:Code></rune:Text></rune:ListItem>
+      <rune:ListItem><rune:Text><Span FontWeight="{DynamicResource Rune.FontWeight.Semibold}">createUi</Span> 选好主题与语言</rune:Text></rune:ListItem>
+    </rune:OrderedList>
+    <rune:OrderedList Width="256" Margin="0,0,16,16" Start="4" Gap="sm">
+      <rune:ListItem>写第一个页面（接着上一列，从 4 开始）</rune:ListItem>
+      <rune:ListItem>跑起开发服务器，改代码立即看到效果</rune:ListItem>
+    </rune:OrderedList>
+  </WrapPanel>
+</UserControl>

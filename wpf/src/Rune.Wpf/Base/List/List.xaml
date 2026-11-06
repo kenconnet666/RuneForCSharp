@@ -1,0 +1,46 @@
+<!--
+  列表的主题样式（vue-tsx-pro 的 listStylesProse）：字号档位是触发器（同 Text，DESIGN §4）；
+  ListItem 的记号、图标、内容层的 em 尺寸在 ListItem.cs 里按字号算
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf"
+                    xmlns:sys="clr-namespace:System;assembly=System.Runtime">
+  <Style TargetType="rune:ListBase">
+    <Style.Triggers>
+      <Trigger Property="Size" Value="xs"><Setter Property="TextElement.FontSize" Value="{DynamicResource Rune.FontSize.Xs}" /></Trigger>
+      <Trigger Property="Size" Value="sm"><Setter Property="TextElement.FontSize" Value="{DynamicResource Rune.FontSize.Sm}" /></Trigger>
+      <Trigger Property="Size" Value="md"><Setter Property="TextElement.FontSize" Value="{DynamicResource Rune.FontSize.Md}" /></Trigger>
+      <Trigger Property="Size" Value="lg"><Setter Property="TextElement.FontSize" Value="{DynamicResource Rune.FontSize.Lg}" /></Trigger>
+      <Trigger Property="Size" Value="xl"><Setter Property="TextElement.FontSize" Value="{DynamicResource Rune.FontSize.Xl}" /></Trigger>
+      <Trigger Property="Size" Value="xxl"><Setter Property="TextElement.FontSize" Value="{DynamicResource Rune.FontSize.Xxl}" /></Trigger>
+      <Trigger Property="Size" Value="xxxl"><Setter Property="TextElement.FontSize" Value="{DynamicResource Rune.FontSize.Xxxl}" /></Trigger>
+    </Style.Triggers>
+  </Style>
+
+  <!-- 部件样式键总要有一个样式（同 SpinnerParts.Icon），使用方同键的样式叠在上面 -->
+  <Style x:Key="{x:Static rune:ListItemParts.Icon}" TargetType="rune:Icon" />
+  <Style x:Key="{x:Static rune:ListItemParts.Content}" TargetType="ContentPresenter" />
+
+  <Style TargetType="rune:ListItem">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="rune:ListItem">
+          <DockPanel>
+            <rune:Text x:Name="PART_Marker" DockPanel.Dock="Left" TextAlignment="Right" />
+            <rune:Icon x:Name="PART_Icon" DockPanel.Dock="Left" VerticalAlignment="Top" Visibility="Collapsed"
+                       Style="{DynamicResource {x:Static rune:ListItemParts.Icon}}" />
+            <ContentPresenter x:Name="PART_ContentPresenter" Style="{DynamicResource {x:Static rune:ListItemParts.Content}}">
+              <!-- 文字项按 rune:Text 排（行高随 Leading），与记号在同一条基线上 -->
+              <ContentPresenter.Resources>
+                <DataTemplate DataType="{x:Type sys:String}">
+                  <rune:Text Text="{Binding}" />
+                </DataTemplate>
+              </ContentPresenter.Resources>
+            </ContentPresenter>
+          </DockPanel>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+</ResourceDictionary>
