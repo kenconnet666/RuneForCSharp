@@ -25,6 +25,8 @@ export const COMPONENT_PROP_RENAMES = {
   Icon: { icon: 'Data' },
   // Text 是 TextBlock 自己的属性
   CodeText: { text: 'Source' },
+  // Measure 是布局的方法
+  Prose: { measure: 'LimitLineLength' },
 };
 
 /** 某个平台上统一改了名的 prop：WinForms 的控件自己有 Size（大小），字号档位叫 TextSize */
@@ -52,6 +54,7 @@ export const PROPS_NOT_PORTED = {
   ButtonBase: { type: BUTTON_TYPE },
   CloseButton: { type: BUTTON_TYPE },
   ClearButton: { type: BUTTON_TYPE },
+  Toolbar: { items: '桌面上没有 CSS 选择器：参与方向键移动的固定是按钮与链接' },
 };
 
 /** 平台控件自带、不用组件自己声明的属性（基类里已经有） */

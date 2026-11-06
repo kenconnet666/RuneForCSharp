@@ -1,0 +1,10 @@
+<!-- Prose 的主题（vue-tsx-pro 的 proseStyles）：竖排、块之间 space.lg、行高 relaxed；都是 Flex 的属性，使用方的样式盖得过 -->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:Prose}" TargetType="rune:Prose">
+    <Setter Property="Direction" Value="column" />
+    <Setter Property="Gap" Value="lg" />
+    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Relaxed}" />
+  </ControlTheme>
+</ResourceDictionary>

@@ -19,6 +19,7 @@
     <ResourceDictionary Source="/Rune.Wpf;component/Base/Indicator/Indicator.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Layout/Flex/Flex.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Layout/Separator/Separator.xaml" />
+    <ResourceDictionary Source="/Rune.Wpf;component/Navigation/Toolbar/Toolbar.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Base/Code/Code.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Base/Blockquote/Blockquote.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Base/Button/Button.xaml" />

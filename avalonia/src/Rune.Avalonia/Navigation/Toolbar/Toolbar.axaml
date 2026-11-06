@@ -1,0 +1,18 @@
+<!--
+  Toolbar 的主题（vue-tsx-pro 的 toolbarStyles）：横排、放不下换行、交叉轴居中，项之间默认 space.xs；竖排时拉伸。
+  都是 Flex 的属性，使用方的样式与本地值盖得过
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:Toolbar}" TargetType="rune:Toolbar">
+    <Setter Property="Wrap" Value="True" />
+    <Setter Property="Align" Value="center" />
+    <Setter Property="Gap" Value="xs" />
+    <Style Selector="^[Orientation=vertical]">
+      <Setter Property="Direction" Value="column" />
+      <Setter Property="Align" Value="stretch" />
+      <Setter Property="Wrap" Value="False" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

@@ -1,0 +1,26 @@
+<!--
+  Toolbar、Prose 的主题样式：都是 Flex，默认值是 Flex 的属性（使用方的样式盖得过）。
+  Toolbar（vue-tsx-pro 的 toolbarStyles）：横排、放不下换行、交叉轴居中、项之间 space.xs；竖排时拉伸。
+  Prose（proseStyles）：竖排、块之间 space.lg、行高 relaxed
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <Style TargetType="rune:Toolbar">
+    <Setter Property="Wrap" Value="True" />
+    <Setter Property="Align" Value="center" />
+    <Setter Property="Gap" Value="xs" />
+    <Style.Triggers>
+      <Trigger Property="Orientation" Value="vertical">
+        <Setter Property="Direction" Value="column" />
+        <Setter Property="Align" Value="stretch" />
+        <Setter Property="Wrap" Value="False" />
+      </Trigger>
+    </Style.Triggers>
+  </Style>
+  <Style TargetType="rune:Prose">
+    <Setter Property="Direction" Value="column" />
+    <Setter Property="Gap" Value="lg" />
+    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Relaxed}" />
+  </Style>
+</ResourceDictionary>
