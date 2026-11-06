@@ -1,0 +1,104 @@
+# 全量验证：三个平台各一个并行的任务（构建、测试、把每个示例截图），外加生成文件的核对与对照报告。
+# 本地只验证改动相关的部分，全量交给这里（HANDOFF"命令表"）
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  platform:
+    name: ${{ matrix.platform }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: avalonia
+            tests: avalonia/tests/Rune.Avalonia.Tests
+          - platform: wpf
+            tests: wpf/tests/Rune.Wpf.Tests
+          - platform: winforms
+            tests: winforms/tests/Rune.WinForms.Tests
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      # 平台目录下的组件库、示例、工具、测试都构建（库被引用多次，后面的构建是增量的）
+      - name: Build
+        shell: pwsh
+        run: |
+          $projects = Get-ChildItem ${{ matrix.platform }} -Recurse -Filter *.csproj | Where-Object FullName -NotMatch '[\\/](bin|obj)[\\/]'
+          foreach ($project in $projects) {
+            dotnet build $project.FullName -c Release
+            if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          }
+
+      - name: Test
+        run: dotnet test --project ${{ matrix.tests }} -c Release --no-build
+
+      # 每个示例在亮、暗主题下各截一张图，出图失败（示例建不起来、渲染出错）就算失败
+      - name: Snapshot examples
+        shell: pwsh
+        run: |
+          [Console]::OutputEncoding = [Text.Encoding]::UTF8
+          $inspect = Get-ChildItem ${{ matrix.platform }}/tools -Recurse -Filter 'Rune.*.Inspect.exe' -ErrorAction SilentlyContinue |
+            Where-Object FullName -Match '[\\/]bin[\\/]Release[\\/]' | Select-Object -First 1
+          if (-not $inspect) { Write-Output '这个平台还没有 inspect'; exit 0 }
+          foreach ($example in (& $inspect.FullName list --json | ConvertFrom-Json)) {
+            foreach ($theme in 'light', 'dark') {
+              & $inspect.FullName snapshot $example.'示例' --theme $theme
+              if ($LASTEXITCODE) { exit $LASTEXITCODE }
+            }
+          }
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: snapshots-${{ matrix.platform }}
+          path: artifacts/inspect
+          if-no-files-found: ignore
+
+  generated:
+    name: generated files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: kenconnet666/vue-tsx-pro
+          path: vue-tsx-pro
+
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: vue-tsx-pro/package.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: vue-tsx-pro/pnpm-lock.yaml
+
+      - name: Install vue-tsx-pro
+        working-directory: vue-tsx-pro
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      # token、语言包、Lucide 图标与 vue-tsx-pro 一致；对照报告写进任务摘要
+      - name: Check generated files
+        env:
+          VUE_TSX_PRO: ${{ github.workspace }}/vue-tsx-pro
+        run: |
+          node tools/token-gen/token-gen.mjs --check
+          node tools/lang-gen/lang-gen.mjs --check
+          node tools/icons-gen/icons-gen.mjs --check
+          node tools/parity/parity.mjs >> "$GITHUB_STEP_SUMMARY"
