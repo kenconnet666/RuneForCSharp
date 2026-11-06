@@ -123,9 +123,23 @@ vue-tsx-pro 那边的会话改了设计时会发通知过来（每完成一个�
 | 删掉 Figma 设计资源；点击波纹保持默认开启 | 不涉及；`Ripple.Enabled` 默认值不变 |
 | 接下来：控件高度 24/28/32/36/40、中文字重（600 只给 H1–H4）、着色页面 + 白卡片、标题阶梯 | 控件高度：先把按钮家族里的 max(2.25em, 24px) 收成一处（三个平台各一处），表定了换成按档位查表；字重、页面底色、标题阶梯多半是 token，重新生成后核对按钮的字重设置 |
 
+### 阶段 4 第二批（2026-11-06 通知，分支 feat/style-overhaul c340d084，未合入 master）
+
+先用 scratchpad 里检出 c340d084 的副本跑了一遍生成器：token-gen 认不出 `sizes.control = round(nearest, 2.25em, 4px)`，上游一合入我们的 CI 就会失败。已经让 token-gen 认识 CSS 的 `round()`：系数照旧（`Rune.Size.Control` = 2.25），另生成取整步长 `Rune.Size.ControlRound` = 4（WinForms `Tokens.Size.ControlRound`）；对上游 master 的输出不变。语言包（主题名的增减）、亮色主题的新底色（上游已经算成具体颜色）都能直接生成，合入后重新生成即可。
+
+| 上游 | 我们 | 跟进 |
+|---|---|---|
+| 控件高度：字号的 2.25 倍取整到 4px（13 / 14 / 16 / 18px → 28 / 32 / 36 / 40px）；字号档位 xs 用 2 倍（12px → 24px）；仍与 minTarget 24px 取大 | 三个平台各一处写死 max(2.25em, 24px)：Avalonia 按钮主题的 MinHeight 与 IconButton 的 Width（`{rune:Em 2.25, Min=24}`）、WPF 的 `EmSize.MinHeight` / `EmSize.Width` + `MinTarget`、WinForms `ButtonCore.Measure` | 收成每个平台一个"控件高度"：`max(round(系数 × 字号 ÷ 步长) × 步长, minTarget)`，系数取 `Rune.Size.Control`（组件的字号档位是 xs 时用 2），步长取 `Rune.Size.ControlRound`；按 CSS 的 round(nearest) 取整（正好一半时往大取）。Avalonia 给 `{rune:Em}` 加取整参数，WPF 的 EmSize 加步长，WinForms 用一个共用方法 |
+| 字重：按钮、组件小标题、分组标签、表头等界面文字 600 → 500；标题 H1–H6、数字、页面级大标题仍 600 | 按钮家族主题的 FontWeight 是 Semibold（WinForms 画成粗体） | 合入后改 Medium（WinForms 画成常规——正是上游要避开的"600 在微软雅黑上落成粗体"）；Strong 仍是 600 |
+| H6 默认字号改 sm | Heading 还没做 | 做时照做 |
+| 亮色系 7 套主题"着色页面 + 白卡片"（background ← 原 surfaceMuted，surface / surfaceRaised ← 白，surfaceMuted 重算），几套主题的图表色调深保 3:1 | token | 合入后重新生成；Gallery、inspect 的页面底色用 `Rune.Brush.Background`，按钮的 surface 样式用 Surface，截图核对白底按钮在着色页面上的效果 |
+| Upload 图片墙的小按钮在深色下对比度不够，改成半透明表面色底 | Upload 还没做 | 做时照做 |
+| 字体只用系统字体栈，不带 web 字体 | 我们本来就只用系统字体 | 不涉及 |
+
 ### 进度
 
 - 2026-11-06：收到计划草案，完成上面的评估。同日上游获批，方向见"已定的方向"。代码未动，等上游各阶段的通知；还没做的组件直接按已定的词表与规则做（新名字、控件高度收成一处、浮层阴影按新规则）。
 - 2026-11-06：收到阶段 1 完成的通知，对照三个平台写了上面"阶段 1"的差别与实现计划。按用户的安排（这阶段先做性能），代码等阶段 2 的通知到了再一起动。
 - 2026-11-06：收到阶段 2 完成、阶段 3 进行中的通知，列出上面 5 个工作包。其中第 3 包是跨模块的重构（Provider 合成），开工前先请用户确认。
 - 2026-11-06：收到阶段 3 合入、阶段 4 进行中的通知。按上游 master 9d5af3f3 重新生成了 token（新增 scrim 三个）；token-gen 能删掉上游没有了的主题文件。Icon 的 `draw`（描线动画）parity 报缺，是早就记下的暂缓项。
+- 2026-11-06：收到阶段 4 第二批的通知（分支上，未合入）。提前对分支跑了生成器，让 token-gen 认识 `round()`，避免上游合入后 CI 失败；控件高度、按钮字重的改法记在上面，等合入后与其他对齐工作一起做。
