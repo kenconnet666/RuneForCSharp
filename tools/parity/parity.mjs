@@ -64,7 +64,12 @@ function csharpTypes(dir) {
   walk(join(repoRoot, dir));
   const inherited = (type, seen = new Set()) =>
     seen.has(type) ? [] : (seen.add(type), [...(types.get(type) ?? []), ...(bases.has(type) ? inherited(bases.get(type), seen) : [])]);
-  return new Map([...types.keys()].map((type) => [type, new Set(inherited(type))]));
+  const merged = new Map([...types.keys()].map((type) => [type, new Set(inherited(type))]));
+  // 沿用基类模板的组件（CloseButton 继承 IconButton）没有自己的部件名类，部件算基类的
+  for (const type of types.keys())
+    for (let base = bases.get(type); base && !merged.has(`${type}Parts`); base = bases.get(base))
+      if (merged.has(`${base}Parts`)) merged.set(`${type}Parts`, merged.get(`${base}Parts`));
+  return merged;
 }
 
 /**

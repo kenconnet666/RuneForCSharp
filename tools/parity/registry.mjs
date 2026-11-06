@@ -32,6 +32,8 @@ export const PROPS_NOT_PORTED = {
   Button: { type: BUTTON_TYPE },
   IconButton: { type: BUTTON_TYPE },
   ButtonBase: { type: BUTTON_TYPE },
+  CloseButton: { type: BUTTON_TYPE },
+  ClearButton: { type: BUTTON_TYPE },
 };
 
 /** 平台控件自带、不用组件自己声明的属性（基类里已经有） */
