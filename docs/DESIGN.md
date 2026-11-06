@@ -188,6 +188,10 @@ TS 版的规则是"显式 prop > 最近一层 Provider > createUi > 组件默认
 
 - **大量重复的轻量部件用自绘**，不用模板：Icon、Badge、Tag、表格单元格、列表行。模板控件只给结构复杂、需要使用方改模板的组件。
 - **WinForms 组件做成无窗口元素**，由少数宿主控件统一布局、绘制、失效。只有需要原生输入法或独立焦点的（文本输入）才用真的子控件。
+  - 已实测这条路可行：Tab 在元素间移动、走到头交还窗体，Enter、Space、点击都能触发。
+  - 无障碍上，UI Automation 能看到每个元素：名称、Button 类型、位置、焦点状态，支持 Invoke，按屏幕坐标也能命中。
+  - 具体写法见 HANDOFF.md §4.1。
+- **整套主题切换**：3000 个控件，每个 4 个 DynamicResource，亮切暗：Avalonia 273 ms，WPF 363 ms。局部切换 300 个：Avalonia 11 ms，WPF 28 ms。token 全用 DynamicResource 可以接受。
 - 档位变化只切伪类或触发器，**不换 Style / ControlTheme / Template**：换 Style 会重新应用全部 setter，换模板会重建整棵子树。
 - Avalonia 组合档位多（TS 的 Button 是 6 × 6）时，注意嵌套样式的数量；必要时把色调做成调色板对象来减少组合样式（做 Button 时实测再定）。
 - 自定义属性的元数据写准 AffectsRender / AffectsMeasure；集合用逐项通知，大列表用虚拟化。
@@ -225,4 +229,5 @@ TS 版的规则是"显式 prop > 最近一层 Provider > createUi > 组件默认
 - Avalonia：桌面窗口里改库的 ControlTheme 能否热重载；HotAvalonia 的 Aggressive 模式在 headless 下完全不生效。
 - WPF：在 Rider/VS 里改 Provider.Styles 能否 XAML 热重载。
 - Avalonia 组合档位的规模（36 个组合样式）对真实组件的影响，以及调色板对象方案。
-- WinForms 无窗口元素的焦点、键盘导航、无障碍（AccessibleObject）方案。
+- WinForms 主题切换的耗时（信号加绘制 effect 的做法，未测完）。
+- 档位类型：enum 还是可扩展的字符串包装类型（XAML 解析、触发器、伪类映射）。

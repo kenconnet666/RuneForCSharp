@@ -15,7 +15,7 @@
 - 只更新该更新的节点。
 - 开发期支持热重载。
 
-设计与取舍见 [docs/DESIGN.md](docs/DESIGN.md)，进度见 [docs/ROADMAP.md](docs/ROADMAP.md)。
+设计与取舍见 [docs/DESIGN.md](docs/DESIGN.md)，进度见 [docs/ROADMAP.md](docs/ROADMAP.md)，接手先读 [HANDOFF.md](HANDOFF.md)。
 
 ## 开发
 
