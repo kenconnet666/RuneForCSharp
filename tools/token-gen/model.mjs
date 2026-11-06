@@ -62,8 +62,11 @@ function convert(kind, raw) {
     case 'length': {
       const length = parseLength(value);
       if (length.unit === '%') throw new Error(`百分比没法换算：${raw}（在 SKIPPED 里登记）`);
-      if (length.unit === 'rem') return { value: length.value * REM, unit: 'px' };
-      return { value: length.value, unit: length.unit === 'em' ? 'em' : 'px' };
+      const converted = length.unit === 'rem' ? { value: length.value * REM, unit: 'px' } : { value: length.value, unit: length.unit === 'em' ? 'em' : 'px' };
+      if (!length.round) return converted;
+      // 取整的步长（round(nearest, 2.25em, 4px) 的 4px）：只认绝对长度，组件按字号算出值后取整到它的倍数
+      if (!['px', 'rem'].includes(length.round.unit)) throw new Error(`取整的步长要是 px 或 rem：${raw}`);
+      return { ...converted, round: length.round.unit === 'rem' ? length.round.value * REM : length.round.value };
     }
     case 'shadow':
       return parseShadows(value);

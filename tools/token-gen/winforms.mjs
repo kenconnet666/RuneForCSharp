@@ -47,6 +47,8 @@ function tokens(model) {
       if (entry.kind === 'duration') lines.push(`        public static readonly TimeSpan ${name} = TimeSpan.FromMilliseconds(${number(entry.value)});`);
       else if (entry.group === 'fontWeights') lines.push(`        public const int ${name} = ${entry.value};`);
       else lines.push(`        public const float ${name} = ${float(entry.kind === 'length' ? entry.value.value : entry.value)};`);
+      if (entry.kind === 'length' && entry.value.round)
+        lines.push(`        ${summary(`${name} 取整的步长（设备无关像素）：按字号算出的值取整到它的倍数。`)}`, `        public const float ${name}Round = ${float(entry.value.round)};`);
     }
     lines.push('    }', '');
   }

@@ -29,8 +29,13 @@ const hex2 = (n) => Math.round(n).toString(16).padStart(2, '0').toUpperCase();
 /** XAML 与 .NET 的写法：`#AARRGGBB`（alpha 在最前，和 CSS 相反） */
 export const argbHex = ({ r, g, b, a }) => `#${hex2(a * 255)}${hex2(r)}${hex2(g)}${hex2(b)}`;
 
-/** 长度 → `{ value, unit }`：px、em、rem、%，或不带单位的数字（0 也是） */
+/**
+ * 长度 → `{ value, unit }`：px、em、rem、%，或不带单位的数字（0 也是）。
+ * CSS 的 `round(nearest, 2.25em, 4px)`（控件高度按字号算再取整到 4 的倍数）→ 里面的长度加 `round`（步长，也是长度）
+ */
 export function parseLength(text) {
+  const rounded = text.trim().match(/^round\(\s*(?:nearest\s*,\s*)?([^,]+),([^,)]+)\)$/);
+  if (rounded) return { ...parseLength(rounded[1]), round: parseLength(rounded[2]) };
   const match = text.trim().match(/^(-?\d*\.?\d+)(px|em|rem|%)?$/);
   if (!match) throw new Error(`认不出的长度：${text}`);
   return { value: Number(match[1]), unit: match[2] ?? '' };

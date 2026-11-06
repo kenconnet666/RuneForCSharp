@@ -39,7 +39,11 @@ function resources(entry) {
     case 'font':
       return [`<FontFamily x:Key="${key}">${escape(value.join(', '))}</FontFamily>`];
     case 'length':
-      return [`<sys:Double x:Key="${key}">${number(value.value)}</sys:Double>`];
+      // 带取整的（控件高度）另给一个"步长"资源：<键>Round
+      return [
+        `<sys:Double x:Key="${key}">${number(value.value)}</sys:Double>`,
+        ...(value.round ? [`<sys:Double x:Key="${key}Round">${number(value.round)}</sys:Double>`] : []),
+      ];
     case 'number':
       if (entry.group === 'fontWeights') {
         if (!FONT_WEIGHTS[value]) throw new Error(`${key}：WPF 没有字重 ${value} 对应的名字`);
