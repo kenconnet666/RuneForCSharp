@@ -49,6 +49,7 @@
 | 17 | 工具的语言 | 读 vue-tsx-pro 的工具用 node，只依赖内置模块与 vue-tsx-pro 自带的 `typescript`；要加载三个库的工具用 C# |
 | 18 | 测试与工具的依赖 | Playwright、FlaUI 只用在测试与工具里，不进组件库的依赖 |
 | 19 | WPF 的 Text 家族 | 从 TextBlock 派生（行内内容、截断、读屏现成）；模板里的 Text 给部件样式键，Provider 合成部件键时叠在同一组件的类型键结果上，"所有实例"的样式就能进模板（2026-11-06 用户确认） |
+| 20 | 自绘组件的部件 | 底色、描边、圆角自己画；图标、文字等部件是代码里组合的真组件（不建模板）：Avalonia 用子选择器 `rune\|Badge > rune\|Icon#PART_Icon`，WPF 子元素引用部件样式键，WinForms 用部件属性记录（2026-11-06 用户确认） |
 
 ## 平台化的约定
 
@@ -254,7 +255,7 @@
 - [x] 档位类型：`IVariant` / `VariantConverter` 与 `TextSize`、`Tone`，三个库都做了。
 - [x] Text 家族（Text、Paragraph、Strong、Em、Small）：三个平台都做了（DESIGN §14）；WPF 从 TextBlock 派生（决定 19）。示例做了 scale、tones、numeric、overflow，inline、links、headings 等 Kbd、Link、Heading。
 - [x] Spinner（第一个带部件的组件，`propsIcon`）：三个平台都做了，部件转发按 DESIGN §7 的三种写法落地（DESIGN §14）；parity 认部件名常量与 `PropsXxx`。
-- [x] Badge（第一个自绘、带配方与组合档位的组件）：三个平台都做了，部件按"待定的决定"的建议 A（代码里组合真的子组件）；示例做了 matrix、shapes，in-context、statuses、tag 等 Table、StatusBadge、Tag。
+- [x] Badge（第一个自绘、带配方与组合档位的组件）：三个平台都做了，部件按决定 20（代码里组合真的子组件）；示例做了 matrix、shapes，in-context、statuses、tag 等 Table、StatusBadge、Tag。
 
 ### 3. 按依赖分层移植组件
 
@@ -326,12 +327,5 @@ RuneForBlazor 已经走过一遍这些组件，同一个组件先看它踩过的
 
 ## 待定的决定
 
-新的待定项写在这里：日期、事项、卡在哪、要决定什么，附上建议。
+暂无。新的待定项写在这里：日期、事项、卡在哪、要决定什么，附上建议。
 
-- **2026-11-06 自绘组件怎么转发部件**（Badge 先遇到；Tag、表格单元格、列表行同理）。
-  - 卡在哪：DESIGN §9 定了数量大的轻量部件自绘、不用模板；§7 的部件转发写的是模板里的部件（Avalonia 的 `/template/`、WPF 模板里的部件样式键）。Badge 的 `propsIcon` 是本库的 Icon，自绘时没有模板可穿。
-  - 选项：
-    - A. 自绘外框（底色、描边、圆点在 Render 里画），图标与文字在代码里组合成真的子组件（有图标时一个 Icon、内容一个 Text），不建模板：部件仍是真的组件。Avalonia 用子选择器 `rune|Badge > rune|Icon`；WPF 子 Icon 在代码里引用部件样式键 `BadgeParts.Icon`，Provider 合成不变；WinForms 照旧 `PropsIcon`。比模板轻（少了 ControlTemplate 与 ContentPresenter），转发方式与模板组件接近。
-    - B. 全部自绘，部件用属性记录（三个平台都用 `IconProps` 这类记录）：最轻，但 XAML 平台上样式只能整条替换记录，Provider 的逐层合并要组件自己做。
-    - C. 照常用模板：转发最统一，但 3000 个时创建慢约 4 倍（DESIGN §9）。
-  - 建议 A。没有回复前先按 A 做 Badge；要改时只动 Badge 与这里的约定。

@@ -13,7 +13,7 @@ namespace Rune.Wpf;
 /// &lt;rune:Text Mono="True" Size="sm"&gt;PO-2026-0187&lt;/rune:Text&gt;    编号、件号：等宽字体
 /// &lt;rune:Text Numeric="True" Tone="danger"&gt;超时 3 天&lt;/rune:Text&gt;  金额、计数：等宽数字
 /// </code>
-/// 从 TextBlock 派生（ROADMAP"待定的决定"的建议 A）：行内内容、换行、截断、读屏都现成。不写的属性都继承外面；
+/// 从 TextBlock 派生（ROADMAP 决定 19）：行内内容、换行、截断、读屏都现成。不写的属性都继承外面；
 /// 写了的档位在代码里设成主题资源的引用（本地值，同 DynamicResource），清掉时回到继承。换某个色调的颜色改主题资源。
 /// </summary>
 public class Text : TextBlock

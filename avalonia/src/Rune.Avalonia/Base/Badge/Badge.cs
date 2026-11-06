@@ -16,7 +16,7 @@ namespace Rune.Avalonia;
 /// &lt;rune:Badge Tone="warning" Dot="True"&gt;待审核&lt;/rune:Badge&gt;   &lt;!-- 文字前一个同色的圆点 --&gt;
 /// </code>
 /// 数量大的轻量部件（DESIGN §9）：不用模板，底色、描边、圆角在 Render 里画，图标、圆点、文字是代码里组合的子元素
-/// （ROADMAP"待定的决定"自绘组件的部件转发，建议 A）。部件是真的元素：<c>rune|Badge &gt; rune|Icon</c>、
+/// （ROADMAP 决定 20）。部件是真的元素：<c>rune|Badge &gt; rune|Icon</c>、
 /// <c>rune|Badge &gt; Border#PART_Dot</c> 的样式能改它们。
 /// 样式 × 色调决定的颜色（<see cref="StatusColors"/>）在代码里绑定主题资源，是受管的；默认的样式、色调、字号、圆角在主题里，
 /// Provider 的样式能改。尺寸都是 em：内边距 0.5em、间距 0.25em、最小高度 1.75em、圆点 0.5em，圆角取主题的 radii。
