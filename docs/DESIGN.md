@@ -518,6 +518,17 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - WinForms 没有行内元素：LinkControl 是单独的控件（Enter 打开，空格不打开，同浏览器）。
 - 三个平台都同 LinkButton：Href 是绝对地址、用系统打开，不可用时不打开；外部链接读屏名称补"在新窗口打开"。TS 的下划线粗细与偏移（textDecorationThickness、textUnderlineOffset）三个平台都用平台默认的下划线。
 
+### CodeText、List、Indicator（2026-11-07）
+
+- **CodeText**：TS 的 text 在三个库里叫 `Source`（Text 是 TextBlock 自己的）。Avalonia、WPF 从 Text 派生，按反引号拆成 Run 与 Code 的行内文字（Code 是部件：Avalonia `PART_Code`，WPF `CodeTextParts.Code`）；WinForms 把 Text、Code 元素排成一行，不换行。
+- **List**：TS 的 ul / ol 里是 li，记号是浏览器画的（outside）。桌面上列表是竖排的面板，直接子元素里的 ListItem 由列表给记号（圆点、从 Start 起的编号、或代替圆点的图标）；ListItem 的模板画记号：在起始边 1.5em 里靠末端（后面空约一个空格），文字缩进 1.5em + space.xs（同 CSS 的 ul 内边距 + li 内边距）；带图标时不缩进，图标上边距 0.2em、后面 space.sm。文字项按 `rune:Text` 排（数据模板），行高随 Leading，与记号同一条基线。
+  - Avalonia：`ListBase : StackPanel`（Spacing = space 系数 × 字号，模板优先级）；WPF：`ListBase : Panel` 自己竖排（WPF 的 StackPanel 没有 Spacing），字号档位是主题样式的触发器；ListItem 的 em 尺寸在代码里按字号算（同 Badge）。
+  - WinForms：`UnorderedListControl`（WinForms 自己有 ListControl）、`OrderedListControl`、自绘的 `ListItemControl`（Text 是项的文字，子控件排在文字下面，嵌套的列表就是子控件）；大小同 Label：自然宽度，不超过布局给的宽度与 MaximumSize，高度按这个宽度换行。
+  - 读屏：列表、列表项；记号不在控件视图里。项是 ContentControl，项里先文字再嵌套列表时内容放一个 StackPanel（TS 里可以直接混写）。
+- **Indicator**：TS 的角标绝对定位、不占位置，中心对准被标记元素的角。Avalonia、WPF 的 Indicator 大小就是内容的大小，角标是代码组合的子元素，排在角上（伸出去的部分照样画出来）；圆形内容收进宽度的 14.6%（CSS 的 margin 百分比按宽度算）。外面一圈页面底色：Avalonia 用 BoxShadow 的 spread（不占位置），WPF 用 2px 的边框（定位时算进去）。WPF 的色调是生成的触发器（recipe-gen 的只按色调的配方），设在 `BadgeBackground`、`BadgeForeground` 上，不碰继承的文字颜色。
+  - WinForms 的控件画不到自己外面、也盖不住兄弟控件：角标是叠在内容上面的小控件（Region 裁成胶囊形，外沿没有抗锯齿，但那一圈是页面底色），IndicatorControl 给伸出去的一半留出位置——这是和 TS 唯一的布局差别。
+  - 读屏：角标是一段文字（Avalonia、WPF 的 Border 本来不进控件树，换成内部的子类给 Text 的 peer），名称是 Label 或语言包的说明，数字不念。
+
 ### Spinner
 
 - 第一个带部件的组件（`propsIcon`），三个平台按 §7 的写法各落地一次：

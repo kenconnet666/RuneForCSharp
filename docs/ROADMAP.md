@@ -20,7 +20,7 @@
 - 组件：Icon、Text 家族（5 个）、Spinner、Badge、Button 家族（Button、IconButton、CloseButton、ClearButton、LinkButton、IconLinkButton，Avalonia、WPF 另有 ButtonBase）三个平台都做了，162 个测试。
 - 做过一轮性能（DESIGN §9"组件基准"）：Avalonia 按钮首次布局快 36%、WinForms 快 4 倍。
 - 上游 vue-tsx-pro 做完了样式体系改造（0.11，分支 feat/style-overhaul，等合入 master），对照与要跟进的在 [UPSTREAM.md](UPSTREAM.md)。
-- M1 进行中（2026-11-07）：Kbd、Code、Mark、Blockquote、StatusDot、H1–H6、Link 三个平台都做了（Text 页的示例都有了，Avalonia、WPF 取值与文档站一致）；TextSize 加了 xxl、xxxl。下一个：CodeText、List、Indicator，然后布局（Flex、Grid、Separator……）。进度以 `node tools/parity/parity.mjs` 为准；每个组件跑 `tools/parity/styles.mjs`（取值）与 `behavior.mjs`（行为）。
+- M1 进行中（2026-11-07）：Kbd、Code、Mark、Blockquote、StatusDot、H1–H6、Link、CodeText、List / OrderedList / ListItem、Indicator 三个平台都做了（Text 页的示例都有了，Avalonia、WPF 取值与文档站一致；List 有 basic 示例，icons 等 Card、Flex、Grid；Indicator 的示例在上游的 Avatar 页，等 Avatar）；TextSize 加了 xxl、xxxl，新的档位类型 `Space`（gap）。已知缺口：WinForms 的 propsCode（CodeText）、propsBadge / propsCount（Indicator）、propsContent（ListItem）——WinForms 部件只有元素才有部件属性记录，这几处的部件是控件或 GDI 画的，等 `Sx` 记录（工作包 5）一起定。下一个：布局（Flex、Grid、Separator、Container……），然后补 List 的 icons 示例。进度以 `node tools/parity/parity.mjs` 为准；每个组件跑 `tools/parity/styles.mjs`（取值）与 `behavior.mjs`（行为）。
 - 生成文件锁定上游的开发线（`tools/vue-tsx-pro.ref`，现在是 45c2ad90 = 0.12.0-dev 的开头，与 0.11.0 的组件库相同）。下一步：里程碑 M0。
 
 ## 已定的决定
