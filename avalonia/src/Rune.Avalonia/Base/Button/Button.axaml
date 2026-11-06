@@ -147,4 +147,12 @@
       </ControlTemplate>
     </Setter>
   </ControlTheme>
+
+  <!-- 预设的图标按钮：只换图标，读屏名称在代码里取语言包 -->
+  <ControlTheme x:Key="{x:Type rune:CloseButton}" TargetType="rune:CloseButton" BasedOn="{StaticResource {x:Type rune:IconButton}}">
+    <Setter Property="Icon" Value="{x:Static rune:Lucide.X}" />
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type rune:ClearButton}" TargetType="rune:ClearButton" BasedOn="{StaticResource {x:Type rune:IconButton}}">
+    <Setter Property="Icon" Value="{x:Static rune:Lucide.CircleX}" />
+  </ControlTheme>
 </ResourceDictionary>

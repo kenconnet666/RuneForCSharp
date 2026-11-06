@@ -1,3 +1,5 @@
+using global::Avalonia.Automation.Peers;
+
 namespace Rune.Avalonia;
 
 /// <summary>
@@ -5,10 +7,23 @@ namespace Rune.Avalonia;
 /// <code>
 /// &lt;rune:IconButton Icon="{x:Static rune:Lucide.Settings}" AutomationProperties.Name="设置" /&gt;
 /// </code>
-/// 没有文字，必须写 <c>AutomationProperties.Name</c>（TS 的 aria-label），读屏才知道它是做什么的。
+/// 没有文字，必须写 <c>AutomationProperties.Name</c>（TS 的 aria-label），读屏才知道它是做什么的；
+/// 预设的 <see cref="CloseButton"/>、<see cref="ClearButton"/> 不写时取语言包。
 /// 部件（模板里的名字，见 <see cref="IconButtonParts"/>）：内容层、图标、加载指示，用 <c>/template/</c> 样式改。
 /// </summary>
-public class IconButton : ButtonCore;
+public class IconButton : ButtonCore
+{
+    /// <summary>没写 <c>AutomationProperties.Name</c> 时的读屏名称（预设按钮取语言包）。</summary>
+    protected virtual string? DefaultAccessibleName => null;
+
+    /// <inheritdoc />
+    protected override AutomationPeer OnCreateAutomationPeer() => new IconButtonAutomationPeer(this);
+
+    sealed class IconButtonAutomationPeer(IconButton owner) : ButtonAutomationPeer(owner)
+    {
+        protected override string? GetNameCore() => base.GetNameCore() is { Length: > 0 } name ? name : owner.DefaultAccessibleName;
+    }
+}
 
 /// <summary>图标按钮的部件名：样式里用 <c>rune|IconButton /template/ rune|Icon#PART_Icon</c> 选中。</summary>
 public static class IconButtonParts
