@@ -77,9 +77,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # 只核对锁定的上游提交（tools/vue-tsx-pro.ref），上游推送不让这里失败
+      - name: Read pinned vue-tsx-pro commit
+        id: upstream
+        run: echo "ref=$(cat tools/vue-tsx-pro.ref)" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@v4
         with:
           repository: kenconnet666/vue-tsx-pro
+          ref: ${{ steps.upstream.outputs.ref }}
           path: vue-tsx-pro
 
       - uses: pnpm/action-setup@v4

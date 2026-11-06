@@ -8,6 +8,12 @@ import { pathToFileURL } from 'node:url';
 /** 本仓库根目录 */
 export const repoRoot = resolve(import.meta.dirname, '../..');
 
+/**
+ * 生成文件对齐的 vue-tsx-pro 提交（tools/vue-tsx-pro.ref，CI 检出它）。上游推送不会让 CI 失败；
+ * 跟进上游新版本是一次专门的提交：改这个文件、重新生成、按上游的变化清单改组件
+ */
+export const pinnedCommit = readFileSync(join(repoRoot, 'tools/vue-tsx-pro.ref'), 'utf8').trim();
+
 /** 基础设施目录：组件只用到它们时是 L0 */
 const INFRA = new Set(['utils', 'config']);
 
@@ -46,6 +52,8 @@ class Vue {
     this.ast = ast;
     this.#api = new API();
     this.commit = execFileSync('git', ['-C', root, 'rev-parse', '--short', 'HEAD'], { encoding: 'utf8' }).trim();
+    if (!pinnedCommit.startsWith(this.commit))
+      process.stderr.write(`注意：读的是 vue-tsx-pro ${this.commit}，锁定的是 ${pinnedCommit.slice(0, 8)}（tools/vue-tsx-pro.ref）；跟进新版本时改锁定的提交\n`);
   }
 
   /** 组件库源码（相对 packages/ui/src，斜杠分隔），不含测试、声明文件与生成的入口 */
