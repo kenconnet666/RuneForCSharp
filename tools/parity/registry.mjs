@@ -23,6 +23,11 @@ export const COMPONENT_PROP_RENAMES = {
   Icon: { icon: 'Data' },
 };
 
+/** 某个组件不移植的 prop 与原因（平台上没有对应的概念）：parity 不报缺 */
+export const PROPS_NOT_PORTED = {
+  Button: { type: "表单提交是浏览器的概念；对话框的默认、取消按钮用平台的 IsDefault、IsCancel" },
+};
+
 /** 平台控件自带、不用组件自己声明的属性（基类里已经有） */
 export const PLATFORM_PROPS = new Set(['IsEnabled', 'Content', 'Tag']);
 

@@ -10,7 +10,7 @@ import { langMembers } from '../lib/lang.mjs';
 import { code, table } from '../lib/markdown.mjs';
 import { openVue, repoRoot } from '../lib/vue.mjs';
 import { component as inspectComponent } from '../ts-inspect/component.mjs';
-import { COMPONENT_PROP_RENAMES, EXCLUDED, PLATFORM_PROPS, PROP_RENAMES } from './registry.mjs';
+import { COMPONENT_PROP_RENAMES, EXCLUDED, PLATFORM_PROPS, PROP_RENAMES, PROPS_NOT_PORTED } from './registry.mjs';
 
 const LIBRARIES = [
   { name: 'Avalonia', dir: 'avalonia/src/Rune.Avalonia' },
@@ -65,7 +65,7 @@ function csharpTypes(dir) {
  */
 function compareProps(vue, name, members, parts) {
   const data = inspectComponent(vue, name).data;
-  const expected = [...data.props, ...data.parts].map((prop) => ({ prop: prop.name, cs: csName(name, prop.name) }));
+  const expected = [...data.props, ...data.parts].filter((prop) => !PROPS_NOT_PORTED[name]?.[prop.name]).map((prop) => ({ prop: prop.name, cs: csName(name, prop.name) }));
   const isPart = (cs) => cs.startsWith('Props') && parts?.has(cs.slice('Props'.length));
   const missing = expected.filter(({ cs }) => !members.has(cs) && !PLATFORM_PROPS.has(cs) && !isPart(cs));
   const known = new Set(expected.map(({ cs }) => cs));
