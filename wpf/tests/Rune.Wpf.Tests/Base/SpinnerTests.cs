@@ -7,7 +7,7 @@ using System.Windows.Media;
 
 namespace Rune.Wpf.Tests;
 
-/// <summary>Spinner：大小经部件样式转给图标、Provider 的部件样式叠在主题之上、图标在转、有 Label 时读屏当作进度条。</summary>
+/// <summary>Spinner：大小经部件样式转给图标、Provider 的部件样式叠在主题之上、图标只在可见时转、有 Label 时读屏当作进度条。</summary>
 public class SpinnerTests
 {
     static Icon IconOf(Spinner spinner) => (Icon)spinner.Template.FindName("PART_Icon", spinner);
@@ -63,12 +63,17 @@ public class SpinnerTests
     });
 
     [Fact]
-    public Task The_icon_rotates_forever() => WpfUi.Run(() =>
+    public Task The_icon_rotates_only_while_visible() => WpfUi.Run(() =>
     {
         var spinner = new Spinner();
         WpfUi.Show(Host(spinner));
 
         var rotation = Assert.IsType<RotateTransform>(IconOf(spinner).RenderTransform);
+        Assert.True(rotation.HasAnimatedProperties);
+        // 收起时停下（动画时钟不管看不看得见都每帧走），再显示时接着转
+        spinner.Visibility = Visibility.Collapsed;
+        Assert.False(rotation.HasAnimatedProperties);
+        spinner.Visibility = Visibility.Visible;
         Assert.True(rotation.HasAnimatedProperties);
     });
 

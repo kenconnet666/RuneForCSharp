@@ -14,12 +14,15 @@ namespace Rune.Wpf;
 /// </code>
 /// 图标是部件（TS 的 propsIcon）：模板里的图标套部件样式 <see cref="SpinnerParts.Icon"/>，图标与大小写在主题的部件样式里，
 /// Provider.Styles 里同键的样式逐个 setter 叠在上面（DESIGN §7）。旋转在代码里开：系统关闭动画时转慢一半，不停
-/// （旋转本身就是"还在加载"的信息，同 TS 的 _reducedMotion）。
+/// （旋转本身就是"还在加载"的信息，同 TS 的 _reducedMotion）。只在可见时转：WPF 的动画时钟不管元素看不看得见都每帧走，
+/// 按钮加载完收起的指示不能一直占着渲染。
 /// </summary>
 [TemplatePart(Name = IconPart, Type = typeof(Icon))]
 public class Spinner : Control
 {
     const string IconPart = "PART_Icon";
+
+    RotateTransform? rotation;
 
     /// <summary>读屏念的说明；给了就是进度条（TS 的 role="status"），不给就是装饰性的（对读屏隐藏）。</summary>
     public static readonly DependencyProperty LabelProperty = DependencyProperty.Register(nameof(Label), typeof(string), typeof(Spinner));
@@ -34,6 +37,9 @@ public class Spinner : Control
         IsTabStopProperty.OverrideMetadata(typeof(Spinner), new FrameworkPropertyMetadata(false));
     }
 
+    /// <summary>新建旋转指示。</summary>
+    public Spinner() => IsVisibleChanged += (_, _) => Spin();
+
     /// <summary>读屏念的说明。</summary>
     public string? Label { get => (string?)GetValue(LabelProperty); set => SetValue(LabelProperty, value); }
 
@@ -45,11 +51,18 @@ public class Spinner : Control
     {
         base.OnApplyTemplate();
         if (GetTemplateChild(IconPart) is not Icon icon) return;
-        var rotation = new RotateTransform();
+        rotation = new RotateTransform();
         icon.RenderTransformOrigin = new Point(0.5, 0.5);
         icon.RenderTransform = rotation;
+        Spin();
+    }
+
+    /// <summary>看得见时转，看不见（收起、隐藏、离开窗口）时停。</summary>
+    void Spin()
+    {
+        if (rotation is null) return;
         var period = TimeSpan.FromSeconds(Motion.Enabled ? 0.8 : 1.6);
-        rotation.BeginAnimation(RotateTransform.AngleProperty, new DoubleAnimation(0, 360, period) { RepeatBehavior = RepeatBehavior.Forever });
+        rotation.BeginAnimation(RotateTransform.AngleProperty, IsVisible ? new DoubleAnimation(0, 360, period) { RepeatBehavior = RepeatBehavior.Forever } : null);
     }
 
     /// <inheritdoc />

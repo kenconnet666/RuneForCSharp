@@ -23,7 +23,7 @@ public partial class RuneTheme : ResourceDictionary
     /// <summary>带上 token，主题默认亮色。</summary>
     public RuneTheme()
     {
-        MergedDictionaries.Add(new ResourceDictionary { Source = TokensSource });
+        MergedDictionaries.Add(Inflated(new ResourceDictionary { Source = TokensSource }));
         Theme = "light";
     }
 
@@ -36,12 +36,23 @@ public partial class RuneTheme : ResourceDictionary
             if (value == theme) return;
             var entry = BuiltinThemes.FirstOrDefault(t => t.Name == value)
                 ?? throw new ArgumentException($"没有内置主题 {value}；有：{string.Join("、", BuiltinThemes.Select(t => t.Name))}", nameof(value));
-            var next = new ResourceDictionary { Source = entry.Source };
+            var next = Inflated(new ResourceDictionary { Source = entry.Source });
             if (current is null) MergedDictionaries.Add(next);
             else MergedDictionaries[MergedDictionaries.IndexOf(current)] = next;
             current = next;
             theme = value;
         }
+    }
+
+    /// <summary>
+    /// 把字典里的资源一次建好。从 BAML 加载的字典里资源是延迟创建的，还没建的资源每被一个元素的 DynamicResource 引用一次，
+    /// WPF 就新建一个延迟引用、挂进按资源键的弱引用列表（带锁）：1000 个按钮的创建因此慢到约 1 秒（DESIGN §9）。
+    /// 主题里的资源只有几百个，建一遍只要几毫秒，之后的查找直接拿到值。
+    /// </summary>
+    static ResourceDictionary Inflated(ResourceDictionary dictionary)
+    {
+        foreach (var key in dictionary.Keys) _ = dictionary[key];
+        return dictionary;
     }
 }
 
