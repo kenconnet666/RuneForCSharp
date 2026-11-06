@@ -3,8 +3,8 @@
 // 还原仓库的本地工具（dotnet-tools.json 固定的 csharp-ls），再以 stdio 启动它加载解决方案。
 // stdout 是 LSP 的通道：启动前的任何输出都只能写 stderr。
 import { spawn, spawnSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
-import { homedir } from 'node:os';
+import { createWriteStream, existsSync, readFileSync } from 'node:fs';
+import { homedir, tmpdir } from 'node:os';
 import { delimiter, dirname, join, resolve } from 'node:path';
 
 const repo = resolve(import.meta.dirname, '../..');
@@ -35,9 +35,23 @@ const dotnet = findDotnet();
 const root = dirname(dotnet);
 const env = { ...process.env, DOTNET_ROOT: root, PATH: `${root}${delimiter}${process.env.PATH ?? ''}` };
 
-const restore = spawnSync(dotnet, ['tool', 'restore'], { cwd: repo, env, stdio: ['ignore', process.stderr, process.stderr] });
-if (restore.status !== 0) process.exit(restore.status ?? 1);
+// 错误输出另存一份：Claude Code 连续崩溃三次就停用语言服务器，日志是事后唯一的线索
+const log = createWriteStream(join(tmpdir(), 'rune-csharp-ls.log'), { flags: 'a' });
+log.write(`\n===== ${new Date().toISOString()} 启动，dotnet：${dotnet}\n`);
 
-const server = spawn(dotnet, ['tool', 'run', 'csharp-ls', '--', '--solution', solution], { cwd: repo, env, stdio: 'inherit' });
-server.on('exit', (code, signal) => process.exit(code ?? (signal ? 1 : 0)));
+// 还原失败（比如正在构建、文件被占用）不急着退出：工具装过的话照样能启动
+const restore = spawnSync(dotnet, ['tool', 'restore'], { cwd: repo, env, encoding: 'utf8' });
+if (restore.status !== 0) {
+  log.write(`dotnet tool restore 退出码 ${restore.status}：${restore.stderr || restore.stdout}\n`);
+  process.stderr.write(restore.stderr || restore.stdout);
+}
+
+const server = spawn(dotnet, ['tool', 'run', 'csharp-ls', '--', '--solution', solution], { cwd: repo, env, stdio: ['inherit', 'inherit', 'pipe'] });
+server.stderr.on('data', (chunk) => {
+  process.stderr.write(chunk);
+  log.write(chunk);
+});
+server.on('exit', (code, signal) => {
+  log.write(`退出：code=${code} signal=${signal}\n`, () => process.exit(code ?? (signal ? 1 : 0)));
+});
 for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => server.kill(signal));

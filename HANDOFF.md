@@ -46,7 +46,7 @@
   - 这台机器没有命令行（只有桌面应用），是照 Claude Code 的格式手动装的：把 `.claude/marketplace/rune-csharp-lsp` 复制到 `~/.claude/plugins/cache/rune-for-csharp/rune-csharp-lsp/1.0.0`，再在 `~/.claude/plugins/installed_plugins.json` 里加一条 `rune-csharp-lsp@rune-for-csharp`（scope 为 project，projectPath 是仓库目录），格式照抄已有的条目。改了插件的 `.lsp.json` 后要重新复制。
 - 语言服务器是 `dotnet-tools.json` 固定的 csharp-ls 0.28.0（MIT，Roslyn）。启动脚本 `tools/lsp/csharp-ls.mjs` 找到装有 global.json 所要 SDK 的 dotnet（这台机器是 `~\.dotnet`），按需 `dotnet tool restore`，再加载 `RuneForCSharp.slnx`。
 - **先 Debug 构建一次**：WPF 的 Gallery 与测试工程的 XAML 引用了 Rune.Wpf 的类型，库的 Debug 输出不存在时这两个工程在语言服务器里加载失败。
-- 自检：`~/.dotnet/dotnet tool run csharp-ls -- --diagnose -s RuneForCSharp.slnx`（要先设 `DOTNET_ROOT=~/.dotnet`），输出里没有"失败"即可。
+- 自检：`~/.dotnet/dotnet tool run csharp-ls -- --diagnose -s RuneForCSharp.slnx`（要先设 `DOTNET_ROOT=~/.dotnet`），输出里没有"失败"即可。语言服务器的错误输出另存在系统临时目录的 `rune-csharp-ls.log`；Claude Code 连崩三次就停用它，要重启会话才会重新拉起。
 - 用法：改 C# 时先用 LSP 查定义、引用、诊断，不靠文本搜索猜；语言服务器没起来时以构建结果为准。axaml / xaml 没有语言服务器，靠构建与测试。
 
 ### 命令表
