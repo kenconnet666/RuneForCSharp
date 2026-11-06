@@ -17,6 +17,7 @@ static class TextExamples
         new("Text", "numeric", "编号与数字", "Mono 用等宽字体（编号、件号）；界面字体的数字本来就等宽，Numeric 只记下意图。", Numeric),
         new("Text", "inline", "行内元素", "Kbd 写按键，Code 写行内代码，Mark 标出要强调的词；整段引用用 BlockquoteControl。WinForms 的文字是整段画的，Code、Mark 是单独的控件，不跟着一段文字换行。", Inline),
         new("Text", "headings", "标题", "H1–H6 各是一个控件，默认字号按级别递减，TextSize 能单独改：视觉层级与文档结构分开。GDI 画不出收紧的字间距。", Headings),
+        new("Text", "links", "链接", "LinkControl 默认带下划线：正文里的链接不能只靠颜色区分。External 加外链图标并告诉读屏在新窗口打开；Underline 的 hover、none 用在一眼看得出是链接的地方。WinForms 的链接是单独的控件，不跟着一段文字换行。", Links),
         new("Text", "overflow", "截断与换行", "Truncate 单行省略，LineClamp 限制行数（都要给宽度：MaximumSize 或关掉 AutoSize）；Wrap 的 Pretty、Balance 在桌面上同普通换行。", Overflow),
     ];
 
@@ -87,6 +88,20 @@ static class TextExamples
             new ParagraphControl { Text = "H2 但用 lg 字号：放在卡片里不至于太大。", Tone = TextTone.Muted },
             new H3Control { Text = "危险操作", Tone = TextTone.Danger },
             new ParagraphControl { Text = "注销账户后数据不可恢复。", Tone = TextTone.Muted }));
+
+    static Control Links() => Column(16,
+        Wrap(4,
+            new TextControl { Text = "正文里的链接默认带下划线：" }, new LinkControl { Text = "按钮", Href = new Uri("https://example.com/components/button") },
+            new TextControl { Text = "、" }, new LinkControl { Text = "主题定制", Href = new Uri("https://example.com/guide/theming") },
+            new TextControl { Text = "，不只靠颜色和周围的文字区分。去别的站点写" }, new LinkControl { Text = "Vue 文档", Href = new Uri("https://vuejs.org"), External = true },
+            new TextControl { Text = "：带图标，读屏会念出“在新窗口打开”。" }),
+        Wrap(16,
+            new LinkControl { Text = "悬停时才有下划线", Href = new Uri("https://example.com/components/text"), Underline = LinkUnderline.Hover, Font = SmallFont() },
+            new LinkControl { Text = "导航里的次要链接", Href = new Uri("https://example.com/components/text"), Underline = LinkUnderline.None, Tone = TextTone.Muted, Font = SmallFont() },
+            new LinkControl { Text = "注销账户", Href = new Uri("https://example.com/account"), Tone = TextTone.Danger, Font = SmallFont() }));
+
+    /// <summary>sm 字号的界面字体（TS 里外面包一层 Text size="sm"）。</summary>
+    static Font SmallFont() => new(Fonts.Installed(RuneTheme.Current.Value.Fonts.Sans), Tokens.FontSize.Sm * 72 / 96);
 
     static Control Card(params Control[] children)
     {
