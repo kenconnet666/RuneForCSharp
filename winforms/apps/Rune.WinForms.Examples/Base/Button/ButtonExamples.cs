@@ -3,7 +3,7 @@ using static Rune.WinForms.Examples.Layout;
 namespace Rune.WinForms.Examples;
 
 /// <summary>
-/// Button 的示例（vue-tsx-pro 文档站 base/Button）。IconButton、ButtonGroup、LinkButton、Card、Kbd 做出来后补上其余几节。
+/// Button 的示例（vue-tsx-pro 文档站 base/Button）。ButtonGroup、LinkButton、Card、Kbd 做出来后补上其余几节。
 /// WinForms 里放进窗体的是 ButtonControl：字号档位叫 TextSize，文字是 Text。
 /// </summary>
 static class ButtonExamples
@@ -45,18 +45,25 @@ static class ButtonExamples
 
     static Control Sizes() => Column(4,
         Row(0, [.. TextSize.Known.Select(size => new ButtonControl { Text = size.Value, TextSize = size, Icon = Lucide.Plus, Anchor = AnchorStyles.None })]),
-        Row(0, [.. TextSize.Known.Select(size => new ButtonControl { Text = size.Value, TextSize = size, Variant = ButtonVariant.Outline, Tone = StatusTone.Neutral, Anchor = AnchorStyles.None })]));
+        Row(0, [.. TextSize.Known.Select(size => new ButtonControl { Text = size.Value, TextSize = size, Variant = ButtonVariant.Outline, Tone = StatusTone.Neutral, Anchor = AnchorStyles.None })]),
+        Row(0, [.. TextSize.Known.Select(size => new IconButtonControl { Icon = Lucide.Settings, TextSize = size, Variant = ButtonVariant.Soft, AccessibleName = $"设置（{size.Value}）", Anchor = AnchorStyles.None })]));
 
     static Control RadiusExample() => Column(4,
         Row(0, [.. Radius.Known.Select(radius => new ButtonControl { Text = radius.Value, Radius = radius })]),
         Row(0, [.. Radius.Known.Select(radius => new ButtonControl { Text = radius.Value, Radius = radius, Variant = ButtonVariant.Outline, Icon = Lucide.Plus })]));
 
-    static Control Icons() => Row(0,
-        new ButtonControl { Text = "新建", Icon = Lucide.Plus },
-        new ButtonControl { Text = "下载", Variant = ButtonVariant.Soft, Icon = Lucide.Download },
-        new ButtonControl { Text = "更多", Variant = ButtonVariant.Outline, Tone = StatusTone.Neutral, IconEnd = Lucide.ChevronDown },
-        new ButtonControl { Text = "下一步", Variant = ButtonVariant.Ghost, IconEnd = Lucide.ArrowRight },
-        new ButtonControl { Text = "查看文档", Variant = ButtonVariant.Link, IconEnd = Lucide.ExternalLink });
+    /// <summary>第二行的"搜索 Ctrl K"等 Kbd 做出来后补上；内容里放 Badge 要等多元素宿主（HANDOFF §4.1）。</summary>
+    static Control Icons() => Column(4,
+        Row(0,
+            new ButtonControl { Text = "新建", Icon = Lucide.Plus },
+            new ButtonControl { Text = "下载", Variant = ButtonVariant.Soft, Icon = Lucide.Download },
+            new ButtonControl { Text = "更多", Variant = ButtonVariant.Outline, Tone = StatusTone.Neutral, IconEnd = Lucide.ChevronDown },
+            new ButtonControl { Text = "下一步", Variant = ButtonVariant.Ghost, IconEnd = Lucide.ArrowRight },
+            new ButtonControl { Text = "查看文档", Variant = ButtonVariant.Link, IconEnd = Lucide.ExternalLink }),
+        Row(0,
+            new IconButtonControl { Icon = Lucide.Pencil, AccessibleName = "编辑" },
+            new IconButtonControl { Icon = Lucide.Share2, AccessibleName = "分享" },
+            new IconButtonControl { Icon = Lucide.Trash, Tone = StatusTone.Danger, AccessibleName = "删除" }));
 
     /// <summary>点击后模拟一次请求：保存 1.5 秒；很快完成（0.1 秒）的不出现旋转指示。</summary>
     static Control Loading()

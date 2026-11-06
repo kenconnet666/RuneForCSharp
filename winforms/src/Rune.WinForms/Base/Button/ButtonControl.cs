@@ -3,22 +3,22 @@ using System.ComponentModel;
 namespace Rune.WinForms;
 
 /// <summary>
-/// 放进窗体、设计器里用的 <see cref="Button"/>：文字内容就是控件的 <see cref="Control.Text"/>，字号档位叫 <see cref="TextSize"/>。
-/// 宿主处理输入：悬停、按下（波纹）、键盘（Enter 按下就点击、空格松开点击，同 Windows 按钮）、焦点（只在键盘提示开着时显示焦点环）。
+/// 按钮家族的宿主（<see cref="ButtonControl"/>、<see cref="IconButtonControl"/> 共用）：外观属性转给元素，处理输入。
+/// 悬停、按下（波纹）、键盘（Enter 按下就点击、空格松开点击，同 Windows 按钮）、焦点（只在键盘提示开着时显示焦点环）。
 /// 实现 <see cref="IButtonControl"/>，能当窗体的 AcceptButton、CancelButton。加载中点击无效（Click 不触发），焦点保留。
 /// 默认留 4 像素的 Padding：焦点环画在按钮外面一圈（CSS 的 outline 不占位，WinForms 的控件画不出自己的边界）。
 /// </summary>
-[ToolboxItem(true)]
-[DefaultEvent(nameof(Click))]
-[DefaultProperty(nameof(Text))]
-[Description("按钮：样式 × 色调 × 字号档位 × 圆角，按下有波纹。")]
-public class ButtonControl : ElementControl<Button>, IButtonControl
+/// <typeparam name="T">按钮元素。</typeparam>
+public abstract class ButtonControlBase<T> : ElementControl<T>, IButtonControl where T : ButtonCore, new()
 {
+    /// <summary>元素的默认值：设计器只序列化与它不同的属性。</summary>
+    static readonly T Defaults = new();
+
     Action? releasePointerRipple;
     Action? releaseKeyRipple;
 
     /// <summary>新建按钮：能获得焦点、进 Tab 顺序。</summary>
-    public ButtonControl()
+    protected ButtonControlBase()
     {
         SetStyle(ControlStyles.Selectable | ControlStyles.StandardClick, true);
         SetStyle(ControlStyles.StandardDoubleClick, false);
@@ -46,17 +46,11 @@ public class ButtonControl : ElementControl<Button>, IButtonControl
     [Description("圆角：none、xs、sm、md、lg、xl、full，默认 md。")]
     public Radius Radius { get => Element.Radius; set => Element.Radius = value; }
 
-    /// <summary>文字前的图标。</summary>
+    /// <summary>图标（ButtonControl 里在文字前）。</summary>
     [Category("Appearance")]
-    [Description("文字前的图标：Lucide 的图标名。")]
+    [Description("图标：Lucide 的图标名。")]
     [DefaultValue(null)]
     public IconData? Icon { get => Element.Icon; set => Element.Icon = value; }
-
-    /// <summary>文字后的图标。</summary>
-    [Category("Appearance")]
-    [Description("文字后的图标：Lucide 的图标名。")]
-    [DefaultValue(null)]
-    public IconData? IconEnd { get => Element.IconEnd; set => Element.IconEnd = value; }
 
     /// <summary>加载中。</summary>
     [Category("Behavior")]
@@ -70,21 +64,10 @@ public class ButtonControl : ElementControl<Button>, IButtonControl
     [DefaultValue(null)]
     public bool? Ripple { get => Element.Ripple; set => Element.Ripple = value; }
 
-    /// <summary>占满宽度（AutoSize 时按父控件给的宽度）。</summary>
-    [Category("Layout")]
-    [Description("占满宽度。")]
-    [DefaultValue(false)]
-    public bool FullWidth { get => Element.FullWidth; set => Element.FullWidth = value; }
-
-    /// <summary>前置图标部件的属性（代码里设）。</summary>
+    /// <summary>图标部件的属性（代码里设）。</summary>
     [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public IconProps? PropsIcon { get => Element.PropsIcon; set => Element.PropsIcon = value; }
-
-    /// <summary>后置图标部件的属性（代码里设）。</summary>
-    [Browsable(false)]
-    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public IconProps? PropsIconEnd { get => Element.PropsIconEnd; set => Element.PropsIconEnd = value; }
 
     /// <summary>加载指示部件的属性（代码里设）。</summary>
     [Browsable(false)]
@@ -96,11 +79,11 @@ public class ButtonControl : ElementControl<Button>, IButtonControl
     [DefaultValue(DialogResult.None)]
     public DialogResult DialogResult { get; set; }
 
-    bool ShouldSerializeVariant() => Variant != ButtonVariant.Solid;
+    bool ShouldSerializeVariant() => Variant != Defaults.Variant;
 
     void ResetVariant() => Variant = default;
 
-    bool ShouldSerializeTone() => Tone != StatusTone.Accent;
+    bool ShouldSerializeTone() => Tone != Defaults.Tone;
 
     void ResetTone() => Tone = default;
 
@@ -108,7 +91,7 @@ public class ButtonControl : ElementControl<Button>, IButtonControl
 
     void ResetTextSize() => TextSize = default;
 
-    bool ShouldSerializeRadius() => Radius != Radius.Md;
+    bool ShouldSerializeRadius() => Radius != Defaults.Radius;
 
     void ResetRadius() => Radius = default;
 
@@ -124,13 +107,6 @@ public class ButtonControl : ElementControl<Button>, IButtonControl
         if (Element.IsLoading || !Enabled) return;
         if (DialogResult != DialogResult.None && FindForm() is { } form) form.DialogResult = DialogResult;
         base.OnClick(e);
-    }
-
-    /// <inheritdoc />
-    protected override void OnTextChanged(EventArgs e)
-    {
-        base.OnTextChanged(e);
-        Element.Content = Text;
     }
 
     /// <inheritdoc />
@@ -235,14 +211,49 @@ public class ButtonControl : ElementControl<Button>, IButtonControl
     protected override AccessibleObject CreateAccessibilityInstance() => new ButtonAccessibleObject(this);
 
     /// <summary>读屏里是按钮：默认动作是按下；加载中状态里带"忙"。</summary>
-    sealed class ButtonAccessibleObject(ButtonControl owner) : ControlAccessibleObject(owner)
+    sealed class ButtonAccessibleObject(ButtonControlBase<T> owner) : ControlAccessibleObject(owner)
     {
         public override AccessibleRole Role => Owner is { AccessibleRole: not AccessibleRole.Default } control ? control.AccessibleRole : AccessibleRole.PushButton;
 
         public override string DefaultAction => "按下";
 
-        public override AccessibleStates State => Owner is ButtonControl { IsLoading: true } ? base.State | AccessibleStates.Busy : base.State;
+        public override AccessibleStates State => Owner is ButtonControlBase<T> { IsLoading: true } ? base.State | AccessibleStates.Busy : base.State;
 
-        public override void DoDefaultAction() => (Owner as ButtonControl)?.PerformClick();
+        public override void DoDefaultAction() => (Owner as ButtonControlBase<T>)?.PerformClick();
+    }
+}
+
+/// <summary>
+/// 放进窗体、设计器里用的 <see cref="Button"/>：文字内容就是控件的 <see cref="Control.Text"/>，字号档位叫 <see cref="ButtonControlBase{T}.TextSize"/>。
+/// 输入、焦点、无障碍见 <see cref="ButtonControlBase{T}"/>。
+/// </summary>
+[ToolboxItem(true)]
+[DefaultEvent(nameof(Click))]
+[DefaultProperty(nameof(Text))]
+[Description("按钮：样式 × 色调 × 字号档位 × 圆角，按下有波纹。")]
+public class ButtonControl : ButtonControlBase<Button>
+{
+    /// <summary>文字后的图标。</summary>
+    [Category("Appearance")]
+    [Description("文字后的图标：Lucide 的图标名。")]
+    [DefaultValue(null)]
+    public IconData? IconEnd { get => Element.IconEnd; set => Element.IconEnd = value; }
+
+    /// <summary>占满宽度（AutoSize 时按父控件给的宽度）。</summary>
+    [Category("Layout")]
+    [Description("占满宽度。")]
+    [DefaultValue(false)]
+    public bool FullWidth { get => Element.FullWidth; set => Element.FullWidth = value; }
+
+    /// <summary>后置图标部件的属性（代码里设）。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public IconProps? PropsIconEnd { get => Element.PropsIconEnd; set => Element.PropsIconEnd = value; }
+
+    /// <inheritdoc />
+    protected override void OnTextChanged(EventArgs e)
+    {
+        base.OnTextChanged(e);
+        Element.Content = Text;
     }
 }
