@@ -18,8 +18,8 @@
 - 阶段 0 骨架完成：三个平台各有组件库、示例应用、测试工程，基础设施都配了测试（37 个，全部通过）。
 - 前置探测都做完了，结论在 DESIGN：档位类型（§3）、Avalonia 组合档位（§4）、部件的转发与层层合并（§7）、WinForms 主题切换（§9）、Avalonia 桌面热重载（§11）。只剩 WPF 的 IDE 热重载要手动试。
 - 梳理了 vue-tsx-pro 的结构：基础设施（`utils/`、`config/`）与组件按依赖分层（阶段 2、3）。
-- 档位类型、Avalonia 组合档位、WinForms 组件形态已定（"已定的决定" 10–12）。
-- 还没有任何组件。下一步：定下"待定的决定"（推进节奏、WinForms 范围等），然后做阶段 1、2。
+- 开工前要定的事都定了（"已定的决定" 10–18）。
+- 还没有任何组件。下一步：阶段 1，先做"信息与验证工具"里的 `ts-inspect`，再做 token-gen、lang-gen、icons-gen。
 
 ## 已定的决定
 
@@ -31,12 +31,18 @@
 | 4 | 尺寸 | 沿用 rem / em（DESIGN §6） |
 | 5 | 更新 | 细粒度更新，只更新该更新的节点（DESIGN §10） |
 | 6 | 开发体验 | 开发期尽量热重载（DESIGN §11） |
-| 7 | 骨架 | 支撑长期开发，不建临时目录；探测工程不进仓库，结论写进 DESIGN |
+| 7 | 骨架 | 支撑长期开发，不建临时目录；一次性的探测不进仓库，结论写进 DESIGN；反复要用的（检查、截图、基准）做成 `tools/` 里的正式工具 |
 | 8 | 部件 | 每个子节点的 API 都能从外层转发，层层合并（DESIGN §7） |
 | 9 | 顺序 | 先做基础设施，再按依赖从下往上做组件：基础组件 → 交互基础 → 复合 → 上层 → 页面组合（阶段 2、3） |
 | 10 | 档位类型 | 配方的档位维度（variant、tone、radius、size……）用字符串包装类型，size 另外接受数字；行为类的封闭集合用 enum（DESIGN §3） |
 | 11 | Avalonia 组合档位 | 调色板对象：色调样式设 `Palette`，样式档位绑定调色板的画刷；开销成问题时退到"每种样式一个 ControlTheme"（DESIGN §4） |
 | 12 | WinForms 组件形态 | 无窗口元素是本体；每个组件另有单元素宿主，能放进设计器；数量大的地方直接用元素（DESIGN §9） |
+| 13 | 推进节奏 | 基础设施层三个库一起做；组件按层推进，每个组件先做 Avalonia、WPF 紧跟；WinForms 可以落后一层，但不跳层 |
+| 14 | WinForms 范围 | 先做到第 3 层（复合组件）；第 4、5 层等前面稳定后再定 |
+| 15 | Avalonia 热重载 | HotAvalonia（MIT），只在 Debug 构建里引用，不进包的依赖 |
+| 16 | 对照粒度 | parity 比对名字与配方取值（每个部件在各档位下用哪个 token）；截图比对放在阶段 4 |
+| 17 | 工具的语言 | 读 vue-tsx-pro 的工具用 node，只依赖内置模块与 vue-tsx-pro 自带的 `typescript`；要加载三个库的工具用 C# |
+| 18 | 测试与工具的依赖 | Playwright、FlaUI 只用在测试与工具里，不进组件库的依赖 |
 
 ## 平台化的约定
 
@@ -117,6 +123,47 @@
 
 本地浅克隆在 `C:\Users\Administrator\RiderProjects\refs\`（不进仓库，只读）：Avalonia（12.1.5）、Semi.Avalonia 与 Ursa.Avalonia（Avalonia 组件库）、HotAvalonia、dotnet/wpf 与 dotnet/winforms（release/10.0）、HandyControl（WPF 组件库）、AntdUI（全自绘的 WinForms 组件库）。查平台行为先读源码，参考别人的做法时写清出处与取舍。
 
+## 信息与验证工具
+
+移植一个组件时，要反复回答这几个问题：
+- TS 版这个组件到底怎么写的（props、部件、配方、默认值、依赖）？
+- 我们做出来的长什么样？每个部件取到了什么值、值从哪一层来？读屏看到了什么？
+- 改了基础设施之后，开销变了没有？
+
+这些都做成**一行就能跑的命令**，人和 Claude 用同一套：
+- 输出确定，同样的输入给同样的结果。
+- 文本用 Markdown 表（默认）或 JSON（`--json`），图片用 PNG（Claude 能直接看图）。
+- 产物写到 `artifacts/`（不进仓库），文件名带上组件、示例、主题、状态。
+- 每做好一个工具，就把命令写进 HANDOFF 的命令表。
+
+| 工具 | 位置与语言 | 回答什么 | 输出 |
+|---|---|---|---|
+| `ts-inspect` | `tools/ts-inspect`，node + vue-tsx-pro 自带的 `typescript` | `component <名字>`：文件、props（类型、默认值、注释）、部件与 `propsXxx` 的类型、配方的 variants 与 compound（逐条列出 token）、ComponentDefaults、用到的组件与基础设施、层号、被谁用到。<br>`token <名字>`：这个 token 在 16 套主题里的取值。<br>`deps`：依赖分层表。<br>`lang <前缀>`：语言包的键与中英文案 | Markdown / JSON |
+| `ts-styles` | `tools/ts-styles`，node；Playwright 借用 vue-tsx-pro 浏览器测试装好的那份（同 RuneForBlazor 的 `tools/parity`），不新增依赖 | 文档站上某个示例里，每个部件计算后的样式（亮、暗；常态、悬停、按下、聚焦），按 `(示例, data-scope, data-part, 第几个)` 编号；外加示例截图 | JSON + PNG |
+| `inspect` | 三个平台各一个控制台程序，C#：`avalonia/tools/`、`wpf/tools/`、`winforms/tools/` | `snapshot <组件/示例>`：渲染成 PNG（主题、宽度、DPI、状态可选）。<br>`tree`：元素树，每个部件的名字、类型、边界。<br>`props`：每个部件解析后的属性（背景、前景、边框、内边距、字号、圆角、透明度）与值的来源（主题、Provider、使用方、本地值）。<br>`uia`：UI Automation 树（名称、角色、状态、支持的 Pattern、键盘焦点） | PNG、Markdown / JSON |
+| `bench` | `inspect bench <场景>` | 把这轮的探测做成固定场景：3000 个控件的创建与布局、亮暗切换、换档位、WinForms 的失效与重画 | Markdown 表（多轮的中位数） |
+| `parity` | `tools/parity`，node | 读上面几个工具的 JSON 做比对：名字（组件、部件、档位、默认值、语言键）与取值（部件在各档位下的 token、尺寸）；报告缺失、改名与差异 | Markdown 报告 |
+
+做法：
+- **示例登记**：Gallery 的示例按"组件 / 示例名"登记，`inspect` 与 Gallery 共用这张登记表。示例名与 vue-tsx-pro 文档站的小节 id 一致，`ts-styles` 和 `inspect props` 才能逐个配对。
+- **出图**：
+  - Avalonia：headless 打开 Skia 渲染（`UseSkia()`，`UseHeadlessDrawing = false`），用 `CaptureRenderedFrame()` 取图；
+  - WPF：`RenderTargetBitmap`；
+  - WinForms：画到 `BufferedGraphics` 上再存图（DESIGN §9）。
+  - 悬停、按下、聚焦这些状态由工具直接设，不靠真实鼠标。
+- **值的来源**：Avalonia 用 `Avalonia.Diagnostics` 的 `GetDiagnostic(property)`（带优先级），WPF 用 `DependencyPropertyHelper.GetValueSource`，WinForms 取解析链上命中的那一层。
+- **做的先后**：
+  1. `ts-inspect` 最先，token-gen、lang-gen、parity 都用它的解析；
+  2. 三个平台的 `inspect`（snapshot、tree、props、uia）在阶段 2 的第一个组件之前做好；
+  3. `ts-styles` 与 parity 的取值比对，在做 Button 时接上；
+  4. `bench` 在用真实 Button 复测调色板开销时建立。
+
+已经有、不用自己做的：
+- Rider 的 MCP：符号、引用、编译问题、运行配置；
+- context7：第三方库的文档；
+- `refs/` 里的平台源码；
+- 内置浏览器：打开 vue-tsx-pro 文档站（`pnpm dev:docs`，端口 5174）看示例和交互。
+
 ## 阶段
 
 ### 0. 骨架（已完成）
@@ -129,9 +176,11 @@
 - [x] 三个示例应用：Avalonia 的 Debug 构建带 HotAvalonia。
 - [x] 前置探测（2026-11-06）：档位类型、组合档位、部件的转发与层层合并、三个平台的主题切换、Avalonia 桌面热重载、WinForms 无窗口元素的焦点与无障碍。
 
-### 1. 生成脚本（tools/）
+### 1. 工具与生成脚本（tools/）
 
-数据源都是 vue-tsx-pro。CI 里固定一个提交，跑 `--check`，核对生成文件与源码一致。脚本怎么解析 TS 源码参考 RuneForBlazor 的 `tools/theme-gen`、`lang-gen`、`icon-gen`（读的是同一个数据源）。
+数据源都是 vue-tsx-pro。CI 里固定一个提交，生成脚本跑 `--check`，核对生成文件与源码一致。脚本怎么解析 TS 源码参考 RuneForBlazor 的 `tools/theme-gen`、`lang-gen`、`icon-gen`（读的是同一个数据源）。
+
+- [ ] `ts-inspect`（见"信息与验证工具"）：先做 `component`、`token`、`deps`、`lang` 四个子命令。下面几个生成脚本都用它的解析，不各写一份。
 
 - [ ] `token-gen`：从 `packages/ui/src/config/theme` 读 tokens 和 16 套主题：
   - Avalonia：`Tokens.axaml`（字号、em 系数、边框宽度、阴影、时长）；每套主题一个自定义 `ThemeVariant` 的 ThemeDictionary（颜色画刷 + 6 个色调的调色板）；按时长档位的 Transitions 集合（DESIGN §8）。
@@ -181,6 +230,10 @@
   - [ ] `ElementHost` 正式化：布局（Flex 的子集）、焦点、Tab、键盘、命中测试、无障碍（HANDOFF §4.1 的做法）、DPI 变化。
   - [ ] 单元素宿主 `ElementControl<T>`：一个元素包成一个控件，能放进设计器（属性、序列化、默认值）。
   - [ ] 配方结果按（档位组合, 作用域）共享 `Computed`；Provider 作用域控件（主题、默认值、语言信号）。
+
+验证用的工具，第一批组件之前做好：
+- [ ] Gallery 的示例登记表（"组件 / 示例名"，示例名对齐 vue-tsx-pro 文档站的小节 id）。
+- [ ] 三个平台的 `inspect`：`snapshot`、`tree`、`props`、`uia`（见"信息与验证工具"）。
 
 用来验证这一层的第一批组件（都在阶段 3 的第 1、2 层，做完就是正式组件）：Icon → Text → Spinner → Badge → Button 家族 → Field。每个都把档位、调色板、部件转发、Provider 的默认值与样式、size 与 em、主题切换、减少动态效果、热重载、无障碍走一遍。
 
@@ -248,17 +301,10 @@ RuneForBlazor 已经走过一遍这些组件，同一个组件先看它踩过的
 ### 4. 质量与发布准备（贯穿全程，最后收尾）
 
 - [ ] 截图对照：三个库各渲染示例成图片，与 vue-tsx-pro 文档站的截图比较（亮、暗主题），差异人工确认。
-- [ ] UIA 自动化测试覆盖有键盘、焦点逻辑的组件。
+- [ ] UIA 自动化测试覆盖有键盘、焦点逻辑的组件（FlaUI，只在测试里用）。
 - [ ] CI：WPF、WinForms 在 Windows 上构建测试，Avalonia 另加 Linux；生成脚本 `--check`。
 - [ ] 打包：三个库各一个 NuGet 包，本地安装试用；发不发、发到哪由用户决定。
 
 ## 待定的决定
 
-每项后面是建议。
-
-1. **推进节奏**：基础设施层（阶段 2）三个库一起做，平台差异早点暴露。组件按层推进，每个组件先做 Avalonia（伪类、选择器最接近 TS 的写法），WPF 紧跟；WinForms 可以落后一层，但不跳层。
-2. **WinForms 的范围**：它全靠自绘，工作量最大。先做到第 3 层（复合组件，覆盖常见的表单、选择、弹层），第 4、5 层（DataTable、日期选择、页面组合）等前面稳定后再定。
-3. **Avalonia 热重载**：用 HotAvalonia（MIT，桌面窗口里已实测可用，只在 Debug 构建里引用，不进包的依赖），不用官方授权版。
-4. **对照粒度**：parity 除了名字，再比对配方取值（每个部件在各档位下用哪个 token），三个库的取值从生成的数据和程序集里读出来比。截图比对放到阶段 4。
-5. **生成脚本的语言**：node，读 TS 源码最直接，RuneForBlazor 的脚本可以参考。只用 node 内置模块和 vue-tsx-pro 自带的 `typescript`。
-6. **测试与工具的依赖**：Playwright（截 vue-tsx-pro 文档站）、FlaUI（UIA 测试，MIT）只用在测试与工具里，不进组件库的依赖；到阶段 4 再引入。
+暂无。新的待定项写在这里：日期、事项、卡在哪、要决定什么，附上建议。

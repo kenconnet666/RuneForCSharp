@@ -29,9 +29,9 @@
 
 - 阶段 0 骨架完成：三个平台都有组件库、示例应用和测试工程，基础设施都配了测试。DESIGN §2 有目录说明。
 - Release 构建零警告，37 个测试全部通过（Avalonia 4、WPF 15、WinForms 18）。
-- 前置探测都做完了，结论写进了 DESIGN（档位类型 §3、组合档位 §4、主题切换 §9、热重载 §11）。
-- 档位类型、Avalonia 组合档位、WinForms 组件形态已经按建议定下（ROADMAP"已定的决定" 10–12）。
-- **还没有任何组件**。ROADMAP"待定的决定"（推进节奏、WinForms 范围等，都附了建议）等用户拍板，然后做阶段 1（生成脚本）和阶段 2（基础设施层）。
+- 前置探测都做完了，结论写进了 DESIGN（档位类型 §3、组合档位 §4、部件转发 §7、主题切换 §9、热重载 §11）。
+- 开工前要定的事都按建议定下了（ROADMAP"已定的决定" 10–18），"待定的决定"现在是空的。
+- **还没有任何组件**。下一步是阶段 1：先做 `tools/ts-inspect`（ROADMAP"信息与验证工具"），再做生成脚本。
 
 ## 3. 环境
 
@@ -39,13 +39,20 @@
 - **这台电脑的坑（和旧电脑一样）**：`C:\Program Files\dotnet` 只有 .NET 8 与 11 预览版，.NET 10（10.0.403）在 `~\.dotnet`。
   - 用 `~/.dotnet/dotnet` 执行构建与测试；直接运行编译出来的 `.exe` 前设 `DOTNET_ROOT=~/.dotnet`，否则报找不到运行时。
 
-```bash
-~/.dotnet/dotnet build RuneForCSharp.slnx -c Release
-```
+### 命令表
 
-```bash
-~/.dotnet/dotnet test --project wpf/tests/Rune.Wpf.Tests
-```
+查信息、做验证的命令都记在这里；ROADMAP"信息与验证工具"里的工具每做好一个，就补一行。
+
+| 做什么 | 命令 |
+|---|---|
+| 构建 | `~/.dotnet/dotnet build RuneForCSharp.slnx -c Release` |
+| 测试（换成 avalonia / winforms 的测试工程同理） | `~/.dotnet/dotnet test --project wpf/tests/Rune.Wpf.Tests` |
+| 开 vue-tsx-pro 文档站（对照示例与交互，端口 5174） | 在 vue-tsx-pro 目录下 `pnpm dev:docs` |
+| 查 TS 组件（`ts-inspect`） | 还没做（阶段 1） |
+| 取 TS 文档站的计算样式（`ts-styles`） | 还没做（阶段 2） |
+| 截图、元素树、属性来源、UIA 树（各平台的 `inspect`） | 还没做（阶段 2） |
+| 基准（`inspect bench`） | 还没做（阶段 2） |
+| 对照报告（`parity`） | 还没做（阶段 1、2） |
 
 - **对照仓库**（已加进 Claude 会话的工作目录）：
   - vue-tsx-pro：`C:\Users\Administrator\IdeaProjects\vue-tsx-pro`，主要看 `packages/ui/src` 和 `packages/ui/COMPONENTS.md`。
@@ -96,8 +103,8 @@
 
 ## 5. 下一步
 
-1. 请用户确认 ROADMAP"待定的决定"（推进节奏、WinForms 范围、热重载方案、对照粒度、脚本语言、测试依赖）。
-2. 阶段 1：`tools/token-gen`，从 vue-tsx-pro 的 `packages/ui/src/config/theme` 生成三种格式（Avalonia 含 16 个自定义 ThemeVariant 与色调调色板）。参考 RuneForBlazor 的 `tools/theme-gen` 怎么解析。
-3. 阶段 2：基础设施层（部件转发与合并、作用域、主题、语言、交互工具），用 Icon → Text → Spinner → Badge → Button 家族 → Field 验证。WPF 的 Provider 要递归合成嵌套的部件样式；WinForms 把 4.1 的做法写成正式的 `ElementHost`，部件属性记录的合并用源代码生成器。
+1. 阶段 1 先做 `tools/ts-inspect`（node + vue-tsx-pro 自带的 `typescript`）：`component`、`token`、`deps`、`lang` 四个子命令，做好后写进命令表。
+2. 阶段 1 接着做 `tools/token-gen`，从 vue-tsx-pro 的 `packages/ui/src/config/theme` 生成三种格式（Avalonia 含 16 个自定义 ThemeVariant 与色调调色板），复用 `ts-inspect` 的解析。参考 RuneForBlazor 的 `tools/theme-gen`。
+3. 阶段 2：先做 Gallery 的示例登记表和三个平台的 `inspect`（截图、元素树、属性来源、UIA 树），再做基础设施层（部件转发与合并、作用域、主题、语言、交互工具），用 Icon → Text → Spinner → Badge → Button 家族 → Field 验证。WPF 的 Provider 要递归合成嵌套的部件样式；WinForms 把 4.1 的做法写成正式的 `ElementHost`，部件属性记录的合并用源代码生成器。
 4. 阶段 3：按依赖分层从下往上做组件（ROADMAP 里有五层的清单）。
 5. WPF 的 XAML 热重载要在 Rider 2026.2 或 VS 里手动试（DESIGN §13）。
