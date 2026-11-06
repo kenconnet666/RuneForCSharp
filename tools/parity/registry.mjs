@@ -23,6 +23,8 @@ export const PROP_RENAMES = {
 /** 只对某个组件的改名（C# 的成员不能与类同名：Icon 的 icon 叫 Data） */
 export const COMPONENT_PROP_RENAMES = {
   Icon: { icon: 'Data' },
+  // Text 是 TextBlock 自己的属性
+  CodeText: { text: 'Source' },
 };
 
 const BUTTON_TYPE = '表单提交是浏览器的概念；对话框的默认、取消按钮用平台的 IsDefault、IsCancel';
