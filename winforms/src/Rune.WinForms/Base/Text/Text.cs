@@ -139,6 +139,9 @@ public class Text : Element
     /// <summary>组件默认是否斜体（Em）。</summary>
     protected virtual bool Italic => false;
 
+    /// <summary>用主题的标题字体（fonts.heading，H1–H6）。</summary>
+    protected virtual bool HeadingFont => false;
+
     /// <inheritdoc />
     protected internal override Size Measure(ElementContext context, Size available)
     {
@@ -172,8 +175,8 @@ public class Text : Element
         var style = host.Style;
         if (Weight.Number is { } weight) style = weight >= Tokens.FontWeight.Semibold ? style | FontStyle.Bold : style & ~FontStyle.Bold;
         if (Italic) style |= FontStyle.Italic;
-        // 只有写了 Mono 才读主题：没写的文字换主题时不重画
-        var family = Mono ? Fonts.Installed(context.Theme.Fonts.Mono) : host.FontFamily.Name;
+        // 只有写了 Mono（或是标题）才读主题：没写的文字换主题时不重画
+        var family = Mono ? Fonts.Installed(context.Theme.Fonts.Mono) : HeadingFont ? Fonts.Installed(context.Theme.Fonts.Heading) : host.FontFamily.Name;
         return family == host.FontFamily.Name && points == host.SizeInPoints && style == host.Style ? host : Fonts.Get(family, points, style);
     }
 
@@ -220,4 +223,59 @@ public class Small : Text
 {
     /// <inheritdoc />
     protected internal override TextSize DefaultSize => TextSize.Xs;
+}
+
+/// <summary>
+/// 标题（vue-tsx-pro 的 H1–H6）：默认字号按级别（H1 xxxl、H2 xxl、H3 xl、H4 lg、H5 md、H6 sm），字重 semibold，标题字体。
+/// GDI 画不出 TS 的 tight 行高与收紧的字间距；读屏没有标题级别（MSAA 没有这个概念）。
+/// </summary>
+public abstract class Heading : Text
+{
+    /// <inheritdoc />
+    protected internal override TextWeight DefaultWeight => TextWeight.Semibold;
+
+    /// <inheritdoc />
+    protected override bool HeadingFont => true;
+}
+
+/// <summary>一级标题：页面标题，默认 xxxl。</summary>
+public class H1 : Heading
+{
+    /// <inheritdoc />
+    protected internal override TextSize DefaultSize => TextSize.Xxxl;
+}
+
+/// <summary>二级标题：一节，默认 xxl。</summary>
+public class H2 : Heading
+{
+    /// <inheritdoc />
+    protected internal override TextSize DefaultSize => TextSize.Xxl;
+}
+
+/// <summary>三级标题：小节，默认 xl。</summary>
+public class H3 : Heading
+{
+    /// <inheritdoc />
+    protected internal override TextSize DefaultSize => TextSize.Xl;
+}
+
+/// <summary>四级标题：段落标题，默认 lg。</summary>
+public class H4 : Heading
+{
+    /// <inheritdoc />
+    protected internal override TextSize DefaultSize => TextSize.Lg;
+}
+
+/// <summary>五级标题：卡片标题，默认 md。</summary>
+public class H5 : Heading
+{
+    /// <inheritdoc />
+    protected internal override TextSize DefaultSize => TextSize.Md;
+}
+
+/// <summary>六级标题：最小的标题，默认 sm。</summary>
+public class H6 : Heading
+{
+    /// <inheritdoc />
+    protected internal override TextSize DefaultSize => TextSize.Sm;
 }

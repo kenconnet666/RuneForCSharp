@@ -16,6 +16,7 @@ static class TextExamples
         new("Text", "tones", "色调", "Tone 取主题的文字色，与 Button、Badge 的色调同名：neutral 是正文色，muted 用于次要说明，其余是品牌色与提示色的文字色。", Tones),
         new("Text", "numeric", "编号与数字", "Mono 用等宽字体（编号、件号）；界面字体的数字本来就等宽，Numeric 只记下意图。", Numeric),
         new("Text", "inline", "行内元素", "Kbd 写按键，Code 写行内代码，Mark 标出要强调的词；整段引用用 BlockquoteControl。WinForms 的文字是整段画的，Code、Mark 是单独的控件，不跟着一段文字换行。", Inline),
+        new("Text", "headings", "标题", "H1–H6 各是一个控件，默认字号按级别递减，TextSize 能单独改：视觉层级与文档结构分开。GDI 画不出收紧的字间距。", Headings),
         new("Text", "overflow", "截断与换行", "Truncate 单行省略，LineClamp 限制行数（都要给宽度：MaximumSize 或关掉 AutoSize）；Wrap 的 Pretty、Balance 在桌面上同普通换行。", Overflow),
     ];
 
@@ -76,6 +77,16 @@ static class TextExamples
                 new SmallControl { Text = "Small 用于附注与版权信息" }, new TextControl { Text = "。" }),
             quote);
     }
+
+    static Control Headings() => Row(48,
+        Column(8,
+            new H1Control { Text = "H1 页面标题" }, new H2Control { Text = "H2 一节" }, new H3Control { Text = "H3 小节" },
+            new H4Control { Text = "H4 段落标题" }, new H5Control { Text = "H5 卡片标题" }, new H6Control { Text = "H6 最小的标题" }),
+        Column(8,
+            new H2Control { Text = "账户设置", TextSize = TextSize.Lg },
+            new ParagraphControl { Text = "H2 但用 lg 字号：放在卡片里不至于太大。", Tone = TextTone.Muted },
+            new H3Control { Text = "危险操作", Tone = TextTone.Danger },
+            new ParagraphControl { Text = "注销账户后数据不可恢复。", Tone = TextTone.Muted }));
 
     static Control Card(params Control[] children)
     {

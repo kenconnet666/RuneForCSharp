@@ -43,6 +43,8 @@ public readonly record struct TextSize(string Value) : IVariant<TextSize>
         "md" => Tokens.FontSize.Md,
         "lg" => Tokens.FontSize.Lg,
         "xl" => Tokens.FontSize.Xl,
+        "xxl" => Tokens.FontSize.Xxl,
+        "xxxl" => Tokens.FontSize.Xxxl,
         _ => float.TryParse(Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var pixels) ? pixels : null,
     };
 
