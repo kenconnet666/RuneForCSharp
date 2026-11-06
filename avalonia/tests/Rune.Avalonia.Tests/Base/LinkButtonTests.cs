@@ -43,6 +43,14 @@ public class LinkButtonTests
         window.MouseDown(at, MouseButton.Left);
         window.MouseUp(at, MouseButton.Left);
         Assert.Single(link.Opened);
+
+        // 可聚焦的不可用：仍收到点击，但不打开链接
+        link.IsLoading = false;
+        link.FocusableWhenDisabled = true;
+        link.IsEnabled = false;
+        window.MouseDown(at, MouseButton.Left);
+        window.MouseUp(at, MouseButton.Left);
+        Assert.Single(link.Opened);
     });
 
     [Upstream("LinkButton", "渲染 a")]

@@ -28,11 +28,11 @@ public class LinkButton : Button
     /// <summary>外部链接。</summary>
     public bool External { get => (bool)GetValue(ExternalProperty); set => SetValue(ExternalProperty, value); }
 
-    /// <summary>先触发 Click、Command，再打开链接；加载中都不执行。</summary>
+    /// <summary>先触发 Click、Command，再打开链接；加载中、不可用（含可聚焦的不可用）时都不执行。</summary>
     protected override void OnClick()
     {
         base.OnClick();
-        if (!IsLoading && Href is { IsAbsoluteUri: true } href) Navigate(href);
+        if (!IsLoading && !IsDisabled && Href is { IsAbsoluteUri: true } href) Navigate(href);
     }
 
     /// <summary>用系统打开链接（浏览器、邮件……）。</summary>
@@ -66,11 +66,11 @@ public class IconLinkButton : IconButton
     /// <summary>外部链接。</summary>
     public bool External { get => (bool)GetValue(ExternalProperty); set => SetValue(ExternalProperty, value); }
 
-    /// <summary>先触发 Click、Command，再打开链接；加载中都不执行。</summary>
+    /// <summary>先触发 Click、Command，再打开链接；加载中、不可用（含可聚焦的不可用）时都不执行。</summary>
     protected override void OnClick()
     {
         base.OnClick();
-        if (!IsLoading && Href is { IsAbsoluteUri: true } href) Navigate(href);
+        if (!IsLoading && !IsDisabled && Href is { IsAbsoluteUri: true } href) Navigate(href);
     }
 
     /// <summary>用系统打开链接。</summary>

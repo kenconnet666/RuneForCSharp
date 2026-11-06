@@ -45,6 +45,13 @@ public class LinkButtonTests
         invoke.Invoke();
         WpfUi.Flush();
         Assert.Single(link.Opened);
+
+        // 可聚焦的不可用：键盘、鼠标仍会走到 OnClick，但不打开链接
+        link.IsLoading = false;
+        link.FocusableWhenDisabled = true;
+        link.IsEnabled = false;
+        typeof(System.Windows.Controls.Primitives.ButtonBase).GetMethod("OnClick", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!.Invoke(link, null);
+        Assert.Single(link.Opened);
     });
 
     [Upstream("LinkButton", "渲染 a")]
