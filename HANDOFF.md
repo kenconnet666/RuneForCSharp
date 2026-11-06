@@ -39,6 +39,14 @@
 - **这台电脑的坑（和旧电脑一样）**：`C:\Program Files\dotnet` 只有 .NET 8 与 11 预览版，.NET 10（10.0.403）在 `~\.dotnet`。
   - 用 `~/.dotnet/dotnet` 执行构建与测试；直接运行编译出来的 `.exe` 前设 `DOTNET_ROOT=~/.dotnet`，否则报找不到运行时。
 
+### C# 的 LSP（Claude Code 项目级插件）
+
+- `.claude/settings.json` 登记了仓库内的插件市场（`.claude/marketplace`）并启用 `rune-csharp-lsp`。新会话打开仓库时 Claude Code 会加载它（第一次可能要在 `/plugin` 里确认安装），之后 Claude 的 LSP 工具能对 `.cs` 查定义、引用、悬停，编辑后推送诊断。
+- 语言服务器是 `dotnet-tools.json` 固定的 csharp-ls 0.28.0（MIT，Roslyn）。启动脚本 `tools/lsp/csharp-ls.mjs` 找到装有 global.json 所要 SDK 的 dotnet（这台机器是 `~\.dotnet`），按需 `dotnet tool restore`，再加载 `RuneForCSharp.slnx`。
+- **先 Debug 构建一次**：WPF 的 Gallery 与测试工程的 XAML 引用了 Rune.Wpf 的类型，库的 Debug 输出不存在时这两个工程在语言服务器里加载失败。
+- 自检：`~/.dotnet/dotnet tool run csharp-ls -- --diagnose -s RuneForCSharp.slnx`（要先设 `DOTNET_ROOT=~/.dotnet`），输出里没有"失败"即可。
+- 用法：改 C# 时先用 LSP 查定义、引用、诊断，不靠文本搜索猜；语言服务器没起来时以构建结果为准。axaml / xaml 没有语言服务器，靠构建与测试。
+
 ### 命令表
 
 查信息、做验证的命令都记在这里；ROADMAP"信息与验证工具"里的工具每做好一个，就补一行。

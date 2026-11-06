@@ -1,0 +1,11 @@
+{
+  "csharp": {
+    "command": "node",
+    "args": ["${CLAUDE_PROJECT_DIR}/tools/lsp/csharp-ls.mjs"],
+    "extensionToLanguage": {
+      ".cs": "csharp"
+    },
+    "workspaceFolder": "${CLAUDE_PROJECT_DIR}",
+    "startupTimeout": 60000
+  }
+}

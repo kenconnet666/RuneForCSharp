@@ -1,0 +1,6 @@
+{
+  "name": "rune-csharp-lsp",
+  "version": "1.0.0",
+  "description": "C# 原生 LSP：编辑后推送诊断，并提供 LSP 工具（定义、引用、悬停）。语言服务器是 dotnet-tools.json 固定的 csharp-ls，由 tools/lsp/csharp-ls.mjs 找到合适的 SDK 后启动，加载 RuneForCSharp.slnx",
+  "author": { "name": "RuneForCSharp" }
+}

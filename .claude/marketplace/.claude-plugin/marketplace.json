@@ -1,0 +1,12 @@
+{
+  "name": "rune-for-csharp",
+  "description": "仓库内的本地插件市场：只提供本项目的 Claude Code 插件",
+  "owner": { "name": "RuneForCSharp" },
+  "plugins": [
+    {
+      "name": "rune-csharp-lsp",
+      "source": "./rune-csharp-lsp",
+      "description": "C# 原生 LSP：仓库固定版本的 csharp-ls（dotnet 本地工具）"
+    }
+  ]
+}

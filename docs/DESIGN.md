@@ -22,8 +22,11 @@ RuneForCSharp 做三套桌面组件库：**Rune.Avalonia**、**Rune.Wpf**、**Ru
 RuneForCSharp/
 ├─ Directory.Build.props / .targets   全仓库的构建设置（net10.0、可空、警告即错误；库才打包）
 ├─ Directory.Packages.props           集中管理包版本
+├─ dotnet-tools.json                  仓库级 dotnet 本地工具（csharp-ls）
 ├─ RuneForCSharp.slnx
+├─ .claude/                           Claude Code 的项目设置与本地插件市场（C# LSP 插件）
 ├─ docs/                              DESIGN.md（本文）、ROADMAP.md
+├─ tools/                             读 vue-tsx-pro 的工具（node）；lsp/ 是 C# 语言服务器的启动脚本
 ├─ avalonia/
 │  ├─ Directory.Build.props           导入根设置
 │  ├─ src/Rune.Avalonia/              组件库
@@ -41,7 +44,7 @@ RuneForCSharp/
    └─ tests/Rune.WinForms.Tests/      STA 线程 + 消息循环
 ```
 
-按平台分目录：三套库互不依赖，每个平台目录能放自己的构建设置（WPF、WinForms 要 Windows 目标），CI 也能按路径只跑改动的平台。工具分两处（都还没建，见 ROADMAP 的"信息与验证工具"）：读 vue-tsx-pro 的生成脚本与检查工具放在根目录的 `tools/`（node）；要加载组件库的截图、检查、基准工具放在各平台目录下的 `tools/`（C#）。产物写到 `artifacts/`，不进仓库。
+按平台分目录：三套库互不依赖，每个平台目录能放自己的构建设置（WPF、WinForms 要 Windows 目标），CI 也能按路径只跑改动的平台。工具分两处（见 ROADMAP 的"信息与验证工具"）：读 vue-tsx-pro 的生成脚本与检查工具放在根目录的 `tools/`（node）；要加载组件库的截图、检查、基准工具放在各平台目录下的 `tools/`（C#）。产物写到 `artifacts/`，不进仓库。
 
 ### 库内的目录
 
