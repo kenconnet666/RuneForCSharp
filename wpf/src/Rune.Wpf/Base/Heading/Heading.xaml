@@ -1,0 +1,20 @@
+<!-- H1–H6 的主题样式（vue-tsx-pro 的 headingStyles 与 createHeading 的默认值）：在 Text 的主题样式上改字号、字重、字体、行高 -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Rune.Wpf;component/Base/Text/Text.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <Style x:Key="Rune.Heading" TargetType="rune:Heading" BasedOn="{StaticResource {x:Type rune:Text}}">
+    <Setter Property="Weight" Value="semibold" />
+    <Setter Property="FontFamily" Value="{DynamicResource Rune.Font.Heading}" />
+    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Tight}" />
+    <Setter Property="Wrap" Value="Balance" />
+  </Style>
+  <Style TargetType="rune:H1" BasedOn="{StaticResource Rune.Heading}"><Setter Property="Size" Value="xxxl" /></Style>
+  <Style TargetType="rune:H2" BasedOn="{StaticResource Rune.Heading}"><Setter Property="Size" Value="xxl" /></Style>
+  <Style TargetType="rune:H3" BasedOn="{StaticResource Rune.Heading}"><Setter Property="Size" Value="xl" /></Style>
+  <Style TargetType="rune:H4" BasedOn="{StaticResource Rune.Heading}"><Setter Property="Size" Value="lg" /></Style>
+  <Style TargetType="rune:H5" BasedOn="{StaticResource Rune.Heading}"><Setter Property="Size" Value="md" /></Style>
+  <Style TargetType="rune:H6" BasedOn="{StaticResource Rune.Heading}"><Setter Property="Size" Value="sm" /></Style>
+</ResourceDictionary>

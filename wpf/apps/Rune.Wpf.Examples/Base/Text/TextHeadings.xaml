@@ -1,0 +1,25 @@
+<UserControl x:Class="Rune.Wpf.Examples.TextHeadings"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/wpf">
+  <Grid>
+    <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition Width="24" /><ColumnDefinition /></Grid.ColumnDefinitions>
+    <StackPanel>
+      <rune:H1 Margin="0,0,0,8">H1 页面标题</rune:H1>
+      <rune:H2 Margin="0,0,0,8">H2 一节</rune:H2>
+      <rune:H3 Margin="0,0,0,8">H3 小节</rune:H3>
+      <rune:H4 Margin="0,0,0,8">H4 段落标题</rune:H4>
+      <rune:H5 Margin="0,0,0,8">H5 卡片标题</rune:H5>
+      <rune:H6>H6 最小的标题</rune:H6>
+    </StackPanel>
+    <!-- 文档结构与视觉层级分开：级别要连续，字号用 Size 改。TS 的 anchor（本节链接）是文档站用的，桌面上不做 -->
+    <StackPanel Grid.Column="2">
+      <rune:H2 Size="lg" Margin="0,0,0,8">账户设置</rune:H2>
+      <rune:Paragraph Tone="muted" Margin="0,0,0,8">H2 但用 lg 字号：放在卡片里不至于太大。</rune:Paragraph>
+      <rune:H3 Margin="0,0,0,8">安全与登录</rune:H3>
+      <rune:Paragraph Tone="muted" Margin="0,0,0,8">读屏照样念出级别（AutomationProperties.HeadingLevel），按标题跳读。</rune:Paragraph>
+      <rune:H3 Tone="danger" Margin="0,0,0,8">危险操作</rune:H3>
+      <rune:Paragraph Tone="muted">注销账户后数据不可恢复。</rune:Paragraph>
+    </StackPanel>
+  </Grid>
+</UserControl>
