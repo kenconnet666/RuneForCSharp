@@ -16,7 +16,7 @@ public sealed record IconProps
     public TextSize? Size { get; init; }
 
     /// <summary>色调。</summary>
-    public Tone? Tone { get; init; }
+    public TextTone? Tone { get; init; }
 
     /// <summary>线宽（24 格画布上的单位）。</summary>
     public float? StrokeWidth { get; init; }

@@ -27,7 +27,7 @@ public class Icon : Control
     public static readonly StyledProperty<TextSize> SizeProperty = AvaloniaProperty.Register<Icon, TextSize>(nameof(Size));
 
     /// <summary>色调（状态图标）；不写时跟随文字颜色。</summary>
-    public static readonly StyledProperty<Tone> ToneProperty = AvaloniaProperty.Register<Icon, Tone>(nameof(Tone));
+    public static readonly StyledProperty<TextTone> ToneProperty = AvaloniaProperty.Register<Icon, TextTone>(nameof(Tone));
 
     /// <summary>线宽（24 格画布上的单位），主题里默认取 strokeWidths.md。</summary>
     public static readonly StyledProperty<double> StrokeWidthProperty = AvaloniaProperty.Register<Icon, double>(nameof(StrokeWidth), 2);
@@ -61,7 +61,7 @@ public class Icon : Control
     public TextSize Size { get => GetValue(SizeProperty); set => SetValue(SizeProperty, value); }
 
     /// <summary>色调；不写时跟随文字颜色。</summary>
-    public Tone Tone { get => GetValue(ToneProperty); set => SetValue(ToneProperty, value); }
+    public TextTone Tone { get => GetValue(ToneProperty); set => SetValue(ToneProperty, value); }
 
     /// <summary>线宽（24 格画布上的单位）。</summary>
     public double StrokeWidth { get => GetValue(StrokeWidthProperty); set => SetValue(StrokeWidthProperty, value); }
@@ -92,7 +92,7 @@ public class Icon : Control
         }
         else if (change.Property == ToneProperty)
         {
-            PseudoClasses.Swap(change.GetOldValue<Tone>().Value, change.GetNewValue<Tone>().Value);
+            PseudoClasses.Swap(change.GetOldValue<TextTone>().Value, change.GetNewValue<TextTone>().Value);
             // 色调的颜色按模板优先级绑定主题资源：盖过继承的文字颜色，使用方带伪类的样式仍能盖过它（同主题里的伪类样式），
             // 但每个图标不用为 7 条色调样式各建一个激活器（图标数量大，DESIGN §9）
             toneBinding?.Dispose();

@@ -28,7 +28,7 @@ public class Text : TextBlock
 
     /// <summary>色调；不写时继承外面的文字颜色。</summary>
     public static readonly DependencyProperty ToneProperty = DependencyProperty.Register(
-        nameof(Tone), typeof(Tone), typeof(Text), new FrameworkPropertyMetadata(default(Tone), (d, _) => ((Text)d).ReferenceResource(ForegroundProperty, ((Text)d).Tone.BrushKey)));
+        nameof(Tone), typeof(TextTone), typeof(Text), new FrameworkPropertyMetadata(default(TextTone), (d, _) => ((Text)d).ReferenceResource(ForegroundProperty, ((Text)d).Tone.BrushKey)));
 
     /// <summary>水平对齐（按书写方向）；不写时继承。</summary>
     public static readonly DependencyProperty AlignProperty = DependencyProperty.Register(
@@ -74,7 +74,7 @@ public class Text : TextBlock
     public TextWeight Weight { get => (TextWeight)GetValue(WeightProperty); set => SetValue(WeightProperty, value); }
 
     /// <summary>色调。</summary>
-    public Tone Tone { get => (Tone)GetValue(ToneProperty); set => SetValue(ToneProperty, value); }
+    public TextTone Tone { get => (TextTone)GetValue(ToneProperty); set => SetValue(ToneProperty, value); }
 
     /// <summary>水平对齐。</summary>
     public TextAlign? Align { get => (TextAlign?)GetValue(AlignProperty); set => SetValue(AlignProperty, value); }

@@ -36,7 +36,7 @@ static class IconButtonExamples
     static IconButtonControl Icon(IconData icon, string name, ButtonVariant variant = default, StatusTone tone = default) =>
         new() { Icon = icon, AccessibleName = name, Variant = variant, Tone = tone, Anchor = AnchorStyles.None };
 
-    static Control Label(string text) => new SmallControl { Text = text, Tone = Tone.Muted, Anchor = AnchorStyles.None };
+    static Control Label(string text) => new SmallControl { Text = text, Tone = TextTone.Muted, Anchor = AnchorStyles.None };
 
     /// <summary>分隔线：Separator 做出来后换掉。</summary>
     static Control Separator() => new Panel

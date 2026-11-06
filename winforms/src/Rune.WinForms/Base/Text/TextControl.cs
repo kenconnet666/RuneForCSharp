@@ -30,7 +30,7 @@ public abstract class TextControlBase<T> : ElementControl<T> where T : Text, new
     /// <summary>色调；不写时跟随 ForeColor。</summary>
     [Category("Appearance")]
     [Description("色调：neutral、muted、accent、danger、success、warning、info；空着时跟随 ForeColor。")]
-    public Tone Tone { get => Element.Tone; set => Element.Tone = value; }
+    public TextTone Tone { get => Element.Tone; set => Element.Tone = value; }
 
     /// <summary>水平对齐（按书写方向）。</summary>
     [Category("Appearance")]

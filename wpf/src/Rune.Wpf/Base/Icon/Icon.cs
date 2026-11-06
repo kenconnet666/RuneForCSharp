@@ -27,7 +27,7 @@ public class Icon : Control
         nameof(Size), typeof(TextSize), typeof(Icon), new FrameworkPropertyMetadata(default(TextSize), FrameworkPropertyMetadataOptions.AffectsMeasure, OnSizeChanged));
 
     /// <summary>色调（状态图标）；不写时跟随文字颜色。主题样式里按取值设 Foreground。</summary>
-    public static readonly DependencyProperty ToneProperty = DependencyProperty.Register(nameof(Tone), typeof(Tone), typeof(Icon));
+    public static readonly DependencyProperty ToneProperty = DependencyProperty.Register(nameof(Tone), typeof(TextTone), typeof(Icon));
 
     /// <summary>线宽（24 格画布上的单位），主题里默认取 strokeWidths.md。</summary>
     public static readonly DependencyProperty StrokeWidthProperty = DependencyProperty.Register(
@@ -62,7 +62,7 @@ public class Icon : Control
     public TextSize Size { get => (TextSize)GetValue(SizeProperty); set => SetValue(SizeProperty, value); }
 
     /// <summary>色调；不写时跟随文字颜色。</summary>
-    public Tone Tone { get => (Tone)GetValue(ToneProperty); set => SetValue(ToneProperty, value); }
+    public TextTone Tone { get => (TextTone)GetValue(ToneProperty); set => SetValue(ToneProperty, value); }
 
     /// <summary>线宽（24 格画布上的单位）。</summary>
     public double StrokeWidth { get => (double)GetValue(StrokeWidthProperty); set => SetValue(StrokeWidthProperty, value); }

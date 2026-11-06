@@ -32,7 +32,7 @@ public class IconTests
     public Task Tone_colors_come_from_the_theme_and_default_follows_the_text() => HeadlessUi.Run(() =>
     {
         var plain = new Icon { Data = Lucide.Info };
-        var danger = new Icon { Data = Lucide.Info, Tone = Tone.Danger };
+        var danger = new Icon { Data = Lucide.Info, Tone = TextTone.Danger };
         var host = new StackPanel { Children = { plain, danger } };
         host.SetValue(TextElement.ForegroundProperty, Brushes.Purple);
         HeadlessUi.Show(host);

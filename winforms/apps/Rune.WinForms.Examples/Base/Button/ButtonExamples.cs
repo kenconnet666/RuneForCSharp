@@ -29,7 +29,7 @@ static class ButtonExamples
     [
         .. Variants.Select(v =>
         {
-            var cell = Column(4, new ButtonControl { Text = v.Variant, Variant = new ButtonVariant(v.Variant) }, new SmallControl { Text = v.Usage, Tone = Tone.Muted });
+            var cell = Column(4, new ButtonControl { Text = v.Variant, Variant = new ButtonVariant(v.Variant) }, new SmallControl { Text = v.Usage, Tone = TextTone.Muted });
             cell.MinimumSize = new Size(Dip(160), 0);
             return cell;
         }),
@@ -68,7 +68,7 @@ static class ButtonExamples
 
     /// <summary>Card 做出来后包一层卡片；桌面没有站内地址，链接都是绝对地址，用系统打开。</summary>
     static Control Links() => Column(16,
-        Column(4, new StrongControl { Text = "还没有订单" }, new ParagraphControl { Text = "新建第一张订单，或者先看看怎么批量导入。", TextSize = TextSize.Sm, Tone = Tone.Muted }),
+        Column(4, new StrongControl { Text = "还没有订单" }, new ParagraphControl { Text = "新建第一张订单，或者先看看怎么批量导入。", TextSize = TextSize.Sm, Tone = TextTone.Muted }),
         Row(0,
             new LinkButtonControl { Text = "新建订单", Href = new Uri("https://example.com/orders/new"), Icon = Lucide.Plus },
             new LinkButtonControl { Text = "导入指南", Href = new Uri("https://example.com/guide/import"), Variant = ButtonVariant.Soft, Icon = Lucide.BookOpen },

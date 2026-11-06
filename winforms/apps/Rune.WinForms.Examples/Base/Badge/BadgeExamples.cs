@@ -48,5 +48,5 @@ static class BadgeExamples
             new BadgeControl { Text = "待审核", Dot = true, Tone = StatusTone.Warning, Radius = Radius.None },
             new BadgeControl { Text = "已停止", Dot = true, Tone = StatusTone.Danger, Variant = StatusVariant.Outline }));
 
-    static TextControl Label(string text) => new() { Text = text, TextSize = TextSize.Xs, Tone = Tone.Muted, Anchor = AnchorStyles.Left };
+    static TextControl Label(string text) => new() { Text = text, TextSize = TextSize.Xs, Tone = TextTone.Muted, Anchor = AnchorStyles.Left };
 }

@@ -47,7 +47,7 @@ public class TextTests
     [Fact]
     public Task Steps_reference_theme_resources_and_follow_the_theme() => WpfUi.Run(() =>
     {
-        var text = new Text { Text = "危险", Tone = Tone.Danger, Size = TextSize.Lg, Weight = TextWeight.Bold, Mono = true, Numeric = true };
+        var text = new Text { Text = "危险", Tone = TextTone.Danger, Size = TextSize.Lg, Weight = TextWeight.Bold, Mono = true, Numeric = true };
         var (host, theme) = Host(text);
         WpfUi.Show(host);
 

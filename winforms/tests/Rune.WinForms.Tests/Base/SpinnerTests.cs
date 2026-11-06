@@ -21,10 +21,10 @@ public class SpinnerTests
     [Fact]
     public Task Props_icon_overrides_field_by_field() => WinFormsUi.Run(() =>
     {
-        using var spinner = new SpinnerControl { IconSize = TextSize.Xl, PropsIcon = new IconProps { StrokeWidth = 3, Tone = Tone.Danger } };
+        using var spinner = new SpinnerControl { IconSize = TextSize.Xl, PropsIcon = new IconProps { StrokeWidth = 3, Tone = TextTone.Danger } };
         var icon = spinner.Element.IconPart;
         Assert.Equal(3, icon.StrokeWidth);
-        Assert.Equal(Tone.Danger, icon.Tone);
+        Assert.Equal(TextTone.Danger, icon.Tone);
         Assert.Equal(Lucide.LoaderCircle, icon.Data); // Spinner 给的图标与大小还在
         Assert.Equal(TextSize.Xl, icon.Size);
 

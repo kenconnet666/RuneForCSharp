@@ -53,7 +53,7 @@ public class Text : Element
     }
 
     /// <summary>色调；不写时跟随宿主的文字颜色。</summary>
-    public Tone Tone
+    public TextTone Tone
     {
         get;
         set

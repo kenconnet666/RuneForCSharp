@@ -57,38 +57,38 @@ public readonly record struct TextSize(string Value) : IVariant<TextSize>
 }
 
 /// <summary>
-/// 文字色调（vue-tsx-pro 的 Tone）：图标、文字按状态着色；inherit 跟随外面的文字颜色。
+/// 文字色调（vue-tsx-pro 的 TextTone）：图标、文字按状态着色；inherit 跟随外面的文字颜色。
 /// </summary>
 /// <param name="Value">取值（neutral、muted、accent……）。</param>
-[TypeConverter(typeof(VariantConverter<Tone>))]
-public readonly record struct Tone(string Value) : IVariant<Tone>
+[TypeConverter(typeof(VariantConverter<TextTone>))]
+public readonly record struct TextTone(string Value) : IVariant<TextTone>
 {
     /// <summary>正文色。</summary>
-    public static readonly Tone Neutral = new("neutral");
+    public static readonly TextTone Neutral = new("neutral");
 
     /// <summary>次要说明。</summary>
-    public static readonly Tone Muted = new("muted");
+    public static readonly TextTone Muted = new("muted");
 
     /// <summary>品牌色的文字。</summary>
-    public static readonly Tone Accent = new("accent");
+    public static readonly TextTone Accent = new("accent");
 
     /// <summary>危险、错误。</summary>
-    public static readonly Tone Danger = new("danger");
+    public static readonly TextTone Danger = new("danger");
 
     /// <summary>成功、正常。</summary>
-    public static readonly Tone Success = new("success");
+    public static readonly TextTone Success = new("success");
 
     /// <summary>警告、需要注意。</summary>
-    public static readonly Tone Warning = new("warning");
+    public static readonly TextTone Warning = new("warning");
 
     /// <summary>信息、提示。</summary>
-    public static readonly Tone Info = new("info");
+    public static readonly TextTone Info = new("info");
 
     /// <summary>跟随外面的文字颜色。</summary>
-    public static readonly Tone Inherit = new("inherit");
+    public static readonly TextTone Inherit = new("inherit");
 
     /// <inheritdoc />
-    public static IReadOnlyList<Tone> Known { get; } = [Neutral, Muted, Accent, Danger, Success, Warning, Info, Inherit];
+    public static IReadOnlyList<TextTone> Known { get; } = [Neutral, Muted, Accent, Danger, Success, Warning, Info, Inherit];
 
     /// <summary>
     /// 这个色调的颜色（同 vue-tsx-pro 的 toneStyles）：取当前主题；不写或 inherit 时是宿主的文字颜色，
@@ -108,9 +108,9 @@ public readonly record struct Tone(string Value) : IVariant<Tone>
     };
 
     /// <inheritdoc />
-    public static Tone Parse(string value)
+    public static TextTone Parse(string value)
     {
-        var tone = new Tone(value);
+        var tone = new TextTone(value);
         Variants.WarnIfUnknown(tone);
         return tone;
     }

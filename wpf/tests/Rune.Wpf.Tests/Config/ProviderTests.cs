@@ -144,10 +144,10 @@ public class ProviderTests
 
         Assert.Equal(3, ((Icon)root.FindName("plain")).StrokeWidth);
         var spinnerIcon = (Icon)((Spinner)root.FindName("spinner")).Template.FindName("PART_Icon", (Spinner)root.FindName("spinner"));
-        Assert.Equal((3d, Tone.Danger), (spinnerIcon.StrokeWidth, spinnerIcon.Tone));
+        Assert.Equal((3d, TextTone.Danger), (spinnerIcon.StrokeWidth, spinnerIcon.Tone));
         Assert.Equal(Lucide.LoaderCircle, spinnerIcon.Data); // 主题里的部件样式还在最下面
         var badgeIcon = LogicalTreeHelper.GetChildren((Badge)root.FindName("badge")).OfType<Icon>().Single();
-        Assert.Equal((1d, Tone.Danger), (badgeIcon.StrokeWidth, badgeIcon.Tone));
+        Assert.Equal((1d, TextTone.Danger), (badgeIcon.StrokeWidth, badgeIcon.Tone));
     });
 
     [Fact]

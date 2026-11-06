@@ -45,11 +45,11 @@ static class IconExamples
 
     static Control Tones() => Wrap(12,
     [
-        .. new (Tone Tone, IconData Data, string Label)[]
+        .. new (TextTone Tone, IconData Data, string Label)[]
         {
-            (Tone.Neutral, Lucide.CircleUser, "中性：正文色"), (Tone.Muted, Lucide.CircleUser, "次要"), (Tone.Accent, Lucide.Sparkles, "品牌色"),
-            (Tone.Info, Lucide.Info, "信息"), (Tone.Success, Lucide.CircleCheck, "成功"), (Tone.Warning, Lucide.TriangleExclamationPoint, "警告"),
-            (Tone.Danger, Lucide.CircleExclamationPoint, "危险"),
+            (TextTone.Neutral, Lucide.CircleUser, "中性：正文色"), (TextTone.Muted, Lucide.CircleUser, "次要"), (TextTone.Accent, Lucide.Sparkles, "品牌色"),
+            (TextTone.Info, Lucide.Info, "信息"), (TextTone.Success, Lucide.CircleCheck, "成功"), (TextTone.Warning, Lucide.TriangleExclamationPoint, "警告"),
+            (TextTone.Danger, Lucide.CircleExclamationPoint, "危险"),
         }.Select(item =>
         {
             var row = Row(8, new IconControl { Data = item.Data, Tone = item.Tone, IconSize = TextSize.Xl, Anchor = AnchorStyles.None }, Text(item.Label, Tokens.FontSize.Sm));
@@ -79,21 +79,21 @@ static class IconExamples
 
     static Control Accessibility() => Wrap(32,
         Column(4,
-            Row(4, Inline(Lucide.CircleCheck, Tone.Success), Text("已保存")),
-            Row(4, Inline(Lucide.TriangleExclamationPoint, Tone.Warning), Text("3 项待确认")),
-            Row(4, Inline(Lucide.CircleX, Tone.Danger), Text("同步失败"))),
+            Row(4, Inline(Lucide.CircleCheck, TextTone.Success), Text("已保存")),
+            Row(4, Inline(Lucide.TriangleExclamationPoint, TextTone.Warning), Text("3 项待确认")),
+            Row(4, Inline(Lucide.CircleX, TextTone.Danger), Text("同步失败"))),
         Row(12,
-            new IconControl { Data = Lucide.TriangleExclamationPoint, Tone = Tone.Warning, IconSize = TextSize.Xl, AccessibleName = "有未保存的修改" },
-            new IconControl { Data = Lucide.Lock, Tone = Tone.Muted, IconSize = TextSize.Xl, AccessibleName = "仅自己可见" },
-            new IconControl { Data = Lucide.Wifi, Tone = Tone.Success, IconSize = TextSize.Xl, AccessibleName = "已连接" }));
+            new IconControl { Data = Lucide.TriangleExclamationPoint, Tone = TextTone.Warning, IconSize = TextSize.Xl, AccessibleName = "有未保存的修改" },
+            new IconControl { Data = Lucide.Lock, Tone = TextTone.Muted, IconSize = TextSize.Xl, AccessibleName = "仅自己可见" },
+            new IconControl { Data = Lucide.Wifi, Tone = TextTone.Success, IconSize = TextSize.Xl, AccessibleName = "已连接" }));
 
     static Control Custom() => Row(32,
         new IconControl { Data = CustomIcons.Logo, IconSize = 40, AccessibleName = "站点标志" },
-        new IconControl { Data = CustomIcons.Verified, IconSize = 40, Tone = Tone.Accent, AccessibleName = "已认证" },
-        new IconControl { Data = CustomIcons.Wave, IconSize = 40, Tone = Tone.Info, AccessibleName = "信号" });
+        new IconControl { Data = CustomIcons.Verified, IconSize = 40, Tone = TextTone.Accent, AccessibleName = "已认证" },
+        new IconControl { Data = CustomIcons.Wave, IconSize = 40, Tone = TextTone.Info, AccessibleName = "信号" });
 
     /// <summary>与文字同一行的图标：跟随字体（1em），竖直居中。</summary>
-    static IconControl Inline(IconData data, Tone tone = default, bool flip = false) => new() { Data = data, Tone = tone, FlipInRtl = flip, Anchor = AnchorStyles.None };
+    static IconControl Inline(IconData data, TextTone tone = default, bool flip = false) => new() { Data = data, Tone = tone, FlipInRtl = flip, Anchor = AnchorStyles.None };
 
     /// <summary>几块竖着叠起来（宽度随宿主，块内放不下时换行）。</summary>
     static Control Stack(params Control[] blocks)

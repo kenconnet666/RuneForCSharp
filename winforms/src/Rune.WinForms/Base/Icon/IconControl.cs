@@ -29,7 +29,7 @@ public class IconControl : ElementControl<Icon>
     /// <summary>色调；不写时跟随 ForeColor。</summary>
     [Category("Appearance")]
     [Description("色调：neutral、muted、accent、danger、success、warning、info；空着时跟随 ForeColor。")]
-    public Tone Tone { get => Element.Tone; set => Element.Tone = value; }
+    public TextTone Tone { get => Element.Tone; set => Element.Tone = value; }
 
     /// <summary>线宽（24 格画布上的单位）。</summary>
     [Category("Appearance")]

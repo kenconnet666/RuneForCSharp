@@ -38,7 +38,7 @@ public class Icon : Element
     }
 
     /// <summary>色调（状态图标）；不写时跟随宿主的文字颜色。</summary>
-    public Tone Tone
+    public TextTone Tone
     {
         get;
         set

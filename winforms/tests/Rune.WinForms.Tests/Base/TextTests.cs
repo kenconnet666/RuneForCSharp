@@ -49,7 +49,7 @@ public class TextTests
     {
         // 实心方块：中间的像素整个被字形盖住，颜色不受抗锯齿影响
         var plain = new CountingText { Text = "██", TextSize = 32, ForeColor = Color.Purple };
-        var danger = new CountingText { Text = "██", TextSize = 32, Tone = Tone.Danger, Left = 200 };
+        var danger = new CountingText { Text = "██", TextSize = 32, Tone = TextTone.Danger, Left = 200 };
         using var form = WinFormsUi.Show(plain, danger);
         try
         {

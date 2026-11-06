@@ -20,7 +20,7 @@
 - 组件：Icon、Text 家族（5 个）、Spinner、Badge、Button 家族（Button、IconButton、CloseButton、ClearButton、LinkButton、IconLinkButton，Avalonia、WPF 另有 ButtonBase）三个平台都做了，162 个测试。
 - 做过一轮性能（DESIGN §9"组件基准"）：Avalonia 按钮首次布局快 36%、WinForms 快 4 倍。
 - 上游 vue-tsx-pro 做完了样式体系改造（0.11，分支 feat/style-overhaul，等合入 master），对照与要跟进的在 [UPSTREAM.md](UPSTREAM.md)。
-- 生成文件锁定上游 9d5af3f3（`tools/vue-tsx-pro.ref`）。下一步：里程碑 M0。
+- 生成文件锁定上游的开发线（`tools/vue-tsx-pro.ref`，现在是 da5a4970 = 0.11.0，之后跟 0.12.0-dev）。下一步：里程碑 M0。
 
 ## 已定的决定
 
@@ -49,7 +49,7 @@
 | 21 | 跟进上游 0.11 | UPSTREAM.md 的 5 个工作包都做：`Tone` 改名 `TextTone`（不留旧名）、组件段只用主题设值、Provider 合成照上游的分段语义（跨模块，WPF 先做）、Badge 色调取共用色表、WinForms 定制入口；另有按钮字重 500、控件高度收成一处（2026-11-06 用户确认按规划修订路线图） |
 | 22 | WinForms 的范围 | 改决定 14：核心五层与扩展都做，和另外两个平台一样（2026-11-06 用户：除了发布，其他都尽量做） |
 | 23 | 扩展与发布 | 核心五层之后依次做 theme-customize、charts、maps、diagram、code-editor、xlsx、three，三个平台都尽量做（three 先评估各平台的 3D 能力，做不到的写进 DESIGN）；docs-kit 做成 Gallery 的示例页（代码预览、属性表）。NuGet 包本地能打出来、能装上试用，但不发布（2026-11-06 用户：发布暂时不做） |
-| 24 | 锁定上游 | 生成文件与 CI 对齐 `tools/vue-tsx-pro.ref` 锁定的提交（上游发版后改成发版的提交）。跟进新版本是一次专门的提交：改锁定、重新生成、按上游的变化清单逐条对照（UPSTREAM.md）。上游的问题发给维护 vue-tsx-pro 的会话修复发版，不直接改那边的仓库；有设计分歧时问用户（2026-11-06） |
+| 24 | 锁定上游 | 跟上游的开发线（0.11 之后是 0.12.0-dev，用户 2026-11-06 定；上游之后会发布）：生成文件与 CI 对齐 `tools/vue-tsx-pro.ref` 锁定的提交，锁定的是 GitHub 上能取到的提交。上游推进时主动跟：改锁定、重新生成、按上游的变化清单逐条对照（UPSTREAM.md），一次专门的提交。上游的问题发给维护 vue-tsx-pro 的会话修复发版，不直接改那边的仓库；有设计分歧时问用户 |
 | 25 | 完成标准 | 每个组件过三道核对：样式（ts-styles 的计算样式对 inspect props，加截图）、行为（上游测试用例逐条对应或登记不适用）、无障碍（UIA 对 ARIA 角色与状态）；parity 报告里没有未解释的差异才勾选（2026-11-06） |
 
 ## 平台化的约定
@@ -202,8 +202,9 @@
 ### M0 清单
 
 - [x] CI 与生成脚本锁定上游提交（`tools/vue-tsx-pro.ref`；读到别的提交时工具提醒）。
-- [ ] 上游 0.11 合入 master、发版后：改锁定，重新生成 token 与语言包（去 ocean、加 high-contrast-dark、着色页面、状态文字、占位文字），截图核对。
-- [ ] 工作包 1：`Tone` → `TextTone`（三个平台，不留旧名）。
+- [x] 锁定上游 0.11.0（da5a4970），重新生成 token 与语言包（去 ocean、加 high-contrast-dark、着色页面、状态文字、占位文字）；之后跟 0.12.0-dev。
+- [ ] 截图核对新的页面底色、白卡片、状态文字（ts-styles 做好后）。
+- [x] 工作包 1：`Tone` → `TextTone`（三个平台，不留旧名；属性名 `Tone` 不变）。
 - [ ] 工作包 2：组件段只用主题设值（Avalonia 的 Size、Radius、色调 → 调色板、Icon / Text 的色调改成主题里的绑定；WPF 的 Size）；DESIGN 写明定制入口与不稳定的资源键。
 - [ ] 工作包 3：Provider 合成照上游的分段语义（WPF 先、Avalonia 后，随机组合测试）。
 - [ ] 工作包 4：Badge 色调取共用色表。
@@ -285,7 +286,7 @@
 
 用来验证这一层的第一批组件（都在阶段 3 的第 1、2 层，做完就是正式组件）：Icon → Text → Spinner → Badge → Button 家族 → Field。每个都把档位、调色板、部件转发、Provider 的默认值与样式、size 与 em、主题切换、减少动态效果、热重载、无障碍走一遍。各组件的进度以 `node tools/parity/parity.mjs` 为准。
 - [x] Icon：三个平台都做了（DESIGN §14）；描线动画 `draw` 暂缓，parity 里列为缺失。
-- [x] 档位类型：`IVariant` / `VariantConverter` 与 `TextSize`、`Tone`，三个库都做了。
+- [x] 档位类型：`IVariant` / `VariantConverter` 与 `TextSize`、`TextTone`（原名 `Tone`，2026-11-06 随上游改名），三个库都做了。
 - [x] Text 家族（Text、Paragraph、Strong、Em、Small）：三个平台都做了（DESIGN §14）；WPF 从 TextBlock 派生（决定 19）。示例做了 scale、tones、numeric、overflow，inline、links、headings 等 Kbd、Link、Heading。
 - [x] Spinner（第一个带部件的组件，`propsIcon`）：三个平台都做了，部件转发按 DESIGN §7 的三种写法落地（DESIGN §14）；parity 认部件名常量与 `PropsXxx`。
 - [x] Badge（第一个自绘、带配方与组合档位的组件）：三个平台都做了，部件按决定 20（代码里组合真的子组件）；示例做了 matrix、shapes，in-context、statuses、tag 等 Table、StatusBadge、Tag。

@@ -26,7 +26,7 @@ public class Text : TextBlock
     public static readonly StyledProperty<TextWeight> WeightProperty = AvaloniaProperty.Register<Text, TextWeight>(nameof(Weight));
 
     /// <summary>色调；不写时继承外面的文字颜色。</summary>
-    public static readonly StyledProperty<Tone> ToneProperty = AvaloniaProperty.Register<Text, Tone>(nameof(Tone));
+    public static readonly StyledProperty<TextTone> ToneProperty = AvaloniaProperty.Register<Text, TextTone>(nameof(Tone));
 
     /// <summary>水平对齐（按书写方向）；不写时继承。</summary>
     public static readonly StyledProperty<TextAlign?> AlignProperty = AvaloniaProperty.Register<Text, TextAlign?>(nameof(Align));
@@ -57,7 +57,7 @@ public class Text : TextBlock
     public TextWeight Weight { get => GetValue(WeightProperty); set => SetValue(WeightProperty, value); }
 
     /// <summary>色调。</summary>
-    public Tone Tone { get => GetValue(ToneProperty); set => SetValue(ToneProperty, value); }
+    public TextTone Tone { get => GetValue(ToneProperty); set => SetValue(ToneProperty, value); }
 
     /// <summary>水平对齐。</summary>
     public TextAlign? Align { get => GetValue(AlignProperty); set => SetValue(AlignProperty, value); }

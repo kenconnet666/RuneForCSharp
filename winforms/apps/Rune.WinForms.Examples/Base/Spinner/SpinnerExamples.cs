@@ -15,11 +15,11 @@ static class SpinnerExamples
         var sizes = Wrap(24,
         [
             .. TextSize.Known.Select(size => new SpinnerControl { IconSize = size, Anchor = AnchorStyles.None }),
-            FollowText(Tone.Accent, "跟随文字颜色", null),
-            FollowText(Tone.Success, "同步中", TextSize.Sm),
+            FollowText(TextTone.Accent, "跟随文字颜色", null),
+            FollowText(TextTone.Success, "同步中", TextSize.Sm),
         ]);
         var card = Row(8, new SpinnerControl { Label = "正在生成报表", Anchor = AnchorStyles.None },
-            new SmallControl { Text = "正在生成报表，大约需要 30 秒", Tone = Tone.Muted, Anchor = AnchorStyles.None });
+            new SmallControl { Text = "正在生成报表，大约需要 30 秒", Tone = TextTone.Muted, Anchor = AnchorStyles.None });
         card.Padding = new Padding(Dip(16));
         card.MinimumSize = new Size(Dip(420), 0);
         card.BackColor = RuneTheme.Current.Peek().Colors.Surface;
@@ -28,7 +28,7 @@ static class SpinnerExamples
     }
 
     /// <summary>与文字同一行：颜色、大小跟随这一行的字体与 ForeColor（Text 的 Tone 只管文字，这里给整行设颜色）。</summary>
-    static Control FollowText(Tone tone, string text, TextSize? size)
+    static Control FollowText(TextTone tone, string text, TextSize? size)
     {
         var row = Row(4, new SpinnerControl { Anchor = AnchorStyles.None }, new TextControl { Text = text, Anchor = AnchorStyles.None });
         row.ForeColor = tone.ColorIn(new ElementContext(row.DeviceDpi, row.Font, row.ForeColor, false));

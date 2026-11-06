@@ -25,17 +25,17 @@ static class TextExamples
     /// <summary>左边一列的名字：xs、muted、宽 5em。</summary>
     static TextControl Name(string text) => new()
     {
-        Text = text, TextSize = TextSize.Xs, Tone = Tone.Muted, AutoSize = false, Anchor = AnchorStyles.Left,
+        Text = text, TextSize = TextSize.Xs, Tone = TextTone.Muted, AutoSize = false, Anchor = AnchorStyles.Left,
         Size = new Size(Dip(70), Dip(18)),
     };
 
     static Control Tones() => Wrap(12,
-        Card(new StrongControl { Text = "部署完成" }, Small("production · 3 分钟前 · 由 @lin 触发", Tone.Muted), Small("全部 128 项检查通过", Tone.Success)),
-        Card(new StrongControl { Text = "账单即将到期" }, Small("还有 2 天自动续费 ¥299", Tone.Warning), Small("查看账单详情", Tone.Accent)),
-        Card(new StrongControl { Text = "同步失败" }, Small("网络连接中断，已暂停上传", Tone.Danger),
-            new ParagraphControl { Text = "恢复联网后会自动重试，不用重新选择文件。", TextSize = TextSize.Sm, Tone = Tone.Info, MaximumSize = new Size(Dip(208), 0) }));
+        Card(new StrongControl { Text = "部署完成" }, Small("production · 3 分钟前 · 由 @lin 触发", TextTone.Muted), Small("全部 128 项检查通过", TextTone.Success)),
+        Card(new StrongControl { Text = "账单即将到期" }, Small("还有 2 天自动续费 ¥299", TextTone.Warning), Small("查看账单详情", TextTone.Accent)),
+        Card(new StrongControl { Text = "同步失败" }, Small("网络连接中断，已暂停上传", TextTone.Danger),
+            new ParagraphControl { Text = "恢复联网后会自动重试，不用重新选择文件。", TextSize = TextSize.Sm, Tone = TextTone.Info, MaximumSize = new Size(Dip(208), 0) }));
 
-    static TextControl Small(string text, Tone tone) => new() { Text = text, TextSize = TextSize.Sm, Tone = tone };
+    static TextControl Small(string text, TextTone tone) => new() { Text = text, TextSize = TextSize.Sm, Tone = tone };
 
     static Control Numeric()
     {
@@ -47,16 +47,16 @@ static class TextExamples
             table.Controls.Add(new TextControl { Text = code, Mono = true, TextSize = TextSize.Sm, Anchor = AnchorStyles.Left });
             table.Controls.Add(new TextControl { Text = $"{amount} 万元", Numeric = true, Anchor = AnchorStyles.Right });
         }
-        return Column(4, table, new TextControl { Text = "超时 11 天", Numeric = true, Tone = Tone.Danger, Weight = TextWeight.Semibold });
+        return Column(4, table, new TextControl { Text = "超时 11 天", Numeric = true, Tone = TextTone.Danger, Weight = TextWeight.Semibold });
     }
 
     static Control Overflow() => Wrap(12,
-        Card(new SmallControl { Text = "Truncate：单行省略", Tone = Tone.Muted },
+        Card(new SmallControl { Text = "Truncate：单行省略", Tone = TextTone.Muted },
             new StrongControl { Text = "vue-tsx-pro / packages / ui / src / display / VirtualList.tsx", Truncate = true, MaximumSize = new Size(Dip(208), 0) },
-            new TextControl { Text = Long, Truncate = true, Tone = Tone.Muted, MaximumSize = new Size(Dip(208), 0) }),
-        Card(new SmallControl { Text = "LineClamp = 2：最多两行", Tone = Tone.Muted },
+            new TextControl { Text = Long, Truncate = true, Tone = TextTone.Muted, MaximumSize = new Size(Dip(208), 0) }),
+        Card(new SmallControl { Text = "LineClamp = 2：最多两行", Tone = TextTone.Muted },
             new ParagraphControl { Text = Long, LineClamp = 2, MaximumSize = new Size(Dip(208), 0) }),
-        Card(new SmallControl { Text = "Wrap = Balance：桌面上同普通换行", Tone = Tone.Muted },
+        Card(new SmallControl { Text = "Wrap = Balance：桌面上同普通换行", Tone = TextTone.Muted },
             new ParagraphControl { Text = "用更自然的 TSX 写 Vue 组件，符文让状态读写像普通变量", Wrap = TextWrap.Balance, TextSize = TextSize.Lg, Weight = TextWeight.Semibold, Align = TextAlign.Center, AutoSize = false, Size = new Size(Dip(208), Dip(72)) }));
 
     /// <summary>一张卡片（Card 做出来后换掉）。</summary>

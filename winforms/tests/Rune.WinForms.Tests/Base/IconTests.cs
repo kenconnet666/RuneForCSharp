@@ -41,7 +41,7 @@ public class IconTests
     {
         // minus 是 24 格中线上的一条横线，正中的像素整个被线盖住，颜色不受抗锯齿影响
         var plain = new CountingIcon { Data = Lucide.Minus, IconSize = 48, ForeColor = Color.Purple };
-        var danger = new CountingIcon { Data = Lucide.Minus, IconSize = 48, Tone = Tone.Danger, Left = 100 };
+        var danger = new CountingIcon { Data = Lucide.Minus, IconSize = 48, Tone = TextTone.Danger, Left = 100 };
         using var form = WinFormsUi.Show(plain, danger);
         try
         {
@@ -128,7 +128,7 @@ public class IconTests
         Assert.False(properties[nameof(IconControl.IconSize)]!.ShouldSerializeValue(icon));
         Assert.False(properties[nameof(IconControl.StrokeWidth)]!.ShouldSerializeValue(icon));
 
-        icon.Tone = Tone.Danger;
+        icon.Tone = TextTone.Danger;
         icon.IconSize = TextSize.Lg;
         Assert.True(properties[nameof(IconControl.Tone)]!.ShouldSerializeValue(icon));
         Assert.True(properties[nameof(IconControl.IconSize)]!.ShouldSerializeValue(icon));
