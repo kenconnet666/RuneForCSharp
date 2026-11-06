@@ -205,11 +205,13 @@
 - [x] 锁定上游 0.11.0（da5a4970），重新生成 token 与语言包（去 ocean、加 high-contrast-dark、着色页面、状态文字、占位文字）；之后跟 0.12.0-dev。
 - [ ] 截图核对新的页面底色、白卡片、状态文字（ts-styles 做好后）。
 - [x] 工作包 1：`Tone` → `TextTone`（三个平台，不留旧名；属性名 `Tone` 不变）。
-- [ ] 工作包 2：组件段只用主题设值（Avalonia 的 Size、Radius、色调 → 调色板、Icon / Text 的色调改成主题里的绑定；WPF 的 Size）；DESIGN 写明定制入口与不稳定的资源键。
+- [x] 工作包 2：档位的值放到使用方盖得过的一层（DESIGN §4"档位的优先级"）：WPF 全部改成主题样式的触发器；Avalonia 不继承的（调色板、圆角）走主题 setter（`Resolved`），继承的（字号、字重、文字颜色）按模板优先级（Avalonia 的绑定回不到继承的值）。
+- [ ] DESIGN 写明各平台的定制入口与不稳定的资源键（随工作包 3）。
 - [ ] 工作包 3：Provider 合成照上游的分段语义（WPF 先、Avalonia 后，随机组合测试）。
-- [ ] 工作包 4：Badge 色调取共用色表。
+- [x] 工作包 4：Badge 色调取共用色表（Avalonia 取调色板对象，WPF、WinForms 由 recipe-gen 生成 Badge 配方；`StatusColors` 删掉）。
 - [ ] 工作包 5：WinForms 的定制入口。
-- [ ] 按钮字重 600 → 500；控件高度收成每个平台一处（`max(round(系数 × 字号 ÷ 步长) × 步长, minTarget)`）。
+- [x] 按钮字重 600 → 500。
+- [ ] 控件高度收成每个平台一处（`max(round(系数 × 字号 ÷ 步长) × 步长, minTarget)`）。
 - [ ] `ts-styles`、parity 取值比对、行为对照、截图对比（"信息与验证工具"）；拿已做的 16 个组件过一遍三道核对，补齐差异。
 - [ ] 按钮家族的缺口：focusableWhenDisabled（三个平台）、WinForms 的 propsContent 与 ButtonBase；ButtonGroup、CopyButton。
 
