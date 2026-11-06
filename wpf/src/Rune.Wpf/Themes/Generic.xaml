@@ -3,8 +3,11 @@
   - 档位与状态写成 Style.Triggers，不写在 ControlTemplate.Triggers 里：主题样式的触发器排在使用方样式的 setter 之后，使用方总能盖过
   - 部件的外观写在按部件键的样式里（模板里 Style="{DynamicResource {x:Static rune:XxxParts.Yyy}}"），不写成模板里的属性：
     模板属性的优先级高于任何样式，Provider 与使用方都改不了
-  主题 tokens（tools/ 从 vue-tsx-pro 生成）与各组件的样式合并到这里。
+  每个组件的主题样式在它自己的文件夹里，合并到这里；token 由 RuneTheme 带进 Application.Resources。
 -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Rune.Wpf;component/Base/Icon/Icon.xaml" />
+  </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>

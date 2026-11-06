@@ -249,8 +249,8 @@
 - [ ] 三个平台的 `inspect`：`snapshot`、`tree`、`props`、`uia`（见"信息与验证工具"）。
 
 用来验证这一层的第一批组件（都在阶段 3 的第 1、2 层，做完就是正式组件）：Icon → Text → Spinner → Badge → Button 家族 → Field。每个都把档位、调色板、部件转发、Provider 的默认值与样式、size 与 em、主题切换、减少动态效果、热重载、无障碍走一遍。各组件的进度以 `node tools/parity/parity.mjs` 为准。
-- [~] Icon：Avalonia 已做（DESIGN §14），WPF、WinForms 接着做；描线动画 `draw` 暂缓。
-- [~] 档位类型：`IVariant` / `VariantConverter` 与 `TextSize`、`Tone`，Avalonia 已做。
+- [~] Icon：Avalonia、WPF 已做（DESIGN §14）；WinForms 等 ElementHost 做好后补；描线动画 `draw` 暂缓。
+- [~] 档位类型：`IVariant` / `VariantConverter` 与 `TextSize`、`Tone`，Avalonia、WPF 已做。
 
 ### 3. 按依赖分层移植组件
 
