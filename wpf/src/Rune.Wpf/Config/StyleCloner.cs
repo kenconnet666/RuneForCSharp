@@ -18,6 +18,7 @@ static class StyleCloner
     {
         var style = new Style(fragment.TargetType, basedOn);
         foreach (var setter in fragment.Setters) style.Setters.Add(Clone(setter));
+        foreach (var trigger in CarriedConditions(fragment, basedOn)) style.Triggers.Add(trigger);
         foreach (var trigger in fragment.Triggers) style.Triggers.Add(Clone(trigger));
         foreach (var key in fragment.Resources.Keys)
         {
@@ -27,6 +28,37 @@ static class StyleCloner
         }
         return style;
     }
+
+    /// <summary>
+    /// 片段的普通值整体替换外层的取值，连外层的条件值一起（vue-tsx-pro 的分段语义，DESIGN §4）：WPF 里样式触发器总是胜过
+    /// 样式 setter，外层"悬停时红色"会盖过内层的"绿色"。所以外层链里每条设了同一属性的触发器，照它的条件补一条、值换成片段的；
+    /// 补出来的排在片段自己的触发器前面，片段自己写的条件值仍然优先。
+    /// </summary>
+    static IEnumerable<TriggerBase> CarriedConditions(Style fragment, Style? basedOn)
+    {
+        var plain = fragment.Setters.OfType<Setter>().Where(s => s.TargetName is null).ToDictionary(s => s.Property, s => s.Value);
+        if (plain.Count == 0) yield break;
+        for (var outer = basedOn; outer is not null; outer = outer.BasedOn)
+            foreach (var trigger in outer.Triggers)
+            {
+                var replaced = Setters(trigger).OfType<Setter>().Where(s => s.TargetName is null && plain.ContainsKey(s.Property)).Select(s => s.Property).Distinct().ToList();
+                if (replaced.Count == 0) continue;
+                var carried = Clone(trigger);
+                var setters = Setters(carried);
+                setters.Clear();
+                foreach (var property in replaced) setters.Add(new Setter(property, plain[property]));
+                yield return carried;
+            }
+    }
+
+    static SetterBaseCollection Setters(TriggerBase trigger) => trigger switch
+    {
+        Trigger t => t.Setters,
+        DataTrigger t => t.Setters,
+        MultiTrigger t => t.Setters,
+        MultiDataTrigger t => t.Setters,
+        _ => throw new NotSupportedException($"Provider 的样式里不支持 {trigger.GetType().Name}"),
+    };
 
     /// <summary>片段里有没有按部件键写的嵌套样式。</summary>
     public static bool HasNestedStyles(Style fragment) =>

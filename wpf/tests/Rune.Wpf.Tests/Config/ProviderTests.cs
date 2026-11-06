@@ -183,4 +183,75 @@ public class ProviderTests
         Assert.Equal($"Light/{Colors.Red}", Label(((ProbeCard)root.FindName("card")).Button));
         Assert.Equal($"Light/{Colors.Black}", Label((ProbeButton)root.FindName("plain")));
     });
+
+    /// <summary>一层 Provider 的片段：普通值与条件值（条件是 ProbeButton.Variant 等于某个值，代替悬停、按下这类状态）。</summary>
+    sealed record Layer(Color? Plain, (string State, Color Value)[] Conditional)
+    {
+        public Provider Wrap(UIElement child)
+        {
+            var fragment = new Style(typeof(ProbeButton));
+            if (Plain is { } plain) fragment.Setters.Add(new Setter(Control.BackgroundProperty, new SolidColorBrush(plain)));
+            foreach (var (state, value) in Conditional)
+                fragment.Triggers.Add(new Trigger { Property = ProbeButton.VariantProperty, Value = state, Setters = { new Setter(Control.BackgroundProperty, new SolidColorBrush(value)) } });
+            return new Provider { Styles = new ResourceDictionary { [typeof(ProbeButton)] = fragment }, Child = child };
+        }
+    }
+
+    /// <summary>
+    /// 参考模型（vue-tsx-pro 的分段语义）：从外到内，普通值整体替换前面的取值（连条件值），条件值与前面的合并、后写的优先；
+    /// 某个状态下的取值是命中的条件值，没有时是普通值。各层都没写时为 null（取主题里的值，不比）。
+    /// </summary>
+    static Color? Expected(IEnumerable<Layer> layers, string state)
+    {
+        Color? plain = null;
+        var conditional = new Dictionary<string, Color>();
+        foreach (var layer in layers)
+        {
+            if (layer.Plain is { } value)
+            {
+                plain = value;
+                conditional.Clear();
+            }
+            foreach (var (s, v) in layer.Conditional) conditional[s] = v;
+        }
+        return conditional.TryGetValue(state, out var hit) ? hit : plain;
+    }
+
+    [Fact]
+    public Task Inner_plain_value_replaces_outer_conditions() => WpfUi.Run(() =>
+    {
+        // 外层：平时红、状态 a 时蓝；内层只写绿：状态 a 时也是绿（WPF 原生是蓝：样式触发器胜过样式 setter）
+        Layer[] layers = [new(Colors.Red, [("a", Colors.Blue)]), new(Colors.Green, [])];
+        var button = new ProbeButton { Variant = "a" };
+        WpfUi.Show(layers[0].Wrap(layers[1].Wrap(button)));
+        Assert.Equal(Colors.Green, ((SolidColorBrush)button.Background).Color);
+    });
+
+    [Fact]
+    public Task Random_layers_match_the_merged_as_one_model() => WpfUi.Run(() =>
+    {
+        // 照搬上游的验证办法：随机生成若干层，与参考模型逐个状态比对
+        var random = new Random(20261107);
+        Color[] palette = [Colors.Red, Colors.Green, Colors.Blue, Colors.Gold, Colors.Teal, Colors.Purple];
+        string[] states = ["a", "b", "c"];
+        var host = new Border();
+        WpfUi.Show(host);
+        for (var round = 0; round < 150; round++)
+        {
+            var layers = Enumerable.Range(0, random.Next(1, 5)).Select(_ => new Layer(
+                random.Next(2) == 0 ? palette[random.Next(palette.Length)] : null,
+                [.. states.Take(2).Where(_ => random.Next(5) < 2).Select(state => (state, palette[random.Next(palette.Length)]))])).ToList();
+            var button = new ProbeButton();
+            UIElement tree = button;
+            for (var i = layers.Count - 1; i >= 0; i--) tree = layers[i].Wrap(tree);
+            host.Child = tree;
+            foreach (var state in states)
+            {
+                button.Variant = state;
+                WpfUi.Flush();
+                if (Expected(layers, state) is { } expected)
+                    Assert.True(expected == ((SolidColorBrush)button.Background).Color, $"第 {round} 轮、状态 {state}：期望 {expected}，实际 {((SolidColorBrush)button.Background).Color}；各层 {string.Join(" | ", layers)}");
+            }
+        }
+    });
 }
