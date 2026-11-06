@@ -49,7 +49,9 @@ function csharpTypes(dir) {
         const classes = [...text.matchAll(/public\s+(?:(?:sealed|partial|abstract|static)\s+)*(?:class|record)\s+(\w+)/g)].map((m) => m[1]);
         // 类型可以带空格（Func<string, string>、值元组），按行匹配：修饰符、类型、名字，后面是 { 或 =>
         const props = [...text.matchAll(/public\s+(?:(?:static|required|override|virtual|new)\s+)*[^\n=;]*?\S\s+(\w+)\s*(?:\{|=>)/g)].map((m) => m[1]);
-        for (const type of classes) types.set(type, new Set([...(types.get(type) ?? []), ...props]));
+        // 部件名常量（Avalonia 的 `SpinnerParts.Icon = "PART_Icon"`、WPF 的部件样式键）：按字段收进所在的类
+        const fields = [...text.matchAll(/public\s+(?:const|static\s+readonly)\s+[\w.<>?]+\s+(\w+)\s*=/g)].map((m) => m[1]);
+        for (const type of classes) types.set(type, new Set([...(types.get(type) ?? []), ...props, ...fields]));
       }
     }
   };
@@ -57,10 +59,15 @@ function csharpTypes(dir) {
   return types;
 }
 
-function compareProps(vue, name, members) {
+/**
+ * props 与部件。部件（`propsIcon`）有两种写法都算有：WinForms 的部件属性记录（`PropsIcon`），
+ * Avalonia、WPF 的部件名常量（`SpinnerParts.Icon`，DESIGN §7）
+ */
+function compareProps(vue, name, members, parts) {
   const data = inspectComponent(vue, name).data;
   const expected = [...data.props, ...data.parts].map((prop) => ({ prop: prop.name, cs: csName(name, prop.name) }));
-  const missing = expected.filter(({ cs }) => !members.has(cs) && !PLATFORM_PROPS.has(cs));
+  const isPart = (cs) => cs.startsWith('Props') && parts?.has(cs.slice('Props'.length));
+  const missing = expected.filter(({ cs }) => !members.has(cs) && !PLATFORM_PROPS.has(cs) && !isPart(cs));
   const known = new Set(expected.map(({ cs }) => cs));
   return { missing, expected: expected.length, extra: [...members].filter((member) => !known.has(member)) };
 }
@@ -83,7 +90,7 @@ try {
     platforms: Object.fromEntries(
       libraries.map((library) => {
         const members = library.types.get(c.name);
-        return [library.name, members ? compareProps(vue, c.name, members) : null];
+        return [library.name, members ? compareProps(vue, c.name, members, library.types.get(`${c.name}Parts`)) : null];
       }),
     ),
   }));
