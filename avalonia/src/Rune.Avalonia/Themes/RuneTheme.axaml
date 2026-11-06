@@ -20,6 +20,7 @@
         <ResourceInclude Source="avares://Rune.Avalonia/Base/Button/Button.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Base/Link/Link.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Base/List/List.axaml" />
+        <ResourceInclude Source="avares://Rune.Avalonia/Base/Indicator/Indicator.axaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>

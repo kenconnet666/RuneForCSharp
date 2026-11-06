@@ -10,14 +10,14 @@ import { basename, join, relative } from 'node:path';
 import { parseArgs } from 'node:util';
 import { table } from '../lib/markdown.mjs';
 import { openVue, repoRoot } from '../lib/vue.mjs';
-import { BEHAVIOR_NOT_APPLICABLE } from './registry.mjs';
+import { BEHAVIOR_NOT_APPLICABLE, TYPE_RENAMES } from './registry.mjs';
 
 const { values: options, positionals } = parseArgs({ allowPositionals: true, options: { json: { type: 'boolean', default: false }, vue: { type: 'string' } } });
 
 const PLATFORMS = {
-  avalonia: { src: 'avalonia/src/Rune.Avalonia', tests: 'avalonia/tests/Rune.Avalonia.Tests' },
-  wpf: { src: 'wpf/src/Rune.Wpf', tests: 'wpf/tests/Rune.Wpf.Tests' },
-  winforms: { src: 'winforms/src/Rune.WinForms', tests: 'winforms/tests/Rune.WinForms.Tests' },
+  avalonia: { src: 'avalonia/src/Rune.Avalonia', tests: 'avalonia/tests/Rune.Avalonia.Tests', library: 'Avalonia' },
+  wpf: { src: 'wpf/src/Rune.Wpf', tests: 'wpf/tests/Rune.Wpf.Tests', library: 'WPF' },
+  winforms: { src: 'winforms/src/Rune.WinForms', tests: 'winforms/tests/Rune.WinForms.Tests', library: 'WinForms' },
 };
 
 function files(dir, pattern) {
@@ -63,8 +63,13 @@ function platform({ src, tests }) {
 const vue = await openVue(options.vue);
 const upstream = upstreamTests(vue.src);
 vue.close?.();
-const platforms = Object.fromEntries(Object.entries(PLATFORMS).map(([name, paths]) => [name, platform(paths)]));
-const components = positionals[0]?.split(',') ?? [...upstream.keys()].filter((c) => Object.values(platforms).some((p) => p.types.has(c))).sort();
+const platforms = Object.fromEntries(Object.entries(PLATFORMS).map(([name, paths]) => [name, { ...platform(paths), library: paths.library }]));
+// 做了没有：类型名同组件，或平台上改了名（registry 的 TYPE_RENAMES），WinForms 只有控件的组件叫 XxxControl
+const made = (p, component) => {
+  const type = TYPE_RENAMES[p.library]?.[component] ?? component;
+  return p.types.has(type) || p.types.has(`${type}Control`);
+};
+const components = positionals[0]?.split(',') ?? [...upstream.keys()].filter((c) => Object.values(platforms).some((p) => made(p, c))).sort();
 
 const results = [];
 for (const component of components) {
@@ -74,7 +79,7 @@ for (const component of components) {
     const na = Object.entries(notApplicable).find(([prefix]) => name.startsWith(prefix));
     const row = { component, test: name, notApplicable: na?.[1] ?? null, platforms: {} };
     for (const [platformName, p] of Object.entries(platforms)) {
-      if (!p.types.has(component)) {
+      if (!made(p, component)) {
         row.platforms[platformName] = '（组件还没做）';
         continue;
       }

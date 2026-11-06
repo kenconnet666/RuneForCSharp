@@ -1,0 +1,21 @@
+<!--
+  Indicator 的主题样式：只放默认值（vue-tsx-pro 的 IndicatorOptions 与 indicatorRecipe 的默认档位），Provider 的样式能改。
+  色调的颜色是生成的 IndicatorRecipe.g.xaml；角标的尺寸、位置在 Indicator.cs 里（代码组合的部件）
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Rune.Wpf;component/Base/Indicator/IndicatorRecipe.g.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <Style TargetType="rune:Indicator" BasedOn="{StaticResource Rune.Recipe.Indicator}">
+    <Setter Property="Tone" Value="danger" />
+    <Setter Property="Placement" Value="top-end" />
+    <Setter Property="Overlap" Value="rectangular" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Top" />
+  </Style>
+  <!-- 部件样式键总要有一个样式（同 SpinnerParts.Icon），使用方同键的样式叠在上面 -->
+  <Style x:Key="{x:Static rune:IndicatorParts.Badge}" TargetType="Border" />
+  <Style x:Key="{x:Static rune:IndicatorParts.Count}" TargetType="TextBlock" />
+</ResourceDictionary>

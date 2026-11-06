@@ -1,0 +1,16 @@
+<!--
+  Indicator 的主题：只放默认值（vue-tsx-pro 的 IndicatorOptions 与 indicatorRecipe 的默认档位），Provider 的样式能改。
+  角标的尺寸、位置在 Indicator.cs 里（代码组合的部件）；色调解析出的调色板在这里绑过来
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:Indicator}" TargetType="rune:Indicator">
+    <Setter Property="Tone" Value="danger" />
+    <Setter Property="Placement" Value="top-end" />
+    <Setter Property="Overlap" Value="rectangular" />
+    <Setter Property="Palette" Value="{rune:Resolved Palette}" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Top" />
+  </ControlTheme>
+</ResourceDictionary>

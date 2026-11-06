@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// 组件配方的生成：样式档位 × 色调的组合（vue-tsx-pro 的 css.recipe compound），按调色板表（token-gen/palette.mjs）展开（按钮家族、Badge）。
+// 组件配方的生成：样式档位 × 色调的组合（vue-tsx-pro 的 css.recipe compound），按调色板表（token-gen/palette.mjs）展开（按钮家族、Badge）；
+// 只有色调、没有样式档位的（Indicator 的实底角标）只按色调展开。
 // Avalonia 用调色板对象，样式里只写 6 条档位（手写在组件的 axaml 里）；WPF 用主题样式的 MultiTrigger（DESIGN §4），
 // 36 条组合加悬停逐条写容易错，这里生成。用法：node tools/recipe-gen/recipe-gen.mjs [--check]
 import { parseArgs } from 'node:util';
@@ -36,6 +37,12 @@ export const RECIPES = {
       outline: { Foreground: 'text', BorderBrush: 'border' },
     },
   },
+  Indicator: {
+    // 角标只有实底一种（vue-tsx-pro 的 statusToneSx('solid', tone)）：设到 Indicator 自己的角标颜色上，不碰继承的文字颜色。
+    // WinForms 直接用 BadgeRecipe 的 solid
+    file: 'wpf/src/Rune.Wpf/Base/Indicator/IndicatorRecipe.g.xaml',
+    tones: { BadgeBackground: 'solid', BadgeForeground: 'contrast' },
+  },
 };
 
 const brush = (tone, field) => `{DynamicResource Rune.Brush.${cap(paletteOf(tone)[field])}}`;
@@ -51,17 +58,26 @@ function trigger(component, variant, tone, setters, hover) {
   return `      <MultiTrigger><MultiTrigger.Conditions>${conditions.join('')}</MultiTrigger.Conditions>${values.join('')}</MultiTrigger>`;
 }
 
+/** 只按色调：一条普通触发器 */
+function toneTrigger(tone, setters) {
+  const values = Object.entries(setters).map(([property, field]) => `<Setter Property="${property}" Value="${brush(tone, field)}" />`);
+  return `      <Trigger Property="Tone" Value="${tone}">${values.join('')}</Trigger>`;
+}
+
 function wpf(component, recipe) {
   const base = [];
   const hovers = [];
-  for (const [variant, { hover, ...setters }] of Object.entries(recipe.variants))
+  if (recipe.tones) for (const tone of TONES) base.push(toneTrigger(tone, recipe.tones));
+  for (const [variant, { hover, ...setters }] of Object.entries(recipe.variants ?? {}))
     for (const tone of TONES) {
       base.push(trigger(component, variant, tone, setters, false));
       if (hover) hovers.push(trigger(component, variant, tone, hover, true));
     }
   return [
     '<!-- 由 tools/recipe-gen 按调色板表（tools/token-gen/palette.mjs）生成，不要手改；运行 node tools/recipe-gen/recipe-gen.mjs -->',
-    `<!-- ${component} 的样式 × 色调（vue-tsx-pro 的配方 compound）：先 ${base.length} 条组合，再 ${hovers.length} 条悬停（排在后面的触发器优先）。组件的主题样式 BasedOn 它 -->`,
+    recipe.tones
+      ? `<!-- ${component} 的色调（${base.length} 条）。组件的主题样式 BasedOn 它 -->`
+      : `<!-- ${component} 的样式 × 色调（vue-tsx-pro 的配方 compound）：先 ${base.length} 条组合，再 ${hovers.length} 条悬停（排在后面的触发器优先）。组件的主题样式 BasedOn 它 -->`,
     '<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"',
     '                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"',
     '                    xmlns:rune="clr-namespace:Rune.Wpf">',
@@ -109,6 +125,6 @@ function winforms(component, recipe) {
 const { values } = parseArgs({ options: { check: { type: 'boolean', default: false } } });
 const outputs = Object.entries(RECIPES).flatMap(([component, recipe]) => [
   { path: recipe.file, content: wpf(component, recipe) },
-  { path: recipe.winforms, content: winforms(component, recipe) },
+  ...(recipe.winforms ? [{ path: recipe.winforms, content: winforms(component, recipe) }] : []),
 ]);
 process.exitCode = writeOutputs(outputs, { check: values.check, commit: '调色板表', command: 'node tools/recipe-gen/recipe-gen.mjs' });
