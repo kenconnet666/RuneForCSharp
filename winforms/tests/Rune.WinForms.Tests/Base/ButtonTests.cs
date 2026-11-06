@@ -49,7 +49,6 @@ public class ButtonTests
     });
 
     [Upstream("Button", "loading 变为 true")]
-
     [Upstream("Button", "loading：不用 disabled")]
 
     [Fact]

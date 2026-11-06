@@ -31,7 +31,6 @@ public class LinkButtonTests
     });
 
     [Upstream("LinkButton", "渲染 a")]
-
     [Upstream("IconLinkButton", "外部链接")]
 
     [Fact]
