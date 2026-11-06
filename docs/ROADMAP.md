@@ -212,7 +212,9 @@
 - [ ] 工作包 5：WinForms 的定制入口。
 - [x] 按钮字重 600 → 500。
 - [x] 控件高度收成每个平台一处 `ControlHeight`（`max(round(系数 × 字号 ÷ 4) × 4, 24)`，xs 档系数 2，Avalonia、WPF 的系数继承；DESIGN §14 Button 家族）。
-- [ ] `ts-styles`、parity 取值比对、行为对照、截图对比（"信息与验证工具"）；拿已做的 16 个组件过一遍三道核对，补齐差异。
+- [x] `ts-styles`（文档站每个示例、每个部件的计算样式，亮暗、悬停 / 聚焦 / 按下）与 `inspect styles`（Avalonia、WPF，同一种格式），`tools/parity/styles.mjs` 逐项比对。Button 的 variants、tones、sizes、radius 两个平台在亮暗主题下都一致（顺手修了按钮文字的行高与竖直对齐）。
+- [ ] WinForms 的 `inspect styles`：元素在绘制时才解析外观，要给元素加一个报出解析结果（各部件的边界、颜色、内边距、圆角、字号）的内部接口。
+- [ ] 行为对照（上游测试用例逐条对应）、截图对比；拿已做的 16 个组件过一遍三道核对，补齐差异（Button 页还缺 basic、types、full-width、group、disabled 示例，icons、loading 的内容与文档站不同）。
 - [ ] 按钮家族的缺口：focusableWhenDisabled（三个平台）、WinForms 的 propsContent 与 ButtonBase；ButtonGroup、CopyButton。
 
 ## 阶段

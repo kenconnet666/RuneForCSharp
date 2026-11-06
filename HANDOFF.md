@@ -65,7 +65,10 @@
 | 查语言包：键、说明、中英文案 | `node tools/ts-inspect/ts-inspect.mjs lang select` |
 | 依赖分层表 / 一个组件往下用到、往上被用到的 | `node tools/ts-inspect/ts-inspect.mjs deps`、`… deps Select` |
 | 以上都能加 `--json`；`--vue <路径>` 或环境变量 `VUE_TSX_PRO` 指定 vue-tsx-pro | `node tools/ts-inspect/ts-inspect.mjs --help` |
-| 取 TS 文档站的计算样式（`ts-styles`） | 还没做（阶段 2） |
+| 跑一份 vue-tsx-pro 文档站（ts-styles 用；不碰 vue-tsx-pro 会话的工作区）：在短路径下克隆、离线安装、构建、起开发服务器（端口 5274，路径长了 pnpm 写不了任务状态） | `git clone --shared ../../IdeaProjects/vue-tsx-pro ~/.rune/vtp-docs`，`git -C ~/.rune/vtp-docs checkout <tools/vue-tsx-pro.ref>`，在里面 `pnpm install --frozen-lockfile --offline --ignore-scripts`、`pnpm build`，再在 `apps/docs` 下 `npx vite --configLoader native --port 5274 --strictPort`（后台） |
+| 取 TS 文档站一页的计算样式：每个示例、每个部件（scope/part#序号），亮暗主题；`--states` 另外强制悬停、聚焦、按下；结果写 `artifacts/ts-styles/<页面>.json` | `node tools/ts-styles/ts-styles.mjs button [示例,…] --vue ~/.rune/vtp-docs` |
+| 我们这边同样格式的取值（Avalonia、WPF；WinForms 还没有） | `… Rune.Avalonia.Inspect.exe styles Button/variants [--theme dark] [--json]` |
+| 取值对照：文档站对一个平台，逐个部件、逐个属性（文字决定的宽高不比，长度容差 0.5px），有差异时退出码 1 | `node tools/parity/styles.mjs button [示例,…] --platform avalonia` |
 | 列出示例（"组件/示例名"，Gallery 与 inspect 共用的登记表） | `avalonia/tools/Rune.Avalonia.Inspect/bin/Release/net10.0/Rune.Avalonia.Inspect.exe list`（先 `export DOTNET_ROOT=~/.dotnet`） |
 | 截图（PNG 写到 `artifacts/inspect/avalonia/`）；`--theme dark`、`--width 600`、`--scale 2` | `… Rune.Avalonia.Inspect.exe snapshot Icon/tones` |
 | 元素树（类型、类与伪类、边界、所在模板） / 属性与来源（本地值、样式、模板、继承，画刷报出 token 名） / UIA 控件视图（角色、名称、Pattern）；都能加 `--json` | `… tree Icon/basic`、`… props Icon/tones`、`… uia Icon/accessibility` |
