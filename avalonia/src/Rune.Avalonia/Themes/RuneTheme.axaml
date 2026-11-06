@@ -18,6 +18,7 @@
         <ResourceInclude Source="avares://Rune.Avalonia/Base/Spinner/Spinner.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Base/Badge/Badge.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Base/Button/Button.axaml" />
+        <ResourceInclude Source="avares://Rune.Avalonia/Base/Link/Link.axaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>

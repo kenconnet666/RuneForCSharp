@@ -1,0 +1,38 @@
+<!--
+  Link 的主题（vue-tsx-pro 的 linkRecipe）：没有底色、内边距，字体跟随外面；下划线是档位（伪类 :underline-always……）；
+  外部链接末尾 0.1em 外一个外链图标。文字色在 Link.cs 里按色调绑定
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:Link}" TargetType="rune:Link" BasedOn="{StaticResource {x:Type rune:ButtonBase}}">
+    <Setter Property="Ripple" Value="False" />
+    <Setter Property="Underline" Value="always" />
+    <Setter Property="CornerRadius" Value="{rune:Em Resource=Rune.Radius.Xs}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <!-- 放进一段文字时不带上段落的行高，按自己的字体排 -->
+    <Setter Property="TextBlock.LineHeight" Value="NaN" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border Name="PART_Root" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}">
+            <StackPanel Orientation="Horizontal">
+              <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" VerticalAlignment="Center" />
+              <rune:Icon Name="PART_Icon" Data="{x:Static rune:Lucide.ArrowUpRight}" IsVisible="{TemplateBinding External}" VerticalAlignment="Center"
+                         Margin="{rune:Em 0.1, 0, 0, 0, Of=TemplatedParent}" />
+            </StackPanel>
+          </Border>
+          <Border Name="PART_FocusRing" IsVisible="False" IsHitTestVisible="False"
+                  BorderThickness="2" BorderBrush="{DynamicResource Rune.Brush.FocusRing}" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:focus-visible /template/ Border#PART_FocusRing"><Setter Property="IsVisible" Value="True" /></Style>
+    <Style Selector="^:underline-always /template/ ContentPresenter#PART_ContentPresenter > TextBlock"><Setter Property="TextDecorations" Value="Underline" /></Style>
+    <Style Selector="^:underline-hover:pointerover:not(:soft-disabled) /template/ ContentPresenter#PART_ContentPresenter > TextBlock"><Setter Property="TextDecorations" Value="Underline" /></Style>
+    <Style Selector="^:disabled, ^:soft-disabled">
+      <Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" />
+      <Setter Property="Cursor" Value="No" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

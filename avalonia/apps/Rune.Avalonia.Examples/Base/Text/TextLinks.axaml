@@ -1,0 +1,16 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/avalonia"
+             x:Class="Rune.Avalonia.Examples.TextLinks">
+  <!-- 桌面没有站内地址：链接都是绝对地址，用系统打开；Link 是控件，放进一段文字时用 InlineUIContainer（底边对齐，文字才在同一条基线上） -->
+  <StackPanel Spacing="16">
+    <rune:Paragraph>
+      正文里的链接默认带下划线：<InlineUIContainer BaselineAlignment="Bottom"><rune:Link Href="https://example.com/components/button">按钮</rune:Link></InlineUIContainer>、<InlineUIContainer BaselineAlignment="Bottom"><rune:Link Href="https://example.com/guide/theming">主题定制</rune:Link></InlineUIContainer>，不只靠颜色和周围的文字区分。去别的站点写 <InlineUIContainer BaselineAlignment="Bottom"><rune:Link Href="https://vuejs.org" External="True">Vue 文档</rune:Link></InlineUIContainer>：带图标，读屏会念出“在新窗口打开”。
+    </rune:Paragraph>
+    <WrapPanel ItemSpacing="16" LineSpacing="8">
+      <rune:Link Href="https://example.com/components/text" Underline="hover" FontSize="{DynamicResource Rune.FontSize.Sm}">悬停时才有下划线</rune:Link>
+      <rune:Link Href="https://example.com/components/text" Underline="none" Tone="muted" FontSize="{DynamicResource Rune.FontSize.Sm}">导航里的次要链接</rune:Link>
+      <rune:Link Href="https://example.com/account" Tone="danger" FontSize="{DynamicResource Rune.FontSize.Sm}">注销账户</rune:Link>
+    </WrapPanel>
+  </StackPanel>
+</UserControl>
