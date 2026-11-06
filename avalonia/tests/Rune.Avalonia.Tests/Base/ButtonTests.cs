@@ -138,4 +138,38 @@ public class ButtonTests
         Assert.Equal(18, icon.Bounds.Width); // 1em，跟随按钮的字号
         Assert.False(Part<Icon>(button, ButtonParts.IconEnd).IsVisible);
     });
+
+    [Fact]
+    public Task Plain_type_styles_override_the_tone_palette_and_radius() => HeadlessUi.Run(() =>
+    {
+        // 色调解析出的调色板、圆角档位在主题这一层（Resolved）：只按类型选的样式也盖得过（vue-tsx-pro 的"定制段盖过组件段"）
+        Application.Current!.TryGetResource("Rune.Palette.Danger", ThemeVariant.Light, out var danger);
+        var button = new Button { Content = "删除" };
+        var host = new StackPanel { Children = { button } };
+        host.Styles.Add(new Style(x => x.OfType<Button>())
+        {
+            Setters = { new Setter(ButtonCore.PaletteProperty, danger), new Setter(Button.CornerRadiusProperty, new CornerRadius(3)) },
+        });
+        HeadlessUi.Show(host);
+
+        Assert.Same(danger, button.Palette);
+        Assert.Equal(Token("Rune.Brush.Danger"), BrushColor(button.Background));
+        Assert.Equal(new CornerRadius(3), button.CornerRadius);
+    });
+
+    [Fact]
+    public Task Class_styles_override_the_size_step() => HeadlessUi.Run(() =>
+    {
+        // 字号是继承属性，档位按模板优先级绑定：带类的样式盖得过，只按类型选的盖不过（DESIGN §4"档位的优先级"）
+        var classed = new Button { Content = "大", Size = TextSize.Xs, Classes = { "big" } };
+        var plain = new Button { Content = "小", Size = TextSize.Xs };
+        var host = new StackPanel { Children = { classed, plain } };
+        host.Styles.Add(new Style(x => x.OfType<Button>().Class("big")) { Setters = { new Setter(Button.FontSizeProperty, 30d) } });
+        host.Styles.Add(new Style(x => x.OfType<Button>()) { Setters = { new Setter(Button.FontSizeProperty, 40d) } });
+        HeadlessUi.Show(host);
+
+        Assert.Equal(30, classed.FontSize);
+        Application.Current!.TryGetResource("Rune.FontSize.Xs", ThemeVariant.Light, out var xs);
+        Assert.Equal(xs, plain.FontSize);
+    });
 }

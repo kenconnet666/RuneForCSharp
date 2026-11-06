@@ -3,7 +3,6 @@ using global::Avalonia.Automation;
 using global::Avalonia.Automation.Peers;
 using global::Avalonia.Controls;
 using global::Avalonia.Controls.Documents;
-using global::Avalonia.Data;
 using global::Avalonia.Media;
 using LayoutSize = global::Avalonia.Size;
 
@@ -42,10 +41,10 @@ public class Icon : Control
     public static readonly StyledProperty<double> FontSizeProperty = TextElement.FontSizeProperty.AddOwner<Icon>();
 
     /// <summary>Size 是档位名时，从主题资源取到的字号（绑定到 Rune.FontSize.*，主题与作用域换了跟着变）。</summary>
+    TemplateResources? resources;
+
     static readonly StyledProperty<double> ResolvedSizeProperty = AvaloniaProperty.Register<Icon, double>("ResolvedSize", double.NaN);
 
-    IDisposable? sizeBinding;
-    IDisposable? toneBinding;
     IPen? pen;
 
     static Icon()
@@ -87,16 +86,13 @@ public class Icon : Control
         base.OnPropertyChanged(change);
         if (change.Property == SizeProperty)
         {
-            sizeBinding?.Dispose();
-            sizeBinding = Size.ResourceKey is { } key ? Bind(ResolvedSizeProperty, this.GetResourceObservable(key)) : null;
+            Resolved.Bind(this, ResolvedSizeProperty, Size.ResourceKey);
         }
         else if (change.Property == ToneProperty)
         {
             PseudoClasses.Swap(change.GetOldValue<TextTone>().Value, change.GetNewValue<TextTone>().Value);
-            // 色调的颜色按模板优先级绑定主题资源：盖过继承的文字颜色，使用方带伪类的样式仍能盖过它（同主题里的伪类样式），
-            // 但每个图标不用为 7 条色调样式各建一个激活器（图标数量大，DESIGN §9）
-            toneBinding?.Dispose();
-            toneBinding = Tone.BrushKey is { } key ? Bind(ForegroundProperty, this.GetResourceObservable(key), BindingPriority.Template) : null;
+            // 色调的颜色按模板优先级绑定主题资源（TemplateResources）：不写成 7 条伪类样式（图标数量大，DESIGN §9）
+            (resources ??= new(this)).Bind(ForegroundProperty, Tone.BrushKey);
         }
         else if (change.Property == FlipInRtlProperty)
         {

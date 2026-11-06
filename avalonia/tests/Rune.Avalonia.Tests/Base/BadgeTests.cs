@@ -93,4 +93,24 @@ public class BadgeTests
         Assert.False(peer.IsControlElement());
         Assert.Contains(peer.GetChildren(), child => child.GetName() == "已发货");
     });
+
+    [Fact]
+    public Task Colors_come_from_the_shared_palette_which_styles_can_swap() => HeadlessUi.Run(() =>
+    {
+        // 与按钮同一张色表：样式档位取调色板的字段；不带伪类的样式换掉调色板，颜色跟着换
+        Application.Current!.TryGetResource("Rune.Palette.Success", ThemeVariant.Light, out var success);
+        var solid = new Badge { Content = "3", Variant = StatusVariant.Solid, Tone = StatusTone.Danger };
+        var swapped = new Badge { Content = "已通过", Variant = StatusVariant.Surface };
+        var host = new StackPanel { Children = { solid, swapped } };
+        host.Styles.Add(new Style(x => x.OfType<Badge>().Name("swapped")) { Setters = { new Setter(Badge.PaletteProperty, success) } });
+        swapped.Name = "swapped";
+        HeadlessUi.Show(host);
+
+        Assert.Equal(Token("Rune.Brush.DangerContrast", ThemeVariant.Light), BrushColor(solid.Foreground));
+        Assert.Equal(Token("Rune.Brush.Danger", ThemeVariant.Light), BrushColor(solid.Background));
+        Assert.Null(solid.BorderBrush);
+        Assert.Equal(Token("Rune.Brush.SuccessText", ThemeVariant.Light), BrushColor(swapped.Foreground));
+        Assert.Equal(Token("Rune.Brush.SuccessSoft", ThemeVariant.Light), BrushColor(swapped.Background));
+        Assert.Equal(Token("Rune.Brush.SuccessBorder", ThemeVariant.Light), BrushColor(swapped.BorderBrush));
+    });
 }

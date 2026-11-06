@@ -49,6 +49,9 @@ public sealed class EmExtension
     /// <summary>系数的资源键（随主题变的 em 系数，如 <c>Rune.Radius.Md</c>）；写了就不用位置参数。</summary>
     public string? Resource { get; set; }
 
+    /// <summary>系数取元素自己的 <see cref="Rune.Avalonia.Resolved"/> 附加属性（档位解析出的系数，如 <c>Radius</c>）；没有值时不设。</summary>
+    public string? Resolved { get; set; }
+
     /// <summary>下限（设备无关像素）：CSS 的 <c>max(2.25em, 24px)</c>。</summary>
     public double Min { get; set; }
 
@@ -56,7 +59,9 @@ public sealed class EmExtension
     /// <param name="serviceProvider">XAML 服务（不使用）。</param>
     public object ProvideValue(IServiceProvider serviceProvider)
     {
-        var converter = new EmConverter(Resource is null ? factors : null, Min);
+        var converter = new EmConverter(Resource is null && Resolved is null ? factors : null, Min);
+        if (Resolved is not null)
+            return new MultiBinding { Bindings = { FontSize(), Rune.Avalonia.Resolved.SelfBinding(Resolved) }, Converter = converter };
         if (Resource is not null)
             return new MultiBinding { Bindings = { FontSize(), new DynamicResourceExtension(Resource) }, Converter = converter };
         return Of == RelativeSourceMode.TemplatedParent
@@ -68,14 +73,15 @@ public sealed class EmExtension
 }
 
 /// <summary>字号（与资源里的系数）× 系数，按目标属性的类型产出 double、Thickness 或 CornerRadius，不低于下限。</summary>
-/// <param name="factors">系数；为 null 时取第二个绑定值（资源里的系数）。</param>
+/// <param name="factors">系数；为 null 时取第二个绑定值（资源或档位解析出的系数），它没有值时不设（UnsetValue）。</param>
 /// <param name="min">下限（设备无关像素）。</param>
 sealed class EmConverter(double[]? factors, double min) : IMultiValueConverter, IValueConverter
 {
     public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture) =>
-        values[0] is double size && (factors ?? (values.Count > 1 && values[1] is double resource ? [resource] : null)) is { } f
-            ? Scale(size, f, targetType)
-            : BindingOperations.DoNothing;
+        values[0] is not double size ? BindingOperations.DoNothing
+        : factors is { } f ? Scale(size, f, targetType)
+        : values.Count > 1 && values[1] is double factor ? Scale(size, [factor], targetType)
+        : AvaloniaProperty.UnsetValue;
 
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
         value is double size && factors is { } f ? Scale(size, f, targetType) : BindingOperations.DoNothing;

@@ -30,6 +30,9 @@ public readonly record struct StatusTone(string Value) : IVariant<StatusTone>
     /// <inheritdoc />
     public static IReadOnlyList<StatusTone> Known { get; } = [Neutral, Accent, Info, Success, Warning, Danger];
 
+    /// <summary>调色板的资源键（<c>Rune.Palette.Danger</c>，token-gen 按 palette.mjs 生成）；没写时为 null。</summary>
+    public string? PaletteKey => Value is { Length: > 0 } tone ? $"Rune.Palette.{char.ToUpperInvariant(tone[0])}{tone[1..]}" : null;
+
     /// <inheritdoc />
     public static StatusTone Parse(string value)
     {
@@ -72,34 +75,6 @@ public readonly record struct StatusVariant(string Value) : IVariant<StatusVaria
 
     /// <inheritdoc />
     public override string ToString() => Value;
-}
-
-/// <summary>样式 × 色调 → 画刷的资源键（vue-tsx-pro 的 badgeRecipe 的 24 条组合；中性色调用反色、填充等另一组 token）。</summary>
-/// <param name="Foreground">文字与图标。</param>
-/// <param name="Background">底色；没有时为 null。</param>
-/// <param name="Border">描边；没有时为 null。</param>
-public readonly record struct StatusColors(string Foreground, string? Background, string? Border)
-{
-    /// <summary>取一种组合的颜色；使用方扩展的取值按浅色底、中性处理。</summary>
-    /// <param name="variant">样式。</param>
-    /// <param name="tone">色调。</param>
-    public static StatusColors Of(StatusVariant variant, StatusTone tone)
-    {
-        var name = StatusTone.Known.Contains(tone) && tone != StatusTone.Neutral ? $"{char.ToUpperInvariant(tone.Value[0])}{tone.Value[1..]}" : null;
-        return (variant.Value, name) switch
-        {
-            ("solid", null) => new(Brush("InverseText"), Brush("InverseSurface"), null),
-            ("solid", _) => new(Brush($"{name}Contrast"), Brush(name), null),
-            ("surface", null) => new(Brush("Text"), Brush("Surface"), Brush("Border")),
-            ("surface", _) => new(Brush($"{name}Text"), Brush($"{name}Soft"), Brush($"{name}Border")),
-            ("outline", null) => new(Brush("Text"), null, Brush("Border")),
-            ("outline", _) => new(Brush($"{name}Text"), null, Brush($"{name}Border")),
-            (_, null) => new(Brush("Text"), Brush("Fill"), null),
-            _ => new(Brush($"{name}Text"), Brush($"{name}Soft"), null),
-        };
-
-        static string Brush(string token) => $"Rune.Brush.{token}";
-    }
 }
 
 /// <summary>圆角档位（vue-tsx-pro 的 Radius，对应主题的 radii，em，随字号缩放）。</summary>

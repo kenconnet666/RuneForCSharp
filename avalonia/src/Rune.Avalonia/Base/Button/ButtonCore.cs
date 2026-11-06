@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using global::Avalonia;
 using global::Avalonia.Controls;
-using global::Avalonia.Data;
 
 namespace Rune.Avalonia;
 
@@ -9,9 +8,10 @@ namespace Rune.Avalonia;
 /// 按钮家族（<see cref="Button"/>、<see cref="IconButton"/>）的外观内核（vue-tsx-pro 的 button-core）：
 /// 外观 = 样式 × 色调 × 字号档位 × 圆角，内部尺寸都是 em，随字号缩放；加载指示防闪烁（<see cref="DelayedLoading"/>：
 /// 很快完成的加载不出现，出现了至少显示 0.5 秒，伪类 <c>:spinner</c>）。
-/// 色调决定 <see cref="Palette"/>（代码里按模板优先级绑定主题资源 <c>Rune.Palette.*</c>），样式档位绑定调色板的字段（DESIGN §4 决定 11），
-/// 档位与色调切伪类（<c>:solid</c>、<c>:danger</c>）；样式档位在共用的主题 <c>Rune.ButtonCore</c> 里，各组件的主题 BasedOn 它，只写自己的默认值与模板。
-/// 使用方或 Provider 区域换某个色调的调色板，照常在带伪类的样式里设 Palette（<c>rune|Button:danger</c>），盖得过代码的绑定。
+/// 色调、圆角在代码里解析成主题资源（<see cref="Resolved"/>：<c>Rune.Palette.*</c>、圆角系数），共用主题 <c>Rune.ButtonCore</c>
+/// 里各一条 setter 绑到 <see cref="Palette"/>、CornerRadius，使用方的样式盖得过；字号档位按模板优先级绑定（字号是继承属性，<see cref="TemplateResources"/>）；
+/// 样式档位绑定调色板的字段（DESIGN §4 决定 11），档位与色调切伪类（<c>:solid</c>、<c>:danger</c>）。各组件的主题 BasedOn
+/// <c>Rune.ButtonCore</c>，只写自己的默认值与模板。使用方或 Provider 区域换某个色调的调色板，在样式里设 Palette（<c>rune|Button:danger</c>）。
 /// </summary>
 public abstract class ButtonCore : ButtonBase
 {
@@ -34,13 +34,13 @@ public abstract class ButtonCore : ButtonBase
     public static readonly StyledProperty<TonePalette?> PaletteProperty = AvaloniaProperty.Register<ButtonCore, TonePalette?>(nameof(Palette));
 
     readonly DelayedLoading spinner;
-    readonly Dictionary<AvaloniaProperty, IDisposable> bindings = [];
-    IDisposable? paletteBinding;
+    readonly TemplateResources resources;
 
     /// <summary>新建按钮。</summary>
     protected ButtonCore()
     {
         spinner = new DelayedLoading(shown => PseudoClasses.Set(":spinner", shown));
+        resources = new TemplateResources(this);
         DetachedFromVisualTree += (_, _) => spinner.Stop();
     }
 
@@ -72,30 +72,15 @@ public abstract class ButtonCore : ButtonBase
         {
             PseudoClasses.Swap(change.GetOldValue<StatusTone>().Value, Tone.Value);
             // 不写成 6 条色调样式：每个按钮省 6 个激活器（Avalonia 的创建开销随嵌套样式的条数涨，DESIGN §9）
-            paletteBinding?.Dispose();
-            paletteBinding = Tone.Value is { Length: > 0 } tone
-                ? Bind(PaletteProperty, this.GetResourceObservable($"Rune.Palette.{char.ToUpperInvariant(tone[0])}{tone[1..]}"), BindingPriority.Template)
-                : null;
+            Resolved.Bind(this, Resolved.PaletteProperty, Tone.PaletteKey);
         }
         else if (change.Property == SizeProperty)
         {
-            if (change.GetOldValue<TextSize>().Pixels is not null) ClearValue(FontSizeProperty);
-            BindTo(FontSizeProperty, Size.ResourceKey is { } key ? this.GetResourceObservable(key).ToBinding() : null);
-            if (Size.Pixels is { } pixels) SetValue(FontSizeProperty, pixels);
+            if (Size.Pixels is { } pixels) resources.Set(FontSizeProperty, pixels);
+            else resources.Bind(FontSizeProperty, Size.ResourceKey);
         }
-        else if (change.Property == RadiusProperty)
-            BindTo(CornerRadiusProperty, Radius.ResourceKey is { } key ? (BindingBase)new EmExtension { Resource = key }.ProvideValue(null!) : null);
+        else if (change.Property == RadiusProperty) Resolved.Bind(this, Resolved.RadiusProperty, Radius.ResourceKey);
         else if (change.Property == IsLoadingProperty) spinner.Update(IsLoading);
-    }
-
-    void BindTo(AvaloniaProperty property, BindingBase? binding)
-    {
-        if (bindings.Remove(property, out var old))
-        {
-            old.Dispose();
-            ClearValue(property);
-        }
-        if (binding is not null) bindings[property] = Bind(property, binding);
     }
 }
 

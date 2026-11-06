@@ -18,8 +18,10 @@ namespace Rune.Avalonia;
 /// 数量大的轻量部件（DESIGN §9）：不用模板，底色、描边、圆角在 Render 里画，图标、圆点、文字是代码里组合的子元素
 /// （ROADMAP 决定 20）。部件是真的元素：<c>rune|Badge &gt; rune|Icon</c>、
 /// <c>rune|Badge &gt; Border#PART_Dot</c> 的样式能改它们。
-/// 样式 × 色调决定的颜色（<see cref="StatusColors"/>）在代码里绑定主题资源，是受管的；默认的样式、色调、字号、圆角在主题里，
-/// Provider 的样式能改。尺寸都是 em：内边距 0.5em、间距 0.25em、最小高度 1.75em、圆点 0.5em，圆角取主题的 radii。
+/// 颜色与按钮同一张色表（vue-tsx-pro 的 statusToneCompound）：色调解析成调色板（<see cref="Resolved"/>，主题里的 setter 绑到
+/// <see cref="Palette"/>，样式能换），样式档位取调色板的字段，按模板优先级设到文字色、底色、描边上（带类或伪类的样式盖得过）。
+/// 默认的样式、色调、字号、圆角在主题里，Provider 的样式能改。尺寸都是 em：内边距 0.5em、间距 0.25em、最小高度 1.75em、
+/// 圆点 0.5em，圆角取主题的 radii。
 /// </summary>
 public class Badge : Control
 {
@@ -50,17 +52,25 @@ public class Badge : Control
     /// <summary>字号（继承给子元素），em 尺寸按它算。</summary>
     public static readonly StyledProperty<double> FontSizeProperty = global::Avalonia.Controls.Documents.TextElement.FontSizeProperty.AddOwner<Badge>();
 
+    /// <summary>底色（样式档位从调色板取，没有底色的样式为 null）。</summary>
+    public static readonly StyledProperty<IBrush?> BackgroundProperty = AvaloniaProperty.Register<Badge, IBrush?>(nameof(Background));
+
+    /// <summary>描边色（样式档位从调色板取，没有描边的样式为 null，边框仍占位）。</summary>
+    public static readonly StyledProperty<IBrush?> BorderBrushProperty = AvaloniaProperty.Register<Badge, IBrush?>(nameof(BorderBrush));
+
+    /// <summary>色调的调色板：主题里的 setter 按 <see cref="Tone"/> 绑定（<c>Rune.Palette.*</c>），样式档位取它的字段。</summary>
+    public static readonly StyledProperty<TonePalette?> PaletteProperty = AvaloniaProperty.Register<Badge, TonePalette?>(nameof(Palette));
+
     /// <summary>圆角档位从主题取到的 em 系数（主题与作用域换了跟着变）。</summary>
     static readonly StyledProperty<double> RadiusCoefficientProperty = AvaloniaProperty.Register<Badge, double>("RadiusCoefficient");
 
-    static readonly StyledProperty<IBrush?> BackgroundProperty = AvaloniaProperty.Register<Badge, IBrush?>("Background");
-
-    static readonly StyledProperty<IBrush?> BorderBrushProperty = AvaloniaProperty.Register<Badge, IBrush?>("BorderBrush");
-
-    readonly Dictionary<AvaloniaProperty, IDisposable> resourceBindings = [];
+    readonly TemplateResources resources;
     Icon? iconPart;
     Border? dotPart;
     Control? contentPart;
+
+    /// <summary>新建标记。</summary>
+    public Badge() => resources = new TemplateResources(this);
 
     static Badge()
     {
@@ -96,28 +106,48 @@ public class Badge : Control
     /// <summary>字号。</summary>
     public double FontSize { get => GetValue(FontSizeProperty); set => SetValue(FontSizeProperty, value); }
 
+    /// <summary>底色。</summary>
+    public IBrush? Background { get => GetValue(BackgroundProperty); set => SetValue(BackgroundProperty, value); }
+
+    /// <summary>描边色。</summary>
+    public IBrush? BorderBrush { get => GetValue(BorderBrushProperty); set => SetValue(BorderBrushProperty, value); }
+
+    /// <summary>色调的调色板。</summary>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Advanced)]
+    public TonePalette? Palette { get => GetValue(PaletteProperty); set => SetValue(PaletteProperty, value); }
+
     double Em => FontSize;
 
     /// <inheritdoc />
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
-        if (change.Property == VariantProperty || change.Property == ToneProperty)
-        {
-            var colors = StatusColors.Of(Variant, Tone);
-            BindResource(ForegroundProperty, colors.Foreground);
-            BindResource(BackgroundProperty, colors.Background);
-            BindResource(BorderBrushProperty, colors.Border);
-        }
+        if (change.Property == ToneProperty) Resolved.Bind(this, Resolved.PaletteProperty, Tone.PaletteKey);
+        else if (change.Property == VariantProperty || change.Property == PaletteProperty) UpdateColors();
         else if (change.Property == SizeProperty)
         {
-            if (change.GetOldValue<TextSize>().Pixels is not null) ClearValue(FontSizeProperty);
-            BindResource(FontSizeProperty, Size.ResourceKey);
-            if (Size.Pixels is { } pixels) SetValue(FontSizeProperty, pixels);
+            if (Size.Pixels is { } pixels) resources.Set(FontSizeProperty, pixels);
+            else resources.Bind(FontSizeProperty, Size.ResourceKey);
         }
-        else if (change.Property == RadiusProperty) BindResource(RadiusCoefficientProperty, Radius.ResourceKey);
+        else if (change.Property == RadiusProperty) resources.Bind(RadiusCoefficientProperty, Radius.ResourceKey);
         else if (change.Property == IconProperty || change.Property == DotProperty) UpdateLeading();
         else if (change.Property == ContentProperty) UpdateContent();
+    }
+
+    /// <summary>样式档位取调色板的字段（vue-tsx-pro 的 statusToneStyles）：使用方扩展的样式按浅色底处理。</summary>
+    void UpdateColors()
+    {
+        if (Palette is not { } p) return;
+        var (fore, back, border) = Variant.Value switch
+        {
+            "solid" => (p.Contrast, p.Solid, null),
+            "surface" => (p.Text, p.Surface, p.Border),
+            "outline" => (p.Text, null, p.Border),
+            _ => (p.Text, p.Soft, (IBrush?)null),
+        };
+        resources.Set(ForegroundProperty, fore);
+        resources.Set(BackgroundProperty, back);
+        resources.Set(BorderBrushProperty, border);
     }
 
     /// <summary>文字前面：有图标时是图标部件，否则有 Dot 时是圆点部件。</summary>
@@ -216,16 +246,6 @@ public class Badge : Control
 
     /// <summary>描边宽度：borderWidths.xs（设备无关像素，不随字号）。没有描边色时边框透明，同样占位，各样式等高。</summary>
     const double BorderWidth = 1;
-
-    void BindResource(AvaloniaProperty property, string? key)
-    {
-        if (resourceBindings.Remove(property, out var old))
-        {
-            old.Dispose();
-            ClearValue(property);
-        }
-        if (key is not null) resourceBindings[property] = Bind(property, this.GetResourceObservable(key));
-    }
 
     /// <inheritdoc />
     protected override AutomationPeer OnCreateAutomationPeer() => new BadgeAutomationPeer(this);

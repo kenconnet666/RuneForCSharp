@@ -14,7 +14,8 @@ namespace Rune.Avalonia;
 /// &lt;rune:Text Numeric="True" Tone="danger"&gt;超时 3 天&lt;/rune:Text&gt;  金额、计数：等宽数字
 /// </code>
 /// 不写的属性都继承外面（字号、字重、颜色是继承属性）。文字用得多，档位不写成主题里的嵌套样式（DESIGN §9：
-/// 嵌套样式多了创建明显变慢），而是写了才在代码里绑定主题资源（本地值）；对齐、换行、截断写了才设到 TextBlock 上。
+/// 嵌套样式多了创建明显变慢），而是写了才在代码里按模板优先级绑定主题资源（<see cref="TemplateResources"/>，带类或伪类的样式盖得过）；
+/// 对齐、换行、截断写了才设到 TextBlock 上。
 /// 换某个色调的颜色改主题资源（<c>Rune.Brush.TextMuted</c>），不用写样式。
 /// </summary>
 public class Text : TextBlock
@@ -48,7 +49,7 @@ public class Text : TextBlock
 
     static readonly FontFeatureCollection TabularNumbers = FontFeatureCollection.Parse("tnum");
 
-    readonly Dictionary<AvaloniaProperty, IDisposable> resourceBindings = [];
+    TemplateResources? resources;
 
     /// <summary>字号。</summary>
     public TextSize Size { get => GetValue(SizeProperty); set => SetValue(SizeProperty, value); }
@@ -83,13 +84,12 @@ public class Text : TextBlock
         base.OnPropertyChanged(change);
         if (change.Property == SizeProperty)
         {
-            if (change.GetOldValue<TextSize>().Pixels is not null) ClearValue(FontSizeProperty);
-            BindResource(FontSizeProperty, Size.ResourceKey);
-            if (Size.Pixels is { } pixels) SetValue(FontSizeProperty, pixels);
+            if (Size.Pixels is { } pixels) Bindings.Set(FontSizeProperty, pixels);
+            else Bindings.Bind(FontSizeProperty, Size.ResourceKey);
         }
-        else if (change.Property == WeightProperty) BindResource(FontWeightProperty, Weight.ResourceKey);
-        else if (change.Property == ToneProperty) BindResource(ForegroundProperty, Tone.BrushKey);
-        else if (change.Property == MonoProperty) BindResource(FontFamilyProperty, Mono ? "Rune.Font.Mono" : null);
+        else if (change.Property == WeightProperty) Bindings.Bind(FontWeightProperty, Weight.ResourceKey);
+        else if (change.Property == ToneProperty) Bindings.Bind(ForegroundProperty, Tone.BrushKey);
+        else if (change.Property == MonoProperty) Bindings.Bind(FontFamilyProperty, Mono ? "Rune.Font.Mono" : null);
         else if (change.Property == NumericProperty) Set(FontFeaturesProperty, Numeric ? TabularNumbers : null);
         else if (change.Property == AlignProperty) SetStruct(TextAlignmentProperty, Align switch
         {
@@ -100,6 +100,8 @@ public class Text : TextBlock
         });
         else if (change.Property == TruncateProperty || change.Property == LineClampProperty || change.Property == WrapProperty) UpdateWrapping();
     }
+
+    TemplateResources Bindings => resources ??= new(this);
 
     /// <summary>truncate 优先于 lineClamp，二者都没有时看 wrap。</summary>
     void UpdateWrapping()
@@ -115,17 +117,6 @@ public class Text : TextBlock
         SetStruct(TextWrappingProperty, wrapping);
         Set(TextTrimmingProperty, trimming);
         SetStruct(MaxLinesProperty, lines);
-    }
-
-    /// <summary>绑定到主题资源（本地值）；key 为 null 时解绑，回到继承或主题里的值。</summary>
-    void BindResource(AvaloniaProperty property, string? key)
-    {
-        if (resourceBindings.Remove(property, out var old))
-        {
-            old.Dispose();
-            ClearValue(property);
-        }
-        if (key is not null) resourceBindings[property] = Bind(property, this.GetResourceObservable(key));
     }
 
     void Set<T>(StyledProperty<T> property, T? value) where T : class?
