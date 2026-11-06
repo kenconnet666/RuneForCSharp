@@ -541,6 +541,13 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - **Container**：Avalonia 从 Control 派生（Decorator 的 Padding 是 Thickness，和 TS 的 padding 档位撞名），WPF 从 Decorator 派生（没有 Padding）；WinForms 是 `ContainerPanel`（WinForms 自己有 ContainerControl），重写 DisplayRectangle 成居中的一栏，停靠、锚定都在里面；属性叫 ContainerSize、InlinePadding（Size、Padding 被控件占了）。WPF 原来的容器查询档位改名 `Breakpoint`（它是断点，不是容器宽度）。
 - 撞名：Rune 的 Grid、Separator 和 Avalonia、WPF 自带的同名。XAML 里有前缀不受影响；C# 里同时引用两个命名空间时写全名（同 Button）。
 
+### Toolbar、Prose、StatusBadge、Skeleton（2026-11-07）
+
+- **漫游焦点**（TS 的 rovingFocus）：每个库一个内部的 `RovingFocus`，Toolbar 先用，以后的 Tabs、Menu、ToggleGroup 同样用。Avalonia、WPF 管项的 `KeyboardNavigation.IsTabStop`，方向键在 KeyDown 里处理；WinForms 管项的 TabStop，方向键在工具栏的 ProcessDialogKey 里处理（按钮不处理方向键，WinForms 把它交给父控件）。另一个方向的方向键吞掉、不动焦点：平台默认会用方向键在控件之间移动，TS 里浏览器什么都不做。项是按钮与链接（TS 的 items 选择器不移植）。
+- **Prose**：TS 的 measure 叫 `LimitLineLength`（Measure 是布局的方法）。70ch 按字体里"0"的宽度算；WPF 强制 MaxWidth（使用方写了 MaxWidth 时不动）。WinForms 画不出 relaxed 行高（TextRenderer 不能设行距）。
+- **StatusMap**：纯数据，三个库各一份孪生文件。StatusBadge 的圆点默认开着：改依赖属性的默认值不触发变化，Badge 收不到，所以构造时按模板优先级（Avalonia）/ 当前值（WPF）设，使用方写的 Dot 盖得过。
+- **Skeleton**：自绘（底色与光带都是 9% 的正文色），包着的内容照常排版但不可见、不可用、对读屏隐藏。扫光：Avalonia 用代码里的 Animation 驱动私有的 Phase 属性；WPF 用关键帧动画（可见、系统没关动画时）；WinForms 读 FrameClock（只在画的时候扫）。WinForms 的骨架大小跟着子控件，子控件保持自己的大小（反过来撑它会互相影响）。
+
 ### Spinner
 
 - 第一个带部件的组件（`propsIcon`），三个平台按 §7 的写法各落地一次：
