@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Diagnostics;
 
 namespace Rune.WinForms;
 
@@ -6,6 +7,7 @@ namespace Rune.WinForms;
 /// 按钮家族的宿主（<see cref="ButtonControl"/>、<see cref="IconButtonControl"/> 共用）：外观属性转给元素，处理输入。
 /// 悬停、按下（波纹）、键盘（Enter 按下就点击、空格松开点击，同 Windows 按钮）、焦点（只在键盘提示开着时显示焦点环）。
 /// 实现 <see cref="IButtonControl"/>，能当窗体的 AcceptButton、CancelButton。加载中点击无效（Click 不触发），焦点保留。
+/// 链接按钮（元素有 Href）：Click 之后用系统打开链接，读屏里是链接，外部链接的名称后补上"在新窗口打开"。
 /// 默认留 4 像素的 Padding：焦点环画在按钮外面一圈（CSS 的 outline 不占位，WinForms 的控件画不出自己的边界）。
 /// </summary>
 /// <typeparam name="T">按钮元素。</typeparam>
@@ -113,7 +115,12 @@ public abstract class ButtonControlBase<T> : ElementControl<T>, IButtonControl w
         if (Element.IsLoading || !Enabled) return;
         if (DialogResult != DialogResult.None && FindForm() is { } form) form.DialogResult = DialogResult;
         base.OnClick(e);
+        if (Element is ILink { Href: { IsAbsoluteUri: true } href }) Navigate(href);
     }
+
+    /// <summary>用系统打开链接（Shell 的默认程序：浏览器、邮件……）。</summary>
+    /// <param name="href">绝对地址。</param>
+    protected virtual void Navigate(Uri href) => Process.Start(new ProcessStartInfo(href.AbsoluteUri) { UseShellExecute = true })?.Dispose();
 
     /// <inheritdoc />
     protected override void OnEnabledChanged(EventArgs e)
@@ -216,16 +223,24 @@ public abstract class ButtonControlBase<T> : ElementControl<T>, IButtonControl w
     /// <inheritdoc />
     protected override AccessibleObject CreateAccessibilityInstance() => new ButtonAccessibleObject(this);
 
-    /// <summary>读屏里是按钮：默认动作是按下；加载中状态里带"忙"；没有名称时用 <see cref="DefaultAccessibleName"/>。</summary>
+    /// <summary>
+    /// 读屏里是按钮（链接按钮是链接）：默认动作是按下；加载中状态里带"忙"；没有名称时用 <see cref="DefaultAccessibleName"/>，
+    /// 外部链接的名称后补上语言包的"在新窗口打开"。
+    /// </summary>
     sealed class ButtonAccessibleObject(ButtonControlBase<T> owner) : ControlAccessibleObject(owner)
     {
         public override string? Name
         {
-            get => base.Name is { Length: > 0 } name ? name : owner.DefaultAccessibleName;
+            get
+            {
+                var name = base.Name is { Length: > 0 } own ? own : owner.DefaultAccessibleName;
+                return owner.Element is ILink { External: true } ? name + RuneLang.Current.Value.LinkNewWindow : name;
+            }
             set => base.Name = value;
         }
 
-        public override AccessibleRole Role => Owner is { AccessibleRole: not AccessibleRole.Default } control ? control.AccessibleRole : AccessibleRole.PushButton;
+        public override AccessibleRole Role => Owner is { AccessibleRole: not AccessibleRole.Default } control ? control.AccessibleRole
+            : owner.Element is ILink ? AccessibleRole.Link : AccessibleRole.PushButton;
 
         public override string DefaultAction => "按下";
 
@@ -235,15 +250,9 @@ public abstract class ButtonControlBase<T> : ElementControl<T>, IButtonControl w
     }
 }
 
-/// <summary>
-/// 放进窗体、设计器里用的 <see cref="Button"/>：文字内容就是控件的 <see cref="Control.Text"/>，字号档位叫 <see cref="ButtonControlBase{T}.TextSize"/>。
-/// 输入、焦点、无障碍见 <see cref="ButtonControlBase{T}"/>。
-/// </summary>
-[ToolboxItem(true)]
-[DefaultEvent(nameof(Click))]
-[DefaultProperty(nameof(Text))]
-[Description("按钮：样式 × 色调 × 字号档位 × 圆角，按下有波纹。")]
-public class ButtonControl : ButtonControlBase<Button>
+/// <summary>有文字的按钮的宿主（<see cref="ButtonControl"/>、<see cref="LinkButtonControl"/> 共用）：文字内容就是控件的 <see cref="Control.Text"/>。</summary>
+/// <typeparam name="T">按钮元素。</typeparam>
+public abstract class ButtonControl<T> : ButtonControlBase<T> where T : Button, new()
 {
     /// <summary>文字后的图标。</summary>
     [Category("Appearance")]
@@ -269,3 +278,13 @@ public class ButtonControl : ButtonControlBase<Button>
         Element.Content = Text;
     }
 }
+
+/// <summary>
+/// 放进窗体、设计器里用的 <see cref="Button"/>：文字内容就是控件的 <see cref="Control.Text"/>，字号档位叫 <see cref="ButtonControlBase{T}.TextSize"/>。
+/// 输入、焦点、无障碍见 <see cref="ButtonControlBase{T}"/>。
+/// </summary>
+[ToolboxItem(true)]
+[DefaultEvent(nameof(Click))]
+[DefaultProperty(nameof(Text))]
+[Description("按钮：样式 × 色调 × 字号档位 × 圆角，按下有波纹。")]
+public class ButtonControl : ButtonControl<Button>;

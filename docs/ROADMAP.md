@@ -256,7 +256,7 @@
 - [x] Text 家族（Text、Paragraph、Strong、Em、Small）：三个平台都做了（DESIGN §14）；WPF 从 TextBlock 派生（决定 19）。示例做了 scale、tones、numeric、overflow，inline、links、headings 等 Kbd、Link、Heading。
 - [x] Spinner（第一个带部件的组件，`propsIcon`）：三个平台都做了，部件转发按 DESIGN §7 的三种写法落地（DESIGN §14）；parity 认部件名常量与 `PropsXxx`。
 - [x] Badge（第一个自绘、带配方与组合档位的组件）：三个平台都做了，部件按决定 20（代码里组合真的子组件）；示例做了 matrix、shapes，in-context、statuses、tag 等 Table、StatusBadge、Tag。
-- [~] Button 家族：Button、IconButton 三个平台都做了，ButtonBase 做了 Avalonia、WPF（DESIGN §14，分层照 TS 的 ButtonBase 与 button-core），效果照 TS（波纹、颜色过渡、焦点环、加载指示防闪烁）；缺 focusableWhenDisabled、WinForms 的 propsContent。CloseButton、ClearButton 三个平台都做了（读屏名称取语言包，语言包的作用域见 DESIGN §6）。LinkButton、ButtonGroup 接着做。
+- [~] Button 家族：Button、IconButton 三个平台都做了，ButtonBase 做了 Avalonia、WPF（DESIGN §14，分层照 TS 的 ButtonBase 与 button-core），效果照 TS（波纹、颜色过渡、焦点环、加载指示防闪烁）；缺 focusableWhenDisabled、WinForms 的 propsContent。CloseButton、ClearButton、LinkButton、IconLinkButton 三个平台都做了（读屏名称取语言包，语言包的作用域见 DESIGN §6；链接的 Href 是绝对地址，用系统打开）。ButtonGroup、CopyButton 接着做。
 
 ### 3. 按依赖分层移植组件
 

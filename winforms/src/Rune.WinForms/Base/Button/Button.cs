@@ -27,10 +27,15 @@ public class Button : ButtonCore
     /// <inheritdoc />
     protected override StatusTone DefaultTone => StatusTone.Accent;
 
-    void RebuildIconEnd()
+    /// <summary>没写 <see cref="IconEnd"/> 时的后置图标（外部链接的外链图标）。</summary>
+    protected virtual IconData? IconEndFallback => null;
+
+    /// <summary>重新合成后置图标部件（<see cref="IconEndFallback"/> 变了时子类调用）。</summary>
+    protected void RebuildIconEnd()
     {
-        iconEnd = IconEnd is null ? null : new Icon();
-        if (iconEnd is not null) new IconProps { Data = IconEnd }.Merge(PropsIconEnd).ApplyTo(iconEnd);
+        var data = IconEnd ?? IconEndFallback;
+        iconEnd = data is null ? null : new Icon();
+        if (iconEnd is not null) new IconProps { Data = data }.Merge(PropsIconEnd).ApplyTo(iconEnd);
         InvalidateMeasure();
     }
 

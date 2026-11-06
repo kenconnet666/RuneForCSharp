@@ -3,7 +3,7 @@ using static Rune.WinForms.Examples.Layout;
 namespace Rune.WinForms.Examples;
 
 /// <summary>
-/// Button 的示例（vue-tsx-pro 文档站 base/Button）。ButtonGroup、LinkButton、Card、Kbd 做出来后补上其余几节。
+/// Button 的示例（vue-tsx-pro 文档站 base/Button）。ButtonGroup、Card、Kbd 做出来后补上其余几节。
 /// WinForms 里放进窗体的是 ButtonControl：字号档位叫 TextSize，文字是 Text。
 /// </summary>
 static class ButtonExamples
@@ -22,6 +22,7 @@ static class ButtonExamples
         new("Button", "radius", "圆角", "Radius 默认 md；full 是胶囊形。", RadiusExample),
         new("Button", "icons", "图标", "Icon 在文字前、IconEnd 在文字后，大小跟随按钮的字号。", Icons),
         new("Button", "loading", "加载中", "IsLoading 显示旋转指示，宽度不变、点击无效、焦点保留；很快完成的加载不出现指示，出现了至少显示 0.5 秒。", Loading),
+        new("Button", "links", "链接按钮", "点了去别处用 LinkButtonControl 而不是按钮加点击：读屏念“链接”。外观同按钮；桌面上 Href 用系统打开，External 显示外链图标并告诉读屏在新窗口打开。", Links),
     ];
 
     static Control VariantsExample() => Wrap(16,
@@ -64,6 +65,14 @@ static class ButtonExamples
             new IconButtonControl { Icon = Lucide.Pencil, AccessibleName = "编辑" },
             new IconButtonControl { Icon = Lucide.Share2, AccessibleName = "分享" },
             new IconButtonControl { Icon = Lucide.Trash, Tone = StatusTone.Danger, AccessibleName = "删除" }));
+
+    /// <summary>Card 做出来后包一层卡片；桌面没有站内地址，链接都是绝对地址，用系统打开。</summary>
+    static Control Links() => Column(16,
+        Column(4, new StrongControl { Text = "还没有订单" }, new ParagraphControl { Text = "新建第一张订单，或者先看看怎么批量导入。", TextSize = TextSize.Sm, Tone = Tone.Muted }),
+        Row(0,
+            new LinkButtonControl { Text = "新建订单", Href = new Uri("https://example.com/orders/new"), Icon = Lucide.Plus },
+            new LinkButtonControl { Text = "导入指南", Href = new Uri("https://example.com/guide/import"), Variant = ButtonVariant.Soft, Icon = Lucide.BookOpen },
+            new LinkButtonControl { Text = "Vue 文档", Href = new Uri("https://vuejs.org"), External = true, Variant = ButtonVariant.Ghost, IconEnd = Lucide.ArrowRight }));
 
     /// <summary>点击后模拟一次请求：保存 1.5 秒；很快完成（0.1 秒）的不出现旋转指示。</summary>
     static Control Loading()
