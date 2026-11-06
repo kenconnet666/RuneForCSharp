@@ -242,6 +242,7 @@ sealed class StyleReport
         ["Strong"] = "@strong",
         ["Em"] = "@em",
         ["Small"] = "@small",
+        ["Kbd"] = "@kbd",
     };
 
     readonly List<(string Key, string Type, Dictionary<string, object> Props)> parts = [];
