@@ -1,0 +1,22 @@
+<!-- Empty 的主题样式（vue-tsx-pro 的 emptyRecipe）：正文色，字号档位是触发器；各部件的样式在 Empty.cs 里 -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <Style TargetType="rune:Empty">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Style.Triggers>
+      <Trigger Property="Size" Value="xs"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xs}" /></Trigger>
+      <Trigger Property="Size" Value="sm"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" /></Trigger>
+      <Trigger Property="Size" Value="md"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Md}" /></Trigger>
+      <Trigger Property="Size" Value="lg"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Lg}" /></Trigger>
+      <Trigger Property="Size" Value="xl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xl}" /></Trigger>
+      <Trigger Property="Size" Value="xxl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xxl}" /></Trigger>
+      <Trigger Property="Size" Value="xxxl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xxxl}" /></Trigger>
+    </Style.Triggers>
+  </Style>
+  <!-- 部件样式键总要有一个样式（同 SpinnerParts.Icon），使用方同键的样式叠在上面 -->
+  <Style x:Key="{x:Static rune:EmptyParts.Icon}" TargetType="rune:Icon" />
+  <Style x:Key="{x:Static rune:EmptyParts.Title}" TargetType="rune:Text" />
+  <Style x:Key="{x:Static rune:EmptyParts.Description}" TargetType="rune:Paragraph" />
+  <Style x:Key="{x:Static rune:EmptyParts.Action}" TargetType="ContentPresenter" />
+</ResourceDictionary>
