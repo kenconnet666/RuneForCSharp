@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- WinForms 组件库：信号驱动的自绘组件（只重绘读到变化的控件与区域）、主题 tokens 与按层合并的样式 -->
+  <PropertyGroup>
+    <IsLibrary>true</IsLibrary>
+    <!-- 公开成员必须写文档注释（CS1591 视为错误） -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <RootNamespace>Rune.WinForms</RootNamespace>
+    <Description>对标 vue-tsx-pro 的 WinForms 组件库：信号驱动的自绘组件、主题 tokens、可层层合并的组件样式与默认值。</Description>
+    <PackageTags>winforms;components;ui;design-system;signals</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Rune.WinForms.Tests" />
+  </ItemGroup>
+
+</Project>

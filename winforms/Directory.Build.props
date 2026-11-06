@@ -1,0 +1,10 @@
+<Project>
+  <!-- WinForms 组件库（src）、示例（apps）、测试（tests）共用：先导入仓库根的设置，再改成 Windows 目标 -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <!-- 每个显示器各自的 DPI：组件按 DeviceDpi 换算 em 与边框 -->
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+  </PropertyGroup>
+</Project>
