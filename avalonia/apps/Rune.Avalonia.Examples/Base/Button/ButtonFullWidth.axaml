@@ -1,0 +1,14 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/avalonia"
+             x:Class="Rune.Avalonia.Examples.ButtonFullWidth">
+  <StackPanel Spacing="8">
+    <rune:Button FullWidth="True" Size="lg" Icon="{x:Static rune:Lucide.LogIn}">登录</rune:Button>
+    <rune:Small Tone="muted" Align="Center">或者</rune:Small>
+    <Grid ColumnDefinitions="*,8,*">
+      <rune:Button FullWidth="True" Variant="surface" Tone="neutral" Icon="{x:Static rune:Lucide.Smartphone}">手机验证码</rune:Button>
+      <rune:Button Grid.Column="2" FullWidth="True" Variant="surface" Tone="neutral" Icon="{x:Static rune:Lucide.Mail}">邮箱验证码</rune:Button>
+    </Grid>
+    <rune:Button FullWidth="True" Variant="link" Tone="neutral">忘记密码？</rune:Button>
+  </StackPanel>
+</UserControl>

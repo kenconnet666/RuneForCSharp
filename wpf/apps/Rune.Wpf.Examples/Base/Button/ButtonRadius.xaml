@@ -4,9 +4,12 @@
              xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/wpf">
   <UserControl.Resources>
     <Style TargetType="rune:Button"><Setter Property="Margin" Value="0,0,8,8" /><Setter Property="VerticalAlignment" Value="Center" /></Style>
+    <Style TargetType="rune:IconButton"><Setter Property="Margin" Value="0,0,8,8" /><Setter Property="VerticalAlignment" Value="Center" /></Style>
   </UserControl.Resources>
+  <!-- 圆角档位与 Badge、Card、输入框共用一套（Radius），对应主题的 radii -->
   <StackPanel>
     <WrapPanel><rune:Button Radius="none">none</rune:Button><rune:Button Radius="xs">xs</rune:Button><rune:Button Radius="sm">sm</rune:Button><rune:Button Radius="md">md</rune:Button><rune:Button Radius="lg">lg</rune:Button><rune:Button Radius="xl">xl</rune:Button><rune:Button Radius="full">full</rune:Button></WrapPanel>
     <WrapPanel><rune:Button Radius="none" Variant="outline" Icon="{x:Static rune:Lucide.Plus}">none</rune:Button><rune:Button Radius="xs" Variant="outline" Icon="{x:Static rune:Lucide.Plus}">xs</rune:Button><rune:Button Radius="sm" Variant="outline" Icon="{x:Static rune:Lucide.Plus}">sm</rune:Button><rune:Button Radius="md" Variant="outline" Icon="{x:Static rune:Lucide.Plus}">md</rune:Button><rune:Button Radius="lg" Variant="outline" Icon="{x:Static rune:Lucide.Plus}">lg</rune:Button><rune:Button Radius="xl" Variant="outline" Icon="{x:Static rune:Lucide.Plus}">xl</rune:Button><rune:Button Radius="full" Variant="outline" Icon="{x:Static rune:Lucide.Plus}">full</rune:Button></WrapPanel>
+    <WrapPanel><rune:IconButton Radius="none" Variant="soft" Tone="danger" Icon="{x:Static rune:Lucide.Heart}" AutomationProperties.Name="收藏（none）" /><rune:IconButton Radius="xs" Variant="soft" Tone="danger" Icon="{x:Static rune:Lucide.Heart}" AutomationProperties.Name="收藏（xs）" /><rune:IconButton Radius="sm" Variant="soft" Tone="danger" Icon="{x:Static rune:Lucide.Heart}" AutomationProperties.Name="收藏（sm）" /><rune:IconButton Radius="md" Variant="soft" Tone="danger" Icon="{x:Static rune:Lucide.Heart}" AutomationProperties.Name="收藏（md）" /><rune:IconButton Radius="lg" Variant="soft" Tone="danger" Icon="{x:Static rune:Lucide.Heart}" AutomationProperties.Name="收藏（lg）" /><rune:IconButton Radius="xl" Variant="soft" Tone="danger" Icon="{x:Static rune:Lucide.Heart}" AutomationProperties.Name="收藏（xl）" /><rune:IconButton Radius="full" Variant="soft" Tone="danger" Icon="{x:Static rune:Lucide.Heart}" AutomationProperties.Name="收藏（full）" /></WrapPanel>
   </StackPanel>
 </UserControl>

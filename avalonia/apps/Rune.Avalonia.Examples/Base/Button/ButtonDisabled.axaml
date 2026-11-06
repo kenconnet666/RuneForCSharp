@@ -1,0 +1,9 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/avalonia"
+             x:Class="Rune.Avalonia.Examples.ButtonDisabled">
+  <!-- Tooltip 做出来后补上第二行：不可用但能聚焦（focusableWhenDisabled），悬停说明为什么不能点 -->
+  <StackPanel Spacing="12">
+    <WrapPanel ItemSpacing="8" LineSpacing="8"><rune:Button Variant="solid" IsEnabled="False">solid</rune:Button><rune:Button Variant="soft" IsEnabled="False">soft</rune:Button><rune:Button Variant="surface" IsEnabled="False">surface</rune:Button><rune:Button Variant="outline" IsEnabled="False">outline</rune:Button><rune:Button Variant="ghost" IsEnabled="False">ghost</rune:Button><rune:Button Variant="link" IsEnabled="False">link</rune:Button></WrapPanel>
+  </StackPanel>
+</UserControl>

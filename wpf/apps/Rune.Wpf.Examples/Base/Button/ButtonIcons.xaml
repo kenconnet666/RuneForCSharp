@@ -6,7 +6,7 @@
     <Style TargetType="rune:Button"><Setter Property="Margin" Value="0,0,8,8" /><Setter Property="VerticalAlignment" Value="Center" /></Style>
     <Style TargetType="rune:IconButton"><Setter Property="Margin" Value="0,0,8,8" /><Setter Property="VerticalAlignment" Value="Center" /></Style>
   </UserControl.Resources>
-  <!-- Kbd 做出来后补上第二行的"搜索 Ctrl K" -->
+  <!-- Kbd 做出来后在"搜索"后面补上 Ctrl K -->
   <StackPanel>
     <WrapPanel>
       <rune:Button Icon="{x:Static rune:Lucide.Plus}">新建</rune:Button>
@@ -16,6 +16,7 @@
       <rune:Button Variant="link" IconEnd="{x:Static rune:Lucide.ExternalLink}">查看文档</rune:Button>
     </WrapPanel>
     <WrapPanel>
+      <rune:Button Variant="surface" Tone="neutral" Icon="{x:Static rune:Lucide.Search}">搜索</rune:Button>
       <rune:Button Variant="soft" Tone="neutral"><StackPanel Orientation="Horizontal"><TextBlock Text="未读消息" VerticalAlignment="Center" Margin="0,0,6,0" /><rune:Badge Variant="solid" Tone="danger" Radius="full">12</rune:Badge></StackPanel></rune:Button>
       <rune:IconButton Icon="{x:Static rune:Lucide.Pencil}" AutomationProperties.Name="编辑" />
       <rune:IconButton Icon="{x:Static rune:Lucide.Share2}" AutomationProperties.Name="分享" />

@@ -2,7 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/avalonia"
              x:Class="Rune.Avalonia.Examples.ButtonIcons">
-  <!-- Kbd 做出来后补上第二行的"搜索 Ctrl K" -->
+  <!-- Kbd 做出来后在"搜索"后面补上 Ctrl K -->
   <StackPanel Spacing="12">
     <WrapPanel ItemSpacing="8" LineSpacing="8">
       <rune:Button Icon="{x:Static rune:Lucide.Plus}">新建</rune:Button>
@@ -12,6 +12,7 @@
       <rune:Button Variant="link" IconEnd="{x:Static rune:Lucide.ExternalLink}">查看文档</rune:Button>
     </WrapPanel>
     <WrapPanel ItemSpacing="8" LineSpacing="8">
+      <rune:Button Variant="surface" Tone="neutral" Icon="{x:Static rune:Lucide.Search}">搜索</rune:Button>
       <rune:Button Variant="soft" Tone="neutral"><StackPanel Orientation="Horizontal" Spacing="6"><TextBlock Text="未读消息" VerticalAlignment="Center" /><rune:Badge Variant="solid" Tone="danger" Radius="full">12</rune:Badge></StackPanel></rune:Button>
       <rune:IconButton Icon="{x:Static rune:Lucide.Pencil}" VerticalAlignment="Center" AutomationProperties.Name="编辑" />
       <rune:IconButton Icon="{x:Static rune:Lucide.Share2}" VerticalAlignment="Center" AutomationProperties.Name="分享" />

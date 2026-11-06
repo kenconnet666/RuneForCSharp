@@ -4,11 +4,19 @@
              xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/wpf">
   <UserControl.Resources>
     <Style TargetType="rune:Button"><Setter Property="Margin" Value="0,0,8,8" /><Setter Property="VerticalAlignment" Value="Center" /></Style>
+    <Style TargetType="rune:IconButton"><Setter Property="Margin" Value="0,0,8,8" /><Setter Property="VerticalAlignment" Value="Center" /></Style>
   </UserControl.Resources>
-  <!-- 点击后加载 1.5 秒；很快完成的加载不出现旋转指示（DelayedLoading），宽度始终不变 -->
-  <WrapPanel>
-    <rune:Button x:Name="Save" Icon="{x:Static rune:Lucide.Save}">保存</rune:Button>
-    <rune:Button x:Name="Quick" Variant="outline">很快完成（0.1 秒）</rune:Button>
-    <rune:Button IsLoading="True" Variant="soft">一直在加载</rune:Button>
-  </WrapPanel>
+  <!-- 点击后模拟一次请求；很快完成的加载不出现旋转指示（DelayedLoading），宽度始终不变 -->
+  <StackPanel>
+    <WrapPanel>
+      <rune:Button x:Name="Save">保存</rune:Button>
+      <rune:Button x:Name="Submit" Variant="outline" Icon="{x:Static rune:Lucide.Send}">提交审核</rune:Button>
+      <rune:Button x:Name="Delete" Variant="soft" Tone="danger" Icon="{x:Static rune:Lucide.Trash}">删除</rune:Button>
+      <rune:IconButton x:Name="Refresh" Variant="surface" Tone="neutral" Icon="{x:Static rune:Lucide.RefreshCw}" AutomationProperties.Name="刷新" />
+    </WrapPanel>
+    <WrapPanel>
+      <rune:Button x:Name="Quick" Variant="surface" Tone="neutral">很快完成（0.1 秒）</rune:Button>
+      <rune:Small Tone="muted" VerticalAlignment="Center" Margin="0,0,0,8">不到 0.2 秒的操作不换成加载指示，按钮不会闪一下</rune:Small>
+    </WrapPanel>
+  </StackPanel>
 </UserControl>

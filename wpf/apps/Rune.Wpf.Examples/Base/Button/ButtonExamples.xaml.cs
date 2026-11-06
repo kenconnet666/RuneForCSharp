@@ -2,7 +2,7 @@ using System.Windows.Controls;
 
 namespace Rune.Wpf.Examples;
 
-/// <summary>Button 的示例（vue-tsx-pro 文档站 base/Button）。ButtonGroup、Card、Kbd 做出来后补上其余几节。</summary>
+/// <summary>Button 的示例（vue-tsx-pro 文档站 base/Button）。Card、Field、ButtonGroup、Kbd、Tooltip 做出来后补上 basic、types、group 与 icons、disabled 的其余部分。</summary>
 static class ButtonExamples
 {
     public static Example[] All =>
@@ -13,7 +13,9 @@ static class ButtonExamples
         new("Button", "radius", "圆角", "Radius 默认 md；full 是胶囊形。", () => new ButtonRadius()),
         new("Button", "icons", "图标", "Icon 在文字前、IconEnd 在文字后，大小跟随按钮的字号；内容也可以放别的组件（Badge）。", () => new ButtonIcons()),
         new("Button", "loading", "加载中", "IsLoading 显示旋转指示，宽度不变、点击无效、焦点保留；很快完成的加载不出现指示，出现了至少显示 0.5 秒。", () => new ButtonLoading()),
+        new("Button", "full-width", "占满宽度", "FullWidth 占满一行：登录页、移动端的主要操作。", () => new ButtonFullWidth()),
         new("Button", "links", "链接按钮", "点了去别处用 LinkButton 而不是 Button 加点击：读屏念“链接”。外观同 Button；桌面上 Href 用系统打开，External 显示外链图标并告诉读屏在新窗口打开。", () => new ButtonLinks()),
+        new("Button", "disabled", "不可用", "IsEnabled=False 时整体变淡、不响应点击。", () => new ButtonDisabled()),
     ];
 }
 
@@ -60,15 +62,32 @@ public partial class ButtonLoading : UserControl
     {
         InitializeComponent();
         Save.Click += (_, _) => Request(Save, TimeSpan.FromSeconds(1.5));
+        Submit.Click += (_, _) => Request(Submit, TimeSpan.FromSeconds(2));
+        Delete.Click += (_, _) => Request(Delete, TimeSpan.FromSeconds(1.2));
+        Refresh.Click += (_, _) => Request(Refresh, TimeSpan.FromSeconds(1));
         Quick.Click += (_, _) => Request(Quick, TimeSpan.FromSeconds(0.1));
     }
 
-    static async void Request(Rune.Wpf.Button button, TimeSpan duration)
+    static async void Request(ButtonCore button, TimeSpan duration)
     {
         button.IsLoading = true;
         await Task.Delay(duration);
         button.IsLoading = false;
     }
+}
+
+/// <summary>Button/full-width。</summary>
+public partial class ButtonFullWidth : UserControl
+{
+    /// <summary>加载示例。</summary>
+    public ButtonFullWidth() => InitializeComponent();
+}
+
+/// <summary>Button/disabled。</summary>
+public partial class ButtonDisabled : UserControl
+{
+    /// <summary>加载示例。</summary>
+    public ButtonDisabled() => InitializeComponent();
 }
 
 /// <summary>Button/links。</summary>
