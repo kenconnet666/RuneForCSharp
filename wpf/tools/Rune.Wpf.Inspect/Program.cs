@@ -58,6 +58,7 @@ static class Inspector
                 "snapshot" => Snapshot(root, options),
                 "tree" => Tree(content, labels).Render(options.Json),
                 "props" => Props(content, labels).Render(options.Json),
+                "styles" => Styles(content).Render(options.Json),
                 _ => Uia(content, labels).Render(options.Json),
             };
         }
@@ -154,6 +155,101 @@ static class Inspector
         for (var current = type; current is not null && current.Namespace == typeof(RuneTheme).Namespace; current = current.BaseType)
             foreach (var field in current.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.DeclaredOnly))
                 if (field.GetValue(null) is DependencyProperty property) yield return property;
+    }
+
+    /// <summary>
+    /// 部件的外观取值（同 tools/ts-styles 的格式）：组件库的组件是 <c>scope/root</c>；它在 <c>*Parts</c> 类里声明的部件
+    /// （模板里的，或代码里组合的）是 <c>scope/part</c>，部件本身是组件时只记部件。看不见的元素不记。
+    /// </summary>
+    static StyleReport Styles(FrameworkElement root)
+    {
+        var report = new StyleReport();
+        Walk(root);
+        return report;
+
+        void Walk(DependencyObject node)
+        {
+            if (node is FrameworkElement { IsVisible: false }) return;
+            if (node is FrameworkElement element)
+            {
+                var name = element.Name is { Length: > 0 } part && Owner(element) is { } owner && DeclaredParts(owner.GetType()).Contains(part)
+                    ? StyleReport.Name(owner.GetType().Name, part)
+                    : IsComponent(element) ? StyleReport.Name(element.GetType().Name, null) : null;
+                if (name is not null) report.Add(name, element.GetType().Name, Values(element));
+            }
+            for (var i = 0; i < VisualTreeHelper.GetChildrenCount(node); i++) Walk(VisualTreeHelper.GetChild(node, i));
+        }
+
+        static bool IsComponent(FrameworkElement element) => element.GetType().Namespace == typeof(RuneTheme).Namespace;
+
+        static FrameworkElement? Owner(FrameworkElement element)
+        {
+            if (element.TemplatedParent is FrameworkElement parent) return parent;
+            for (var node = VisualTreeHelper.GetParent(element); node is not null; node = VisualTreeHelper.GetParent(node))
+                if (node is FrameworkElement ancestor && IsComponent(ancestor)) return ancestor;
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// 组件声明的部件名：它与基类各自的 <c>&lt;类型&gt;Parts</c> 类里的部件。WPF 的部件是样式键（<c>ButtonParts.Icon</c>，模板里的元素名是
+    /// <c>PART_Icon</c>）；只有名字没有样式键的部件（PART_Ripples）是字符串常量。
+    /// </summary>
+    static HashSet<string> DeclaredParts(Type type)
+    {
+        var names = new HashSet<string>();
+        for (var t = type; t is not null; t = t.BaseType)
+            if (typeof(RuneTheme).Assembly.GetType($"{t.Namespace}.{t.Name}Parts") is { } parts)
+                foreach (var field in parts.GetFields(BindingFlags.Public | BindingFlags.Static))
+                    if (field.IsLiteral) names.Add((string)field.GetRawConstantValue()!);
+                    else if (field.GetValue(null) is ComponentResourceKey) names.Add($"PART_{field.Name}");
+        return names;
+    }
+
+    static IEnumerable<(string, object?)> Values(FrameworkElement element)
+    {
+        object? Get(string name)
+        {
+            for (var type = element.GetType(); type is not null; type = type.BaseType)
+                if (type.GetField($"{name}Property", BindingFlags.Public | BindingFlags.Static) is { } field && field.GetValue(null) is DependencyProperty property)
+                    return element.GetValue(property);
+            return null;
+        }
+        string? Brush(object? value) => value is SolidColorBrush brush
+            ? StyleReport.Color((byte)Math.Round(brush.Color.A * brush.Opacity), brush.Color.R, brush.Color.G, brush.Color.B)
+            : null;
+
+        yield return ("Width", element.ActualWidth);
+        yield return ("Height", element.ActualHeight);
+        yield return ("MinWidth", element.MinWidth);
+        yield return ("MinHeight", element.MinHeight);
+        if (Get("Padding") is Thickness padding)
+        {
+            yield return ("PaddingTop", padding.Top);
+            yield return ("PaddingRight", padding.Right);
+            yield return ("PaddingBottom", padding.Bottom);
+            yield return ("PaddingLeft", padding.Left);
+        }
+        if (Get("BorderThickness") is Thickness border)
+        {
+            yield return ("BorderTop", border.Top);
+            yield return ("BorderRight", border.Right);
+            yield return ("BorderBottom", border.Bottom);
+            yield return ("BorderLeft", border.Left);
+            yield return ("BorderColor", Brush(Get("BorderBrush")) ?? "#00000000");
+        }
+        if (Get("CornerRadius") is CornerRadius radius)
+        {
+            yield return ("RadiusTopLeft", radius.TopLeft);
+            yield return ("RadiusTopRight", radius.TopRight);
+            yield return ("RadiusBottomRight", radius.BottomRight);
+            yield return ("RadiusBottomLeft", radius.BottomLeft);
+        }
+        yield return ("Background", Brush(Get("Background")) ?? "#00000000");
+        yield return ("Foreground", Brush(element.GetValue(TextElement.ForegroundProperty)) ?? Brush(Get("Foreground")));
+        yield return ("FontSize", (double)element.GetValue(TextElement.FontSizeProperty));
+        yield return ("FontWeight", ((FontWeight)element.GetValue(TextElement.FontWeightProperty)).ToOpenTypeWeight());
+        yield return ("Opacity", element.Opacity);
     }
 
     static ReportTable Uia(FrameworkElement root, Dictionary<DependencyObject, string> labels)

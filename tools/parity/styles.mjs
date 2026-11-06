@@ -93,8 +93,8 @@ function same(prop, a, b, props, mine) {
   if (a === 'auto') a = 0;
   // 自绘的组件在测量里保证最小尺寸，没有 MinHeight 属性：实际高度够了就算一样
   if (prop === 'MinHeight' && b === 0 && typeof a === 'number' && mine.Height >= a - TOLERANCE) return true;
-  // 胶囊形：CSS 写 9999px，平台按 em 系数算出更大的数，都远大于高度的一半
-  if (prop.startsWith('Radius') && a >= 999 && b >= 999) return true;
+  // 胶囊形：CSS 写 9999px；平台按 em 系数算出更大的数，或已经夹到高度的一半，画出来一样
+  if (prop.startsWith('Radius') && a >= 999 && (b >= 999 || b >= mine.Height / 2 - TOLERANCE)) return true;
   // TS 用 visibility: hidden 藏起的部件，平台上用透明度 0
   if (prop === 'Opacity' && props.Visibility === 'hidden' && b === 0) return true;
   if (typeof a === 'number' && typeof b === 'number') return Math.abs(a - b) <= TOLERANCE;
