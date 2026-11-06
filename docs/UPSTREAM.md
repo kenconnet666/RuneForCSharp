@@ -146,6 +146,16 @@ vue-tsx-pro 那边的会话改了设计时会发通知过来（每完成一个�
 | 新增 `transitions.pop`：锚定的小浮层（菜单、弹出框、选项列表、日期面板）进场 sm(120ms) + enter 缓动、离场 xs(75ms)，缩放 0.96；对话框仍用 scale（md） | 浮层还没做 | 做 Popover / Menu 时把"小浮层进出场"做成一处共用（时长、缓动取 token），对话框另用 scale |
 | 文档站默认用霞鹜文楷等宽（独立包 rune-ui-wuxiawenkai，只有 woff2 网页字体）；组件库仍默认系统字体 | 组件库同样默认系统字体；没有文档站，Gallery 是桌面程序 | 不涉及。woff2 是网页分发格式，桌面上要用得另取 TTF 嵌入 Gallery，要做时再定 |
 
+### 0.11 发版前（2026-11-06 通知，PR #4 等 CI 后合入 master）
+
+| 上游 | 我们 | 跟进 |
+|---|---|---|
+| 主入口不再导出组件内部的样式表；外观定制只走 `components.Xxx` 的 defaults / styles / variants 与部件的 `propsXxx.sx`，照常导出配方与共用样式件 | WinForms 的 `ButtonRecipe` 已是 internal。Avalonia 的 `Rune.ButtonCore` 主题、WPF 的 `Rune.ButtonCore` / `Rune.Recipe.Button` 样式是资源键，XAML 里藏不住 | 不收（相当于上游照常导出的配方）。在 DESIGN 里写明定制入口：按类型的隐式主题 / 样式、部件、调色板；这几个键是组装用的，不保证跨版本稳定。做第 2 包（组件段只用主题设值）时一起写 |
+| Tabs、Steps 换逻辑属性：横排、竖排各给一份指示条位置，免得从右到左时物理属性盖掉逻辑属性 | Tabs、Steps 还没做 | 做时注意：Avalonia、WPF 的 `FlowDirection` 会整体镜像布局和 RenderTransform，指示条照常按 Left/Top 平移即可；WinForms 的 `RightToLeft` 不镜像，指示条位置要自己按方向换算 |
+| 状态写法换条件别名推迟：`:is(…)` 的优先级排在 `:hover` 前，已选 / 不可用的项悬停时露出悬停色 | Avalonia 样式没有优先级之分，同一优先级里后声明的赢；WPF 的 Trigger 也是后写的赢 | 同一类问题：做有已选、不可用状态的组件时，这两种状态的样式写在 pointerover / IsMouseOver 之后，并各加一条"不可用 + 悬停"的测试 |
+| 文档站示例画布改用页面底色，卡片才看得出层级 | 三个平台的 Gallery 窗口已是 `Background`，示例里的卡片用 Surface | 不涉及 |
+| 0.11 的使用方变化在 RELEASE.md，剩余工作在 ROADMAP 阶段 24 | — | 合入 master 后按 RELEASE.md 逐条核对，与第二、三批一起重新生成 token、语言包 |
+
 ### 进度
 
 - 2026-11-06：收到计划草案，完成上面的评估。同日上游获批，方向见"已定的方向"。代码未动，等上游各阶段的通知；还没做的组件直接按已定的词表与规则做（新名字、控件高度收成一处、浮层阴影按新规则）。
@@ -154,3 +164,4 @@ vue-tsx-pro 那边的会话改了设计时会发通知过来（每完成一个�
 - 2026-11-06：收到阶段 3 合入、阶段 4 进行中的通知。按上游 master 9d5af3f3 重新生成了 token（新增 scrim 三个）；token-gen 能删掉上游没有了的主题文件。Icon 的 `draw`（描线动画）parity 报缺，是早就记下的暂缓项。
 - 2026-11-06：收到阶段 4 第二批的通知（分支上，未合入）。提前对分支跑了生成器，让 token-gen 认识 `round()`，避免上游合入后 CI 失败；控件高度、按钮字重的改法记在上面，等合入后与其他对齐工作一起做。
 - 2026-11-06：收到阶段 4 第三批的通知（分支上，未合入）。生成器对 8a14554a 不用改；Field、FormSection、小浮层过渡记在上面，组件还没做。
+- 2026-11-06：收到 0.11 发版前的通知。样式类本来就没当公开 API 暴露（WinForms 是 internal，XAML 的资源键藏不住，改为在 DESIGN 里写明不稳定），其余记在上面，等合入 master 后一起跟进。
