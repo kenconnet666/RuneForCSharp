@@ -21,7 +21,13 @@ const vue = await openVue(options.vue);
 try {
   const model = buildModel(vue);
   const outputs = [...avalonia(model), ...wpf(model), ...winforms(model)];
-  process.exitCode = writeOutputs(outputs, { check: options.check, commit: vue.commit, command: 'node tools/token-gen/token-gen.mjs' });
+  process.exitCode = writeOutputs(outputs, {
+    check: options.check,
+    commit: vue.commit,
+    command: 'node tools/token-gen/token-gen.mjs',
+    // 每套主题一个文件：上游删掉的主题，文件跟着删
+    owned: ['wpf/src/Rune.Wpf/Config/Generated/Themes'],
+  });
 } catch (error) {
   process.stderr.write(`${error.message}\n`);
   process.exitCode = 1;
