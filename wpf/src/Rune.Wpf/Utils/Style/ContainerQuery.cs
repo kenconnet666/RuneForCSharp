@@ -25,21 +25,21 @@ public enum ContainerSize
 /// 容器查询（WPF 没有，Avalonia 有原生的 ContainerQuery）：设了 <c>Watch</c> 的元素按自己的宽度写 <c>Size</c>，
 /// Size 会继承给后代，样式触发器直接用它：
 /// <code>
-/// &lt;Grid rune:Container.Watch="True"&gt; … &lt;/Grid&gt;
-/// &lt;Trigger Property="rune:Container.Size" Value="Xs"&gt; … &lt;/Trigger&gt;
+/// &lt;Grid rune:ContainerQuery.Watch="True"&gt; … &lt;/Grid&gt;
+/// &lt;Trigger Property="rune:ContainerQuery.Size" Value="Xs"&gt; … &lt;/Trigger&gt;
 /// </code>
 /// 用会继承的属性，不用向上找祖先的绑定：断点变化时只通知订阅了它的触发器，没有每个元素一个绑定的开销。
 /// </summary>
-public static class Container
+public static class ContainerQuery
 {
     /// <summary>最近一个被观察的容器的宽度档位（会继承）；没有被观察的容器时为 Lg。</summary>
     public static readonly DependencyProperty SizeProperty = DependencyProperty.RegisterAttached(
-        "Size", typeof(ContainerSize), typeof(Container),
+        "Size", typeof(ContainerSize), typeof(ContainerQuery),
         new FrameworkPropertyMetadata(ContainerSize.Lg, FrameworkPropertyMetadataOptions.Inherits));
 
     /// <summary>按这个元素的宽度更新它的 Size。</summary>
     public static readonly DependencyProperty WatchProperty = DependencyProperty.RegisterAttached(
-        "Watch", typeof(bool), typeof(Container), new PropertyMetadata(false, OnWatchChanged));
+        "Watch", typeof(bool), typeof(ContainerQuery), new PropertyMetadata(false, OnWatchChanged));
 
     /// <summary>读宽度档位。</summary>
     public static ContainerSize GetSize(DependencyObject d) => (ContainerSize)d.GetValue(SizeProperty);

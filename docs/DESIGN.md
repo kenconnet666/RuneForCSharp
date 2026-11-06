@@ -223,7 +223,7 @@ TS 版的规则是"显式 prop > 最近一层 Provider > createUi > 组件默认
 - **整页缩放**：Avalonia 的 `LayoutTransformControl`、WPF 的 `LayoutTransform` 相当于浏览器缩放，但 1px 边框也会被放大，只作为大屏或无障碍的选项。
 - **响应式**：
   - Avalonia 用原生 `ContainerQuery`（已实测）。
-  - WPF 用 `Container.Watch` / `Container.Size`：会继承的附加属性加触发器，断点同 TS 版的 40/48/64/80rem。
+  - WPF 用 `ContainerQuery.Watch` / `ContainerQuery.Size`：会继承的附加属性加触发器，断点同 TS 版的 40/48/64/80rem。
   - WinForms 在 Resize 时算出断点。
 
 ## 7. 部件属性与事件

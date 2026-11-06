@@ -27,7 +27,7 @@
       <MultiTrigger>
         <MultiTrigger.Conditions>
           <Condition Property="Variant" Value="solid" />
-          <Condition Property="rune:Container.Size" Value="Xs" />
+          <Condition Property="rune:ContainerQuery.Size" Value="Xs" />
         </MultiTrigger.Conditions>
         <Setter Property="Background" Value="Orange" />
       </MultiTrigger>
