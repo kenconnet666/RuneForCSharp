@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Media;
@@ -50,7 +51,7 @@ public class ButtonTests
 
         Assert.Equal(16, large.FontSize);
         Assert.Equal(new Thickness(16, 4, 16, 4), large.Padding); // 1em × 0.25em
-        Assert.Equal(36, large.MinHeight);                         // max(2.25em, 24px)
+        Assert.Equal(36, large.MinHeight);                         // 控件高度：round(2.25em, 4px)
         Assert.Equal(new CornerRadius(0.4 * 16), large.CornerRadius);
         Assert.Equal(pill.ActualHeight / 2, pill.CornerRadius.TopLeft, 3);
     });
@@ -124,5 +125,24 @@ public class ButtonTests
         Assert.Equal(3, Part<Icon>(button, "PART_Icon").StrokeWidth);
         Assert.Equal(1, Part<Icon>(button, "PART_IconEnd").StrokeWidth);
         Assert.Equal(Lucide.Plus, Part<Icon>(button, "PART_Icon").Data);
+    });
+
+    [Fact]
+    public Task Control_heights_sit_on_a_4px_grid_and_xs_passes_its_factor_inside() => WpfUi.Run(() =>
+    {
+        // vue-tsx-pro 0.11：字号的 2.25 倍（xs 档 2 倍）取整到 4px → xs–xl 依次 24 / 28 / 32 / 36 / 40
+        var steps = new[] { TextSize.Xs, TextSize.Sm, TextSize.Md, TextSize.Lg, TextSize.Xl }.Select(size => new Rune.Wpf.Button { Content = size.Value, Size = size }).ToList();
+        // 外面的容器写了 xs 的系数，里面没写档位的按钮跟着它（同 CSS 变量的继承）
+        var inner = new Rune.Wpf.Button { Content = "里面" };
+        var toolbar = new StackPanel { Children = { inner } };
+        TextElement.SetFontSize(toolbar, 12);
+        ControlHeight.SetFactor(toolbar, ControlHeight.XsFactor);
+        var (host, _) = Host([.. steps, toolbar]);
+        WpfUi.Show(host);
+
+        Assert.Equal([24d, 28, 32, 36, 40], steps.Select(button => button.MinHeight));
+        Assert.Equal(24, inner.MinHeight);
+        Assert.Equal((host.FindResource("Rune.Size.Control"), host.FindResource("Rune.Size.ControlRound"), host.FindResource("Rune.Size.MinTarget")),
+            ((object)ControlHeight.DefaultFactor, (object)ControlHeight.Step, (object)ControlHeight.MinTarget));
     });
 }

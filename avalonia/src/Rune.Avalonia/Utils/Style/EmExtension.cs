@@ -12,7 +12,7 @@ namespace Rune.Avalonia;
 /// 组件只在根元素上设字号（size 档位或继承上下文），内边距、圆角、间距等写成 em，整体等比缩放。
 /// <code>
 /// &lt;Setter Property="Padding" Value="{rune:Em 1, 0.25}" /&gt;                        &lt;!-- 水平 1em、垂直 0.25em --&gt;
-/// &lt;Setter Property="MinHeight" Value="{rune:Em 2.25, Min=24}" /&gt;                 &lt;!-- max(2.25em, 24px) --&gt;
+/// &lt;Setter Property="MinWidth" Value="{rune:Em 4, Min=24}" /&gt;                     &lt;!-- max(4em, 24px)；控件高度用 {rune:ControlHeight} --&gt;
 /// &lt;Setter Property="CornerRadius" Value="{rune:Em Resource=Rune.Radius.Md}" /&gt;   &lt;!-- 系数取主题资源（随主题变） --&gt;
 /// &lt;Border CornerRadius="{rune:Em 0.4, Of=TemplatedParent}" /&gt;                   &lt;!-- 模板里取组件根的字号 --&gt;
 /// </code>

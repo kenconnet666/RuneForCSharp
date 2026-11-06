@@ -42,7 +42,8 @@
     <Setter Property="Palette" Value="{rune:Resolved Palette}" />
     <Setter Property="CornerRadius" Value="{rune:Em Resolved=Radius}" />
     <Setter Property="Padding" Value="{rune:Em 1, 0.25}" />
-    <Setter Property="MinHeight" Value="{rune:Em 2.25, Min=24}" />
+    <!-- 控件高度：字号的 2.25 倍（xs 档 2 倍）取整到 4px，不低于 24px（vue-tsx-pro 的 sizes.control） -->
+    <Setter Property="MinHeight" Value="{rune:ControlHeight}" />
     <!-- borderWidths.xs、sm 是不随主题变的像素 token（资源是 double，Thickness 不能直接引用）；没有描边色时也占位，各样式等高 -->
     <Setter Property="BorderThickness" Value="1" />
     <!-- 界面文字用 medium：600 在微软雅黑上落成粗体（vue-tsx-pro 0.11 S4） -->
@@ -123,7 +124,7 @@
     <Setter Property="Variant" Value="ghost" />
     <Setter Property="Tone" Value="neutral" />
     <Setter Property="Padding" Value="{rune:Em 0, 0.25}" />
-    <Setter Property="Width" Value="{rune:Em 2.25, Min=24}" />
+    <Setter Property="Width" Value="{rune:ControlHeight}" />
     <Setter Property="Template">
       <ControlTemplate>
         <Panel>

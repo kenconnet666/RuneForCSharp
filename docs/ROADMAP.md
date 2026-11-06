@@ -211,7 +211,7 @@
 - [x] 工作包 4：Badge 色调取共用色表（Avalonia 取调色板对象，WPF、WinForms 由 recipe-gen 生成 Badge 配方；`StatusColors` 删掉）。
 - [ ] 工作包 5：WinForms 的定制入口。
 - [x] 按钮字重 600 → 500。
-- [ ] 控件高度收成每个平台一处（`max(round(系数 × 字号 ÷ 步长) × 步长, minTarget)`）。
+- [x] 控件高度收成每个平台一处 `ControlHeight`（`max(round(系数 × 字号 ÷ 4) × 4, 24)`，xs 档系数 2，Avalonia、WPF 的系数继承；DESIGN §14 Button 家族）。
 - [ ] `ts-styles`、parity 取值比对、行为对照、截图对比（"信息与验证工具"）；拿已做的 16 个组件过一遍三道核对，补齐差异。
 - [ ] 按钮家族的缺口：focusableWhenDisabled（三个平台）、WinForms 的 propsContent 与 ButtonBase；ButtonGroup、CopyButton。
 

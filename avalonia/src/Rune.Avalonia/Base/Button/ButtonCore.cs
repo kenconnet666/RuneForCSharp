@@ -76,6 +76,7 @@ public abstract class ButtonCore : ButtonBase
         }
         else if (change.Property == SizeProperty)
         {
+            ControlHeight.Apply(this, Size);
             if (Size.Pixels is { } pixels) resources.Set(FontSizeProperty, pixels);
             else resources.Bind(FontSizeProperty, Size.ResourceKey);
         }

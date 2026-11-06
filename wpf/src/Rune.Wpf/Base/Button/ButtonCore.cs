@@ -77,6 +77,7 @@ public abstract class ButtonCore : ButtonBase
     /// <summary>档位的字号、圆角在主题样式的触发器里；字号写成像素数时是本地值（同 TS 的行内样式）。</summary>
     static void OnSizeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
+        ControlHeight.Apply(d, (TextSize)e.NewValue);
         if (((TextSize)e.NewValue).Pixels is { } pixels) d.SetValue(FontSizeProperty, pixels);
         else if (((TextSize)e.OldValue).Pixels is not null) d.ClearValue(FontSizeProperty);
     }

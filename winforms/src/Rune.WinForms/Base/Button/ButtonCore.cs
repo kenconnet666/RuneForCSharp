@@ -67,7 +67,7 @@ public abstract class ButtonCore : Element
     /// <summary>组件的默认色调（Button 是 accent，IconButton 是 neutral）。</summary>
     protected abstract StatusTone DefaultTone { get; }
 
-    /// <summary>宽高相等（IconButton）：宽度 max(2.25em, 24px)，左右没有内边距。</summary>
+    /// <summary>宽高相等（IconButton）：宽度取控件高度（<see cref="ControlHeight"/>），左右没有内边距。</summary>
     protected virtual bool Square => false;
 
     /// <summary>合成好的图标部件。</summary>
@@ -148,8 +148,8 @@ public abstract class ButtonCore : Element
         var (inline, block) = Padding(em);
         var width = content.Width + 2 * (inline + border);
         var height = content.Height + 2 * (block + border);
-        // max(2.25em, 24px)：最小高度（链接没有）与方形按钮的宽度
-        var control = Math.Max(2.25f * em, context.Scale(Tokens.Size.MinTarget));
+        // 控件高度：最小高度（链接没有）与方形按钮的宽度
+        var control = ControlHeight.Of(context, em, ControlHeight.Factor(Size));
         if (Variant != ButtonVariant.Link) height = Math.Max(height, control);
         if (Square) width = control;
         return new Size((int)MathF.Ceiling(width), (int)MathF.Ceiling(height));

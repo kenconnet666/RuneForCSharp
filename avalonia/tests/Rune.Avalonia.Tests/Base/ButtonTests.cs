@@ -58,7 +58,7 @@ public class ButtonTests
 
         Assert.Equal(16, large.FontSize);
         Assert.Equal(new Thickness(16, 4), large.Padding);           // 1em × 0.25em
-        Assert.Equal(36, large.MinHeight);                           // max(2.25em, 24px)
+        Assert.Equal(36, large.MinHeight);                           // 控件高度：round(2.25em, 4px)
         Assert.Equal(new CornerRadius(0.4 * 16), large.CornerRadius); // radii.md = 0.4em
         Assert.Equal(ButtonVariant.Ghost, styled.Variant);
     });
@@ -171,5 +171,31 @@ public class ButtonTests
         Assert.Equal(30, classed.FontSize);
         Application.Current!.TryGetResource("Rune.FontSize.Xs", ThemeVariant.Light, out var xs);
         Assert.Equal(xs, plain.FontSize);
+    });
+
+    [Fact]
+    public Task Control_heights_sit_on_a_4px_grid_and_xs_passes_its_factor_inside() => HeadlessUi.Run(() =>
+    {
+        // vue-tsx-pro 0.11：字号的 2.25 倍（xs 档 2 倍）取整到 4px → xs–xl 依次 24 / 28 / 32 / 36 / 40
+        var steps = new[] { TextSize.Xs, TextSize.Sm, TextSize.Md, TextSize.Lg, TextSize.Xl }.Select(size => new Button { Content = size.Value, Size = size }).ToList();
+        // 外面的容器写了 xs 的系数，里面没写档位的按钮跟着它（同 CSS 变量的继承）
+        var inner = new Button { Content = "里面" };
+        var toolbar = new StackPanel { Children = { inner } };
+        toolbar.SetValue(TextElement.FontSizeProperty, 12d);
+        ControlHeight.SetFactor(toolbar, ControlHeight.XsFactor);
+        var host = new StackPanel();
+        host.Children.AddRange(steps);
+        host.Children.Add(toolbar);
+        HeadlessUi.Show(host);
+
+        Assert.Equal([24d, 28, 32, 36, 40], steps.Select(button => button.MinHeight));
+        Assert.Equal(24, inner.MinHeight);
+    });
+
+    [Fact]
+    public Task Control_height_constants_match_the_tokens() => HeadlessUi.Run(() =>
+    {
+        double Token(string key) => Application.Current!.TryGetResource(key, ThemeVariant.Light, out var value) ? (double)value! : double.NaN;
+        Assert.Equal((Token("Rune.Size.Control"), Token("Rune.Size.ControlRound"), Token("Rune.Size.MinTarget")), (ControlHeight.DefaultFactor, ControlHeight.Step, ControlHeight.MinTarget));
     });
 }

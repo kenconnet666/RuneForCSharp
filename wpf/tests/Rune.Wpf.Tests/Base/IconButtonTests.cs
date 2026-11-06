@@ -36,7 +36,7 @@ public class IconButtonTests
         WpfUi.Show(host);
 
         Assert.Equal((ButtonVariant.Ghost, StatusTone.Neutral, Radius.Md), (large.Variant, large.Tone, large.Radius));
-        Assert.Equal((36d, 36d), (large.ActualWidth, large.ActualHeight)); // max(2.25em, 24px)，lg = 16px
+        Assert.Equal((36d, 36d), (large.ActualWidth, large.ActualHeight)); // 控件高度：lg = 16px → 36px
         Assert.Equal((24d, 24d), (small.ActualWidth, small.ActualHeight)); // 8px 的 2.25em 不到 24px，取最小点击区域
         Assert.Equal(16, Part<Icon>(large, "PART_Icon").ActualWidth);      // 图标 1em
         Assert.Equal(BrushColor((Brush)host.FindResource("Rune.Brush.Text")), BrushColor(large.Foreground));

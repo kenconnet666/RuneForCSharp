@@ -39,7 +39,7 @@ public class IconButtonTests
         var window = HeadlessUi.Show(new StackPanel { Children = { large, small } });
 
         Assert.Equal((ButtonVariant.Ghost, StatusTone.Neutral, Radius.Md), (large.Variant, large.Tone, large.Radius));
-        Assert.Equal(new Size(36, 36), large.Bounds.Size);   // max(2.25em, 24px)，lg = 16px
+        Assert.Equal(new Size(36, 36), large.Bounds.Size);   // 控件高度：lg = 16px → 36px
         Assert.Equal(new Size(24, 24), small.Bounds.Size);   // 8px 的 2.25em 不到 24px，取最小点击区域
         Assert.Equal(16, Part<Icon>(large, IconButtonParts.Icon).Bounds.Width); // 图标 1em
         Assert.Equal(Token("Rune.Brush.Text"), BrushColor(large.Foreground));

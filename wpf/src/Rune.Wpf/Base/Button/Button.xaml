@@ -47,8 +47,8 @@
   <Style x:Key="Rune.ButtonCore" TargetType="rune:ButtonCore" BasedOn="{StaticResource Rune.Recipe.Button}">
     <Setter Property="Radius" Value="md" />
     <Setter Property="rune:EmSize.Padding" Value="1,0.25" />
-    <Setter Property="rune:EmSize.MinHeight" Value="2.25" />
-    <Setter Property="rune:EmSize.MinTarget" Value="24" />
+    <!-- 控件高度：字号的 2.25 倍（xs 档 2 倍）取整到 4px，不低于 24px（vue-tsx-pro 的 sizes.control） -->
+    <Setter Property="rune:ControlHeight.MinHeight" Value="True" />
     <!-- borderWidths.xs：没有描边色时也占位，各样式等高 -->
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="BorderBrush" Value="Transparent" />
@@ -76,7 +76,7 @@
       <!-- 链接样式：无底、左右内边距 0（上下 0.25em 保留）、最小高度 0（颜色在配方里，悬停下划线在代码里） -->
       <Trigger Property="Variant" Value="link">
         <Setter Property="rune:EmSize.Padding" Value="0,0.25" />
-        <Setter Property="rune:EmSize.MinHeight" Value="{x:Null}" />
+        <Setter Property="rune:ControlHeight.MinHeight" Value="False" />
       </Trigger>
       <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" /></Trigger>
     </Style.Triggers>
@@ -122,7 +122,7 @@
     <Setter Property="Variant" Value="ghost" />
     <Setter Property="Tone" Value="neutral" />
     <Setter Property="rune:EmSize.Padding" Value="0,0.25" />
-    <Setter Property="rune:EmSize.Width" Value="2.25" />
+    <Setter Property="rune:ControlHeight.Width" Value="True" />
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="rune:IconButton">

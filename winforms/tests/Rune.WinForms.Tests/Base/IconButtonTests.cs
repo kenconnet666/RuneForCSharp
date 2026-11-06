@@ -24,7 +24,7 @@ public class IconButtonTests
         var scale = large.DeviceDpi / 96f;
 
         Assert.Equal((ButtonVariant.Ghost, StatusTone.Neutral), (large.Variant, large.Tone));
-        var side = (int)MathF.Ceiling(36 * scale); // max(2.25em, 24px)，lg = 16px
+        var side = (int)MathF.Ceiling(36 * scale); // 控件高度：lg = 16px → 36px
         Assert.Equal((side, side), (large.Width - large.Padding.Horizontal, large.Height - large.Padding.Vertical));
         Assert.Equal((int)MathF.Ceiling(24 * scale), small.Width - small.Padding.Horizontal); // 8px 的 2.25em 不到 24px
         Assert.Equal(large.Element.IconPart!.Bounds.Width, large.Element.IconPart.Bounds.Height);
@@ -96,5 +96,17 @@ public class IconButtonTests
 
         // TS 的 link 只去掉左右内边距与最小高度：上下 0.25em 加描边保留
         Assert.InRange(link.Height - link.Padding.Vertical - (line + 2 * (4 + 1) * scale), -1, 1);
+    });
+
+    [Fact]
+    public Task Control_heights_sit_on_a_4px_grid() => WinFormsUi.Run(() =>
+    {
+        // vue-tsx-pro 0.11：字号的 2.25 倍（xs 档 2 倍）取整到 4px → xs–xl 依次 24 / 28 / 32 / 36 / 40
+        var buttons = new[] { TextSize.Xs, TextSize.Sm, TextSize.Md, TextSize.Lg, TextSize.Xl }
+            .Select(size => new IconButtonControl { Icon = Lucide.Settings, TextSize = size }).ToArray();
+        using var form = WinFormsUi.Show(buttons);
+        var scale = buttons[0].DeviceDpi / 96f;
+
+        Assert.Equal(new[] { 24, 28, 32, 36, 40 }.Select(side => (int)MathF.Ceiling(side * scale)), buttons.Select(button => button.Width - button.Padding.Horizontal));
     });
 }
