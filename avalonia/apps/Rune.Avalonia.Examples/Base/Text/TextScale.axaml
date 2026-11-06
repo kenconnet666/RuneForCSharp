@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/avalonia"
+             x:Class="Rune.Avalonia.Examples.TextScale">
+  <!-- 左列：size 档位；右列：weight 档位。名字一列宽 5em -->
+  <UserControl.Styles>
+    <Style Selector="StackPanel.row">
+      <Setter Property="Orientation" Value="Horizontal" />
+      <Setter Property="Spacing" Value="12" />
+    </Style>
+    <Style Selector="StackPanel.row > rune|Text.name">
+      <Setter Property="Width" Value="70" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+  </UserControl.Styles>
+  <WrapPanel ItemSpacing="32" LineSpacing="24">
+    <StackPanel Spacing="8">
+      <StackPanel Classes="row"><rune:Text Classes="name" Size="xs" Tone="muted">size=xs</rune:Text><rune:Text Size="xs">界面里的文字 Typography</rune:Text></StackPanel>
+      <StackPanel Classes="row"><rune:Text Classes="name" Size="xs" Tone="muted">size=sm</rune:Text><rune:Text Size="sm">界面里的文字 Typography</rune:Text></StackPanel>
+      <StackPanel Classes="row"><rune:Text Classes="name" Size="xs" Tone="muted">size=md</rune:Text><rune:Text Size="md">界面里的文字 Typography</rune:Text></StackPanel>
+      <StackPanel Classes="row"><rune:Text Classes="name" Size="xs" Tone="muted">size=lg</rune:Text><rune:Text Size="lg">界面里的文字 Typography</rune:Text></StackPanel>
+      <StackPanel Classes="row"><rune:Text Classes="name" Size="xs" Tone="muted">size=xl</rune:Text><rune:Text Size="xl">界面里的文字 Typography</rune:Text></StackPanel>
+    </StackPanel>
+    <StackPanel Spacing="8">
+      <StackPanel Classes="row"><rune:Text Classes="name" Size="xs" Tone="muted">light</rune:Text><rune:Text Weight="light" Size="lg">季度营收 ¥1,280,000</rune:Text></StackPanel>
+      <StackPanel Classes="row"><rune:Text Classes="name" Size="xs" Tone="muted">normal</rune:Text><rune:Text Weight="normal" Size="lg">季度营收 ¥1,280,000</rune:Text></StackPanel>
+      <StackPanel Classes="row"><rune:Text Classes="name" Size="xs" Tone="muted">medium</rune:Text><rune:Text Weight="medium" Size="lg">季度营收 ¥1,280,000</rune:Text></StackPanel>
+      <StackPanel Classes="row"><rune:Text Classes="name" Size="xs" Tone="muted">semibold</rune:Text><rune:Text Weight="semibold" Size="lg">季度营收 ¥1,280,000</rune:Text></StackPanel>
+      <StackPanel Classes="row"><rune:Text Classes="name" Size="xs" Tone="muted">bold</rune:Text><rune:Text Weight="bold" Size="lg">季度营收 ¥1,280,000</rune:Text></StackPanel>
+    </StackPanel>
+  </WrapPanel>
+</UserControl>

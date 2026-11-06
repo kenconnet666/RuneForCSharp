@@ -1,0 +1,24 @@
+<!--
+  Text 家族的主题：只放各组件自己的默认值（vue-tsx-pro 的 createText 的 defaults），使用方的样式能改。
+  档位不写成嵌套样式：Text 在代码里按档位绑定主题资源（见 Text.cs）
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <!-- 浏览器里的文字放不下就换行；TextBlock 默认不换行 -->
+  <ControlTheme x:Key="{x:Type rune:Text}" TargetType="rune:Text">
+    <Setter Property="TextWrapping" Value="Wrap" />
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type rune:Paragraph}" TargetType="rune:Paragraph" BasedOn="{StaticResource {x:Type rune:Text}}">
+    <Setter Property="Wrap" Value="Pretty" />
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type rune:Strong}" TargetType="rune:Strong" BasedOn="{StaticResource {x:Type rune:Text}}">
+    <Setter Property="Weight" Value="semibold" />
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type rune:Em}" TargetType="rune:Em" BasedOn="{StaticResource {x:Type rune:Text}}">
+    <Setter Property="FontStyle" Value="Italic" />
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type rune:Small}" TargetType="rune:Small" BasedOn="{StaticResource {x:Type rune:Text}}">
+    <Setter Property="Size" Value="xs" />
+  </ControlTheme>
+</ResourceDictionary>

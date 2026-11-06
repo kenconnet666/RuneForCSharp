@@ -322,4 +322,11 @@ RuneForBlazor 已经走过一遍这些组件，同一个组件先看它踩过的
 
 ## 待定的决定
 
-暂无。新的待定项写在这里：日期、事项、卡在哪、要决定什么，附上建议。
+新的待定项写在这里：日期、事项、卡在哪、要决定什么，附上建议。
+
+- **2026-11-06 WPF 的 Text 家族从哪派生**（Avalonia 已做；WinForms 是无窗口元素，不受影响）。
+  - 卡在哪：Text 会被别的组件当部件放进模板（Field 的说明、Empty 的描述……）。WPF 外层的隐式样式只进得了 Control 派生元素的模板（DESIGN §7），从 TextBlock 派生的 Text 在模板里收不到 Provider 按类型写的样式。
+  - 选项：
+    - A. 从 TextBlock 派生：行内内容（Run、Bold、InlineUIContainer）、换行、截断、选择、读屏都现成，开销最小。模板里的 Text 一律给部件样式键；Provider 合成部件键时让它 BasedOn 同一组件的类型键结果，"所有实例"就能进模板。
+    - B. 从 Control 派生、OnRender 里画 FormattedText（MaxTextWidth、MaxLineCount、Trimming 都有）：隐式样式直接进模板；但只能放纯文字，没有行内内容，读屏、选择要自己做。
+  - 建议 A（Provider 的部件键本来就要按类型键叠，代价在 Provider 一处）。没有回复前先按 A 做，Provider 那一步做部件转发时一起实现。

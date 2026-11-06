@@ -1,0 +1,39 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/avalonia"
+             x:Class="Rune.Avalonia.Examples.TextTones">
+  <!-- 三张卡片；Card 做出来后换成 rune:Card -->
+  <UserControl.Styles>
+    <Style Selector="WrapPanel > Border">
+      <Setter Property="Width" Value="240" />
+      <Setter Property="Padding" Value="16" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+      <Setter Property="Background" Value="{DynamicResource Rune.Brush.Surface}" />
+    </Style>
+  </UserControl.Styles>
+  <WrapPanel ItemSpacing="12" LineSpacing="12">
+    <Border>
+      <StackPanel Spacing="4">
+        <rune:Strong>部署完成</rune:Strong>
+        <rune:Text Size="sm" Tone="muted">production · 3 分钟前 · 由 @lin 触发</rune:Text>
+        <rune:Text Size="sm" Tone="success">全部 128 项检查通过</rune:Text>
+      </StackPanel>
+    </Border>
+    <Border>
+      <StackPanel Spacing="4">
+        <rune:Strong>账单即将到期</rune:Strong>
+        <rune:Text Size="sm" Tone="warning">还有 2 天自动续费 ¥299</rune:Text>
+        <rune:Text Size="sm" Tone="accent">查看账单详情</rune:Text>
+      </StackPanel>
+    </Border>
+    <Border>
+      <StackPanel Spacing="4">
+        <rune:Strong>同步失败</rune:Strong>
+        <rune:Text Size="sm" Tone="danger">网络连接中断，已暂停上传</rune:Text>
+        <rune:Paragraph Size="sm" Tone="info">恢复联网后会自动重试，不用重新选择文件。</rune:Paragraph>
+      </StackPanel>
+    </Border>
+  </WrapPanel>
+</UserControl>
