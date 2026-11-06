@@ -156,6 +156,38 @@ vue-tsx-pro 那边的会话改了设计时会发通知过来（每完成一个�
 | 文档站示例画布改用页面底色，卡片才看得出层级 | 三个平台的 Gallery 窗口已是 `Background`，示例里的卡片用 Surface | 不涉及 |
 | 0.11 的使用方变化在 RELEASE.md，剩余工作在 ROADMAP 阶段 24 | — | 合入 master 后按 RELEASE.md 逐条核对，与第二、三批一起重新生成 token、语言包 |
 
+### 0.11 全量清单对照（2026-11-06 通知；GitHub 上 feat/style-overhaul 已到 da5a4970 chore(release): 0.11.0，master 仍是 9d5af3f3）
+
+状态：**已有**＝C# 版已经是这样；**合入后**＝等上游 master 合入，CI 按 GitHub master 核对生成文件，提前生成会让 CI 失败；**待定**＝已列工作包，等用户确认开工；**做时照做**＝组件还没做；**不涉及**＝网页专有。
+
+| 上游 | 状态 | 我们的对应 |
+|---|---|---|
+| 一.1 按合并来源分段、@layer；宿主不分层的 CSS 盖过组件库 | 待定（第 3 包） | 桌面的对应是 Provider 合成：后面的普通取值替换前面的条件取值。宿主一侧：Avalonia 应用的 Styles 排在 RuneTheme 后、WPF 应用资源里的隐式样式本来就盖过组件库 |
+| 一.2 条件别名（_hover、_disabled…） | 不涉及 | 平台用伪类、Trigger；"已选、不可用写在悬停之后"的先后规则见上一节 |
+| 一.3 compound 的 `when` → `match` | 不涉及 | recipe-gen 是对照 button-core 手写的取值表，不读上游配方语法 |
+| 一.4 `components: { Xxx: { defaults, styles, variants } }` 一个入口 | 待定（第 2、5 包） | Avalonia、WPF：按类型的隐式主题 / 样式；WinForms 要补一个定制入口 |
+| 一.5 公开 API 收口（内部样式表不导出，hotStyles、VarTheme） | 已有 | WinForms 配方是 internal；XAML 资源键在 DESIGN 写明不稳定（随第 2 包） |
+| 二 variant 只表示外观（Skeleton shape、图表 type） | 做时照做 | Skeleton、Sparkline、TimelineChart、WaveGrid 还没做 |
+| 二 `Tone` → `TextTone`；StatusTone 不变 | 待定（第 1 包） | 三个平台各有 `Tone` 记录结构（Typography.cs），属性名 `Tone` 不变；公开类型改名，不留旧名 |
+| 二 不改的（Container/Dialog/Drawer size、NavList compact、Result status） | 做时照做 | 组件还没做 |
+| 三 去掉 ocean、新增 high-contrast-dark | 合入后 | 重新生成 token 与语言包；token-gen 会删掉 Ocean 的主题文件 |
+| 三 跟随系统时按对比度偏好选高对比 | 做时照做 | 做"跟随系统"的主题切换时接平台的高对比设置 |
+| 三 scrim、scrimStrong、onScrim | 已有 | 已按 9d5af3f3 生成 |
+| 三 去掉 Figma 资源 | 不涉及 | — |
+| 四 S2 着色页面 + 白卡片、S1 状态文字中间调、S6 占位文字 11 级 | 合入后 | 都是 token，重新生成；截图核对 Gallery 的白底按钮与 success/warning/info 文字 |
+| 四 S3 控件高度 24/28/32/36/40 | 合入后 | 见"阶段 4 第二批"：三个平台各收成一个控件高度计算，取 `Rune.Size.ControlRound` |
+| 四 S4 界面文字 600 → 500 | 待定 | 按钮家族主题的 Semibold 改 Medium（不依赖 token，确认开工就做）；Heading 的 H5/H6 还没做 |
+| 四 C1 ButtonBase 继承字重 | 已有 | ButtonBase 主题不设 FontWeight；WinForms 没有 ButtonBase |
+| 四 C2 elevated 卡片描边、C3 Field / FormSection、transitions.pop | 做时照做 | 见上两节 |
+| 四 不改的（阴影分档、display 档、info 色相、波纹默认开） | 已有 | — |
+| 五 focusRingStyles.inset / virtual、disclosureStyles.flip / turn、anchoredPanelSx | 做时照做 | 焦点环已是 ButtonBase 的部件，inset / virtual 在第一个要用的组件（列表项、输入框）里加 |
+| 五 statusToneCompound（Badge、Alert 色调取共用色表） | 待定（第 4 包） | Badge 的颜色改从调色板表取 |
+| 五 Table / DataTable 共用配方、OtpField 用输入框配方 | 做时照做 | — |
+| 五 按钮的内容、前后图标、加载指示是部件 | 已有 | `ButtonParts` 的 Content / Icon / IconEnd / Spinner（三个平台） |
+| 五 从右到左：展开箭头、Tabs / Steps 逻辑属性；Upload 小按钮底色 | 做时照做 | 见上一节 |
+| 六 文档站画布用页面底色、字体切换 | 已有 / 不涉及 | Gallery 已是页面底色；字体切换是网页的 |
+| 七 下个版本（部件补齐、状态别名、裸值换 token、截图进 CI） | 跟上游节奏 | 我们的组件都按部件做；裸值换 token 做第 2 包时一起查 |
+
 ### 进度
 
 - 2026-11-06：收到计划草案，完成上面的评估。同日上游获批，方向见"已定的方向"。代码未动，等上游各阶段的通知；还没做的组件直接按已定的词表与规则做（新名字、控件高度收成一处、浮层阴影按新规则）。
@@ -165,3 +197,4 @@ vue-tsx-pro 那边的会话改了设计时会发通知过来（每完成一个�
 - 2026-11-06：收到阶段 4 第二批的通知（分支上，未合入）。提前对分支跑了生成器，让 token-gen 认识 `round()`，避免上游合入后 CI 失败；控件高度、按钮字重的改法记在上面，等合入后与其他对齐工作一起做。
 - 2026-11-06：收到阶段 4 第三批的通知（分支上，未合入）。生成器对 8a14554a 不用改；Field、FormSection、小浮层过渡记在上面，组件还没做。
 - 2026-11-06：收到 0.11 发版前的通知。样式类本来就没当公开 API 暴露（WinForms 是 internal，XAML 的资源键藏不住，改为在 DESIGN 里写明不稳定），其余记在上面，等合入 master 后一起跟进。
+- 2026-11-06：收到 0.11 全量清单，逐项对照写在上面。代码等两件事：上游 master 合入（token、语言包、控件高度），用户确认开工（第 1–5 包、按钮字重）。
