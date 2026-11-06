@@ -101,4 +101,5 @@ jobs:
           node tools/token-gen/token-gen.mjs --check
           node tools/lang-gen/lang-gen.mjs --check
           node tools/icons-gen/icons-gen.mjs --check
+          node tools/recipe-gen/recipe-gen.mjs --check
           node tools/parity/parity.mjs >> "$GITHUB_STEP_SUMMARY"
