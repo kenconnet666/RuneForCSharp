@@ -139,6 +139,14 @@
     </Setter>
   </Style>
 
+  <!-- 链接按钮：外观同 Button / IconButton；外部链接没写 IconEnd 时显示外链图标（本地值盖过样式触发器） -->
+  <Style TargetType="rune:LinkButton" BasedOn="{StaticResource {x:Type rune:Button}}">
+    <Style.Triggers>
+      <Trigger Property="External" Value="True"><Setter Property="IconEnd" Value="{x:Static rune:Lucide.ArrowUpRight}" /></Trigger>
+    </Style.Triggers>
+  </Style>
+  <Style TargetType="rune:IconLinkButton" BasedOn="{StaticResource {x:Type rune:IconButton}}" />
+
   <!-- 预设的图标按钮：只换图标，读屏名称在代码里取语言包 -->
   <Style TargetType="rune:CloseButton" BasedOn="{StaticResource {x:Type rune:IconButton}}">
     <Setter Property="Icon" Value="{x:Static rune:Lucide.X}" />
