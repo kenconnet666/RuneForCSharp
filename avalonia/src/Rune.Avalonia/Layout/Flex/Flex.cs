@@ -18,6 +18,8 @@ namespace Rune.Avalonia;
 /// </code>
 /// 子元素写 <c>rune:Flex.Grow="True"</c> 分剩下的空间（也能缩到比内容窄，文字才能截断）；Flex 自己的 Grow 是同一个附加属性，放在外层 Flex 里时生效。
 /// 不够放时各项按内容宽度加权收缩，最多缩到内容的最小宽度（CSS 的 flex-shrink: 1）。间距按 Flex 自己的字号算（em）。
+/// 自己的大小照平台面板的规矩（与 StackPanel、Grid 一样）：VerticalAlignment、HorizontalAlignment 默认 Stretch，放在定高的宿主里会被拉满，
+/// Align="center" 的一行这时落在整块高度的中间；CSS 里 flex 容器的高度跟着内容。要贴着上边就写 VerticalAlignment="Top"。
 /// </summary>
 public class Flex : Panel
 {
