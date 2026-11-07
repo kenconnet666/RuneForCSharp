@@ -179,4 +179,11 @@
   <Style TargetType="rune:ClearButton" BasedOn="{StaticResource {x:Type rune:IconButton}}">
     <Setter Property="Icon" Value="{x:Static rune:Lucide.CircleX}" />
   </Style>
+  <!-- 复制按钮：复制成功时换成对勾 -->
+  <Style TargetType="rune:CopyButton" BasedOn="{StaticResource {x:Type rune:IconButton}}">
+    <Setter Property="Icon" Value="{x:Static rune:Lucide.Copy}" />
+    <Style.Triggers>
+      <Trigger Property="IsCopied" Value="True"><Setter Property="Icon" Value="{x:Static rune:Lucide.Check}" /></Trigger>
+    </Style.Triggers>
+  </Style>
 </ResourceDictionary>

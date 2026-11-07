@@ -618,6 +618,16 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 取值核对：上游的 Field、Label 没有部件标记，inspect 把它们的部件按标签记（星号是 @svg）；checkbox 页（含 validation）Avalonia、WPF 0 差异。表单页（Form 的 states、layout 等）的示例要等 TextField、Select、NumberField、Form。
 - 没做：表单（Form、useForm：`name`、`valueProp`、按名字取错误与约束、提交时焦点移到第一个出错的控件）、字段布局的统一设置（Form、FormSection 的 labelPlacement、readonly、disabled）。WinForms 的 propsLabel（标签是控件）、propsControl（控件列没有元素）。
 
+### CopyButton（2026-11-07）
+
+- 外观同 IconButton（ghost、中性色），图标固定是复制 / 对勾（上游没有 icon prop）。`Value` 是要复制的文字；上游的"value 给函数"拆成 `ValueFactory`（`Func<Task<string>>`，点击时才取，等待时 IsLoading、重复点击不再取）。`Timeout` 是 TimeSpan（默认 2 秒）；`onCopied` 是事件 `Copied`（`CopiedEventArgs.Success`、`Error`），取值与写剪贴板的异常都收在这里。
+- 剪贴板：Avalonia 是 TopLevel 的 Clipboard（headless 测试里是假的剪贴板）；WPF `Clipboard.SetText`；WinForms `Clipboard.SetDataObject(text, true, 5, 100)`（剪贴板被占用时重试）。WPF、WinForms 的测试写真实的系统剪贴板，测完放回原来的文字。
+- 换成对勾：Avalonia 是主题里 `^:copied /template/ rune|Icon#PART_Icon` 换图形（Icon 属性不动）；WPF 是样式触发器 `IsCopied` 换 Icon；WinForms 元素的 `IsCopied` 换 Icon。弹出动画从 0.5 倍、透明到原样（durations.md、enter）：Avalonia 用 Transitions（关键帧动画没有 TransformOperations 的插值器）、WPF 用 DoubleAnimation、WinForms 是 Animator 推一个进度信号，PaintContent 里缩放、淡入。
+- 复原用 Task.Delay 再回到 UI 线程（headless 的调度器不走 DispatcherTimer），再次复制作废上一次的复原。
+- 播报"已复制"：WPF 发 UIA 通知事件（RaiseNotificationEvent），WinForms 发 `RaiseAutomationNotification`；Avalonia 没有通知事件，按钮是礼貌的实时区域，复制后项状态（ItemStatus）是"已复制"（WPF 也报项状态）。
+- 测试的等待：Avalonia `HeadlessUi.Until` / `Pump`，WPF `WpfUi.Until`（三处测试都要等异步结果，收进了测试的基础设施）。
+- 示例：上游的 CopyButton 在 icon-button 页的 states（还要 Tooltip、focusableWhenDisabled）与 presets（还要 TextField）里，这两个示例等这些组件做好再补。
+
 ### Spinner
 
 - 第一个带部件的组件（`propsIcon`），三个平台按 §7 的写法各落地一次：

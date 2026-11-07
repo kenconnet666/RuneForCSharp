@@ -236,6 +236,7 @@ sealed class StyleReport
         ["IconLinkButton"] = "button",
         ["CloseButton"] = "button",
         ["ClearButton"] = "button",
+        ["CopyButton"] = "button",
         // 上游的勾选类（Switch，以后的 Checkbox、Radio）共用 choice 的部件标记
         ["Switch"] = "choice",
         ["Checkbox"] = "choice",

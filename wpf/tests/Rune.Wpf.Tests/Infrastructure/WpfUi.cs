@@ -80,6 +80,16 @@ static class WpfUi
         Dispatcher.PushFrame(frame);
     }
 
+    /// <summary>边处理消息边等，直到条件成立（异步的事件处理、延时）；超过 3 秒算失败。</summary>
+    public static void Until(Func<bool> condition)
+    {
+        for (var clock = System.Diagnostics.Stopwatch.StartNew(); !condition();)
+        {
+            if (clock.Elapsed > TimeSpan.FromSeconds(3)) throw new TimeoutException("等了 3 秒条件仍不成立");
+            Wait(TimeSpan.FromMilliseconds(10));
+        }
+    }
+
     static Dispatcher StartDispatcher()
     {
         Dispatcher? result = null;

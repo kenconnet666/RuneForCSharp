@@ -4,7 +4,7 @@ using System.Windows.Controls;
 
 namespace Rune.Wpf.Examples;
 
-/// <summary>IconButton 的示例（vue-tsx-pro 文档站 base/IconButton）。states 要等 Tooltip、CopyButton 与 focusableWhenDisabled，presets 要等 CopyButton、TextField。</summary>
+/// <summary>IconButton 的示例（vue-tsx-pro 文档站 base/IconButton）。states 要等 Tooltip 与 focusableWhenDisabled，presets 要等 TextField。</summary>
 static class IconButtonExamples
 {
     public static Example[] All =>

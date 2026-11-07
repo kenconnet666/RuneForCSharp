@@ -2,7 +2,6 @@ using Avalonia;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Styling;
-using Avalonia.Threading;
 using Avalonia.VisualTree;
 
 namespace Rune.Avalonia.Tests;
@@ -11,16 +10,6 @@ namespace Rune.Avalonia.Tests;
 public class CardTests
 {
     static Border Part(Card card, string name) => card.GetVisualDescendants().OfType<Border>().Single(b => b.Name == name);
-
-    /// <summary>边等真实时间边处理投递回 UI 线程的任务（DelayedLoading 用 Task.Delay 等待）。</summary>
-    static void Pump(TimeSpan duration)
-    {
-        for (var clock = System.Diagnostics.Stopwatch.StartNew(); clock.Elapsed < duration;)
-        {
-            Thread.Sleep(10);
-            Dispatcher.UIThread.RunJobs();
-        }
-    }
 
     [Upstream("Card", "页头、正文、页脚各一层")]
     [Upstream("Card", "Card 的 extra 和 header 在同一个页头里")]
@@ -60,7 +49,7 @@ public class CardTests
         Assert.True(Part(card, CardParts.Header).IsVisible); // 页头照常显示
 
         card.IsLoading = false;
-        Pump(TimeSpan.FromMilliseconds(600));
+        HeadlessUi.Pump(TimeSpan.FromMilliseconds(600));
         Assert.False(card.SkeletonShown);
         Assert.Null(ControlAutomationPeer.CreatePeerForElement(card).GetItemStatus());
     });
@@ -74,10 +63,10 @@ public class CardTests
         Assert.False(card.Revealing); // 一开始就有正文：不淡入
 
         card.IsLoading = true;
-        Pump(TimeSpan.FromMilliseconds(300));
+        HeadlessUi.Pump(TimeSpan.FromMilliseconds(300));
         Assert.True(card.SkeletonShown);
         card.IsLoading = false;
-        Pump(TimeSpan.FromMilliseconds(600));
+        HeadlessUi.Pump(TimeSpan.FromMilliseconds(600));
         Assert.False(card.SkeletonShown);
         Assert.True(card.Revealing); // 出现过骨架：换回正文时淡入
     });

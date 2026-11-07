@@ -249,7 +249,7 @@ public abstract class ButtonCore : Element
         graphics.Clip = region;
     }
 
-    static Color Fade(Color color, float opacity) => opacity >= 1 ? color : Color.FromArgb((int)(color.A * opacity), color);
+    private protected static Color Fade(Color color, float opacity) => opacity >= 1 ? color : Color.FromArgb((int)(color.A * opacity), color);
 
     /// <summary>描边宽度：borderWidths.xs；没有描边色时同样占位。</summary>
     static float Border(ElementContext context) => context.Scale(Tokens.BorderWidth.Xs);

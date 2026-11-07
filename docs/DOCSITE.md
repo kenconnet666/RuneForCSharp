@@ -140,7 +140,7 @@ CodeBlock 的语法高亮先做一个够用的版本（C#、XAML 两种语言）
 - [x] 测试：按名字找部件、主题颜色、画刷颜色、读屏节点收进各平台测试的 `Infrastructure/Lookup.cs`。
 
 保留不拆的（理由）：
-- 按钮家族（Button、ButtonBase、ButtonCore、IconButton、IconLinkButton、LinkButton、CloseButton、ClearButton）留在 `Base/Button`：上游是分开的文件，
+- 按钮家族（Button、ButtonBase、ButtonCore、IconButton、IconLinkButton、LinkButton、CloseButton、ClearButton、CopyButton）留在 `Base/Button`：上游是分开的文件，
   但它们共用一份主题文件与 ButtonCore，拆开后每个文件夹只剩一两个文件，还要拆主题。
 - Code 与 Mark 留在 `Base/Code`：共用主题文件（WinForms 还共用 ChipText），Mark 只有几行。
 - Progress 一个文件五百多行：条形、环形共用状态与动画，拆开反而要来回跳。

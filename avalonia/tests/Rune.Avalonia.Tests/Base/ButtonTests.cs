@@ -8,7 +8,6 @@ using Avalonia.Input;
 using Avalonia.Input.Raw;
 using Avalonia.Media;
 using Avalonia.Styling;
-using Avalonia.Threading;
 using Avalonia.VisualTree;
 
 namespace Rune.Avalonia.Tests;
@@ -87,7 +86,7 @@ public class ButtonTests
         Assert.Equal(Provider.GetLang(button).Loading, ControlAutomationPeer.CreatePeerForElement(button).GetItemStatus());
         Assert.DoesNotContain(":spinner", button.Classes); // 200 毫秒内不出现
 
-        Pump(TimeSpan.FromMilliseconds(350));
+        HeadlessUi.Pump(TimeSpan.FromMilliseconds(350));
         Assert.Contains(":spinner", button.Classes);
         Assert.True(Part<Spinner>(button, ButtonParts.Spinner).IsVisible);
         Assert.Equal(0, Part<StackPanel>(button, ButtonParts.Content).Opacity); // 内容透明，宽度不变
@@ -97,19 +96,9 @@ public class ButtonTests
         window.MouseUp(at, MouseButton.Left);
         Assert.Equal(1, clicks);
         Assert.Contains(":spinner", button.Classes); // 出现了至少显示 0.5 秒
-        Pump(TimeSpan.FromMilliseconds(600));
+        HeadlessUi.Pump(TimeSpan.FromMilliseconds(600));
         Assert.DoesNotContain(":spinner", button.Classes);
     });
-
-    /// <summary>边等真实时间边处理投递回 UI 线程的任务（DelayedLoading 用 Task.Delay 等待）。</summary>
-    static void Pump(TimeSpan duration)
-    {
-        for (var clock = System.Diagnostics.Stopwatch.StartNew(); clock.Elapsed < duration;)
-        {
-            Thread.Sleep(10);
-            Dispatcher.UIThread.RunJobs();
-        }
-    }
 
     [Fact]
     public Task Pressing_starts_a_ripple_of_the_text_color() => HeadlessUi.Run(() =>

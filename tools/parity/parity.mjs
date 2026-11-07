@@ -19,7 +19,8 @@ const LIBRARIES = [
 ];
 
 const pascal = (name) => name.replace(/^_/, '').replace(/^\w/, (c) => c.toUpperCase());
-const csName = (component, prop) => COMPONENT_PROP_RENAMES[component]?.[prop] ?? PROP_RENAMES[prop] ?? pascal(prop);
+// 回调 onCopied 是 C# 的事件 Copied
+const csName = (component, prop) => COMPONENT_PROP_RENAMES[component]?.[prop] ?? PROP_RENAMES[prop] ?? pascal(prop.replace(/^on(?=[A-Z])/, ''));
 
 /** vue-tsx-pro 的组件：`export const 名字 = _component(…)` 或工厂（createText、createFlex……，createContext 不算） */
 function vueComponents(vue) {
@@ -37,7 +38,7 @@ function vueComponents(vue) {
 }
 
 /**
- * 一个库的 C# 源码：公开的类 → 它的公开属性（按文件读，一个文件里的属性算给文件里声明的类），
+ * 一个库的 C# 源码：公开的类 → 它的公开属性与事件（按文件读，一个文件里的属性算给文件里声明的类），
  * 加上库里基类的（IconButton 的 Variant 在 ButtonCore 里）。限定名的基类（global::Avalonia.Controls.Button）是平台的，不展开
  */
 function csharpTypes(dir) {
@@ -58,7 +59,9 @@ function csharpTypes(dir) {
         const props = [...text.matchAll(/public\s+(?:(?:static|required|override|virtual|new)\s+)*[^\n=;]*?\S\s+(\w+)\s*(?:\{|=>)/g)].map((m) => m[1]);
         // 部件名常量（Avalonia 的 `SpinnerParts.Icon = "PART_Icon"`、WPF 的部件样式键）：按字段收进所在的类
         const fields = [...text.matchAll(/public\s+(?:const|static\s+readonly)\s+[\w.<>?]+\s+(\w+)\s*=/g)].map((m) => m[1]);
-        for (const type of classes) types.set(type, new Set([...(types.get(type) ?? []), ...props, ...fields]));
+        // 事件（TS 的 onCopied 回调）
+        const events = [...text.matchAll(/public\s+event\s+[^\n;]*?\s(\w+)\s*;/g)].map((m) => m[1]);
+        for (const type of classes) types.set(type, new Set([...(types.get(type) ?? []), ...props, ...fields, ...events]));
       }
     }
   };

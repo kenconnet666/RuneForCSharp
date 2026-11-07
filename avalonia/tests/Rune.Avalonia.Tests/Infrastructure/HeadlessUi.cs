@@ -34,6 +34,27 @@ static class HeadlessUi
         window.UpdateLayout();
         Dispatcher.UIThread.RunJobs();
     }
+
+    /// <summary>边等真实时间边处理投递回 UI 线程的任务（库里的延时用 Task.Delay，headless 的调度器不走计时器）。</summary>
+    public static void Pump(TimeSpan duration)
+    {
+        for (var clock = System.Diagnostics.Stopwatch.StartNew(); clock.Elapsed < duration;)
+        {
+            Thread.Sleep(10);
+            Dispatcher.UIThread.RunJobs();
+        }
+    }
+
+    /// <summary>边等边处理 UI 线程上的任务，直到条件成立（异步的事件处理、延时）；超过 3 秒算失败。</summary>
+    public static void Until(Func<bool> condition)
+    {
+        for (var clock = System.Diagnostics.Stopwatch.StartNew(); !condition();)
+        {
+            if (clock.Elapsed > TimeSpan.FromSeconds(3)) throw new TimeoutException("等了 3 秒条件仍不成立");
+            Thread.Sleep(10);
+            Dispatcher.UIThread.RunJobs();
+        }
+    }
 }
 
 /// <summary>测试会话的入口（HeadlessUnitTestSession 按约定找 BuildAvaloniaApp）。</summary>

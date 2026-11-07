@@ -168,4 +168,11 @@
   <ControlTheme x:Key="{x:Type rune:ClearButton}" TargetType="rune:ClearButton" BasedOn="{StaticResource {x:Type rune:IconButton}}">
     <Setter Property="Icon" Value="{x:Static rune:Lucide.CircleX}" />
   </ControlTheme>
+  <ControlTheme x:Key="{x:Type rune:CopyButton}" TargetType="rune:CopyButton" BasedOn="{StaticResource {x:Type rune:IconButton}}">
+    <Setter Property="Icon" Value="{x:Static rune:Lucide.Copy}" />
+    <!-- 复制成功时只换图标部件的图形，使用方写的 Icon 不动 -->
+    <Style Selector="^:copied /template/ rune|Icon#PART_Icon">
+      <Setter Property="Data" Value="{x:Static rune:Lucide.Check}" />
+    </Style>
+  </ControlTheme>
 </ResourceDictionary>

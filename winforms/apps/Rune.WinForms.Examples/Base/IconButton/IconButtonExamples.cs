@@ -1,7 +1,7 @@
 namespace Rune.WinForms.Examples;
 
 /// <summary>
-/// IconButton 的示例（vue-tsx-pro 文档站 base/IconButton）。states 要等 Tooltip、CopyButton 与 focusableWhenDisabled，presets 要等 CopyButton、TextField。
+/// IconButton 的示例（vue-tsx-pro 文档站 base/IconButton）。states 要等 Tooltip 与 focusableWhenDisabled，presets 要等 TextField。
 /// WinForms 里放进窗体的是 IconButtonControl：读屏名称写 AccessibleName。
 /// </summary>
 static class IconButtonExamples
