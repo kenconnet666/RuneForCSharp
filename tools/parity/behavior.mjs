@@ -31,9 +31,11 @@ function files(dir, pattern) {
   return out;
 }
 
-/**/**
+/**
+/**
  * vue-tsx-pro：组件 → it 名字。用例归到外层 describe 写的组件（display.test.tsx 里的 describe('Card')）；
- * describe 里并列几个组件（'Card、Descriptions、Text'）时归到用例名开头的那个；不在 describe 里的归到文件名（Badge.test.tsx）
+ * describe 里并列几个组件（'Card、Descriptions、Text'）时归到用例名开头的那个；describe 不是组件名、或不在 describe 里时，
+ * 用例名以组件名开头的归到它，否则归到文件名（Badge.test.tsx）
  */
 function upstreamTests(src) {
   const tests = new Map();
@@ -55,7 +57,8 @@ function upstreamTests(src) {
       const test = /^\s*(?:(?:it|test)\(|\]\)\()\s*(['"`])((?:(?!\1).)*)\1/.exec(line);
       if (!test) continue;
       const names = describes.findLast((d) => d.names.length)?.names ?? [];
-      add(names.find((name) => test[2].startsWith(name)) ?? names[0] ?? fileComponent, test[2]);
+      // describe 不是组件名（'受控：…'）时，用例名以组件名开头的归到那个组件（'Radio：整组…'）
+      add(names.find((name) => test[2].startsWith(name)) ?? names[0] ?? /^[A-Z]\w*/.exec(test[2])?.[0] ?? fileComponent, test[2]);
     }
   }
   return tests;
