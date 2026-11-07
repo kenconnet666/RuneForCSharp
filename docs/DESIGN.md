@@ -728,6 +728,33 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   放在 FieldControl 这类不是 FlexControl 的容器里时要自己并上最小高度。
 - 没做：`format`（手机号、身份证号、银行卡号的分组显示）、Textarea、form 示例（要 Form）。
 
+### AppShell（2026-11-07）
+
+- 照上游：顶栏（3rem，surfaceTranslucent、下边 border）、品牌格（有侧栏时宽屏下与侧栏同宽 16rem，结束边的竖线接上侧栏，顶栏内容与正文起始边对齐）、
+  导航（`Nav`）、内容（`Header`）、全屏按钮；主体是侧栏（收起成 3.5rem 的图标栏，底部收起栏）、正文（space.xl 内边距）与页脚、右侧栏（14rem）。
+  断点按外壳自己的宽度（TS 按视口）：lg 以上侧栏常驻、更窄收进抽屉（顶栏最前面出现菜单按钮），xl 以上显示右侧栏，md 以下不显示全屏按钮。
+  正文那一列是外壳自己的滚动区域（`MainScroll`，TS 是整页滚动），本页目录的 ScrollRoot 给它。文案取页面组合的文案表 `PatternsMessages`（lang-gen 从上游
+  patterns/messages.ts 生成），窗口按钮的文案是桌面专有的 `DesktopMessages`（孪生文件）。
+- 收起：外壳在侧栏上设 NavList 的紧凑范围（TS 的 NavCompactContext：Avalonia、WPF 是继承的附加属性 `NavList.CompactScope`，WinForms 是外壳设的
+  `ScopeCompact`），品牌只剩标志（产品名仍是读屏名称）。AppShellBrand 是没有底色的按钮（TS 的 href 换成 Click / Command）。
+- 全屏：隐藏顶栏和侧栏、右上角的退出按钮、Esc（在窗口一级监听，焦点不在外壳里也算）；外壳是窗口的内容时窗口也全屏（Avalonia 的 WindowState.FullScreen，
+  WPF、WinForms 是无边框再最大化），退出时还原；从别处退出了窗口全屏，外壳也退出。
+- 窄时的抽屉先用外壳自己的面板（遮罩 + 起始边 xs 宽的面板，标题"导航"与关闭按钮），侧栏的内容在常驻侧栏与抽屉之间搬（一个控件只能有一个父级）；
+  抽屉里的导航换了当前页就关上。Drawer 做好后换成它。
+- **顶栏兼作标题栏（桌面特有，用户 2026-11-07 定）**：外壳是窗口的内容（WinForms：铺满窗体）时 `ExtendsContentIntoTitleBar`（默认开）去掉系统的标题栏，
+  顶栏的空白处拖动、双击最大化、右键系统菜单，结束边是自绘的 `WindowCaptionButton`（46 像素宽、与顶栏等高，悬停 fillHover、关闭悬停 danger）。
+  系统的缩放边框、贴边都保留；最大化按钮对系统报 HTMAXBUTTON，Windows 11 悬停时照样弹出贴靠布局——它因此收不到客户区的鼠标，悬停、按下从非客户区的消息转过来。
+  命中规则三个平台一样：从命中的元素往上，最大化按钮是 HTMAXBUTTON，别的窗口按钮与能聚焦的控件是客户区，都不是就是标题栏（顶栏里的提示文字也能拖）。
+  - **Avalonia 12**：`WindowDecorations = BorderOnly` + `ExtendClientAreaToDecorationsHint`，元素标 `WindowDecorationProperties.ElementRole`
+    （顶栏 TitleBar，里面能聚焦的控件 User，三个按钮 Minimize / Maximize / CloseButton；平台从命中的元素往上找第一个有角色的）。Full 时平台会自己画标题栏，所以用 BorderOnly。
+  - **WPF**：WindowChrome（CaptionHeight 0、保留缩放边框、1 像素玻璃框留住阴影）之后再挂 HwndSource 钩子——后挂的先收到消息，WM_NCHITTEST 在这里判断；
+    最大化时窗口超出显示器一圈，内容按工作区（全屏时按整个显示器）缩回来。
+  - **WinForms**：NativeWindow 子类化窗体：WM_NCCALCSIZE 把客户区上边挪回窗体顶端（最大化时让出边框厚度），WM_NCHITTEST 时顶上一条是缩放边框。
+    踩过：Control 默认可选中（Selectable），外壳里的容器要关掉，不然顶栏全是客户区；`Form.ClientSize` 仍按系统标题栏换算窗体大小，实际客户区多出标题栏的高度；
+    Form.DrawToBitmap 用 WM_PRINT 画非客户区，会画出经典主题的标题栏（屏幕上没有，核对要截屏）。WinForms 的子控件不能半透明：顶栏的半透明底直接合成，
+    抽屉的遮罩画在打开时外壳的截图上；各格自己排、自己画，没有部件属性（PLATFORM_PROPS_NOT_PORTED）。
+- 示例：fullscreen（整页示例：`Example.Framed`，inspect 不留内边距，同上游的 iframe）；window 是桌面特有的，在新窗口打开外壳。admin 要等 Stat，mixed 要等 NavBar。
+
 ### CodeBlock（2026-11-07）
 
 - 标题栏（surfaceMuted、等宽 0.85em、下边分隔线）、代码区（等宽 0.9em、行高 normal、上下 0.75em 左右 1em，ScrollArea 横向滚动，Wrap 时换行）、

@@ -82,6 +82,9 @@ Chromium（Skia）、Avalonia（Skia）、WPF（DirectWrite）、WinForms（GDI 
 | text | 14 / 14（20.49%） | 13 / 14（19.74%） | 14 / 14（10.10%） |
 | badge | 4 / 4（41.84%） | 4 / 4（48.30%） | 4 / 4（24.75%） |
 
+app-shell 页只做了 fullscreen（整页示例，效果区是 756×448 的 iframe，窄布局）：Avalonia 0.04%、WPF 0.04%、WinForms 1.24%（GDI 的文字：品牌名、H1 的行高把卡片往下推了 2 像素）。
+上游的整页示例在 iframe 里：ts-shots 进到 iframe 的文档收文字盒子；我们的示例写 `Framed: true`，inspect 不加画布的内边距与最小高度。
+
 text-field 页只做了 appearance：Avalonia 0.12%、WPF 0.43%、WinForms 4.9%（inspect 用 DrawToBitmap 截图，画不出原生 TextBox 的占位文字）。
 
 画布对齐整像素（第一节）之前，上游的效果区多在半像素上，行线、边框总差一行：code 页 Avalonia 8 / 8 超过（2.13%）、icon-button 4 / 4（1.95%），对齐后都降到 0.5% 以内。
@@ -143,7 +146,7 @@ CodeBlock 的语法高亮先做一个够用的版本（C#、XAML 两种语言）
 ## 三、先后顺序（用户 2026-11-07 定：对照基础之后先做文档站要用的组件）
 
 1. [x] **对照基础**：画布与缩放对齐、`ts-shots`、`pixels.mjs` 与报告、登记表；已做的页面跑出差异总表（见下面"差异基线"）。
-2. [ ] **文档站要用的组件**：~~Tooltip~~、~~CopyButton~~、~~ScrollArea~~、~~CodeBlock~~（2026-11-07 做了，内置简单高亮）、Tabs（核心做了：line、soft、横竖排、键盘；可关闭、排序、全部标签页等 Menu）、~~Table~~（静态表格）、~~NavList~~（紧凑时分组弹出子项等 HoverCard）、~~TableOfContents~~、~~ToggleGroup~~（分段控件）、~~TextField~~（format、Textarea 还没做）、Select、AppShell、CommandPalette。
+2. [ ] **文档站要用的组件**：~~Tooltip~~、~~CopyButton~~、~~ScrollArea~~、~~CodeBlock~~（2026-11-07 做了，内置简单高亮）、Tabs（核心做了：line、soft、横竖排、键盘；可关闭、排序、全部标签页等 Menu）、~~Table~~（静态表格）、~~NavList~~（紧凑时分组弹出子项等 HoverCard）、~~TableOfContents~~、~~ToggleGroup~~（分段控件）、~~TextField~~（format、Textarea 还没做）、~~AppShell~~（顶栏兼作窗口标题栏；抽屉等 Drawer，admin、mixed 示例等 Stat、NavBar）、Select、CommandPalette。
    每个组件照常过取值、行为、像素三道核对。
 3. [ ] **文档应用**：每个平台一个，替换 Gallery；同时做内容抽取（`docs-gen` 产出页面与示例清单、示例注册改两级、覆盖率），API 表从 XML 文档注释生成。
 4. [ ] **补齐组件与示例**：按上游的层级把 136 页做齐，每页过三道核对。
