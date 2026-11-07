@@ -14,7 +14,8 @@ namespace Rune.Avalonia;
 /// <code>
 /// &lt;rune:Collapse IsOpen="{Binding ShowAdvanced}"&gt;&lt;rune:Grid MinItemWidth="9em"&gt;…&lt;/rune:Grid&gt;&lt;/rune:Collapse&gt;
 /// </code>
-/// 高度在 0 与内容高度之间过渡（durations.md、easings.standard，系统关闭动画时直接到位）；内容一直按完整高度排版，露不出来的部分裁掉。
+/// 高度在 0 与内容高度之间过渡（durations.md、easings.standard，系统关闭动画时直接到位）；内容一直按完整高度排版，过渡中、收起时露不出来的部分裁掉，
+/// 完全展开后不再裁（贴边控件外面一圈的焦点环不被切掉，同上游 a3ae9428）。
 /// 完全收起（过渡结束）后内容隐藏：不能 Tab 聚焦，读屏也读不到；收起的过程中仍可见。展开时有伪类 :open（TS 的 data-state）。
 /// <see cref="Lazy"/> 时第一次展开才放进内容，之后收起也保留。内容层是部件 <see cref="CollapseParts.Content"/>。
 /// 页内搜索命中收起的内容时自动展开（hidden="until-found"）是浏览器的能力，桌面上没有。
@@ -81,6 +82,7 @@ public class Collapse : Control
             UpdateContent();
             holder.IsVisible = true;
         }
+        ClipToBounds = true;
         var from = GetValue(OpennessProperty);
         transition?.Cancel();
         transition = null;
@@ -112,10 +114,11 @@ public class Collapse : Control
         if (!token.IsCancellationRequested) Settle();
     }
 
-    /// <summary>过渡结束：完全收起时隐藏内容（不能聚焦、读屏读不到）。</summary>
+    /// <summary>过渡结束：完全收起时隐藏内容（不能聚焦、读屏读不到）；完全展开时不再裁剪。</summary>
     void Settle()
     {
         if (!IsOpen) holder.IsVisible = false;
+        ClipToBounds = !IsOpen;
     }
 
     /// <inheritdoc />

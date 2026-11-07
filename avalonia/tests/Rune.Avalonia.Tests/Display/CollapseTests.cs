@@ -27,11 +27,13 @@ public class CollapseTests
         Assert.True(Holder(collapse).IsVisible);
         Assert.Contains(":open", collapse.Classes);
         Assert.Equal(40, collapse.Bounds.Height);
+        Assert.False(collapse.ClipToBounds); // 完全展开后不裁：贴边控件的焦点环不被切掉
 
         collapse.IsOpen = false;
         HeadlessUi.Flush(window);
         Assert.False(Holder(collapse).IsVisible);
         Assert.Equal(0, collapse.Bounds.Height);
+        Assert.True(collapse.ClipToBounds);
     });
 
     [Fact]

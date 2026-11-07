@@ -79,6 +79,7 @@ public class Collapse : FrameworkElement
             UpdateContent();
             holder.Visibility = Visibility.Visible;
         }
+        ClipToBounds = true;
         var (from, to) = ((double)GetValue(OpennessProperty), open ? 1d : 0d);
         // 先写终值：过渡结束（FillBehavior.Stop）或被打断后留下的就是它
         SetValue(OpennessProperty, to);
@@ -103,6 +104,8 @@ public class Collapse : FrameworkElement
     void Settle()
     {
         if (!IsOpen) holder.Visibility = Visibility.Collapsed;
+        // 完全展开后不再裁：贴边控件外面一圈的焦点环不被切掉（上游 a3ae9428）；过渡中、收起时照旧裁
+        ClipToBounds = !IsOpen;
     }
 
     /// <inheritdoc />

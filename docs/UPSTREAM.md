@@ -170,8 +170,20 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 |---|---|---|
 | Listbox 自己滚动时焦点环画在里面（focusRingStyles.inset） | 核对时发现 Avalonia、WPF 的 Listbox 键盘聚焦时根本没有焦点环（焦点装饰、焦点框都关了；Avalonia 的说明以为由 ScrollArea 画，其实 ScrollArea 只在自己有焦点时画）；WinForms 本来就画在里面 | 已修：Avalonia 借 ScrollArea 里侧 2 像素的那圈（列表 :focus-visible 时显示），WPF 在根上叠一圈 2 像素、键盘聚焦时显示 |
 | CodeBlock 的复制按钮焦点环画在里面 | 我们的复制按钮同 IconButton，焦点环本来就压在按钮里面 | 不涉及 |
-| Tabs 的标签（列表可横向滚动）焦点环画在里面 | Avalonia、WPF 的标签焦点环在外面一圈（Margin -4）；WinForms 画在里面 | CI 绿后锁定时改成里面 |
+| Tabs 的标签（列表可横向滚动）焦点环画在里面 | 我们的 Tab 从 ButtonBase 派生，焦点环本来就压在里面（外面一圈的是 TabPanel 的，上游同样画在外面） | 不涉及 |
 | DataTable 表头排序按钮、Splitter 把手 | 还没做 | 做时照新的 |
+
+### 第十三批（2026-11-08 通知，master a3ae9428：焦点环不再被容器裁掉，全站检查清零）
+
+CI 还在排队，锁定停在 95a6c2ee。上游的检查是 apps/docs/src/test/focus-ring.browser.test.ts（键盘聚焦每个元素、算祖先的 overflow 是否裁到焦点环）。
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| Collapse 完全展开（过渡结束）后内容层不再裁剪，过渡中、收起时照旧 | Avalonia、WPF 的 Collapse 一直 ClipToBounds，贴边的勾选项、按钮外面一圈的焦点环会被切 | 已改：过渡开始时裁、结束时按开合定（展开不裁）；WinForms 的子控件本来就裁在自己的边里、焦点环画在控件的 Padding 里，不涉及 |
+| NavList 的行与分组触发器、Accordion 标题、Tree、VirtualList、NotificationCenter 的整行焦点环画在里面 | NavList 的行焦点环本来就在里面；Accordion、Tree 等还没做 | 做时照新的 |
+| CodeBlock 复制按钮（标题栏里也是）、SlideCaptcha 刷新、Upload 图片墙缩略图画在里面 | 复制按钮同 IconButton，本来就在里面 | 不涉及 |
+| DataTable 单元格、StatGroup 根 overflow: hidden → overflowX: clip | 还没做 | 做时照新的 |
+| Upload 的文件名链接自己省略；ItemList、PeoplePickerPanel 的内边距调整 | 还没做 | 做时照新的 |
 
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 
