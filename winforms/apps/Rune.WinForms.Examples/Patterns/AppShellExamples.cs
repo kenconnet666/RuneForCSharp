@@ -43,7 +43,7 @@ static class AppShellExamples
             hint.Text = shell.IsFullscreen ? "全屏中" : "点右边的按钮进入全屏";
             title.Text = shell.IsFullscreen ? "只看正文" : "工作台";
         };
-        return new FramePanel(shell, 28 * 16);
+        return new FramePanel(shell, 24 * 16);
     }
 
     static Control WindowDemo()

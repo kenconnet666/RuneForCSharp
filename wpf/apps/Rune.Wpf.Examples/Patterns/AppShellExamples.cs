@@ -17,8 +17,8 @@ static class AppShellExamples
         new("AppShell", "window", "顶栏兼作标题栏", "桌面特有：外壳是窗口的内容时（ExtendsContentIntoTitleBar，默认开），去掉系统的标题栏，顶栏的空白处拖动窗口、双击最大化，结束边是自绘的最小化、最大化、关闭；系统的缩放边框、贴边与 Windows 11 的贴靠布局都保留。", WindowDemo),
     ];
 
-    /// <summary>示例的效果区高 28rem（TS 的 frame）。</summary>
-    static FrameworkElement Frame(AppShell shell) => new Border { Height = 28 * 16, ClipToBounds = true, Child = shell };
+    /// <summary>示例的效果区高 24rem（TS 的 frame）。</summary>
+    static FrameworkElement Frame(AppShell shell) => new Border { Height = 24 * 16, ClipToBounds = true, Child = shell };
 
     static NavList Navigation()
     {
