@@ -2,23 +2,20 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/wpf">
-  <!-- 编号左对齐、金额右对齐（Flex 的 justify="between" 做出来后换掉 Grid） -->
-  <StackPanel HorizontalAlignment="Left" Width="320">
-    <Grid Margin="0,0,0,4">
-      <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-      <rune:Text Mono="True" Size="sm" Text="PO-2026-0276" />
-      <rune:Text Grid.Column="1" Numeric="True" Text="1,117.48 万元" />
-    </Grid>
-    <Grid Margin="0,0,0,4">
-      <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-      <rune:Text Mono="True" Size="sm" Text="PO-2026-0233" />
-      <rune:Text Grid.Column="1" Numeric="True" Text="9.10 万元" />
-    </Grid>
-    <Grid Margin="0,0,0,4">
-      <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-      <rune:Text Mono="True" Size="sm" Text="PO-2026-02114" />
-      <rune:Text Grid.Column="1" Numeric="True" Text="211.06 万元" />
-    </Grid>
-    <rune:Text Numeric="True" Tone="danger" Weight="semibold" Text="超时 11 天" />
-  </StackPanel>
+  <!-- 编号左对齐、金额右对齐：Flex 的 Justify=between，Gap 是两端靠得太近时的最小间距 -->
+  <rune:Flex Direction="column" Gap="xs" HorizontalAlignment="Left">
+    <rune:Flex Justify="between" Gap="xl">
+      <rune:Text Mono="True" Size="sm">PO-2026-0276</rune:Text>
+      <rune:Text Numeric="True">1,117.48 万元</rune:Text>
+    </rune:Flex>
+    <rune:Flex Justify="between" Gap="xl">
+      <rune:Text Mono="True" Size="sm">PO-2026-0233</rune:Text>
+      <rune:Text Numeric="True">9.10 万元</rune:Text>
+    </rune:Flex>
+    <rune:Flex Justify="between" Gap="xl">
+      <rune:Text Mono="True" Size="sm">PO-2026-02114</rune:Text>
+      <rune:Text Numeric="True">211.06 万元</rune:Text>
+    </rune:Flex>
+    <rune:Text Numeric="True" Tone="danger" Weight="semibold">超时 11 天</rune:Text>
+  </rune:Flex>
 </UserControl>

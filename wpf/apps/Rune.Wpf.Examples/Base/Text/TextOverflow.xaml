@@ -3,40 +3,25 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/wpf"
              xmlns:local="clr-namespace:Rune.Wpf.Examples">
-  <WrapPanel>
-    <WrapPanel.Resources>
-      <Style TargetType="Border">
-        <Setter Property="Width" Value="240" />
-        <Setter Property="Margin" Value="0,0,12,12" />
-        <Setter Property="Padding" Value="16" />
-        <Setter Property="CornerRadius" Value="8" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
-        <Setter Property="Background" Value="{DynamicResource Rune.Brush.Surface}" />
-      </Style>
-      <Style TargetType="rune:Small">
-        <Setter Property="Tone" Value="muted" />
-        <Setter Property="Margin" Value="0,0,0,4" />
-      </Style>
-    </WrapPanel.Resources>
-    <Border>
-      <StackPanel>
-        <rune:Small Text="Truncate：单行省略" />
-        <rune:Strong Truncate="True" Margin="0,0,0,4" Text="vue-tsx-pro / packages / ui / src / display / VirtualList.tsx" />
+  <rune:Grid MinItemWidth="18em" Gap="md">
+    <rune:Card>
+      <rune:Flex Direction="column" Gap="xs">
+        <rune:Small Tone="muted">Truncate：单行省略</rune:Small>
+        <rune:Strong Truncate="True">vue-tsx-pro / packages / ui / src / display / VirtualList.tsx</rune:Strong>
         <rune:Text Truncate="True" Tone="muted" Text="{x:Static local:TextOverflow.Long}" />
-      </StackPanel>
-    </Border>
-    <Border>
-      <StackPanel>
-        <rune:Small Text="LineClamp=&quot;2&quot;：最多两行" />
+      </rune:Flex>
+    </rune:Card>
+    <rune:Card>
+      <rune:Flex Direction="column" Gap="xs">
+        <rune:Small Tone="muted">LineClamp="2"：最多两行</rune:Small>
         <rune:Paragraph LineClamp="2" Text="{x:Static local:TextOverflow.Long}" />
-      </StackPanel>
-    </Border>
-    <Border>
-      <StackPanel>
-        <rune:Small Text="Wrap=&quot;Balance&quot;：桌面上同普通换行" />
-        <rune:Paragraph Wrap="Balance" Size="lg" Weight="semibold" Align="Center" Text="用更自然的 TSX 写 Vue 组件，符文让状态读写像普通变量" />
-      </StackPanel>
-    </Border>
-  </WrapPanel>
+      </rune:Flex>
+    </rune:Card>
+    <rune:Card>
+      <rune:Flex Direction="column" Gap="xs">
+        <rune:Small Tone="muted">Wrap="Balance"：桌面上同普通换行</rune:Small>
+        <rune:Paragraph Wrap="Balance" Size="lg" Weight="semibold" Align="Center">用更自然的 TSX 写 Vue 组件，符文让状态读写像普通变量</rune:Paragraph>
+      </rune:Flex>
+    </rune:Card>
+  </rune:Grid>
 </UserControl>
