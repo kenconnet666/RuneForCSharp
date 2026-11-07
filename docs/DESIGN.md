@@ -577,6 +577,19 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 读屏：整个 Progress 是进度条（TS 有标签行时外层不是 progressbar，桌面上合成一个元素，里面的文字对读屏隐藏），名称是 AutomationProperties.Name 或 Label，取值文字在 Value 模式里；Avalonia、WPF 另给 RangeValue（最小、最大、当前），WinForms 的自定义控件给不了。状态：Avalonia 伪类 `:indeterminate`、`:complete`，WPF、WinForms 的 `State`。
 - 部件：Indicator（条形的进度，Border）、Header、Label、ValueLabel；propsRoot 不移植（外层就是 Progress 自己）。WinForms 有 PropsLabel、PropsValueLabel（新的 `TextProps` 记录），propsIndicator、propsHeader 等部件记录（自绘的部分没有元素）。
 
+### Switch（2026-11-07）
+
+- 色调实底（TS 的 `toneFillStyles`：`--tone-fill` 与其上的 `--tone-on-fill`）三个平台各一份映射：neutral 反色表面、accent 品牌色、状态色取文字色（黄、绿的实色在表面上不到 3:1）。Avalonia 是画刷资源键（`ToneFill.Keys`），WinForms 是 `ToneFill.Colors(tone, theme.Colors)`；以后的 Checkbox、Radio 共用。
+- 尺寸都是 em：轨道 2.25 × 1.25、滑块 0.875（离轨道两端 0.1875）、轨道与文字间距 space.sm；轨道里有内容时宽度取两份中较宽的加滑块一侧 1.375、另一侧 0.5（切换时宽度不跳）；轨道与第一行文字垂直居中，高度不低于 24px（WCAG 2.5.8）。滑块在 durations.sm + 标准缓动内滑到另一端，从右到左时整体镜像。
+- 行为：空格松开时切换、整块可点；只读时能聚焦、不能切换；`IsLoading` 时不能切换，滑块里转圈（`DelayedLoading` 防闪烁，读屏的“忙”立即生效）。切换前发可取消的 `Toggling`（带要切到的值），受控用法“等接口再写回”拦下它、接口回来再写 `IsChecked`（TS 的受控 `onUpdate:_checked`）。
+- WinForms：
+  - 元素 `Switch` + 宿主 `SwitchControl`；轨道、滑块、焦点环、轨道里的内容是画的。轨道色随滑块位置在 borderStrong 与实底之间插值（同一个 `Animator` 信号，等于 TS 的 background-color 过渡）；滑块的投影用主题的 shadows.sm（`Drawing.Shadow`，几圈半透明填充近似模糊）；不可用时每个颜色按 opacities.disabled 混进宿主的背景色（GDI 的文字不认 alpha，混色等价于整体半透明）。
+  - 焦点环贴着轨道（外扩 4、宽 2），画在宿主默认的 4 像素 Padding 里，只在 `ShowFocusCues` 时画。
+  - 轨道里的内容是 `SwitchContent`（文字或图标，字符串与 `IconData` 都能直接赋值：`CheckedContent = Lucide.Moon`），不另分 CheckedText / CheckedIcon；设计器里按文字编辑。图标取 `PropsContentText` 的字号（默认 xs）与色调。
+  - 部件：`PropsLabel`、`PropsContentText`（`TextProps`）、`PropsSpinner`（`IconProps`）；propsControl、propsThumb、propsContent 是画出来的，没有元素，缺口同 Progress，等部件记录（`Sx`）一起定；propsRoot 不移植（外层就是 Switch）。
+  - 读屏：复选按钮（`AccessibleRole.CheckButton`），名称是 AccessibleName 或文字，状态选中 / 未选中（切换时发 StateChange）、切换中带 Busy、只读带 ReadOnly；轨道里的内容不进无障碍树。MSAA 没有“必填”“校验未通过”的状态，`IsRequired`、`IsInvalid` 只影响外观。
+  - 文字的行高按字体算（不是 TS 的 1.5em），在 1.5em 的第一行里垂直居中，多行时上下各留一份。
+
 ### Spinner
 
 - 第一个带部件的组件（`propsIcon`），三个平台按 §7 的写法各落地一次：
