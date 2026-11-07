@@ -222,6 +222,17 @@ areaLabels、pointLabels 同样改了。
 Gauge（dial、svg、track、value、band、target、ends）、QuarterCalendar（root、header、heading、grid，同 CalendarView）、Rating（root、star、clip）、
 NavBar（root、list、item）补了部件标记。这些组件都还没做，做时部件名照这里。
 
+### 第十八批（2026-11-08 通知，0.14.0 发版；之后的 56e28b39 进下一版）
+
+锁定跟到 b2c94ade（0.14.0 发版前 CI 绿的最新提交，含部件名 camelCase 与第七、八批；0.14.0 的发版提交与 56e28b39 的 CI 还在跑）。生成文件、属性对照都没变。
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| 0.14.0：焦点环不被裁、space.xxs、部件名 camelCase、图表数据表等 | 已在前几批跟进 | 不涉及 |
+| 新的单元测试（ac894f2c 等）：ButtonBase 的 type、不可用、加载中；Label 的星号与 data-disabled、for 指向一组时聚焦第一个控件；SelectedTags 单独用时对读屏隐藏、移除按钮不进 Tab、数字的 maxTagCount；Tooltip 的描述、延时、Esc、触屏不显示 | 行为对照多了 10 条没对上（203 条、65 条），多数是我们已有的行为没标记，Label 的“一组”与 SelectedTags 单独使用要先核对 | 并进行为对照的整理：逐条对上已有测试、补测试或登记不适用 |
+| Timeline、Stat、CodeBlock、Tour 成为配方组件（components.Xxx 设默认值、按部件追加样式）；CodeBlock 部件标记 header、title、body、pre、code、line、lineNumber；CodeBlockOptions：wrap、copyable、lineNumbers、maxLines、flush | 我们 CodeBlock 的部件名本来就是这些；Avalonia、WPF 的默认值用平台样式就能设；WinForms 按组件的默认值记录还没有 CodeBlock 的 | 56e28b39 绿了锁定时：WinForms 加 CodeBlockDefaults（Wrap、Copyable、LineNumbers、MaxLines、Flush），重跑 code 页的取值对照 |
+| Stat 的部件标记、TimelineOptions、StatOptions、TourOptions | 还没做 | 做时照新的 |
+
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 
 计划：vue-tsx-pro 的 `.claude/reports/style-overhaul-plan.md`（阶段 0 护栏 → 1 引擎 → 2 架构与 API → 3 整理 → 4 美学 → 5 文档）。
