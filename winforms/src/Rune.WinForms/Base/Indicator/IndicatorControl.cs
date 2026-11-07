@@ -128,7 +128,7 @@ public class IndicatorControl : Panel
     internal Font CountFont => Fonts.Get(Font.FontFamily.Name, Font.SizeInPoints * 0.75f, FontStyle.Bold);
 
     /// <summary>读屏念的说明。</summary>
-    internal string Description => Label ?? (Dot ? RuneLang.Current.Value.IndicatorDot : RuneLang.Current.Value.IndicatorCount(Count ?? 0));
+    internal string Description => Label ?? (Dot ? ProviderControl.LangOf(this).IndicatorDot : ProviderControl.LangOf(this).IndicatorCount(Count ?? 0));
 
     void UpdateBadge()
     {
@@ -234,7 +234,7 @@ public class IndicatorControl : Panel
         protected override void OnPaint(PaintEventArgs e)
         {
             using var _ = paint.Track();
-            var colors = RuneTheme.Current.Value.Colors;
+            var colors = ProviderControl.ThemeOf(owner).Colors;
             var (background, foreground, _) = BadgeRecipe.Colors("solid", owner.Tone.Value, false, colors);
             var graphics = e.Graphics;
             graphics.Clear(colors.Background);

@@ -6,7 +6,7 @@ namespace Rune.WinForms;
 /// <code>
 /// RuneTheme.Current.Value = BuiltinThemes.Dark;
 /// </code>
-/// 局部主题（Provider 作用域）做 Provider 时再加，在这之上按 Parent 链取最近的一层。
+/// 这是最外层；局部的主题写在 <see cref="ProviderControl.Theme"/>，组件按 Parent 链取最近的一层。
 /// </summary>
 public static class RuneTheme
 {

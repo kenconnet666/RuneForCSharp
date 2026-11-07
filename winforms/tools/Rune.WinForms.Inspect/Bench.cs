@@ -76,7 +76,7 @@ static class BenchRunner
     {
         readonly List<(Element Element, Effect Paint)> elements = [];
 
-        ElementContext Context => new(DeviceDpi, Font, ForeColor, false);
+        ElementContext Context => ElementContext.Of(this);
 
         /// <summary>接上元素，量好、排成几行（间距 8 设备无关像素）。</summary>
         public void Arrange(Element[] items)

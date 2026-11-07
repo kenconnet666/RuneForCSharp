@@ -11,7 +11,7 @@ namespace Rune.WinForms;
 /// </code>
 /// 竖线 borderWidths.md、颜色 borderStrong；上下内边距 space.xs、起始边 space.lg（按字体的 em，随字体与 DPI 重算）。
 /// </summary>
-public class BlockquoteControl : Panel
+public class BlockquoteControl : Panel, IScopeAware
 {
     readonly Effect theme;
 
@@ -36,9 +36,18 @@ public class BlockquoteControl : Panel
     float Rule => Tokens.BorderWidth.Md * DeviceDpi / 96f;
 
     /// <summary>主题变了：文字颜色换成 textMuted、重画竖线。</summary>
+    void IScopeAware.ScopeChanged() => ApplyTheme();
+
+    /// <inheritdoc />
+    protected override void OnParentChanged(EventArgs e)
+    {
+        base.OnParentChanged(e);
+        ApplyTheme();
+    }
+
     void ApplyTheme()
     {
-        using (theme.Track()) ForeColor = RuneTheme.Current.Value.Colors.TextMuted;
+        using (theme.Track()) ForeColor = ProviderControl.ThemeOf(this).Colors.TextMuted;
         Invalidate();
     }
 
@@ -55,7 +64,7 @@ public class BlockquoteControl : Panel
         base.OnPaint(e);
         var width = (int)MathF.Ceiling(Rule);
         var x = RightToLeft == RightToLeft.Yes ? Width - width : 0;
-        using var brush = new SolidBrush(RuneTheme.Current.Value.Colors.BorderStrong);
+        using var brush = new SolidBrush(ProviderControl.ThemeOf(this).Colors.BorderStrong);
         e.Graphics.FillRectangle(brush, x, 0, width, Height);
     }
 

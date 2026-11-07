@@ -8,7 +8,7 @@ namespace Rune.WinForms;
 /// 记号（圆点、编号）在起始边的 1.5em 里靠末端，文字与它隔 space.xs；带图标时图标在前（上边距 0.2em），文字隔 space.sm，不缩进。
 /// 记号、图标、文字是画的（元素），读屏里是列表项，名称是文字。
 /// </summary>
-public class ListItemControl : Panel, IElementHost
+public class ListItemControl : Panel, IElementHost, IScopeAware
 {
     readonly Effect paint;
     readonly Text text = new();
@@ -79,7 +79,22 @@ public class ListItemControl : Panel, IElementHost
         Relayout();
     }
 
-    ElementContext Context => new(DeviceDpi, Font, ForeColor, RightToLeft == RightToLeft.Yes);
+    ElementContext Context => ElementContext.Of(this);
+
+    /// <summary>所在作用域的主题、默认值变了：重新排版、重画。</summary>
+    void IScopeAware.ScopeChanged()
+    {
+        PerformLayout();
+        Invalidate(true);
+    }
+
+    /// <inheritdoc />
+    protected override void OnParentChanged(EventArgs e)
+    {
+        base.OnParentChanged(e);
+        // 换了位置可能换了作用域
+        ((IScopeAware)this).ScopeChanged();
+    }
 
     /// <summary>文字的起始边离控件起始边多远：记号的 1.5em + space.xs，或图标 + space.sm。</summary>
     int Indent(ElementContext context) => icon is null

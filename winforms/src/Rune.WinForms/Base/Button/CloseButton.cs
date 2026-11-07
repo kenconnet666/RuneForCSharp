@@ -26,7 +26,7 @@ public class ClearButton : IconButton
 public class CloseButtonControl : ButtonControlBase<CloseButton>
 {
     /// <inheritdoc />
-    protected override string DefaultAccessibleName => RuneLang.Current.Value.Close;
+    protected override string DefaultAccessibleName => ProviderControl.LangOf(this).Close;
 }
 
 /// <summary>放进窗体、设计器里用的 <see cref="ClearButton"/>：读屏名称默认取语言包的"清空"（<see cref="Lang.Clear"/>）。输入框里清空内容用。</summary>
@@ -36,5 +36,5 @@ public class CloseButtonControl : ButtonControlBase<CloseButton>
 public class ClearButtonControl : ButtonControlBase<ClearButton>
 {
     /// <inheritdoc />
-    protected override string DefaultAccessibleName => RuneLang.Current.Value.Clear;
+    protected override string DefaultAccessibleName => ProviderControl.LangOf(this).Clear;
 }

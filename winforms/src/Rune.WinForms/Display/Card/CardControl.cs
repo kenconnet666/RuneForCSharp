@@ -15,7 +15,7 @@ namespace Rune.WinForms;
 /// 很快完成时不闪；读屏状态里带"忙"。WinForms 画不到控件外面：elevated 的阴影不画（只有抬高的表面色与弱边框）。
 /// 宽度由父容器给（停靠、锚定），高度跟着内容（AutoSize）。TS 的装饰效果（tilt、spotlight、beam）还没做。
 /// </summary>
-public class CardControl : Panel
+public class CardControl : Panel, IScopeAware
 {
     readonly CardEngine engine;
     readonly Effect paint;
@@ -128,7 +128,22 @@ public class CardControl : Panel
 
     int Line => Math.Max(1, (int)MathF.Round(Tokens.BorderWidth.Xs * DeviceDpi / 96f));
 
-    ElementContext Context => new(DeviceDpi, Font, ForeColor, RightToLeft == RightToLeft.Yes);
+    ElementContext Context => ElementContext.Of(this);
+
+    /// <summary>所在作用域的主题、默认值变了：重新排版、重画。</summary>
+    void IScopeAware.ScopeChanged()
+    {
+        PerformLayout();
+        Invalidate(true);
+    }
+
+    /// <inheritdoc />
+    protected override void OnParentChanged(EventArgs e)
+    {
+        base.OnParentChanged(e);
+        // 换了位置可能换了作用域
+        ((IScopeAware)this).ScopeChanged();
+    }
 
     bool HasHeader => Header.Length > 0 || Extra is not null;
 
@@ -183,7 +198,7 @@ public class CardControl : Panel
     {
         base.OnPaint(e);
         using var _ = paint.Track();
-        var colors = RuneTheme.Current.Value.Colors;
+        var colors = ProviderControl.ThemeOf(this).Colors;
         var (fill, border) = Variant.Value switch
         {
             "outline" => ((Color?)null, (Color?)colors.Border),
@@ -193,7 +208,7 @@ public class CardControl : Panel
         };
         var graphics = e.Graphics;
         var line = Line;
-        var radius = Radius.Value == "full" ? Height / 2f : (Radius.In(RuneTheme.Current.Value.Radii) ?? 0) * Em;
+        var radius = Radius.Value == "full" ? Height / 2f : (Radius.In(ProviderControl.ThemeOf(this).Radii) ?? 0) * Em;
         var state = graphics.Save();
         graphics.SmoothingMode = SmoothingMode.AntiAlias;
         using (var shape = Drawing.RoundedRectangle(new RectangleF(line / 2f, line / 2f, Width - line, Height - line), radius))

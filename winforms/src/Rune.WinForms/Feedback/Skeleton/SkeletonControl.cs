@@ -85,7 +85,7 @@ public class SkeletonControl : Panel
             "text" => new Size(width, (int)MathF.Round(em)),
             "heading" => new Size((int)MathF.Round(0.4f * width), (int)MathF.Round(1.5f * em)),
             "circle" => new Size((int)MathF.Round(2.5f * em), (int)MathF.Round(2.5f * em)),
-            "button" => new Size((int)MathF.Round(6 * em), (int)MathF.Round(ControlHeight.Of(new ElementContext(DeviceDpi, Font, ForeColor, false), em, Tokens.Size.Control))),
+            "button" => new Size((int)MathF.Round(6 * em), (int)MathF.Round(ControlHeight.Of(ElementContext.Of(this), em, Tokens.Size.Control))),
             "image" => new Size(width, width * 9 / 16),
             _ => null,
         };
@@ -106,7 +106,7 @@ public class SkeletonControl : Panel
         base.OnPaint(e);
         if (!IsLoading || Width <= 0 || Height <= 0) return;
         using var _ = paint.Track();
-        var theme = RuneTheme.Current.Value;
+        var theme = ProviderControl.ThemeOf(this);
         var tint = Color.FromArgb((int)Math.Round(255 * 0.09), theme.Colors.Text);
         var radius = Shape.Value == "circle" ? Height / 2f : Math.Min((Shape.Value is "button" or "image" ? theme.Radii.Md : theme.Radii.Sm) * Em, Height / 2f);
         var graphics = e.Graphics;

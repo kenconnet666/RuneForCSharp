@@ -70,6 +70,11 @@ public abstract class ButtonControlBase<T> : ElementControl<T>, IButtonControl w
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public IconProps? PropsIcon { get => Element.PropsIcon; set => Element.PropsIcon = value; }
 
+    /// <summary>外观覆盖（代码里设，上游的 sx）：盖过作用域的 <see cref="ButtonSx"/> 与配方。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public ButtonSx? Sx { get => Element.Sx; set => Element.Sx = value; }
+
     /// <summary>加载指示部件的属性（代码里设）。</summary>
     [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -80,19 +85,19 @@ public abstract class ButtonControlBase<T> : ElementControl<T>, IButtonControl w
     [DefaultValue(DialogResult.None)]
     public DialogResult DialogResult { get; set; }
 
-    bool ShouldSerializeVariant() => Variant != Defaults.Variant;
+    bool ShouldSerializeVariant() => Element.Explicit.Variant;
 
     void ResetVariant() => Variant = default;
 
-    bool ShouldSerializeTone() => Tone != Defaults.Tone;
+    bool ShouldSerializeTone() => Element.Explicit.Tone;
 
     void ResetTone() => Tone = default;
 
-    bool ShouldSerializeTextSize() => TextSize != default;
+    bool ShouldSerializeTextSize() => Element.Explicit.Size;
 
     void ResetTextSize() => TextSize = default;
 
-    bool ShouldSerializeRadius() => Radius != Defaults.Radius;
+    bool ShouldSerializeRadius() => Element.Explicit.Radius;
 
     void ResetRadius() => Radius = default;
 
@@ -234,7 +239,7 @@ public abstract class ButtonControlBase<T> : ElementControl<T>, IButtonControl w
             get
             {
                 var name = base.Name is { Length: > 0 } own ? own : owner.DefaultAccessibleName;
-                return owner.Element is ILink { External: true } ? name + RuneLang.Current.Value.LinkNewWindow : name;
+                return owner.Element is ILink { External: true } ? name + ProviderControl.LangOf(owner).LinkNewWindow : name;
             }
             set => base.Name = value;
         }

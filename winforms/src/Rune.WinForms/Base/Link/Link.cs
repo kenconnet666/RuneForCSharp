@@ -13,16 +13,23 @@ namespace Rune.WinForms;
 public class Link : Element
 {
     readonly Text text = new() { Wrap = TextWrap.NoWrap };
+    TextTone tone;
+    LinkUnderline underline;
     readonly Icon icon = new() { Data = Lucide.ArrowUpRight };
 
     /// <summary>链接文字。</summary>
     public string Content { get => text.Content; set { text.Content = value; InvalidateMeasure(); } }
 
-    /// <summary>色调；不写时 accent。</summary>
-    public TextTone Tone { get => field.Value is null ? TextTone.Accent : field; set { field = value; text.Tone = value.Value is null ? TextTone.Accent : value; Invalidate(); } }
+    /// <summary>色调；不写时取作用域的默认值（<see cref="LinkDefaults"/>），再没有时 accent。</summary>
+    public TextTone Tone { get => tone.Value is not null ? tone : ScopeDefaults?.Tone ?? TextTone.Accent; set { tone = value; Invalidate(); } }
 
-    /// <summary>下划线；不写时 always。</summary>
-    public LinkUnderline Underline { get => field.Value is null ? LinkUnderline.Always : field; set { field = value; Invalidate(); } }
+    /// <summary>下划线；不写时取作用域的默认值，再没有时 always。</summary>
+    public LinkUnderline Underline { get => underline.Value is not null ? underline : ScopeDefaults?.Underline ?? LinkUnderline.Always; set { underline = value; Invalidate(); } }
+
+    /// <summary>实例上写过的档位（设计器只序列化这些）。</summary>
+    internal (bool Tone, bool Underline) Explicit => (tone.Value is not null, underline.Value is not null);
+
+    LinkDefaults? ScopeDefaults => Scope?.ResolveDefaults<LinkDefaults>();
 
     /// <summary>外部链接：末尾显示外链图标。</summary>
     public bool External { get; set { field = value; InvalidateMeasure(); } }
@@ -33,14 +40,12 @@ public class Link : Element
     /// <summary>键盘聚焦（宿主设）：画焦点框。</summary>
     public bool IsFocusVisible { get; set { field = value; Invalidate(); } }
 
-    /// <summary>新建：文字默认品牌色。</summary>
-    public Link() => text.Tone = TextTone.Accent;
 
     /// <summary>里面的环境：要下划线时字体加上下划线。</summary>
     ElementContext Inner(ElementContext context)
     {
-        var underline = Underline == LinkUnderline.Always || (Underline == LinkUnderline.Hover && IsHovered);
-        var style = underline ? context.Font.Style | FontStyle.Underline : context.Font.Style & ~FontStyle.Underline;
+        var shown = Underline == LinkUnderline.Always || (Underline == LinkUnderline.Hover && IsHovered);
+        var style = shown ? context.Font.Style | FontStyle.Underline : context.Font.Style & ~FontStyle.Underline;
         return style == context.Font.Style ? context : context with { Font = Fonts.Get(context.Font.FontFamily.Name, context.Font.SizeInPoints, style) };
     }
 
@@ -134,11 +139,11 @@ public class LinkControl : ElementControl<Link>
     [AllowNull]
     public override string Text { get => base.Text; set => base.Text = value; }
 
-    bool ShouldSerializeTone() => Tone != TextTone.Accent;
+    bool ShouldSerializeTone() => Element.Explicit.Tone;
 
     void ResetTone() => Tone = default;
 
-    bool ShouldSerializeUnderline() => Underline != LinkUnderline.Always;
+    bool ShouldSerializeUnderline() => Element.Explicit.Underline;
 
     void ResetUnderline() => Underline = default;
 
@@ -219,7 +224,7 @@ public class LinkControl : ElementControl<Link>
     {
         public override string? Name
         {
-            get => owner.External ? base.Name + RuneLang.Current.Value.LinkNewWindow : base.Name;
+            get => owner.External ? base.Name + ProviderControl.LangOf(owner).LinkNewWindow : base.Name;
             set => base.Name = value;
         }
 
@@ -256,4 +261,17 @@ public readonly record struct LinkUnderline(string Value) : IVariant<LinkUnderli
 
     /// <inheritdoc />
     public override string ToString() => Value;
+}
+
+/// <summary>Link 在作用域里的默认值（上游的 <c>defaults.Link</c>）：<c>scope.Defaults.Set(new LinkDefaults { Underline = LinkUnderline.Hover });</c></summary>
+public sealed record LinkDefaults : IScopeRecord<LinkDefaults>
+{
+    /// <summary>色调。</summary>
+    public TextTone? Tone { get; init; }
+
+    /// <summary>下划线。</summary>
+    public LinkUnderline? Underline { get; init; }
+
+    /// <inheritdoc />
+    public LinkDefaults Merge(LinkDefaults? over) => over is null ? this : new() { Tone = over.Tone ?? Tone, Underline = over.Underline ?? Underline };
 }

@@ -16,7 +16,7 @@ public sealed record Example(string Component, string Id, string Title, string D
 public static class ExampleCatalog
 {
     /// <summary>全部示例。</summary>
-    public static IReadOnlyList<Example> All { get; } = [.. IconExamples.All, .. TextExamples.All, .. ListExamples.All, .. SpinnerExamples.All, .. BadgeExamples.All, .. ButtonExamples.All, .. IconButtonExamples.All, .. CardExamples.All, .. AvatarExamples.All, .. EmptyExamples.All, .. ProgressExamples.All, .. SwitchExamples.All];
+    public static IReadOnlyList<Example> All { get; } = [.. IconExamples.All, .. TextExamples.All, .. ListExamples.All, .. SpinnerExamples.All, .. BadgeExamples.All, .. ButtonExamples.All, .. IconButtonExamples.All, .. CardExamples.All, .. AvatarExamples.All, .. EmptyExamples.All, .. ProgressExamples.All, .. ProviderExamples.All, .. SwitchExamples.All];
 
     /// <summary>按"组件/示例名"找（不分大小写）；没有时为 null。</summary>
     /// <param name="key">如 <c>Icon/basic</c>。</param>
@@ -36,7 +36,7 @@ static class Build
     public static T Styled<T>(T container, TextSize size = default, TextTone tone = default) where T : Control
     {
         if (size.Pixels is { } pixels) container.Font = new Font(Fonts.Installed(RuneTheme.Current.Peek().Fonts.Sans), pixels * 72 / 96);
-        if (tone != default) container.ForeColor = tone.ColorIn(new ElementContext(container.DeviceDpi, container.Font, container.ForeColor, false));
+        if (tone != default) container.ForeColor = tone.ColorIn(ElementContext.Of(container));
         return container;
     }
 

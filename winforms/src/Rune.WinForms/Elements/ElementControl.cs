@@ -10,7 +10,7 @@ namespace Rune.WinForms;
 /// </summary>
 /// <typeparam name="T">元素的类型。</typeparam>
 [ToolboxItem(false)]
-public abstract class ElementControl<T> : Control, IElementHost, IBaseline where T : Element, new()
+public abstract class ElementControl<T> : Control, IElementHost, IBaseline, IScopeAware where T : Element, new()
 {
     readonly Effect paint;
 
@@ -36,7 +36,7 @@ public abstract class ElementControl<T> : Control, IElementHost, IBaseline where
     [DefaultValue(true)]
     public override bool AutoSize { get => base.AutoSize; set => base.AutoSize = value; }
 
-    ElementContext Context => new(DeviceDpi, Font, ForeColor, RightToLeft == RightToLeft.Yes);
+    ElementContext Context => ElementContext.Of(this);
 
     /// <summary>元素想要的大小加上 Padding。宽度受布局给的建议宽度与 MaximumSize 限制（同 Label：要换行就设 MaximumSize 或关掉 AutoSize）。</summary>
     public override Size GetPreferredSize(Size proposedSize)
@@ -88,6 +88,17 @@ public abstract class ElementControl<T> : Control, IElementHost, IBaseline where
     protected override void OnDpiChangedAfterParent(EventArgs e)
     {
         base.OnDpiChangedAfterParent(e);
+        RefreshLayout();
+    }
+
+    /// <summary>所在作用域的主题、默认值变了：重新量大小、重画。</summary>
+    void IScopeAware.ScopeChanged() => RefreshLayout();
+
+    /// <inheritdoc />
+    protected override void OnParentChanged(EventArgs e)
+    {
+        base.OnParentChanged(e);
+        // 换了位置可能换了作用域（默认值、主题跟着变）
         RefreshLayout();
     }
 

@@ -18,21 +18,36 @@ public abstract class ButtonCore : Element
     readonly List<RippleState> ripples = [];
     readonly DelayedLoading delayed;
     (Color? Background, Color Foreground, Color? Border) target;
+    ButtonVariant variant;
+    StatusTone tone;
+    TextSize size;
+    Radius radius;
 
     /// <summary>新建按钮。</summary>
     protected ButtonCore() => delayed = new DelayedLoading(_ => InvalidateMeasure());
 
-    /// <summary>样式；不写时取组件的默认（<see cref="DefaultVariant"/>）。</summary>
-    public ButtonVariant Variant { get => field.Value is null ? DefaultVariant : field; set { field = value; InvalidateMeasure(); } }
+    /// <summary>样式；不写时取作用域的默认值（<see cref="ButtonDefaults"/>），再没有时取组件的默认（<see cref="DefaultVariant"/>）。</summary>
+    public ButtonVariant Variant { get => variant.Value is not null ? variant : ScopeDefaults?.Variant ?? DefaultVariant; set { variant = value; InvalidateMeasure(); } }
 
-    /// <summary>色调；不写时取组件的默认（<see cref="DefaultTone"/>）。</summary>
-    public StatusTone Tone { get => field.Value is null ? DefaultTone : field; set { field = value; Invalidate(); } }
+    /// <summary>色调；不写时取作用域的默认值，再没有时取组件的默认（<see cref="DefaultTone"/>）。</summary>
+    public StatusTone Tone { get => tone.Value is not null ? tone : ScopeDefaults?.Tone ?? DefaultTone; set { tone = value; Invalidate(); } }
 
-    /// <summary>字号档位，内部尺寸随之缩放；不写时跟随宿主的字体。</summary>
-    public TextSize Size { get; set { field = value; InvalidateMeasure(); } }
+    /// <summary>字号档位，内部尺寸随之缩放；不写时取作用域的默认值，再没有时跟随宿主的字体。</summary>
+    public TextSize Size { get => size.Value is not null ? size : ScopeDefaults?.Size ?? default; set { size = value; InvalidateMeasure(); } }
 
-    /// <summary>圆角；不写时 md。</summary>
-    public Radius Radius { get => field.Value is null ? Radius.Md : field; set { field = value; Invalidate(); } }
+    /// <summary>圆角；不写时取作用域的默认值，再没有时 md。</summary>
+    public Radius Radius { get => radius.Value is not null ? radius : ScopeDefaults?.Radius ?? Radius.Md; set { radius = value; Invalidate(); } }
+
+    /// <summary>外观覆盖（上游的 sx）：盖过作用域的 <see cref="ButtonSx"/> 与配方。</summary>
+    public ButtonSx? Sx { get; set { field = value; InvalidateMeasure(); Invalidate(); } }
+
+    /// <summary>实例上写过的档位（设计器只序列化这些；没写的跟着作用域与组件默认走）。</summary>
+    internal (bool Variant, bool Tone, bool Size, bool Radius) Explicit => (variant.Value is not null, tone.Value is not null, size.Value is not null, radius.Value is not null);
+
+    ButtonDefaults? ScopeDefaults => Scope?.ResolveDefaults<ButtonDefaults>();
+
+    /// <summary>合并好的外观覆盖：作用域的在下，实例的在上。</summary>
+    ButtonSx? ResolvedSx => Scope?.ResolveStyles<ButtonSx>() is { } scoped ? scoped.Merge(Sx) : Sx;
 
     /// <summary>加载中：显示旋转指示，宽度不变，点击无效（宿主拦下）。</summary>
     public bool IsLoading { get; set { field = value; delayed.Update(value); Invalidate(); } }
@@ -119,7 +134,7 @@ public abstract class ButtonCore : Element
     /// </summary>
     void Retarget(bool animate)
     {
-        target = ButtonRecipe.Colors(Variant.Value, Tone.Value, IsHovered && IsEnabled, RuneTheme.Current.Peek().Colors);
+        target = Colors((Scope?.Theme ?? RuneTheme.Current.Peek()).Colors);
         var back = target.Background ?? Color.Transparent;
         if (animate) Animator.Animate(background, back, Tokens.Duration.Sm);
         else background.Value = back;
@@ -135,8 +150,20 @@ public abstract class ButtonCore : Element
         return context with { Font = Fonts.Get(host.FontFamily.Name, points, style), ForeColor = fore };
     }
 
-    /// <summary>左右、上下的内边距：上下 0.25em；左右 1em，链接与方形按钮没有。</summary>
-    (float Inline, float Block) Padding(float em) => (Variant == ButtonVariant.Link || Square ? 0 : em, 0.25f * em);
+    /// <summary>配方的颜色，外观覆盖写了的换掉（写了底色时悬停也用它）。</summary>
+    (Color? Background, Color Foreground, Color? Border) Colors(ThemeColors colors)
+    {
+        var recipe = ButtonRecipe.Colors(Variant.Value, Tone.Value, IsHovered && IsEnabled, colors);
+        if (ResolvedSx is not { } sx) return recipe;
+        return (sx.Background ?? recipe.Background, sx.Foreground ?? recipe.Foreground, sx.BorderColor ?? recipe.Border);
+    }
+
+    /// <summary>左右、上下的内边距：上下 0.25em；左右 1em，链接与方形按钮没有；外观覆盖写了的换掉。</summary>
+    (float Inline, float Block) Padding(float em)
+    {
+        var sx = ResolvedSx;
+        return ((sx?.PaddingInline ?? (Variant == ButtonVariant.Link || Square ? 0 : 1)) * em, (sx?.PaddingBlock ?? 0.25f) * em);
+    }
 
     /// <inheritdoc />
     protected internal override Size Measure(ElementContext context, Size available)
@@ -158,14 +185,14 @@ public abstract class ButtonCore : Element
     /// <inheritdoc />
     protected internal override void Paint(Graphics graphics, ElementContext context)
     {
-        var colors = ButtonRecipe.Colors(Variant.Value, Tone.Value, IsHovered && IsEnabled, context.Theme.Colors);
+        var colors = Colors(context.Theme.Colors);
         if (colors != target) Retarget(animate: false);
         var dim = IsEnabled ? 1f : Tokens.Opacity.Disabled;
         var inner = Inner(context, Fade(colors.Foreground, dim));
         var em = inner.Em;
         var border = Border(context);
         var bounds = new RectangleF(Bounds.X + border / 2, Bounds.Y + border / 2, Bounds.Width - border, Bounds.Height - border);
-        var radius = MathF.Min((Radius.In(context.Theme.Radii) ?? 0) * em, bounds.Height / 2);
+        var radius = MathF.Min(((ResolvedSx?.Radius ?? Radius).In(context.Theme.Radii) ?? 0) * em, bounds.Height / 2);
         var state = graphics.Save();
         try
         {

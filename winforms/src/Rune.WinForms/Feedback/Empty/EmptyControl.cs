@@ -12,7 +12,7 @@ namespace Rune.WinForms;
 /// 直接加的子控件是标题与说明之外的内容；项之间 space.sm，操作上面再空 space.sm；上下内边距 space.xl、左右 space.lg，按字体算。
 /// 宽度由父容器给（停靠、锚定），高度跟着内容。只是展示，读屏里是一组内容，名称是标题。
 /// </summary>
-public class EmptyControl : Panel, IElementHost
+public class EmptyControl : Panel, IElementHost, IScopeAware
 {
     readonly EmptyEngine engine;
     readonly Effect paint;
@@ -123,7 +123,22 @@ public class EmptyControl : Panel, IElementHost
     /// <summary>标题与说明元素（测试用）。</summary>
     internal (Text Title, Text Description) TextElements => (title, description);
 
-    ElementContext Context => new(DeviceDpi, Font, ForeColor, RightToLeft == RightToLeft.Yes);
+    ElementContext Context => ElementContext.Of(this);
+
+    /// <summary>所在作用域的主题、默认值变了：重新排版、重画。</summary>
+    void IScopeAware.ScopeChanged()
+    {
+        PerformLayout();
+        Invalidate(true);
+    }
+
+    /// <inheritdoc />
+    protected override void OnParentChanged(EventArgs e)
+    {
+        base.OnParentChanged(e);
+        // 换了位置可能换了作用域
+        ((IScopeAware)this).ScopeChanged();
+    }
 
     void ApplyTextSize()
     {
@@ -157,7 +172,7 @@ public class EmptyControl : Panel, IElementHost
     {
         base.OnPaint(e);
         using var _ = paint.Track();
-        var context = Context with { ForeColor = RuneTheme.Current.Value.Colors.Text };
+        var context = Context with { ForeColor = Context.Theme.Colors.Text };
         if (icon.Data is not null) icon.Paint(e.Graphics, context);
         if (Title.Length > 0) title.Paint(e.Graphics, context);
         if (Description.Length > 0) description.Paint(e.Graphics, context);

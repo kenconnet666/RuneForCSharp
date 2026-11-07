@@ -71,7 +71,7 @@ public class Progress : Element
 
     double? TargetPercent => Target is { } target ? PercentOf(target, Max) : null;
 
-    static string PercentText(double percent) => (percent / 100).ToString("P0", CultureInfo.GetCultureInfo(RuneLang.Current.Value.Code));
+    string PercentText(double percent) => (percent / 100).ToString("P0", CultureInfo.GetCultureInfo(CurrentLang.Code));
 
     /// <summary>读屏念的取值文字："75%"，有目标时"60%，目标 80%"；不确定进度时为 null。</summary>
     public string? SpokenValue
@@ -80,7 +80,7 @@ public class Progress : Element
         {
             if (Value is null) return null;
             var spoken = ValueText?.Invoke(Clamped, Max) ?? PercentText(Percent);
-            return TargetPercent is { } target ? $"{spoken}，{RuneLang.Current.Value.ProgressTarget(PercentText(target))}" : spoken;
+            return TargetPercent is { } target ? $"{spoken}，{CurrentLang.ProgressTarget(PercentText(target))}" : spoken;
         }
     }
 

@@ -27,6 +27,12 @@ public abstract class Element
     /// <param name="context">宿主的环境。</param>
     protected internal virtual int? Baseline(ElementContext context) => null;
 
+    /// <summary>宿主所在的作用域（<see cref="ProviderControl"/>）；宿主不是控件、或不在作用域里时为 null。</summary>
+    protected internal ProviderControl? Scope => Host is Control host ? ProviderControl.Of(host) : null;
+
+    /// <summary>所在作用域的语言包（没有作用域时应用级的）。</summary>
+    protected internal Lang CurrentLang => Scope?.EffectiveLang ?? RuneLang.Current.Value;
+
     /// <summary>外观变了：重画自己的区域。</summary>
     protected void Invalidate() => Host?.InvalidateElement(this);
 
@@ -46,15 +52,24 @@ public interface IElementHost
     void InvalidateLayout(Element element);
 }
 
-/// <summary>元素所在的环境：宿主控件的 DPI、字体、文字颜色、方向，以及当前的主题。</summary>
+/// <summary>元素所在的环境：宿主控件的 DPI、字体、文字颜色、方向，以及所在的作用域（主题、语言、组件定制）。</summary>
 /// <param name="Dpi">宿主的 DeviceDpi。</param>
 /// <param name="Font">宿主的字体（环境属性，跟随父控件）。</param>
 /// <param name="ForeColor">宿主的文字颜色（环境属性）。</param>
 /// <param name="RightToLeft">宿主是否从右到左。</param>
-public readonly record struct ElementContext(int Dpi, Font Font, Color ForeColor, bool RightToLeft)
+/// <param name="Scope">宿主所在的作用域（<see cref="ProviderControl"/>）；null 时用应用级的主题与语言。</param>
+public readonly record struct ElementContext(int Dpi, Font Font, Color ForeColor, bool RightToLeft, ProviderControl? Scope = null)
 {
-    /// <summary>当前的主题：用到时才读，读了才被绘制 effect 追踪，没读的元素换主题时不重画。</summary>
-    public ThemeTokens Theme => RuneTheme.Current.Value;
+    /// <summary>宿主控件的环境：DPI、字体、文字颜色、方向，沿 Parent 链找到的作用域。</summary>
+    /// <param name="host">宿主控件。</param>
+    public static ElementContext Of(Control host) =>
+        new(host.DeviceDpi, host.Font, host.ForeColor, host.RightToLeft == System.Windows.Forms.RightToLeft.Yes, ProviderControl.Of(host));
+
+    /// <summary>当前的主题（作用域的，没有时应用级的）：用到时才读，读了才被绘制 effect 追踪，没读的元素换主题时不重画。</summary>
+    public ThemeTokens Theme => Scope?.EffectiveTheme ?? RuneTheme.Current.Value;
+
+    /// <summary>当前的语言包（作用域的，没有时应用级的）。</summary>
+    public Lang Lang => Scope?.EffectiveLang ?? RuneLang.Current.Value;
 
     /// <summary>设备无关像素 → 设备像素。</summary>
     /// <param name="dip">设备无关像素。</param>

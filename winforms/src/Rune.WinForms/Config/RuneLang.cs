@@ -7,7 +7,7 @@ namespace Rune.WinForms;
 /// <code>
 /// RuneLang.Current.Value = Lang.EnUs;
 /// </code>
-/// 局部的语言包（Provider 作用域）做 Provider 时再加。
+/// 这是最外层；局部的语言包写在 <see cref="ProviderControl.Lang"/>。
 /// </summary>
 public static class RuneLang
 {
