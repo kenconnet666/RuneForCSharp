@@ -90,6 +90,8 @@ export const PLATFORM_COMPONENT_PROP_RENAMES = {
     Card: { padding: 'CardPadding' },
     // 同 TextFieldControl
     Select: { placeholder: 'PlaceholderText' },
+    // 控件自己有 Size
+    Dialog: { size: 'DialogSize' },
     // 扩展组件：每个控件多出的属性前面带 Tooltip（设计器里是"Tooltip 在 tooltipProvider1 上"）
     Tooltip: {
       children: 'Tooltip',
@@ -153,6 +155,7 @@ export const PROPS_NOT_PORTED = {
     propsTag: '标签是 SelectedTags 建的 sm、soft 的 Tag：样式写在 Tag 的主题或部件上',
   },
   SelectedTags: { propsTag: '标签固定是 sm、soft 的 Tag：样式写在 Tag 的主题或部件上' },
+  Dialog: { lazy: '正文是传进来的控件实例，对话框关着时不在可视树里（不排版、不绘制），本来就是打开时才有代价' },
   Popover: {
     lazy: '内容是传进来的控件实例，浮层关着时不在可视树里（不排版、不绘制），本来就是打开时才有代价',
     role: '浮层固定是对话框（Avalonia、WPF 的读屏节点、WinForms 的 AccessibleRole.Dialog）；需要打断操作的确认用对话框组件',
@@ -175,6 +178,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
   },
   WPF: {
     ScrollArea: { propsViewport: '视口就是 ScrollArea 自己：读屏名称、焦点都在它身上；滚动呈现器没有部件样式' },
+    Dialog: Object.fromEntries(['propsHeader', 'propsTitle', 'propsClose', 'propsDescription', 'propsBody', 'propsFooter', 'propsCancel', 'propsConfirm']
+      .map((prop) => [prop, '标题行、标题、关闭按钮、说明、正文、页脚、按钮是 Dialog 代码组合的子元素，部件样式键只有面板、遮罩与阴影；外观跟着各自组件的主题样式'])),
     Select: Object.fromEntries(['propsListbox', 'propsSearch'].map((prop) => [prop, '弹出层里的列表、搜索框是 Select 建的，外观跟着 Listbox、TextField 的主题样式'])),
   },
   WinForms: {
@@ -197,6 +202,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
       ...Object.fromEntries(['propsValue', 'propsTags', 'propsClear', 'propsChevron', 'propsPopover', 'propsListbox', 'propsSearch', 'propsIcon']
         .map((prop) => [prop, '部件是 SelectControl 组合的子控件与两层窗口，没有部件属性记录'])),
     },
+    Dialog: Object.fromEntries(['propsHeader', 'propsTitle', 'propsClose', 'propsDescription', 'propsBody', 'propsFooter', 'propsCancel', 'propsConfirm']
+      .map((prop) => [prop, '标题行、正文、页脚是 DialogControl 组合的子控件，面板与遮罩是两层窗口画的，没有部件属性记录'])),
     Tag: { propsRemove: '移除按钮是 CloseButtonControl 子控件，颜色、字号跟着标签；没有部件属性记录' },
     Popover: { propsArrow: '面板、阴影与箭头是组件库画在分层窗口上的位图，箭头没有可改样式的部件' },
     Listbox: Object.fromEntries(

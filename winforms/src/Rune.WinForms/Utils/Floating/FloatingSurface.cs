@@ -46,15 +46,16 @@ sealed class FloatingSurface : IDisposable
     /// <param name="inset">内容窗口离面板外沿的距离（描边加内边距）。</param>
     /// <param name="context">弹出它的控件的环境（主题、字号、DPI、书写方向）。</param>
     /// <param name="arrow">箭头：所在的边（top 是面板在触发器上方）、触发器在屏幕上的矩形、边长；null 时没有。</param>
-    public void Show(Rectangle panel, int inset, ElementContext context, (string Side, Rectangle Target, float Size)? arrow)
+    /// <param name="elevation">面板的圆角与阴影档位；默认 lg（弹出框、下拉），对话框是 xl。</param>
+    public void Show(Rectangle panel, int inset, ElementContext context, (string Side, Rectangle Target, float Size)? arrow, Elevation elevation = Elevation.Lg)
     {
         var origin = Form.Origin;
         if (origin.FindForm() is not { } host) return;
         var theme = context.Theme;
         var em = context.Em;
         var border = Border(context);
-        var radius = theme.Radii.Lg * em;
-        var shadow = theme.Shadows.Lg;
+        var radius = (elevation == Elevation.Xl ? theme.Radii.Xl : theme.Radii.Lg) * em;
+        var shadow = elevation == Elevation.Xl ? theme.Shadows.Xl : theme.Shadows.Lg;
         var overhang = (int)MathF.Ceiling(Math.Max(arrow is { } a ? 0.71f * a.Size : 0,
             shadow.Where(layer => !layer.Inset).Select(layer => context.Scale(Math.Max(Math.Abs(layer.X), Math.Abs(layer.Y)) + layer.Spread + layer.Blur)).DefaultIfEmpty(0).Max()));
         var bitmap = LayeredWindow.Canvas(new Size(panel.Width + 2 * overhang, panel.Height + 2 * overhang));
@@ -181,6 +182,16 @@ sealed class FloatingSurface : IDisposable
         Watch(null);
         Form.Dispose();
         Backdrop?.Dispose();
+    }
+
+    /// <summary>面板的圆角与阴影档位。</summary>
+    public enum Elevation
+    {
+        /// <summary>lg：弹出框、下拉。</summary>
+        Lg,
+
+        /// <summary>xl：对话框。</summary>
+        Xl,
     }
 
     /// <summary>按下鼠标的位置不在浮层、也不在弹出它的控件上：点了外面。</summary>

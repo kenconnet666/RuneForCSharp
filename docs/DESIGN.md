@@ -906,7 +906,7 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 没做：远程选项 load（searchable、custom 示例）、renderValue、表单的 name、placement。
 - 示例：basic、tags、appearance（Avalonia 0.12%–1.55%，WPF 0.10%–1.53%，WinForms 4%–5.8%）。
 
-### Dialog（2026-11-07，进行中：Avalonia、WPF 已做）
+### Dialog（2026-11-07）
 
 - 模态对话框（上游 Dialog 与内核 ModalCore）：标题行（H2 lg、关闭按钮）、说明（muted，读屏的帮助文字）、正文（ScrollArea，内容长时只滚正文）、页脚（Footer，
   靠结束边；是布局面板时占满一行；写了 Confirm 时后面是"取消 / 确认"）。面板 surfaceRaised、xs 描边、xl 圆角、xl 阴影，宽度档位 `DialogSize`（容器档位加 full，默认 xs），
@@ -915,7 +915,13 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 对话框写在哪里都行：自己不可见、不参与排版（同关着的原生 dialog 是 display: none；不然放在 Flex 里多算一个间距），打开时用一个铺满窗口客户区的弹出层放遮罩与居中的面板
   （窗口变大小时跟着）。没有用窗口的覆盖层：headless 测试的窗口没有模板，也就没有 OverlayLayer。
 - **WPF**：同样是铺满窗口客户区的 Popup（Center 定位到窗口的根元素，窗口变大小时重新定位），阴影单独一层；面板是带读屏节点（窗口类型、本地化"对话框"）的 Border 子类。
-- 没做：进出场动画、命令式打开（useDialog）、AlertDialog；WinForms 接着做。
+- **WinForms**：`DialogControl`（宽度档位叫 `DialogSize`：控件自己有 Size）。遮罩是铺满宿主窗体客户区的半透明分层窗口（点它即点了遮罩），面板用 `FloatingSurface`
+  的激活模式（加了 xl 档：xl 圆角、xl 阴影），内容窗口按圆角裁掉；打开期间用 Win32 的 EnableWindow 禁用宿主（同 ShowDialog；改 WinForms 的 Enabled 会让里面的控件按不可用重画），
+  宿主移动、变大小时跟着。不接 FloatingSurface 的"点了外面"（切到别的程序也会触发），只认遮罩上的点击。踩过：窗口显示之前子控件的 Visible 一律是 false、
+  输入框没建句柄时量出的高度偏小——有没有说明、页脚按属性判断，显示之后再量一次高度；ScrollAreaControl 不认 Padding，正文的内边距放在里面一层。
+- 没做：进出场动画、命令式打开（useDialog）、AlertDialog。
+- behavior.mjs：describe 不是纯组件名（'Dialog 的 onOpenChange'）时，用例名不以组件名开头的归到 describe 开头的组件名（原来退回文件名）。这样多归出 19 条已做组件的上游用例
+  （Badge、Button、Card、Icon 等的属性落点、Provider 默认值），原来被算成"组件还没做"，待逐条对应或登记不适用。
 - 示例：dialog（编辑资料，确认时校验与等待）、long-content（宽度档位、长正文、占满一行的页脚）。
 
 ### Spinner

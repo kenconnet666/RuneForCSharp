@@ -120,7 +120,7 @@ public class GridTests
         Assert.Equal((AccessibleRole.List, AccessibleRole.ListItem), (list.AccessibilityObject.Role, item.AccessibilityObject.Role));
     });
 
-    [Upstream("Grid", "balanced：")]
+    [Upstream("Grid", "balancedColumns：")]
     [Fact]
     public Task Balanced_never_leaves_one_item_alone_on_the_last_row() => WinFormsUi.Run(() =>
     {

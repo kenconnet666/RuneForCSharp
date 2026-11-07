@@ -107,7 +107,7 @@ public class GridTests
         Assert.Equal(AutomationControlType.ListItem, ControlAutomationPeer.CreatePeerForElement(item).GetAutomationControlType());
     });
 
-    [Upstream("Grid", "balanced：")]
+    [Upstream("Grid", "balancedColumns：")]
     [Fact]
     public Task Balanced_never_leaves_one_item_alone_on_the_last_row() => HeadlessUi.Run(() =>
     {

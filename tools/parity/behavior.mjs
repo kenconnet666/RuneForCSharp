@@ -35,7 +35,7 @@ function files(dir, pattern) {
 /**
  * vue-tsx-pro：组件 → it 名字。用例归到外层 describe 写的组件（display.test.tsx 里的 describe('Card')）；
  * describe 里并列几个组件（'Card、Descriptions、Text'）时归到用例名开头的那个；describe 不是组件名、或不在 describe 里时，
- * 用例名以组件名开头的归到它，否则归到文件名（Badge.test.tsx）
+ * 用例名以组件名开头的归到它，再其次归到 describe 开头的组件名（'Dialog 的 onOpenChange'），否则归到文件名（Badge.test.tsx）
  */
 function upstreamTests(src) {
   const tests = new Map();
@@ -50,7 +50,9 @@ function upstreamTests(src) {
       while (describes.length && describes.at(-1).indent >= indent && /^\s*\S/.test(line) && !/^\s*[)}\]]/.test(line)) describes.pop();
       const describe = /^\s*describe\(\s*(['"`])((?:(?!\1).)*)\1/.exec(line);
       if (describe) {
-        describes.push({ indent, names: describe[2].split('、').map((name) => name.trim()).filter((name) => /^[A-Z]\w*$/.test(name)) });
+        // 不是纯组件名（'Dialog 的 onOpenChange'）时记下开头的组件名：用例名不以组件名开头时归到它
+        const lead = /^[A-Z]\w*(?=\s|$)/.exec(describe[2])?.[0];
+        describes.push({ indent, lead, names: describe[2].split('、').map((name) => name.trim()).filter((name) => /^[A-Z]\w*$/.test(name)) });
         continue;
       }
       // it('名字', …)，以及 it.each([...])('名字', …) 的最后一行
@@ -58,7 +60,7 @@ function upstreamTests(src) {
       if (!test) continue;
       const names = describes.findLast((d) => d.names.length)?.names ?? [];
       // describe 不是组件名（'受控：…'）时，用例名以组件名开头的归到那个组件（'Radio：整组…'）
-      add(names.find((name) => test[2].startsWith(name)) ?? names[0] ?? /^[A-Z]\w*/.exec(test[2])?.[0] ?? fileComponent, test[2]);
+      add(names.find((name) => test[2].startsWith(name)) ?? names[0] ?? /^[A-Z]\w*/.exec(test[2])?.[0] ?? describes.findLast((d) => d.lead)?.lead ?? fileComponent, test[2]);
     }
   }
   return tests;

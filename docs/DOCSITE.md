@@ -70,6 +70,7 @@ Chromium（Skia）、Avalonia（Skia）、WPF（DirectWrite）、WinForms（GDI 
 | checkbox | 2 / 10（0.76%） | 1 / 10（0.51%） | 10 / 10（17.68%） |
 | empty | 2 / 2（0.60%） | 1 / 2（0.51%） | 2 / 2（10.71%） |
 | popover（popover、tooltip、placement） | 2 / 6（0.89%） | 4 / 6（0.92%） | 6 / 6（10.02%） |
+| dialog（dialog、long-content） | 4 / 4（1.79%） | 3 / 4（1.20%） | 4 / 4（15.01%，ToggleGroup 的 sm 档偏高） |
 | select（basic、tags、appearance） | 4 / 6（1.55%） | 2 / 6（1.53%） | 6 / 6（5.76%） |
 | icon | 2 / 14（1.82%） | 2 / 14（1.77%） | 8 / 14（7.96%） |
 | list | 4 / 4（1.51%） | 2 / 4（1.29%） | 4 / 4（11.17%） |
