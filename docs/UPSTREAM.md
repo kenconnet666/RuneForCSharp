@@ -217,6 +217,11 @@ areaLabels、pointLabels 同样改了。
 | data-part 一律 camelCase | inspect 的部件称呼本来就是 scope 连字符小写、部件 camelCase（`PART_HeaderContent` → `app-shell/headerContent`），与新规则一致；原来上游的 header-content 对不上，锁定到这一提交后 AppShell 顶栏的这一格就能配对取值 | 不用改；锁定后重跑 app-shell 的 styles 对照 |
 | 第十五批的部件名（上面）改成 camelCase | 本文第十五批只写了“见通知” | 以本批为准 |
 
+### 第十七批（2026-11-08 通知，master b2c94ade：部件补齐第八批）
+
+Gauge（dial、svg、track、value、band、target、ends）、QuarterCalendar（root、header、heading、grid，同 CalendarView）、Rating（root、star、clip）、
+NavBar（root、list、item）补了部件标记。这些组件都还没做，做时部件名照这里。
+
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 
 计划：vue-tsx-pro 的 `.claude/reports/style-overhaul-plan.md`（阶段 0 护栏 → 1 引擎 → 2 架构与 API → 3 整理 → 4 美学 → 5 文档）。
