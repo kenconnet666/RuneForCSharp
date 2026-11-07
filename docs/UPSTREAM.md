@@ -206,6 +206,17 @@ CI 还在排队，锁定停在 a189e71b。
 | NotificationList、Upload、ConditionBuilder、ColorPicker、JsonViewer、Lightbox、Timeline、ProportionBar 的内部节点补部件标记（部件名见通知） | 这些组件都还没做 | 做时部件名照上游 |
 | TreemapChart 读屏数据表的单元格只写数字（表头已有单位），三个图表共用 useChartValueText | 还没做图表 | 做时照新的 |
 
+### 第十六批（2026-11-08 通知，master 7437db27：部件名统一成 camelCase）
+
+data-scope 是组件名的连字符小写，data-part 是 camelCase 的部件名（同配方的部件键与 propsXxx）；第十五批里带连字符的名字随之改成 itemTitle、legendItem、
+toggleLine / toggleContent、wallList，此前的 dayHead、dayButton、weekNumber、edgeLine…、pathBar、eyeDropper、collapsedItem、headerContent、centerLabel、
+areaLabels、pointLabels 同样改了。
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| data-part 一律 camelCase | inspect 的部件称呼本来就是 scope 连字符小写、部件 camelCase（`PART_HeaderContent` → `app-shell/headerContent`），与新规则一致；原来上游的 header-content 对不上，锁定到这一提交后 AppShell 顶栏的这一格就能配对取值 | 不用改；锁定后重跑 app-shell 的 styles 对照 |
+| 第十五批的部件名（上面）改成 camelCase | 本文第十五批只写了“见通知” | 以本批为准 |
+
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 
 计划：vue-tsx-pro 的 `.claude/reports/style-overhaul-plan.md`（阶段 0 护栏 → 1 引擎 → 2 架构与 API → 3 整理 → 4 美学 → 5 文档）。
