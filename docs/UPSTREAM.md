@@ -80,14 +80,28 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 
 ### 第五批（2026-11-08 通知，master 到 fd628293）
 
-锁定跟到 91903a2b（QRCode，当时 CI 绿的最新提交；ad0a85ea 一次失败一次成功，728b56b4、fd628293 还在跑）。语言包重新生成：ListNoMore、QrCode、QrExpired、QrRefresh、QrScanned；token、图标、配方没变。
+锁定先跟到 91903a2b（QRCode，当时 CI 绿的最新提交；ad0a85ea 一次失败一次成功，728b56b4、fd628293 还在跑），语言包多了 ListNoMore、QrCode、QrExpired、QrRefresh、QrScanned；
+之后跟到 0.12.0 发版（dda1276f，含这一批的全部），语言包又多了 JsonViewer 的 Json*、SignaturePad 的 Signature*。token、图标、配方都没变。
 
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
 | QRCode 与自写的编码器 encodeQr（91903a2b） | 还没做 | 做时编码器做成孪生文件（纯计算），标准附录的向量一起搬进测试 |
 | 子路径 ui/area：全国省市区（ad0a85ea、01a40e80） | 还没做 Cascader、TreeSelect | 做 Cascader 时照新的 |
 | JsonViewer（728b56b4，建在 Tree 上） | 还没做 Tree | CI 绿后锁定，做时照新的 |
-| SignaturePad、纸面配色 paper（fd628293）：要拍照、扫描、导出的一律浅底深色 | 还没做 | CI 绿后锁定（语言包会多 signature 等）；做 QRCode、SignaturePad 时用同一套纸面配色 |
+| SignaturePad、纸面配色 paper（fd628293）：要拍照、扫描、导出的一律浅底深色 | 还没做 | 语言包已重新生成；做 QRCode、SignaturePad 时用同一套纸面配色 |
+
+### 第六批（2026-11-08 通知，0.12.0 之后 master 到 96efc7ad；P3 组件补缺完成）
+
+锁定停在 0.12.0（dda1276f）：这一批的 8b909944、88671dd1、613b93bb CI 失败，c09d837b、96efc7ad 还在跑，绿了再跟。
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| Carousel（8b909944、c09d837b）：原生横向滚动加吸附、autoplay、页点、APG 轮播语义 | 还没做 | 做时照新的；桌面上滚动吸附要自己做 |
+| 语言包破坏性合并：zoomIn、zoomOut、slideCounter、resetView 代替 lightbox*、chart* 的同义键 | 我们没用这些键（Lightbox、图表没做） | 锁定时重新生成语言包即可 |
+| ImageCropper，usePanZoom 加 frame、cover，Upload 的 transform（88671dd1） | 还没做 | 做时照新的 |
+| ColorPicker 与颜色工具；ColorField 的色块改成按钮弹出 ColorPicker（613b93bb，破坏性） | 还没做 ColorField | 做 ColorField 时直接照新的 |
+| DataTable、TreeDataTable 的 virtualColumns（96efc7ad） | 还没做 DataTable | 做时照新的 |
+| 下一步上游做 P2 文档站整改、P2.5 逐个组件精修，做完请我们整体跟进一遍 | | 到时按页重截、逐页对照 |
 
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 

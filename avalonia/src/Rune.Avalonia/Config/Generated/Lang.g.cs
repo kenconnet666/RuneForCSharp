@@ -474,6 +474,45 @@ public sealed partial record Lang
     /// <summary>回到顶部按钮的名称，默认“回到顶部”</summary>
     public required string BackToTop { get; init; }
 
+    /// <summary>JsonViewer：对象、数组收起时的项数，默认“{count} 项”</summary>
+    public required Func<double, string> JsonItems { get; init; }
+
+    /// <summary>JsonViewer：搜索框的提示，默认“搜索键或值”</summary>
+    public required string JsonSearch { get; init; }
+
+    /// <summary>JsonViewer：全部展开，默认“全部展开”</summary>
+    public required string JsonExpandAll { get; init; }
+
+    /// <summary>JsonViewer：全部收起，默认“全部收起”</summary>
+    public required string JsonCollapseAll { get; init; }
+
+    /// <summary>JsonViewer：复制选中项的值，默认“复制值”</summary>
+    public required string JsonCopyValue { get; init; }
+
+    /// <summary>JsonViewer：复制选中项的路径，默认“复制路径”</summary>
+    public required string JsonCopyPath { get; init; }
+
+    /// <summary>JsonViewer：没有选中项时路径栏的提示，默认“选中一项后可以复制它的值与路径”</summary>
+    public required string JsonPathHint { get; init; }
+
+    /// <summary>SignaturePad：签名区域的默认名称，默认“签名”</summary>
+    public required string Signature { get; init; }
+
+    /// <summary>SignaturePad：还没签时区域里的提示，默认“在此处签名”</summary>
+    public required string SignaturePlaceholder { get; init; }
+
+    /// <summary>SignaturePad：撤销上一笔，默认“撤销上一笔”</summary>
+    public required string SignatureUndo { get; init; }
+
+    /// <summary>SignaturePad：清空，默认“清空签名”</summary>
+    public required string SignatureClear { get; init; }
+
+    /// <summary>SignaturePad：读屏念的状态，默认“已签名”</summary>
+    public required string SignatureSigned { get; init; }
+
+    /// <summary>SignaturePad：读屏念的状态（只读时也显示），默认“未签名”</summary>
+    public required string SignatureEmpty { get; init; }
+
     /// <summary>二维码图片的默认名称（读屏），默认“二维码”</summary>
     public required string QrCode { get; init; }
 
@@ -1092,6 +1131,19 @@ public sealed partial record Lang
         RatingStar = value => string.Create(CultureInfo.InvariantCulture, $"{value} 星"),
         RatingSummary = (value, count) => (value is null ? "未评分" : string.Create(CultureInfo.InvariantCulture, $"{value} 星，满分 {count} 星")),
         BackToTop = "回到顶部",
+        JsonItems = count => string.Create(CultureInfo.InvariantCulture, $"{count} 项"),
+        JsonSearch = "搜索键或值",
+        JsonExpandAll = "全部展开",
+        JsonCollapseAll = "全部收起",
+        JsonCopyValue = "复制值",
+        JsonCopyPath = "复制路径",
+        JsonPathHint = "选中一项后可以复制它的值与路径",
+        Signature = "签名",
+        SignaturePlaceholder = "在此处签名",
+        SignatureUndo = "撤销上一笔",
+        SignatureClear = "清空签名",
+        SignatureSigned = "已签名",
+        SignatureEmpty = "未签名",
         QrCode = "二维码",
         QrExpired = "二维码已过期",
         QrRefresh = "刷新",
@@ -1477,6 +1529,19 @@ public sealed partial record Lang
         RatingStar = value => (value == 1 ? "1 star" : string.Create(CultureInfo.InvariantCulture, $"{value} stars")),
         RatingSummary = (value, count) => (value is null ? "Not rated" : string.Create(CultureInfo.InvariantCulture, $"{value} out of {count} stars")),
         BackToTop = "Back to top",
+        JsonItems = count => (count == 1 ? "1 item" : string.Create(CultureInfo.InvariantCulture, $"{count} items")),
+        JsonSearch = "Search keys or values",
+        JsonExpandAll = "Expand all",
+        JsonCollapseAll = "Collapse all",
+        JsonCopyValue = "Copy value",
+        JsonCopyPath = "Copy path",
+        JsonPathHint = "Select an item to copy its value or path",
+        Signature = "Signature",
+        SignaturePlaceholder = "Sign here",
+        SignatureUndo = "Undo last stroke",
+        SignatureClear = "Clear signature",
+        SignatureSigned = "Signed",
+        SignatureEmpty = "Not signed",
         QrCode = "QR code",
         QrExpired = "QR code expired",
         QrRefresh = "Refresh",
