@@ -9,16 +9,6 @@ namespace Rune.Wpf.Tests;
 /// <summary>Card：页头（含 extra）、正文、页脚；加载中正文换成骨架，页头照常；读屏的项状态是加载中。</summary>
 public class CardTests
 {
-    static IEnumerable<DependencyObject> Descendants(DependencyObject parent)
-    {
-        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
-        {
-            var child = VisualTreeHelper.GetChild(parent, i);
-            yield return child;
-            foreach (var descendant in Descendants(child)) yield return descendant;
-        }
-    }
-
     static StackPanel Themed(params UIElement[] children)
     {
         var host = new StackPanel { Width = 300 };
@@ -27,7 +17,7 @@ public class CardTests
         return host;
     }
 
-    static IEnumerable<string> Texts(DependencyObject root) => Descendants(root).OfType<TextBlock>().Where(text => text.IsVisible).Select(text => text.Text);
+    static IEnumerable<string> Texts(DependencyObject root) => WpfUi.Descendants(root).OfType<TextBlock>().Where(text => text.IsVisible).Select(text => text.Text);
 
     [Upstream("Card", "页头、正文、页脚各一层")]
     [Upstream("Card", "Card 的 extra 和 header 在同一个页头里")]
@@ -44,7 +34,7 @@ public class CardTests
         Assert.Equal(["操作", "内容"], Texts(onlyExtra)); // 只有 extra 也有页头
         Assert.Equal(((SolidColorBrush)full.FindResource("Rune.Brush.Surface")).Color, ((SolidColorBrush)full.Background!).Color);
         // 阴影层与表面叠在一起（阴影在后面）
-        var layers = Descendants(full).OfType<Border>().Take(2).ToList();
+        var layers = WpfUi.Descendants(full).OfType<Border>().Take(2).ToList();
         Assert.Equal(layers[0].TranslatePoint(default, full), layers[1].TranslatePoint(default, full));
         Assert.Equal(layers[0].RenderSize, layers[1].RenderSize);
     });
@@ -74,7 +64,7 @@ public class CardTests
 
         // 一开始就在加载：立即显示骨架（不等防闪烁的延迟），页头照常显示
         Assert.True(card.SkeletonShown);
-        Assert.Equal(4, Descendants(card).OfType<SkeletonText>().Single().Children.Count);
+        Assert.Equal(4, WpfUi.Descendants(card).OfType<SkeletonText>().Single().Children.Count);
         Assert.Equal(["标题"], Texts(card));
         Assert.Equal(Provider.GetLang(card).Loading, UIElementAutomationPeer.CreatePeerForElement(card).GetItemStatus());
 

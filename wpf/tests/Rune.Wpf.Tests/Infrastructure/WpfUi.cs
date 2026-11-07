@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace Rune.Wpf.Tests;
@@ -52,6 +53,17 @@ static class WpfUi
         var frame = new DispatcherFrame();
         Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.ContextIdle, () => frame.Continue = false);
         Dispatcher.PushFrame(frame);
+    }
+
+    /// <summary>可视树里的全部后代（深度优先）。</summary>
+    public static IEnumerable<DependencyObject> Descendants(DependencyObject parent)
+    {
+        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, i);
+            yield return child;
+            foreach (var descendant in Descendants(child)) yield return descendant;
+        }
     }
 
     /// <summary>边处理消息边等一段真实时间（动画按真实时间推进）。</summary>
