@@ -33,7 +33,7 @@ public class TableTests
     static TableCell Cell(Table table, int row, int column) => (TableCell)table.Rows[row].Row.Cells[column];
 
     [Fact]
-    [Upstream("Table", "渲染原生 table 结构，列标题默认 scope=\"col\"，标题是 caption")]
+    [Upstream("Table", "渲染原生 table 结构")]
     public Task Sections_rows_and_the_caption_make_the_structure() => HeadlessUi.Run(() =>
     {
         var table = Build();

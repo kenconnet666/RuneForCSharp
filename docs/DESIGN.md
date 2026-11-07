@@ -646,6 +646,24 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 没做：可关闭（Delete、中键、关闭按钮）、新建按钮、拖动与 Alt + 方向键排序、"全部标签页"菜单、propsIndicator / propsBar / propsAdd——等 Menu 一起做。
   vertical 示例的面板要 TextField。
 
+### Table（2026-11-07，静态表格）
+
+- 照上游一个部分一个组件：Table > TableCaption、TableHead / TableBody / TableFoot > TableRow > TableCell / TableHeaderCell。Table 的 Density、Variant、Striped；
+  单元格的 Align、Nowrap；表头单元格的 ColumnWidth（TS 的 width：控件自己有 Width）与 Scope。档位类型 `TableDensity`、`TableVariant`、`TableAlign` 是孪生文件（`Table/TableVariants.cs`）。
+- 排版不交给平台的表格面板：单元格逻辑上属于各自的行，可视上由表格里的一个网格统一排——列宽照 CSS 的 table-layout: auto（表格宽 100%：放得下时按各列
+  不换行的宽度比例分多出来的宽度；放不下时在最小宽度与最大宽度之间插值；表头单元格不换行；写了 ColumnWidth 的列定宽），行高取各格最高的。
+  行底色（表头 fill；斑马纹 fill；表体指针下的行 fillHover）与分隔线（表头下 border、表体行下 borderMuted、表尾上 border）由网格（WinForms 是行）画，
+  上下边吸附到设备像素：浏览器画表格也吸附，行高带小数（表头里放了徽标的那一行 35.49）时分隔线不发虚。
+- 单元格的外观：text、行高 normal；表头 textMuted、sm、中等字重；表体里的行标题中等字重；表尾加粗（行标题也照表尾）。上下内边距按密度、左右 space.md，都按单元格自己的字号。
+- **Avalonia**：Table 是 Control，里面外框 Border → 只挂可视子元素的竖排容器（标题、横向 ScrollArea → 网格）。标题与滚动区域要进 LogicalChildren，不然没有主题。
+  ScrollArea 给内容的宽度是无限的：表格在量的时候把自己的宽度交给网格分列。外观在 Table.axaml 里按 :head、:foot、:row-header 伪类。
+- **WPF**：同样的结构（FrameworkElement，AddLogicalChild / AddVisualChild），单元格按只读的 SectionKind 触发外观（Table.xaml）。分隔线用 GuidelineSet 吸附。
+- **WinForms**：TableControl、TableCaptionControl、TableHead/Body/FootControl、TableRowControl、TableCellControl、TableHeaderCellControl，都是子控件，位置由 TableControl 排；
+  单元格里是 Text（按行高 normal 竖直居中画）或子控件（横排、竖直居中）。行透明（先画出表格的圆角外框），底色按表格内框的圆角裁。
+  GDI+ 默认像素中心在整数坐标上，整数坐标的 2 像素边线会压在两行之间发虚：外框与行用 PixelOffsetMode.Half。没做最小宽度也放不下时的横向滚动。
+- 像素对照（plans）：Avalonia 0.08% / 0.12%、WPF 0.05% / 0.38%、WinForms 0.32% / 0.41%。剩下的主要是表头那一行：上游是文字加行内的徽标（vertical-align: middle），
+  行盒撑到 21.99，我们的 Flex 是 21，下面的行线差半个像素。示例：plans；invoice 要等 ToggleGroup，column-table 要等 ColumnTable。
+
 ### CodeBlock（2026-11-07）
 
 - 标题栏（surfaceMuted、等宽 0.85em、下边分隔线）、代码区（等宽 0.9em、行高 normal、上下 0.75em 左右 1em，ScrollArea 横向滚动，Wrap 时换行）、

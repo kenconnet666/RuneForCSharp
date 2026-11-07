@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// 三个库各有一份、除命名空间外逐字相同的源文件（纯计算或纯数据，不用平台类型：FlexLayout、GridLayout、StatusMap、AvatarInitials、ListboxOption、FloatingPlacement、ScrollAreaVariants、CodeHighlighting、TabsVariants）。三个库不共享代码（ROADMAP 决定 2），
+// 三个库各有一份、除命名空间外逐字相同的源文件（纯计算或纯数据，不用平台类型：FlexLayout、GridLayout、StatusMap、AvatarInitials、ListboxOption、FloatingPlacement、ScrollAreaVariants、CodeHighlighting、TabsVariants、TableVariants）。三个库不共享代码（ROADMAP 决定 2），
 // 一致性靠这里检查：改了一份，另外两份照抄。用法：node tools/twins/twins.mjs；有不同时退出码为 1
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -16,6 +16,7 @@ const TWINS = [
   ['avalonia/src/Rune.Avalonia/Layout/ScrollArea/ScrollAreaVariants.cs', 'wpf/src/Rune.Wpf/Layout/ScrollArea/ScrollAreaVariants.cs', 'winforms/src/Rune.WinForms/Layout/ScrollArea/ScrollAreaVariants.cs'],
   ['avalonia/src/Rune.Avalonia/Base/CodeBlock/CodeHighlighting.cs', 'wpf/src/Rune.Wpf/Base/CodeBlock/CodeHighlighting.cs', 'winforms/src/Rune.WinForms/Base/CodeBlock/CodeHighlighting.cs'],
   ['avalonia/src/Rune.Avalonia/Navigation/Tabs/TabsVariants.cs', 'wpf/src/Rune.Wpf/Navigation/Tabs/TabsVariants.cs', 'winforms/src/Rune.WinForms/Navigation/Tabs/TabsVariants.cs'],
+  ['avalonia/src/Rune.Avalonia/Table/TableVariants.cs', 'wpf/src/Rune.Wpf/Table/TableVariants.cs', 'winforms/src/Rune.WinForms/Table/TableVariants.cs'],
 ];
 
 /** 去掉命名空间那一行，统一换行符 */

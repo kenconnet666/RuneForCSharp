@@ -262,24 +262,29 @@ public class Table : Control
         public override void Render(DrawingContext context)
         {
             var width = Bounds.Width;
-            var y = 0d;
             IBrush? Brush(string key) => owner.Resource<IBrush?>(key, null);
             var rowBrush = Brush(owner.Variant == TableVariant.Ghost ? "Rune.Brush.Background" : "Rune.Brush.Surface");
+            // 行的上下边吸附到设备像素（同浏览器画表格）：行高带小数时分隔线不发虚。网格自己可能不在整像素上，按到根的偏移算
+            var scale = TopLevel.GetTopLevel(this)?.RenderScaling ?? 1;
+            var offset = VisualRoot is Visual root ? this.TranslatePoint(default, root)?.Y ?? 0 : 0;
+            double Snap(double value) => Math.Round((value + offset) * scale) / scale - offset;
+            Rect Band(double top, double bottom) => new(0, Snap(top), width, Snap(bottom) - Snap(top));
+            var y = 0d;
             for (var r = 0; r < rows.Count && r < heights.Length; r++)
             {
                 var (section, row, _) = rows[r];
-                var height = heights[r];
+                var bottom = y + heights[r];
                 var background = section is TableHead ? Brush("Rune.Brush.Fill")
                     : r == hovered && section is TableBody ? Brush("Rune.Brush.FillHover")
                     : row.IsStriped ? Brush("Rune.Brush.Fill") : rowBrush;
-                if (background is not null) context.FillRectangle(background, new Rect(0, y, width, height));
+                if (background is not null) context.FillRectangle(background, Band(y, bottom));
                 if (section is TableFoot)
                 {
-                    if (Brush("Rune.Brush.Border") is { } line) context.FillRectangle(line, new Rect(0, y, width, 1));
+                    if (Brush("Rune.Brush.Border") is { } line) context.FillRectangle(line, Band(y, y + 1));
                 }
                 else if (Brush(section is TableHead ? "Rune.Brush.Border" : "Rune.Brush.BorderMuted") is { } line)
-                    context.FillRectangle(line, new Rect(0, y + height - 1, width, 1));
-                y += height;
+                    context.FillRectangle(line, Band(bottom - 1, bottom));
+                y = bottom;
             }
         }
 
