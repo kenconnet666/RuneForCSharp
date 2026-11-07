@@ -53,6 +53,30 @@ public class DialogTests
     }
 
     [Fact]
+    public Task Draggable_stays_in_the_form_and_recenters_on_open() => WinFormsUi.Run(() =>
+    {
+        var dialog = new DialogControl { Title = "付款信息", Draggable = true, Content = new TextControl { Text = "核对" } };
+        WithForm(form =>
+        {
+            Open(dialog);
+            var area = form.RectangleToScreen(form.ClientRectangle);
+            var start = dialog.Surface.Backdrop!.Panel;
+
+            dialog.DragTo(new Point(60, 40));
+            Assert.Equal(new Point(start.X + 60, start.Y + 40), dialog.Surface.Backdrop.Panel.Location);
+            dialog.DragTo(new Point(5000, 5000));
+            Assert.Equal(area.Right, dialog.Surface.Backdrop.Panel.Right); // 不超出宿主窗体
+            Assert.Equal(area.Bottom, dialog.Surface.Backdrop.Panel.Bottom);
+
+            dialog.IsOpen = false;
+            WinFormsUi.Pump();
+            Open(dialog);
+            Assert.Equal(Point.Empty, dialog.Offset); // 每次打开回到正中
+            Assert.Equal(start, dialog.Surface.Backdrop.Panel);
+        }, dialog);
+    });
+
+    [Fact]
     [Upstream("Dialog", "关闭按钮是 close、确认是 confirm、Esc 是 escape")]
     public Task Close_confirm_and_escape_report_why() => WinFormsUi.Run(() =>
     {

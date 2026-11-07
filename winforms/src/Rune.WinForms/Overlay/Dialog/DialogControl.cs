@@ -13,6 +13,7 @@ namespace Rune.WinForms;
 /// 正文（内容长时只滚正文）、页脚（<see cref="Footer"/>，靠结束边；写了 <see cref="Confirm"/> 时后面是"取消 / 确认"）。宽度档位 <see cref="DialogSize"/>（控件自己有 Size；默认 xs，不超出窗体，
 /// 四周至少留 1em）。打开时焦点移到第一个能聚焦的控件（有关闭按钮时就是它），关上后还给打开前的控件。关闭按钮、取消、Esc、点遮罩（<see cref="Dismissible"/>）都先问
 /// <see cref="BeforeClose"/>；确认的任务进行中按钮加载、关不掉，结果为 false 或失败时保持打开。<see cref="OpenChanged"/> 报告原因（代码里改 IsOpen 不报告）。
+/// <see cref="Draggable"/> 时按住标题（或标题行的空白）能把面板挪开：拖到哪都不超出宿主窗体，每次打开回到正中；关闭按钮照常点。
 /// 读屏：对话框，以标题为名称、说明为帮助文字。
 /// </summary>
 [DefaultEvent(nameof(OpenChanged))]
@@ -49,6 +50,12 @@ public class DialogControl : Control
         layout.Dock = DockStyle.Fill;
         surface.Form.Controls.Add(layout);
         surface.Form.Escape += (_, _) => _ = RequestClose(OpenChangeReason.Escape);
+        foreach (var handle in new Control[] { title, layout })
+        {
+            handle.MouseDown += OnHandleDown;
+            handle.MouseMove += OnHandleMove;
+            handle.MouseUp += (_, _) => dragFrom = null;
+        }
         close.Click += (_, _) => _ = RequestClose(OpenChangeReason.Close);
         cancel.Click += (_, _) => _ = RequestClose(OpenChangeReason.Close);
         confirm.Click += (_, _) => _ = RunConfirm();
@@ -138,6 +145,40 @@ public class DialogControl : Control
     [Category("Layout")]
     public DialogSize DialogSize { get => field.Value is null ? DialogSize.Xs : field; set { field = value; if (open) Present(); } }
 
+    /// <summary>可以拖动：按住标题把面板挪开，不超出宿主窗体；每次打开回到正中。</summary>
+    [Category("Behavior")]
+    [DefaultValue(false)]
+    public bool Draggable { get; set { field = value; title.Cursor = value ? Cursors.SizeAll : Cursors.Default; } }
+
+    /// <summary>拖出来的位移（设备像素，测试用）：面板离正中的偏移，排版时限制在宿主窗体里。</summary>
+    internal Point Offset { get; private set; }
+
+    Point? dragFrom;
+    Point dragOrigin;
+
+    /// <summary>按住标题、或标题行的空白开始拖。</summary>
+    void OnHandleDown(object? sender, MouseEventArgs e)
+    {
+        if (!Draggable || e.Button != MouseButtons.Left || HeaderHidden) return;
+        if (sender == layout && e.Y > title.Bottom) return;
+        dragFrom = Cursor.Position;
+        dragOrigin = Offset;
+    }
+
+    void OnHandleMove(object? sender, MouseEventArgs e)
+    {
+        if (dragFrom is not { } from) return;
+        var now = Cursor.Position;
+        DragTo(new Point(dragOrigin.X + now.X - from.X, dragOrigin.Y + now.Y - from.Y));
+    }
+
+    /// <summary>挪到离正中这么远（重新摆面板时限制在宿主窗体里）。</summary>
+    internal void DragTo(Point offset)
+    {
+        Offset = offset;
+        if (open) PresentPanel();
+    }
+
     bool ShouldSerializeTone() => Tone != StatusTone.Accent;
 
     bool ShouldSerializeDialogSize() => DialogSize != DialogSize.Xs;
@@ -208,6 +249,7 @@ public class DialogControl : Control
         host = FindForm();
         if (host is null) return;
         returnFocus = host.ActiveControl;
+        Offset = Point.Empty;
         host.Move += OnHostChanged;
         host.Resize += OnHostChanged;
         Present();
@@ -263,6 +305,11 @@ public class DialogControl : Control
             var height = DialogSize == DialogSize.Full ? maxHeight : Math.Min(maxHeight, layout.PreferredHeight(width - 2 * border) + 2 * border);
             var top = TopFraction is { } fraction ? Math.Min((int)(area.Height * fraction), (area.Height - height) / 2) : (area.Height - height) / 2;
             var panel = new Rectangle(area.X + (area.Width - width) / 2, area.Y + top, width, height);
+            // 拖出来的位移：整块不超出宿主窗体
+            Offset = new Point(
+                Math.Clamp(Offset.X, area.Left - panel.Left, Math.Max(area.Left - panel.Left, area.Right - panel.Right)),
+                Math.Clamp(Offset.Y, area.Top - panel.Top, Math.Max(area.Top - panel.Top, area.Bottom - panel.Bottom)));
+            panel.Offset(Offset);
             if (pass > 0 && surface.Backdrop?.Panel == panel) break;
             surface.Show(panel, border, context, null, FloatingSurface.Elevation.Xl);
         }

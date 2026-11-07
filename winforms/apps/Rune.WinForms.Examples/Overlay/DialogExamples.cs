@@ -7,7 +7,34 @@ static class DialogExamples
     [
         new("Dialog", "dialog", "编辑表单", "写了 Confirm 时页脚是“取消 / 确认”：确认的任务进行中按钮加载、关不掉，结果为 false（姓名没填）时对话框留着。焦点进对话框里第一个能聚焦的控件，关上后回到打开它的按钮。", Profile),
         new("Dialog", "long-content", "宽度与长内容", "DialogSize 是宽度档位（默认 xs），不超出窗体；内容长时只滚正文，标题与页脚固定。Footer 是布局面板时占满一行。", Terms),
+        new("Dialog", "draggable", "可以拖动", "Draggable 时按住标题行能把对话框挪开（核对数据时看后面被挡住的内容），拖到哪都不超出窗体，下次打开回到正中；标题行上的关闭按钮照常点。（付款信息上游用 Descriptions，还没有：先排成标签、值两列）", Payable),
     ];
+
+    static readonly (string Label, string Value)[] Payment =
+    [
+        ("收款单位", "华辰精密机械有限公司"),
+        ("开户行", "招商银行上海张江支行"),
+        ("账号", "6214 8301 2233 4455"),
+        ("金额", "¥128,000.00"),
+    ];
+
+    static Control Payable()
+    {
+        var rows = new FlexControl { Direction = FlexDirection.Column, Gap = Space.Sm, AutoSize = true };
+        foreach (var (label, value) in Payment)
+        {
+            var name = new SmallControl { Tone = TextTone.Muted, Text = label, AutoSize = false };
+            name.Size = new Size(name.LogicalToDeviceUnits(6 * 14), name.GetPreferredSize(Size.Empty).Height);
+            rows.Controls.Add(Build.Flex(new FlexControl { Gap = Space.Md }, name, new TextControl { TextSize = TextSize.Sm, Text = value }));
+        }
+        var done = new ButtonControl { Text = "确认无误" };
+        var dialog = new DialogControl { Title = "付款信息", Draggable = true, Content = rows, Footer = done };
+        done.Click += (_, _) => dialog.IsOpen = false;
+        var open = new ButtonControl { Variant = ButtonVariant.Outline, Text = "核对付款信息" };
+        open.Click += (_, _) => dialog.IsOpen = true;
+        return Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Sm, Align = FlexAlign.Start },
+            open, new SmallControl { Tone = TextTone.Muted, Text = "打开后按住标题栏拖动" }, dialog);
+    }
 
     static readonly string[] Departments = ["设计中心", "研发部", "市场部", "财务部"];
 
