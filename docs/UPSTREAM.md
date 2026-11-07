@@ -6,7 +6,8 @@ vue-tsx-pro 那边的会话改了设计时会发通知过来（每完成一个�
 
 ## 上游问题
 
-移植时发现的 vue-tsx-pro 的问题：记一行，再发消息给维护 vue-tsx-pro 的会话（附复现与建议）；那边修好发版、我们升级锁定后勾掉。
+移植时发现的 vue-tsx-pro 的问题：记一行，再在 GitHub 的 kenconnet666/vue-tsx-pro 开 issue、打 `parity` 标签（附复现与建议；2026-11-08 起，会话消息只用于通知），
+那边的修复提交会关联 issue；修好、我们升级锁定后勾掉。
 
 | 日期 | 组件 | 现象与复现 | 建议 | 状态 |
 |---|---|---|---|---|
@@ -23,7 +24,7 @@ vue-tsx-pro 那边的会话改了设计时会发通知过来（每完成一个�
 | 样式引擎最低层统一 `box-sizing: border-box` | 修我们报的 Listbox 高度问题 | 等提交号，重截 listbox multiple |
 | 组件里的导航链接部件（ItemList 标题、Card 页头操作、StatGroup 操作、Timeline 附件）默认悬停才有下划线 | 正文 Link 不变 | 做这些组件时照做 |
 | P3 新组件：ChoiceCard、ItemList 可选中的行、ColorPicker、ImageCropper、Carousel、Dialog 拖动、Tag 加 selected、QRCode、FloatButton 组、JsonViewer、SignaturePad、DataTable 横向虚拟化 | Tag 刚做完 | selected 发版后补 |
-| P10 把组件规格（属性、默认值、部件、档位、键盘）导成 JSON | 可以在 CI 里比对 | 出来后让 parity 工具改读它 |
+| P10 把组件规格（属性、默认值、部件、档位、键盘）导成 JSON | 可以在 CI 里比对 | 已出（0.13.0，见第十一批），上线后让 parity 工具改读它 |
 
 ### 第一批（2026-11-07 通知，master a21e56f8）
 
@@ -147,6 +148,19 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 | 组件内部节点统一带 data-scope / data-part，[data-part] 一律 border-box；部件属性按“默认 < 使用方的 < 组件管的（值、无障碍、事件）”合并 | 网页的标记与盒模型；部件的合并顺序我们本来如此（DESIGN §7） | 不涉及 |
 | 新增部件属性：CommentThread、CommentComposer、Checklist、Cascader、KanbanBoard、CalendarBoard、ColorPicker、DiagramNode | 这些组件都还没做 | 做时照新的部件 |
 | AppShell、FilterBar、Timeline、Tree、ItemList 等只补了标记 | AppShell 已做，部件属性不变 | 不涉及 |
+
+锁定跟到 95a6c2ee（这一批全部绿了）：生成文件、对照结果都没变。
+
+### 第十一批（2026-11-08 通知，0.13.0 发版）
+
+0.13.0 的发版提交（0f554523）CI 还在跑，锁定停在 95a6c2ee。
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| 组件规格 JSON：文档站构建时输出 `/spec/components.json`（`{ package, version, components: [{ name, entry, category, api: { props: [{ name, kind, type, required, default, bindable, values }], parts: { scope, names }, customizable } }] }`，267 个组件） | 现在的 parity.mjs 用 TypeScript 解析上游源码取属性与部件 | 上线后（通知时还是 404）把 parity 改成读这份 JSON：属性、默认值、可绑定、部件逐项比，默认值也进 CI |
+| GitHub 的 parity 标签：要上游改的开 issue 打 parity 标签，会话消息只用于通知 | 上游问题的报法变了 | 照办（本文“上游问题”一节已改） |
+| P6（/testing 子路径、vtp-ui create 模板） | 网页端的工具 | 不涉及 |
+| 部件补齐第六批：Descriptions、Banner、FormErrorSummary、Carousel、QRCode、CharacterCount、Steps、Breadcrumbs、Splitter 等只补 data-scope/data-part 标记 | 网页的标记；CharacterCount 已做，部件属性不变 | 不涉及 |
 
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 
