@@ -248,6 +248,16 @@ NavBar（root、list、item）补了部件标记。这些组件都还没做，�
 QueryTable、ErrorBoundary、JsonViewer、ImageCropper、QuarterCalendar、Carousel、TabList 的 propsScrollButton、Transfer、XY 图表、MapChart）。
 这些里面只有 TabList 是已做的，但我们的 TabList 还没有滚动按钮（连同 onAdd、onReorder、showAllMenu 等，parity 缺 6/8）：做 TabList 的这些功能时一起加 PropsScrollButton。CI 还在跑，锁定停在 56e28b39。
 
+### 第二十一批（2026-11-08 通知，master 7c019043：新组件 UserButton）
+
+账号菜单的触发器：建在 ButtonBase 上，Avatar（sm）+ 名字 + 可选一行说明 + 结束边箭头。没有说明时是顶栏胶囊（radius full、悬停 fillHover）；有说明且不 compact 时占满一行
+（radius md，箭头换成 ChevronsUpDown）；compact 只剩头像，名字成为读屏名称。配方 UserButton（部件 root、avatar、text、name、description、indicator；档位 compact、
+状态 described），部件属性 propsAvatar、propsName、propsDescription、propsIndicator（indicator 可给图标或 false）。Avatar 页加了“用户按钮”示例。
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| 新组件 UserButton | ButtonBase、Avatar 都已做，三个平台都能直接组合 | CI 绿后锁定，三个平台照做，补 Avatar 页的示例 |
+
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 
 计划：vue-tsx-pro 的 `.claude/reports/style-overhaul-plan.md`（阶段 0 护栏 → 1 引擎 → 2 架构与 API → 3 整理 → 4 美学 → 5 文档）。
