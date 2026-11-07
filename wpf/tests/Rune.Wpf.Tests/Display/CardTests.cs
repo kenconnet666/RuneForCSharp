@@ -43,6 +43,10 @@ public class CardTests
         Assert.Equal(["内容"], Texts(plain)); // 没有页头页脚时只有正文
         Assert.Equal(["操作", "内容"], Texts(onlyExtra)); // 只有 extra 也有页头
         Assert.Equal(((SolidColorBrush)full.FindResource("Rune.Brush.Surface")).Color, ((SolidColorBrush)full.Background!).Color);
+        // 阴影层与表面叠在一起（阴影在后面）
+        var layers = Descendants(full).OfType<Border>().Take(2).ToList();
+        Assert.Equal(layers[0].TranslatePoint(default, full), layers[1].TranslatePoint(default, full));
+        Assert.Equal(layers[0].RenderSize, layers[1].RenderSize);
     });
 
     [Upstream("Card", "loading：正文换成对读屏隐藏的骨架")]

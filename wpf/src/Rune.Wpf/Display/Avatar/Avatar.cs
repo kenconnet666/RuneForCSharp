@@ -52,7 +52,8 @@ public class Avatar : Control
         "RadiusFactor", typeof(double), typeof(Avatar), new FrameworkPropertyMetadata(0d, FrameworkPropertyMetadataOptions.AffectsArrange));
 
     readonly Border root = new();
-    readonly Grid layers = new();
+    // 写全名：Rune.Wpf.Grid 是 CSS 的网格布局
+    readonly System.Windows.Controls.Grid layers = new();
     readonly Image image = new() { Stretch = Stretch.UniformToFill, Visibility = Visibility.Collapsed };
     readonly ContentPresenter fallback = new() { HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
     bool failed;

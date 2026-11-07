@@ -74,7 +74,8 @@ public class Card : FrameworkElement
     static readonly DependencyProperty RadiusFactorProperty = DependencyProperty.Register(
         "RadiusFactor", typeof(double), typeof(Card), new FrameworkPropertyMetadata(0d, (d, _) => ((Card)d).UpdateMetrics()));
 
-    readonly Grid root = new();
+    // 写全名：Rune.Wpf.Grid 是 CSS 的网格布局；这里要的是叠放（阴影层在表面后面）
+    readonly System.Windows.Controls.Grid root = new();
     readonly Border shadow = new();
     readonly Border surface = new() { BorderThickness = new Thickness(1) };
     readonly StackPanel layout = new();

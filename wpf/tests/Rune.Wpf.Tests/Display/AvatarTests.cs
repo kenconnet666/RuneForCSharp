@@ -47,6 +47,11 @@ public class AvatarTests
         var peer = UIElementAutomationPeer.CreatePeerForElement(named);
         Assert.Equal((AutomationControlType.Image, "张三", true), (peer.GetAutomationControlType(), peer.GetName(), peer.IsControlElement()));
         Assert.Equal("三", Descendants(named).OfType<TextBlock>().Single().Text);
+        // 后备内容在头像正中
+        var initials = Descendants(named).OfType<TextBlock>().Single();
+        var center = initials.TranslatePoint(new Point(initials.ActualWidth / 2, initials.ActualHeight / 2), named);
+        Assert.Equal(named.ActualWidth / 2, center.X, 1);
+        Assert.Equal(named.ActualHeight / 2, center.Y, 1);
         Assert.False(UIElementAutomationPeer.CreatePeerForElement(anonymous).IsControlElement()); // 没有名字：装饰
         Assert.Single(Descendants(anonymous).OfType<Icon>()); // 后备内容是人像图标
         Assert.False(photo.FallbackShown); // 有图片时显示图片
