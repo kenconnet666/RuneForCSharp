@@ -2,28 +2,18 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/wpf">
-  <WrapPanel>
-    <WrapPanel.Resources>
-      <Style x:Key="Row" TargetType="StackPanel">
-        <Setter Property="Orientation" Value="Horizontal" />
-        <Setter Property="Margin" Value="0,0,0,4" />
-      </Style>
-      <Style TargetType="rune:Icon">
-        <Setter Property="VerticalAlignment" Value="Center" />
-        <Setter Property="Margin" Value="0,0,4,0" />
-      </Style>
-    </WrapPanel.Resources>
+  <rune:Flex Gap="xl" Wrap="True">
     <!-- 旁边已有文字：图标只是装饰，读屏跳过 -->
-    <StackPanel Margin="0,0,32,16">
-      <StackPanel Style="{StaticResource Row}"><rune:Icon Data="{x:Static rune:Lucide.CircleCheck}" Tone="success" /><TextBlock Text="已保存" /></StackPanel>
-      <StackPanel Style="{StaticResource Row}"><rune:Icon Data="{x:Static rune:Lucide.TriangleExclamationPoint}" Tone="warning" /><TextBlock Text="3 项待确认" /></StackPanel>
-      <StackPanel Style="{StaticResource Row}"><rune:Icon Data="{x:Static rune:Lucide.CircleX}" Tone="danger" /><TextBlock Text="同步失败" /></StackPanel>
-    </StackPanel>
+    <rune:Flex Direction="column" Gap="xs">
+      <rune:Text><InlineUIContainer BaselineAlignment="Center"><rune:Icon Data="{x:Static rune:Lucide.CircleCheck}" Tone="success" /></InlineUIContainer> 已保存</rune:Text>
+      <rune:Text><InlineUIContainer BaselineAlignment="Center"><rune:Icon Data="{x:Static rune:Lucide.TriangleExclamationPoint}" Tone="warning" /></InlineUIContainer> 3 项待确认</rune:Text>
+      <rune:Text><InlineUIContainer BaselineAlignment="Center"><rune:Icon Data="{x:Static rune:Lucide.CircleX}" Tone="danger" /></InlineUIContainer> 同步失败</rune:Text>
+    </rune:Flex>
     <!-- 单独出现、表达含义：给名称 -->
-    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-      <rune:Icon Data="{x:Static rune:Lucide.TriangleExclamationPoint}" Tone="warning" Size="xl" Margin="0,0,12,0" AutomationProperties.Name="有未保存的修改" />
-      <rune:Icon Data="{x:Static rune:Lucide.Lock}" Tone="muted" Size="xl" Margin="0,0,12,0" AutomationProperties.Name="仅自己可见" />
+    <rune:Flex Gap="md" Align="center">
+      <rune:Icon Data="{x:Static rune:Lucide.TriangleExclamationPoint}" Tone="warning" Size="xl" AutomationProperties.Name="有未保存的修改" />
+      <rune:Icon Data="{x:Static rune:Lucide.Lock}" Tone="muted" Size="xl" AutomationProperties.Name="仅自己可见" />
       <rune:Icon Data="{x:Static rune:Lucide.Wifi}" Tone="success" Size="xl" AutomationProperties.Name="已连接" />
-    </StackPanel>
-  </WrapPanel>
+    </rune:Flex>
+  </rune:Flex>
 </UserControl>

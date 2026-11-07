@@ -2,9 +2,7 @@ using System.Windows.Controls;
 
 namespace Rune.Wpf.Examples;
 
-/// <summary>
-/// Text 的示例（vue-tsx-pro 文档站 base/Text）。inline 要等 Kbd、Code、Mark、Blockquote，links 等 Link，headings 等 Heading。
-/// </summary>
+/// <summary>Text 的示例（vue-tsx-pro 文档站 base/Text）。</summary>
 static class TextExamples
 {
     public static Example[] All =>
