@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Media;
 
 namespace Rune.Wpf;
 
@@ -103,6 +104,28 @@ public abstract class TextInputBase : TextBox, IFieldControl
     /// <summary>必填。</summary>
     public bool? IsRequired { get => (bool?)GetValue(IsRequiredProperty); set => SetValue(IsRequiredProperty, value); }
 
+    /// <summary>只要输入、不要外壳（没有边框、底色、内边距与焦点环；命令面板的搜索行）：本地值压过主题样式与模板触发器。</summary>
+    internal bool Bare
+    {
+        get;
+        set
+        {
+            field = value;
+            if (value)
+            {
+                Background = BorderBrush = Brushes.Transparent;
+                Padding = default;
+            }
+            else
+            {
+                ClearValue(BackgroundProperty);
+                ClearValue(BorderBrushProperty);
+                ClearValue(PaddingProperty);
+            }
+            HideFocusRing();
+        }
+    }
+
     /// <summary>出错（自己的或所在字段的）。</summary>
     public bool ShowsInvalid => (bool)GetValue(ShowsInvalidProperty);
 
@@ -125,6 +148,7 @@ public abstract class TextInputBase : TextBox, IFieldControl
         count = GetTemplateChild(TextInputParts.Count) as CharacterCount;
         if (clear is not null) clear.Click += OnClear;
         OnTemplateParts();
+        HideFocusRing();
         FitInnerButtons();
         Sync();
     }
@@ -147,6 +171,13 @@ public abstract class TextInputBase : TextBox, IFieldControl
         if (button is null) return;
         button.Width = button.MinHeight = Math.Max(1.5 * em, ControlHeight.MinTarget);
         button.Margin = new Thickness(-0.25 * em, 0, -0.25 * em, 0);
+    }
+
+    void HideFocusRing()
+    {
+        if (GetTemplateChild("PART_FocusRing") is not UIElement ring) return;
+        if (Bare) ring.Visibility = Visibility.Collapsed;
+        else ring.ClearValue(VisibilityProperty);
     }
 
     /// <summary>派生类取自己模板里的部件（OnApplyTemplate 里、同步之前）。</summary>

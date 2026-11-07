@@ -178,6 +178,15 @@ public class Dialog : FrameworkElement
     /// <summary>用户开、关了（关闭按钮、取消、确认、Esc、点遮罩）；代码里改 IsOpen 时不发。</summary>
     public event EventHandler<OpenChangedEventArgs>? OpenChanged;
 
+    /// <summary>标题行只给读屏（命令面板：标题是面板的名称，不显示）。</summary>
+    internal bool HeaderHidden { get; set { field = value; Sync(); } }
+
+    /// <summary>面板顶边离窗口顶的比例（命令面板停在上部：结果变多变少时输入框不跳）；null 时居中。</summary>
+    internal double? TopFraction { get; set { field = value; layer.InvalidateArrange(); } }
+
+    /// <summary>正文不留内边距（命令面板的搜索行、列表贴边）。</summary>
+    internal bool BodyFlush { get; set { field = value; UpdateMetrics(); } }
+
     /// <summary>面板（测试用）。</summary>
     internal Border Panel => panel;
 
@@ -206,6 +215,10 @@ public class Dialog : FrameworkElement
         description.Visibility = string.IsNullOrEmpty(Description) ? Visibility.Collapsed : Visibility.Visible;
         AutomationProperties.SetHelpText(panel, Description ?? "");
         close.Visibility = Closable ? Visibility.Visible : Visibility.Collapsed;
+        header.Visibility = HeaderHidden ? Visibility.Collapsed : Visibility.Visible;
+        // 标题行藏起来时 LabeledBy 指向的标题不在了：名称直接写在面板上
+        if (HeaderHidden) AutomationProperties.SetName(panel, Title ?? "");
+        else panel.ClearValue(AutomationProperties.NameProperty);
         content.Content = Content;
         footerContent.Content = Footer;
         footerContent.Visibility = Footer is null ? Visibility.Collapsed : Visibility.Visible;
@@ -230,7 +243,7 @@ public class Dialog : FrameworkElement
         header.Margin = new Thickness(xl, xl, xl, 0);
         close.Margin = new Thickness(0, -xs, -sm, -xs);
         description.Margin = new Thickness(xl, xs, xl, 0);
-        content.Margin = new Thickness(xl, lg, xl, lg);
+        content.Margin = BodyFlush ? default : new Thickness(xl, lg, xl, lg);
         footer.Margin = new Thickness(xl, 0, xl, xl);
         // 弹出层不在窗口的可视树里：字号同对话框
         TextElement.SetFontSize(layer, em);
@@ -368,7 +381,8 @@ public class Dialog : FrameworkElement
             owner.scrim.Arrange(new Rect(finalSize));
             var (width, maxHeight) = PanelLimits(finalSize);
             var height = owner.Size == DialogSize.Full ? maxHeight : Math.Min(maxHeight, owner.panel.DesiredSize.Height);
-            var box = new Rect((finalSize.Width - width) / 2, (finalSize.Height - height) / 2, width, height);
+            var top = owner.TopFraction is { } fraction ? Math.Min(finalSize.Height * fraction, (finalSize.Height - height) / 2) : (finalSize.Height - height) / 2;
+            var box = new Rect((finalSize.Width - width) / 2, top, width, height);
             owner.shadow.Arrange(box);
             owner.panel.Arrange(box);
             return finalSize;

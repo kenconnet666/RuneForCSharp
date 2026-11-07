@@ -17,11 +17,16 @@ namespace Rune.Wpf.Inspect;
 static class Program
 {
     [STAThread]
-    static int Main(string[] args) => InspectProgram.Run(args, options => options.Command switch
+    static int Main(string[] args) => InspectProgram.Run(args, options =>
     {
-        "list" => Inspector.List(options),
-        "bench" => BenchRunner.Run(options),
-        _ => Inspector.Run(options),
+        // 同应用里的 Application：await 之后回到界面线程（示例里有异步取数据的）
+        SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext());
+        return options.Command switch
+        {
+            "list" => Inspector.List(options),
+            "bench" => BenchRunner.Run(options),
+            _ => Inspector.Run(options),
+        };
     });
 }
 
