@@ -1,0 +1,89 @@
+using System.Windows;
+using System.Windows.Controls;
+
+namespace Rune.Wpf;
+
+/// <summary>
+/// 多行文本框（vue-tsx-pro 的 Textarea）：外壳与 TextField 相同（<see cref="TextInputBase"/>），高度随内容增长，在 <see cref="Rows"/> 与 <see cref="MaxRows"/> 行之间，
+/// 超过 MaxRows 后出现浮层滚动条。
+/// <code>
+/// &lt;rune:Field Label="备注"&gt;&lt;rune:Textarea Text="{Binding Note}" Rows="3" MaxRows="8" ShowCount="True" MaxLength="200" /&gt;&lt;/rune:Field&gt;
+/// </code>
+/// 高度按行高（lineHeights.normal）算：至少 Rows 行加上文字区上下各 space.xs 的内边距（TS 的 rows 加自动增高），至多 MaxRows 行（含内边距，TS 的 <c>max-height: 8lh</c>）。
+/// <see cref="Fixed"/> 时固定为 Rows 行、不随内容增高（TS 还能拖动右下角调整高度，桌面上没做）。清空按钮贴在第一行（右上角），字数贴在右下角。值是平台 TextBox 的 Text（TS 的 _value）。
+/// </summary>
+public class Textarea : TextInputBase
+{
+    /// <summary>最少显示几行，默认 3。</summary>
+    public static readonly DependencyProperty RowsProperty = DependencyProperty.Register(nameof(Rows), typeof(int), typeof(Textarea),
+        new FrameworkPropertyMetadata(3, (d, _) => ((Textarea)d).Sync()), value => (int)value > 0);
+
+    /// <summary>最多增高到几行，之后出现滚动条；不写时不限。</summary>
+    public static readonly DependencyProperty MaxRowsProperty = DependencyProperty.Register(nameof(MaxRows), typeof(int?), typeof(Textarea),
+        new FrameworkPropertyMetadata(null, (d, _) => ((Textarea)d).Sync()), value => value is null or > 0);
+
+    /// <summary>不随内容增高，固定为 Rows 行。</summary>
+    public static readonly DependencyProperty FixedProperty = DependencyProperty.Register(nameof(Fixed), typeof(bool), typeof(Textarea),
+        new FrameworkPropertyMetadata(false, (d, _) => ((Textarea)d).Sync()));
+
+    FrameworkElement? rows;
+    FrameworkElement? host;
+    FrameworkElement? placeholder;
+
+    static Textarea() => DefaultStyleKeyProperty.OverrideMetadata(typeof(Textarea), new FrameworkPropertyMetadata(typeof(Textarea)));
+
+    /// <summary>最少行数。</summary>
+    public int Rows { get => (int)GetValue(RowsProperty); set => SetValue(RowsProperty, value); }
+
+    /// <summary>最多行数。</summary>
+    public int? MaxRows { get => (int?)GetValue(MaxRowsProperty); set => SetValue(MaxRowsProperty, value); }
+
+    /// <summary>固定高度。</summary>
+    public bool Fixed { get => (bool)GetValue(FixedProperty); set => SetValue(FixedProperty, value); }
+
+    /// <inheritdoc />
+    protected override void OnTemplateParts()
+    {
+        rows = GetTemplateChild(TextareaParts.Rows) as FrameworkElement;
+        host = GetTemplateChild("PART_ContentHost") as FrameworkElement;
+        placeholder = GetTemplateChild("PART_Placeholder") as FrameworkElement;
+    }
+
+    /// <summary>字号、行高变了重算行数的高度。</summary>
+    protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+        if (e.Property == TextBlock.LineHeightProperty || e.Property == FontSizeProperty) Sync();
+    }
+
+    /// <summary>文字区的高度：至少 Rows 行加上下各 space.xs，至多 MaxRows 行（含内边距），固定时正好是最少的高度。</summary>
+    protected override void Sync()
+    {
+        base.Sync();
+        if (rows is null) return;
+        var lineHeight = TextBlock.GetLineHeight(this);
+        var line = double.IsNaN(lineHeight) || lineHeight <= 0 ? FontSize * (TryFindResource("Rune.LineHeight.Normal") as double? ?? 1.5) : lineHeight;
+        var inset = (TryFindResource("Rune.Space.Xs") as double? ?? 0.25) * FontSize;
+        var min = Rows * line + 2 * inset;
+        rows.MinHeight = min;
+        rows.MaxHeight = Fixed ? min : MaxRows is { } max ? Math.Max(min, max * line) : double.PositiveInfinity;
+        if (host is not null) host.Margin = new Thickness(0, inset, 0, inset);
+        if (placeholder is not null) placeholder.Margin = new Thickness(0, inset, 0, inset);
+    }
+}
+
+/// <summary>Textarea 模板里的部件名（外壳、清空、字数同 <see cref="TextInputParts"/>）。</summary>
+public static class TextareaParts
+{
+    /// <summary>外壳（Border：边框、底色、圆角）。</summary>
+    public const string Root = TextInputParts.Root;
+
+    /// <summary>文字区（行数的高度设在这层上）。</summary>
+    public const string Rows = "PART_Rows";
+
+    /// <summary>清空按钮（rune:ClearButton，贴在第一行）。</summary>
+    public const string Clear = TextInputParts.Clear;
+
+    /// <summary>字数计数（rune:CharacterCount，贴在右下角）。</summary>
+    public const string Count = TextInputParts.Count;
+}

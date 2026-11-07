@@ -61,8 +61,8 @@ public class TextFieldTests
     });
 
     [Fact]
-    [Upstream("TextField", "控件上显式写的状态优先于 Field")]
-    [Upstream("TextField", "标签的 for 指向控件")]
+    [Upstream("Field", "控件上显式写的状态优先于 Field")]
+    [Upstream("Field", "标签的 for 指向控件")]
     public Task Fields_name_the_control_and_explicit_states_win() => HeadlessUi.Run(() =>
     {
         var inField = new TextField { Text = "admin" };

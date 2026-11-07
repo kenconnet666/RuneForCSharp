@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// 三个库各有一份、除命名空间外逐字相同的源文件（纯计算或纯数据，不用平台类型：FlexLayout、GridLayout、StatusMap、AvatarInitials、ListboxOption、FloatingPlacement、ScrollAreaVariants、CodeHighlighting、TabsVariants、TableVariants、Selection、ToggleGroupVariants、ControlVariants、TextFieldVariants、DesktopMessages）。三个库不共享代码（ROADMAP 决定 2），
+// 三个库各有一份、除命名空间外逐字相同的源文件（纯计算或纯数据，不用平台类型：FlexLayout、GridLayout、StatusMap、AvatarInitials、ListboxOption、FloatingPlacement、ScrollAreaVariants、CodeHighlighting、TabsVariants、TableVariants、Selection、ToggleGroupVariants、ControlVariants、TextFieldVariants、TextFormat、DesktopMessages）。三个库不共享代码（ROADMAP 决定 2），
 // 一致性靠这里检查：改了一份，另外两份照抄。用法：node tools/twins/twins.mjs；有不同时退出码为 1
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -22,6 +22,7 @@ const TWINS = [
   ['avalonia/src/Rune.Avalonia/Input/Control/ControlVariants.cs', 'wpf/src/Rune.Wpf/Input/Control/ControlVariants.cs', 'winforms/src/Rune.WinForms/Input/Control/ControlVariants.cs'],
   ['avalonia/src/Rune.Avalonia/Input/TextField/TextFieldVariants.cs', 'wpf/src/Rune.Wpf/Input/TextField/TextFieldVariants.cs', 'winforms/src/Rune.WinForms/Input/TextField/TextFieldVariants.cs'],
   ['avalonia/src/Rune.Avalonia/Config/DesktopMessages.cs', 'wpf/src/Rune.Wpf/Config/DesktopMessages.cs', 'winforms/src/Rune.WinForms/Config/DesktopMessages.cs'],
+  ['avalonia/src/Rune.Avalonia/Input/TextField/TextFormat.cs', 'wpf/src/Rune.Wpf/Input/TextField/TextFormat.cs', 'winforms/src/Rune.WinForms/Input/TextField/TextFormat.cs'],
 ];
 
 /** 去掉命名空间那一行，统一换行符 */

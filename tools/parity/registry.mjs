@@ -30,8 +30,8 @@ export const PROP_RENAMES = {
 /** 只对某个组件的改名（C# 的成员不能与类同名：Icon 的 icon 叫 Data） */
 export const COMPONENT_PROP_RENAMES = {
   Icon: { icon: 'Data' },
-  // 文本框的值是平台 TextBox 的 Text（WinForms 是 Control.Text）
-  TextField: { _value: 'Text' },
+  // 多行文本框的值是平台 TextBox 的 Text（TextField 有 format，值另是 Value：有格式时是去掉分隔的原文）
+  Textarea: { _value: 'Text' },
   // Text 是 TextBlock 自己的属性
   CodeText: { text: 'Source' },
   // Measure 是布局的方法
@@ -161,6 +161,14 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     },
     Collapse: { lazy: '收起时子控件隐藏：隐藏的控件不建句柄、不参与布局，本来就是第一次展开才真正创建' },
     Tooltip: { propsArrow: '提示窗口整张是组件库画的位图，箭头没有可改样式的部件' },
+    TextField: Object.fromEntries(
+      ['propsRoot', 'propsIcon', 'propsIconEnd', 'propsPrefix', 'propsSuffix', 'propsCount', 'propsClear', 'propsReveal']
+        .map((prop) => [prop, '外壳是 TextInputControl 自己画的，里面的图标、前后缀、按钮、字数是子控件，没有部件属性：外观跟主题，按钮走 ProviderControl 的组件定制']),
+    ),
+    Textarea: Object.fromEntries(
+      ['propsRoot', 'propsCount', 'propsClear']
+        .map((prop) => [prop, '外壳是 TextInputControl 自己画的，清空按钮、字数是子控件，没有部件属性：外观跟主题，按钮走 ProviderControl 的组件定制']),
+    ),
     AppShell: Object.fromEntries(
       ['propsHeader', 'propsBrand', 'propsHeaderContent', 'propsBody', 'propsSidebar', 'propsSidebarScroll', 'propsMain', 'propsNav', 'propsFooter',
         'propsCollapse', 'propsAside', 'propsAsideScroll', 'propsMenuButton', 'propsFullscreenButton', 'propsFullscreenExit', 'propsDrawer']
@@ -216,6 +224,8 @@ export const PLATFORM_BEHAVIOR_NOT_APPLICABLE = {
 };
 
 export const BEHAVIOR_NOT_APPLICABLE = {
+  TextField: { 'TextField：前后缀是部件，不算在值里；是指向输入框的 label': '桌面的读屏名称不拼前后缀（网页是 label 指向输入框才念进去）：读屏名称取字段的标签，前后缀是显示用的固定文字，不进值里' },
+  CharacterCount: { 'CharacterCount 的部件属性': '看得见的字数就是控件自己的文字，读屏读的是控件的名称（完整的句子），不另分部件（PROPS_NOT_PORTED）' },
   Tabs: {
     '只当导航用（没有 TabPanel）时标签不写 aria-controls': '桌面的读屏没有 aria-controls：标签与面板的关系由面板的名称（对应标签的文字）表达',
     'lazy：面板第一次显示时才渲染内容': '看不见的面板不排版、不绘制，本来就是懒的（PROPS_NOT_PORTED）',

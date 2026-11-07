@@ -726,7 +726,18 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   以后换成 ScrollArea。框里的按钮点击不把焦点交给输入框。
 - **WinForms**：平台的 TextBox 不能透明，底色跟着外壳的状态换；默认的读屏名称会取 Text（输入的值），改成只认 AccessibleName 与字段的标签。
   放在 FieldControl 这类不是 FlexControl 的容器里时要自己并上最小高度。
-- 没做：`format`（手机号、身份证号、银行卡号的分组显示）、Textarea、form 示例（要 Form）。
+- 外壳收进 `TextInputBase`（WinForms 是 `TextInputControl`，放在 `Input/Control`，对应上游的 control.tsx）：外观档位、占位文字、清空、字数、字段的状态、
+  读屏名称、焦点环都在这里，TextField 与 Textarea 只写自己的部件；主题是共用的 `Rune.TextInput`（Avalonia 的 ControlTheme、WPF 的 Style），两个组件 BasedOn 它、只写模板。
+- **format**（TS 的 text-format）：孪生文件 `TextFormat`（`Display` / `Parse` / `DisplayPosition`，现成的 Phone、IdCard、BankCard，`Grouped` 写别的）。
+  TextField 的值是 `Value`（TS 的 _value，Avalonia、WPF 默认双向绑定；WinForms 有 ValueChanged）：没有格式时同 Text，有格式时输入框里分组显示、Value 是原文。
+  输入后重新分组、光标放回原来那个字符后面：Avalonia、WPF 投递到这次输入处理完之后再做（TextBox 改完文字还会再挪光标，在 TextChanged 里读到的光标是旧的）；
+  WinForms 的 Edit 控件在 EN_CHANGE 时光标已经到位，直接做。TS 的 inputmode（手机上的键盘）桌面没有。
+- **Textarea**：Rows（默认 3）、MaxRows、Fixed、Clearable（贴第一行）、ShowCount（贴右下角）。高度照上游实际的效果：至少 Rows 行加文字区上下各 space.xs
+  （上游是 rows 属性加自动增高），至多 MaxRows 行（含内边距，上游的 max-height 是 border-box），超过后出现滚动条。踩过：Avalonia 的 TextBox 每次测量都把
+  PART_ScrollViewer 的最小、最大高度改回自己的 MinLines、MaxLines，行数的高度要设在外面一层（`TextareaParts.Rows`）；WPF 的行高用 TextBlock.LineHeight
+  （BlockLineHeight）；WinForms 的 TextBox 改不了行距，行高是 Edit 控件的（tmHeight，用 TextRenderer 量，不是 Font.GetHeight），滚动条是系统的。
+  拖动右下角调整高度（TS 的 fixed 时 resize: vertical）没做。
+- 没做：form 示例（要 Form）；formats 示例里的校验（要 Form 的 schema）；Field 的说明是纯文字，TS 的 formats 示例在说明里用 Code 显示值。
 
 ### AppShell（2026-11-07）
 
