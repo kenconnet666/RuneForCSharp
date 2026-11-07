@@ -175,13 +175,14 @@ function recipes(vue, candidates, name) {
       compound: config.compound && ast.isArrayLiteralExpression(config.compound)
         ? config.compound.elements.map((element) => {
             const entries = entriesOf(element, source, ast);
-            const when = entries.find(([key]) => key === 'when')?.[1];
+            // 组合的条件写在 match 里（上游阶段 24.4 删掉了旧名 when）
+            const match = entries.find(([key]) => key === 'match')?.[1];
             return {
-              when: when ? entriesOf(when, source, ast).map(([key, value]) => `${key}=${flatten(value, source, ast)}`).join(', ') : flatten(element, source, ast),
-              parts: entries.filter(([key]) => key !== 'when').map(([part, styles]) => ({ part, styles: flatten(styles, source, ast) })),
+              match: match ? entriesOf(match, source, ast).map(([key, value]) => `${key}=${flatten(value, source, ast)}`).join(', ') : flatten(element, source, ast),
+              parts: entries.filter(([key]) => key !== 'match').map(([part, styles]) => ({ part, styles: flatten(styles, source, ast) })),
             };
           })
-        : config.compound ? [{ when: '（不是数组字面量）', parts: [{ part: '', styles: flatten(config.compound, source, ast) }] }] : [],
+        : config.compound ? [{ match: '（不是数组字面量）', parts: [{ part: '', styles: flatten(config.compound, source, ast) }] }] : [],
     };
   });
 }
@@ -252,7 +253,7 @@ function render(data) {
     if (plain.size) out += `没有自己样式的取值：${[...plain].map(([dimension, values]) => `${dimension}=${values.map((v) => v.value).join('/')}`).join('；')}\n\n`;
     out += table(['档位', '取值', '部件', '样式'], styled.flatMap((v) => v.parts.map((p) => [v.dimension, v.value, p.part, p.styles])));
     out += `\n### compound（${recipe.compound.length}）\n\n`;
-    out += table(['条件', '部件', '样式'], recipe.compound.flatMap((c) => c.parts.map((p) => [c.when, p.part, p.styles])));
+    out += table(['条件', '部件', '样式'], recipe.compound.flatMap((c) => c.parts.map((p) => [c.match, p.part, p.styles])));
   }
 
   if (data.styles.length) {

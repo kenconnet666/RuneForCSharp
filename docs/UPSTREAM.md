@@ -123,6 +123,18 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 |---|---|---|
 | SchemaForm / SchemaFields：按 useForm 的 zod schema 生成字段（控件映射、meta.group 分组、columns 与 span、对象数组可增删的行），emptyValues、schemaFields、schemaFilters、schemaConditionFields | 还没做 Form（useForm）；桌面上没有 zod | 做 Form 时一起定方案：schema 换成 .NET 这边的描述（特性标注的模型或描述对象），控件映射、分组、栏数、增删行照上游 |
 
+### 第九批（2026-11-08 通知，master 8c2f40a8，阶段 24.4 删旧写法，破坏性）
+
+8c2f40a8 的 CI 还在排队，锁定仍停在 08906695。没有新的 token 与语言包条目。
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| createUi / Provider 去掉 defaults、styles 两个选项，只用 components（`{ Button: { defaults, styles, variants } }`），styles.Tab 别名删 | Avalonia、WPF 的 Provider 是平台的样式与资源字典；WinForms 的 ProviderControl 是按组件分的强类型记录（`Defaults.Set(new ButtonDefaults …)`、`Styles.Set(new ButtonSx …)`），本来就按组件归，不是旧写法的别名 | 不改；以后做变体（variants）时再看要不要并成一个按组件的入口 |
+| Skeleton 的 variant → shape（SkeletonVariants 删） | 我们没带 variant（registry 登记为“上游已废弃”） | 锁定到这一提交时删掉 registry 里这一条 |
+| WaveGrid 的 variant → type，TimelineChart 系列 variant → type | 还没做 | 做时照新名 |
+| Tones / Tone → TextTones / TextTone | 我们的色调类型本来叫 TextTone | 不涉及 |
+| tsx 的 Theme → VarTheme；配方 compound 的 when → match | 当前锁定已经全是 match | ts-inspect 读组合条件改认 match（原来找 when，组合的条件读不出来） |
+
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 
 计划：vue-tsx-pro 的 `.claude/reports/style-overhaul-plan.md`（阶段 0 护栏 → 1 引擎 → 2 架构与 API → 3 整理 → 4 美学 → 5 文档）。
