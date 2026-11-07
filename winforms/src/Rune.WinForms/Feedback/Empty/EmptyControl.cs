@@ -108,6 +108,14 @@ public class EmptyControl : Panel, IElementHost, IScopeAware
     [Description("字号档位，内部尺寸随之缩放；不写时跟随字体。")]
     public TextSize TextSize { get => textSize.Or(ProviderControl.Of(this)?.ResolveDefaults<EmptyDefaults>()?.Size, default); set { textSize = value; ApplyTextSize(); } }
 
+    /// <summary>外观覆盖（代码里设，上游的 sx）：盖过作用域的 <see cref="EmptySx"/> 与配方。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public EmptySx? Sx { get; set { field = value; Invalidate(); } }
+
+    /// <summary>合并好的外观覆盖：作用域的在下，实例的在上。</summary>
+    EmptySx? ResolvedSx => ProviderControl.Of(this)?.ResolveStyles(Sx) ?? Sx;
+
     TextSize textSize;
 
     /// <inheritdoc />
@@ -175,7 +183,7 @@ public class EmptyControl : Panel, IElementHost, IScopeAware
     {
         base.OnPaint(e);
         using var _ = paint.Track();
-        var context = Context with { ForeColor = Context.Theme.Colors.Text };
+        var context = Context with { ForeColor = ResolvedSx?.Foreground ?? Context.Theme.Colors.Text };
         if (icon.Data is not null) icon.Paint(e.Graphics, context);
         if (Title.Length > 0) title.Paint(e.Graphics, context);
         if (Description.Length > 0) description.Paint(e.Graphics, context);
@@ -272,4 +280,14 @@ public sealed record EmptyDefaults : IScopeRecord<EmptyDefaults>
 
     /// <inheritdoc />
     public EmptyDefaults Merge(EmptyDefaults? over) => over is null ? this : new() { Size = over.Size ?? Size };
+}
+
+/// <summary>Empty 的外观覆盖（上游的 <c>sx</c> 与 <c>components.Empty.styles</c>）：作用域的在下，实例的 Sx 在上。</summary>
+public sealed record EmptySx : IScopeRecord<EmptySx>
+{
+    /// <summary>标题的颜色（图标、说明是 muted，改它们用 PropsIcon、PropsDescription）。</summary>
+    public Color? Foreground { get; init; }
+
+    /// <inheritdoc />
+    public EmptySx Merge(EmptySx? over) => over is null ? this : new() { Foreground = over.Foreground ?? Foreground };
 }

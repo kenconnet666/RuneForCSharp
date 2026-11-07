@@ -46,7 +46,7 @@ public class Badge : Element
     BadgeDefaults? ScopeDefaults => Scope?.ResolveDefaults<BadgeDefaults>();
 
     /// <summary>合并好的外观覆盖：作用域的在下，实例的在上。</summary>
-    BadgeSx? ResolvedSx => Scope?.ResolveStyles<BadgeSx>() is { } scoped ? scoped.Merge(Sx) : Sx;
+    BadgeSx? ResolvedSx => Scope?.ResolveStyles(Sx) ?? Sx;
 
     /// <summary>文字前的图标。</summary>
     public IconData? Icon { get; set { field = value; Rebuild(); } }

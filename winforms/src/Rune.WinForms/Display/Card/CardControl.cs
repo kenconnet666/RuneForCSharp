@@ -53,6 +53,14 @@ public class CardControl : Panel, IScopeAware
     [Description("圆角，默认 lg。")]
     public Radius Radius { get => radius.Or(ScopeDefaults?.Radius, Radius.Lg); set { radius = value; Invalidate(); } }
 
+    /// <summary>外观覆盖（代码里设，上游的 sx）：盖过作用域的 <see cref="CardSx"/> 与配方。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public CardSx? Sx { get; set { field = value; Invalidate(); } }
+
+    /// <summary>合并好的外观覆盖：作用域的在下，实例的在上。</summary>
+    CardSx? ResolvedSx => ProviderControl.Of(this)?.ResolveStyles(Sx) ?? Sx;
+
     /// <summary>页头的文字（semibold）；读屏里是卡片的名称。</summary>
     [Category("Appearance")]
     [Description("页头的文字。")]
@@ -213,9 +221,12 @@ public class CardControl : Panel, IScopeAware
             "ghost" => (null, null),
             _ => (colors.Surface, colors.Border),
         };
+        var sx = ResolvedSx;
+        (fill, border) = (sx?.Background ?? fill, sx?.BorderColor ?? border);
+        var corners = sx?.Radius ?? Radius;
         var graphics = e.Graphics;
         var line = Line;
-        var radius = Radius.Value == "full" ? Height / 2f : (Radius.In(ProviderControl.ThemeOf(this).Radii) ?? 0) * Em;
+        var radius = corners.Value == "full" ? Height / 2f : (corners.In(ProviderControl.ThemeOf(this).Radii) ?? 0) * Em;
         var state = graphics.Save();
         graphics.SmoothingMode = SmoothingMode.AntiAlias;
         using (var shape = Drawing.RoundedRectangle(new RectangleF(line / 2f, line / 2f, Width - line, Height - line), radius))
@@ -382,4 +393,20 @@ public sealed record CardDefaults : IScopeRecord<CardDefaults>
 
     /// <inheritdoc />
     public CardDefaults Merge(CardDefaults? over) => over is null ? this : new() { Variant = over.Variant ?? Variant, Padding = over.Padding ?? Padding, Radius = over.Radius ?? Radius };
+}
+
+/// <summary>Card 的外观覆盖（上游的 <c>sx</c> 与 <c>components.Card.styles</c>）：作用域的在下，实例的 Sx 在上，盖过样式的配色。</summary>
+public sealed record CardSx : IScopeRecord<CardSx>
+{
+    /// <summary>底色（ghost、outline 写了也画）。</summary>
+    public Color? Background { get; init; }
+
+    /// <summary>描边的颜色（ghost 写了也画）。</summary>
+    public Color? BorderColor { get; init; }
+
+    /// <summary>圆角。</summary>
+    public Radius? Radius { get; init; }
+
+    /// <inheritdoc />
+    public CardSx Merge(CardSx? over) => over is null ? this : new() { Background = over.Background ?? Background, BorderColor = over.BorderColor ?? BorderColor, Radius = over.Radius ?? Radius };
 }

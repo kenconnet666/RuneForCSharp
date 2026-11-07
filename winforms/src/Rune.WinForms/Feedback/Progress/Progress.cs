@@ -44,6 +44,12 @@ public class Progress : Element
 
     ProgressDefaults? ScopeDefaults => Scope?.ResolveDefaults<ProgressDefaults>();
 
+    /// <summary>外观覆盖（上游的 sx）：盖过作用域的 <see cref="ProgressSx"/> 与配方。</summary>
+    public ProgressSx? Sx { get; set { field = value; Invalidate(); } }
+
+    /// <summary>合并好的外观覆盖：作用域的在下，实例的在上。</summary>
+    ProgressSx? ResolvedSx => Scope?.ResolveStyles(Sx) ?? Sx;
+
     StatusTone tone;
     TextSize size;
     Radius radius;
@@ -173,7 +179,7 @@ public class Progress : Element
         context = context.Sized(Size);
         SizeTexts(context);
         var colors = context.Theme.Colors;
-        var indicatorColor = Tone.Value switch
+        var indicatorColor = ResolvedSx?.IndicatorColor ?? Tone.Value switch
         {
             "neutral" => colors.TextMuted,
             "info" => colors.InfoText,
@@ -209,13 +215,13 @@ public class Progress : Element
         }
         var thickness = Thickness(context);
         var track = new RectangleF(x, y, width, thickness);
-        var radius = MathF.Min((Radius.In(context.Theme.Radii) ?? 0) * context.Em, thickness / 2);
+        var radius = MathF.Min((Corners.In(context.Theme.Radii) ?? 0) * context.Em, thickness / 2);
         var state = graphics.Save();
         try
         {
             graphics.SmoothingMode = SmoothingMode.AntiAlias;
             using var path = Drawing.RoundedRectangle(track, radius);
-            using (var fill = new SolidBrush(colors.Fill)) graphics.FillPath(fill, path);
+            using (var fill = new SolidBrush(TrackColor(colors))) graphics.FillPath(fill, path);
             graphics.SetClip(path, CombineMode.Intersect);
             var (start, length) = Value is null ? IndeterminateSegment() : (0f, (float)fraction.Value);
             // 不确定进度：四成宽的一段从起始边外滑到结束边外；从右到左时从右往左
@@ -240,6 +246,12 @@ public class Progress : Element
         }
     }
 
+    /// <summary>画出来的圆角：外观覆盖写了的，否则 <see cref="Radius"/>。</summary>
+    Radius Corners => ResolvedSx?.Radius ?? Radius;
+
+    /// <summary>轨道的颜色：外观覆盖写了的，否则 fill。</summary>
+    Color TrackColor(ThemeColors colors) => ResolvedSx?.TrackColor ?? colors.Fill;
+
     /// <summary>不确定进度的那一段（起点、长度，按轨道宽度的比例）：1.4 秒一轮、标准缓动；系统关闭动画时 3 秒。</summary>
     static (float Start, float Length) IndeterminateSegment()
     {
@@ -259,11 +271,11 @@ public class Progress : Element
         {
             graphics.SmoothingMode = SmoothingMode.AntiAlias;
             var circle = RectangleF.Inflate(ring, -5 * scale, -5 * scale);
-            using (var track = new Pen(colors.Fill, 10 * scale)) graphics.DrawEllipse(track, circle);
+            using (var track = new Pen(TrackColor(colors), 10 * scale)) graphics.DrawEllipse(track, circle);
             // 从正上方顺时针；不确定进度时四分之一圈一直转（1 秒一圈，系统关闭动画时 3 秒）
             var (start, sweep) = Value is null ? ((float)(FrameClock.Shared.Now.TotalSeconds % (Motion.Enabled ? 1 : 3) / (Motion.Enabled ? 1 : 3)), 0.25f) : (0f, (float)fraction.Value);
             using var indicator = new Pen(indicatorColor, 10 * scale);
-            if (Radius != Radius.None) indicator.StartCap = indicator.EndCap = LineCap.Round;
+            if (Corners != Radius.None) indicator.StartCap = indicator.EndCap = LineCap.Round;
             if (sweep >= 0.9999f) graphics.DrawEllipse(indicator, circle);
             else if (sweep > 0) graphics.DrawArc(indicator, circle, -90 + start * 360, sweep * 360);
             if (TargetPercent is { } target)
@@ -341,6 +353,11 @@ public class ProgressControl : ElementControl<Progress>
     [Category("Appearance")]
     [Description("字号：xs–xl 或像素数；粗细、直径随之缩放。")]
     public TextSize TextSize { get => Element.Size; set => Element.Size = value; }
+
+    /// <summary>外观覆盖（代码里设，上游的 sx）：盖过作用域的 <see cref="ProgressSx"/> 与配方。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public ProgressSx? Sx { get => Element.Sx; set => Element.Sx = value; }
 
     /// <summary>圆角。</summary>
     [Category("Appearance")]
@@ -466,4 +483,20 @@ public sealed record ProgressDefaults : IScopeRecord<ProgressDefaults>
 
     /// <inheritdoc />
     public ProgressDefaults Merge(ProgressDefaults? over) => over is null ? this : new() { Tone = over.Tone ?? Tone, Size = over.Size ?? Size, Radius = over.Radius ?? Radius };
+}
+
+/// <summary>Progress 的外观覆盖（上游的 <c>sx</c> 与 <c>components.Progress.styles</c>）：作用域的在下，实例的 Sx 在上，盖过色调。</summary>
+public sealed record ProgressSx : IScopeRecord<ProgressSx>
+{
+    /// <summary>轨道的颜色。</summary>
+    public Color? TrackColor { get; init; }
+
+    /// <summary>进度的颜色。</summary>
+    public Color? IndicatorColor { get; init; }
+
+    /// <summary>圆角（环形只看是不是 none：圆头还是平头）。</summary>
+    public Radius? Radius { get; init; }
+
+    /// <inheritdoc />
+    public ProgressSx Merge(ProgressSx? over) => over is null ? this : new() { TrackColor = over.TrackColor ?? TrackColor, IndicatorColor = over.IndicatorColor ?? IndicatorColor, Radius = over.Radius ?? Radius };
 }

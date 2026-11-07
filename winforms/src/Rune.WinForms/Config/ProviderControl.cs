@@ -75,6 +75,11 @@ public class ProviderControl : Panel
     /// <typeparam name="T">外观记录。</typeparam>
     public T? ResolveStyles<T>() where T : class, IScopeRecord<T> => Merge(Outer?.ResolveStyles<T>(), Styles.Get<T>());
 
+    /// <summary>实例的外观覆盖盖在这一层合并的外观上（组件的 <c>Sx</c>）；都没写时为 null。</summary>
+    /// <param name="own">实例上写的。</param>
+    /// <typeparam name="T">外观记录。</typeparam>
+    public T? ResolveStyles<T>(T? own) where T : class, IScopeRecord<T> => Merge(ResolveStyles<T>(), own);
+
     static T? Merge<T>(T? below, T? over) where T : class, IScopeRecord<T> => below is null ? over : below.Merge(over);
 
     /// <summary>这一层变了：里面的组件重新排版、重画（嵌套的作用域也通知，它们看到的合并结果跟着变）。</summary>

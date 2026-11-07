@@ -77,6 +77,12 @@ public class Switch : Element
 
     ChoiceDefaults? ScopeDefaults => Scope?.ResolveDefaults<ChoiceDefaults>();
 
+    /// <summary>外观覆盖（上游的 sx）：盖过作用域的 <see cref="SwitchSx"/> 与配方。</summary>
+    public SwitchSx? Sx { get; set { field = value; Invalidate(); } }
+
+    /// <summary>合并好的外观覆盖：作用域的在下，实例的在上。</summary>
+    SwitchSx? ResolvedSx => Scope?.ResolveStyles(Sx) ?? Sx;
+
     StatusTone tone;
     TextSize size;
 
@@ -204,6 +210,7 @@ public class Switch : Element
         var theme = context.Theme;
         var colors = theme.Colors;
         var (fill, onFill) = ToneFill.Colors(Tone, colors);
+        var sx = ResolvedSx;
         var metrics = Layout(inner, Bounds.Width);
         var back = IsEnabled ? default : BackColor(colors);
         Color Dim(Color color) => IsEnabled ? color : Drawing.Mix(back, color, Tokens.Opacity.Disabled);
@@ -219,7 +226,7 @@ public class Switch : Element
             graphics.SmoothingMode = SmoothingMode.AntiAlias;
             // 轨道色随滑块的位置从 borderStrong 过渡到色调的实底（TS 的 background-color 过渡，同一时长与缓动）
             using (var path = Drawing.RoundedRectangle(track, trackHeight / 2))
-            using (var brush = new SolidBrush(Dim(Drawing.Mix(colors.BorderStrong, fill, progress)))) graphics.FillPath(brush, path);
+            using (var brush = new SolidBrush(Dim(Drawing.Mix(sx?.TrackOffColor ?? colors.BorderStrong, sx?.TrackColor ?? fill, progress)))) graphics.FillPath(brush, path);
             if (IsInvalid)
             {
                 var width = context.Scale(Tokens.BorderWidth.Sm);
@@ -241,7 +248,7 @@ public class Switch : Element
             }
 
             if (IsEnabled) Drawing.Shadow(graphics, thumb, thumb.Width / 2, theme.Shadows.Sm, inner.Scale(1));
-            using (var brush = new SolidBrush(Dim(IsChecked ? onFill : colors.Background))) graphics.FillEllipse(brush, thumb);
+            using (var brush = new SolidBrush(Dim(sx?.ThumbColor ?? (IsChecked ? onFill : colors.Background)))) graphics.FillEllipse(brush, thumb);
             if (delayed.Shown) PaintSpinner(graphics, inner with { ForeColor = Dim(fill) }, thumb);
 
             if (IsFocusVisible)
@@ -413,6 +420,11 @@ public class SwitchControl : ElementControl<Switch>
     [Category("Appearance")]
     [Description("字号：xs–xl 或像素数；轨道、滑块随之缩放，空着时跟随字体。")]
     public TextSize TextSize { get => Element.Size; set => Element.Size = value; }
+
+    /// <summary>外观覆盖（代码里设，上游的 sx）：盖过作用域的 <see cref="SwitchSx"/> 与配方。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public SwitchSx? Sx { get => Element.Sx; set => Element.Sx = value; }
 
     /// <summary>文字，也是读屏名称（没写 AccessibleName 时）。</summary>
     [AllowNull]
@@ -588,4 +600,20 @@ public sealed record ChoiceDefaults : IScopeRecord<ChoiceDefaults>
 
     /// <inheritdoc />
     public ChoiceDefaults Merge(ChoiceDefaults? over) => over is null ? this : new() { Size = over.Size ?? Size, Tone = over.Tone ?? Tone };
+}
+
+/// <summary>Switch 的外观覆盖（上游的 <c>sx</c> 与 <c>components.Switch.styles</c>）：作用域的在下，实例的 Sx 在上，盖过色调。</summary>
+public sealed record SwitchSx : IScopeRecord<SwitchSx>
+{
+    /// <summary>打开时轨道的颜色。</summary>
+    public Color? TrackColor { get; init; }
+
+    /// <summary>关着时轨道的颜色。</summary>
+    public Color? TrackOffColor { get; init; }
+
+    /// <summary>滑块的颜色（开、关一样）。</summary>
+    public Color? ThumbColor { get; init; }
+
+    /// <inheritdoc />
+    public SwitchSx Merge(SwitchSx? over) => over is null ? this : new() { TrackColor = over.TrackColor ?? TrackColor, TrackOffColor = over.TrackOffColor ?? TrackOffColor, ThumbColor = over.ThumbColor ?? ThumbColor };
 }

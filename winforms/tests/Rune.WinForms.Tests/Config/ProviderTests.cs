@@ -176,6 +176,34 @@ public class ProviderTests
     });
 
     [Fact]
+    public Task Scope_styles_and_instance_sx_recolor_the_other_components() => WinFormsUi.Run(() =>
+    {
+        static int Pixel(Control control, float x, float y)
+        {
+            using var bitmap = new Bitmap(control.Width, control.Height);
+            control.DrawToBitmap(bitmap, new Rectangle(Point.Empty, control.Size));
+            return bitmap.GetPixel((int)(x * control.Width), (int)(y * control.Height)).ToArgb();
+        }
+        var (red, green, blue) = (Color.FromArgb(200, 0, 0), Color.FromArgb(0, 128, 0), Color.FromArgb(0, 0, 200));
+        var card = new CardControl { Width = 120, Height = 60 };
+        var avatar = new AvatarControl { Text = "林", Sx = new AvatarSx { Background = red } };
+        var progress = new ProgressControl { Value = 0, Dock = DockStyle.Bottom }; // 进度条的宽度由外面给
+        var toggle = new SwitchControl { Sx = new SwitchSx { TrackOffColor = blue } };
+        var scope = new ProviderControl { Dock = DockStyle.Fill };
+        scope.Styles.Set(new CardSx { Background = green });
+        scope.Styles.Set(new AvatarSx { Background = blue, Radius = Radius.None });
+        scope.Styles.Set(new ProgressSx { TrackColor = green });
+        scope.Styles.Set(new SwitchSx { TrackOffColor = red, ThumbColor = green });
+        scope.Controls.AddRange([card, avatar, progress, toggle]);
+        using var form = WinFormsUi.Show(scope);
+
+        Assert.Equal(green.ToArgb(), Pixel(card, 0.5f, 0.5f));
+        Assert.Equal(red.ToArgb(), Pixel(avatar, 0.05f, 0.05f)); // 实例的底色盖过作用域的；圆角取作用域的 none，角上也是底色
+        Assert.Equal(green.ToArgb(), Pixel(progress, 0.5f, 0.5f));
+        Assert.Equal(blue.ToArgb(), Pixel(toggle, 0.7f, 0.5f)); // 关着的轨道
+    });
+
+    [Fact]
     [Upstream("Provider", "defineTheme 的局部修改")]
     public Task A_scoped_theme_colors_only_the_components_inside() => WinFormsUi.Run(() =>
     {

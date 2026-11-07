@@ -47,7 +47,7 @@ public abstract class ButtonCore : Element
     ButtonDefaults? ScopeDefaults => Scope?.ResolveDefaults<ButtonDefaults>();
 
     /// <summary>合并好的外观覆盖：作用域的在下，实例的在上。</summary>
-    ButtonSx? ResolvedSx => Scope?.ResolveStyles<ButtonSx>() is { } scoped ? scoped.Merge(Sx) : Sx;
+    ButtonSx? ResolvedSx => Scope?.ResolveStyles(Sx) ?? Sx;
 
     /// <summary>加载中：显示旋转指示，宽度不变，点击无效（宿主拦下）。</summary>
     public bool IsLoading { get; set { field = value; delayed.Update(value); Invalidate(); } }

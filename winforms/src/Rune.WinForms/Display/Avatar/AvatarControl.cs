@@ -39,6 +39,12 @@ public class Avatar : Element
 
     AvatarDefaults? ScopeDefaults => Scope?.ResolveDefaults<AvatarDefaults>();
 
+    /// <summary>外观覆盖（上游的 sx）：盖过作用域的 <see cref="AvatarSx"/> 与配方。</summary>
+    public AvatarSx? Sx { get; set { field = value; Invalidate(); } }
+
+    /// <summary>合并好的外观覆盖：作用域的在下，实例的在上。</summary>
+    AvatarSx? ResolvedSx => Scope?.ResolveStyles(Sx) ?? Sx;
+
     TextSize size;
     Radius radius;
     AvatarVariant variant;
@@ -66,7 +72,9 @@ public class Avatar : Element
         var inner = context.Sized(Size);
         var side = Math.Min(Bounds.Width, Bounds.Height);
         var box = new RectangleF(Bounds.X, Bounds.Y, side, side);
-        var radius = Radius.Value == "full" ? side / 2f : (Radius.In(context.Theme.Radii) ?? 0) * inner.Em;
+        var sx = ResolvedSx;
+        var corners = sx?.Radius ?? Radius;
+        var radius = corners.Value == "full" ? side / 2f : (corners.In(context.Theme.Radii) ?? 0) * inner.Em;
         var state = graphics.Save();
         try
         {
@@ -83,8 +91,8 @@ public class Avatar : Element
                 return;
             }
             var (background, foreground, _) = BadgeRecipe.Colors(Variant.Value, Tone.Value, false, context.Theme.Colors);
-            using (var brush = new SolidBrush(background ?? context.Theme.Colors.Fill)) graphics.FillPath(brush, shape);
-            var fallback = inner with { ForeColor = foreground };
+            using (var brush = new SolidBrush(sx?.Background ?? background ?? context.Theme.Colors.Fill)) graphics.FillPath(brush, shape);
+            var fallback = inner with { ForeColor = sx?.Foreground ?? foreground };
             Element part = initials.Content.Length > 0 ? initials : person;
             var size = part.Measure(fallback, Bounds.Size);
             part.Bounds = new Rectangle((int)(box.X + (side - size.Width) / 2f), (int)(box.Y + (side - size.Height) / 2f), size.Width, size.Height);
@@ -143,6 +151,11 @@ public class AvatarControl : ElementControl<Avatar>
     [Category("Appearance")]
     [Description("字号档位，头像边长是它的 2.5 倍；不写时跟随字体。")]
     public TextSize TextSize { get => Element.Size; set => Element.Size = value; }
+
+    /// <summary>外观覆盖（代码里设，上游的 sx）：盖过作用域的 <see cref="AvatarSx"/> 与配方。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public AvatarSx? Sx { get => Element.Sx; set => Element.Sx = value; }
 
     /// <summary>圆角。</summary>
     [Category("Appearance")]
@@ -226,4 +239,20 @@ public sealed record AvatarDefaults : IScopeRecord<AvatarDefaults>
 
     /// <inheritdoc />
     public AvatarDefaults Merge(AvatarDefaults? over) => over is null ? this : new() { Size = over.Size ?? Size, Radius = over.Radius ?? Radius, Variant = over.Variant ?? Variant, Tone = over.Tone ?? Tone };
+}
+
+/// <summary>Avatar 的外观覆盖（上游的 <c>sx</c> 与 <c>components.Avatar.styles</c>）：作用域的在下，实例的 Sx 在上，盖过配方。</summary>
+public sealed record AvatarSx : IScopeRecord<AvatarSx>
+{
+    /// <summary>后备内容（首字母、人像）的底色。</summary>
+    public Color? Background { get; init; }
+
+    /// <summary>首字母、人像的颜色。</summary>
+    public Color? Foreground { get; init; }
+
+    /// <summary>圆角（图片也按它裁）。</summary>
+    public Radius? Radius { get; init; }
+
+    /// <inheritdoc />
+    public AvatarSx Merge(AvatarSx? over) => over is null ? this : new() { Background = over.Background ?? Background, Foreground = over.Foreground ?? Foreground, Radius = over.Radius ?? Radius };
 }

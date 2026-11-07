@@ -62,6 +62,14 @@ public class IndicatorControl : Panel
     [Description("色调，默认 danger。")]
     public StatusTone Tone { get => tone.Or(ProviderControl.Of(this)?.ResolveDefaults<IndicatorDefaults>()?.Tone, StatusTone.Danger); set { tone = value; badge.Invalidate(); } }
 
+    /// <summary>外观覆盖（代码里设，上游的 sx）：盖过作用域的 <see cref="IndicatorSx"/> 与配方。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public IndicatorSx? Sx { get; set { field = value; badge.Invalidate(); } }
+
+    /// <summary>合并好的外观覆盖：作用域的在下，实例的在上。</summary>
+    IndicatorSx? ResolvedSx => ProviderControl.Of(this)?.ResolveStyles(Sx) ?? Sx;
+
     /// <summary>位置；不写时 top-end。</summary>
     [Category("Appearance")]
     [Description("角标在哪个角（按书写方向），默认 top-end。")]
@@ -237,6 +245,7 @@ public class IndicatorControl : Panel
             using var _ = paint.Track();
             var colors = ProviderControl.ThemeOf(owner).Colors;
             var (background, foreground, _) = BadgeRecipe.Colors("solid", owner.Tone.Value, false, colors);
+            if (owner.ResolvedSx is { } sx) (background, foreground) = (sx.Background ?? background, sx.Foreground ?? foreground);
             var graphics = e.Graphics;
             graphics.Clear(colors.Background);
             var ring = owner.Ring;
@@ -332,4 +341,17 @@ public sealed record IndicatorDefaults : IScopeRecord<IndicatorDefaults>
 
     /// <inheritdoc />
     public IndicatorDefaults Merge(IndicatorDefaults? over) => over is null ? this : new() { Tone = over.Tone ?? Tone };
+}
+
+/// <summary>Indicator 的外观覆盖（上游的 <c>sx</c> 与 <c>components.Indicator.styles</c>）：作用域的在下，实例的 Sx 在上，盖过配方。</summary>
+public sealed record IndicatorSx : IScopeRecord<IndicatorSx>
+{
+    /// <summary>标记的底色。</summary>
+    public Color? Background { get; init; }
+
+    /// <summary>数字的颜色。</summary>
+    public Color? Foreground { get; init; }
+
+    /// <inheritdoc />
+    public IndicatorSx Merge(IndicatorSx? over) => over is null ? this : new() { Background = over.Background ?? Background, Foreground = over.Foreground ?? Foreground };
 }

@@ -31,6 +31,12 @@ public class Link : Element
 
     LinkDefaults? ScopeDefaults => Scope?.ResolveDefaults<LinkDefaults>();
 
+    /// <summary>外观覆盖（上游的 sx）：盖过作用域的 <see cref="LinkSx"/> 与配方。</summary>
+    public LinkSx? Sx { get; set { field = value; Invalidate(); } }
+
+    /// <summary>合并好的外观覆盖：作用域的在下，实例的在上。</summary>
+    LinkSx? ResolvedSx => Scope?.ResolveStyles(Sx) ?? Sx;
+
     /// <summary>外部链接：末尾显示外链图标。</summary>
     public bool External { get; set { field = value; InvalidateMeasure(); } }
 
@@ -71,7 +77,7 @@ public class Link : Element
     /// <inheritdoc />
     protected internal override void Paint(Graphics graphics, ElementContext context)
     {
-        var inner = Inner(context) with { ForeColor = Tone.ColorIn(context) };
+        var inner = Inner(context) with { ForeColor = ResolvedSx?.Foreground ?? Tone.ColorIn(context) };
         var size = text.Measure(inner, new Size(int.MaxValue, int.MaxValue));
         text.Bounds = new Rectangle(Bounds.X, Bounds.Y + (Bounds.Height - size.Height) / 2, size.Width, size.Height);
         text.Paint(graphics, inner);
@@ -134,6 +140,11 @@ public class LinkControl : ElementControl<Link>
     [Category("Appearance")]
     [Description("下划线：always（默认）、hover、none。")]
     public LinkUnderline Underline { get => Element.Underline; set => Element.Underline = value; }
+
+    /// <summary>外观覆盖（代码里设，上游的 sx）：盖过作用域的 <see cref="LinkSx"/> 与配方。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public LinkSx? Sx { get => Element.Sx; set => Element.Sx = value; }
 
     /// <summary>链接文字。</summary>
     [AllowNull]
@@ -274,4 +285,14 @@ public sealed record LinkDefaults : IScopeRecord<LinkDefaults>
 
     /// <inheritdoc />
     public LinkDefaults Merge(LinkDefaults? over) => over is null ? this : new() { Tone = over.Tone ?? Tone, Underline = over.Underline ?? Underline };
+}
+
+/// <summary>Link 的外观覆盖（上游的 <c>sx</c> 与 <c>components.Link.styles</c>）：作用域的在下，实例的 Sx 在上，盖过色调。</summary>
+public sealed record LinkSx : IScopeRecord<LinkSx>
+{
+    /// <summary>文字、下划线、外链图标的颜色。</summary>
+    public Color? Foreground { get; init; }
+
+    /// <inheritdoc />
+    public LinkSx Merge(LinkSx? over) => over is null ? this : new() { Foreground = over.Foreground ?? Foreground };
 }
