@@ -5,12 +5,15 @@ namespace Rune.Wpf;
 /// <summary>
 /// 间距档位（vue-tsx-pro 的 Space，对应主题的 space）：列表、Flex、Grid 的 gap。值是 em 系数（<c>Rune.Space.Md</c>），按所在元素的字号算。
 /// </summary>
-/// <param name="Value">取值（none、xs、sm、md、lg、xl）。</param>
+/// <param name="Value">取值（none、xxs、xs、sm、md、lg、xl）。</param>
 [TypeConverter(typeof(VariantConverter<Space>))]
 public readonly record struct Space(string Value) : IVariant<Space>
 {
     /// <summary>0。</summary>
     public static readonly Space None = new("none");
+
+    /// <summary>0.125em：紧挨着的两行（标题与说明）、挨在一起的小按钮之间。</summary>
+    public static readonly Space Xxs = new("xxs");
 
     /// <summary>0.25em：图标与文字之间、列表项之间。</summary>
     public static readonly Space Xs = new("xs");
@@ -28,7 +31,7 @@ public readonly record struct Space(string Value) : IVariant<Space>
     public static readonly Space Xl = new("xl");
 
     /// <inheritdoc />
-    public static IReadOnlyList<Space> Known { get; } = [None, Xs, Sm, Md, Lg, Xl];
+    public static IReadOnlyList<Space> Known { get; } = [None, Xxs, Xs, Sm, Md, Lg, Xl];
 
     /// <summary>em 系数的资源键（<c>Rune.Space.Md</c>）；default 时为 null。</summary>
     public string? ResourceKey => Value is null ? null : $"Rune.Space.{char.ToUpperInvariant(Value[0])}{Value[1..]}";

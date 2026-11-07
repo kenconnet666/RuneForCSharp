@@ -72,11 +72,13 @@ public static class Tokens
         public const float Wider = 0.05f;
     }
 
-    /// <summary>space（6 个）。</summary>
+    /// <summary>space（7 个）。</summary>
     public static class Space
     {
         /// <summary>none = 0（设备无关像素）：`0`</summary>
         public const float None = 0f;
+        /// <summary>xxs = 0.125em（em 系数）：`0.125em`：紧挨着的两行（标题与说明）、挨在一起的小按钮之间</summary>
+        public const float Xxs = 0.125f;
         /// <summary>xs = 0.25em（em 系数）：`0.25em`：图标与文字之间、控件的上下内边距</summary>
         public const float Xs = 0.25f;
         /// <summary>sm = 0.5em（em 系数）：`0.5em`：控件内部元素之间</summary>

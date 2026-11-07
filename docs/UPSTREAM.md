@@ -189,13 +189,22 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 
 ### 第十四批（2026-11-08 通知，master 0e7f08a3：间距多一档 space.xxs = 0.125em）
 
-0e7f08a3 的 CI 还在排队，锁定停在 a3ae9428。
+0e7f08a3 的 CI 绿了之后锁定跟到 a189e71b（含 31a4a292：DataTable 展开按钮用 minTarget，我们还没有 DataTable）：token 重新生成（Rune.Space.Xxs），三个平台的 `Space` 加了 Xxs。
 
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
-| 主题加 space.xxs（0.125em，vtp-space 组，在 none 与 xs 之间） | token 由 token-gen 从上游生成；`Space` 档位类型是手写的 | 锁定时重新生成 token，三个平台的 `Space` 加 Xxs |
+| 主题加 space.xxs（0.125em，vtp-space 组，在 none 与 xs 之间） | token 由 token-gen 从上游生成；`Space` 档位类型是手写的 | 已做：token 重新生成，三个平台的 `Space` 加 Xxs（WinForms 的 Factor 对上 Tokens.Space.Xxs） |
 | 写死的 2px 间距换成 xxs（ItemList、Checklist、NotificationCenter 标题与说明之间、CalendarBoard、DiagramNode、Upload 图片墙等）；Diagram 连线标签、ProportionBar、DiagramNode、ColorPicker、ImageCropper 的宽度换成 token | 这些组件都还没做 | 做时照新的 |
 | 组件规格 JSON 不含 token，token 照 tokens.ts 核对 | token-gen 本来就读 tokens.ts | 不涉及 |
+
+### 第十五批（2026-11-08 通知，master cb4d5941、bcd44fd1：部件补齐第七批，TreemapChart 数据表）
+
+CI 还在排队，锁定停在 a189e71b。
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| NotificationList、Upload、ConditionBuilder、ColorPicker、JsonViewer、Lightbox、Timeline、ProportionBar 的内部节点补部件标记（部件名见通知） | 这些组件都还没做 | 做时部件名照上游 |
+| TreemapChart 读屏数据表的单元格只写数字（表头已有单位），三个图表共用 useChartValueText | 还没做图表 | 做时照新的 |
 
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 
