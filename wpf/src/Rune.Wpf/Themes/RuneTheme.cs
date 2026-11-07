@@ -10,20 +10,25 @@ namespace Rune.Wpf;
 /// &lt;/Application.Resources&gt;
 /// </code>
 /// 换 <see cref="Theme"/> 就换掉合并进来的主题字典，用 DynamicResource 的地方随之更新（3000 个控件约 360 ms，DESIGN §9）。
-/// 组件自己的主题样式在 Themes/Generic.xaml，按 DefaultStyleKey 生效，不经过这里。
+/// 组件自己的主题样式在 Themes/Generic.xaml，按 DefaultStyleKey 生效，不经过这里；平台控件（ToolTip）的隐式样式经这里合并。
 /// </summary>
 public partial class RuneTheme : ResourceDictionary
 {
     // 相对的组件 URI 不依赖 pack 协议：Application 建好之前读 BuiltinThemes 也不会抛异常
     static readonly Uri TokensSource = new("/Rune.Wpf;component/Config/Generated/Tokens.g.xaml", UriKind.Relative);
 
+    // 平台控件（ToolTip）的隐式样式：不按 DefaultStyleKey 生效，要合并进资源
+    static readonly Uri PlatformStylesSource = new("/Rune.Wpf;component/Overlay/Tooltip/Tooltip.xaml", UriKind.Relative);
+
     ResourceDictionary? current;
     string theme = "";
 
-    /// <summary>带上 token，主题默认亮色。</summary>
+    /// <summary>带上 token 与平台提示的样式，主题默认亮色；装上提示的默认时机与 Esc（<see cref="Tooltip"/>）。</summary>
     public RuneTheme()
     {
+        Tooltip.Install();
         MergedDictionaries.Add(Inflated(new ResourceDictionary { Source = TokensSource }));
+        MergedDictionaries.Add(new ResourceDictionary { Source = PlatformStylesSource });
         Theme = "light";
     }
 

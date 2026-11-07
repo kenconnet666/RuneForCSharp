@@ -57,11 +57,14 @@ static class HeadlessUi
     }
 }
 
-/// <summary>测试会话的入口（HeadlessUnitTestSession 按约定找 BuildAvaloniaApp）。</summary>
+/// <summary>
+/// 测试会话的入口（HeadlessUnitTestSession 按约定找 BuildAvaloniaApp）。弹出层（提示、菜单）建成独立的窗口，同桌面上一样：
+/// headless 默认放进窗口模板里的覆盖层，测试的窗口只装了组件库的主题、没有模板。
+/// </summary>
 sealed class TestAppBuilder
 {
     public static AppBuilder BuildAvaloniaApp() =>
-        AppBuilder.Configure<TestApp>().UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = true });
+        AppBuilder.Configure<TestApp>().UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = true, OverlayPopups = false });
 }
 
 /// <summary>测试用的应用：只装组件库自己的主题。</summary>

@@ -14,6 +14,10 @@ namespace Rune.Avalonia;
 /// </summary>
 public class RuneTheme : Styles
 {
-    /// <summary>加载主题里的 tokens 与组件样式。</summary>
-    public RuneTheme() => AvaloniaXamlLoader.Load(this);
+    /// <summary>加载主题里的 tokens 与组件样式；装上提示的默认值与键盘行为（<see cref="Tooltip"/>）。</summary>
+    public RuneTheme()
+    {
+        Tooltip.Install();
+        AvaloniaXamlLoader.Load(this);
+    }
 }

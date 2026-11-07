@@ -36,6 +36,14 @@ export const COMPONENT_PROP_RENAMES = {
   // 平台的 ItemsControl 自己有 Items（直接写的项）；数据给 ItemsSource
   CheckboxGroup: { items: 'ItemsSource' },
   RadioGroup: { items: 'ItemsSource' },
+  // Avalonia、WPF 沿用平台的提示（ToolTip.Tip、ToolTipService），组件库只补位置、距离、箭头
+  Tooltip: {
+    children: 'ToolTip.Tip',
+    _open: 'ToolTip.IsOpen',
+    delay: 'ToolTip.ShowDelay',
+    disabled: 'ToolTip.ServiceEnabled',
+    onOpenChange: 'ToolTip.ToolTipOpening',
+  },
 };
 
 /** 某个平台上统一改了名的 prop：WinForms 的控件自己有 Size（大小），字号档位叫 TextSize */
@@ -45,7 +53,29 @@ export const PLATFORM_PROP_RENAMES = {
 
 /** 某个平台上某个组件改了名的 prop（盖过 PLATFORM_PROP_RENAMES）：WinForms 的控件自己有 Size、Padding */
 export const PLATFORM_COMPONENT_PROP_RENAMES = {
-  WinForms: { Container: { size: 'ContainerSize', padding: 'InlinePadding' }, Card: { padding: 'CardPadding' } },
+  WPF: {
+    // 平台的提示：FrameworkElement.ToolTip 与 ToolTipService
+    Tooltip: {
+      children: 'ToolTip',
+      _open: 'ToolTipService.IsOpen',
+      delay: 'ToolTipService.InitialShowDelay',
+      disabled: 'ToolTipService.IsEnabled',
+      onOpenChange: 'ToolTipOpening',
+    },
+  },
+  WinForms: {
+    Container: { size: 'ContainerSize', padding: 'InlinePadding' },
+    Card: { padding: 'CardPadding' },
+    // 扩展组件：每个控件多出的属性前面带 Tooltip（设计器里是"Tooltip 在 tooltipProvider1 上"）
+    Tooltip: {
+      children: 'Tooltip',
+      placement: 'TooltipPlacement',
+      arrow: 'TooltipArrow',
+      disabled: 'Active',
+      _open: 'Current',
+      onOpenChange: 'Opened',
+    },
+  },
 };
 
 /** 某个平台上改了名的组件（平台自带同名类型时）：库 → { 组件: 类型名 } */
@@ -54,7 +84,8 @@ export const TYPE_RENAMES = {
   Avalonia: { Label: 'FieldLabel' },
   WPF: { Label: 'FieldLabel' },
   // WinForms 自己有 ListControl（ListBox、ComboBox 的基类）
-  WinForms: { List: 'UnorderedList', Container: 'ContainerPanel', Label: 'FieldLabel' },
+  // WinForms 的提示是扩展组件（同平台的 ToolTip 组件），不是控件
+  WinForms: { List: 'UnorderedList', Container: 'ContainerPanel', Label: 'FieldLabel', Tooltip: 'TooltipProvider' },
 };
 
 const FORM_NAME = '表单提交的字段名是浏览器的概念；值经 Value 绑定，单选组的互斥由组自己管';
@@ -69,6 +100,7 @@ export const PROPS_NOT_PORTED = {
   CloseButton: { type: BUTTON_TYPE },
   ClearButton: { type: BUTTON_TYPE },
   CopyButton: { type: BUTTON_TYPE },
+  Tooltip: { trigger: '提示挂在触发器上（Avalonia、WPF 的 ToolTip 附加属性，WinForms 的扩展属性），不用渲染函数' },
   Toolbar: { items: '桌面上没有 CSS 选择器：参与方向键移动的固定是按钮与链接' },
   Skeleton: { variant: '上游已废弃（改名为 shape），新库不带' },
   Progress: { propsRoot: '外层就是 Progress 自己（读屏的进度条也是它）：样式直接写在 Progress 上' },
@@ -83,11 +115,29 @@ export const PROPS_NOT_PORTED = {
 export const PLATFORM_PROPS_NOT_PORTED = {
   WinForms: {
     Collapse: { lazy: '收起时子控件隐藏：隐藏的控件不建句柄、不参与布局，本来就是第一次展开才真正创建' },
+    Tooltip: { propsArrow: '提示窗口整张是组件库画的位图，箭头没有可改样式的部件' },
   },
 };
 
 /** 平台控件自带、不用组件自己声明的属性（基类里已经有；ItemsSource 是 Avalonia、WPF 的 ItemsControl 的） */
-export const PLATFORM_PROPS = new Set(['IsEnabled', 'Content', 'Tag', 'AutomationProperties.Name', 'ItemsSource']);
+export const PLATFORM_PROPS = new Set([
+  'IsEnabled',
+  'Content',
+  'Tag',
+  'AutomationProperties.Name',
+  'ItemsSource',
+  // 平台的提示：Avalonia 的 ToolTip.*，WPF 的 ToolTip 与 ToolTipService.*（WPF 的映射见 PLATFORM_COMPONENT_PROP_RENAMES）
+  'ToolTip.Tip',
+  'ToolTip.IsOpen',
+  'ToolTip.ShowDelay',
+  'ToolTip.ServiceEnabled',
+  'ToolTip.ToolTipOpening',
+  'ToolTip',
+  'ToolTipService.IsOpen',
+  'ToolTipService.InitialShowDelay',
+  'ToolTipService.IsEnabled',
+  'ToolTipOpening',
+]);
 
 /** 桌面上不做的组件与原因（ROADMAP 阶段 3） */
 export const EXCLUDED = {

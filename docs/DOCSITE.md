@@ -26,8 +26,10 @@
 - **字体**：两边都用主题的字体栈（`system-ui, Segoe UI, PingFang SC, …, Microsoft YaHei UI, …`），在 Windows 上落到 Segoe UI（西文）与微软雅黑 UI（中文），
   本机与 CI 的 Windows 都有，不另带字体文件。文档站的字体切换（更纱黑体、霞鹜文楷）不参与对照。
 - **缩放**：100%（deviceScaleFactor 1）与 200% 两档；WinForms 按显示器的 DPI 出图，比对时取同档的上游截图。
-- **画布**：上游示例效果区 `[data-demo]` 宽 756，里面一层有 21（1.5em）的内边距，页面底色、md 字号、行高 normal（`site/canvas.ts`）。
-  我们的 `inspect snapshot` 用 `--width 756 --padding 21` 出同样大小的图（底色、字号、字体本来就同上游的画布）。
+- **画布**：上游示例效果区 `[data-demo]` 宽 756，里面一层有 21（1.5em）的内边距，页面底色、md 字号、行高 normal（`site/canvas.ts`）；
+  效果区至少 7rem（112）高，内容竖直居中（Example 的 canvas、CodePreview 的 `justify-content: center`）。
+  我们的 `inspect snapshot` 用 `--width 756 --padding 21 --min-height 112` 出同样大小的图（底色、字号、字体本来就同上游的画布）；
+  居中的偏移按设备像素取整（浏览器的布局是小数，边框贴着整像素画：偏移 35.5 时卡片的边画在 36）。
 - **布局不取整**：上游按小数像素排版（一项高 39.375），Avalonia 默认按整像素取整，往下越排越偏；对照时 `--exact` 关掉取整（同取值对照）。
   WPF 默认就不取整；WinForms 只有整像素，偏差算进差异。
 - **主题**：token 由生成器保证一致；对照亮、暗两套，其余内置主题抽查。
@@ -46,7 +48,7 @@ Chromium（Skia）、Avalonia（Skia）、WPF（DirectWrite）、WinForms（GDI 
 ### 3. 工具
 
 - [x] **上游截图**：`tools/ts-shots`（上游的 `shots-batch.mjs` 截的是整个小节，含标题、说明、源码，所以另写）：每个示例的效果区一张，亮暗、1x / 2x，另存文字盒子。
-- [x] **我们的截图**：`inspect snapshot` 加了 `--padding`、`--exact`（`--width`、`--scale`、`--theme`、`--out` 本来就有）。
+- [x] **我们的截图**：`inspect snapshot` 加了 `--padding`、`--min-height`、`--exact`（`--width`、`--scale`、`--theme`、`--out` 本来就有）。
 - [x] **比对**：`tools/parity/pixels.mjs <页面|all> --platform …`：两边出图、盖文字、容位移、逐像素比，出差异图与 HTML 报告（上游 | 我们 | 差异），
   `all` 另出每页一行的总表；超过允许值时退出码为 1。图片读写借用上游副本里装好的 `pngjs`（同 `ts-styles` 借用 Playwright）。
 - [ ] **CI**：要 Windows、上游文档站的开发服务器与 Playwright 的浏览器，先在本机跑；等文档站要用的组件做完、差异收敛后再接进 CI（报告作为产物上传，新出现的超阈值差异让 CI 失败）。
@@ -121,7 +123,7 @@ CodeBlock 的语法高亮先做一个够用的版本（C#、XAML 两种语言）
 ## 三、先后顺序（用户 2026-11-07 定：对照基础之后先做文档站要用的组件）
 
 1. [x] **对照基础**：画布与缩放对齐、`ts-shots`、`pixels.mjs` 与报告、登记表；已做的页面跑出差异总表（见下面"差异基线"）。
-2. [ ] **文档站要用的组件**：Tooltip、CopyButton、Tabs、Table、Select / SegmentedControl、CodeBlock（简单高亮）、NavList、Toc、ScrollArea、AppShell、CommandPalette。
+2. [ ] **文档站要用的组件**：~~Tooltip~~、~~CopyButton~~（2026-11-07 做了）、Tabs、Table、Select / SegmentedControl、CodeBlock（简单高亮）、NavList、Toc、ScrollArea、AppShell、CommandPalette。
    每个组件照常过取值、行为、像素三道核对。
 3. [ ] **文档应用**：每个平台一个，替换 Gallery；同时做内容抽取（`docs-gen` 产出页面与示例清单、示例注册改两级、覆盖率），API 表从 XML 文档注释生成。
 4. [ ] **补齐组件与示例**：按上游的层级把 136 页做齐，每页过三道核对。

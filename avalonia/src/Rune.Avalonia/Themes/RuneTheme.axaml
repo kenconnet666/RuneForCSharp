@@ -27,6 +27,7 @@
         <ResourceInclude Source="avares://Rune.Avalonia/Display/Card/Card.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Display/Avatar/Avatar.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Input/Choice/Choice.axaml" />
+        <ResourceInclude Source="avares://Rune.Avalonia/Overlay/Tooltip/Tooltip.axaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>

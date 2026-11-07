@@ -59,9 +59,13 @@ function csharpTypes(dir) {
         const props = [...text.matchAll(/public\s+(?:(?:static|required|override|virtual|new)\s+)*[^\n=;]*?\S\s+(\w+)\s*(?:\{|=>)/g)].map((m) => m[1]);
         // 部件名常量（Avalonia 的 `SpinnerParts.Icon = "PART_Icon"`、WPF 的部件样式键）：按字段收进所在的类
         const fields = [...text.matchAll(/public\s+(?:const|static\s+readonly)\s+[\w.<>?]+\s+(\w+)\s*=/g)].map((m) => m[1]);
+        // 附加属性（rune:Tooltip.Placement）：字段名去掉 Property
+        const attached = fields.filter((name) => name.endsWith('Property')).map((name) => name.slice(0, -'Property'.length));
+        // 扩展属性（WinForms 的 TooltipProvider.GetTooltip(control)）：一个参数的 GetXxx
+        const extended = [...text.matchAll(/public\s+[\w.<>?]+\s+Get(\w+)\(\s*Control\s+\w+\s*\)/g)].map((m) => m[1]);
         // 事件（TS 的 onCopied 回调）
         const events = [...text.matchAll(/public\s+event\s+[^\n;]*?\s(\w+)\s*;/g)].map((m) => m[1]);
-        for (const type of classes) types.set(type, new Set([...(types.get(type) ?? []), ...props, ...fields, ...events]));
+        for (const type of classes) types.set(type, new Set([...(types.get(type) ?? []), ...props, ...fields, ...attached, ...extended, ...events]));
       }
     }
   };

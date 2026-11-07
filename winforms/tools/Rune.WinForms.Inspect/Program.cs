@@ -75,6 +75,15 @@ static class Inspector
             form.PerformLayout();
             Application.DoEvents();
         }
+        // 文档站的示例区：至少 MinHeight 高，内容竖直居中（CodePreview 的 justify-content: center；多出的奇数像素给下面，同浏览器把 .5 往下取整到像素）
+        var extra = (int)(options.MinHeight * scale) - form.ClientSize.Height;
+        if (extra > 0)
+        {
+            form.Padding = new Padding(form.Padding.Left, form.Padding.Top + extra / 2, form.Padding.Right, form.Padding.Bottom + extra - extra / 2);
+            form.ClientSize = new Size(form.ClientSize.Width, (int)(options.MinHeight * scale));
+            form.PerformLayout();
+            Application.DoEvents();
+        }
         return form;
     }
 

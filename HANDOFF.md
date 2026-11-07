@@ -31,7 +31,7 @@
 - 阶段 0 骨架完成：三个平台都有组件库、示例应用和测试工程，基础设施都配了测试。DESIGN §2 有目录说明。
 - Release 构建零警告，约 175 个测试（Avalonia 53、WPF 61、WinForms 61）；WPF 的 `BrushTransitionTests.Background_interpolates…` 在机器忙时本地会失败（逐帧取样），CI 上通过。
 - 2026-11-07 的进展（里程碑 M0，见 ROADMAP 的 M0 清单）：跟上游 0.12.0-dev（`tools/vue-tsx-pro.ref`）；Tone → TextTone；按钮字重 500；控件高度 `ControlHeight`；档位的优先级（Avalonia `Resolved` / `TemplateResources`，WPF 主题触发器）；Badge 与按钮同一张调色板表；行高系数 `Leading`；可聚焦的不可用（Avalonia、WPF）。
-- M1（2026-11-07 起）：Kbd、Code、Mark、Blockquote、StatusDot、H1–H6、Link、CodeText、List、Indicator，布局的 Flex、Grid、Separator、Container，Toolbar、Prose、StatusBadge、Skeleton、SkeletonText、Card、Avatar、Empty、Collapse、Progress、Switch、Checkbox、Radio（勾选类共用 `ChoiceBase`）、Field 三个平台都做了，接着按 ROADMAP 的"现状"往下做。孪生文件（三个库各一份的纯计算或纯数据：FlexLayout、GridLayout、StatusMap、AvatarInitials、ListboxOption）改一份要照抄另外两份，`node tools/twins/twins.mjs` 核对。parity 的登记表多了 `TYPE_RENAMES`（平台上改了名的组件，如 WinForms 的 List → UnorderedListControl）与 `PLATFORM_PROP_RENAMES`（WinForms 的 size → TextSize）、`PLATFORM_PROPS_NOT_PORTED`（某个平台上不移植的 prop）。WinForms 的截图（inspect snapshot）自己按 z 序逐层画：DrawToBitmap 把叠在上面的兄弟控件画到下面。
+- M1（2026-11-07 起）：Kbd、Code、Mark、Blockquote、StatusDot、H1–H6、Link、CodeText、List、Indicator，布局的 Flex、Grid、Separator、Container，Toolbar、Prose、StatusBadge、Skeleton、SkeletonText、Card、Avatar、Empty、Collapse、Progress、Switch、Checkbox、Radio（勾选类共用 `ChoiceBase`）、Field、CopyButton、Tooltip（浮层的位置类型 `FloatingPlacement` 是孪生文件）三个平台都做了，接着按 docs/DOCSITE.md 第三节的顺序做文档站要用的组件。孪生文件（三个库各一份的纯计算或纯数据：FlexLayout、GridLayout、StatusMap、AvatarInitials、ListboxOption、FloatingPlacement）改一份要照抄另外两份，`node tools/twins/twins.mjs` 核对。parity 的登记表多了 `TYPE_RENAMES`（平台上改了名的组件，如 WinForms 的 List → UnorderedListControl）与 `PLATFORM_PROP_RENAMES`（WinForms 的 size → TextSize）、`PLATFORM_PROPS_NOT_PORTED`（某个平台上不移植的 prop）。WinForms 的截图（inspect snapshot）自己按 z 序逐层画：DrawToBitmap 把叠在上面的兄弟控件画到下面。
 - 对照工具：`ts-styles` + `inspect styles` + `tools/parity/styles.mjs`（取值，Avalonia、WPF 上 Button、Badge、Text、Icon、IconButton 都一致）；`tools/parity/behavior.mjs`（上游测试用例 → 我们的测试，`[Upstream]` 标注）；`ts-shots` + `tools/parity/pixels.mjs`（像素，docs/DOCSITE.md 第一节）。做组件时三样都跑。
 - 前置探测都做完了，结论写进了 DESIGN（档位类型 §3、组合档位 §4、部件转发 §7、主题切换 §9、热重载 §11）。
 - 要定的事都定下了（ROADMAP"已定的决定" 10–20），"待定的决定"现在是空的。
@@ -74,8 +74,8 @@
 | 取值对照：文档站对一个平台，逐个部件、逐个属性（文字决定的宽高不比，长度容差 0.5px），有差异时退出码 1 | `node tools/parity/styles.mjs button [示例,…] --platform avalonia` |
 | 列出示例（"组件/示例名"，Gallery 与 inspect 共用的登记表） | `avalonia/tools/Rune.Avalonia.Inspect/bin/Release/net10.0/Rune.Avalonia.Inspect.exe list`（先 `export DOTNET_ROOT=~/.dotnet`） |
 | 截文档站每个示例的效果区（亮暗、1x / 2x，另存文字盒子），写到 `artifacts/ts-shots/<页面>/` | `node tools/ts-shots/ts-shots.mjs checkbox [示例,…]` |
-| 像素对照：两边同样条件出图（宽 756、留白 21、`--exact` 不取整），盖掉文字、容 1 像素位移后逐像素比；报告 `artifacts/parity/pixels/<平台>/<页面>.html`；`all` 跑截过的全部页面出总表 | `node tools/parity/pixels.mjs checkbox --platform wpf` |
-| 截图（PNG 写到 `artifacts/inspect/avalonia/`）；`--theme dark`、`--width 600`、`--padding 0`、`--scale 2`、`--exact`（布局不取整） | `… Rune.Avalonia.Inspect.exe snapshot Icon/tones` |
+| 像素对照：两边同样条件出图（宽 756、留白 21、至少高 112 且内容竖直居中、`--exact` 不取整），盖掉文字、容 1 像素位移后逐像素比；报告 `artifacts/parity/pixels/<平台>/<页面>.html`；`all` 跑截过的全部页面出总表 | `node tools/parity/pixels.mjs checkbox --platform wpf` |
+| 截图（PNG 写到 `artifacts/inspect/avalonia/`）；`--theme dark`、`--width 600`、`--padding 0`、`--min-height 112`（至少多高，内容竖直居中）、`--scale 2`、`--exact`（布局不取整） | `… Rune.Avalonia.Inspect.exe snapshot Icon/tones` |
 | 元素树（类型、类与伪类、边界、所在模板） / 属性与来源（本地值、样式、模板、继承，画刷报出 token 名） / UIA 控件视图（角色、名称、Pattern）；都能加 `--json` | `… tree Icon/basic`、`… props Icon/tones`、`… uia Icon/accessibility` |
 | WPF 的 inspect（同样的命令；tree 的"样式"列是隐式还是显式 Style，props 的来源分主题样式、样式触发器、资源引用等） | `wpf/tools/Rune.Wpf.Inspect/bin/Release/net10.0-windows/Rune.Wpf.Inspect.exe snapshot Icon/sizes` |
 | WinForms 的 inspect（同样的命令，没有 `--scale`；tree 里单元素宿主下面列出它的元素，uia 是 MSAA 树） | `winforms/tools/Rune.WinForms.Inspect/bin/Release/net10.0-windows/Rune.WinForms.Inspect.exe uia Icon/accessibility` |

@@ -87,7 +87,8 @@ static class Inspector
 
     static Window Show(Control content, InspectOptions options)
     {
-        var root = new Border { Padding = new Thickness(options.Padding), Child = content };
+        var area = new Border { VerticalAlignment = VerticalAlignment.Top, Child = content };
+        var root = new Border { Padding = new Thickness(options.Padding), MinHeight = options.MinHeight, Child = area };
         root.Bind(Border.BackgroundProperty, root.GetResourceObservable("Rune.Brush.Background"));
         root.Bind(TextElement.ForegroundProperty, root.GetResourceObservable("Rune.Brush.Text"));
         root.Bind(TextElement.FontSizeProperty, root.GetResourceObservable("Rune.FontSize.Md"));
@@ -98,8 +99,17 @@ static class Inspector
         Dispatcher.UIThread.RunJobs();
         window.UpdateLayout();
         Dispatcher.UIThread.RunJobs();
+        area.Margin = new Thickness(0, CenterOffset(root.Bounds.Height - 2 * options.Padding - area.Bounds.Height, options.Scale), 0, 0);
+        window.UpdateLayout();
+        Dispatcher.UIThread.RunJobs();
         return window;
     }
+
+    /// <summary>
+    /// 文档站的示例区至少 MinHeight 高、内容竖直居中（CodePreview 的 justify-content: center）。居中的偏移按设备像素取整：
+    /// 浏览器的布局是小数，但边框贴着整像素画（偏移 35.5 时卡片的边画在 36）。
+    /// </summary>
+    static double CenterOffset(double free, double scale) => free > 0 ? Math.Floor(free / 2 * scale + 0.5) / scale : 0;
 
     static string Snapshot(Window window, InspectOptions options)
     {

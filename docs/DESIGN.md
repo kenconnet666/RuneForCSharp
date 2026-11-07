@@ -628,6 +628,31 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 测试的等待：Avalonia `HeadlessUi.Until` / `Pump`，WPF `WpfUi.Until`（三处测试都要等异步结果，收进了测试的基础设施）。
 - 示例：上游的 CopyButton 在 icon-button 页的 states（还要 Tooltip、focusableWhenDisabled）与 presets（还要 TextField）里，这两个示例等这些组件做好再补。
 
+### Tooltip（2026-11-07）
+
+- 第一个浮层。上游是包着触发器的组件（trigger 渲染函数），桌面上沿用平台的写法：Avalonia 的 `ToolTip.Tip`、WPF 的 `ToolTip`、WinForms 的扩展组件
+  `TooltipProvider`（同平台的 ToolTip 组件，控件多出 Tooltip、TooltipPlacement、TooltipArrow）。组件库补上外观和平台没有的行为；位置是三个平台共用的
+  档位类型 `FloatingPlacement`（12 种，`Utils/Floating`，以后 Popover、Menu、Select 也用）。
+- 外观：反色底、sm 字号、sm 圆角（em 系数随主题）、内边距 0.25em / 0.5em、最宽 20em，淡入 durations.md、enter。箭头是 0.625em 的方块转 45°，尖角圆角 2，
+  跨在朝向触发器的边上、对准触发器中心（离两端至少一个箭头宽）；面板与触发器隔 offset（6）加箭头伸出的 0.7 倍边长。
+- **Avalonia**：RuneTheme 给平台的 ToolTip 换了 ControlTheme（应用里所有提示都一样）。平台已有：停留后显示、刚关掉时直接显示（BetweenShowDelay）、
+  按下隐藏、指针能移到提示上、同时只一个、ShowOnDisabled。组件库补：有提示的元素用模板优先级写 ShowDelay 500、BetweenShowDelay 300、VerticalOffset 0
+  （平台的附加属性注册在 Control 上，改不了 Control 自己的默认值；本地值照样盖过）；Tab / 方向键聚焦立即显示、失焦与 Esc 隐藏；提示文字写进 HelpText
+  （模板优先级）。位置在 ToolTipOpening 时按 `rune:Tooltip.Placement` 与书写方向换成 PlacementMode。与触发器的距离做成模板根 `TooltipLayout` 在主轴两侧
+  留的透明边：平台弹出层的偏移量翻转时不跟着反向，透明边不受影响。箭头在 ToolTip 的 Loaded 时按提示与触发器在屏幕上的实际位置定边（可能翻转过）。
+- **WPF**：RuneTheme 合并 `Overlay/Tooltip/Tooltip.xaml`（平台 ToolTip 的隐式样式，不走 DefaultStyleKey）。平台已有：键盘聚焦显示（按 InitialShowDelay）、
+  指针移到提示上不消失（safe area）、文字提示是帮助文字。组件库补：InitialShowDelay 500、BetweenShowDelay 300（覆盖 FrameworkElement 的元数据）、Esc 隐藏、
+  12 种位置——`Placement=Custom` 加定位回调（样式里绑定 PlacementTarget，转换器按触发器生成回调），回调给要的那边与对面两个候选，平台挑整个在屏幕里的；
+  回调的尺寸是设备像素，按触发器的实际宽度换算。面板与箭头由 `TooltipChrome` 按字号画，有箭头时四周留透明边（弹出窗口外画不出东西）。
+  踩过：样式里 `{Binding PlacementTarget.(rune:Tooltip.Arrow)}` 运行时按调用方的程序集解析，找不到类型（PathError）；xmlns 写上程序集又编译不过——改成 TooltipChrome 自己从触发器读。
+- **WinForms**：平台的提示窗口是系统画的矩形，画不出圆角与箭头；`TooltipWindow` 是不抢焦点的置顶分层窗口，整张预乘 ARGB 位图用 UpdateLayeredWindow 贴上，淡入改整体不透明度。
+  文字用 GDI（TextRenderer，同别的元素）画在不透明底上再贴进面板：直接画到透明位图上 GDI 会把文字像素的不透明度写成 0。时机、键盘（消息过滤器记最近的输入是不是键盘，Esc 吃掉）、
+  翻转与贴边（与屏幕边隔 8）都是组件库做的；提示文字写进控件的 AccessibleDescription（使用方写了的不动）。提示只能是文字（快捷键写在文字里）。
+- 测试：Avalonia 的 headless 弹出层默认放进窗口模板的覆盖层，测试的窗口没有模板——测试平台开 `OverlayPopups = false` 建成独立窗口；headless 送按键时会清掉焦点，Esc 之后的焦点不核对。
+  WPF、WinForms 的位置测试用屏幕上的窗口（弹出层会被挪进屏幕）。上游没有 Tooltip 的单元测试，不标 [Upstream]。
+- 没做：HoverCard（同一套悬停时机，做浮层时一起）；Popover 页的 popover、hover-card、timing 示例；tooltip 示例里"更多格式"的菜单（等 Menu）。
+  WPF 键盘聚焦按平台的 InitialShowDelay 才显示（上游立即）；Avalonia 的离场没有淡出（上游也只有 Chromium 有）。
+
 ### Spinner
 
 - 第一个带部件的组件（`propsIcon`），三个平台按 §7 的写法各落地一次：

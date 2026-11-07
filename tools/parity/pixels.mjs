@@ -35,7 +35,8 @@ if (!pageName) {
 }
 
 /** 文档站示例区的宽度与内边距（CSS 像素）：两边同样大小出图 */
-const CANVAS = { width: 756, padding: 21 };
+// 示例区至少 7rem 高、内容竖直居中（docs 的 Example 与 CodePreview）
+const CANVAS = { width: 756, padding: 21, minHeight: 112 };
 /** 每个通道差超过这个值才算不同（抗锯齿的细微差别不算） */
 const THRESHOLD = 24;
 /** 文字盒子往外扩几个 CSS 像素再盖掉：盖住抗锯齿的边与两边几个像素的位置差 */
@@ -79,7 +80,7 @@ function comparePage(pageName, only) {
       const boxes = JSON.parse(readFileSync(join(shots, `${id}-${theme}.json`), 'utf8'));
       const ours = join(out, `${id}-${theme}.png`);
       try {
-        const args = ['snapshot', `${component}/${id}`, '--theme', theme, '--width', String(CANVAS.width), '--padding', String(CANVAS.padding), '--exact', '--out', ours];
+        const args = ['snapshot', `${component}/${id}`, '--theme', theme, '--width', String(CANVAS.width), '--padding', String(CANVAS.padding), '--min-height', String(CANVAS.minHeight), '--exact', '--out', ours];
         inspect(options.platform === 'winforms' ? args : [...args, '--scale', options.scale]);
       } catch {
         results.push({ id, theme, missing: true });

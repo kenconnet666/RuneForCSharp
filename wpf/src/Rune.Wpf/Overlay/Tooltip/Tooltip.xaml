@@ -1,0 +1,33 @@
+<!--
+  平台 ToolTip 的隐式样式（vue-tsx-pro 的 tooltipStyles.panel）：RuneTheme 合并进来，应用里所有提示都用它。
+  面板与箭头由 TooltipChrome 按字号画；位置由 Tooltip.PlacementCallback 按触发器上的 rune:Tooltip.Placement 算（触发器写了
+  ToolTipService.Placement 时平台用它，盖过这里的 Custom）。箭头开关由 TooltipChrome 从触发器上读（绑定路径里的附加属性在运行时
+  按调用方的程序集解析，找不到 Rune.Wpf 的类型）。
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <Style TargetType="ToolTip">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.InverseSurface}" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.InverseText}" />
+    <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
+    <Setter Property="HasDropShadow" Value="False" />
+    <Setter Property="Placement" Value="Custom" />
+    <Setter Property="CustomPopupPlacementCallback" Value="{Binding PlacementTarget, RelativeSource={RelativeSource Self}, Converter={x:Static rune:Tooltip.PlacementCallback}}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ToolTip">
+          <rune:TooltipChrome x:Name="PART_Chrome" Background="{TemplateBinding Background}" Radius="{DynamicResource Rune.Radius.Sm}">
+            <ContentPresenter>
+              <ContentPresenter.Resources>
+                <Style TargetType="TextBlock">
+                  <Setter Property="TextWrapping" Value="Wrap" />
+                </Style>
+              </ContentPresenter.Resources>
+            </ContentPresenter>
+          </rune:TooltipChrome>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+</ResourceDictionary>
