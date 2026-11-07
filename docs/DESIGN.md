@@ -277,13 +277,14 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 | 部件的属性（含附加属性、无障碍） | 样式穿透模板：`rune\|TextField /template/ rune\|Icon#PART_Icon`。Setter 只设一个属性，天然逐个属性合并 | 部件样式键（`ComponentResourceKey`，模板里 `Style="{DynamicResource …}"`），Provider 把每层串成 BasedOn 链 | 部件属性对象：字段可空的记录（`IconProps`），逐字段合并 |
 | 嵌套组件的部件 | 选择器继续往下写：`rune\|Select /template/ rune\|TextField#PART_Search /template/ rune\|Icon#PART_Icon` | 外层部件样式的 `Style.Resources` 里给内层组件的部件键 | 嵌套记录（`SelectProps.Search` 是 `TextFieldProps`，里面有 `Icon`），递归合并 |
 | 所有实例（Provider 的 `styles`） | Provider 的 Styles 里写不带路径的选择器（`rune\|Icon`） | Provider.Styles 里写部件键 | 作用域上的部件属性 |
-| 单个实例（`propsXxx`） | 控件自己的 `Styles` | 现在要包一层 Provider；计划让任何元素都能当一层（阶段 2） | 组件的 `PropsXxx` 属性 |
+| 单个实例（`propsXxx`） | 控件自己的 `Styles` | 元素自己设附加属性 `Provider.Styles`（任何元素都能当一层，同 Provider 的合成） | 组件的 `PropsXxx` 属性 |
 | 层层合并 | 外层作用域 < 内层作用域 < 实例的 Styles，逐个属性 | 主题 < 应用 < 外层 Provider < 内层 Provider，逐个 setter | 配方 < 外层作用域 < 内层作用域 < 实例，逐字段 |
 | 部件的事件 | 组件给语义事件与可取消的前置事件（`Clearing` 带 `Cancel`）；输入级的接管用隧道事件；部件的路由事件照常冒泡 | 同左（Preview 事件） | 记录里可以放委托，使用方先执行、`Cancel` 跳过组件的处理；组件另给语义事件 |
 | 受管属性 | 组件在代码里设本地值或用模板绑定，样式盖不过 | 同左 | 不进部件记录 |
 
 实测结果：
 - **Avalonia**：两层 `/template/` 只命中 Outer 里那个 Inner 的图标，单独的 Inner 不受影响；外层作用域设 StrokeWidth、内层作用域对同一路径只设 Foreground，结果两个都在；实例自己的 Styles 能覆盖作用域；`AutomationProperties.Name` 这样的附加属性也能经样式转发。
+- **WPF 的附加层**（2026-11-07）：`Provider.Styles` 是附加属性，Provider（Decorator）与任何元素共用 `ProviderLayer` 的合成；元素自己这一层的类型键样式也作用到它自己（WPF 查隐式样式从元素自己的 Resources 开始）。踩过：XAML 里附加属性元素在宿主 Initialized 之后才赋值，而且先赋空字典、再往里加样式，没有通知；所以宿主 Loaded 时条目数变了就重新合成（外层变了也是在 Loaded 里发现）。
 - **WPF**：部件键经 Provider 逐层合并（主题的 Bold + 外层的 Red + 内层的 FontSize=20）。外层部件样式的 `Style.Resources` 里给内层部件键，查找能定位到 Outer 里的 Inner，但会**整个替换**这个部件样式（主题的 Bold、外层的 Red 都丢了）。Provider 合成时递归进部件样式的 `Style.Resources`，嵌套的部件样式叠在外层同键的结果上（已做，测试覆盖：卡片里按钮的标签 = 主题 Bold < 这一层 Light < 嵌套的 Red）。
 - **WinForms**：记录的逐字段合并在 §4 已实测过一层；嵌套记录的递归合并、事件委托的"使用方先执行"由源代码生成器生成，不手写（阶段 2）。
 

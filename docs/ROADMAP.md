@@ -253,7 +253,7 @@
 合并与配置：
 - [~] 部件的转发与层层合并（`utils/props.ts`，178）：DESIGN §7 的三种写法落地（Spinner、Badge 用上了）。
   - Avalonia：部件名常量（`ButtonParts.Icon = "PART_Icon"`），主题里给每个内部节点起名；不需要新的运行时。
-  - WPF：[x] Provider 合成递归进部件样式的 `Style.Resources`（嵌套组件的部件叠在同键结果上）；[x] 部件键用 `PartKey`（带部件类型），类型键样式叠到同类型的部件下面（决定 19）；[ ] Provider 的合成做成附加属性，任何元素（包括组件自己）都能当一层，单个实例不用再包 Provider。
+  - WPF：[x] Provider 合成递归进部件样式的 `Style.Resources`（嵌套组件的部件叠在同键结果上）；[x] 部件键用 `PartKey`（带部件类型），类型键样式叠到同类型的部件下面（决定 19）；[x] Provider 的合成做成附加属性（`Provider.Styles` 本身就是附加属性，合成在 `ProviderLayer`），任何元素（包括组件自己）都能当一层，单个实例不用再包 Provider（2026-11-07）。
   - WinForms：部件属性记录与源代码生成器（`[PartProps]` 生成逐字段合并、嵌套记录递归合并、事件委托"使用方先执行"）。
 - [ ] 作用域与 Provider（`config/context`，121）：主题、语言、默认值、部件样式沿作用域继承。
 - [ ] 组件默认值（`config/defaults`，19）与配方（`config/styles`，25）：DESIGN §4、§5。

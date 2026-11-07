@@ -40,12 +40,10 @@ static class ProgressExamples
                 ValueLabel = $"{Number(used)} / {Number(total)} {unit}",
                 ValueText = (value, max) => $"{value} / {max} {unit}",
             };
-            // TS 的 propsValueLabel：超出时数值用危险色（单个实例的部件样式包一层 Provider）
-            column.Children.Add(used <= total ? progress : new Provider
-            {
-                Styles = new ResourceDictionary { [ProgressParts.ValueLabel] = new Style(typeof(Text)) { Setters = { new Setter(Text.ToneProperty, TextTone.Danger) } } },
-                Child = progress,
-            });
+            // TS 的 propsValueLabel：超出时数值用危险色（单个实例的部件样式：Provider.Styles 直接设在这个 Progress 上）
+            if (used > total)
+                Provider.SetStyles(progress, new ResourceDictionary { [ProgressParts.ValueLabel] = new Style(typeof(Text)) { Setters = { new Setter(Text.ToneProperty, TextTone.Danger) } } });
+            column.Children.Add(progress);
         }
         column.Children.Add(new Progress { Value = 64, Label = "资料完善度" });
         // 只要标签、不要右侧的数值：ShowValueLabel="False"
