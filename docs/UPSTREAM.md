@@ -69,14 +69,25 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 
 ### 第四批（2026-11-08 通知，master 到 89c01fc8）
 
-锁定跟到 f5d31cdd（含 237f97d2）：当时 77cffad3（FloatButton）的 CI 失败，cffe9ad9、89c01fc8 还在跑，CI 绿了再跟。语言包、token、图标、配方都没变。
+锁定先跟到 f5d31cdd（含 237f97d2）：当时 77cffad3（FloatButton）的 CI 失败，cffe9ad9、89c01fc8 还在跑；89c01fc8 绿了之后随第五批跟到 91903a2b。
 
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
 | Dialog 的 draggable（237f97d2）：按住标题栏拖，不超出窗口，每次打开回到正中 | 已做 Dialog | 这次做 |
 | FileDrop、Upload 选文件夹（directory，f5d31cdd） | 还没做 | 做时照新的（桌面上是选文件夹的对话框、拖进来的文件夹递归读出文件） |
 | FloatButton、FloatButtonGroup（速拨），BackTop 基于它（77cffad3） | 还没做 | CI 绿了锁定，做时照新的 |
-| useInfiniteList、InfiniteListStatus，语言包 listNoMore；Select、Combobox、Mentions 的 load 分页（page、{ items, next }），ListboxView 的 onRangeChange 与 loading: 'more'（cffe9ad9） | Select 的远程选项还没做 | CI 绿了锁定，重新生成语言包；做 Select 的 load 时连分页一起做 |
+| useInfiniteList、InfiniteListStatus，语言包 listNoMore；Select、Combobox、Mentions 的 load 分页（page、{ items, next }），ListboxView 的 onRangeChange 与 loading: 'more'（cffe9ad9） | Select 的远程选项还没做 | 语言包已重新生成（ListNoMore）；做 Select 的 load 时连分页、Listbox 的 RangeChange 一起做 |
+
+### 第五批（2026-11-08 通知，master 到 fd628293）
+
+锁定跟到 91903a2b（QRCode，当时 CI 绿的最新提交；ad0a85ea 一次失败一次成功，728b56b4、fd628293 还在跑）。语言包重新生成：ListNoMore、QrCode、QrExpired、QrRefresh、QrScanned；token、图标、配方没变。
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| QRCode 与自写的编码器 encodeQr（91903a2b） | 还没做 | 做时编码器做成孪生文件（纯计算），标准附录的向量一起搬进测试 |
+| 子路径 ui/area：全国省市区（ad0a85ea、01a40e80） | 还没做 Cascader、TreeSelect | 做 Cascader 时照新的 |
+| JsonViewer（728b56b4，建在 Tree 上） | 还没做 Tree | CI 绿后锁定，做时照新的 |
+| SignaturePad、纸面配色 paper（fd628293）：要拍照、扫描、导出的一律浅底深色 | 还没做 | CI 绿后锁定（语言包会多 signature 等）；做 QRCode、SignaturePad 时用同一套纸面配色 |
 
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 

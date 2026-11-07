@@ -270,8 +270,11 @@ public sealed partial record Lang
     /// <summary>选项列表：输入搜索词后给读屏播报的结果条数，默认“{count} 个选项”</summary>
     public required Func<double, string> ListResultCount { get; init; }
 
-    /// <summary>远程选项（Select、Combobox、TreeSelect 的 load）加载失败时列表里的提示，默认“加载失败，请重试”</summary>
+    /// <summary>远程选项（Select、Combobox、TreeSelect 的 load）、滚动加载的列表（InfiniteListStatus）加载失败时的提示，默认“加载失败，请重试”</summary>
     public required string ListLoadFailed { get; init; }
+
+    /// <summary>滚动加载的列表取完了（InfiniteListStatus），默认“没有更多了”</summary>
+    public required string ListNoMore { get; init; }
 
     /// <summary>批量操作栏里取消全部选择的按钮，默认“取消选择”</summary>
     public required string TableClearSelection { get; init; }
@@ -470,6 +473,18 @@ public sealed partial record Lang
 
     /// <summary>回到顶部按钮的名称，默认“回到顶部”</summary>
     public required string BackToTop { get; init; }
+
+    /// <summary>二维码图片的默认名称（读屏），默认“二维码”</summary>
+    public required string QrCode { get; init; }
+
+    /// <summary>二维码已过期（status="expired"），默认“二维码已过期”</summary>
+    public required string QrExpired { get; init; }
+
+    /// <summary>已过期时的刷新按钮，默认“刷新”</summary>
+    public required string QrRefresh { get; init; }
+
+    /// <summary>已扫描、等手机上确认（status="scanned"），默认“已扫描，请在手机上确认”</summary>
+    public required string QrScanned { get; init; }
 
     /// <summary>截断文字的展开按钮，默认“展开”</summary>
     public required string EllipsisExpand { get; init; }
@@ -1005,6 +1020,7 @@ public sealed partial record Lang
         TableSelectedCount = count => string.Create(CultureInfo.InvariantCulture, $"已选 {count} 项"),
         ListResultCount = count => string.Create(CultureInfo.InvariantCulture, $"{count} 个选项"),
         ListLoadFailed = "加载失败，请重试",
+        ListNoMore = "没有更多了",
         TableClearSelection = "取消选择",
         TableDetails = "详情",
         TableRowDetails = row => $"{row} 的详情",
@@ -1076,6 +1092,10 @@ public sealed partial record Lang
         RatingStar = value => string.Create(CultureInfo.InvariantCulture, $"{value} 星"),
         RatingSummary = (value, count) => (value is null ? "未评分" : string.Create(CultureInfo.InvariantCulture, $"{value} 星，满分 {count} 星")),
         BackToTop = "回到顶部",
+        QrCode = "二维码",
+        QrExpired = "二维码已过期",
+        QrRefresh = "刷新",
+        QrScanned = "已扫描，请在手机上确认",
         EllipsisExpand = "展开",
         EllipsisCollapse = "收起",
         ProgressTarget = value => $"目标 {value}",
@@ -1385,6 +1405,7 @@ public sealed partial record Lang
         TableSelectedCount = count => string.Create(CultureInfo.InvariantCulture, $"{count} selected"),
         ListResultCount = count => (count == 1 ? "1 option" : string.Create(CultureInfo.InvariantCulture, $"{count} options")),
         ListLoadFailed = "Failed to load. Try again.",
+        ListNoMore = "No more items",
         TableClearSelection = "Clear selection",
         TableDetails = "Details",
         TableRowDetails = row => $"Details of {row}",
@@ -1456,6 +1477,10 @@ public sealed partial record Lang
         RatingStar = value => (value == 1 ? "1 star" : string.Create(CultureInfo.InvariantCulture, $"{value} stars")),
         RatingSummary = (value, count) => (value is null ? "Not rated" : string.Create(CultureInfo.InvariantCulture, $"{value} out of {count} stars")),
         BackToTop = "Back to top",
+        QrCode = "QR code",
+        QrExpired = "QR code expired",
+        QrRefresh = "Refresh",
+        QrScanned = "Scanned. Confirm on your phone.",
         EllipsisExpand = "More",
         EllipsisCollapse = "Less",
         ProgressTarget = value => $"target {value}",
