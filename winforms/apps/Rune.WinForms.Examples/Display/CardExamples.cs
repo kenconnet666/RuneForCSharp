@@ -7,7 +7,7 @@ static class CardExamples
     [
         new("Card", "variants", "样式", "Variant 有 surface（默认）、outline、elevated、ghost，颜色取主题。WinForms 画不到控件外面：elevated 没有阴影，只有抬高的表面色与弱边框。", Variants),
         new("Card", "extra", "页头的操作", "Extra 在页头的结束边（\"全部 ↗\"、标记、按钮），和 Header 排在一行、放不下时换行。", Extra),
-        new("Card", "loading", "内边距与加载中", "CardPadding 取间距档位；IsLoading 时正文换成扫光的骨架，很快完成的加载不出现骨架。上游用 Switch 切换，Switch 做出来之前用 CheckBox。", Loading),
+        new("Card", "loading", "内边距与加载中", "CardPadding 取间距档位；IsLoading 时正文换成扫光的骨架，很快完成的加载不出现骨架。用 Switch 切换。", Loading),
     ];
 
     static readonly (CardVariant Variant, string Description)[] Kinds =
@@ -31,14 +31,14 @@ static class CardExamples
 
     static Control Loading()
     {
-        var toggle = new CheckBox { Text = "加载中", Checked = true, AutoSize = true };
+        var toggle = new SwitchControl { Text = "加载中", IsChecked = true };
         var cards = new[] { Space.Sm, Space.Md, Space.Lg }.Select(padding => Build.Card(
             new CardControl { CardPadding = padding, IsLoading = true, Header = $"CardPadding = {padding}" },
             new ParagraphControl { Text = "正文加载中换成几行扫光的骨架，页头照常显示，读屏状态带\"忙\"。", TextSize = TextSize.Sm },
             new SmallControl { Text = "很快完成的加载不出现骨架", Tone = TextTone.Muted })).ToArray();
-        toggle.CheckedChanged += (_, _) =>
+        toggle.IsCheckedChanged += (_, _) =>
         {
-            foreach (var card in cards) card.IsLoading = toggle.Checked;
+            foreach (var card in cards) card.IsLoading = toggle.IsChecked;
         };
         return Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Md }, toggle, Build.Grid(new GridControl { MinItemWidth = "11em", Gap = Space.Md }, cards));
     }
