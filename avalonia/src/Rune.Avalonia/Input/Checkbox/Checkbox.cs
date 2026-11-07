@@ -92,10 +92,13 @@ public class Checkbox : ChoiceBase
     public string? Value { get => GetValue(ValueProperty); set => SetValue(ValueProperty, value); }
 
     /// <inheritdoc />
-    protected override bool ReadOnly => base.ReadOnly || group?.IsReadOnly == true;
+    private protected override bool InGroup => group is not null;
 
     /// <inheritdoc />
-    protected override bool Invalid => base.Invalid || group?.IsInvalid == true;
+    protected override bool ReadOnly => base.ReadOnly || group?.ReadOnly == true;
+
+    /// <inheritdoc />
+    protected override bool Invalid => base.Invalid || group?.Invalid == true;
 
     /// <inheritdoc />
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)

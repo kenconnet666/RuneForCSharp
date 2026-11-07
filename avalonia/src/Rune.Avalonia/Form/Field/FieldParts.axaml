@@ -1,0 +1,28 @@
+<!--
+  Field 与 FieldLabel 的默认外观（vue-tsx-pro 的 labelStyles、fieldStyles）：标签 md 字号、中等字重、行高 tight、正文色，
+  必填的星号是 dangerText，不可用时变淡；错误是 sm 字号，警示图标上下各让 0.25em（与第一行文字居中）。
+  说明、错误的字号与色调在代码里（Text 的 Size、Tone）。写成主题里的样式（DESIGN §7 代码组合的控件），使用方的部件样式盖得过
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|FieldLabel">
+    <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Md}" />
+    <Setter Property="TextElement.FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Tight}" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+  </Style>
+  <Style Selector="rune|FieldLabel:disabled">
+    <Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" />
+  </Style>
+  <Style Selector="rune|FieldLabel > rune|Icon#PART_Required">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.DangerText}" />
+  </Style>
+  <Style Selector="rune|Field > rune|Flex#PART_Error">
+    <Setter Property="TextElement.FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
+  </Style>
+  <Style Selector="rune|Field > rune|Flex#PART_Error > rune|Icon">
+    <Setter Property="Margin" Value="{rune:Em 0, 0.25}" />
+  </Style>
+</Styles>

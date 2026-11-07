@@ -78,10 +78,16 @@ public class Radio : ChoiceBase
     internal RadioGroup? Group => group;
 
     /// <inheritdoc />
-    protected internal override bool ReadOnly => group?.IsReadOnly == true;
+    private protected override bool InGroup => group is not null;
 
     /// <inheritdoc />
-    protected internal override bool Invalid => group?.IsInvalid == true;
+    protected internal override bool ReadOnly => group?.ReadOnly == true;
+
+    /// <inheritdoc />
+    protected internal override bool Invalid => group?.Invalid == true;
+
+    /// <inheritdoc />
+    protected internal override bool Required => group?.Required == true;
 
     /// <summary>单选项点了只会选中。</summary>
     protected override bool NextChecked => true;

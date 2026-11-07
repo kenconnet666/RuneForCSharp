@@ -11,7 +11,7 @@ namespace Rune.Wpf;
 /// 整组不可用写 IsEnabled。排列由主题样式里的 ItemsPanel 给（Choice.xaml）。
 /// 项在加载时按可视树（其次逻辑树）往上找到最近的组并登记，所以项可以放在组里的任意布局容器中。
 /// </summary>
-public abstract class ChoiceGroup : ItemsControl
+public abstract class ChoiceGroup : ItemsControl, IFieldControl
 {
     /// <summary>排列方向；默认竖排。</summary>
     public static readonly DependencyProperty OrientationProperty = DependencyProperty.Register(
@@ -32,6 +32,14 @@ public abstract class ChoiceGroup : ItemsControl
     readonly HashSet<ChoiceBase> members = [];
 
     static ChoiceGroup() => FocusableProperty.OverrideMetadata(typeof(ChoiceGroup), new FrameworkPropertyMetadata(false));
+
+    /// <summary>整组只读：自己写了的优先，其次所在字段的。</summary>
+    internal bool ReadOnly => Field.IsSet(this, IsReadOnlyProperty) ? IsReadOnly : Field.Of(this)?.IsReadOnly ?? false;
+
+    /// <summary>整组出错：自己写了的优先，其次所在字段的。</summary>
+    internal bool Invalid => Field.IsSet(this, IsInvalidProperty) ? IsInvalid : Field.Of(this)?.Invalid ?? false;
+
+    void IFieldControl.FieldChanged() => Sync();
 
     /// <summary>排列方向。</summary>
     public Orientation Orientation { get => (Orientation)GetValue(OrientationProperty); set => SetValue(OrientationProperty, value); }
@@ -114,12 +122,17 @@ public abstract class ChoiceGroup : ItemsControl
             (node is Visual ? VisualTreeHelper.GetParent(node) : null) ?? LogicalTreeHelper.GetParent(node);
     }
 
-    /// <summary>读屏：一组（role="group"），名称写 AutomationProperties.Name。</summary>
+    /// <summary>读屏：一组（role="group"），名称写 AutomationProperties.Name，没写时是所在字段的标签；帮助文字是字段的说明与错误。</summary>
     protected override AutomationPeer OnCreateAutomationPeer() => new ChoiceGroupAutomationPeer(this);
 
     sealed class ChoiceGroupAutomationPeer(ChoiceGroup owner) : FrameworkElementAutomationPeer(owner)
     {
         protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Group;
+
+        protected override string GetNameCore() =>
+            base.GetNameCore() is { Length: > 0 } name ? name : (Field.Of(owner) is { } field && field.Owns(owner) ? field.LabelText : null) ?? "";
+
+        protected override string GetHelpTextCore() => base.GetHelpTextCore() is { Length: > 0 } help ? help : Field.Of(owner)?.HelpText ?? "";
 
         protected override string GetClassNameCore() => owner.GetType().Name;
     }

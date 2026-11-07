@@ -16,6 +16,7 @@ export const PROP_RENAMES = {
   required: 'IsRequired',
   invalid: 'IsInvalid',
   indeterminate: 'IsIndeterminate',
+  labelHidden: 'IsLabelHidden',
   disabled: 'IsEnabled',
   children: 'Content',
   _value: 'Value',
@@ -49,8 +50,11 @@ export const PLATFORM_COMPONENT_PROP_RENAMES = {
 
 /** 某个平台上改了名的组件（平台自带同名类型时）：库 → { 组件: 类型名 } */
 export const TYPE_RENAMES = {
+  // 三个平台都自带 Label：表单标签叫 FieldLabel
+  Avalonia: { Label: 'FieldLabel' },
+  WPF: { Label: 'FieldLabel' },
   // WinForms 自己有 ListControl（ListBox、ComboBox 的基类）
-  WinForms: { List: 'UnorderedList', Container: 'ContainerPanel' },
+  WinForms: { List: 'UnorderedList', Container: 'ContainerPanel', Label: 'FieldLabel' },
 };
 
 const FORM_NAME = '表单提交的字段名是浏览器的概念；值经 Value 绑定，单选组的互斥由组自己管';

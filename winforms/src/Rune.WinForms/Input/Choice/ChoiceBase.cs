@@ -44,8 +44,8 @@ public abstract class ChoiceBase : Element
     /// <summary>键盘聚焦（宿主按 ShowFocusCues 设，同 :focus-visible）。</summary>
     public bool IsFocusVisible { get; internal set { if (field == value) return; field = value; Invalidate(); } }
 
-    /// <summary>派生类公开的只读、必填、出错（Radio 的来自单选组）。</summary>
-    private protected bool readOnly, required, invalid;
+    /// <summary>派生类公开的只读、必填、出错（Radio 的来自单选组）；null 是没写，取所在字段的。</summary>
+    private protected bool? readOnly, required, invalid;
 
     /// <summary>派生类公开的色调、字号档位（Radio 的来自单选组）。</summary>
     private protected StatusTone tone;
@@ -59,14 +59,20 @@ public abstract class ChoiceBase : Element
     /// <summary>说明部件的属性（TS 的 propsDescription）。</summary>
     private protected TextProps? DescriptionProps { get => field; set { field = value; RebuildDescription(); } }
 
-    /// <summary>只读：能聚焦，不能切换。</summary>
-    internal virtual bool ReadOnly => readOnly;
+    /// <summary>所在的字段：在复选组、单选组里时字段归组（项不接字段）。</summary>
+    internal FieldControl? Field => InGroup || Host is not Control host ? null : FieldControl.Of(host);
 
-    /// <summary>校验未通过。</summary>
-    internal virtual bool Invalid => invalid;
+    /// <summary>在复选组、单选组里。</summary>
+    private protected virtual bool InGroup => false;
 
-    /// <summary>必填。</summary>
-    internal virtual bool Required => required;
+    /// <summary>只读：能聚焦，不能切换。自己写了的优先，其次所在字段的。</summary>
+    internal virtual bool ReadOnly => readOnly ?? Field?.IsReadOnly ?? false;
+
+    /// <summary>校验未通过：自己写了的优先，其次所在字段的。</summary>
+    internal virtual bool Invalid => invalid ?? Field?.Invalid ?? false;
+
+    /// <summary>必填：自己写了的优先，其次所在字段的。</summary>
+    internal virtual bool Required => required ?? Field?.IsRequired ?? false;
 
     /// <summary>色调：实例上写的，其次作用域的 <see cref="ChoiceDefaults"/>，最后 accent。</summary>
     internal virtual StatusTone ResolvedTone => tone.Or(ScopeDefaults?.Tone, StatusTone.Accent);

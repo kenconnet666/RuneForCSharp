@@ -41,6 +41,9 @@ public class RadioGroup : ChoiceGroup
     /// <summary>必填。</summary>
     public bool IsRequired { get => (bool)GetValue(IsRequiredProperty); set => SetValue(IsRequiredProperty, value); }
 
+    /// <summary>必填：自己写了的优先，其次所在字段的。</summary>
+    internal bool Required => Field.IsSet(this, IsRequiredProperty) ? IsRequired : Field.Of(this)?.IsRequired ?? false;
+
     /// <summary>色调。</summary>
     public StatusTone Tone { get => (StatusTone)GetValue(ToneProperty); set => SetValue(ToneProperty, value); }
 
@@ -98,7 +101,7 @@ public class RadioGroup : ChoiceGroup
         };
         if (step is not { } delta) return;
         e.Handled = true;
-        if (IsReadOnly) return;
+        if (ReadOnly) return;
         var radios = Choices<Radio>().Where(radio => radio.IsVisible && radio.IsEnabled).ToList();
         var index = radios.IndexOf(current);
         if (radios.Count == 0 || index < 0) return;

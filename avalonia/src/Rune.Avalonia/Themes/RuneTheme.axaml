@@ -42,4 +42,5 @@
   <StyleInclude Source="avares://Rune.Avalonia/Input/Switch/SwitchParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Input/Checkbox/CheckboxParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Input/Radio/RadioParts.axaml" />
+  <StyleInclude Source="avares://Rune.Avalonia/Form/Field/FieldParts.axaml" />
 </Styles>

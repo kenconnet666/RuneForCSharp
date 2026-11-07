@@ -16,7 +16,7 @@ namespace Rune.Wpf;
 /// 只读、必填、出错、色调、字号、说明由派生类按上游的 props 公开（Radio 的这些来自单选组）。
 /// </summary>
 [ContentProperty(nameof(Content))]
-public abstract class ChoiceBase : Control
+public abstract class ChoiceBase : Control, IFieldControl
 {
     /// <summary>是否勾选（默认双向绑定）。</summary>
     public static readonly DependencyProperty IsCheckedProperty = DependencyProperty.Register(
@@ -39,6 +39,18 @@ public abstract class ChoiceBase : Control
 
     /// <summary>焦点环是否显示：只在键盘聚焦时（指针点击得到的焦点不显示，同 :focus-visible）。</summary>
     public static readonly DependencyProperty IsFocusVisibleProperty = IsFocusVisiblePropertyKey.DependencyProperty;
+
+    static readonly DependencyPropertyKey IsEffectivelyInvalidPropertyKey = DependencyProperty.RegisterReadOnly(
+        nameof(IsEffectivelyInvalid), typeof(bool), typeof(ChoiceBase), new PropertyMetadata(false));
+
+    /// <summary>实际出错：自己写的，其次所在的组、字段的（部件样式的触发器读它）。</summary>
+    public static readonly DependencyProperty IsEffectivelyInvalidProperty = IsEffectivelyInvalidPropertyKey.DependencyProperty;
+
+    static readonly DependencyPropertyKey IsEffectivelyReadOnlyPropertyKey = DependencyProperty.RegisterReadOnly(
+        nameof(IsEffectivelyReadOnly), typeof(bool), typeof(ChoiceBase), new PropertyMetadata(false));
+
+    /// <summary>实际只读：自己写的，其次所在的组、字段的（主题样式的触发器读它）。</summary>
+    public static readonly DependencyProperty IsEffectivelyReadOnlyProperty = IsEffectivelyReadOnlyPropertyKey.DependencyProperty;
 
     // 下面几项由派生类 AddOwner 公开：Switch、Checkbox 自己有，Radio 的来自单选组（上游 RadioProps 没有）
     internal static readonly DependencyProperty IsReadOnlyCoreProperty = DependencyProperty.Register(
@@ -108,11 +120,26 @@ public abstract class ChoiceBase : Control
     /// <summary>焦点环是否显示。</summary>
     public bool IsFocusVisible => (bool)GetValue(IsFocusVisibleProperty);
 
-    /// <summary>只读：能聚焦，不能切换；外观照常。</summary>
-    protected internal virtual bool ReadOnly => (bool)GetValue(IsReadOnlyCoreProperty);
+    /// <summary>实际出错。</summary>
+    public bool IsEffectivelyInvalid => (bool)GetValue(IsEffectivelyInvalidProperty);
 
-    /// <summary>校验未通过。</summary>
-    protected internal virtual bool Invalid => (bool)GetValue(IsInvalidCoreProperty);
+    /// <summary>实际只读。</summary>
+    public bool IsEffectivelyReadOnly => (bool)GetValue(IsEffectivelyReadOnlyProperty);
+
+    /// <summary>所在的字段：在复选组、单选组里时字段归组（项不接字段）。</summary>
+    private protected Field? FieldOwner => InGroup ? null : Field.Of(this);
+
+    /// <summary>在复选组、单选组里。</summary>
+    private protected virtual bool InGroup => false;
+
+    /// <summary>只读：能聚焦，不能切换；外观照常。自己写了的优先，其次所在字段的。</summary>
+    protected internal virtual bool ReadOnly => Field.IsSet(this, IsReadOnlyCoreProperty) ? (bool)GetValue(IsReadOnlyCoreProperty) : FieldOwner?.IsReadOnly ?? false;
+
+    /// <summary>校验未通过：自己写了的优先，其次所在字段的。</summary>
+    protected internal virtual bool Invalid => Field.IsSet(this, IsInvalidCoreProperty) ? (bool)GetValue(IsInvalidCoreProperty) : FieldOwner?.Invalid ?? false;
+
+    /// <summary>必填：自己写了的优先，其次所在字段的。</summary>
+    protected internal virtual bool Required => Field.IsSet(this, IsRequiredCoreProperty) ? (bool)GetValue(IsRequiredCoreProperty) : FieldOwner?.IsRequired ?? false;
 
     /// <summary>这次能不能切换（只读、不可用之外的理由，如 Switch 切换中）。</summary>
     protected virtual bool CanToggle => true;
@@ -181,9 +208,13 @@ public abstract class ChoiceBase : Control
     /// <param name="newValue">新的值。</param>
     protected virtual void OnCheckedChanged(bool oldValue, bool newValue) { }
 
-    /// <summary>文字与说明；派生类加上自己随状态变的部分。</summary>
+    void IFieldControl.FieldChanged() => Update();
+
+    /// <summary>文字与说明、实际的出错与只读；派生类加上自己随状态变的部分。</summary>
     protected internal virtual void Update()
     {
+        SetValue(IsEffectivelyInvalidPropertyKey, Invalid);
+        SetValue(IsEffectivelyReadOnlyPropertyKey, ReadOnly);
         label.Content = Content;
         label.Visibility = Content is null ? Visibility.Collapsed : Visibility.Visible;
         description.Content = GetValue(DescriptionCoreProperty);
@@ -315,17 +346,23 @@ public abstract class ChoiceBase : Control
         return arrangeBounds;
     }
 
-    /// <summary>读屏的共同部分：名称取文字，说明是帮助文字（TS 的 aria-describedby），必填；控件部件不进子节点。</summary>
+    /// <summary>
+    /// 读屏的共同部分：名称取文字，没有文字时是所在字段的标签（第一个控件认领）；帮助文字是说明，其次字段的说明与错误（TS 的 aria-describedby）；
+    /// 必填；控件部件不进子节点。
+    /// </summary>
     protected abstract class ChoiceAutomationPeer(ChoiceBase owner) : FrameworkElementAutomationPeer(owner)
     {
         /// <inheritdoc />
-        protected override string GetNameCore() => base.GetNameCore() is { Length: > 0 } name ? name : owner.Content as string ?? "";
+        protected override string GetNameCore() =>
+            base.GetNameCore() is { Length: > 0 } name ? name
+            : owner.Content as string ?? (owner.FieldOwner is { } field && field.Owns(owner) ? field.LabelText : null) ?? "";
 
         /// <inheritdoc />
-        protected override string GetHelpTextCore() => base.GetHelpTextCore() is { Length: > 0 } help ? help : owner.GetValue(DescriptionCoreProperty) as string ?? "";
+        protected override string GetHelpTextCore() =>
+            base.GetHelpTextCore() is { Length: > 0 } help ? help : owner.GetValue(DescriptionCoreProperty) as string ?? owner.FieldOwner?.HelpText ?? "";
 
         /// <inheritdoc />
-        protected override bool IsRequiredForFormCore() => (bool)owner.GetValue(IsRequiredCoreProperty);
+        protected override bool IsRequiredForFormCore() => owner.Required;
 
         /// <inheritdoc />
         protected override List<AutomationPeer>? GetChildrenCore() => null;

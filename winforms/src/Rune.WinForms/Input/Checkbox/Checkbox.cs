@@ -13,13 +13,13 @@ public class Checkbox : ChoiceBase
     readonly Icon indicator = new() { StrokeWidth = 3 };
 
     /// <summary>只读：能聚焦、读屏念"只读"，勾选状态不能改；外观照常。</summary>
-    public bool IsReadOnly { get => readOnly; set => readOnly = value; }
+    public bool IsReadOnly { get => readOnly ?? false; set => readOnly = value; }
 
     /// <summary>必填（如"同意条款"）。</summary>
-    public bool IsRequired { get => required; set => required = value; }
+    public bool IsRequired { get => required ?? false; set => required = value; }
 
     /// <summary>校验未通过：方框的描边是危险色。</summary>
-    public bool IsInvalid { get => invalid; set { invalid = value; Invalidate(); } }
+    public bool IsInvalid { get => invalid ?? false; set { invalid = value; Invalidate(); } }
 
     /// <summary>部分勾选（"全选"下面只选了一部分）：显示横线，读屏念"部分选中"。</summary>
     public bool IsIndeterminate { get; set { field = value; Invalidate(); } }
@@ -51,10 +51,13 @@ public class Checkbox : ChoiceBase
     internal CheckboxGroupControl? Group { get; set { if (field == value) return; field = value; Invalidate(); } }
 
     /// <inheritdoc />
-    internal override bool ReadOnly => base.ReadOnly || Group?.IsReadOnly == true;
+    private protected override bool InGroup => Group is not null;
 
     /// <inheritdoc />
-    internal override bool Invalid => base.Invalid || Group?.IsInvalid == true;
+    internal override bool ReadOnly => base.ReadOnly || Group?.ReadOnly == true;
+
+    /// <inheritdoc />
+    internal override bool Invalid => base.Invalid || Group?.Invalid == true;
 
     /// <summary>对勾 / 横线部件（测试用）。</summary>
     internal Icon IndicatorPart => indicator;
@@ -200,8 +203,6 @@ public class CheckboxControl : ChoiceControl<Checkbox>
         public override AccessibleRole Role => Owner is { AccessibleRole: not AccessibleRole.Default } control ? control.AccessibleRole : AccessibleRole.CheckButton;
 
         public override AccessibleStates State => owner.IsIndeterminate ? (base.State & ~AccessibleStates.Checked) | AccessibleStates.Mixed : base.State;
-
-        public override string? Help => base.Help ?? owner.Description;
 
         public override string DefaultAction => owner.IsChecked ? "取消勾选" : "勾选";
     }

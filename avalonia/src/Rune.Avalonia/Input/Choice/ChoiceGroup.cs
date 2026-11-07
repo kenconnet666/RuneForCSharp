@@ -13,7 +13,7 @@ namespace Rune.Avalonia;
 /// 整组不可用写 IsEnabled。排列由主题里的 ItemsPanel 给（ChoiceGroup.axaml）。
 /// </summary>
 [PseudoClasses(":horizontal", ":readonly", ":invalid")]
-public abstract class ChoiceGroup : ItemsControl
+public abstract class ChoiceGroup : ItemsControl, IFieldControl
 {
     /// <summary>排列方向；默认竖排。</summary>
     public static readonly StyledProperty<Orientation> OrientationProperty = AvaloniaProperty.Register<ChoiceGroup, Orientation>(nameof(Orientation), Orientation.Vertical);
@@ -39,6 +39,12 @@ public abstract class ChoiceGroup : ItemsControl
     /// <summary>数据 → 选项。</summary>
     public Func<object?, ListboxOption>? ToOption { get => GetValue(ToOptionProperty); set => SetValue(ToOptionProperty, value); }
 
+    /// <summary>整组只读：自己写了的优先，其次所在字段的。</summary>
+    internal bool ReadOnly => IsSet(IsReadOnlyProperty) ? IsReadOnly : Field.Of(this)?.IsReadOnly ?? false;
+
+    /// <summary>整组出错：自己写了的优先，其次所在字段的。</summary>
+    internal bool Invalid => IsSet(IsInvalidProperty) ? IsInvalid : Field.Of(this)?.Invalid ?? false;
+
     /// <summary>新建：竖排。</summary>
     protected ChoiceGroup() => PseudoClasses.Set(":horizontal", false);
 
@@ -47,12 +53,16 @@ public abstract class ChoiceGroup : ItemsControl
     {
         base.OnPropertyChanged(change);
         if (change.Property == OrientationProperty) PseudoClasses.Set(":horizontal", Orientation == Orientation.Horizontal);
-        else if (change.Property == IsReadOnlyProperty || change.Property == IsInvalidProperty)
-        {
-            PseudoClasses.Set(":readonly", IsReadOnly);
-            PseudoClasses.Set(":invalid", IsInvalid);
-            Sync();
-        }
+        else if (change.Property == IsReadOnlyProperty || change.Property == IsInvalidProperty || change.Property == Field.OwnerProperty) Refresh();
+    }
+
+    void IFieldControl.FieldChanged() => Refresh();
+
+    void Refresh()
+    {
+        PseudoClasses.Set(":readonly", ReadOnly);
+        PseudoClasses.Set(":invalid", Invalid);
+        Sync();
     }
 
     /// <summary>直接写在里面的勾选项就是它自己的容器；数据生成一个。</summary>
@@ -86,11 +96,16 @@ public abstract class ChoiceGroup : ItemsControl
     protected IEnumerable<T> Choices<T>() where T : ChoiceBase =>
         this.GetLogicalDescendants().OfType<T>().Where(item => item.FindLogicalAncestorOfType<ChoiceGroup>() == this);
 
-    /// <summary>读屏：一组（role="group"），名称写 AutomationProperties.Name。</summary>
+    /// <summary>读屏：一组（role="group"），名称写 AutomationProperties.Name，没写时是所在字段的标签；帮助文字是字段的说明与错误。</summary>
     protected override AutomationPeer OnCreateAutomationPeer() => new ChoiceGroupAutomationPeer(this);
 
     sealed class ChoiceGroupAutomationPeer(ChoiceGroup owner) : ItemsControlAutomationPeer(owner)
     {
         protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Group;
+
+        protected override string? GetNameCore() =>
+            base.GetNameCore() is { Length: > 0 } name ? name : Field.Of(owner) is { } field && field.Owns(owner) ? field.LabelText : null;
+
+        protected override string? GetHelpTextCore() => base.GetHelpTextCore() is { Length: > 0 } help ? help : Field.Of(owner)?.HelpText;
     }
 }

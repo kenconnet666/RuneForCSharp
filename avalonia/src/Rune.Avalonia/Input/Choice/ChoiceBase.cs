@@ -19,7 +19,7 @@ namespace Rune.Avalonia;
 /// 只读、必填、出错、色调、字号、说明由派生类按上游的 props 公开（Radio 的这些来自单选组）。
 /// </summary>
 [PseudoClasses(":checked", ":readonly", ":invalid")]
-public abstract class ChoiceBase : Control
+public abstract class ChoiceBase : Control, IFieldControl
 {
     /// <summary>是否勾选（默认双向绑定）。</summary>
     public static readonly StyledProperty<bool> IsCheckedProperty = AvaloniaProperty.Register<ChoiceBase, bool>(nameof(IsChecked), defaultBindingMode: BindingMode.TwoWay);
@@ -66,6 +66,7 @@ public abstract class ChoiceBase : Control
         resources.Bind(GapFactorProperty, "Rune.Space.Sm");
         resources.Bind(MinTargetProperty, "Rune.Size.MinTarget");
         BindTone();
+        UpdateMetrics();
     }
 
     /// <summary>
@@ -89,11 +90,20 @@ public abstract class ChoiceBase : Control
     /// <summary>字号。</summary>
     public double FontSize { get => GetValue(FontSizeProperty); set => SetValue(FontSizeProperty, value); }
 
-    /// <summary>只读：能聚焦，不能切换；外观照常。</summary>
-    protected virtual bool ReadOnly => GetValue(IsReadOnlyCoreProperty);
+    /// <summary>所在的字段：在复选组、单选组里时字段归组（项不接字段）。</summary>
+    private protected Field? FieldOwner => InGroup ? null : Field.Of(this);
 
-    /// <summary>校验未通过。</summary>
-    protected virtual bool Invalid => GetValue(IsInvalidCoreProperty);
+    /// <summary>在复选组、单选组里。</summary>
+    private protected virtual bool InGroup => false;
+
+    /// <summary>只读：能聚焦，不能切换；外观照常。自己写了的优先，其次所在字段的。</summary>
+    protected virtual bool ReadOnly => IsSet(IsReadOnlyCoreProperty) ? GetValue(IsReadOnlyCoreProperty) : FieldOwner?.IsReadOnly ?? false;
+
+    /// <summary>校验未通过：自己写了的优先，其次所在字段的。</summary>
+    protected virtual bool Invalid => IsSet(IsInvalidCoreProperty) ? GetValue(IsInvalidCoreProperty) : FieldOwner?.Invalid ?? false;
+
+    /// <summary>必填：自己写了的优先，其次所在字段的。</summary>
+    protected virtual bool Required => IsSet(IsRequiredCoreProperty) ? GetValue(IsRequiredCoreProperty) : FieldOwner?.IsRequired ?? false;
 
     /// <summary>这次能不能切换（只读、不可用之外的理由，如 Switch 切换中）。</summary>
     protected virtual bool CanToggle => true;
@@ -123,11 +133,7 @@ public abstract class ChoiceBase : Control
         if (change.Property == FontSizeProperty || change.Property == Leading.FactorProperty)
         {
             box?.InvalidateMeasure();
-            // 说明小一号（0.875em）；文字是普通字符串时 TextBlock 的行高是像素数，按各自的字号乘行高系数（同 Text）。主题样式与使用方的值盖得过
-            var leading = Leading.GetFactor(this);
-            description.SetValue(ContentPresenter.FontSizeProperty, 0.875 * Em, BindingPriority.Template);
-            description.SetValue(ContentPresenter.LineHeightProperty, leading * 0.875 * Em, BindingPriority.Template);
-            label.SetValue(ContentPresenter.LineHeightProperty, leading * Em, BindingPriority.Template);
+            UpdateMetrics();
         }
         if (change.Property == IsCheckedProperty)
         {
@@ -142,7 +148,19 @@ public abstract class ChoiceBase : Control
             else resources.Bind(FontSizeProperty, size.ResourceKey);
         }
         else if (change.Property == IsReadOnlyCoreProperty || change.Property == IsInvalidCoreProperty || change.Property == ContentProperty
-                 || change.Property == DescriptionCoreProperty) Update();
+                 || change.Property == DescriptionCoreProperty || change.Property == Field.OwnerProperty) Update();
+    }
+
+    /// <summary>
+    /// 说明小一号（0.875em）；文字是普通字符串时 TextBlock 的行高是像素数，按各自的字号乘行高系数（同 Text）。主题样式与使用方的值盖得过。
+    /// 新建时也算一次：字号与继承来的一样时不会有变化通知
+    /// </summary>
+    void UpdateMetrics()
+    {
+        var leading = Leading.GetFactor(this);
+        description.SetValue(ContentPresenter.FontSizeProperty, 0.875 * Em, BindingPriority.Template);
+        description.SetValue(ContentPresenter.LineHeightProperty, leading * 0.875 * Em, BindingPriority.Template);
+        label.SetValue(ContentPresenter.LineHeightProperty, leading * Em, BindingPriority.Template);
     }
 
     void BindTone()
@@ -151,6 +169,8 @@ public abstract class ChoiceBase : Control
         resources.Bind(ToneFillProperty, fill);
         resources.Bind(ToneOnFillProperty, onFill);
     }
+
+    void IFieldControl.FieldChanged() => Update();
 
     /// <summary>勾选变了（Switch 在这里让滑块滑过去）。</summary>
     protected virtual void OnCheckedChanged() { }
@@ -254,14 +274,19 @@ public abstract class ChoiceBase : Control
     /// <summary>画一层透明底：控件与文字之间的空隙也能点（TS 的 label 整块可点）。</summary>
     public override void Render(DrawingContext context) => context.FillRectangle(Brushes.Transparent, new Rect(Bounds.Size));
 
-    /// <summary>读屏的共同部分：名称取文字，说明是帮助文字（TS 的 aria-describedby）。</summary>
+    /// <summary>
+    /// 读屏的共同部分：名称取文字，没有文字时是所在字段的标签（第一个控件认领）；帮助文字是说明，其次字段的说明与错误（TS 的 aria-describedby）。Avalonia 的读屏接口没有必填。
+    /// </summary>
     protected abstract class ChoiceAutomationPeer(ChoiceBase owner) : ControlAutomationPeer(owner)
     {
         /// <inheritdoc />
-        protected override string? GetNameCore() => base.GetNameCore() is { Length: > 0 } name ? name : owner.Content as string;
+        protected override string? GetNameCore() =>
+            base.GetNameCore() is { Length: > 0 } name ? name
+            : owner.Content as string ?? (owner.FieldOwner is { } field && field.Owns(owner) ? field.LabelText : null);
 
         /// <inheritdoc />
-        protected override string? GetHelpTextCore() => base.GetHelpTextCore() is { Length: > 0 } help ? help : owner.GetValue(DescriptionCoreProperty) as string;
+        protected override string? GetHelpTextCore() =>
+            base.GetHelpTextCore() is { Length: > 0 } help ? help : owner.GetValue(DescriptionCoreProperty) as string ?? owner.FieldOwner?.HelpText;
     }
 }
 

@@ -1,8 +1,7 @@
 namespace Rune.WinForms.Examples;
 
 /// <summary>
-/// vue-tsx-pro 文档站 input/Checkbox 页的示例：复选框、选项来自数据、开关、单选。validation 等 Field；
-/// 上游包在 Field 里的地方先用 <see cref="Labeled"/>（标签、说明、错误摆在上下），Field 做好后换掉。
+/// vue-tsx-pro 文档站 input/Checkbox 页的示例：复选框、选项来自数据、开关、单选、必选与出错。
 /// WinForms 的 Radio 文字是字符串：单选的价格放在同一行的另一个控件里。
 /// </summary>
 static class CheckboxExamples
@@ -13,6 +12,7 @@ static class CheckboxExamples
         new("Checkbox", "items", "选项来自数据", "CheckboxGroupControl、RadioGroupControl 的 ItemsSource 可以是 ListboxOption（值、文字、说明、不可用）、字符串，或任意数据加 ToOption。Description 显示在文字下方，读屏作为帮助文字；单独的 Checkbox、Radio 也能写。", Items),
         new("Checkbox", "switch", "开关", "Switch 是立即生效的设置（需要提交才生效的用 Checkbox）。切换要等接口时写 IsLoading：滑块里转圈、点击无效；在 Toggling 里拦下切换，接口回来后再改 IsChecked。轨道里可以放图标或文字，对读屏隐藏。", Settings),
         new("Checkbox", "radio", "单选", "整组一个 Tab 位置，停在选中项；方向键在组内移动并选中。Orientation = Horizontal 横排。", Shipping),
+        new("Checkbox", "validation", "必选与出错", "提交时才检查：FieldControl 的 IsRequired 标出必填，Error 让整组标红并把错误作为帮助文字念出；单个复选框（同意条款）同样包在字段里显示错误。", Validation),
     ];
 
     static readonly (string Value, string Label)[] PermissionOptions =
@@ -54,16 +54,12 @@ static class CheckboxExamples
             new CheckboxControl { Value = "push", Text = "App 推送" },
             new CheckboxControl { Value = "phone", Text = "电话（企业版）", Enabled = false },
         ]);
-        var note = new SmallControl { Text = "至少选一种", Tone = TextTone.Muted };
-        channels.ValueChanged += (_, _) =>
-        {
-            channels.IsInvalid = channels.Value.Count == 0;
-            (note.Text, note.Tone) = channels.IsInvalid ? ("请至少选一种", TextTone.Danger) : ("至少选一种", TextTone.Muted);
-        };
+        var channelsField = new FieldControl { Label = "通知方式", Description = "至少选一种", Content = channels };
+        channels.ValueChanged += (_, _) => channelsField.Error = channels.Value.Count > 0 ? null : "请至少选一种";
 
         return Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Lg },
             Build.Card(new CardControl { CardPadding = Space.Sm }, Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Sm }, all, granted)),
-            Labeled("通知方式", channels, note),
+            channelsField,
             Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Xs }, new CheckboxControl { Text = "我已阅读并同意《服务条款》", Tone = StatusTone.Success }, summary));
     }
 
@@ -96,15 +92,15 @@ static class CheckboxExamples
                 new ListboxOption("sms", "短信") { Description = "只发紧急的待办（需要绑定手机号）", IsDisabled = true },
             },
         };
-        var selected = new SmallControl { Tone = TextTone.Muted };
-        void Sync() => selected.Text = $"已选：{(notify.Value.Count > 0 ? string.Join("、", notify.Value) : "（无）")}";
+        var notifyField = new FieldControl { Label = "通知方式", Content = notify };
+        void Sync() => notifyField.Description = $"已选：{(notify.Value.Count > 0 ? string.Join("、", notify.Value) : "（无）")}";
         notify.ValueChanged += (_, _) => Sync();
         Sync();
         var period = new RadioGroupControl { ItemsSource = new[] { "按日", "按周", "按月" }, Value = "按周", Orientation = Orientation.Horizontal };
         return Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Lg },
-            Labeled("套餐", plan),
-            Labeled("通知方式", notify, selected),
-            Labeled("横排的字符串选项", period));
+            new FieldControl { Label = "套餐", Content = plan },
+            notifyField,
+            new FieldControl { Label = "横排的字符串选项", Content = period });
     }
 
     static Control Shipping()
@@ -123,28 +119,48 @@ static class CheckboxExamples
             row.SetGrow(radio, true);
             shipping.Controls.Add(row);
         }
-        var invoice = new RadioGroupControl { Orientation = Orientation.Horizontal, IsInvalid = true };
+        var invoice = new RadioGroupControl { Orientation = Orientation.Horizontal };
         invoice.Controls.AddRange([
             new RadioControl { Value = "none", Text = "不开发票" },
             new RadioControl { Value = "personal", Text = "个人" },
             new RadioControl { Value = "company", Text = "企业" },
         ]);
-        var error = new SmallControl { Text = "请选择发票类型", Tone = TextTone.Danger };
-        invoice.ValueChanged += (_, _) =>
-        {
-            invoice.IsInvalid = invoice.Value is null;
-            error.Visible = invoice.IsInvalid;
-        };
-        return Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Lg }, Labeled("配送方式", shipping), Labeled("发票 *", invoice, error));
+        var invoiceField = new FieldControl { Label = "发票", IsRequired = true, Error = "请选择发票类型", Content = invoice };
+        invoice.ValueChanged += (_, _) => invoiceField.Error = invoice.Value is null ? "请选择发票类型" : null;
+        return Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Lg }, new FieldControl { Label = "配送方式", Content = shipping }, invoiceField);
     }
 
-    /// <summary>标签在上、内容、说明或错误在下（Field 的临时替代）；组以标签为读屏名称。</summary>
-    static FlexControl Labeled(string label, Control content, Control? note = null)
+    static Control Validation()
     {
-        content.AccessibleName ??= label.TrimEnd(' ', '*');
-        var field = Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Xs }, new TextControl { Text = label, Weight = TextWeight.Medium }, content);
-        if (note is not null) field.Controls.Add(note);
-        return field;
+        var channels = new CheckboxGroupControl { Orientation = Orientation.Horizontal };
+        channels.Controls.AddRange([
+            new CheckboxControl { Value = "email", Text = "邮件" },
+            new CheckboxControl { Value = "sms", Text = "短信" },
+            new CheckboxControl { Value = "inbox", Text = "站内信" },
+        ]);
+        var channelsField = new FieldControl { Label = "通知方式", IsRequired = true, Content = channels };
+        var agreed = new CheckboxControl { Text = "我已阅读并同意服务条款", IsRequired = true };
+        var agreedField = new FieldControl { Content = agreed };
+        var done = new SmallControl { Text = "已保存", Tone = TextTone.Success, Visible = false };
+        var submitted = false;
+        // 提交时才检查；提交过之后随勾选实时更新
+        void Check()
+        {
+            if (!submitted) return;
+            channelsField.Error = channels.Value.Count == 0 ? "至少选一种通知方式" : null;
+            agreedField.Error = agreed.IsChecked ? null : "请先同意服务条款";
+            done.Visible = channelsField.Error is null && agreedField.Error is null;
+        }
+        channels.ValueChanged += (_, _) => Check();
+        agreed.IsCheckedChanged += (_, _) => Check();
+        var save = new ButtonControl { Text = "保存设置" };
+        save.Click += (_, _) =>
+        {
+            submitted = true;
+            Check();
+        };
+        return Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Lg, Align = FlexAlign.Start },
+            channelsField, agreedField, Build.Flex(new FlexControl { Gap = Space.Sm, Align = FlexAlign.Center }, save, done));
     }
 
     static Control Settings()

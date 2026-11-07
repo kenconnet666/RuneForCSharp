@@ -8,7 +8,7 @@ namespace Rune.WinForms;
 /// 整组只读、出错，项可以直接放在里面（也可以套在别的布局容器里），也可以来自 <see cref="ItemsSource"/>（ListboxOption、字符串，
 /// 或任意数据加 <see cref="ToOption"/>）。整组不可用写 Enabled。项沿 Parent 链找到最近的组。
 /// </summary>
-public abstract class ChoiceGroupControl : FlexControl
+public abstract class ChoiceGroupControl : FlexControl, IFieldControl
 {
     readonly List<Control> generated = [];
 
@@ -25,13 +25,23 @@ public abstract class ChoiceGroupControl : FlexControl
     [Category("Behavior")]
     [Description("整组只读：能聚焦，选择不能改；外观照常。")]
     [DefaultValue(false)]
-    public bool IsReadOnly { get; set { field = value; Sync(); } }
+    public bool IsReadOnly { get => readOnly ?? false; set { readOnly = value; Sync(); } }
 
     /// <summary>整组校验未通过（如"至少选一项"）。</summary>
     [Category("Appearance")]
     [Description("整组校验未通过：各项的描边是危险色。")]
     [DefaultValue(false)]
-    public bool IsInvalid { get; set { field = value; Sync(); } }
+    public bool IsInvalid { get => invalid ?? false; set { invalid = value; Sync(); } }
+
+    bool? readOnly, invalid;
+
+    /// <summary>整组只读：自己写了的优先，其次所在字段的。</summary>
+    internal bool ReadOnly => readOnly ?? FieldControl.Of(this)?.IsReadOnly ?? false;
+
+    /// <summary>整组出错：自己写了的优先，其次所在字段的。</summary>
+    internal bool Invalid => invalid ?? FieldControl.Of(this)?.Invalid ?? false;
+
+    void IFieldControl.FieldChanged() => Sync();
 
     /// <summary>数据 → 选项（值、文字、说明、不可用）；数据是 ListboxOption、字符串时不用写。</summary>
     [Browsable(false)]
@@ -117,9 +127,17 @@ public abstract class ChoiceGroupControl : FlexControl
     /// <inheritdoc />
     protected override AccessibleObject CreateAccessibilityInstance() => new ChoiceGroupAccessibleObject(this);
 
-    /// <summary>读屏：一组（role="group"），名称写 AccessibleName。</summary>
+    /// <summary>读屏：一组（role="group"），名称写 AccessibleName，没写时是所在字段的标签；帮助文字是字段的说明与错误。</summary>
     sealed class ChoiceGroupAccessibleObject(ChoiceGroupControl owner) : ControlAccessibleObject(owner)
     {
         public override AccessibleRole Role => Owner is { AccessibleRole: not AccessibleRole.Default } control ? control.AccessibleRole : AccessibleRole.Grouping;
+
+        public override string? Name
+        {
+            get => base.Name is { Length: > 0 } name ? name : FieldControl.Of(owner) is { } scope && scope.Owns(owner) ? scope.Label : null;
+            set => base.Name = value;
+        }
+
+        public override string? Help => base.Help ?? FieldControl.Of(owner)?.HelpText;
     }
 }

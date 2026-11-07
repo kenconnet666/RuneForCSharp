@@ -104,10 +104,13 @@ public class Checkbox : ChoiceBase
     public string? Value { get => (string?)GetValue(ValueProperty); set => SetValue(ValueProperty, value); }
 
     /// <inheritdoc />
-    protected internal override bool ReadOnly => base.ReadOnly || group?.IsReadOnly == true;
+    private protected override bool InGroup => group is not null;
 
     /// <inheritdoc />
-    protected internal override bool Invalid => base.Invalid || group?.IsInvalid == true;
+    protected internal override bool ReadOnly => base.ReadOnly || group?.ReadOnly == true;
+
+    /// <inheritdoc />
+    protected internal override bool Invalid => base.Invalid || group?.Invalid == true;
 
     void OnIndeterminateChanged()
     {

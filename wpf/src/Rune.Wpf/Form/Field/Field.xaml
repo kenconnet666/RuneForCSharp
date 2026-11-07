@@ -1,0 +1,49 @@
+<!--
+  Field 与 FieldLabel 的主题样式与部件样式（vue-tsx-pro 的 labelStyles、fieldStyles）：
+  标签 md 字号、中等字重、行高 tight、正文色，必填的星号是 dangerText、贴着第一行的顶边，不可用时变淡；
+  说明是 sm、muted，错误是 sm、dangerText，前面的警示图标上下各让 0.25em（在代码里按字号给）。使用方同键的样式叠在上面（DESIGN §7）
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <Style TargetType="rune:Field" />
+
+  <Style TargetType="rune:FieldLabel">
+    <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Md}" />
+    <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Tight}" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="Focusable" Value="False" />
+    <Style.Triggers>
+      <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" /></Trigger>
+    </Style.Triggers>
+  </Style>
+
+  <Style x:Key="{x:Static rune:FieldLabelParts.Content}" TargetType="ContentPresenter" />
+
+  <Style x:Key="{x:Static rune:FieldLabelParts.Required}" TargetType="rune:Icon">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.DangerText}" />
+  </Style>
+
+  <Style x:Key="{x:Static rune:FieldParts.Label}" TargetType="rune:FieldLabel" />
+
+  <Style x:Key="{x:Static rune:FieldParts.Description}" TargetType="rune:Text">
+    <Setter Property="Size" Value="sm" />
+    <Setter Property="Tone" Value="muted" />
+  </Style>
+
+  <Style x:Key="{x:Static rune:FieldParts.Error}" TargetType="rune:Flex">
+    <Setter Property="Gap" Value="xs" />
+    <Setter Property="Align" Value="start" />
+    <Setter Property="TextElement.FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
+  </Style>
+
+  <Style x:Key="{x:Static rune:FieldParts.ErrorText}" TargetType="rune:Text">
+    <Setter Property="Tone" Value="danger" />
+  </Style>
+
+  <Style x:Key="{x:Static rune:FieldParts.ErrorIcon}" TargetType="rune:Icon">
+    <Setter Property="Tone" Value="danger" />
+  </Style>
+</ResourceDictionary>

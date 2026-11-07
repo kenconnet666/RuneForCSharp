@@ -9,7 +9,7 @@ namespace Rune.WinForms;
 /// Text 是文字，也是读屏名称（没写 AccessibleName 时）；切换时通知读屏。
 /// </summary>
 /// <typeparam name="T">承载的元素。</typeparam>
-public abstract class ChoiceControl<T> : ElementControl<T> where T : ChoiceBase, new()
+public abstract class ChoiceControl<T> : ElementControl<T>, IFieldControl where T : ChoiceBase, new()
 {
     /// <summary>新建：能获得焦点、进 Tab 顺序。</summary>
     protected ChoiceControl()
@@ -57,6 +57,12 @@ public abstract class ChoiceControl<T> : ElementControl<T> where T : ChoiceBase,
         var args = new ChoiceTogglingEventArgs(next);
         OnToggling(args);
         if (!args.Cancel) Element.ApplyChecked(next);
+    }
+
+    void IFieldControl.FieldChanged()
+    {
+        Invalidate();
+        AccessibilityNotifyClients(AccessibleEvents.StateChange, -1);
     }
 
     /// <summary>引发 <see cref="Toggling"/>。</summary>
@@ -139,16 +145,24 @@ public abstract class ChoiceControl<T> : ElementControl<T> where T : ChoiceBase,
         Element.IsFocusVisible = Focused && ShowFocusCues;
     }
 
-    /// <summary>读屏的共同部分：名称取 AccessibleName 或文字，说明是帮助文字；选中、只读的状态；默认动作是切换。</summary>
+    /// <summary>
+    /// 读屏的共同部分：名称取 AccessibleName 或文字，都没有时是所在字段的标签（第一个控件认领）；帮助文字是说明，其次字段的说明与错误；
+    /// 选中、只读的状态；默认动作是切换。
+    /// </summary>
     /// <param name="owner">控件。</param>
     protected abstract class ChoiceAccessibleObject(ChoiceControl<T> owner) : ControlAccessibleObject(owner)
     {
         /// <inheritdoc />
         public override string? Name
         {
-            get => base.Name is { Length: > 0 } name ? name : owner.Text;
+            get => base.Name is { Length: > 0 } name ? name
+                : owner.Text is { Length: > 0 } text ? text
+                : owner.Element.Field is { } scope && scope.Owns(owner) ? scope.Label : null;
             set => base.Name = value;
         }
+
+        /// <inheritdoc />
+        public override string? Help => base.Help ?? (owner.Element.DescriptionPart.Content is { Length: > 0 } own ? own : owner.Element.Field?.HelpText);
 
         /// <inheritdoc />
         public override AccessibleStates State

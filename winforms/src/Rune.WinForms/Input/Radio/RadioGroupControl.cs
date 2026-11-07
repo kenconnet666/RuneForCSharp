@@ -45,7 +45,12 @@ public class RadioGroupControl : ChoiceGroupControl
     [Category("Behavior")]
     [Description("必填（外观不变，供表单用）。")]
     [DefaultValue(false)]
-    public bool IsRequired { get; set; }
+    public bool IsRequired { get => required ?? false; set => required = value; }
+
+    bool? required;
+
+    /// <summary>必填：自己写了的优先，其次所在字段的。</summary>
+    internal bool Required => required ?? FieldControl.Of(this)?.IsRequired ?? false;
 
     /// <summary>选中时的色调；不写时取作用域的默认值（<see cref="ChoiceDefaults"/>），再没有时 accent。</summary>
     [Category("Appearance")]
@@ -91,7 +96,7 @@ public class RadioGroupControl : ChoiceGroupControl
     /// <param name="delta">1 往后，-1 往前。</param>
     internal void Step(RadioControl from, int delta)
     {
-        if (IsReadOnly) return;
+        if (ReadOnly) return;
         var radios = Choices<RadioControl>().Where(radio => radio.Visible && radio.Enabled).ToList();
         var index = radios.IndexOf(from);
         if (radios.Count == 0 || index < 0) return;

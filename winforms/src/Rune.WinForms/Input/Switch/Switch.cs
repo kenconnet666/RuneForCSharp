@@ -25,13 +25,13 @@ public class Switch : ChoiceBase
     public Switch() => delayed = new DelayedLoading(_ => Invalidate());
 
     /// <summary>只读：能聚焦，不能切换（查看详情、审批时）；外观照常。</summary>
-    public bool IsReadOnly { get => readOnly; set => readOnly = value; }
+    public bool IsReadOnly { get => readOnly ?? false; set => readOnly = value; }
 
     /// <summary>必填（外观不变，供表单用）。</summary>
-    public bool IsRequired { get => required; set => required = value; }
+    public bool IsRequired { get => required ?? false; set => required = value; }
 
     /// <summary>校验未通过：轨道描边是危险色。</summary>
-    public bool IsInvalid { get => invalid; set { invalid = value; Invalidate(); } }
+    public bool IsInvalid { get => invalid ?? false; set { invalid = value; Invalidate(); } }
 
     /// <summary>切换中（如等接口返回）：滑块里转圈（防闪烁），不能切换。</summary>
     public bool IsLoading { get; set { field = value; delayed.Update(value); Invalidate(); } }

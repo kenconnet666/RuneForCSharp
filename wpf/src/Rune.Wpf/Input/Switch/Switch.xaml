@@ -18,7 +18,7 @@
       <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource AncestorType=rune:Switch}}" Value="True">
         <Setter Property="Background" Value="{Binding ToneFill, RelativeSource={RelativeSource AncestorType=rune:Switch}}" />
       </DataTrigger>
-      <DataTrigger Binding="{Binding IsInvalid, RelativeSource={RelativeSource AncestorType=rune:Switch}}" Value="True">
+      <DataTrigger Binding="{Binding IsEffectivelyInvalid, RelativeSource={RelativeSource AncestorType=rune:Switch}}" Value="True">
         <Setter Property="BorderThickness" Value="2" />
         <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Danger}" />
       </DataTrigger>

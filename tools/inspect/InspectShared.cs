@@ -238,6 +238,15 @@ sealed class StyleReport
         ["ChoiceBase"] = "choice",
     };
 
+    /// <summary>
+    /// 上游没有部件标记的组件（样式直接写在元素上，不带 data-scope）：它们自己与部件都不按组件记，
+    /// 里面的元素按标签配对（Field 的星号是 @svg）。
+    /// </summary>
+    static readonly HashSet<string> Unscoped = ["Field", "FieldLabel"];
+
+    /// <summary>组件在上游有部件标记（不在 <see cref="Unscoped"/> 里）。</summary>
+    public static bool IsScoped(string componentType) => !Unscoped.Contains(componentType);
+
     /// <summary>组件根在上游是另一个组件的部件：复选组、单选组是 choice 配方的 group。</summary>
     static readonly Dictionary<string, string> RootAliases = new()
     {

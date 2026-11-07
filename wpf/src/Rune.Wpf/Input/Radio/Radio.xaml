@@ -1,7 +1,7 @@
 <!--
   Radio 的部件样式（主题样式与外层在 Input/Choice/Choice.xaml；vue-tsx-pro 的 radioStyles 与 choiceInputStyles）：
   圆是 2px borderStrong 描边、表面底色；选中时描边与底色都是色调的实底（ToneFill），圆点是其上的颜色（ToneOnFill）；
-  单选组出错时描边是危险色，排在选中之后。随状态变的用祖先绑定的 DataTrigger（使用方同键的样式叠在上面，DESIGN §7）
+  单选组（或它所在的字段）出错时描边是危险色，排在选中之后。随状态变的用祖先绑定的 DataTrigger（使用方同键的样式叠在上面，DESIGN §7）
 -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -17,7 +17,7 @@
         <Setter Property="Background" Value="{Binding ToneFill, RelativeSource={RelativeSource AncestorType=rune:Radio}}" />
         <Setter Property="BorderBrush" Value="{Binding ToneFill, RelativeSource={RelativeSource AncestorType=rune:Radio}}" />
       </DataTrigger>
-      <DataTrigger Binding="{Binding IsInvalid, RelativeSource={RelativeSource AncestorType=rune:RadioGroup}}" Value="True">
+      <DataTrigger Binding="{Binding IsEffectivelyInvalid, RelativeSource={RelativeSource AncestorType=rune:Radio}}" Value="True">
         <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Danger}" />
       </DataTrigger>
     </Style.Triggers>

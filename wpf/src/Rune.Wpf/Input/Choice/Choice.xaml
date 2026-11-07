@@ -16,6 +16,7 @@
     <!-- 焦点环是部件，不用 WPF 的焦点虚线框 -->
     <Setter Property="FocusVisualStyle" Value="{x:Null}" />
     <Style.Triggers>
+      <Trigger Property="IsEffectivelyReadOnly" Value="True"><Setter Property="Cursor" Value="Arrow" /></Trigger>
       <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" /></Trigger>
     </Style.Triggers>
   </Style>
@@ -30,7 +31,6 @@
       <Trigger Property="Size" Value="xl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xl}" /></Trigger>
       <Trigger Property="Size" Value="xxl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xxl}" /></Trigger>
       <Trigger Property="Size" Value="xxxl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xxxl}" /></Trigger>
-      <Trigger Property="IsReadOnly" Value="True"><Setter Property="Cursor" Value="Arrow" /></Trigger>
     </Style.Triggers>
   </Style>
 
@@ -44,16 +44,10 @@
       <Trigger Property="Size" Value="xl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xl}" /></Trigger>
       <Trigger Property="Size" Value="xxl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xxl}" /></Trigger>
       <Trigger Property="Size" Value="xxxl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xxxl}" /></Trigger>
-      <Trigger Property="IsReadOnly" Value="True"><Setter Property="Cursor" Value="Arrow" /></Trigger>
-      <DataTrigger Binding="{Binding IsReadOnly, RelativeSource={RelativeSource AncestorType=rune:CheckboxGroup}}" Value="True"><Setter Property="Cursor" Value="Arrow" /></DataTrigger>
     </Style.Triggers>
   </Style>
 
-  <Style TargetType="rune:Radio" BasedOn="{StaticResource Rune.ChoiceStyle}">
-    <Style.Triggers>
-      <DataTrigger Binding="{Binding IsReadOnly, RelativeSource={RelativeSource AncestorType=rune:RadioGroup}}" Value="True"><Setter Property="Cursor" Value="Arrow" /></DataTrigger>
-    </Style.Triggers>
-  </Style>
+  <Style TargetType="rune:Radio" BasedOn="{StaticResource Rune.ChoiceStyle}" />
 
   <Style x:Key="{x:Static rune:ChoiceBaseParts.Label}" TargetType="ContentPresenter">
     <Setter Property="VerticalAlignment" Value="Top" />

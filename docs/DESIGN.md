@@ -605,7 +605,18 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 单选组的键盘同原生 radio：整组一个 Tab 位置，停在选中项（没有选中时是第一个可用项）；方向键在组内移动并选中，到头从另一端继续，跳过不可用的，从右到左时左右反过来；只读时方向键不动。没有用 `RovingFocus`：Tab 停靠点跟着选中项而不是上次聚焦的项，移动时还要选中。
 - 取值核对：`styles.mjs` 对 checkbox 页（checkbox、items、switch、radio）Avalonia、WPF 都是 0 差异。inspect 把 Checkbox、Radio、Switch 报成上游的 `choice` 部件（方框、圆、轨道是 input，对勾、圆点、滑块是 indicator，组是 choice/group）；比对工具把"透明或与底色同色的描边"与"不画描边"算作一样，原生 input 的前景色不比，方框、圆、滑块比高度。
 - WinForms：元素 `Checkbox`、`Radio` + 宿主 `CheckboxControl`、`RadioControl`（共用的宿主是 `ChoiceControl<T>`）；方框、圆、圆点、焦点环是画的。Radio 的文字只能是字符串（元素不能放任意内容）：示例里单选的价格放在同一行的另一个控件里。每项四周留 4 像素给焦点环，所以组里各项的间距比上游大一些（同 Switch）。读屏没有"必填""校验未通过"的状态。
-- 示例：checkbox、items、radio 里上游包在 Field 里的地方先用标签、说明、错误上下摆放代替（示例文件里的 `Labeled`），Field 做好后换掉；validation 等 Field。
+- 示例：checkbox 页五个示例都有了（Field 做好后换掉了先前的标签、说明上下摆放的替代，补了 validation）。
+
+### Field（2026-11-07）
+
+- 组成：标签（`FieldLabel`：三个平台都自带 Label，这里改名；WinForms 是 `FieldLabelControl`）、控件（Content）、说明、错误（警示图标 + 文字）。WinForms 的字段是 `FieldControl`。标签 md、中等字重、行高 tight，必填时文字后有 0.7em 的星号（dangerText，贴着第一行顶边，对读屏隐藏）；说明 sm、muted；错误 sm、dangerText，图标上下各让 0.25em。竖排间距 space.xs。说明、错误是文字（上游可以是任意内容）。
+- 状态交给里面的控件：出错（有错误且 IsInvalid 不是 false；只写 IsInvalid 时只标红不显示错误）、必填、只读；控件上自己写了的优先（Avalonia 用 `IsSet`，WPF 看值的来源不是默认值，WinForms 存成可空）。不可用写平台的 IsEnabled，里面一起不可用、标签变淡（上游"控件上写 disabled=false 优先"在桌面上做不到：不可用沿树继承）。错误、说明是控件读屏的帮助文字（TS 的 aria-describedby）。
+- 控件从哪里知道字段：Avalonia、WPF 是一个继承的附加属性（字段把自己设上去，里面的元素都读得到，变了时通知控件）；WinForms 沿 Parent 链找。接入字段的控件实现内部接口 `IFieldControl`（勾选类、复选组、单选组；以后的输入框照样接）。复选组、单选组里的项不接字段，由组接。
+- 第一个控件认领标签（同上游的 claim）：字段按逻辑树深度优先找第一个接入的控件（不进到控件里面），它没有自己的名称时以标签为读屏名称，点标签聚焦它（是一组时聚焦组里的 Tab 停靠项或第一个能聚焦的）；其余控件留着自己的名字。
+- 标签在起始边（`LabelPlacement = start`）：标签一列（`LabelWidth`，默认 8em；文字默认贴着控件 end 对齐），列距 space.md，控件、说明、错误一列；标签的第一行基线对上控件第一行文字的基线（Avalonia、WPF 取控件可视树里第一个显示着的 TextBlock 的第一行；WinForms 取控件报的基线，否则最上面的子控件的）。`IsLabelHidden` 时标签只给读屏、不占标签列。
+- WPF 的部件样式要看"实际的"出错、只读（自己的、组的、字段的），勾选类加了只读的 `IsEffectivelyInvalid`、`IsEffectivelyReadOnly`（Avalonia 是 `:invalid`、`:readonly` 伪类）。
+- 取值核对：上游的 Field、Label 没有部件标记，inspect 把它们的部件按标签记（星号是 @svg）；checkbox 页（含 validation）Avalonia、WPF 0 差异。表单页（Form 的 states、layout 等）的示例要等 TextField、Select、NumberField、Form。
+- 没做：表单（Form、useForm：`name`、`valueProp`、按名字取错误与约束、提交时焦点移到第一个出错的控件）、字段布局的统一设置（Form、FormSection 的 labelPlacement、readonly、disabled）。WinForms 的 propsLabel（标签是控件）、propsControl（控件列没有元素）。
 
 ### Spinner
 

@@ -29,13 +29,16 @@ public class Radio : ChoiceBase
     internal RadioGroupControl? Group { get; set { if (field == value) return; field = value; InvalidateMeasure(); } }
 
     /// <inheritdoc />
-    internal override bool ReadOnly => Group?.IsReadOnly == true;
+    private protected override bool InGroup => Group is not null;
 
     /// <inheritdoc />
-    internal override bool Invalid => Group?.IsInvalid == true;
+    internal override bool ReadOnly => Group?.ReadOnly == true;
 
     /// <inheritdoc />
-    internal override bool Required => Group?.IsRequired == true;
+    internal override bool Invalid => Group?.Invalid == true;
+
+    /// <inheritdoc />
+    internal override bool Required => Group?.Required == true;
 
     /// <summary>色调随组。</summary>
     internal override StatusTone ResolvedTone => Group?.Tone ?? base.ResolvedTone;
@@ -163,8 +166,6 @@ public class RadioControl : ChoiceControl<Radio>
     sealed class RadioAccessibleObject(RadioControl owner) : ChoiceAccessibleObject(owner)
     {
         public override AccessibleRole Role => Owner is { AccessibleRole: not AccessibleRole.Default } control ? control.AccessibleRole : AccessibleRole.RadioButton;
-
-        public override string? Help => base.Help ?? owner.Description;
 
         public override string DefaultAction => "选中";
     }

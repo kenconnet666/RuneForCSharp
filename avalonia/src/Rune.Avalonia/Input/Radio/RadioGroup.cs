@@ -44,6 +44,9 @@ public class RadioGroup : ChoiceGroup
     /// <summary>字号档位。</summary>
     public TextSize Size { get => GetValue(SizeProperty); set => SetValue(SizeProperty, value); }
 
+    /// <summary>必填：自己写了的优先，其次所在字段的。</summary>
+    internal bool Required => IsSet(IsRequiredProperty) ? IsRequired : Field.Of(this)?.IsRequired ?? false;
+
     /// <inheritdoc />
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
@@ -91,7 +94,7 @@ public class RadioGroup : ChoiceGroup
         };
         if (step is not { } delta) return;
         e.Handled = true;
-        if (IsReadOnly) return;
+        if (ReadOnly) return;
         var radios = Choices<Radio>().Where(radio => radio.IsEffectivelyVisible && radio.IsEffectivelyEnabled).ToList();
         var index = radios.IndexOf(current);
         if (radios.Count == 0 || index < 0) return;
