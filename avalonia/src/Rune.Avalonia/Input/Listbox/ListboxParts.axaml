@@ -1,6 +1,6 @@
 <!--
   Listbox 部件的默认外观：分组标题 sm、textMuted、medium，上 space.sm、下 space.xs、左右 space.sm（TS 的 groupLabel）；
-  有焦点时整个列表一圈焦点环由滚动区域画（键盘聚焦时）。
+  键盘聚焦时整个列表一圈焦点环：借滚动区域里侧 2 像素的那圈（列表自己滚动，它就是视口，外面一圈会被裁掉；上游 c6b0309d 同样画在里面）。
 -->
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -12,6 +12,9 @@
         <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
       </ControlTemplate>
     </Setter>
+  </Style>
+  <Style Selector="rune|Listbox:focus-visible > rune|ScrollArea#PART_Scroll /template/ Border#PART_FocusRing">
+    <Setter Property="IsVisible" Value="True" />
   </Style>
   <Style Selector="rune|Listbox TextBlock#PART_GroupLabel">
     <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />

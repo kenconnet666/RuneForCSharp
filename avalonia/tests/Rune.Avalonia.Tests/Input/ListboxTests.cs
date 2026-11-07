@@ -157,4 +157,17 @@ public class ListboxTests
         HeadlessUi.Show(loading);
         HeadlessUi.Until(() => loading.GetLogicalDescendants().OfType<StackPanel>().Any(panel => panel.Name == ListboxParts.Skeleton && panel.IsVisible));
     });
+
+    [Fact]
+    public Task Keyboard_focus_shows_the_ring_inside_the_list() => HeadlessUi.Run(() =>
+    {
+        var list = new Listbox { ItemsSource = Fruits, VerticalAlignment = global::Avalonia.Layout.VerticalAlignment.Top };
+        var window = HeadlessUi.Show(list);
+        var ring = global::Avalonia.VisualTree.VisualExtensions.GetVisualDescendants(list).OfType<Border>().Single(border => border.Name == "PART_FocusRing");
+        Assert.False(ring.IsVisible);
+        list.Focus(NavigationMethod.Tab);
+        HeadlessUi.Flush(window);
+        Assert.True(ring.IsVisible); // 键盘聚焦：里侧 2 像素的焦点环
+        Assert.Equal(list.Bounds.Size, ring.Bounds.Size);
+    });
 }

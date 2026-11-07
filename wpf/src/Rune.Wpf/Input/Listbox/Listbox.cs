@@ -67,6 +67,7 @@ public class Listbox : FrameworkElement, IFieldControl
     readonly ListboxRows rows;
     readonly StackPanel skeleton = new() { Visibility = Visibility.Collapsed };
     readonly ContentPresenter empty = new() { Visibility = Visibility.Collapsed };
+    readonly Border focusRing = new() { Name = "PART_FocusRing", Visibility = Visibility.Collapsed, IsHitTestVisible = false, BorderThickness = new Thickness(2) };
     readonly DelayedLoading loading;
     bool syncing;
 
@@ -95,12 +96,17 @@ public class Listbox : FrameworkElement, IFieldControl
         root.Children.Add(rows);
         root.Children.Add(skeleton);
         root.Children.Add(empty);
+        // 键盘聚焦时一圈 2 像素的焦点环画在里面：列表自己滚动，外面一圈会被滚动区域裁掉（上游 c6b0309d 同样画在里面）
+        focusRing.SetResourceReference(Border.BorderBrushProperty, "Rune.Brush.FocusRing");
+        root.Children.Add(focusRing);
         AddLogicalChild(root);
         AddVisualChild(root);
-        GotKeyboardFocus += (_, _) =>
+        GotKeyboardFocus += (_, e) =>
         {
+            if (e.NewFocus == this) focusRing.Visibility = InputManager.Current.MostRecentInputDevice is KeyboardDevice ? Visibility.Visible : Visibility.Collapsed;
             if (State.Active is null) State.ActivateDefault();
         };
+        LostKeyboardFocus += (_, _) => focusRing.Visibility = Visibility.Collapsed;
         Loaded += (_, _) =>
         {
             UpdateMetrics();

@@ -162,6 +162,17 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 | P6（/testing 子路径、vtp-ui create 模板） | 网页端的工具 | 不涉及 |
 | 部件补齐第六批：Descriptions、Banner、FormErrorSummary、Carousel、QRCode、CharacterCount、Steps、Breadcrumbs、Splitter 等只补 data-scope/data-part 标记 | 网页的标记；CharacterCount 已做，部件属性不变 | 不涉及 |
 
+### 第十二批（2026-11-08 通知，master 9b155f35、c6b0309d：会被裁掉的焦点环画在里面）
+
+这两个提交的 CI 还在排队，锁定停在 95a6c2ee。
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| Listbox 自己滚动时焦点环画在里面（focusRingStyles.inset） | 核对时发现 Avalonia、WPF 的 Listbox 键盘聚焦时根本没有焦点环（焦点装饰、焦点框都关了；Avalonia 的说明以为由 ScrollArea 画，其实 ScrollArea 只在自己有焦点时画）；WinForms 本来就画在里面 | 已修：Avalonia 借 ScrollArea 里侧 2 像素的那圈（列表 :focus-visible 时显示），WPF 在根上叠一圈 2 像素、键盘聚焦时显示 |
+| CodeBlock 的复制按钮焦点环画在里面 | 我们的复制按钮同 IconButton，焦点环本来就压在按钮里面 | 不涉及 |
+| Tabs 的标签（列表可横向滚动）焦点环画在里面 | Avalonia、WPF 的标签焦点环在外面一圈（Margin -4）；WinForms 画在里面 | CI 绿后锁定时改成里面 |
+| DataTable 表头排序按钮、Splitter 把手 | 还没做 | 做时照新的 |
+
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 
 计划：vue-tsx-pro 的 `.claude/reports/style-overhaul-plan.md`（阶段 0 护栏 → 1 引擎 → 2 架构与 API → 3 整理 → 4 美学 → 5 文档）。
