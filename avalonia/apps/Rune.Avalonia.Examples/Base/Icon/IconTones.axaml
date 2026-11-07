@@ -2,24 +2,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/avalonia"
              x:Class="Rune.Avalonia.Examples.IconTones">
-  <UserControl.Styles>
-    <Style Selector="WrapPanel > StackPanel">
-      <Setter Property="Orientation" Value="Horizontal" />
-      <Setter Property="Spacing" Value="8" />
-      <Setter Property="Width" Value="144" />
-    </Style>
-    <Style Selector="WrapPanel > StackPanel > TextBlock">
-      <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
-      <Setter Property="VerticalAlignment" Value="Center" />
-    </Style>
-  </UserControl.Styles>
-  <WrapPanel ItemSpacing="12" LineSpacing="12">
-    <StackPanel><rune:Icon Data="{x:Static rune:Lucide.CircleUser}" Tone="neutral" Size="xl" /><TextBlock Text="中性：正文色" /></StackPanel>
-    <StackPanel><rune:Icon Data="{x:Static rune:Lucide.CircleUser}" Tone="muted" Size="xl" /><TextBlock Text="次要" /></StackPanel>
-    <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Sparkles}" Tone="accent" Size="xl" /><TextBlock Text="品牌色" /></StackPanel>
-    <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Info}" Tone="info" Size="xl" /><TextBlock Text="信息" /></StackPanel>
-    <StackPanel><rune:Icon Data="{x:Static rune:Lucide.CircleCheck}" Tone="success" Size="xl" /><TextBlock Text="成功" /></StackPanel>
-    <StackPanel><rune:Icon Data="{x:Static rune:Lucide.TriangleExclamationPoint}" Tone="warning" Size="xl" /><TextBlock Text="警告" /></StackPanel>
-    <StackPanel><rune:Icon Data="{x:Static rune:Lucide.CircleExclamationPoint}" Tone="danger" Size="xl" /><TextBlock Text="危险" /></StackPanel>
-  </WrapPanel>
+  <rune:Grid MinItemWidth="9rem" Gap="md">
+    <rune:Flex Align="center" Gap="sm"><rune:Icon Data="{x:Static rune:Lucide.CircleUser}" Tone="neutral" Size="xl" /><rune:Text Size="sm">中性：正文色</rune:Text></rune:Flex>
+    <rune:Flex Align="center" Gap="sm"><rune:Icon Data="{x:Static rune:Lucide.CircleUser}" Tone="muted" Size="xl" /><rune:Text Size="sm">次要</rune:Text></rune:Flex>
+    <rune:Flex Align="center" Gap="sm"><rune:Icon Data="{x:Static rune:Lucide.Sparkles}" Tone="accent" Size="xl" /><rune:Text Size="sm">品牌色</rune:Text></rune:Flex>
+    <rune:Flex Align="center" Gap="sm"><rune:Icon Data="{x:Static rune:Lucide.Info}" Tone="info" Size="xl" /><rune:Text Size="sm">信息</rune:Text></rune:Flex>
+    <rune:Flex Align="center" Gap="sm"><rune:Icon Data="{x:Static rune:Lucide.CircleCheck}" Tone="success" Size="xl" /><rune:Text Size="sm">成功</rune:Text></rune:Flex>
+    <rune:Flex Align="center" Gap="sm"><rune:Icon Data="{x:Static rune:Lucide.TriangleExclamationPoint}" Tone="warning" Size="xl" /><rune:Text Size="sm">警告</rune:Text></rune:Flex>
+    <rune:Flex Align="center" Gap="sm"><rune:Icon Data="{x:Static rune:Lucide.CircleExclamationPoint}" Tone="danger" Size="xl" /><rune:Text Size="sm">危险</rune:Text></rune:Flex>
+  </rune:Grid>
 </UserControl>

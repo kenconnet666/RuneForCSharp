@@ -3,11 +3,12 @@ using Avalonia.Interactivity;
 
 namespace Rune.Avalonia.Examples;
 
-/// <summary>Button 的示例（vue-tsx-pro 文档站 base/Button）。Card、Field、ButtonGroup、Kbd、Tooltip 做出来后补上 basic、types、group 与 icons、disabled 的其余部分。</summary>
+/// <summary>Button 的示例（vue-tsx-pro 文档站 base/Button）。Field、ButtonGroup、Tooltip 做出来后补上 types、group 与 disabled 的其余部分。</summary>
 static class ButtonExamples
 {
     public static Example[] All =>
     [
+        new("Button", "basic", "基础用法", "一组操作里只有一个主要操作用默认的实底样式，其余按重要程度依次减弱；破坏性操作放在另一侧。页脚默认靠结束边排，要两端分开时在 Footer 里放一个 Flex（Justify=between），再用样式给它的外层 ContentPresenter 写 Flex.Grow 占满一行。", () => new ButtonBasic()),
         new("Button", "variants", "样式", "solid 是一组操作里的主要操作，每组最多一个；其余按强调程度递减。", () => new ButtonVariants()),
         new("Button", "tones", "色调", "Tone 与 Badge、Alert 同一套：neutral 用于取消这类不需要强调的操作，danger 用于删除等破坏性操作。", () => new ButtonTones()),
         new("Button", "sizes", "尺寸", "Size 是字号档位，内边距、高度、图标都按 em 随之缩放；不写时继承外面的字号。", () => new ButtonSizes()),
@@ -18,6 +19,22 @@ static class ButtonExamples
         new("Button", "links", "链接按钮", "点了去别处用 LinkButton 而不是 Button 加点击：读屏念“链接”。外观同 Button；桌面上 Href 用系统打开，External 显示外链图标并告诉读屏在新窗口打开。", () => new ButtonLinks()),
         new("Button", "disabled", "不可用", "IsEnabled=False 时整体变淡、不响应点击。", () => new ButtonDisabled()),
     ];
+}
+
+/// <summary>Button/basic：点"发布"切换草稿与已发布。</summary>
+public partial class ButtonBasic : UserControl
+{
+    /// <summary>加载示例。</summary>
+    public ButtonBasic()
+    {
+        InitializeComponent();
+        Publish.Click += (_, _) =>
+        {
+            var published = Publish.Content as string == "发布";
+            Publish.Content = published ? "撤回" : "发布";
+            Status.Text = published ? "已发布" : "草稿 · 3 分钟前保存";
+        };
+    }
 }
 
 /// <summary>Button/variants。</summary>

@@ -2,27 +2,18 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/avalonia"
              x:Class="Rune.Avalonia.Examples.IconAccessibility">
-  <UserControl.Styles>
-    <Style Selector="StackPanel.row">
-      <Setter Property="Orientation" Value="Horizontal" />
-      <Setter Property="Spacing" Value="4" />
-    </Style>
-    <Style Selector="StackPanel.row > rune|Icon">
-      <Setter Property="VerticalAlignment" Value="Center" />
-    </Style>
-  </UserControl.Styles>
-  <WrapPanel ItemSpacing="32" LineSpacing="16">
+  <rune:Flex Gap="xl" Wrap="True" VerticalAlignment="Top">
     <!-- 旁边已有文字：图标只是装饰，读屏跳过 -->
-    <StackPanel Spacing="4">
-      <StackPanel Classes="row"><rune:Icon Data="{x:Static rune:Lucide.CircleCheck}" Tone="success" /><TextBlock Text="已保存" /></StackPanel>
-      <StackPanel Classes="row"><rune:Icon Data="{x:Static rune:Lucide.TriangleExclamationPoint}" Tone="warning" /><TextBlock Text="3 项待确认" /></StackPanel>
-      <StackPanel Classes="row"><rune:Icon Data="{x:Static rune:Lucide.CircleX}" Tone="danger" /><TextBlock Text="同步失败" /></StackPanel>
-    </StackPanel>
+    <rune:Flex Direction="column" Gap="xs">
+        <rune:Text><InlineUIContainer BaselineAlignment="Center"><rune:Icon Data="{x:Static rune:Lucide.CircleCheck}" Tone="success" /></InlineUIContainer> 已保存</rune:Text>
+        <rune:Text><InlineUIContainer BaselineAlignment="Center"><rune:Icon Data="{x:Static rune:Lucide.TriangleExclamationPoint}" Tone="warning" /></InlineUIContainer> 3 项待确认</rune:Text>
+        <rune:Text><InlineUIContainer BaselineAlignment="Center"><rune:Icon Data="{x:Static rune:Lucide.CircleX}" Tone="danger" /></InlineUIContainer> 同步失败</rune:Text>
+    </rune:Flex>
     <!-- 单独出现、表达含义：给名称 -->
-    <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+    <rune:Flex Gap="md" Align="center">
       <rune:Icon Data="{x:Static rune:Lucide.TriangleExclamationPoint}" Tone="warning" Size="xl" AutomationProperties.Name="有未保存的修改" />
       <rune:Icon Data="{x:Static rune:Lucide.Lock}" Tone="muted" Size="xl" AutomationProperties.Name="仅自己可见" />
       <rune:Icon Data="{x:Static rune:Lucide.Wifi}" Tone="success" Size="xl" AutomationProperties.Name="已连接" />
-    </StackPanel>
-  </WrapPanel>
+    </rune:Flex>
+  </rune:Flex>
 </UserControl>

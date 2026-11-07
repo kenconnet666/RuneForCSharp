@@ -23,6 +23,13 @@ public partial class IconTones : UserControl
     public IconTones() => InitializeComponent();
 }
 
+/// <summary>Icon/with-text：与文字、按钮、链接、标记搭配。</summary>
+public partial class IconWithText : UserControl
+{
+    /// <summary>加载示例。</summary>
+    public IconWithText() => InitializeComponent();
+}
+
 /// <summary>Icon/direction：从右到左。</summary>
 public partial class IconDirection : UserControl
 {
