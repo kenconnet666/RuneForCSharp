@@ -67,6 +67,17 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 | Upload 接父级放进来的待上传文件（ff221742） | 还没做 | 做时照新的 |
 | 文档：ButtonBase 页换成"长得不像按钮的按钮"；Upload、Timeline、Code 合并示例 | Code 页的示例变了 | 跟着像素差异改示例 |
 
+### 第四批（2026-11-08 通知，master 到 89c01fc8）
+
+锁定跟到 f5d31cdd（含 237f97d2）：当时 77cffad3（FloatButton）的 CI 失败，cffe9ad9、89c01fc8 还在跑，CI 绿了再跟。语言包、token、图标、配方都没变。
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| Dialog 的 draggable（237f97d2）：按住标题栏拖，不超出窗口，每次打开回到正中 | 已做 Dialog | 这次做 |
+| FileDrop、Upload 选文件夹（directory，f5d31cdd） | 还没做 | 做时照新的（桌面上是选文件夹的对话框、拖进来的文件夹递归读出文件） |
+| FloatButton、FloatButtonGroup（速拨），BackTop 基于它（77cffad3） | 还没做 | CI 绿了锁定，做时照新的 |
+| useInfiniteList、InfiniteListStatus，语言包 listNoMore；Select、Combobox、Mentions 的 load 分页（page、{ items, next }），ListboxView 的 onRangeChange 与 loading: 'more'（cffe9ad9） | Select 的远程选项还没做 | CI 绿了锁定，重新生成语言包；做 Select 的 load 时连分页一起做 |
+
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 
 计划：vue-tsx-pro 的 `.claude/reports/style-overhaul-plan.md`（阶段 0 护栏 → 1 引擎 → 2 架构与 API → 3 整理 → 4 美学 → 5 文档）。

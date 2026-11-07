@@ -922,6 +922,9 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   的激活模式（加了 xl 档：xl 圆角、xl 阴影），内容窗口按圆角裁掉；打开期间用 Win32 的 EnableWindow 禁用宿主（同 ShowDialog；改 WinForms 的 Enabled 会让里面的控件按不可用重画），
   宿主移动、变大小时跟着。不接 FloatingSurface 的"点了外面"（切到别的程序也会触发），只认遮罩上的点击。踩过：窗口显示之前子控件的 Visible 一律是 false、
   输入框没建句柄时量出的高度偏小——有没有说明、页脚按属性判断，显示之后再量一次高度；ScrollAreaControl 不认 Padding，正文的内边距放在里面一层。
+- 可以拖动（上游 237f97d2，2026-11-08）：`Draggable` 时标题行是把手（移动指针），从标题行上的按钮、输入框按下不拖；位移在排版时加到面板上、限制在窗口里，
+  每次打开回到正中。Avalonia 用指针捕获，WPF 用鼠标捕获（测试里鼠标位置造不出来，直接调内部的 `DragTo`）；WinForms 的面板是单独的窗口，按住标题或标题行的空白，
+  按屏幕上的光标位移重新摆面板。示例：draggable（付款信息上游用 Descriptions，还没有，先排成标签、值两列）。
 - 没做：进出场动画、命令式打开（useDialog）、AlertDialog。
 - behavior.mjs：describe 不是纯组件名（'Dialog 的 onOpenChange'）时，用例名不以组件名开头的归到 describe 开头的组件名（原来退回文件名）。这样多归出 19 条已做组件的上游用例
   （Badge、Button、Card、Icon 等的属性落点、Provider 默认值），原来被算成"组件还没做"，待逐条对应或登记不适用。
