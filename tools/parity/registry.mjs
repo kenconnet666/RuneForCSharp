@@ -40,6 +40,8 @@ export const COMPONENT_PROP_RENAMES = {
   ScrollArea: { focusable: 'IsViewportFocusable' },
   // 代码的语言：lang 是缩写，C# 写全
   CodeBlock: { lang: 'Language' },
+  // 控件自己有 Width
+  TableHeaderCell: { width: 'ColumnWidth' },
   // Avalonia、WPF 沿用平台的提示（ToolTip.Tip、ToolTipService），组件库只补位置、距离、箭头
   Tooltip: {
     children: 'ToolTip.Tip',
@@ -108,6 +110,8 @@ export const PROPS_NOT_PORTED = {
   CopyButton: { type: BUTTON_TYPE },
   Tooltip: { trigger: '提示挂在触发器上（Avalonia、WPF 的 ToolTip 附加属性，WinForms 的扩展属性），不用渲染函数' },
   ScrollArea: { propsContent: '内容就是 Content 本身，平台的滚动呈现器直接排它，中间没有包一层' },
+  Table: { propsRoot: '外层的外框与横向滚动区域由 Table 管：外观按密度、样式、斑马纹与主题 token' },
+  ...Object.fromEntries(['TableHead', 'TableBody', 'TableFoot', 'TableRow', 'TableCaption', 'TableCell', 'TableHeaderCell'].map((name) => [name, { propsRoot: '行、单元格、各部分本身就是元素：样式直接写在它们身上' }])),
   Tabs: { lazy: '看不见的面板不排版、不绘制（IsVisible / Visible 为 false），本来就是第一次显示时才有代价' },
   Toolbar: { items: '桌面上没有 CSS 选择器：参与方向键移动的固定是按钮与链接' },
   Skeleton: { variant: '上游已废弃（改名为 shape），新库不带' },

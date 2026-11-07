@@ -1,0 +1,46 @@
+<!--
+  Table 单元格与标题的主题（vue-tsx-pro 的 tableRecipe、tablePartStyles）：单元格 text 颜色、行高 normal；表头 textMuted、sm、中等字重；
+  表体、表尾里的行标题中等字重；表尾加粗。标题 textMuted、sm，上下 space.sm、左右 space.md。
+  内边距（左右 space.md、上下按密度）、行底色与分隔线、外框在 Table.cs 里。
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:TableCell}" TargetType="rune:TableCell">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="TextBlock.LineHeight" Value="{rune:Em Resource=Rune.LineHeight.Normal}" />
+    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Normal}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
+                          HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:head">
+      <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+      <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
+      <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
+    </Style>
+    <Style Selector="^:row-header">
+      <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
+    </Style>
+    <Style Selector="^:foot">
+      <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Semibold}" />
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type rune:TableHeaderCell}" TargetType="rune:TableHeaderCell" BasedOn="{StaticResource {x:Type rune:TableCell}}" />
+
+  <ControlTheme x:Key="{x:Type rune:TableCaption}" TargetType="rune:TableCaption">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+    <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
+    <Setter Property="Padding" Value="{rune:Em 0.75, 0.5}" />
+    <Setter Property="TextBlock.LineHeight" Value="{rune:Em Resource=Rune.LineHeight.Normal}" />
+    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Normal}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Padding="{TemplateBinding Padding}" />
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>
