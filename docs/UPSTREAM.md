@@ -52,6 +52,21 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 | FilterBar / QueryTable 重做（cad81082，作废 a6ffbb54 那版）：标题单独一列，第一排条件 auto-fit 加按钮区（展开、高级筛选、actions、重置、查询、竖线、end），其余条件从第二排 auto-fill；minFieldWidth 默认 14em，加 propsBody、propsRow | 还没做 | 做时照 cad81082 |
 | 文档站合页：NavMenu、NavBar 并进 NavList 页等 | NavList 页现有的示例 id 不变 | 新的 menu、nav-bar 示例等 NavMenu、NavBar |
 
+### 第三批（2026-11-07 通知，master 到 ff221742）
+
+锁定跟到 d386edd8（当时 CI 绿的最新提交，含 554b7246、0950975c、0f69e5c5）；6160d6d2、ff221742 的 CI 还没跑完，下次锁定。语言包、token、图标、配方都没变。
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| 单选、复选的卡片外观（554b7246）：card、横排按 minItemWidth（默认 14em）auto-fill；Radio、Checkbox 加 end、propsEnd | 已做 Checkbox、Radio | 这次做 |
+| ItemList 整条可点、selected、disabled（0950975c） | 还没做 | 做时照新的 |
+| 可选中的 Tag（0f69e5c5）：_selected 时是按钮（aria-pressed），没选中 surface、选中 solid 加对勾，默认 accent、sm | 已做 Tag | 这次做 |
+| 静态 Table 的 stickyHeader、sticky（9a57a058，这次锁定才进来） | 已做 Table | 这次做 |
+| ScrollArea 各部件带标记、border-box（6160d6d2） | 网页的盒模型，桌面上本来就是 | CI 绿后锁定，核对 scroll-area 的像素 |
+| 链接下划线 LinkUnderlineScope（ff221742）：显式 > 容器给的 > defaults.Link > always；ItemList、Stat、Timeline 等整块 hover，Card 只给页头 | 已做 Link、Card | CI 绿后锁定时做 |
+| Upload 接父级放进来的待上传文件（ff221742） | 还没做 | 做时照新的 |
+| 文档：ButtonBase 页换成"长得不像按钮的按钮"；Upload、Timeline、Code 合并示例 | Code 页的示例变了 | 跟着像素差异改示例 |
+
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 
 计划：vue-tsx-pro 的 `.claude/reports/style-overhaul-plan.md`（阶段 0 护栏 → 1 引擎 → 2 架构与 API → 3 整理 → 4 美学 → 5 文档）。
