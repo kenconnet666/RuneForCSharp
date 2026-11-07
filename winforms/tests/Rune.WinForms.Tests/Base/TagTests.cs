@@ -60,4 +60,26 @@ public class TagTests
         Assert.InRange(removable.Width - plain.Width, (int)(1.5f * em) - 1, (int)(1.5f * em) + 1);
         Assert.True(button.Right <= removable.Width);
     });
+
+    [Fact]
+    [Upstream("Tag", "_selected：整个标签是按钮")]
+    public Task Selectable_tag_is_a_toggle_button_with_a_check_when_selected() => WinFormsUi.Run(() =>
+    {
+        var urgent = new TagControl { Text = "加急", IsSelected = false, Variant = StatusVariant.Soft };
+        urgent.RemoveRequested += (_, _) => { };
+        using var form = WinFormsUi.Show(urgent);
+
+        Assert.Equal(AccessibleRole.PushButton, urgent.AccessibilityObject.Role);
+        Assert.False(urgent.AccessibilityObject.State.HasFlag(AccessibleStates.Pressed));
+        Assert.Null(urgent.RemoveButton); // 可选中的标签不带移除按钮
+        Assert.Null(urgent.Element.IconPart);
+        Assert.Equal((StatusTone.Accent, TextSize.Sm, StatusVariant.Soft), (urgent.Tone, urgent.TextSize, urgent.Variant)); // 没写的色调、字号取 accent、sm
+        Assert.True(urgent.CanSelect);
+
+        urgent.AccessibilityObject.DoDefaultAction();
+        Assert.True(urgent.IsSelected);
+        Assert.True(urgent.AccessibilityObject.State.HasFlag(AccessibleStates.Pressed));
+        Assert.Same(Lucide.Check, urgent.Element.IconPart?.Data); // 选中时前面一个对勾
+        Assert.Equal(StatusVariant.Solid, urgent.Variant); // 选中一律实底
+    });
 }

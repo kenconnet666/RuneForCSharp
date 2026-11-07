@@ -12,6 +12,8 @@ namespace Rune.WinForms;
 /// 订阅了 <see cref="RemoveRequested"/> 才有移除按钮（上游给了 onRemove 才有）：文字后面一个圆形的 <see cref="CloseButtonControl"/> 子控件，
 /// 1.5em、字号与颜色同标签，读屏名称是"移除 + 标签文字"（<see cref="RemoveLabel"/> 能改）。使用方移除了标签时，原来在移除按钮上的焦点交给
 /// 同一容器里下一个（没有就上一个）能聚焦的控件。出入：没有离场的淡出缩小（子控件不能半透明），点了就请求移除。
+/// 可选中（筛选条件的一排标签）：写了 <see cref="IsSelected"/> 时整个标签是切换按钮（读屏是按钮、状态"已按下"），点击、空格、Enter 切换；
+/// 没选中时 surface（有描边），选中时 solid 实底并在前面加一个对勾；没写的色调、字号用 accent、sm。可选中的标签不带移除按钮。
 /// </summary>
 [ToolboxItem(true)]
 [DefaultEvent(nameof(RemoveRequested))]
@@ -47,6 +49,121 @@ public class TagControl : BadgeControl
         }
     }
 
+    /// <summary>可选中：null 时是普通标签；true / false 时整个标签是切换按钮，点一下切换（变了发 <see cref="IsSelectedChanged"/>）。</summary>
+    [Category("Behavior")]
+    [Description("可选中：空着是普通标签；True / False 时整个标签是切换按钮，点一下切换。")]
+    [DefaultValue(null)]
+    public bool? IsSelected
+    {
+        get => Element.Selected;
+        set
+        {
+            if (Element.Selected == value) return;
+            Element.Selected = value;
+            SetStyle(ControlStyles.Selectable, value is not null);
+            TabStop = value is not null;
+            Cursor = value is null ? Cursors.Default : Cursors.Hand;
+            SyncRemove();
+            PerformLayout();
+            Invalidate();
+            IsSelectedChanged?.Invoke(this, EventArgs.Empty);
+            AccessibilityNotifyClients(AccessibleEvents.StateChange, -1);
+        }
+    }
+
+    /// <summary>IsSelected 变了；数据绑定认它。</summary>
+    [Category("Property Changed")]
+    [Description("IsSelected 变了。")]
+    public event EventHandler? IsSelectedChanged;
+
+    /// <summary>切换选中（可选中时）。</summary>
+    void ToggleSelected()
+    {
+        if (IsSelected is { } selected && Enabled) IsSelected = !selected;
+    }
+
+    /// <inheritdoc />
+    protected override void OnClick(EventArgs e)
+    {
+        ToggleSelected();
+        base.OnClick(e);
+    }
+
+    /// <inheritdoc />
+    protected override void OnMouseDown(MouseEventArgs e)
+    {
+        base.OnMouseDown(e);
+        if (IsSelected is not null && e.Button == MouseButtons.Left) Focus();
+    }
+
+    /// <inheritdoc />
+    protected override bool IsInputKey(Keys keyData) => IsSelected is not null && keyData is Keys.Space or Keys.Enter || base.IsInputKey(keyData);
+
+    /// <summary>Enter 按下时、空格松开时切换（同原生按钮）。</summary>
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+        if (IsSelected is null || e.KeyCode is not (Keys.Enter or Keys.Space)) return;
+        e.Handled = e.SuppressKeyPress = true;
+        if (e.KeyCode == Keys.Enter) ToggleSelected();
+    }
+
+    /// <inheritdoc />
+    protected override void OnKeyUp(KeyEventArgs e)
+    {
+        base.OnKeyUp(e);
+        if (IsSelected is not null && e.KeyCode == Keys.Space) ToggleSelected();
+    }
+
+    /// <inheritdoc />
+    protected override void OnGotFocus(EventArgs e)
+    {
+        base.OnGotFocus(e);
+        Invalidate();
+    }
+
+    /// <inheritdoc />
+    protected override void OnLostFocus(EventArgs e)
+    {
+        base.OnLostFocus(e);
+        Invalidate();
+    }
+
+    /// <summary>可选中时键盘聚焦画焦点环（2px focusRing，压在边上，同按钮）。</summary>
+    protected override void OnPaint(PaintEventArgs e)
+    {
+        base.OnPaint(e);
+        if (IsSelected is null || !Focused || !ShowFocusCues) return;
+        var context = ElementContext.Of(this);
+        var width = context.Scale(2);
+        var bounds = RectangleF.Inflate(Element.Bounds, -width / 2, -width / 2);
+        var radius = MathF.Min((Element.Radius.In(context.Theme.Radii) ?? 0) * Element.EmIn(context), bounds.Height / 2);
+        e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+        using var path = Drawing.RoundedRectangle(bounds, radius);
+        using var pen = new Pen(context.Theme.Colors.FocusRing, width);
+        e.Graphics.DrawPath(pen, path);
+    }
+
+    /// <summary>可选中时读屏是按钮（状态"已按下"），否则同 Badge。</summary>
+    protected override AccessibleObject CreateAccessibilityInstance() => new TagAccessibleObject(this);
+
+    sealed class TagAccessibleObject(TagControl owner) : ControlAccessibleObject(owner)
+    {
+        public override AccessibleRole Role => owner.IsSelected is null ? base.Role : AccessibleRole.PushButton;
+
+        public override string? Name => base.Name is { Length: > 0 } name ? name : owner.Text;
+
+        public override AccessibleStates State => owner.IsSelected == true ? base.State | AccessibleStates.Pressed : base.State;
+
+        public override string? DefaultAction => owner.IsSelected is null ? base.DefaultAction : "切换";
+
+        public override void DoDefaultAction()
+        {
+            if (owner.IsSelected is null) base.DoDefaultAction();
+            else owner.ToggleSelected();
+        }
+    }
+
     /// <summary>移除按钮能不能聚焦（SelectedTagsControl 里不能：焦点留在下拉上，点击也不抢）；要在订阅 RemoveRequested 之前设。</summary>
     [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
     internal bool RemoveFocusable { get; init; } = true;
@@ -57,7 +174,7 @@ public class TagControl : BadgeControl
     /// <summary>有订阅时放上移除按钮，没有时拿掉。</summary>
     void SyncRemove()
     {
-        if (removeRequested is null)
+        if (removeRequested is null || IsSelected is not null)
         {
             if (remove is null) return;
             Controls.Remove(remove);

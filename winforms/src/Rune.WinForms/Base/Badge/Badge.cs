@@ -26,13 +26,36 @@ public class Badge : Element
     public string Content { get => text.Content; set { text.Content = value; InvalidateMeasure(); } }
 
     /// <summary>样式；不写时取作用域的默认值（<see cref="BadgeDefaults"/>），再没有时 soft。</summary>
-    public StatusVariant Variant { get => variant.Or(ScopeDefaults?.Variant, StatusVariant.Soft); set { variant = value; Invalidate(); } }
+    public StatusVariant Variant
+    {
+        get => Selected switch
+        {
+            true => StatusVariant.Solid,
+            false => variant.Value is null ? StatusVariant.Surface : variant,
+            null => variant.Or(ScopeDefaults?.Variant, StatusVariant.Soft),
+        };
+        set { variant = value; Invalidate(); }
+    }
 
-    /// <summary>色调；不写时取作用域的默认值，再没有时 neutral。</summary>
-    public StatusTone Tone { get => tone.Or(ScopeDefaults?.Tone, StatusTone.Neutral); set { tone = value; Invalidate(); } }
+    /// <summary>色调；不写时取作用域的默认值，再没有时 neutral（可选中的标签 accent）。</summary>
+    public StatusTone Tone
+    {
+        get => Selected is not null && tone.Value is null ? StatusTone.Accent : tone.Or(ScopeDefaults?.Tone, StatusTone.Neutral);
+        set { tone = value; Invalidate(); }
+    }
 
-    /// <summary>字号档位；不写时取作用域的默认值，再没有时 xs。</summary>
-    public TextSize Size { get => size.Or(ScopeDefaults?.Size, TextSize.Xs); set { size = value; InvalidateMeasure(); } }
+    /// <summary>字号档位；不写时取作用域的默认值，再没有时 xs（可选中的标签 sm）。</summary>
+    public TextSize Size
+    {
+        get => Selected is not null && size.Value is null ? TextSize.Sm : size.Or(ScopeDefaults?.Size, TextSize.Xs);
+        set { size = value; InvalidateMeasure(); }
+    }
+
+    /// <summary>
+    /// 可选中的标签（<see cref="TagControl.IsSelected"/>）：null 时是普通标记；没写的色调、字号用 accent、sm，没选中时没写的样式用 surface，
+    /// 选中时一律 solid、前面一个对勾（同上游 props 盖过作用域的默认值）。
+    /// </summary>
+    internal bool? Selected { get; set { if (field == value) return; field = value; Rebuild(); Invalidate(); } }
 
     /// <summary>圆角；不写时取作用域的默认值，再没有时 sm。表格、密集列表里的状态常用 none。</summary>
     public Radius Radius { get => radius.Or(ScopeDefaults?.Radius, Radius.Sm); set { radius = value; Invalidate(); } }
@@ -76,8 +99,9 @@ public class Badge : Element
 
     void Rebuild()
     {
-        icon = Icon is null ? null : new Icon();
-        if (icon is not null) new IconProps { Data = Icon }.Merge(PropsIcon).ApplyTo(icon);
+        var data = Selected == true ? Lucide.Check : Icon;
+        icon = data is null ? null : new Icon();
+        if (icon is not null) new IconProps { Data = data }.Merge(PropsIcon).ApplyTo(icon);
         InvalidateMeasure();
     }
 

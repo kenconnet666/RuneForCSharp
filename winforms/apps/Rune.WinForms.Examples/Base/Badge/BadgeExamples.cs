@@ -15,7 +15,31 @@ static class BadgeExamples
         new("Badge", "shapes", "尺寸、形状与图标", "TextSize 默认 xs；Radius = full 是胶囊，计数常用实底；Icon 放在文字前，Dot 是同色的小圆点，表格里比整块底色更轻。", Shapes),
         new("Badge", "tag", "Tag 标签", "TagControl 的外观选项与 BadgeControl 相同，作用域里 Badge 的默认值一起改两者；技能、分类、关键词这类成组出现的短文字用它。", TagBasic),
         new("Badge", "tag-removable", "可移除的标签", "订阅了 RemoveRequested 就有移除按钮（WinForms 没有离场的淡出，点了就请求移除）；按钮的读屏名称是“移除 + 标签文字”，RemoveLabel 可以改。", TagRemovable),
+        new("Badge", "tag-selectable", "可选中的标签", "写了 IsSelected 时整个标签是切换按钮，点一下切换：没选中时有描边，选中时实底色、前面一个对勾（不只靠颜色），不写色调时用 accent。筛选条件这类一排可选的短文字用它；要“只能选一个”的分段控件用 ToggleGroup。", TagSelectable),
     ];
+
+    static readonly string[] Conditions = ["加急", "待我审批", "已逾期", "本周到期", "有附件"];
+
+    static Control TagSelectable()
+    {
+        var picked = new HashSet<string> { "加急", "已逾期" };
+        var summary = new SmallControl { Tone = TextTone.Muted };
+        void Sync() => summary.Text = $"已选：{(picked.Count == 0 ? "（无）" : string.Join("、", Conditions.Where(picked.Contains)))}";
+        var row = new FlexControl { Gap = Space.Xs, Wrap = true, AccessibleName = "筛选" };
+        foreach (var option in Conditions)
+        {
+            var tag = new TagControl { Text = option, IsSelected = picked.Contains(option) };
+            tag.IsSelectedChanged += (_, _) =>
+            {
+                if (tag.IsSelected == true) picked.Add(option);
+                else picked.Remove(option);
+                Sync();
+            };
+            row.Controls.Add(tag);
+        }
+        Sync();
+        return Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Sm }, row, summary);
+    }
 
     /// <summary>一行一种样式、一列一种色调：第一列是样式名。</summary>
     static Control Matrix() => Build.Grid(new GridControl { Columns = 7, Align = GridAlign.Center, Justify = GridAlign.Start, RowGap = Space.Sm, ColumnGap = Space.Md },
