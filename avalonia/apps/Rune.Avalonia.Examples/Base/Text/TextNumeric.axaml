@@ -2,20 +2,20 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/avalonia"
              x:Class="Rune.Avalonia.Examples.TextNumeric">
-  <!-- 编号左对齐、金额右对齐（Flex 的 justify="between" 做出来后换掉 Grid） -->
-  <StackPanel Spacing="4" HorizontalAlignment="Left" Width="320">
-    <Grid ColumnDefinitions="*,Auto">
+  <!-- 编号左对齐、金额右对齐：Flex 的 Justify=between，Gap 是两端靠得太近时的最小间距 -->
+  <rune:Flex Direction="column" Gap="xs" HorizontalAlignment="Left" VerticalAlignment="Top">
+    <rune:Flex Justify="between" Gap="xl">
       <rune:Text Mono="True" Size="sm">PO-2026-0276</rune:Text>
-      <rune:Text Grid.Column="1" Numeric="True">1,117.48 万元</rune:Text>
-    </Grid>
-    <Grid ColumnDefinitions="*,Auto">
+      <rune:Text Numeric="True">1,117.48 万元</rune:Text>
+    </rune:Flex>
+    <rune:Flex Justify="between" Gap="xl">
       <rune:Text Mono="True" Size="sm">PO-2026-0233</rune:Text>
-      <rune:Text Grid.Column="1" Numeric="True">9.10 万元</rune:Text>
-    </Grid>
-    <Grid ColumnDefinitions="*,Auto">
+      <rune:Text Numeric="True">9.10 万元</rune:Text>
+    </rune:Flex>
+    <rune:Flex Justify="between" Gap="xl">
       <rune:Text Mono="True" Size="sm">PO-2026-02114</rune:Text>
-      <rune:Text Grid.Column="1" Numeric="True">211.06 万元</rune:Text>
-    </Grid>
+      <rune:Text Numeric="True">211.06 万元</rune:Text>
+    </rune:Flex>
     <rune:Text Numeric="True" Tone="danger" Weight="semibold">超时 11 天</rune:Text>
-  </StackPanel>
+  </rune:Flex>
 </UserControl>
