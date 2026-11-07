@@ -92,7 +92,8 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 
 ### 第六批（2026-11-08 通知，0.12.0 之后 master 到 96efc7ad；P3 组件补缺完成）
 
-锁定停在 0.12.0（dda1276f）：这一批的 8b909944、88671dd1、613b93bb CI 失败，c09d837b、96efc7ad 还在跑，绿了再跟。
+锁定先停在 0.12.0（dda1276f）：这一批的组件提交 CI 都没绿；之后跟到 08906695（文档提交，CI 绿，含这一批全部）。语言包重新生成：
+合并成 ZoomIn、ZoomOut、SlideCounter、ResetView（去掉 Lightbox*、Chart* 的同义键），新增 Crop*、Color*、Carousel*；token、图标、配方没变。
 
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
@@ -102,6 +103,17 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 | ColorPicker 与颜色工具；ColorField 的色块改成按钮弹出 ColorPicker（613b93bb，破坏性） | 还没做 ColorField | 做 ColorField 时直接照新的 |
 | DataTable、TreeDataTable 的 virtualColumns（96efc7ad） | 还没做 DataTable | 做时照新的 |
 | 下一步上游做 P2 文档站整改、P2.5 逐个组件精修，做完请我们整体跟进一遍 | | 到时按页重截、逐页对照 |
+
+### 第七批（2026-11-08 通知，master 到 685a7553）
+
+685a7553 的 CI 还在跑，锁定停在 08906695。没有新的 token 与语言包条目。
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| 画布 /diagram：节点形状 circle、diamond，连线端点按形状求交，DiagramNode 的 active | 还没做 Diagram | 做时照新的 |
+| useFormDialog 的表单 novalidate | 还没做 | 做时照新的（桌面上本来就没有浏览器的校验气泡） |
+| LinkUnderlineContext 的值改成函数：LinkUnderlineScope 的 underline 变了里面的链接跟着变 | 已做 | 我们本来就跟着变：Avalonia 是继承的属性、WPF 在作用域变了时重新强制、WinForms 设作用域时重画里面的链接 |
+| flow-ts-ui 删掉，流程设计器与审批面板改成文档站 patterns/Workflow 页里的组合 | 还没做这些组件 | 做 Workflow 页时照新的 |
 
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 

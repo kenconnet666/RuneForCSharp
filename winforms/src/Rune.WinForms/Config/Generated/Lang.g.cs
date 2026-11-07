@@ -54,23 +54,35 @@ public sealed partial record Lang
     /// <summary>请求失败、又没有可用的错误文案时的文字，默认“请求失败，请稍后重试”</summary>
     public required string RequestFailed { get; init; }
 
+    /// <summary>放大按钮（图片预览、地图、裁剪图片共用），默认“放大”</summary>
+    public required string ZoomIn { get; init; }
+
+    /// <summary>缩小按钮（图片预览、地图、裁剪图片共用），默认“缩小”</summary>
+    public required string ZoomOut { get; init; }
+
+    /// <summary>第几张（图片预览的计数、轮播每一张与页点的名称）：`(2, 5)` → “第 2 张，共 5 张”</summary>
+    public required Func<double, double, string> SlideCounter { get; init; }
+
+    /// <summary>回到初始的大小、位置与方向（图片预览、裁剪图片共用），默认“还原”</summary>
+    public required string ResetView { get; init; }
+
+    /// <summary>裁剪图片：区域的名称，默认“裁剪图片”</summary>
+    public required string CropLabel { get; init; }
+
+    /// <summary>裁剪图片：操作说明（读屏），默认“拖动移动图片，滚轮或 + − 缩放，方向键微调”</summary>
+    public required string CropHint { get; init; }
+
+    /// <summary>裁剪图片：缩放滑块的名称，默认“缩放”</summary>
+    public required string CropZoom { get; init; }
+
     /// <summary>图片预览（Lightbox）的名称，默认“图片预览”</summary>
     public required string LightboxLabel { get; init; }
-
-    /// <summary>图片预览：放大，默认“放大”</summary>
-    public required string LightboxZoomIn { get; init; }
-
-    /// <summary>图片预览：缩小，默认“缩小”</summary>
-    public required string LightboxZoomOut { get; init; }
 
     /// <summary>图片预览：向左旋转，默认“向左旋转”</summary>
     public required string LightboxRotateLeft { get; init; }
 
     /// <summary>图片预览：向右旋转，默认“向右旋转”</summary>
     public required string LightboxRotateRight { get; init; }
-
-    /// <summary>图片预览：回到初始的大小、位置与方向，默认“还原”</summary>
-    public required string LightboxReset { get; init; }
 
     /// <summary>图片预览：下载，默认“下载”</summary>
     public required string LightboxDownload { get; init; }
@@ -80,9 +92,6 @@ public sealed partial record Lang
 
     /// <summary>图片预览：下一张，默认“下一张”</summary>
     public required string LightboxNext { get; init; }
-
-    /// <summary>图片预览的位置：`(2, 5)` → “第 2 张，共 5 张”</summary>
-    public required Func<double, double, string> LightboxCounter { get; init; }
 
     /// <summary>描述列表里复制一项的值的按钮：`('订单号')` → “复制订单号”</summary>
     public required Func<string, string> DescriptionsCopy { get; init; }
@@ -140,12 +149,6 @@ public sealed partial record Lang
 
     /// <summary>图表缩放后恢复全部，默认“显示全部”</summary>
     public required string ChartZoomReset { get; init; }
-
-    /// <summary>地图的放大按钮，默认“放大”</summary>
-    public required string ChartZoomIn { get; init; }
-
-    /// <summary>地图的缩小按钮，默认“缩小”</summary>
-    public required string ChartZoomOut { get; init; }
 
     /// <summary>地图的复位按钮，默认“复位”</summary>
     public required string ChartZoomFit { get; init; }
@@ -494,6 +497,45 @@ public sealed partial record Lang
 
     /// <summary>JsonViewer：没有选中项时路径栏的提示，默认“选中一项后可以复制它的值与路径”</summary>
     public required string JsonPathHint { get; init; }
+
+    /// <summary>ColorPicker：饱和度与明度的色板（读屏），默认“饱和度与明度”</summary>
+    public required string ColorArea { get; init; }
+
+    /// <summary>ColorPicker：色板当前的位置：`(80, 45)` → “饱和度 80%，明度 45%”</summary>
+    public required Func<double, double, string> ColorAreaValue { get; init; }
+
+    /// <summary>ColorPicker：色相滑块，默认“色相”</summary>
+    public required string ColorHue { get; init; }
+
+    /// <summary>ColorPicker：不透明度滑块，默认“不透明度”</summary>
+    public required string ColorAlpha { get; init; }
+
+    /// <summary>ColorPicker：从屏幕上取色（吸管），默认“从屏幕取色”</summary>
+    public required string ColorEyeDropper { get; init; }
+
+    /// <summary>ColorPicker：颜色值的写法，默认“格式”</summary>
+    public required string ColorFormat { get; init; }
+
+    /// <summary>ColorPicker：预设的颜色，默认“预设颜色”</summary>
+    public required string ColorPresets { get; init; }
+
+    /// <summary>ColorPicker：最近用过的颜色，默认“最近使用”</summary>
+    public required string ColorRecent { get; init; }
+
+    /// <summary>Carousel：区域的默认名称，默认“轮播”</summary>
+    public required string Carousel { get; init; }
+
+    /// <summary>Carousel：上一张，默认“上一张”</summary>
+    public required string CarouselPrevious { get; init; }
+
+    /// <summary>Carousel：下一张，默认“下一张”</summary>
+    public required string CarouselNext { get; init; }
+
+    /// <summary>Carousel：暂停自动播放，默认“暂停自动播放”</summary>
+    public required string CarouselPause { get; init; }
+
+    /// <summary>Carousel：继续自动播放，默认“开始自动播放”</summary>
+    public required string CarouselPlay { get; init; }
 
     /// <summary>SignaturePad：签名区域的默认名称，默认“签名”</summary>
     public required string Signature { get; init; }
@@ -954,7 +996,7 @@ public sealed partial record Lang
     /// <summary>主题：青瓷，默认“青瓷”</summary>
     public required string ThemeCeladon { get; init; }
 
-    /// <summary>ColorField 色块（原生取色器）的名称，默认“选择颜色”</summary>
+    /// <summary>ColorField 色块（打开取色器的按钮）的名称，默认“选择颜色”</summary>
     public required string ColorPick { get; init; }
 
     /// <summary>翻页导航（上一篇、下一篇）的名称，默认“翻页”</summary>
@@ -979,16 +1021,19 @@ public sealed partial record Lang
         ImagePreview = alt => $"查看大图：{alt}",
         ImageError = "图片加载失败",
         RequestFailed = "请求失败，请稍后重试",
+        ZoomIn = "放大",
+        ZoomOut = "缩小",
+        SlideCounter = (index, total) => string.Create(CultureInfo.InvariantCulture, $"第 {index} 张，共 {total} 张"),
+        ResetView = "还原",
+        CropLabel = "裁剪图片",
+        CropHint = "拖动移动图片，滚轮或 + − 缩放，方向键微调",
+        CropZoom = "缩放",
         LightboxLabel = "图片预览",
-        LightboxZoomIn = "放大",
-        LightboxZoomOut = "缩小",
         LightboxRotateLeft = "向左旋转",
         LightboxRotateRight = "向右旋转",
-        LightboxReset = "还原",
         LightboxDownload = "下载",
         LightboxPrevious = "上一张",
         LightboxNext = "下一张",
-        LightboxCounter = (index, total) => string.Create(CultureInfo.InvariantCulture, $"第 {index} 张，共 {total} 张"),
         DescriptionsCopy = label => $"复制{label}",
         FieldCompareHeaders = ["字段", "原值", "新值", "变化"],
         FieldCompareTo = "改为",
@@ -1015,8 +1060,6 @@ public sealed partial record Lang
         ChartExportName = "图表",
         ChartZoom = "显示范围",
         ChartZoomReset = "显示全部",
-        ChartZoomIn = "放大",
-        ChartZoomOut = "缩小",
         ChartZoomFit = "复位",
         ChartZoomWheelHint = "按住 Ctrl 滚动缩放地图",
         ChartSeries = "系列",
@@ -1138,6 +1181,19 @@ public sealed partial record Lang
         JsonCopyValue = "复制值",
         JsonCopyPath = "复制路径",
         JsonPathHint = "选中一项后可以复制它的值与路径",
+        ColorArea = "饱和度与明度",
+        ColorAreaValue = (saturation, brightness) => string.Create(CultureInfo.InvariantCulture, $"饱和度 {saturation}%，明度 {brightness}%"),
+        ColorHue = "色相",
+        ColorAlpha = "不透明度",
+        ColorEyeDropper = "从屏幕取色",
+        ColorFormat = "格式",
+        ColorPresets = "预设颜色",
+        ColorRecent = "最近使用",
+        Carousel = "轮播",
+        CarouselPrevious = "上一张",
+        CarouselNext = "下一张",
+        CarouselPause = "暂停自动播放",
+        CarouselPlay = "开始自动播放",
         Signature = "签名",
         SignaturePlaceholder = "在此处签名",
         SignatureUndo = "撤销上一笔",
@@ -1377,16 +1433,19 @@ public sealed partial record Lang
         ImagePreview = alt => $"View larger: {alt}",
         ImageError = "Image failed to load",
         RequestFailed = "Request failed. Try again later.",
+        ZoomIn = "Zoom in",
+        ZoomOut = "Zoom out",
+        SlideCounter = (index, total) => string.Create(CultureInfo.InvariantCulture, $"{index} of {total}"),
+        ResetView = "Reset",
+        CropLabel = "Crop image",
+        CropHint = "Drag to move the image, scroll or press + and − to zoom, arrow keys to nudge",
+        CropZoom = "Zoom",
         LightboxLabel = "Image viewer",
-        LightboxZoomIn = "Zoom in",
-        LightboxZoomOut = "Zoom out",
         LightboxRotateLeft = "Rotate left",
         LightboxRotateRight = "Rotate right",
-        LightboxReset = "Reset",
         LightboxDownload = "Download",
         LightboxPrevious = "Previous image",
         LightboxNext = "Next image",
-        LightboxCounter = (index, total) => string.Create(CultureInfo.InvariantCulture, $"{index} of {total}"),
         DescriptionsCopy = label => $"Copy {label}",
         FieldCompareHeaders = ["Field", "Before", "After", "Change"],
         FieldCompareTo = "changed to",
@@ -1413,8 +1472,6 @@ public sealed partial record Lang
         ChartExportName = "chart",
         ChartZoom = "Visible range",
         ChartZoomReset = "Show all",
-        ChartZoomIn = "Zoom in",
-        ChartZoomOut = "Zoom out",
         ChartZoomFit = "Fit to view",
         ChartZoomWheelHint = "Hold Ctrl and scroll to zoom the map",
         ChartSeries = "Series",
@@ -1536,6 +1593,19 @@ public sealed partial record Lang
         JsonCopyValue = "Copy value",
         JsonCopyPath = "Copy path",
         JsonPathHint = "Select an item to copy its value or path",
+        ColorArea = "Saturation and brightness",
+        ColorAreaValue = (saturation, brightness) => string.Create(CultureInfo.InvariantCulture, $"Saturation {saturation}%, brightness {brightness}%"),
+        ColorHue = "Hue",
+        ColorAlpha = "Opacity",
+        ColorEyeDropper = "Pick a color from the screen",
+        ColorFormat = "Format",
+        ColorPresets = "Preset colors",
+        ColorRecent = "Recently used",
+        Carousel = "Carousel",
+        CarouselPrevious = "Previous slide",
+        CarouselNext = "Next slide",
+        CarouselPause = "Pause autoplay",
+        CarouselPlay = "Start autoplay",
         Signature = "Signature",
         SignaturePlaceholder = "Sign here",
         SignatureUndo = "Undo last stroke",
