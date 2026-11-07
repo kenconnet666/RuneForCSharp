@@ -193,6 +193,7 @@ public class TextFieldControl : TextInputControl
         var password = Type == TextFieldType.Password;
         Input.UseSystemPasswordChar = password && !RevealPassword;
         reveal.Visible = password;
+        ControlShell.FitInnerButton(reveal, Em);
         reveal.Icon = RevealPassword ? Lucide.EyeOff : Lucide.Eye;
         reveal.AccessibleName = ProviderControl.LangOf(this).PasswordShow;
     }

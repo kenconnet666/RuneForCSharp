@@ -25,6 +25,17 @@ vue-tsx-pro 那边的会话改了设计时会发通知过来（每完成一个�
 | P3 新组件：ChoiceCard、ItemList 可选中的行、ColorPicker、ImageCropper、Carousel、Dialog 拖动、Tag 加 selected、QRCode、FloatButton 组、JsonViewer、SignaturePad、DataTable 横向虚拟化 | Tag 刚做完 | selected 发版后补 |
 | P10 把组件规格（属性、默认值、部件、档位、键盘）导成 JSON | 可以在 CI 里比对 | 出来后让 parity 工具改读它 |
 
+### 第一批（2026-11-07 通知，master a21e56f8）
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| box-sizing 统一（313f0e23）：Listbox multiple 示例正好 16rem | 修了我们报的高度问题 | CI 绿后锁定新提交，重截 listbox multiple；上游问题表那一行勾掉 |
+| _hover、_active 在不可用时不算（0fc803a6） | 我们的不可用状态本来就不画悬停、按下 | 不涉及 |
+| 样式引擎：焦点伪类优先级、globalRule、CSP nonce | 网页专用 | 不涉及 |
+| 新组件 ErrorBoundary（b61938fb）、语言包 errorTitle、errorRetry | 语言包生成文件会变 | 锁定新提交时重新生成语言包；ErrorBoundary 等 Result |
+| 输入框外壳只在点到空白处时转交焦点（1cc605e3） | 我们的外壳：Avalonia 按下按钮时不转交，WPF、WinForms 点外壳就聚焦里面的输入框 | 锁定新提交时核对三个平台，点在外壳里能聚焦的元素上不转交 |
+| 文档站 IconButton 页并进 Button 页（7c7ac651） | ts-shots 的页名 icon-button 会失效 | 锁定新提交时把 IconButton 的示例挪到 button 页 |
+
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 
 计划：vue-tsx-pro 的 `.claude/reports/style-overhaul-plan.md`（阶段 0 护栏 → 1 引擎 → 2 架构与 API → 3 整理 → 4 美学 → 5 文档）。

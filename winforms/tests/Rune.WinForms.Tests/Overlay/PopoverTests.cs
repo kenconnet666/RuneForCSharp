@@ -1,7 +1,7 @@
 namespace Rune.WinForms.Tests;
 
 /// <summary>
-/// PopoverControl：点触发器打开（原因 Trigger），焦点进到第一个能聚焦的控件；Esc 关上（原因 Escape），焦点回到触发器；代码里改 IsOpen 也报告；
+/// PopoverControl：点触发器打开（原因 Trigger），焦点进到第一个能聚焦的控件；Esc 关上（原因 Escape），焦点回到触发器；代码里改 IsOpen 不报告；
 /// 内容窗口是以触发器为名称的对话框，盖在画好的面板里面（内边距以内），底色是浮起的表面。
 /// </summary>
 public class PopoverTests
@@ -58,7 +58,7 @@ public class PopoverTests
         popover.IsOpen = true;
         WinFormsUi.Pump();
         popover.IsOpen = false;
-        Assert.Equal([(true, OpenChangeReason.Trigger), (false, OpenChangeReason.Escape), (true, OpenChangeReason.Programmatic), (false, OpenChangeReason.Programmatic)], reasons);
+        Assert.Equal([(true, OpenChangeReason.Trigger), (false, OpenChangeReason.Escape)], reasons);
     }));
 
     [Fact]

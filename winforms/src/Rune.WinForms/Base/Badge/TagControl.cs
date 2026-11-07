@@ -47,6 +47,10 @@ public class TagControl : BadgeControl
         }
     }
 
+    /// <summary>移除按钮能不能聚焦（SelectedTagsControl 里不能：焦点留在下拉上，点击也不抢）；要在订阅 RemoveRequested 之前设。</summary>
+    [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+    internal bool RemoveFocusable { get; init; } = true;
+
     /// <summary>移除按钮（测试用）；没有订阅时为 null。</summary>
     internal CloseButtonControl? RemoveButton => remove;
 
@@ -63,7 +67,9 @@ public class TagControl : BadgeControl
             return;
         }
         if (remove is not null) return;
-        remove = new CloseButtonControl { Radius = Radius.Full, AutoSize = false };
+        remove = RemoveFocusable ? new CloseButtonControl() : new PassiveCloseButton();
+        remove.Radius = Radius.Full;
+        remove.AutoSize = false;
         remove.Click += (_, _) => RequestRemove();
         Controls.Add(remove);
         Element.TrailingEm = RemoveEm;
@@ -124,6 +130,16 @@ public class TagControl : BadgeControl
                 return;
             }
             if (candidate.SelectNextControl(null, true, true, true, false)) return;
+        }
+    }
+
+    /// <summary>不能聚焦的移除按钮：点它不抢焦点、不进 Tab 顺序。</summary>
+    sealed class PassiveCloseButton : CloseButtonControl
+    {
+        public PassiveCloseButton()
+        {
+            SetStyle(ControlStyles.Selectable, false);
+            TabStop = false;
         }
     }
 }

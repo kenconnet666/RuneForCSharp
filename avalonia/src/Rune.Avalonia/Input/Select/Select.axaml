@@ -1,0 +1,66 @@
+<!--
+  Select 的主题（vue-tsx-pro 的 controlParts、selectStyles）：外壳同输入框（Rune.TextInput：控件高度、左右 space.md、xs 宽的 border 描边、悬停 borderStrong、
+  md 圆角、surface 底；soft 时 fill 底、没有描边；只读 borderMuted 描边、fill 底；出错 danger；不可用半透明；聚焦时焦点环压住边框），指针是手形。
+  里面依次是前置图标、多选的标签、已选的文字（没有选择时是 textMuted 的占位文字，要满足 4.5:1）、清空按钮、下拉箭头（打开时翻转）；图标 textMuted，隔 space.sm。
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:Select}" TargetType="rune:Select">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Surface}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{rune:Em Resolved=Radius}" />
+    <Setter Property="Padding" Value="{rune:Em 0.75, 0}" />
+    <Setter Property="MinHeight" Value="{rune:ControlHeight}" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusAdorner" Value="{x:Null}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border Name="PART_Root" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
+            <rune:Flex Align="center" Gap="sm">
+              <rune:Icon Name="PART_Icon" Data="{TemplateBinding Icon}" IsVisible="{TemplateBinding Icon, Converter={x:Static ObjectConverters.IsNotNull}}" />
+              <rune:SelectedTags Name="PART_Tags" rune:Flex.Grow="True" IsVisible="False" />
+              <TextBlock Name="PART_Value" rune:Flex.Grow="True" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
+                         LineHeight="{rune:Em Resource=Rune.LineHeight.Normal, Of=TemplatedParent}" />
+              <rune:ClearButton Name="PART_Clear" Radius="full" IsVisible="False" />
+              <rune:Icon Name="PART_Chevron" Data="{x:Static rune:Lucide.ChevronDown}" RenderTransformOrigin="50%,50%" />
+            </rune:Flex>
+          </Border>
+          <Border Name="PART_FocusRing" IsVisible="False" IsHitTestVisible="False" Margin="-1" BorderThickness="2"
+                  BorderBrush="{DynamicResource Rune.Brush.FocusRing}" CornerRadius="{TemplateBinding CornerRadius}" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^ /template/ rune|Icon#PART_Icon"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" /></Style>
+    <Style Selector="^ /template/ rune|Icon#PART_Chevron"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" /></Style>
+    <Style Selector="^:open /template/ rune|Icon#PART_Chevron"><Setter Property="RenderTransform" Value="rotate(180deg)" /></Style>
+    <Style Selector="^:placeholder /template/ TextBlock#PART_Value"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" /></Style>
+    <!-- 框里的小按钮：同输入框的清空按钮（1.5em，不小于 24px），左右各收进 space.xs -->
+    <Style Selector="^ /template/ rune|ClearButton#PART_Clear">
+      <Setter Property="Width" Value="{rune:Em 1.5, Min=24}" />
+      <Setter Property="MinHeight" Value="{rune:Em 1.5, Min=24}" />
+      <Setter Property="Margin" Value="{rune:Em -0.25, 0}" />
+    </Style>
+    <Style Selector="^:pointerover"><Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderStrong}" /></Style>
+    <Style Selector="^:focus /template/ Border#PART_FocusRing"><Setter Property="IsVisible" Value="True" /></Style>
+    <Style Selector="^:soft">
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="Background" Value="{DynamicResource Rune.Brush.Fill}" />
+    </Style>
+    <Style Selector="^:readonly">
+      <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+      <Setter Property="Background" Value="{DynamicResource Rune.Brush.Fill}" />
+      <Setter Property="Cursor" Value="Arrow" />
+    </Style>
+    <Style Selector="^:invalid"><Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Danger}" /></Style>
+    <Style Selector="^:invalid /template/ Border#PART_FocusRing"><Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Danger}" /></Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" />
+      <Setter Property="Cursor" Value="No" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

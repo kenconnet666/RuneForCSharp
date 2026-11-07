@@ -55,6 +55,17 @@ public class Tag : Badge
         }
     }
 
+    /// <summary>移除按钮能不能聚焦（SelectedTags 里不能：焦点留在下拉的触发框上，按下也不抢）。</summary>
+    internal bool RemoveFocusable
+    {
+        get;
+        set
+        {
+            field = value;
+            if (remove is not null) remove.Focusable = value;
+        }
+    } = true;
+
     /// <summary>正在离场（测试、样式用；上游的 data-state="closed"）。</summary>
     public bool IsDismissing => dismissing;
 
@@ -81,7 +92,7 @@ public class Tag : Badge
             return;
         }
         if (remove is not null) return;
-        remove = new CloseButton { Name = TagParts.Remove, Radius = Radius.Full, VerticalAlignment = VerticalAlignment.Center };
+        remove = new CloseButton { Name = TagParts.Remove, Radius = Radius.Full, VerticalAlignment = VerticalAlignment.Center, Focusable = RemoveFocusable };
         // 颜色、字号同标签（上游 color: inherit，按钮不按自己的字号档位放大）
         remove.Bind(ForegroundProperty, this.GetObservable(ForegroundProperty));
         remove.Click += (_, _) => Dismiss();

@@ -125,7 +125,28 @@ public abstract class TextInputBase : TextBox, IFieldControl
         count = GetTemplateChild(TextInputParts.Count) as CharacterCount;
         if (clear is not null) clear.Click += OnClear;
         OnTemplateParts();
+        FitInnerButtons();
         Sync();
+    }
+
+    /// <inheritdoc />
+    protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+        if (e.Property == FontSizeProperty) FitInnerButtons();
+    }
+
+    /// <summary>框里的小按钮按字号收紧（派生类加上自己的，如显示密码按钮）。</summary>
+    protected virtual void FitInnerButtons() => FitInnerButton(clear, FontSize);
+
+    /// <summary>框里的小按钮（清空、显示密码）：比独立的图标按钮紧凑，1.5em（不小于 24），左右各收进 space.xs；Select 的清空按钮同样。</summary>
+    /// <param name="button">按钮；null 时什么也不做。</param>
+    /// <param name="em">外壳的字号。</param>
+    internal static void FitInnerButton(FrameworkElement? button, double em)
+    {
+        if (button is null) return;
+        button.Width = button.MinHeight = Math.Max(1.5 * em, ControlHeight.MinTarget);
+        button.Margin = new Thickness(-0.25 * em, 0, -0.25 * em, 0);
     }
 
     /// <summary>派生类取自己模板里的部件（OnApplyTemplate 里、同步之前）。</summary>

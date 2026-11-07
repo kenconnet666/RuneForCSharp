@@ -45,7 +45,37 @@ public class ListboxControl : Control, IFieldControl
             UpdateBody();
         });
         Controls.AddRange([scroll, skeleton, empty]);
-        foreach (Control child in Controls) child.MouseDown += (_, _) => Focus();
+        foreach (Control child in Controls) child.MouseDown += (_, _) => FocusUnlessEmbedded();
+    }
+
+    /// <summary>嵌在下拉的弹出层里（SelectControl）：不能聚焦、点击不抢焦点，按键由下拉转过来。</summary>
+    [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+    internal bool Embedded
+    {
+        get;
+        set
+        {
+            field = value;
+            SetStyle(ControlStyles.Selectable, !value);
+            TabStop = !value;
+        }
+    }
+
+    /// <summary>没有选项时的说明；null 时取语言包的"没有选项"（下拉搜索没有匹配时换成"没有匹配的选项"）。</summary>
+    [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+    internal string? EmptyText
+    {
+        get;
+        set
+        {
+            field = value;
+            UpdateBody();
+        }
+    }
+
+    internal void FocusUnlessEmbedded()
+    {
+        if (!Embedded) Focus();
     }
 
     /// <summary>数据：ListboxOption、字符串，或任意数据加 <see cref="ToOption"/>。</summary>
@@ -183,7 +213,7 @@ public class ListboxControl : Control, IFieldControl
         var hasRows = State.Options.Count > 0;
         scroll.Visible = !skeleton.Visible && hasRows;
         empty.Visible = !skeleton.Visible && !hasRows && !IsLoading;
-        empty.Description = ProviderControl.LangOf(this).SelectEmpty;
+        empty.Description = EmptyText ?? ProviderControl.LangOf(this).SelectEmpty;
         PerformLayout();
     }
 
@@ -393,6 +423,7 @@ sealed class ListboxView : Control, IElementHost
     readonly Effect paint;
     List<Row> rows = [];
     bool pressed;
+    bool painting;
 
     /// <summary>一行：组名（Option 为空）或选项，在内容里的位置与高度。</summary>
     readonly record struct Row(string? Group, ListStateEntry? Option, int Top, int Height);
@@ -458,15 +489,35 @@ sealed class ListboxView : Control, IElementHost
 
     public override Size GetPreferredSize(Size proposedSize) => new(proposedSize.Width, TotalHeight);
 
-    void IElementHost.InvalidateElement(Element element) => Invalidate();
+    // 画的时候给 label、description 换内容只是借它们来量、来画：这时的失效通知不再要求重画，否则每画一遍都让自己失效，无限重画
+    void IElementHost.InvalidateElement(Element element)
+    {
+        if (!painting) Invalidate();
+    }
 
-    void IElementHost.InvalidateLayout(Element element) => Invalidate();
+    void IElementHost.InvalidateLayout(Element element)
+    {
+        if (!painting) Invalidate();
+    }
 
     /// <summary>只画与剪切区相交的行。</summary>
     protected override void OnPaint(PaintEventArgs e)
     {
         base.OnPaint(e);
         using var _ = paint.Track();
+        painting = true;
+        try
+        {
+            PaintRows(e);
+        }
+        finally
+        {
+            painting = false;
+        }
+    }
+
+    void PaintRows(PaintEventArgs e)
+    {
         var graphics = e.Graphics;
         var context = ElementContext.Of(this);
         var colors = context.Theme.Colors;
@@ -550,7 +601,7 @@ sealed class ListboxView : Control, IElementHost
     {
         base.OnMouseDown(e);
         pressed = e.Button == MouseButtons.Left;
-        owner.Focus();
+        owner.FocusUnlessEmbedded();
     }
 
     /// <summary>在一个可用的选项上按下、松开：选中。</summary>

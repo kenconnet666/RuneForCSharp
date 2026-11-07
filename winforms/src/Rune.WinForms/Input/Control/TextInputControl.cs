@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Drawing.Drawing2D;
 
 namespace Rune.WinForms;
 
@@ -222,12 +221,11 @@ public abstract class TextInputControl : FlexControl, IFieldControl
     /// <summary>内边距、控件高度、只读、清空按钮、字数；输入框的底色跟着外壳（平台的 TextBox 不能透明）。派生类接着同步自己的部件。</summary>
     protected virtual void Sync()
     {
-        var em = Em;
-        Padding = new Padding((int)MathF.Round(0.75f * em), 0, (int)MathF.Round(0.75f * em), 0);
-        MinimumSize = new Size(0, (int)MathF.Ceiling(ControlHeight.Of(ElementContext.Of(this), em, Tokens.Size.Control)));
+        ControlShell.Layout(this, Em);
+        ControlShell.FitInnerButton(clear, Em);
         input.ReadOnly = ReadOnly;
         var colors = ProviderControl.ThemeOf(this).Colors;
-        input.BackColor = Fill(colors);
+        input.BackColor = ControlShell.Fill(colors, Variant, ReadOnly);
         input.ForeColor = colors.Text;
         clear.Visible = Clearable && Enabled && !ReadOnly && Text.Length > 0;
         count.Visible = ShowCount;
@@ -242,9 +240,6 @@ public abstract class TextInputControl : FlexControl, IFieldControl
         var size = base.GetPreferredSize(proposedSize);
         return new Size(Math.Max(size.Width, MinimumSize.Width), Math.Max(size.Height, MinimumSize.Height));
     }
-
-    /// <summary>外壳的底色：surface；soft、只读时 fill。</summary>
-    Color Fill(ThemeColors colors) => Variant == ControlVariant.Soft || ReadOnly ? colors.Fill : colors.Surface;
 
     void SetHovered(bool value)
     {
@@ -274,35 +269,11 @@ public abstract class TextInputControl : FlexControl, IFieldControl
         input.Focus();
     }
 
-    /// <summary>
-    /// 外壳：surface 底（soft、只读时 fill）、xs 宽的描边（border，悬停 borderStrong；soft 时没有；只读 borderMuted；出错 danger）、圆角；
-    /// 里面有焦点时 2 像素的焦点环压住边框（出错时 danger）；不可用时整体变淡由文字颜色体现。
-    /// </summary>
+    /// <summary>外壳（<see cref="ControlShell"/>）；不可用时整体变淡由文字颜色体现。</summary>
     protected override void OnPaint(PaintEventArgs e)
     {
         base.OnPaint(e);
-        var theme = ProviderControl.ThemeOf(this);
-        var colors = theme.Colors;
-        var graphics = e.Graphics;
-        graphics.SmoothingMode = SmoothingMode.AntiAlias;
-        graphics.PixelOffsetMode = PixelOffsetMode.Half;
-        var radius = Math.Min((Radius.In(theme.Radii) ?? 0) * Em, Height / 2f);
-        using (var path = Drawing.RoundedRectangle(new RectangleF(0, 0, Width, Height), radius))
-        using (var fill = new SolidBrush(Fill(colors)))
-            graphics.FillPath(fill, path);
-        var line = LogicalToDeviceUnits(1);
-        Color? border = Invalid ? colors.Danger : ReadOnly ? colors.BorderMuted : Variant == ControlVariant.Soft ? null : hovered ? colors.BorderStrong : colors.Border;
-        if (border is { } stroke)
-        {
-            using var outline = Drawing.RoundedRectangle(new RectangleF(line / 2f, line / 2f, Width - line, Height - line), Math.Max(0, radius - line / 2f));
-            using var pen = new Pen(stroke, line);
-            graphics.DrawPath(pen, outline);
-        }
-        if (!ContainsFocus) return;
-        var ring = LogicalToDeviceUnits(2);
-        using var focus = Drawing.RoundedRectangle(new RectangleF(ring / 2f, ring / 2f, Width - ring, Height - ring), Math.Max(0, radius - ring / 2f));
-        using var focusPen = new Pen(Invalid ? colors.Danger : colors.FocusRing, ring);
-        graphics.DrawPath(focusPen, focus);
+        ControlShell.Paint(e.Graphics, this, Em, Radius, Variant, (ReadOnly, Invalid, hovered, ContainsFocus));
     }
 
     /// <inheritdoc />

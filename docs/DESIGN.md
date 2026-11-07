@@ -850,7 +850,7 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 ### Popover（2026-11-07）
 
 - 非模态弹出框：点触发器开关，点外面、Esc 关闭；打开时焦点进第一个能聚焦的元素（没有时到面板上），关上后回到触发器（点外面关的不抢回焦点）。
-  `OpenChanged` 带原因（`OpenChangeReason`：Trigger、Outside、Escape、Programmatic；上游的 onOpenChange，parity 里通用改名）。
+  `OpenChanged` 带原因（`OpenChangeReason`：Trigger、Outside、Escape、Select、Focus；上游的 onOpenChange，parity 里通用改名），同上游只报告用户的操作：代码里（父级、绑定）改 IsOpen 时不发。
   浮层开着时点触发器：平台先按"点了外面"关掉，紧接着这次点击又会打开——刚关掉 300 毫秒内的触发器点击不再打开。
   面板 surfaceRaised、xs 描边、lg 圆角、lg 阴影、space.md 内边距；位置 `Placement`（默认 bottom-start）、`Offset`（6，有箭头时加箭头伸出的 0.7 倍边长）、`Arrow`。
   读屏：浮层是对话框（上游的 role="dialog"），以触发器为名称。lazy、role 不移植（内容是控件实例；角色固定）。
@@ -882,6 +882,29 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 顺手修的：WinForms 按钮禁用时文字不变淡——GDI 的 TextRenderer 不认颜色里的不透明度，改成把前景色按 disabled 不透明度混进主题的表面色。
 - 示例：Badge 页的 tag、tag-removable。剩下的差异主要来自字重：上游字体栈以 `system-ui` 开头（Windows 上的 Chrome 有真正的 500），
   我们的字体 token 从 "Segoe UI" 起，medium 落回常规，文字窄一点、横排的标签一路往后错开（DOCSITE"看过的原因"）。
+
+### Select、SelectedTags（2026-11-07）
+
+- 下拉选择（select-only combobox）：外壳同输入框（Avalonia、WPF 照 Rune.TextInput 写了一份 Select 的主题；WinForms 抽出 `ControlShell`，TextInputControl 与 SelectControl 共用），
+  触发框就是控件自己，焦点一直在它上面（可搜索时进搜索框）。弹出层贴着外壳下方、至少与它同宽（放不下时翻到上方），面板同 Popover（surfaceRaised、描边、lg 圆角、lg 阴影），
+  没有内边距；里面是不可聚焦的 Listbox（Select 把按键转给它的 `ListState`），可搜索、可新建时顶部一行搜索框（下边 borderMuted）。
+- 值：单选 `Value`（空字符串算没有选中，清空写回 null）、多选 `Values`（清空写回空列表）；已选项的文字取自全部数据（被过滤掉的也在），按数据建一次值 → 文字的表
+  （上游的性能用例：三万个全选在 1 秒内挂载）。多选的已选项是外壳里一排 `SelectedTags`（sm、soft 的 Tag，移除按钮不能聚焦、按下不抢焦点；读屏看不到这一排，
+  下拉的值是全部已选）；`MaxTagCount` 是 `TagLimit`（数字或 responsive：一行按宽度放，其余收进"+N"）。
+- 搜索与新建：孪生文件 `SelectSearch`（忽略大小写与重音的匹配、过滤、"新建"项 `SelectCreation`、`TagLimit` 与它的 XAML 转换器）。新建报告 `OptionCreated`
+  （WinForms 的 Control 自己有 Created）。打开时清空搜索词、高亮已选项；输入搜索词高亮第一个匹配的。
+- 开关的原因：`OpenChangeReason` 加了 Select（单选选中后关闭）、Focus（Tab 离开）；同上游只报告用户的操作，代码里改 IsOpen 不报告（Popover 一起改了）。
+- 初始化器里 ItemsSource 可能先于 ToOption、Values 先于 MaxTagCount 设：WPF 等加载、WinForms 等句柄建好再把数据交给列表、再建标签（Avalonia 的列表进了逻辑树才建，
+  标签那一排在模板里）；取已选文字时认不出的数据先跳过。
+- **Avalonia**：TemplatedControl，弹出层是平台 Popup（点外面关、点在外壳上那一下不再打开），弹出层里的事件沿宿主冒泡上来，按下、按键、文字输入要排除。
+- **WPF**：Control，Popup + Custom 定位回调、阴影单独一层；列表的值用绑定到私有属性接回来（DependencyPropertyDescriptor 会泄漏）；EmSize.Register 已经覆盖了 FontSize 的元数据，
+  字号变化在 OnPropertyChanged 里接。框内的小按钮（清空、显示密码）收成 1.5em（`TextInputBase.FitInnerButton`，TextField 原来是完整的控件高度）。
+- **WinForms**：`SelectControl : FlexControl`；弹出层用 `FloatingSurface`（Popover 的两层窗口抽出来共用）的不激活模式：内容窗口 WS_EX_NOACTIVATE，点外面由消息过滤器发现，
+  宿主失去激活、移动时也关；可搜索时切到激活模式（搜索框要键盘）。内容窗口没有内边距：按面板的圆角裁成圆角（Region）。列表 `Embedded`（不能聚焦）。
+  踩过：ListboxView 画的时候给元素换内容会回调失效，无限重画（屏幕外的测试窗口收不到 WM_PAINT，一直没发现）——绘制期间不再响应元素的失效通知；
+  Values 先于 MaxTagCount 设时一下子建了三万个标签控件、句柄耗尽。框内小按钮同样收成 1.5em（`ControlShell.FitInnerButton`）。没有自定义选项内容。
+- 没做：远程选项 load（searchable、custom 示例）、renderValue、表单的 name、placement。
+- 示例：basic、tags、appearance（Avalonia 0.12%–1.55%，WPF 0.10%–1.53%，WinForms 4%–5.8%）。
 
 ### Spinner
 

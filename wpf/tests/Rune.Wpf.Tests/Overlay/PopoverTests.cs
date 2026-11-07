@@ -7,7 +7,7 @@ using System.Windows.Input;
 namespace Rune.Wpf.Tests;
 
 /// <summary>
-/// Popover：点触发器打开（原因 Trigger），焦点进到第一个能聚焦的元素；Esc 关上（原因 Escape），焦点回到触发器；代码里改 IsOpen 也报告；
+/// Popover：点触发器打开（原因 Trigger），焦点进到第一个能聚焦的元素；Esc 关上（原因 Escape），焦点回到触发器；代码里改 IsOpen 不报告；
 /// 浮层以触发器为名称，面板是浮起的表面。
 /// </summary>
 public class PopoverTests
@@ -46,7 +46,7 @@ public class PopoverTests
         popover.IsOpen = true;
         WpfUi.Flush();
         popover.IsOpen = false;
-        Assert.Equal([(true, OpenChangeReason.Trigger), (false, OpenChangeReason.Escape), (true, OpenChangeReason.Programmatic), (false, OpenChangeReason.Programmatic)], reasons);
+        Assert.Equal([(true, OpenChangeReason.Trigger), (false, OpenChangeReason.Escape)], reasons);
     });
 
     [Fact]

@@ -15,7 +15,7 @@ using Avalonia.VisualTree;
 
 namespace Rune.Avalonia;
 
-/// <summary>为什么开、关（vue-tsx-pro 的 OpenChangeReason）。</summary>
+/// <summary>为什么开、关（vue-tsx-pro 的 OpenChangeReason）：只报告用户的操作，代码里（父级、绑定）改 IsOpen 时不报告。</summary>
 public enum OpenChangeReason
 {
     /// <summary>点了触发器。</summary>
@@ -27,8 +27,11 @@ public enum OpenChangeReason
     /// <summary>按了 Esc。</summary>
     Escape,
 
-    /// <summary>代码里改了 IsOpen。</summary>
-    Programmatic,
+    /// <summary>选中了一项（单选的下拉选中后关闭）。</summary>
+    Select,
+
+    /// <summary>焦点离开了（Tab 移走）。</summary>
+    Focus,
 }
 
 /// <summary>浮层开关变了的事件参数。</summary>
@@ -84,7 +87,7 @@ public class Popover : Control
     readonly ContentPresenter content = new();
     readonly Canvas arrowLayer = new() { IsHitTestVisible = false };
     readonly Border arrow = new() { Name = PopoverParts.Arrow, IsVisible = false };
-    OpenChangeReason pending = OpenChangeReason.Programmatic;
+    OpenChangeReason? pending;
     bool focusWasInside;
 
     /// <summary>新建：触发器、弹出层（面板与箭头）。</summary>
@@ -124,7 +127,7 @@ public class Popover : Control
     /// <summary>箭头。</summary>
     public bool Arrow { get => GetValue(ArrowProperty); set => SetValue(ArrowProperty, value); }
 
-    /// <summary>开关变了（触发器、点外面、Esc、代码里改）。</summary>
+    /// <summary>用户开、关了（触发器、点外面、Esc）；代码里改 IsOpen 时不发。</summary>
     public event EventHandler<OpenChangedEventArgs>? OpenChanged;
 
     /// <summary>浮层的面板（测试用）。</summary>
@@ -173,7 +176,7 @@ public class Popover : Control
     {
         pending = reason;
         SetCurrentValue(IsOpenProperty, open);
-        pending = OpenChangeReason.Programmatic;
+        pending = null;
     }
 
     void Toggle()
@@ -181,7 +184,7 @@ public class Popover : Control
         var reason = pending;
         PseudoClasses.Set(":open", IsOpen);
         if (popup.IsOpen != IsOpen) popup.IsOpen = IsOpen;
-        OpenChanged?.Invoke(this, new OpenChangedEventArgs(IsOpen, reason));
+        if (reason is { } known) OpenChanged?.Invoke(this, new OpenChangedEventArgs(IsOpen, known));
     }
 
     /// <summary>打开：等排好版、定好位置后放箭头、焦点移到第一个能聚焦的元素（没有时到面板上）。</summary>

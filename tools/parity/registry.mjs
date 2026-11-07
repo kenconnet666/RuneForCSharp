@@ -44,6 +44,9 @@ export const COMPONENT_PROP_RENAMES = {
   Avatar: { name: 'DisplayName', src: 'Source' },
   // 移除由使用方做：事件是"请求移除"（离场结束才发）
   Tag: { onRemove: 'RemoveRequested' },
+  SelectedTags: { onRemove: 'RemoveRequested' },
+  // 数据是平台的 ItemsSource；自定义选项内容是数据模板；新建是事件（Control 自己有 Created）
+  Select: { items: 'ItemsSource', children: 'ItemTemplate', onCreate: 'OptionCreated' },
   // 平台的 ItemsControl 自己有 Items（直接写的项）；数据给 ItemsSource
   CheckboxGroup: { items: 'ItemsSource' },
   RadioGroup: { items: 'ItemsSource' },
@@ -85,6 +88,8 @@ export const PLATFORM_COMPONENT_PROP_RENAMES = {
   WinForms: {
     Container: { size: 'ContainerSize', padding: 'InlinePadding' },
     Card: { padding: 'CardPadding' },
+    // 同 TextFieldControl
+    Select: { placeholder: 'PlaceholderText' },
     // 扩展组件：每个控件多出的属性前面带 Tooltip（设计器里是"Tooltip 在 tooltipProvider1 上"）
     Tooltip: {
       children: 'Tooltip',
@@ -139,6 +144,15 @@ export const PROPS_NOT_PORTED = {
   ScrollArea: { propsContent: '内容就是 Content 本身，平台的滚动呈现器直接排它，中间没有包一层' },
   Table: { propsRoot: '外层的外框与横向滚动区域由 Table 管：外观按密度、样式、斑马纹与主题 token' },
   ...Object.fromEntries(['TableHead', 'TableBody', 'TableFoot', 'TableRow', 'TableCaption', 'TableCell', 'TableHeaderCell'].map((name) => [name, { propsRoot: '行、单元格、各部分本身就是元素：样式直接写在它们身上' }])),
+  Select: {
+    placement: '弹出层固定贴着外壳下方、至少与它同宽（放不下时翻到上方），同平台的下拉框',
+    name: FORM_NAME,
+    renderValue: '触发框就是控件自己：单选显示已选项的文字，多选显示标签；读屏念全部已选',
+    _search: '搜索词只在弹出层的搜索框里；自己发请求的远程搜索等 load 一起做',
+    propsRoot: '外壳就是 Select 自己：样式直接写在 Select 上',
+    propsTag: '标签是 SelectedTags 建的 sm、soft 的 Tag：样式写在 Tag 的主题或部件上',
+  },
+  SelectedTags: { propsTag: '标签固定是 sm、soft 的 Tag：样式写在 Tag 的主题或部件上' },
   Popover: {
     lazy: '内容是传进来的控件实例，浮层关着时不在可视树里（不排版、不绘制），本来就是打开时才有代价',
     role: '浮层固定是对话框（Avalonia、WPF 的读屏节点、WinForms 的 AccessibleRole.Dialog）；需要打断操作的确认用对话框组件',
@@ -161,6 +175,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
   },
   WPF: {
     ScrollArea: { propsViewport: '视口就是 ScrollArea 自己：读屏名称、焦点都在它身上；滚动呈现器没有部件样式' },
+    Select: Object.fromEntries(['propsListbox', 'propsSearch'].map((prop) => [prop, '弹出层里的列表、搜索框是 Select 建的，外观跟着 Listbox、TextField 的主题样式'])),
   },
   WinForms: {
     Tabs: { ripple: '标签是组件库画的容器控件（里面放文字与计数），没有按下的波纹' },
@@ -176,6 +191,12 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     },
     Collapse: { lazy: '收起时子控件隐藏：隐藏的控件不建句柄、不参与布局，本来就是第一次展开才真正创建' },
     Tooltip: { propsArrow: '提示窗口整张是组件库画的位图，箭头没有可改样式的部件' },
+    Select: {
+      children: 'WinForms 的选项是 ListboxControl 画出来的，没有自定义内容',
+      empty: '没有选项时是固定的空状态（语言包的"没有选项"、搜索时"没有匹配的选项"）',
+      ...Object.fromEntries(['propsValue', 'propsTags', 'propsClear', 'propsChevron', 'propsPopover', 'propsListbox', 'propsSearch', 'propsIcon']
+        .map((prop) => [prop, '部件是 SelectControl 组合的子控件与两层窗口，没有部件属性记录'])),
+    },
     Tag: { propsRemove: '移除按钮是 CloseButtonControl 子控件，颜色、字号跟着标签；没有部件属性记录' },
     Popover: { propsArrow: '面板、阴影与箭头是组件库画在分层窗口上的位图，箭头没有可改样式的部件' },
     Listbox: Object.fromEntries(

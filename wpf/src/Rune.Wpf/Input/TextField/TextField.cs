@@ -79,6 +79,13 @@ public class TextField : TextInputBase
     public string Value { get => (string)GetValue(ValueProperty); set => SetValue(ValueProperty, value); }
 
     /// <inheritdoc />
+    protected override void FitInnerButtons()
+    {
+        base.FitInnerButtons();
+        FitInnerButton(reveal, FontSize);
+    }
+
+    /// <inheritdoc />
     protected override void OnTemplateParts()
     {
         if (reveal is not null) reveal.Click -= OnReveal;

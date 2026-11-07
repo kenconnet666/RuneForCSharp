@@ -13,7 +13,7 @@ using LayoutGrid = System.Windows.Controls.Grid;
 
 namespace Rune.Wpf;
 
-/// <summary>为什么开、关（vue-tsx-pro 的 OpenChangeReason）。</summary>
+/// <summary>为什么开、关（vue-tsx-pro 的 OpenChangeReason）：只报告用户的操作，代码里（父级、绑定）改 IsOpen 时不报告。</summary>
 public enum OpenChangeReason
 {
     /// <summary>点了触发器。</summary>
@@ -25,8 +25,11 @@ public enum OpenChangeReason
     /// <summary>按了 Esc。</summary>
     Escape,
 
-    /// <summary>代码里改了 IsOpen。</summary>
-    Programmatic,
+    /// <summary>选中了一项（单选的下拉选中后关闭）。</summary>
+    Select,
+
+    /// <summary>焦点离开了（Tab 移走）。</summary>
+    Focus,
 }
 
 /// <summary>浮层开关变了的事件参数。</summary>
@@ -90,7 +93,7 @@ public class Popover : FrameworkElement
     readonly ContentPresenter content = new();
     readonly Canvas arrowLayer = new() { IsHitTestVisible = false };
     readonly Border arrow = new() { Visibility = Visibility.Collapsed };
-    OpenChangeReason pending = OpenChangeReason.Programmatic;
+    OpenChangeReason? pending;
     long closedAt = long.MinValue / 2;
     bool focusWasInside;
 
@@ -143,7 +146,7 @@ public class Popover : FrameworkElement
     /// <summary>箭头。</summary>
     public bool Arrow { get => (bool)GetValue(ArrowProperty); set => SetValue(ArrowProperty, value); }
 
-    /// <summary>开关变了（触发器、点外面、Esc、代码里改）。</summary>
+    /// <summary>用户开、关了（触发器、点外面、Esc）；代码里改 IsOpen 时不发。</summary>
     public event EventHandler<OpenChangedEventArgs>? OpenChanged;
 
     /// <summary>浮层的面板（测试用）。</summary>
@@ -204,14 +207,14 @@ public class Popover : FrameworkElement
     {
         pending = reason;
         SetCurrentValue(IsOpenProperty, open);
-        pending = OpenChangeReason.Programmatic;
+        pending = null;
     }
 
     void Toggle()
     {
         var reason = pending;
         if (popup.IsOpen != IsOpen) popup.IsOpen = IsOpen;
-        OpenChanged?.Invoke(this, new OpenChangedEventArgs(IsOpen, reason));
+        if (reason is { } known) OpenChanged?.Invoke(this, new OpenChangedEventArgs(IsOpen, known));
     }
 
     /// <summary>

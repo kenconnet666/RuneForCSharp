@@ -1,9 +1,8 @@
 using System.ComponentModel;
-using System.Drawing.Drawing2D;
 
 namespace Rune.WinForms;
 
-/// <summary>为什么开、关（vue-tsx-pro 的 OpenChangeReason）。</summary>
+/// <summary>为什么开、关（vue-tsx-pro 的 OpenChangeReason）：只报告用户的操作，代码里（父级、绑定）改 IsOpen 时不报告。</summary>
 public enum OpenChangeReason
 {
     /// <summary>点了触发器。</summary>
@@ -15,8 +14,11 @@ public enum OpenChangeReason
     /// <summary>按了 Esc。</summary>
     Escape,
 
-    /// <summary>代码里改了 IsOpen。</summary>
-    Programmatic,
+    /// <summary>选中了一项（单选的下拉选中后关闭）。</summary>
+    Select,
+
+    /// <summary>焦点离开了（Tab 移走）。</summary>
+    Focus,
 }
 
 /// <summary>浮层开关变了的事件参数。</summary>
@@ -37,16 +39,15 @@ public sealed class OpenChangedEventArgs(bool isOpen, OpenChangeReason reason) :
 /// var sharing = new PopoverControl { Trigger = new ButtonControl { Icon = Lucide.Share2, Text = "分享" }, Content = sharePanel, Arrow = true };
 /// sharing.OpenChanged += (_, e) => …;
 /// </code>
-/// 触发器照常排在原处（控件的大小就是触发器的大小），点它（Click）开关。浮层是两层窗口：底下的分层窗口画面板（surfaceRaised、xs 描边、lg 圆角、lg 阴影）
-/// 与箭头，上面的普通窗口放内容，只盖内边距（space.md）以内。位置 <see cref="Placement"/>（12 种，默认 bottom-start，空间不够时翻到另一边、
+/// 触发器照常排在原处（控件的大小就是触发器的大小），点它（Click）开关。浮层是两层窗口（<see cref="FloatingSurface"/>，激活模式）：底下的分层窗口
+/// 画面板（surfaceRaised、xs 描边、lg 圆角、lg 阴影）与箭头，上面的普通窗口放内容，只盖内边距（space.md）以内。位置 <see cref="Placement"/>（12 种，默认 bottom-start，空间不够时翻到另一边、
 /// 贴着屏幕边挪回来），与触发器隔 <see cref="Offset"/>，<see cref="Arrow"/> 时有指向触发器的箭头。打开时内容窗口激活、焦点移到第一个能聚焦的控件，
 /// 关上后回到触发器。内容窗口失去激活（点了外面、切到别的窗口）、Esc 关闭；<see cref="OpenChanged"/> 报告原因。
 /// 读屏：内容窗口是对话框，以触发器为名称。
 /// </summary>
 public class PopoverControl : Control, IBaseline, IScopeAware
 {
-    readonly FloatingForm surface;
-    LayeredWindow? backdrop;
+    readonly FloatingSurface surface;
     long closedAt = long.MinValue / 2;
     bool open;
 
@@ -57,12 +58,10 @@ public class PopoverControl : Control, IBaseline, IScopeAware
         SetStyle(ControlStyles.SupportsTransparentBackColor, true);
         BackColor = Color.Transparent;
         AutoSize = true;
-        surface = new FloatingForm(this) { AccessibleRole = AccessibleRole.Dialog };
-        surface.Deactivate += (_, _) =>
-        {
-            if (IsOpen) SetOpen(false, OpenChangeReason.Outside);
-        };
-        surface.Escape += (_, _) => SetOpen(false, OpenChangeReason.Escape);
+        surface = new FloatingSurface(this);
+        surface.Form.AccessibleRole = AccessibleRole.Dialog;
+        surface.Outside += (_, _) => SetOpen(false, OpenChangeReason.Outside);
+        surface.Form.Escape += (_, _) => SetOpen(false, OpenChangeReason.Escape);
     }
 
     /// <summary>触发器（一般是按钮）：照常排在原处，点它开关。</summary>
@@ -98,18 +97,18 @@ public class PopoverControl : Control, IBaseline, IScopeAware
         set
         {
             if (field == value) return;
-            if (field is not null) surface.Controls.Remove(field);
+            if (field is not null) surface.Form.Controls.Remove(field);
             field = value;
             if (value is null) return;
             value.Dock = DockStyle.Fill;
-            surface.Controls.Add(value);
+            surface.Form.Controls.Add(value);
         }
     }
 
     /// <summary>开着。</summary>
     [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public bool IsOpen { get => open; set => SetOpen(value, OpenChangeReason.Programmatic); }
+    public bool IsOpen { get => open; set => SetOpen(value, null); }
 
     /// <summary>弹出位置，默认 bottom-start；空间不够时翻到另一边。</summary>
     [Category("Behavior")]
@@ -132,14 +131,14 @@ public class PopoverControl : Control, IBaseline, IScopeAware
 
     void ResetPlacement() => Placement = FloatingPlacement.BottomStart;
 
-    /// <summary>开关变了（触发器、点外面、Esc、代码里改）。</summary>
+    /// <summary>用户开、关了（触发器、点外面、Esc）；代码里改 IsOpen 时不发。</summary>
     public event EventHandler<OpenChangedEventArgs>? OpenChanged;
 
     /// <summary>放内容的窗口（测试用）。</summary>
-    internal Form Surface => surface;
+    internal Form Surface => surface.Form;
 
     /// <summary>画面板的窗口（测试用）；没打开过时为 null。</summary>
-    internal LayeredWindow? Backdrop => backdrop;
+    internal LayeredWindow? Backdrop => surface.Backdrop;
 
     /// <inheritdoc />
     public int? Baseline => (Trigger as IBaseline)?.Baseline;
@@ -159,7 +158,7 @@ public class PopoverControl : Control, IBaseline, IScopeAware
 
     void IScopeAware.ScopeChanged()
     {
-        ProviderControl.NotifyDescendants(surface);
+        ProviderControl.NotifyDescendants(surface.Form);
         if (IsOpen) Present();
     }
 
@@ -172,64 +171,30 @@ public class PopoverControl : Control, IBaseline, IScopeAware
         SetOpen(!IsOpen, OpenChangeReason.Trigger);
     }
 
-    void SetOpen(bool next, OpenChangeReason reason)
+    void SetOpen(bool next, OpenChangeReason? reason)
     {
         if (next == open) return;
         open = next;
         if (next) Present();
         else Dismiss();
-        OpenChanged?.Invoke(this, new OpenChangedEventArgs(next, reason));
+        if (reason is { } known) OpenChanged?.Invoke(this, new OpenChangedEventArgs(next, known));
     }
 
-    /// <summary>
-    /// 画好面板、摆好两层窗口并显示：面板 = 内容 + 内边距 + 描边，位置同提示（<see cref="FloatingLayout.Position"/>）；
-    /// 画面窗口四周留出阴影与箭头伸出的一段。焦点移到内容里第一个能聚焦的控件（没有时在内容窗口上）。
-    /// </summary>
+    /// <summary>面板 = 内容 + 内边距 + 描边，位置同提示（<see cref="FloatingLayout.Position"/>）；交给两层窗口画好、显示。</summary>
     void Present()
     {
-        if (!IsHandleCreated || FindForm() is not { } owner) return;
+        if (!IsHandleCreated) return;
         var context = ElementContext.Of(this);
-        var theme = context.Theme;
         var em = context.Em;
-        var border = Math.Max(1, (int)MathF.Round(context.Scale(Tokens.BorderWidth.Xs)));
-        var inset = (int)MathF.Round(Tokens.Space.Md * em) + border;
+        var inset = (int)MathF.Round(Tokens.Space.Md * em) + FloatingSurface.Border(context);
         var content = Content is { } control ? Measure(control) : Size.Empty;
         var panelSize = new Size(content.Width + 2 * inset, content.Height + 2 * inset);
         var arrow = Arrow ? 0.625f * em : 0;
         var gap = context.Scale(Offset) + 0.7f * arrow;
         var target = RectangleToScreen(ClientRectangle);
         var (side, panel) = FloatingLayout.Position(Placement, context.RightToLeft, target, panelSize, gap, Screen.FromControl(this).WorkingArea);
-
-        var shadow = theme.Shadows.Lg;
-        var overhang = (int)MathF.Ceiling(Math.Max(0.71f * arrow,
-            shadow.Where(layer => !layer.Inset).Select(layer => context.Scale(Math.Max(Math.Abs(layer.X), Math.Abs(layer.Y)) + layer.Spread + layer.Blur)).DefaultIfEmpty(0).Max()));
-        var bitmap = LayeredWindow.Canvas(new Size(panelSize.Width + 2 * overhang, panelSize.Height + 2 * overhang));
-        var inner = new RectangleF(overhang, overhang, panelSize.Width, panelSize.Height);
-        var radius = theme.Radii.Lg * em;
-        Drawing.Shadow(bitmap, inner, radius, shadow, context.Scale(1));
-        using (var graphics = Graphics.FromImage(bitmap))
-        {
-            graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            using var fill = new SolidBrush(theme.Colors.SurfaceRaised);
-            using var pen = new Pen(theme.Colors.Border, border);
-            using (var path = Drawing.RoundedRectangle(inner, radius)) graphics.FillPath(fill, path);
-            var half = border / 2f;
-            using (var path = Drawing.RoundedRectangle(RectangleF.Inflate(inner, -half, -half), Math.Max(0, radius - half))) graphics.DrawPath(pen, path);
-            if (Arrow) PaintArrow(graphics, fill, pen, inner, side, target, panel.Location, arrow);
-        }
-
-        backdrop ??= new LayeredWindow();
-        if (backdrop.Owner != owner) backdrop.Owner = owner;
-        backdrop.Present(bitmap, new Point(panel.X - overhang, panel.Y - overhang), panel, Arrow ? side : null, TimeSpan.Zero);
-        surface.Font = Font;
-        surface.ForeColor = theme.Colors.Text;
-        surface.BackColor = theme.Colors.SurfaceRaised;
-        surface.RightToLeft = context.RightToLeft ? RightToLeft.Yes : RightToLeft.No;
-        surface.AccessibleName = Trigger is { } trigger ? trigger.AccessibleName ?? trigger.Text : null;
-        surface.Bounds = Rectangle.Inflate(panel, -inset, -inset);
-        if (!surface.Visible) surface.Show(backdrop);
-        surface.Activate();
-        if (!surface.SelectNextControl(null, true, true, true, false)) surface.Focus();
+        surface.Form.AccessibleName = Trigger is { } trigger ? trigger.AccessibleName ?? trigger.Text : null;
+        surface.Show(panel, inset, context, Arrow ? (side, target, arrow) : null);
     }
 
     static Size Measure(Control content)
@@ -242,40 +207,9 @@ public class PopoverControl : Control, IBaseline, IScopeAware
     void Dismiss()
     {
         closedAt = Environment.TickCount64;
-        var focusWasInside = surface.ContainsFocus || Form.ActiveForm == surface;
-        surface.Hide();
-        backdrop?.Dismiss();
-        if (!focusWasInside) return;
+        if (!surface.Hide()) return;
         FindForm()?.Activate();
         Trigger?.Focus();
-    }
-
-    /// <summary>
-    /// 箭头（TS 的 propsArrow）：旋转 45° 的小方块，跨在朝向触发器的那条边上、对准触发器的中心（离面板两端至少一个箭头宽），
-    /// 底色同面板，朝外的两条边描边（盖住面板在那里的描边）。
-    /// </summary>
-    static void PaintArrow(Graphics graphics, Brush fill, Pen pen, RectangleF inner, string side, Rectangle target, Point panelOnScreen, float size)
-    {
-        var vertical = side is "top" or "bottom";
-        var center = vertical ? target.Left + target.Width / 2f - panelOnScreen.X : target.Top + target.Height / 2f - panelOnScreen.Y;
-        var length = vertical ? inner.Width : inner.Height;
-        var cross = Math.Clamp(center, 1.5f * size, Math.Max(1.5f * size, length - 1.5f * size));
-        var (point, angle) = side switch
-        {
-            "top" => (new PointF(inner.Left + cross, inner.Bottom), 45f),
-            "bottom" => (new PointF(inner.Left + cross, inner.Top), 225f),
-            "left" => (new PointF(inner.Right, inner.Top + cross), -45f),
-            _ => (new PointF(inner.Left, inner.Top + cross), 135f),
-        };
-        var state = graphics.Save();
-        graphics.TranslateTransform(point.X, point.Y);
-        graphics.RotateTransform(angle);
-        var half = size / 2;
-        graphics.FillRectangle(fill, -half, -half, size, size);
-        // 旋转前的右边、下边：转过去后朝外
-        var edge = half - pen.Width / 2;
-        graphics.DrawLines(pen, [new PointF(edge, -half), new PointF(edge, edge), new PointF(-half, edge)]);
-        graphics.Restore(state);
     }
 
     /// <inheritdoc />
@@ -285,7 +219,6 @@ public class PopoverControl : Control, IBaseline, IScopeAware
         {
             if (Trigger is { } trigger) trigger.Click -= OnTriggerClick;
             surface.Dispose();
-            backdrop?.Dispose();
         }
         base.Dispose(disposing);
     }
