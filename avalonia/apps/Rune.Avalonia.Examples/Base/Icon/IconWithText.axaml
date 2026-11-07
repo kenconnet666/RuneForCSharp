@@ -3,7 +3,7 @@
              xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/avalonia"
              x:Class="Rune.Avalonia.Examples.IconWithText">
   <!-- Icon、Link 是控件，放进一段文字时用 InlineUIContainer（中线对齐，图标才与文字同高）；
-       Link 的内容不是纯文字时下划线要自己写在文字上，文字用 TextBlock（rune:Text 带自己的行高，会把段落的行撑乱） -->
+       Link 里的文字用 TextBlock（rune:Text 带自己的行高，会把段落的行撑乱），下划线由 Link 给 -->
   <rune:Flex Direction="column" Gap="md">
     <rune:Flex Gap="lg" Wrap="True">
       <rune:Text Tone="muted"><InlineUIContainer BaselineAlignment="Center"><rune:Icon Data="{x:Static rune:Lucide.MapPin}" /></InlineUIContainer> 上海·徐汇</rune:Text>
@@ -11,7 +11,7 @@
       <rune:Text Tone="muted"><InlineUIContainer BaselineAlignment="Center"><rune:Icon Data="{x:Static rune:Lucide.Users}" /></InlineUIContainer> 128 人参与</rune:Text>
     </rune:Flex>
     <rune:Paragraph>
-      图标跟随文字的字号与颜色，和文字基线对齐；放在句子中间也不会撑高行距，<InlineUIContainer BaselineAlignment="Center"><rune:Link Href="https://example.com/guide/design"><rune:Flex Align="center" Gap="xs"><TextBlock Text="查看设计规范" TextDecorations="Underline" /><rune:Icon Data="{x:Static rune:Lucide.ExternalLink}" /></rune:Flex></rune:Link></InlineUIContainer>。
+      图标跟随文字的字号与颜色，和文字基线对齐；放在句子中间也不会撑高行距，<InlineUIContainer BaselineAlignment="Center"><rune:Link Href="https://example.com/guide/design"><rune:Flex Align="center" Gap="xs"><TextBlock Text="查看设计规范" /><rune:Icon Data="{x:Static rune:Lucide.ExternalLink}" /></rune:Flex></rune:Link></InlineUIContainer>。
     </rune:Paragraph>
     <rune:Flex Gap="sm" Wrap="True" Align="center">
       <rune:Button Icon="{x:Static rune:Lucide.Plus}">新建项目</rune:Button>

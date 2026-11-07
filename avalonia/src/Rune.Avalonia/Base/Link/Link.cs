@@ -71,28 +71,21 @@ public class Link : ButtonBase
     protected override void OnApplyTemplate(global::Avalonia.Controls.Primitives.TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
-        if (presenter is not null) presenter.PropertyChanged -= OnPresenterChanged;
         presenter = e.NameScope.Find<global::Avalonia.Controls.Presenters.ContentPresenter>("PART_ContentPresenter");
-        if (presenter is not null) presenter.PropertyChanged += OnPresenterChanged;
         UpdateUnderline();
     }
 
-    void OnPresenterChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
-    {
-        if (e.Property == global::Avalonia.Controls.Presenters.ContentPresenter.ChildProperty) UpdateUnderline();
-    }
-
     /// <summary>
-    /// 文字内容的下划线：always 总有，hover 在指针在上面（可聚焦的不可用时除外）时有。按模板优先级设在生成的 TextBlock 上
-    /// （它逻辑上挂在 Link 下，控件主题里写不了子选择器）；内容是别的控件时不管。
+    /// 下划线：always 总有，hover 在指针在上面（可聚焦的不可用时除外）时有。按模板优先级设在内容呈现器上，
+    /// TextDecorations 是继承的：纯文字、文字加图标（图标不画下划线）里的文字都带上（控件主题里写不了子选择器）。
     /// </summary>
     void UpdateUnderline()
     {
         underline?.Dispose();
         underline = null;
-        if (presenter?.Child is not global::Avalonia.Controls.TextBlock text) return;
+        if (presenter is null) return;
         var shown = Underline.Value is null or "always" || (Underline.Value == "hover" && IsPointerOver && !IsDisabled);
-        if (shown) underline = text.SetValue(global::Avalonia.Controls.TextBlock.TextDecorationsProperty, global::Avalonia.Media.TextDecorations.Underline, global::Avalonia.Data.BindingPriority.Template);
+        if (shown) underline = presenter.SetValue(global::Avalonia.Controls.Documents.Inline.TextDecorationsProperty, global::Avalonia.Media.TextDecorations.Underline, global::Avalonia.Data.BindingPriority.Template);
     }
 
     static string? Pseudo(LinkUnderline underline) => underline.Value is null ? null : $"underline-{underline.Value}";

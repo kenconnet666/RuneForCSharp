@@ -54,10 +54,13 @@ public class LinkTests
     {
         var always = new Link { Content = "按钮" };
         var none = new Link { Content = "次要", Underline = LinkUnderline.None };
-        HeadlessUi.Show(new StackPanel { Children = { always, none } });
+        // 文字加图标：里面的文字也带下划线（TextDecorations 继承）
+        var mixed = new Link { Content = new StackPanel { Orientation = global::Avalonia.Layout.Orientation.Horizontal, Children = { new TextBlock { Text = "查看设计规范" }, new Icon { Data = Lucide.ExternalLink } } } };
+        HeadlessUi.Show(new StackPanel { Children = { always, none, mixed } });
         static TextDecorationCollection? Decorations(Link link) => global::Avalonia.VisualTree.VisualExtensions.GetVisualDescendants(link).OfType<TextBlock>().First().TextDecorations;
 
         Assert.Equal(TextDecorations.Underline, Decorations(always));
         Assert.Null(Decorations(none));
+        Assert.Equal(TextDecorations.Underline, Decorations(mixed));
     });
 }
