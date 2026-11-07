@@ -2,50 +2,27 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/wpf">
-  <!-- 一格：图标在上，说明在下，按底边对齐 -->
-  <UserControl.Resources>
-    <Style x:Key="Cell" TargetType="StackPanel">
-      <Setter Property="Margin" Value="0,0,24,16" />
-      <Setter Property="VerticalAlignment" Value="Bottom" />
-    </Style>
-    <Style TargetType="rune:Icon">
-      <Setter Property="Data" Value="{x:Static rune:Lucide.Star}" />
-      <Setter Property="HorizontalAlignment" Value="Center" />
-      <Setter Property="Margin" Value="0,0,0,4" />
-    </Style>
-    <Style TargetType="TextBlock">
-      <Setter Property="HorizontalAlignment" Value="Center" />
-      <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
-      <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
-    </Style>
-  </UserControl.Resources>
-  <StackPanel>
-    <WrapPanel Margin="0,0,0,8">
-      <StackPanel Style="{StaticResource Cell}"><rune:Icon Size="xs" /><TextBlock Text="xs" /></StackPanel>
-      <StackPanel Style="{StaticResource Cell}"><rune:Icon Size="sm" /><TextBlock Text="sm" /></StackPanel>
-      <StackPanel Style="{StaticResource Cell}"><rune:Icon Size="md" /><TextBlock Text="md" /></StackPanel>
-      <StackPanel Style="{StaticResource Cell}"><rune:Icon Size="lg" /><TextBlock Text="lg" /></StackPanel>
-      <StackPanel Style="{StaticResource Cell}"><rune:Icon Size="xl" /><TextBlock Text="xl" /></StackPanel>
-      <StackPanel Style="{StaticResource Cell}">
-        <TextBlock FontSize="{DynamicResource Rune.FontSize.Xl}" Foreground="{DynamicResource Rune.Brush.Text}" Margin="0,0,0,4">
-          <InlineUIContainer BaselineAlignment="Center"><rune:Icon Margin="0" /></InlineUIContainer>
-          <Run Text="星标" />
-        </TextBlock>
-        <TextBlock Text="跟随文字" />
-      </StackPanel>
-    </WrapPanel>
-    <WrapPanel Margin="0,0,0,8">
-      <StackPanel Style="{StaticResource Cell}"><rune:Icon Size="16" /><TextBlock Text="16px" /></StackPanel>
-      <StackPanel Style="{StaticResource Cell}"><rune:Icon Size="24" /><TextBlock Text="24px" /></StackPanel>
-      <StackPanel Style="{StaticResource Cell}"><rune:Icon Size="32" /><TextBlock Text="32px" /></StackPanel>
-      <StackPanel Style="{StaticResource Cell}"><rune:Icon Size="48" /><TextBlock Text="48px" /></StackPanel>
-    </WrapPanel>
-    <WrapPanel>
-      <StackPanel Style="{StaticResource Cell}"><rune:Icon Size="32" StrokeWidth="1" /><TextBlock Text="线宽 1" /></StackPanel>
-      <StackPanel Style="{StaticResource Cell}"><rune:Icon Size="32" StrokeWidth="1.5" /><TextBlock Text="线宽 1.5" /></StackPanel>
-      <StackPanel Style="{StaticResource Cell}"><rune:Icon Size="32" StrokeWidth="2" /><TextBlock Text="线宽 2" /></StackPanel>
-      <StackPanel Style="{StaticResource Cell}"><rune:Icon Size="32" StrokeWidth="2.5" /><TextBlock Text="线宽 2.5" /></StackPanel>
-      <StackPanel Style="{StaticResource Cell}"><rune:Icon Size="32" StrokeWidth="3" /><TextBlock Text="线宽 3" /></StackPanel>
-    </WrapPanel>
-  </StackPanel>
+  <rune:Flex Direction="column" Gap="lg">
+    <rune:Flex Gap="lg" Align="end" Wrap="True">
+      <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="xs" /><rune:Small Tone="muted">xs</rune:Small></rune:Flex>
+      <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="sm" /><rune:Small Tone="muted">sm</rune:Small></rune:Flex>
+      <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="md" /><rune:Small Tone="muted">md</rune:Small></rune:Flex>
+      <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="lg" /><rune:Small Tone="muted">lg</rune:Small></rune:Flex>
+      <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="xl" /><rune:Small Tone="muted">xl</rune:Small></rune:Flex>
+      <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Text Size="xl"><InlineUIContainer BaselineAlignment="Center"><rune:Icon Data="{x:Static rune:Lucide.Star}" /></InlineUIContainer> 星标</rune:Text><rune:Small Tone="muted">跟随文字</rune:Small></rune:Flex>
+    </rune:Flex>
+    <rune:Flex Gap="lg" Align="end" Wrap="True">
+      <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="16" /><rune:Small Tone="muted">16px</rune:Small></rune:Flex>
+      <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="24" /><rune:Small Tone="muted">24px</rune:Small></rune:Flex>
+      <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="32" /><rune:Small Tone="muted">32px</rune:Small></rune:Flex>
+      <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="48" /><rune:Small Tone="muted">48px</rune:Small></rune:Flex>
+    </rune:Flex>
+    <rune:Flex Gap="lg" Align="end" Wrap="True">
+      <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="32" StrokeWidth="1" /><rune:Small Tone="muted">线宽 1</rune:Small></rune:Flex>
+      <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="32" StrokeWidth="1.5" /><rune:Small Tone="muted">线宽 1.5</rune:Small></rune:Flex>
+      <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="32" StrokeWidth="2" /><rune:Small Tone="muted">线宽 2</rune:Small></rune:Flex>
+      <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="32" StrokeWidth="2.5" /><rune:Small Tone="muted">线宽 2.5</rune:Small></rune:Flex>
+      <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="32" StrokeWidth="3" /><rune:Small Tone="muted">线宽 3</rune:Small></rune:Flex>
+    </rune:Flex>
+  </rune:Flex>
 </UserControl>
