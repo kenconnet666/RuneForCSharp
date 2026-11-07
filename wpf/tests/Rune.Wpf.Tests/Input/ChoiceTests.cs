@@ -1,0 +1,229 @@
+using System.Windows;
+using System.Windows.Automation;
+using System.Windows.Automation.Peers;
+using System.Windows.Automation.Provider;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+
+namespace Rune.Wpf.Tests;
+
+/// <summary>
+/// Checkbox、Radio 与两个组：点击、空格、读屏切换；组的值双向写回；部分勾选；方向键在单选组里移动并选中、Tab 停在选中项；
+/// 只读、出错随组；数据生成的项；拦下切换；方框、圆点的颜色。
+/// </summary>
+public class ChoiceTests
+{
+    static StackPanel Show(params UIElement[] children)
+    {
+        var host = new StackPanel();
+        host.Resources.MergedDictionaries.Add(new RuneTheme());
+        foreach (var child in children) host.Children.Add(child);
+        WpfUi.Show(host);
+        WpfUi.Flush();
+        return host;
+    }
+
+    static T Part<T>(ChoiceBase owner, PartKey key) where T : FrameworkElement
+    {
+        var style = (Style)owner.FindResource(key);
+        return Assert.Single(WpfUi.Descendants(owner).OfType<T>(), part => ReferenceEquals(part.Style, style));
+    }
+
+    static Color ColorOf(object? brush) => brush is SolidColorBrush solid ? solid.Color : default;
+
+    static Color Resource(FrameworkElement owner, string key) => ColorOf(owner.FindResource(key));
+
+    static AutomationPeer Peer(UIElement element) => UIElementAutomationPeer.CreatePeerForElement(element);
+
+    static void Click(UIElement owner)
+    {
+        owner.RaiseEvent(new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left) { RoutedEvent = Mouse.MouseDownEvent });
+        owner.RaiseEvent(new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left) { RoutedEvent = Mouse.MouseUpEvent });
+        WpfUi.Flush();
+    }
+
+    static void Press(UIElement owner, Key key, bool up = true)
+    {
+        var events = up ? new[] { Keyboard.KeyDownEvent, Keyboard.KeyUpEvent } : [Keyboard.KeyDownEvent];
+        foreach (var routed in events)
+            owner.RaiseEvent(new KeyEventArgs(Keyboard.PrimaryDevice, PresentationSource.FromVisual(owner), 0, key) { RoutedEvent = routed });
+        WpfUi.Flush();
+    }
+
+    [Fact]
+    [Upstream("Checkbox", "原生 checkbox：点击写回")]
+    public Task Checkbox_toggles_and_shows_an_indeterminate_state() => WpfUi.Run(() =>
+    {
+        var agree = new Checkbox { Content = "同意" };
+        var all = new Checkbox { Content = "全选", IsIndeterminate = true };
+        Show(agree, all);
+
+        Assert.Equal(AutomationControlType.CheckBox, Peer(agree).GetAutomationControlType());
+        Assert.Equal("同意", Peer(agree).GetName());
+        Click(agree);
+        Assert.True(agree.IsChecked);
+        Assert.Equal(ToggleState.On, ((IToggleProvider)Peer(agree).GetPattern(PatternInterface.Toggle)).ToggleState);
+        Press(agree, Key.Space);
+        Assert.False(agree.IsChecked);
+
+        Assert.Equal(ToggleState.Indeterminate, ((IToggleProvider)Peer(all).GetPattern(PatternInterface.Toggle)).ToggleState);
+        Assert.Same(Lucide.Minus, Part<Icon>(all, CheckboxParts.Indicator).Data); // 部分勾选：横线
+        Assert.Equal(1, Part<Icon>(all, CheckboxParts.Indicator).Opacity);
+        Assert.Equal(0, Part<Icon>(agree, CheckboxParts.Indicator).Opacity); // 没勾：标记不显示（仍占位）
+    });
+
+    [Fact]
+    public Task Checkbox_box_uses_the_tone_fill_when_checked_and_danger_when_invalid() => WpfUi.Run(() =>
+    {
+        var plain = new Checkbox();
+        var on = new Checkbox { IsChecked = true, Tone = StatusTone.Success };
+        var bad = new Checkbox { IsChecked = true, IsInvalid = true };
+        Show(plain, on, bad);
+
+        Assert.Equal(Resource(plain, "Rune.Brush.BorderStrong"), ColorOf(Part<Border>(plain, CheckboxParts.Box).BorderBrush));
+        Assert.Equal(Resource(plain, "Rune.Brush.Surface"), ColorOf(Part<Border>(plain, CheckboxParts.Box).Background));
+        Assert.Equal(Resource(on, "Rune.Brush.SuccessText"), ColorOf(Part<Border>(on, CheckboxParts.Box).Background)); // 绿色的实底用文字色
+        Assert.Same(on.ToneOnFill, Part<Icon>(on, CheckboxParts.Indicator).Foreground);
+        Assert.Equal(Resource(bad, "Rune.Brush.Danger"), ColorOf(Part<Border>(bad, CheckboxParts.Box).BorderBrush)); // 出错盖过勾选
+        Assert.Equal(1.125 * plain.FontSize, Part<Border>(plain, CheckboxParts.Box).ActualWidth, tolerance: 0.5);
+    });
+
+    [Fact]
+    [Upstream("Checkbox", "复选组：value 是勾选项的数组")]
+    public Task Checkbox_group_writes_the_checked_values_back() => WpfUi.Run(() =>
+    {
+        var email = new Checkbox { Value = "email", Content = "邮件" };
+        var sms = new Checkbox { Value = "sms", Content = "短信" };
+        var group = new CheckboxGroup { Value = ["email"], Items = { email, sms } };
+        Show(group);
+
+        Assert.Equal(AutomationControlType.Group, Peer(group).GetAutomationControlType());
+        Assert.Equal((true, false), (email.IsChecked, sms.IsChecked));
+        Click(sms);
+        Assert.Equal(["email", "sms"], group.Value);
+        Click(email);
+        Assert.Equal(["sms"], group.Value);
+        Assert.Equal((false, true), (email.IsChecked, sms.IsChecked));
+
+        group.IsReadOnly = true; // 只读随组
+        Click(sms);
+        Assert.Equal(["sms"], group.Value);
+    });
+
+    [Fact]
+    [Upstream("RadioGroup", "同组的 radio 共用自动生成的 name")]
+    public Task Radio_group_selects_one_value_and_disables_as_a_whole() => WpfUi.Run(() =>
+    {
+        var express = new Radio { Value = "express", Content = "快递" };
+        var pickup = new Radio { Value = "pickup", Content = "自提" };
+        var group = new RadioGroup { Value = "express", Items = { express, pickup } };
+        Show(group);
+
+        Assert.Equal(AutomationControlType.RadioButton, Peer(express).GetAutomationControlType());
+        Assert.Equal((true, false), (express.IsChecked, pickup.IsChecked));
+        Click(pickup);
+        Assert.Equal("pickup", group.Value);
+        Assert.Equal((false, true), (express.IsChecked, pickup.IsChecked));
+        Assert.True(((ISelectionItemProvider)Peer(pickup).GetPattern(PatternInterface.SelectionItem)).IsSelected);
+
+        group.IsEnabled = false;
+        Assert.False(express.IsEnabled || pickup.IsEnabled);
+    });
+
+    [Fact]
+    public Task Radio_group_has_one_tab_stop_and_arrows_move_and_select() => WpfUi.Run(() =>
+    {
+        var (a, b, c) = (new Radio { Value = "a", Content = "甲" }, new Radio { Value = "b", Content = "乙", IsEnabled = false }, new Radio { Value = "c", Content = "丙" });
+        var group = new RadioGroup { Items = { a, b, c } };
+        Show(group);
+
+        Assert.Equal((true, false, false), (KeyboardNavigation.GetIsTabStop(a), KeyboardNavigation.GetIsTabStop(b), KeyboardNavigation.GetIsTabStop(c))); // 没选中时停在第一项
+        group.Value = "c";
+        Assert.Equal((false, true), (KeyboardNavigation.GetIsTabStop(a), KeyboardNavigation.GetIsTabStop(c)));
+
+        Press(c, Key.Down, up: false); // 到头从另一端继续
+        Assert.Equal("a", group.Value);
+        Press(a, Key.Right, up: false); // 跳过不可用的
+        Assert.Equal("c", group.Value);
+
+        group.IsReadOnly = true;
+        Press(c, Key.Up, up: false);
+        Assert.Equal("c", group.Value);
+    });
+
+    [Fact]
+    public Task Radio_dot_and_circle_follow_the_group_tone() => WpfUi.Run(() =>
+    {
+        var on = new Radio { Value = "x" };
+        var off = new Radio { Value = "y" };
+        var group = new RadioGroup { Value = "x", Tone = StatusTone.Warning, Items = { on, off } };
+        Show(group);
+
+        Assert.Equal(Resource(on, "Rune.Brush.WarningText"), ColorOf(Part<Border>(on, RadioParts.Circle).Background));
+        Assert.Same(on.ToneOnFill, Part<Border>(on, RadioParts.Indicator).Background);
+        Assert.Equal(1, ((ScaleTransform)Part<Border>(on, RadioParts.Indicator).RenderTransform).ScaleX);
+        Assert.Equal(0, ((ScaleTransform)Part<Border>(off, RadioParts.Indicator).RenderTransform).ScaleX); // 没选中：圆点缩成 0
+        Assert.Equal(Resource(off, "Rune.Brush.BorderStrong"), ColorOf(Part<Border>(off, RadioParts.Circle).BorderBrush));
+    });
+
+    [Fact]
+    [Upstream("Switch", "Switch 与 Checkbox")]
+    [Upstream("Radio", "Radio：整组对回父级的值")]
+    public Task Cancelled_toggles_keep_the_old_value() => WpfUi.Run(() =>
+    {
+        var checkbox = new Checkbox { IsChecked = true };
+        checkbox.Toggling += (_, e) => e.Cancel = true;
+        var (a, b) = (new Radio { Value = "a" }, new Radio { Value = "b" });
+        b.Toggling += (_, e) => e.Cancel = true;
+        var group = new RadioGroup { Value = "a", Items = { a, b } };
+        Show(checkbox, group);
+
+        Click(checkbox);
+        Click(b);
+        Assert.True(checkbox.IsChecked);
+        Assert.Equal(("a", true, false), (group.Value, a.IsChecked, b.IsChecked));
+    });
+
+    [Fact]
+    [Upstream("CheckboxGroup", "CheckboxGroup 的 items")]
+    public Task Checkbox_group_items_come_from_options() => WpfUi.Run(() =>
+    {
+        var group = new CheckboxGroup
+        {
+            Value = ["email"],
+            ItemsSource = new[]
+            {
+                new ListboxOption("email", "邮件") { Description = "每天汇总一封" },
+                new ListboxOption("sms", "短信") { IsDisabled = true },
+                new ListboxOption("app", "站内信"),
+            },
+        };
+        Show(group);
+        var items = WpfUi.Descendants(group).OfType<Checkbox>().ToList();
+
+        Assert.Equal(["email", "sms", "app"], items.Select(item => item.Value));
+        Assert.True(items[0].IsChecked);
+        Assert.False(items[1].IsEnabled);
+        Assert.Equal("每天汇总一封", Peer(items[0]).GetHelpText());
+        Click(items[2]);
+        Assert.Equal(["email", "app"], group.Value);
+    });
+
+    [Fact]
+    [Upstream("RadioGroup", "RadioGroup 的 items")]
+    public Task Radio_group_items_come_from_strings_or_mapped_data() => WpfUi.Run(() =>
+    {
+        var plain = new RadioGroup { ItemsSource = new[] { "日", "周", "月" } };
+        var plans = new RadioGroup
+        {
+            ItemsSource = new[] { ("basic", "基础版", "免费"), ("pro", "专业版", "¥99 / 月") },
+            ToOption = item => item is (string id, string name, string price) ? new ListboxOption(id, name) { Description = price } : throw new ArgumentException(null, nameof(item)),
+        };
+        Show(plain, plans);
+
+        Assert.Equal(["日", "周", "月"], WpfUi.Descendants(plain).OfType<Radio>().Select(radio => radio.Content as string));
+        var pro = WpfUi.Descendants(plans).OfType<Radio>().ElementAt(1);
+        Assert.Equal(("pro", "专业版", "¥99 / 月"), (pro.Value, pro.Content as string, pro.Description as string));
+    });
+}

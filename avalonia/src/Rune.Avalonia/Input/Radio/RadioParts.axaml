@@ -1,0 +1,25 @@
+<!--
+  Radio 部件的默认外观（vue-tsx-pro 的 radioStyles 与 choiceInputStyles）：圆是 2px borderStrong 描边、表面底色；
+  选中时描边与底色都是色调的实底（ToneFill），圆点是其上的颜色（ToneOnFill）；出错时描边是危险色（排在选中之后）。
+  写成主题里的样式（DESIGN §7 代码组合的控件），使用方的部件样式盖得过
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|Radio > #PART_Control > Border#PART_Circle">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Surface}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderStrong}" />
+    <!-- borderWidths.sm（资源是 double，Thickness 写字面值） -->
+    <Setter Property="BorderThickness" Value="2" />
+  </Style>
+  <Style Selector="rune|Radio:checked > #PART_Control > Border#PART_Circle">
+    <Setter Property="Background" Value="{Binding $parent[rune:Radio].ToneFill}" />
+    <Setter Property="BorderBrush" Value="{Binding $parent[rune:Radio].ToneFill}" />
+  </Style>
+  <Style Selector="rune|Radio:invalid > #PART_Control > Border#PART_Circle">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Danger}" />
+  </Style>
+  <Style Selector="rune|Radio > #PART_Control > Border#PART_Indicator">
+    <Setter Property="Background" Value="{Binding $parent[rune:Radio].ToneOnFill}" />
+  </Style>
+</Styles>

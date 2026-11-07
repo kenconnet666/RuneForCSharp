@@ -1,6 +1,5 @@
 <!--
-  Switch 的主题样式（vue-tsx-pro 的 choiceRecipe 外层）：默认 accent，整块可点，正文色、行高 normal，字号档位是触发器；
-  不可用时整体变淡，只读时不像能点。
+  Switch 的部件样式（主题样式与外层在 Input/Choice/Choice.xaml）。
   部件的默认外观写在部件样式里（switchStyles 与 choiceInputStyles；使用方同键的样式叠在上面，DESIGN §7），随状态变的用祖先绑定的 DataTrigger：
   关时轨道是 borderStrong、滑块是页面底色加小阴影；开时轨道是色调实底（ToneFill）、滑块是其上的颜色（ToneOnFill）；出错时轨道描边是危险色。
   轨道里的文字 fontSizes.xs、半粗，只显示当前状态那份，所以颜色只看是否打开：开时是实底上的颜色，关时是正文色
@@ -8,28 +7,6 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:rune="clr-namespace:Rune.Wpf">
-  <Style TargetType="rune:Switch">
-    <Setter Property="Tone" Value="accent" />
-    <Setter Property="Cursor" Value="Hand" />
-    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
-    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Normal}" />
-    <Setter Property="HorizontalAlignment" Value="Left" />
-    <Setter Property="VerticalAlignment" Value="Center" />
-    <!-- 焦点环是部件，不用 WPF 的焦点虚线框 -->
-    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-    <Style.Triggers>
-      <Trigger Property="Size" Value="xs"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xs}" /></Trigger>
-      <Trigger Property="Size" Value="sm"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" /></Trigger>
-      <Trigger Property="Size" Value="md"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Md}" /></Trigger>
-      <Trigger Property="Size" Value="lg"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Lg}" /></Trigger>
-      <Trigger Property="Size" Value="xl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xl}" /></Trigger>
-      <Trigger Property="Size" Value="xxl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xxl}" /></Trigger>
-      <Trigger Property="Size" Value="xxxl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xxxl}" /></Trigger>
-      <Trigger Property="IsReadOnly" Value="True"><Setter Property="Cursor" Value="Arrow" /></Trigger>
-      <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" /></Trigger>
-    </Style.Triggers>
-  </Style>
-
   <Style x:Key="{x:Static rune:SwitchParts.Control}" TargetType="Panel" />
 
   <Style x:Key="{x:Static rune:SwitchParts.Track}" TargetType="Border">
@@ -93,7 +70,4 @@
     <Setter Property="TextElement.FontWeight" Value="{DynamicResource Rune.FontWeight.Semibold}" />
   </Style>
 
-  <Style x:Key="{x:Static rune:SwitchParts.Label}" TargetType="ContentPresenter">
-    <Setter Property="VerticalAlignment" Value="Top" />
-  </Style>
 </ResourceDictionary>

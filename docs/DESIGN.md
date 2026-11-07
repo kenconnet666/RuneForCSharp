@@ -190,7 +190,7 @@ WPF 没有这个问题：主题样式（DefaultStyleKey）的触发器整体低�
 ### WinForms：分层解析
 
 - 没有样式系统。外观是一个"字段可空"的记录，按"Sx > 内层作用域 > 外层作用域 > 配方"逐字段取第一个非空值（已实测）。
-- 已做（2026-11-07）：作用域控件 `ProviderControl`（`Config/`）：`Theme`、`Lang`（null 沿用外层，最外层是应用级信号）、`Defaults`、`Styles`（每种组件一个记录，`IScopeRecord<T>.Merge` 逐字段合并）。组件沿 Parent 链取最近一层：元素经 `ElementContext.Scope`（宿主用 `ElementContext.Of(control)` 建环境），控件用 `ProviderControl.ThemeOf / LangOf`。档位的取值是"实例写了的 > 作用域合并的默认值 > 组件默认"；实例写了的单独存，设计器只序列化它们（以前按"不等于组件默认"判断，显式写成默认值会被作用域盖掉）。作用域里任何一项变了，就通知里面的宿主（`IScopeAware`）重新排版、重画；宿主换了父级时也重新解析。已接上的组件：按钮家族（`ButtonDefaults`、`ButtonSx`）、Badge（`BadgeDefaults`、`BadgeSx`）、Link、Indicator、Avatar、Card、Progress、Empty（各自的 `XxxDefaults`，字段与上游 `defaults.Xxx` 对应；Card 的 `Padding` 在控件上叫 `CardPadding`）、Switch（上游勾选类共用的 `ChoiceDefaults`，以后的 Checkbox、Radio 也用它）。取值顺序写在 `Variants.Or` 一处。外观覆盖记录（`XxxSx`：实例的 `Sx` 与作用域的 `Styles`，合并在 `ProviderControl.ResolveStyles(own)` 一处）这些组件都有，字段只收组件实际画的东西：按钮家族、Badge（底色、前景、描边色、圆角，按钮另有内边距）、Link（前景）、Indicator（标记的底色、数字色）、Avatar（底色、前景、圆角）、Card（底色、描边色、圆角）、Progress（轨道色、进度色、圆角）、Empty（标题色）、Switch（开 / 关的轨道色、滑块色）。上游的 sx 是任意 CSS，这里只能是记录里列出的字段；部件内部的细节仍用部件属性（`PropsXxx`）。
+- 已做（2026-11-07）：作用域控件 `ProviderControl`（`Config/`）：`Theme`、`Lang`（null 沿用外层，最外层是应用级信号）、`Defaults`、`Styles`（每种组件一个记录，`IScopeRecord<T>.Merge` 逐字段合并）。组件沿 Parent 链取最近一层：元素经 `ElementContext.Scope`（宿主用 `ElementContext.Of(control)` 建环境），控件用 `ProviderControl.ThemeOf / LangOf`。档位的取值是"实例写了的 > 作用域合并的默认值 > 组件默认"；实例写了的单独存，设计器只序列化它们（以前按"不等于组件默认"判断，显式写成默认值会被作用域盖掉）。作用域里任何一项变了，就通知里面的宿主（`IScopeAware`）重新排版、重画；宿主换了父级时也重新解析。已接上的组件：按钮家族（`ButtonDefaults`、`ButtonSx`）、Badge（`BadgeDefaults`、`BadgeSx`）、Link、Indicator、Avatar、Card、Progress、Empty（各自的 `XxxDefaults`，字段与上游 `defaults.Xxx` 对应；Card 的 `Padding` 在控件上叫 `CardPadding`）、Switch、Checkbox、单选组（上游勾选类共用的 `ChoiceDefaults`）。取值顺序写在 `Variants.Or` 一处。外观覆盖记录（`XxxSx`：实例的 `Sx` 与作用域的 `Styles`，合并在 `ProviderControl.ResolveStyles(own)` 一处）这些组件都有，字段只收组件实际画的东西：按钮家族、Badge（底色、前景、描边色、圆角，按钮另有内边距）、Link（前景）、Indicator（标记的底色、数字色）、Avatar（底色、前景、圆角）、Card（底色、描边色、圆角）、Progress（轨道色、进度色、圆角）、Empty（标题色）、Switch（开 / 关的轨道色、滑块色）、Checkbox、Radio（勾选时的实底、没勾时的描边色、对勾或圆点的颜色）。上游的 sx 是任意 CSS，这里只能是记录里列出的字段；部件内部的细节仍用部件属性（`PropsXxx`）。
 - 没做：解析结果按（档位组合, 作用域）共享 `Computed`（现在每次取值沿 Parent 链合并，作用域变了靠通知而不是信号）；作用域的部件属性（如 `PropsIcon` 的默认值）；上游的 `components.X.variants`；语言包的部分覆盖（上游 `lang` 是 Partial，三个平台都还是整份替换）。
 - 原设想：作用域控件沿 Parent 链查找，作用域里的样式与默认值都是信号。解析结果是 `Computed`，绘制时读取它（第 10 节）。
 - 配方结果**按（档位组合, 作用域）共享一个 `Computed`**，不要每个元素一个：主题 token 的订阅者从"元素数 × token 数"降到"组合数 × token 数"（3000 个元素读 3 个 token：8100 → 18，第 9 节）。
@@ -595,6 +595,17 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   - 部件：`PropsLabel`、`PropsContentText`（`TextProps`）、`PropsSpinner`（`IconProps`）；propsControl、propsThumb、propsContent 是画出来的，没有元素，缺口同 Progress，等部件记录（`Sx`）一起定；propsRoot 不移植（外层就是 Switch）。
   - 读屏：复选按钮（`AccessibleRole.CheckButton`），名称是 AccessibleName 或文字，状态选中 / 未选中（切换时发 StateChange）、切换中带 Busy、只读带 ReadOnly；轨道里的内容不进无障碍树。MSAA 没有“必填”“校验未通过”的状态，`IsRequired`、`IsInvalid` 只影响外观。
   - 文字的行高按字体算（不是 TS 的 1.5em），在 1.5em 的第一行里垂直居中，多行时上下各留一份。
+
+### Checkbox、Radio 与勾选类的共用部分（2026-11-07）
+
+- 三个平台都抽了勾选类的基类 `ChoiceBase`（Switch、Checkbox、Radio 共用，同上游的 choice-styles）：控件部件在起始边、文字与说明一列、第一行 1.5em、整块可点、高度不低于 24px；点击、空格松开切换；可取消的 `Toggling`（参数改名 `ChoiceTogglingEventArgs`，Switch 原来的 `SwitchTogglingEventArgs` 去掉）；只读、出错、色调、字号、说明由派生类按上游的 props 公开（Radio 的来自单选组）。部件：文字 `ChoiceBaseParts.Label`、说明 `ChoiceBaseParts.Description`（muted、0.875em），Switch 原来的 `SwitchParts.Label` 并进来。
+- Checkbox：方框 1.125em、radii.sm、2px borderStrong 描边、表面底色；勾上或部分勾选时描边与底色都是色调的实底，对勾 / 横线 0.875em、描线 3、实底上的颜色；出错时描边是危险色（排在勾选之后）。不勾时标记用透明度 0 隐藏（仍占位，同上游的 visibility: hidden）。读屏是复选框 + Toggle 模式，部分勾选是 Indeterminate（WinForms 是 Mixed）。上游的对勾描线动画（Icon 的 draw）还没做。
+- Radio：圆 1.125em，圆点 0.45em 在 durations.sm 内从 0 放大（加入组时按组的值直接到位，初次显示不播）。读屏是单选按钮 + SelectionItem 模式（组没有实现 Selection 模式）。色调、只读、出错随组；字号：Avalonia 绑组的 Size，WPF 从组继承字号（组的 Size 是触发器），WinForms 取组的 TextSize。
+- 组（CheckboxGroup、RadioGroup）：Avalonia、WPF 是 ItemsControl（直接写的项是自己的容器，`ItemsSource` 生成项；ItemsPanel 是 Flex：竖排 gap xs，横排换行、列距 lg、行距 xs；模板把 Padding 给 ItemsPresenter），WinForms 是 `FlexControl` 派生的 `ChoiceGroupControl`（`ItemsSource` 生成的子控件放在直接放的后面）。选项是 `ListboxOption`（三个库的孪生文件，以后 Select、Listbox 共用），任意数据给 `ToOption`。项沿树往上找最近的组（WPF 在 Loaded 时登记，先可视树后逻辑树），所以项可以套在组里的布局容器中。复选组勾选、取消时换一个新的列表（追加在末尾或去掉）。上游的 `name`（表单字段名）不移植。
+- 单选组的键盘同原生 radio：整组一个 Tab 位置，停在选中项（没有选中时是第一个可用项）；方向键在组内移动并选中，到头从另一端继续，跳过不可用的，从右到左时左右反过来；只读时方向键不动。没有用 `RovingFocus`：Tab 停靠点跟着选中项而不是上次聚焦的项，移动时还要选中。
+- 取值核对：`styles.mjs` 对 checkbox 页（checkbox、items、switch、radio）Avalonia、WPF 都是 0 差异。inspect 把 Checkbox、Radio、Switch 报成上游的 `choice` 部件（方框、圆、轨道是 input，对勾、圆点、滑块是 indicator，组是 choice/group）；比对工具把"透明或与底色同色的描边"与"不画描边"算作一样，原生 input 的前景色不比，方框、圆、滑块比高度。
+- WinForms：元素 `Checkbox`、`Radio` + 宿主 `CheckboxControl`、`RadioControl`（共用的宿主是 `ChoiceControl<T>`）；方框、圆、圆点、焦点环是画的。Radio 的文字只能是字符串（元素不能放任意内容）：示例里单选的价格放在同一行的另一个控件里。每项四周留 4 像素给焦点环，所以组里各项的间距比上游大一些（同 Switch）。读屏没有"必填""校验未通过"的状态。
+- 示例：checkbox、items、radio 里上游包在 Field 里的地方先用标签、说明、错误上下摆放代替（示例文件里的 `Labeled`），Field 做好后换掉；validation 等 Field。
 
 ### Spinner
 

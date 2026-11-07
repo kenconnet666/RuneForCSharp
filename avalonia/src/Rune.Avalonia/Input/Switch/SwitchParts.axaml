@@ -42,16 +42,4 @@
     <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xs}" />
     <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Semibold}" />
   </Style>
-  <!-- 焦点环：键盘聚焦时贴着轨道（focusRingStyles.tight） -->
-  <Style Selector="rune|Switch > #PART_Control > Border#PART_FocusRing">
-    <Setter Property="IsVisible" Value="False" />
-    <Setter Property="BorderThickness" Value="2" />
-    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.FocusRing}" />
-  </Style>
-  <Style Selector="rune|Switch:focus-visible > #PART_Control > Border#PART_FocusRing">
-    <Setter Property="IsVisible" Value="True" />
-  </Style>
-  <Style Selector="rune|Switch > ContentPresenter#PART_Label">
-    <Setter Property="VerticalAlignment" Value="Top" />
-  </Style>
 </Styles>

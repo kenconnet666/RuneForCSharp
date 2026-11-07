@@ -1,0 +1,25 @@
+<!--
+  Checkbox 部件的默认外观（vue-tsx-pro 的 checkboxStyles 与 choiceInputStyles）：方框是 2px borderStrong 描边、表面底色；
+  勾上或部分勾选时描边与底色都是色调的实底（ToneFill），对勾、横线是其上的颜色（ToneOnFill）；出错时描边是危险色（排在勾选之后）。
+  写成主题里的样式（DESIGN §7 代码组合的控件），使用方的部件样式盖得过
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|Checkbox > #PART_Control > Border#PART_Box">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Surface}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderStrong}" />
+    <!-- borderWidths.sm（资源是 double，Thickness 写字面值） -->
+    <Setter Property="BorderThickness" Value="2" />
+  </Style>
+  <Style Selector="rune|Checkbox:checked > #PART_Control > Border#PART_Box, rune|Checkbox:indeterminate > #PART_Control > Border#PART_Box">
+    <Setter Property="Background" Value="{Binding $parent[rune:Checkbox].ToneFill}" />
+    <Setter Property="BorderBrush" Value="{Binding $parent[rune:Checkbox].ToneFill}" />
+  </Style>
+  <Style Selector="rune|Checkbox:invalid > #PART_Control > Border#PART_Box">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Danger}" />
+  </Style>
+  <Style Selector="rune|Checkbox > #PART_Control > rune|Icon#PART_Indicator">
+    <Setter Property="Foreground" Value="{Binding $parent[rune:Checkbox].ToneOnFill}" />
+  </Style>
+</Styles>

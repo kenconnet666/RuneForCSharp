@@ -233,6 +233,16 @@ sealed class StyleReport
         ["ClearButton"] = "button",
         // 上游的勾选类（Switch，以后的 Checkbox、Radio）共用 choice 的部件标记
         ["Switch"] = "choice",
+        ["Checkbox"] = "choice",
+        ["Radio"] = "choice",
+        ["ChoiceBase"] = "choice",
+    };
+
+    /// <summary>组件根在上游是另一个组件的部件：复选组、单选组是 choice 配方的 group。</summary>
+    static readonly Dictionary<string, string> RootAliases = new()
+    {
+        ["CheckboxGroup"] = "choice/group",
+        ["RadioGroup"] = "choice/group",
     };
 
     /// <summary>部件在上游叫别的名字：API 名（propsThumb）与部件标记（data-part="indicator"）不同的。</summary>
@@ -240,6 +250,8 @@ sealed class StyleReport
     {
         [("Switch", "PART_Track")] = "input",
         [("Switch", "PART_Thumb")] = "indicator",
+        [("Checkbox", "PART_Box")] = "input",
+        [("Radio", "PART_Circle")] = "input",
     };
 
     /// <summary>TS 里没有部件标记的组件（css.create 写的）：按渲染出的标签配对，<c>@p#0</c>，同 tools/ts-styles。</summary>
@@ -267,6 +279,7 @@ sealed class StyleReport
     public static string Name(string componentType, string? partName)
     {
         if (partName is null && Tags.TryGetValue(componentType, out var tag)) return tag;
+        if (partName is null && RootAliases.TryGetValue(componentType, out var root)) return root;
         var scope = ScopeAliases.GetValueOrDefault(componentType) ?? Kebab(componentType);
         var part = partName is null ? "root"
             : PartAliases.GetValueOrDefault((componentType, partName)) ?? char.ToLowerInvariant(partName["PART_".Length]) + partName["PART_".Length..][1..];

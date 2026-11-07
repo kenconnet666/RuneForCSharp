@@ -1,0 +1,40 @@
+<!--
+  Radio 的部件样式（主题样式与外层在 Input/Choice/Choice.xaml；vue-tsx-pro 的 radioStyles 与 choiceInputStyles）：
+  圆是 2px borderStrong 描边、表面底色；选中时描边与底色都是色调的实底（ToneFill），圆点是其上的颜色（ToneOnFill）；
+  单选组出错时描边是危险色，排在选中之后。随状态变的用祖先绑定的 DataTrigger（使用方同键的样式叠在上面，DESIGN §7）
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <Style x:Key="{x:Static rune:RadioParts.Control}" TargetType="Panel" />
+
+  <Style x:Key="{x:Static rune:RadioParts.Circle}" TargetType="Border">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Surface}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderStrong}" />
+    <Setter Property="BorderThickness" Value="2" />
+    <Style.Triggers>
+      <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource AncestorType=rune:Radio}}" Value="True">
+        <Setter Property="Background" Value="{Binding ToneFill, RelativeSource={RelativeSource AncestorType=rune:Radio}}" />
+        <Setter Property="BorderBrush" Value="{Binding ToneFill, RelativeSource={RelativeSource AncestorType=rune:Radio}}" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding IsInvalid, RelativeSource={RelativeSource AncestorType=rune:RadioGroup}}" Value="True">
+        <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Danger}" />
+      </DataTrigger>
+    </Style.Triggers>
+  </Style>
+
+  <!-- 焦点环：键盘聚焦时贴着圆（focusRingStyles.tight） -->
+  <Style x:Key="{x:Static rune:RadioParts.FocusRing}" TargetType="Border">
+    <Setter Property="BorderThickness" Value="2" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.FocusRing}" />
+    <Style.Triggers>
+      <DataTrigger Binding="{Binding IsFocusVisible, RelativeSource={RelativeSource AncestorType=rune:Radio}}" Value="True">
+        <Setter Property="Visibility" Value="Visible" />
+      </DataTrigger>
+    </Style.Triggers>
+  </Style>
+
+  <Style x:Key="{x:Static rune:RadioParts.Indicator}" TargetType="Border">
+    <Setter Property="Background" Value="{Binding ToneOnFill, RelativeSource={RelativeSource AncestorType=rune:Radio}}" />
+  </Style>
+</ResourceDictionary>

@@ -1,21 +1,37 @@
 <!--
-  Switch 的主题（vue-tsx-pro 的 choiceRecipe 外层）：默认 accent，整块可点，正文色、行高 normal；不可用时整体变淡，只读时不像能点
+  勾选类控件的主题（vue-tsx-pro 的 choiceRecipe 的 group 与 defaults）：Switch、Checkbox、RadioGroup 的色调默认 accent；
+  复选组、单选组竖排时 gap xs，横排时换行、列距 lg、行距 xs。外层与部件的外观在 ChoiceParts.axaml 与各组件的 *Parts.axaml
 -->
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="Rune.ChoiceGroupTheme" TargetType="rune:ChoiceGroup">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" Margin="{TemplateBinding Padding}" />
+      </ControlTemplate>
+    </Setter>
+    <Setter Property="ItemsPanel">
+      <ItemsPanelTemplate>
+        <rune:Flex Direction="column" Gap="xs" />
+      </ItemsPanelTemplate>
+    </Setter>
+    <Style Selector="^:horizontal">
+      <Setter Property="ItemsPanel">
+        <ItemsPanelTemplate>
+          <rune:Flex Wrap="True" ColumnGap="lg" RowGap="xs" />
+        </ItemsPanelTemplate>
+      </Setter>
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type rune:CheckboxGroup}" TargetType="rune:CheckboxGroup" BasedOn="{StaticResource Rune.ChoiceGroupTheme}" />
+  <ControlTheme x:Key="{x:Type rune:RadioGroup}" TargetType="rune:RadioGroup" BasedOn="{StaticResource Rune.ChoiceGroupTheme}">
+    <Setter Property="Tone" Value="accent" />
+  </ControlTheme>
   <ControlTheme x:Key="{x:Type rune:Switch}" TargetType="rune:Switch">
     <Setter Property="Tone" Value="accent" />
-    <Setter Property="Cursor" Value="Hand" />
-    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
-    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Normal}" />
-    <Setter Property="HorizontalAlignment" Value="Left" />
-    <Setter Property="VerticalAlignment" Value="Center" />
-    <Style Selector="^:readonly">
-      <Setter Property="Cursor" Value="Arrow" />
-    </Style>
-    <Style Selector="^:disabled">
-      <Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" />
-    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type rune:Checkbox}" TargetType="rune:Checkbox">
+    <Setter Property="Tone" Value="accent" />
   </ControlTheme>
 </ResourceDictionary>

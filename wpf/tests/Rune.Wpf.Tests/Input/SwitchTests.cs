@@ -152,7 +152,7 @@ public class SwitchTests
         Assert.True(Part<Border>(wide, SwitchParts.Track).ActualWidth > 2.25 * em);
 
         // 文字：一行 1.5em 高，轨道居中在这一行里
-        Assert.Equal(1.5 * em, Part<ContentPresenter>(labeled, SwitchParts.Label).ActualHeight, tolerance: 0.6);
+        Assert.Equal(1.5 * em, Part<ContentPresenter>(labeled, ChoiceBaseParts.Label).ActualHeight, tolerance: 0.6);
         Assert.Equal(0.125 * em, Part<Border>(labeled, SwitchParts.Track).TranslatePoint(default, labeled).Y, tolerance: 0.6);
 
         plain.IsChecked = true;

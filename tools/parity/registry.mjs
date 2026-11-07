@@ -15,6 +15,7 @@ export const PROP_RENAMES = {
   readonly: 'IsReadOnly',
   required: 'IsRequired',
   invalid: 'IsInvalid',
+  indeterminate: 'IsIndeterminate',
   disabled: 'IsEnabled',
   children: 'Content',
   _value: 'Value',
@@ -31,6 +32,9 @@ export const COMPONENT_PROP_RENAMES = {
   Prose: { measure: 'LimitLineLength' },
   // Name 是控件名；图片给平台的图片对象
   Avatar: { name: 'DisplayName', src: 'Source' },
+  // 平台的 ItemsControl 自己有 Items（直接写的项）；数据给 ItemsSource
+  CheckboxGroup: { items: 'ItemsSource' },
+  RadioGroup: { items: 'ItemsSource' },
 };
 
 /** 某个平台上统一改了名的 prop：WinForms 的控件自己有 Size（大小），字号档位叫 TextSize */
@@ -49,6 +53,8 @@ export const TYPE_RENAMES = {
   WinForms: { List: 'UnorderedList', Container: 'ContainerPanel' },
 };
 
+const FORM_NAME = '表单提交的字段名是浏览器的概念；值经 Value 绑定，单选组的互斥由组自己管';
+
 const BUTTON_TYPE = '表单提交是浏览器的概念；对话框的默认、取消按钮用平台的 IsDefault、IsCancel';
 
 /** 某个组件不移植的 prop 与原因（平台上没有对应的概念）：parity 不报缺 */
@@ -62,6 +68,10 @@ export const PROPS_NOT_PORTED = {
   Skeleton: { variant: '上游已废弃（改名为 shape），新库不带' },
   Progress: { propsRoot: '外层就是 Progress 自己（读屏的进度条也是它）：样式直接写在 Progress 上' },
   Switch: { propsRoot: '外层（TS 的 label）就是 Switch 自己：样式直接写在 Switch 上' },
+  Checkbox: { propsRoot: '外层（TS 的 label）就是 Checkbox 自己：样式直接写在 Checkbox 上' },
+  Radio: { propsRoot: '外层（TS 的 label）就是 Radio 自己：样式直接写在 Radio 上' },
+  CheckboxGroup: { name: FORM_NAME },
+  RadioGroup: { name: FORM_NAME },
 };
 
 /** 某个平台上不移植的 prop 与原因（盖在 PROPS_NOT_PORTED 上）：库 → { 组件: { prop: 原因 } } */
@@ -71,8 +81,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
   },
 };
 
-/** 平台控件自带、不用组件自己声明的属性（基类里已经有） */
-export const PLATFORM_PROPS = new Set(['IsEnabled', 'Content', 'Tag', 'AutomationProperties.Name']);
+/** 平台控件自带、不用组件自己声明的属性（基类里已经有；ItemsSource 是 Avalonia、WPF 的 ItemsControl 的） */
+export const PLATFORM_PROPS = new Set(['IsEnabled', 'Content', 'Tag', 'AutomationProperties.Name', 'ItemsSource']);
 
 /** 桌面上不做的组件与原因（ROADMAP 阶段 3） */
 export const EXCLUDED = {
