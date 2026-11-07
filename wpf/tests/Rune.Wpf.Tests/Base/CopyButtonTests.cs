@@ -21,6 +21,22 @@ public class CopyButtonTests
 
     static Icon Glyph(CopyButton button) => (Icon)button.Template.FindName("PART_Icon", button);
 
+    /// <summary>读系统剪贴板上的文字：别的程序正占着剪贴板时稍等再试（全量测试时偶尔碰到）。</summary>
+    static string ClipboardText()
+    {
+        for (var attempt = 0; ; attempt++)
+        {
+            try
+            {
+                return Clipboard.GetText();
+            }
+            catch (System.Runtime.InteropServices.COMException) when (attempt < 10)
+            {
+                WpfUi.Wait(TimeSpan.FromMilliseconds(50));
+            }
+        }
+    }
+
     /// <summary>测试写真实的系统剪贴板：先记下原来的文字，测完放回去。</summary>
     static void KeepingClipboard(Action body)
     {
@@ -40,7 +56,7 @@ public class CopyButtonTests
     [Upstream("CopyButton", "复制后 data-state=")]
     public Task Copying_shows_a_check_announces_and_resets_after_the_timeout() => WpfUi.Run(() => KeepingClipboard(() =>
     {
-        var button = new CopyButton { Value = "secret", Timeout = TimeSpan.FromMilliseconds(200) };
+        var button = new CopyButton { Value = "secret", Timeout = TimeSpan.FromMilliseconds(800) };
         WpfUi.Show(Host(button));
         CopiedEventArgs? result = null;
         button.Copied += (_, e) => result = e;
@@ -51,7 +67,7 @@ public class CopyButtonTests
         WpfUi.Until(() => result is not null);
 
         Assert.True(result!.Success);
-        Assert.Equal("secret", Clipboard.GetText());
+        Assert.Equal("secret", ClipboardText());
         Assert.True(button.IsCopied);
         Assert.Same(Lucide.Check, Glyph(button).Data);
         Assert.Equal("已复制", button.Peer().GetItemStatus());
@@ -101,6 +117,6 @@ public class CopyButtonTests
         WpfUi.Until(() => copied);
         Assert.False(button.IsLoading);
         Assert.True(button.IsCopied);
-        Assert.Equal("https://example.com/invite/abc", Clipboard.GetText());
+        Assert.Equal("https://example.com/invite/abc", ClipboardText());
     }));
 }

@@ -61,6 +61,7 @@ Chromium（Skia）、Avalonia（Skia）、WPF（DirectWrite）、WinForms（GDI 
 |---|---|---|---|
 | popover | 2 / 4（0.89%） | 4 / 4（0.92%） | 4 / 4（10.73%） |
 | scroll-area | 6 / 6（4.10%） | 6 / 6（3.32%） | 6 / 6（13.90%） |
+| code（CodeBlock 的四节） | 8 / 8（2.13%） | 8 / 8（2.89%） | 8 / 8（14.25%，Switch 那一行的行高） |
 | checkbox | 6 / 10（1.40%） | 8 / 10（1.44%） | 10 / 10（17.82%） |
 | empty | 2 / 2（1.46%） | 2 / 2（1.42%） | 2 / 2（10.77%） |
 | icon-button | 4 / 4（1.95%） | 4 / 4（1.99%） | 4 / 4（16.41%） |
@@ -127,7 +128,7 @@ CodeBlock 的语法高亮先做一个够用的版本（C#、XAML 两种语言）
 ## 三、先后顺序（用户 2026-11-07 定：对照基础之后先做文档站要用的组件）
 
 1. [x] **对照基础**：画布与缩放对齐、`ts-shots`、`pixels.mjs` 与报告、登记表；已做的页面跑出差异总表（见下面"差异基线"）。
-2. [ ] **文档站要用的组件**：~~Tooltip~~、~~CopyButton~~、~~ScrollArea~~（2026-11-07 做了）、CodeBlock（简单高亮）、Tabs、Table、Select / SegmentedControl、NavList、Toc、AppShell、CommandPalette。
+2. [ ] **文档站要用的组件**：~~Tooltip~~、~~CopyButton~~、~~ScrollArea~~、~~CodeBlock~~（2026-11-07 做了，内置简单高亮）、Tabs、Table、Select / SegmentedControl、NavList、Toc、AppShell、CommandPalette。
    每个组件照常过取值、行为、像素三道核对。
 3. [ ] **文档应用**：每个平台一个，替换 Gallery；同时做内容抽取（`docs-gen` 产出页面与示例清单、示例注册改两级、覆盖率），API 表从 XML 文档注释生成。
 4. [ ] **补齐组件与示例**：按上游的层级把 136 页做齐，每页过三道核对。

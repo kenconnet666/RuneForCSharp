@@ -1,0 +1,77 @@
+<!--
+  CodeBlock 部件的默认外观（vue-tsx-pro 的 codeBlockStyles；DESIGN §7 代码组合的控件）：
+  外层 borderMuted 边框、md 圆角、surface 底色（flush 时去掉）；标题栏 surfaceMuted、textMuted、等宽 0.85em，下边一道 borderMuted；
+  pre 等宽 0.9em、行高 normal、上下 0.75em 左右 1em（按行显示时左右的内边距给每一行，底色铺满整行）；有复制按钮没有标题时右边让出按钮的位置；
+  强调的行 fill、新增 codeInserted、删除 codeDeleted；行号 codeComment、至少两个数字宽、与代码隔 1em；展开按钮 surfaceMuted、sm 字号，上边一道分隔线。
+  字号的倍数（0.9、0.85）与 em 尺寸（内边距、圆角、行高、行号宽度）在 CodeBlock.cs 里按各层的字号算：Border 没有字号属性，这里写不上 em。
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|CodeBlock Border#PART_Root">
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Surface}" />
+  </Style>
+  <Style Selector="rune|CodeBlock Border#PART_Root.flush">
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="0" />
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+
+  <Style Selector="rune|CodeBlock Border#PART_Header">
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.SurfaceMuted}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+    <Setter Property="TextElement.FontFamily" Value="{DynamicResource Rune.Font.Mono}" />
+  </Style>
+  <Style Selector="rune|CodeBlock ContentPresenter#PART_Title">
+    <Setter Property="TextBlock.TextTrimming" Value="CharacterEllipsis" />
+  </Style>
+
+  <Style Selector="rune|CodeBlock Border#PART_Pre">
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="TextElement.FontFamily" Value="{DynamicResource Rune.Font.Mono}" />
+    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Normal}" />
+  </Style>
+
+  <Style Selector="rune|CodeBlock DockPanel#PART_Line">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="rune|CodeBlock DockPanel#PART_Line.highlighted">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Fill}" />
+  </Style>
+  <Style Selector="rune|CodeBlock DockPanel#PART_Line.added">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.CodeInserted}" />
+  </Style>
+  <Style Selector="rune|CodeBlock DockPanel#PART_Line.removed">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.CodeDeleted}" />
+  </Style>
+  <Style Selector="rune|CodeBlock TextBlock#PART_LineNumber">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.CodeComment}" />
+  </Style>
+
+  <!-- 复制按钮：右上角，不透明的底色（长行从按钮下面经过时字不和图标叠在一起） -->
+  <Style Selector="rune|CodeBlock Panel#PART_Body > rune|CopyButton#PART_Copy">
+    <Setter Property="HorizontalAlignment" Value="Right" />
+    <Setter Property="VerticalAlignment" Value="Top" />
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Surface}" />
+  </Style>
+  <Style Selector="rune|CodeBlock Panel#PART_Body > rune|CopyButton#PART_Copy:pointerover">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Fill}" />
+  </Style>
+
+  <Style Selector="rune|CodeBlock rune|ButtonBase#PART_Expand">
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="MinHeight" Value="{rune:ControlHeight}" />
+    <Setter Property="BorderThickness" Value="0,1,0,0" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.SurfaceMuted}" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+    <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
+  </Style>
+  <Style Selector="rune|CodeBlock rune|ButtonBase#PART_Expand:pointerover">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Fill}" />
+  </Style>
+</Styles>

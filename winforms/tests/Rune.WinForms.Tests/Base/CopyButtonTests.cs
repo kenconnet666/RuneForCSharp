@@ -34,7 +34,7 @@ public class CopyButtonTests
     [Upstream("CopyButton", "复制后 data-state=")]
     public Task Copying_shows_a_check_and_resets_after_the_timeout() => WinFormsUi.Run(() => KeepingClipboard(() =>
     {
-        var button = new CopyButtonControl { Value = "secret", Timeout = TimeSpan.FromMilliseconds(200) };
+        var button = new CopyButtonControl { Value = "secret", Timeout = TimeSpan.FromMilliseconds(800) };
         using var form = WinFormsUi.Show(button);
         CopiedEventArgs? result = null;
         button.Copied += (_, e) => result = e;

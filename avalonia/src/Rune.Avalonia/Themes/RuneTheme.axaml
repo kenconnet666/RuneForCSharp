@@ -37,6 +37,7 @@
   <StyleInclude Source="avares://Rune.Avalonia/Base/Indicator/IndicatorParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Layout/Separator/SeparatorParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Display/Card/CardParts.axaml" />
+  <StyleInclude Source="avares://Rune.Avalonia/Base/CodeBlock/CodeBlockParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Display/Avatar/AvatarParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Feedback/Empty/EmptyParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Feedback/Progress/ProgressParts.axaml" />

@@ -38,6 +38,8 @@ export const COMPONENT_PROP_RENAMES = {
   RadioGroup: { items: 'ItemsSource' },
   // 平台控件自己有 Focusable（能不能聚焦）：内容超出时才可聚焦的开关另起名
   ScrollArea: { focusable: 'IsViewportFocusable' },
+  // 代码的语言：lang 是缩写，C# 写全
+  CodeBlock: { lang: 'Language' },
   // Avalonia、WPF 沿用平台的提示（ToolTip.Tip、ToolTipService），组件库只补位置、距离、箭头
   Tooltip: {
     children: 'ToolTip.Tip',
@@ -56,6 +58,8 @@ export const PLATFORM_PROP_RENAMES = {
 /** 某个平台上某个组件改了名的 prop（盖过 PLATFORM_PROP_RENAMES）：WinForms 的控件自己有 Size、Padding */
 export const PLATFORM_COMPONENT_PROP_RENAMES = {
   WPF: {
+    // FrameworkElement 自己有 Language（界面文字的语言）
+    CodeBlock: { lang: 'CodeLanguage' },
     // 平台的提示：FrameworkElement.ToolTip 与 ToolTipService
     Tooltip: {
       children: 'ToolTip',
@@ -123,6 +127,10 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     ScrollArea: { propsViewport: '视口就是 ScrollArea 自己：读屏名称、焦点都在它身上；滚动呈现器没有部件样式' },
   },
   WinForms: {
+    CodeBlock: Object.fromEntries(
+      ['propsCode', 'propsRoot', 'propsHeader', 'propsTitle', 'propsBody', 'propsLine', 'propsLineNumber', 'propsCopy', 'propsScroll', 'propsExpand', 'propsExpandIcon']
+        .map((prop) => [prop, '外层、标题栏、代码与行号、展开按钮都是 CodeBlockControl 自己画的，没有可改的部件']),
+    ),
     ScrollArea: {
       propsViewport: '视口就是 ScrollAreaControl 自己：读屏名称、焦点都在它身上',
       propsScrollbar: '滚动条是组件库画的滑块子控件，没有可改的部件属性',
@@ -168,6 +176,9 @@ export const EXCLUDED = {
 export const PLATFORM_BEHAVIOR_NOT_APPLICABLE = {
   WinForms: {
     ScrollArea: { '内容层、滚动条、滑块都能加属性': '滚动条是组件库画的滑块子控件，没有部件属性可加（PLATFORM_PROPS_NOT_PORTED）' },
+    CodeBlock: {
+      '部件属性': '代码块是 CodeBlockControl 自己画的，没有部件属性可加（PLATFORM_PROPS_NOT_PORTED）',
+    },
   },
 };
 

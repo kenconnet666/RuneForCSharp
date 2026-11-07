@@ -628,6 +628,23 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 测试的等待：Avalonia `HeadlessUi.Until` / `Pump`，WPF `WpfUi.Until`（三处测试都要等异步结果，收进了测试的基础设施）。
 - 示例：上游的 CopyButton 在 icon-button 页的 states（还要 Tooltip、focusableWhenDisabled）与 presets（还要 TextField）里，这两个示例等这些组件做好再补。
 
+### CodeBlock（2026-11-07）
+
+- 标题栏（surfaceMuted、等宽 0.85em、下边分隔线）、代码区（等宽 0.9em、行高 normal、上下 0.75em 左右 1em，ScrollArea 横向滚动，Wrap 时换行）、
+  右上角的复制按钮（有标题时进标题栏）、按行显示（行号 codeComment、强调 fill、新增 codeInserted、删除 codeDeleted，底色铺满整行）、
+  超过 MaxLines 折叠（展开按钮 surfaceMuted、sm 字号、箭头展开后翻转）、Flush 去掉外框。代码总是从左到右；关掉字体连字（Cascadia Code 把 => 画成 ⇒）。
+- 高亮器：`CodeHighlighter` 委托（代码、语言 → 高亮段），默认 `CodeHighlighting.Builtin`：按正则扫描 TS / JS、C#、XML / XAML / HTML、JSON、CSS、SQL、bash，
+  种类到颜色的映射照上游的 Shiki 主题（标点用注释色）。`CodeHighlighting`（分行、行号写法 `ParseLines`、内置高亮器）是孪生文件。异步：先纯文本，
+  同一批属性变化合并成一次（投递到界面线程之后再取），慢结果不覆盖新结果，失败时保留纯文本。
+- **Avalonia**：代码组合控件（同 Card），部件是子元素（`CodeBlockParts` 名字），颜色在 CodeBlockParts.axaml；em 尺寸在代码里按各层的字号算——Border 没有字号属性，
+  主题里的 `{rune:Em}` 在它上面不起作用（踩过：内边距、行高全是 0）。代码用 SelectableTextBlock（可选中）。
+- **WPF**：同样组合，部件样式键（`CodeBlockParts`）；FrameworkElement 自己有 Language（界面文字的语言），代码的语言叫 `CodeLanguage`。部件样式 BasedOn 别的组件的
+  主题样式时要把那个字典合并进来（StaticResource 只认本字典与合并进来的）。行号的读屏节点自己说不是控件、不是内容（WPF 没有 AccessibilityView）。
+  踩过：`Grid` 在 Rune.Wpf 里是组件库的流式网格，平台的要写全名。
+- **WinForms**：`CodeBlockControl` 自己画外框与标题栏，代码区是画出来的 `CodeView`（逐段着色的 GDI 文字），放进 ScrollAreaControl；复制按钮是 CopyButtonControl。
+  GDI 关不掉 OpenType 特性：装了 Cascadia Mono（同一套字形、不带连字）时换成它。标题栏至少放得下复制按钮。代码不能选中（复制按钮复制全部），没有部件属性。
+- 示例：Code 页的 block、options、flush、diff；group、preview 要等 Tabs 与示例卡片（docs-kit）。
+
 ### ScrollArea（2026-11-07）
 
 - 浮层滚动条：滚动仍是平台的，滚动条浮在内容上方、出现消失不占位。粗 0.5em + 两侧各 2 像素，滑块 textMuted 半透明（悬停、拖动 75%），至少 20 像素长；
