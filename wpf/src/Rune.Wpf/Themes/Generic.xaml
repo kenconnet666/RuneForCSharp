@@ -22,6 +22,7 @@
     <ResourceDictionary Source="/Rune.Wpf;component/Navigation/Toolbar/Toolbar.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Feedback/Skeleton/Skeleton.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Display/Card/Card.xaml" />
+    <ResourceDictionary Source="/Rune.Wpf;component/Display/Collapse/Collapse.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Display/Avatar/Avatar.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Feedback/Empty/Empty.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Base/Code/Code.xaml" />

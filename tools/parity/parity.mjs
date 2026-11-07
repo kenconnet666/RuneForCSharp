@@ -10,7 +10,7 @@ import { langMembers } from '../lib/lang.mjs';
 import { code, table } from '../lib/markdown.mjs';
 import { openVue, repoRoot } from '../lib/vue.mjs';
 import { component as inspectComponent } from '../ts-inspect/component.mjs';
-import { COMPONENT_PROP_RENAMES, EXCLUDED, PLATFORM_PROPS, PROP_RENAMES, PLATFORM_COMPONENT_PROP_RENAMES, PLATFORM_PROP_RENAMES, PROPS_NOT_PORTED, TYPE_RENAMES } from './registry.mjs';
+import { COMPONENT_PROP_RENAMES, EXCLUDED, PLATFORM_PROPS, PROP_RENAMES, PLATFORM_COMPONENT_PROP_RENAMES, PLATFORM_PROP_RENAMES, PLATFORM_PROPS_NOT_PORTED, PROPS_NOT_PORTED, TYPE_RENAMES } from './registry.mjs';
 
 const LIBRARIES = [
   { name: 'Avalonia', dir: 'avalonia/src/Rune.Avalonia' },
@@ -86,7 +86,7 @@ function csharpTypes(dir) {
 function compareProps(vue, name, members, parts, library) {
   const data = inspectComponent(vue, name).data;
   const expected = [...data.props, ...data.parts]
-    .filter((prop) => !PROPS_NOT_PORTED[name]?.[prop.name])
+    .filter((prop) => !PROPS_NOT_PORTED[name]?.[prop.name] && !PLATFORM_PROPS_NOT_PORTED[library]?.[name]?.[prop.name])
     .map((prop) => ({ prop: prop.name, cs: csName(name, prop.name), alias: PLATFORM_COMPONENT_PROP_RENAMES[library]?.[name]?.[prop.name] ?? PLATFORM_PROP_RENAMES[library]?.[prop.name] }));
   const isPart = (cs) => cs.startsWith('Props') && parts?.has(cs.slice('Props'.length));
   const missing = expected.filter(({ cs, alias }) => !members.has(cs) && !members.has(alias) && !PLATFORM_PROPS.has(cs) && !isPart(cs));

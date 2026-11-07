@@ -60,6 +60,13 @@ export const PROPS_NOT_PORTED = {
   Skeleton: { variant: '上游已废弃（改名为 shape），新库不带' },
 };
 
+/** 某个平台上不移植的 prop 与原因（盖在 PROPS_NOT_PORTED 上）：库 → { 组件: { prop: 原因 } } */
+export const PLATFORM_PROPS_NOT_PORTED = {
+  WinForms: {
+    Collapse: { lazy: '收起时子控件隐藏：隐藏的控件不建句柄、不参与布局，本来就是第一次展开才真正创建' },
+  },
+};
+
 /** 平台控件自带、不用组件自己声明的属性（基类里已经有） */
 export const PLATFORM_PROPS = new Set(['IsEnabled', 'Content', 'Tag', 'AutomationProperties.Name']);
 
@@ -80,4 +87,5 @@ export const BEHAVIOR_NOT_APPLICABLE = {
   Flex: { createFlex: '桌面没有语义标签：别的语义容器从 Flex 派生、改读屏角色（FlexList、FlexOrderedList 就是这样，测试覆盖）' },
   Container: { createContainer: '桌面没有语义标签：要别的语义时从 Container 派生' },
   Grid: { createGrid: '桌面没有语义标签：别的语义容器从 Grid 派生、改读屏角色（GridList 就是这样，测试覆盖）' },
+  Collapse: { '页内搜索命中': '页内搜索命中收起的内容时展开（hidden="until-found"、beforematch）是浏览器的能力，桌面没有页内搜索' },
 };

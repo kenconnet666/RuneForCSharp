@@ -1,0 +1,6 @@
+<!-- 部件样式键总要有一个样式（同 SpinnerParts.Icon），使用方同键的样式叠在上面 -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <Style x:Key="{x:Static rune:CollapseParts.Content}" TargetType="Border" />
+</ResourceDictionary>
