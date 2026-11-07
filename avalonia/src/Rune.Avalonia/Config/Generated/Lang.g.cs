@@ -11,7 +11,7 @@ namespace Rune.Avalonia;
 /// 没有移植的键：
 /// <c>errorCodes</c>（接口错误码的文案：桌面库不内置请求客户端（ROADMAP"平台化的约定"），应用自己的请求层按需要定义）；
 /// <c>formIssues</c>（zod 的校验文案：三个库的校验走 INotifyDataErrorInfo / DataAnnotations，用它们自己的文案）；
-/// <c>messages</c>（页面级组件（主题编辑器、文档站组件）自带的文案表：做到这些组件时再定）；
+/// <c>messages</c>（Lang 里覆盖页面级文案表的入口（createUi 的 lang.messages）：文案表本身另外生成（PatternsMessages.g.cs），改文案用 record 的 with）；
 /// </summary>
 public sealed partial record Lang
 {
