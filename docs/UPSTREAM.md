@@ -11,6 +11,7 @@ vue-tsx-pro 那边的会话改了设计时会发通知过来（每完成一个�
 | 日期 | 组件 | 现象与复现 | 建议 | 状态 |
 |---|---|---|---|---|
 | 2026-11-07 | Checkbox、Radio、Switch | 原生 input 不继承字体，方框、轨道的 em 按浏览器给 input 的 13.333px 算，sm、lg 档与文字、滑块对不上 | input 加 `font: 'inherit'` | 已修（9f7be887，0.11.1；锁定跟到 875797ae） |
+| 2026-11-07 | Listbox | multiple 示例写的 `height: 16rem` 落在有 padding: xs 的根元素上，默认 content-box，列表实际高 16rem + 0.5em；桌面上 Height 是整个控件，对照矮 7 像素 | listboxStyles.root 加 `boxSizing: 'border-box'`（同 control、itemStyles），或示例注明不含内边距 | 已通知（等回复） |
 
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 

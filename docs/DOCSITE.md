@@ -82,6 +82,8 @@ Chromium（Skia）、Avalonia（Skia）、WPF（DirectWrite）、WinForms（GDI 
 | text | 14 / 14（20.49%） | 13 / 14（19.74%） | 14 / 14（10.10%） |
 | badge | 4 / 4（41.84%） | 4 / 4（48.30%） | 4 / 4（24.75%） |
 
+listbox 页（remote 等远程选项）：single Avalonia 0.08%、WPF 0.07%、WinForms 1.40%；multiple 2.6% / 3.0% / 3.2%（上游示例的高度是 content-box，见 DESIGN §14 Listbox）。
+
 app-shell 页只做了 fullscreen（整页示例，效果区是 756×448 的 iframe，窄布局）：Avalonia 0.04%、WPF 0.04%、WinForms 1.24%（GDI 的文字：品牌名、H1 的行高把卡片往下推了 2 像素）。
 上游的整页示例在 iframe 里：ts-shots 进到 iframe 的文档收文字盒子；我们的示例写 `Framed: true`，inspect 不加画布的内边距与最小高度。
 

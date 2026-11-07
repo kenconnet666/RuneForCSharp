@@ -1,0 +1,25 @@
+<!--
+  Listbox 的主题（vue-tsx-pro 的 listboxStyles、itemStyles）：选项一行（控件高度、上下 space.xs、左右 space.sm、sm 圆角、图标与文字隔 space.sm）、
+  文字 text、行高 normal；高亮（键盘或指针所在）fillHover 底；已选 accentText；不可用半透明、不跟指针。说明 sm、textMuted；已选标记在行尾。
+  分组标题 sm、textMuted、medium，上 space.sm、下 space.xs、左右 space.sm。尺寸按 em 在 Listbox.cs 里算。
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:Listbox}" TargetType="rune:Listbox">
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="FocusAdorner" Value="{x:Null}" />
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type rune:ListboxItem}" TargetType="rune:ListboxItem">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Style Selector="^:active"><Setter Property="Background" Value="{DynamicResource Rune.Brush.FillHover}" /></Style>
+    <Style Selector="^:selected"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.AccentText}" /></Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" />
+      <Setter Property="Cursor" Value="No" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

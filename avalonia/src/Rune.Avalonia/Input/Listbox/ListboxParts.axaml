@@ -1,0 +1,26 @@
+<!--
+  Listbox 部件的默认外观：分组标题 sm、textMuted、medium，上 space.sm、下 space.xs、左右 space.sm（TS 的 groupLabel）；
+  有焦点时整个列表一圈焦点环由滚动区域画（键盘聚焦时）。
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <!-- 行的容器只要一个 ItemsPresenter（不依赖平台主题给 ItemsControl 的模板） -->
+  <Style Selector="rune|Listbox ItemsControl#PART_Rows">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="rune|Listbox TextBlock#PART_GroupLabel">
+    <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
+    <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+    <Setter Property="LineHeight" Value="{rune:Em Resource=Rune.LineHeight.Normal}" />
+    <Setter Property="Margin" Value="{rune:Em 0.5, 0.5, 0.5, 0.25}" />
+  </Style>
+  <Style Selector="rune|Listbox rune|ListboxItem rune|Icon#PART_Check">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.AccentText}" />
+  </Style>
+</Styles>

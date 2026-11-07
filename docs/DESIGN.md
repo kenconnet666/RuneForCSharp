@@ -766,6 +766,29 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
     抽屉的遮罩画在打开时外壳的截图上；各格自己排、自己画，没有部件属性（PLATFORM_PROPS_NOT_PORTED）。
 - 示例：fullscreen（整页示例：`Example.Framed`，inspect 不留内边距，同上游的 iframe）；window 是桌面特有的，在新窗口打开外壳。admin 要等 Stat，mixed 要等 NavBar。
 
+### Listbox 与列表状态（2026-11-07）
+
+- 数据层是孪生文件 `ListState`（TS 的 list-state）：选项按分组排好（没有分组的在前，组按第一次出现的顺序）、高亮项、已选项（`Selection.Toggle`）、
+  移动跳过不可用项、到头停住、Page Up / Down 一页 10 项、类型搜索（`Typeahead`：连续输入拼成一个词，500 毫秒后重来，反复按同一个字母轮换；
+  时间由调用方给，不依赖平台的计时器）。平台的按键先换成 `ListKey`，`ListState.Handle` 处理。`ListboxOption` 加了 Icon 与 Group。
+  Select、Combobox 以后用同一个状态，焦点在触发按钮或搜索框上，把按键转给列表。
+- Listbox：ItemsSource（ListboxOption、字符串，或任意数据加 ToOption）、SelectionMode、Value / Values（同 ToggleGroup）、IsRequired（跟着 Field）、
+  IsLoading（防闪烁的骨架行）、Empty、Picked（点击、Enter、空格，再选已选项也发）。选项一行照 itemStyles：控件高度、上下 space.xs、左右 space.sm、
+  sm 圆角，高亮 fillHover，已选 accentText 加行尾的勾，不可用半透明；组名 sm、textMuted、medium。没写高度时最高 20em。
+  读屏：列表（能否多选、是否必选）+ 列表项（选中、不可用、组名作说明）；桌面没有 aria-activedescendant，高亮项是 WinForms 子节点的 Focused 状态，
+  Avalonia、WPF 的选项不可聚焦（焦点留在列表上）。
+- **Avalonia**：代码组合的 Control：ScrollArea 里一个 ItemsControl（VirtualizingStackPanel），数据模板按行的种类建组名或 `ListboxItem`，回收复用时按
+  DataContext 重画。踩过：测试只加载 RuneTheme，平台的 ItemsControl 没有模板（ListboxParts.axaml 给它一个只有 ItemsPresenter 的模板）；
+  `TextBlock.LineHeight` 不往下继承（选项文字的行高在代码里设）；`:disabled` 由平台按 IsEnabled 管，不可用的选项设 IsEnabled = false；
+  初始化器里 ItemsSource 可能先于 ToOption 设，进了逻辑树才建选项。
+- **WPF**：虚拟化要求 ScrollViewer 在 ItemsControl 自己的模板里：行的容器（`ListboxParts.Rows` 的样式）模板是 ScrollArea（CanContentScroll）
+  包 ItemsPresenter；容器是 Decorator，按行的种类放组名（Text，行高系数只对 Text 生效）或 ListboxItem。合成的鼠标事件拿不到位置：选项按"按下过、
+  再松开"判断点击。
+- **WinForms**：`ListboxControl` 自己画行（`ListboxView` 放在 ScrollAreaControl 里，只画与剪切区相交的行，用 Text、Icon 元素），没有子控件；
+  量好每行的高度（有说明的行更高）。不可用的文字、图标混进底色。没有自定义选项内容与部件属性（PLATFORM_PROPS_NOT_PORTED）。
+- 示例：multiple、single。上游 multiple 示例的 `height: 16rem` 落在 content-box 上（列表实际高 16rem 加上下 space.xs），桌面上 Height 是整个控件，
+  所以矮 7 像素（Avalonia 2.6%，WPF 3.0%）；remote 要等远程选项（load）。
+
 ### CodeBlock（2026-11-07）
 
 - 标题栏（surfaceMuted、等宽 0.85em、下边分隔线）、代码区（等宽 0.9em、行高 normal、上下 0.75em 左右 1em，ScrollArea 横向滚动，Wrap 时换行）、

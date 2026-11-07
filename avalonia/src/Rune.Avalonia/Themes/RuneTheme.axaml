@@ -30,6 +30,7 @@
         <ResourceInclude Source="avares://Rune.Avalonia/Navigation/TableOfContents/TableOfContents.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Input/ToggleGroup/ToggleGroup.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Input/TextField/TextField.axaml" />
+        <ResourceInclude Source="avares://Rune.Avalonia/Input/Listbox/Listbox.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Table/Table.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Display/Card/Card.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Display/Avatar/Avatar.axaml" />
@@ -56,4 +57,5 @@
   <StyleInclude Source="avares://Rune.Avalonia/Navigation/NavList/NavListParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Navigation/TableOfContents/TableOfContentsParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Patterns/AppShell/AppShellParts.axaml" />
+  <StyleInclude Source="avares://Rune.Avalonia/Input/Listbox/ListboxParts.axaml" />
 </Styles>

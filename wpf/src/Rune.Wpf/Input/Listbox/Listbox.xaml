@@ -1,0 +1,55 @@
+<!--
+  Listbox 的主题样式（vue-tsx-pro 的 listboxStyles、itemStyles）：选项一行（控件高度、上下 space.xs、左右 space.sm、sm 圆角、图标与文字隔 space.sm）、
+  文字 text、行高 normal；高亮（键盘或指针所在）fillHover 底；已选 accentText；不可用半透明、不跟指针。说明 sm、textMuted；已选标记在行尾，accentText。
+  分组标题 sm、textMuted、medium，上 space.sm、下 space.xs、左右 space.sm。行的容器是虚拟滚动的 ItemsControl，滚动条是浮层的（ScrollArea）。
+  尺寸按 em 在 Listbox.cs 里算。
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Rune.Wpf;component/Base/Icon/Icon.xaml" />
+    <ResourceDictionary Source="/Rune.Wpf;component/Base/Text/Text.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <Style TargetType="rune:ListboxItem">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Style.Triggers>
+      <Trigger Property="IsActive" Value="True"><Setter Property="Background" Value="{DynamicResource Rune.Brush.FillHover}" /></Trigger>
+      <Trigger Property="IsSelected" Value="True"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.AccentText}" /></Trigger>
+      <Trigger Property="IsEnabled" Value="False">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" />
+      </Trigger>
+    </Style.Triggers>
+  </Style>
+
+  <Style x:Key="{x:Static rune:ListboxParts.Rows}" TargetType="ItemsControl">
+    <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True" />
+    <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling" />
+    <Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel" />
+    <Setter Property="ScrollViewer.CanContentScroll" Value="True" />
+    <Setter Property="ItemsPanel">
+      <Setter.Value>
+        <ItemsPanelTemplate><VirtualizingStackPanel /></ItemsPanelTemplate>
+      </Setter.Value>
+    </Setter>
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ItemsControl">
+          <rune:ScrollArea CanContentScroll="True" Focusable="False" IsViewportFocusable="False">
+            <ItemsPresenter Margin="{TemplateBinding Padding}" />
+          </rune:ScrollArea>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style x:Key="{x:Static rune:ListboxParts.Skeleton}" TargetType="StackPanel" />
+  <Style x:Key="{x:Static rune:ListboxParts.GroupLabel}" TargetType="rune:Text" BasedOn="{StaticResource {x:Type rune:Text}}">
+    <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
+  </Style>
+  <Style x:Key="{x:Static rune:ListboxParts.Check}" TargetType="rune:Icon" BasedOn="{StaticResource {x:Type rune:Icon}}">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.AccentText}" />
+  </Style>
+</ResourceDictionary>

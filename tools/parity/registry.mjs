@@ -32,6 +32,8 @@ export const COMPONENT_PROP_RENAMES = {
   Icon: { icon: 'Data' },
   // 多行文本框的值是平台 TextBox 的 Text（TextField 有 format，值另是 Value：有格式时是去掉分隔的原文）
   Textarea: { _value: 'Text' },
+  // 数据是平台的 ItemsSource；点选是事件
+  Listbox: { items: 'ItemsSource', onPick: 'Picked' },
   // Text 是 TextBlock 自己的属性
   CodeText: { text: 'Source' },
   // Measure 是布局的方法
@@ -107,6 +109,11 @@ const BUTTON_TYPE = '表单提交是浏览器的概念；对话框的默认、�
 
 /** 某个组件不移植的 prop 与原因（平台上没有对应的概念）：parity 不报缺 */
 export const PROPS_NOT_PORTED = {
+  Listbox: {
+    id: '桌面没有元素 id：选项与列表的关系由读屏树的父子关系表达（TS 用 id 拼 aria-activedescendant）',
+    scroller: '列表总是自己滚动：Select 弹出层里的列表同样带自己的滚动区域',
+    estimateSize: '虚拟化按实际的行高排（Avalonia、WPF 的虚拟化面板；WinForms 量出每行的高度），不用估计值',
+  },
   AppShell: {
     skipLink: '跳到正文的链接是网页的（SkipLink 不做）：桌面上 Tab 顺序就从外壳开始',
     pageScrollbar: '整页的浮层滚动条是网页的：桌面上正文那一列本身是 ScrollArea（AppShell.MainScroll）',
@@ -161,6 +168,10 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     },
     Collapse: { lazy: '收起时子控件隐藏：隐藏的控件不建句柄、不参与布局，本来就是第一次展开才真正创建' },
     Tooltip: { propsArrow: '提示窗口整张是组件库画的位图，箭头没有可改样式的部件' },
+    Listbox: Object.fromEntries(
+      ['empty', 'propsOption', 'propsGroupLabel', 'propsCheck', 'propsEmpty', 'propsSkeleton']
+        .map((prop) => [prop, '选项、组名、已选标记是 ListboxControl 画出来的，空状态与骨架是固定的子控件，没有部件属性与自定义内容']),
+    ),
     TextField: Object.fromEntries(
       ['propsRoot', 'propsIcon', 'propsIconEnd', 'propsPrefix', 'propsSuffix', 'propsCount', 'propsClear', 'propsReveal']
         .map((prop) => [prop, '外壳是 TextInputControl 自己画的，里面的图标、前后缀、按钮、字数是子控件，没有部件属性：外观跟主题，按钮走 ProviderControl 的组件定制']),
