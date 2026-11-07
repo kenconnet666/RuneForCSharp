@@ -132,7 +132,6 @@ static class CheckboxExamples
             {
                 Value = value,
                 Content = new Flex { Justify = FlexJustify.Between, Gap = Space.Lg, Children = { text, new Small { Text = price } } },
-                HorizontalAlignment = HorizontalAlignment.Stretch,
             });
             AutomationProperties.SetName((Radio)shipping.Items[^1]!, title);
         }

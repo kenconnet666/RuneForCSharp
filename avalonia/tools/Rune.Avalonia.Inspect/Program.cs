@@ -87,7 +87,7 @@ static class Inspector
 
     static Window Show(Control content, InspectOptions options)
     {
-        var root = new Border { Padding = new Thickness(24), Child = content };
+        var root = new Border { Padding = new Thickness(options.Padding), Child = content };
         root.Bind(Border.BackgroundProperty, root.GetResourceObservable("Rune.Brush.Background"));
         root.Bind(TextElement.ForegroundProperty, root.GetResourceObservable("Rune.Brush.Text"));
         root.Bind(TextElement.FontSizeProperty, root.GetResourceObservable("Rune.FontSize.Md"));
@@ -103,11 +103,24 @@ static class Inspector
 
     static string Snapshot(Window window, InspectOptions options)
     {
+        if (options.Exact) Unrounded(window);
         var path = Report.SnapshotPath("avalonia", options);
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         using var frame = window.CaptureRenderedFrame() ?? throw new InvalidOperationException("headless 窗口没有渲染出帧");
         frame.Save(path, PngBitmapEncoderOptions.Default);
         return $"{path}（{frame.PixelSize.Width}×{frame.PixelSize.Height}）{Environment.NewLine}";
+    }
+
+    /// <summary>不按像素取整布局：浏览器里的尺寸是小数（3.5px 的内边距、39.375 高的一项），取整后差出 1px 多、往下越排越偏，比不出真正的差别。</summary>
+    static void Unrounded(Control root)
+    {
+        foreach (var layoutable in root.GetSelfAndVisualDescendants().OfType<Layoutable>())
+        {
+            layoutable.UseLayoutRounding = false;
+            layoutable.InvalidateMeasure();
+        }
+        root.UpdateLayout();
+        Dispatcher.UIThread.RunJobs();
     }
 
     static ReportTable Tree(Control root, Dictionary<Visual, string> labels)
@@ -156,13 +169,7 @@ static class Inspector
     /// </summary>
     static StyleReport Styles(Control root)
     {
-        // 不按像素取整布局：浏览器里的尺寸是小数（3.5px 的内边距），取整后差出 1px 多，比不出真正的差别
-        foreach (var layoutable in root.GetSelfAndVisualDescendants().OfType<Layoutable>())
-        {
-            layoutable.UseLayoutRounding = false;
-            layoutable.InvalidateMeasure();
-        }
-        root.UpdateLayout();
+        Unrounded(root);
         var report = new StyleReport();
         foreach (var element in root.GetSelfAndVisualDescendants().OfType<Control>().Where(element => element.IsEffectivelyVisible))
         {

@@ -5,7 +5,7 @@ static class SpinnerExamples
 {
     public static Example[] All =>
     [
-        new("Spinner", "spinner", "旋转指示", "SpinnerControl 默认跟随字体大小与 ForeColor，旁边有文字时是装饰；单独出现时写 Label，读屏当作进度条念出来。", Spinners),
+        new("Progress", "spinner", "旋转指示", "SpinnerControl 默认跟随字体大小与 ForeColor，旁边有文字时是装饰；单独出现时写 Label，读屏当作进度条念出来。", Spinners),
     ];
 
     static Control Spinners() => Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Lg },

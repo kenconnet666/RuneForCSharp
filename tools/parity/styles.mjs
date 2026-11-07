@@ -6,11 +6,10 @@
 //   node tools/parity/styles.mjs <页面> [示例,…] [--platform avalonia|wpf|winforms] [--json]
 //
 // 先跑 ts-styles 取文档站这一页；三个平台的 inspect 要先 Release 构建。有差异时退出码为 1。
-import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
-import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
+import { componentOf, inspector } from '../lib/inspect.mjs';
 import { table } from '../lib/markdown.mjs';
 import { repoRoot } from '../lib/vue.mjs';
 
@@ -38,20 +37,11 @@ const COMPARED = [
 const SIZED = (key) => /\/(root|icon|iconEnd|spinner|dot|input|indicator)#|^@svg#/.test(key);
 const TOLERANCE = 0.5;
 
-const INSPECT = {
-  avalonia: 'avalonia/tools/Rune.Avalonia.Inspect/bin/Release/net10.0/Rune.Avalonia.Inspect.exe',
-  wpf: 'wpf/tools/Rune.Wpf.Inspect/bin/Release/net10.0-windows/Rune.Wpf.Inspect.exe',
-  winforms: 'winforms/tools/Rune.WinForms.Inspect/bin/Release/net10.0-windows/Rune.WinForms.Inspect.exe',
-};
-
 const capture = join(repoRoot, 'artifacts/ts-styles', `${pageName}.json`);
 if (!existsSync(capture)) throw new Error(`没有 ${capture}：先跑 node tools/ts-styles/ts-styles.mjs ${pageName}`);
 const upstream = JSON.parse(readFileSync(capture, 'utf8'));
-const exe = join(repoRoot, INSPECT[options.platform] ?? '');
-if (!INSPECT[options.platform] || !existsSync(exe)) throw new Error(`没有 ${options.platform} 的 inspect：先 Release 构建 ${INSPECT[options.platform] ?? ''}`);
-// 这台机器的 .NET 10 在 ~/.dotnet（HANDOFF §3）
-const env = { ...process.env, DOTNET_ROOT: process.env.DOTNET_ROOT ?? join(homedir(), '.dotnet') };
-const component = pageName.replace(/(^|-)(\w)/g, (_, __, c) => c.toUpperCase());
+const inspect = inspector(options.platform);
+const component = componentOf(pageName);
 
 const results = [];
 for (const [id, example] of Object.entries(upstream.examples)) {
@@ -59,7 +49,7 @@ for (const [id, example] of Object.entries(upstream.examples)) {
   for (const [theme, theirs] of Object.entries(example.themes)) {
     let ours;
     try {
-      ours = JSON.parse(execFileSync(exe, ['styles', `${component}/${id}`, '--theme', theme, '--width', String(upstream.width ?? 800), '--json'], { env, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })).parts;
+      ours = JSON.parse(inspect(['styles', `${component}/${id}`, '--theme', theme, '--width', String(upstream.width ?? 800), '--json'])).parts;
     } catch {
       results.push({ example: id, theme, missing: true, diffs: [], only: { theirs: [], ours: [] } });
       continue;

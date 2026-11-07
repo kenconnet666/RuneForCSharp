@@ -70,7 +70,7 @@ static class Inspector
 
     static (Window Window, Border Root) Show(FrameworkElement content, InspectOptions options)
     {
-        var root = new Border { Padding = new Thickness(24), Child = content };
+        var root = new Border { Padding = new Thickness(options.Padding), Child = content };
         root.SetResourceReference(Border.BackgroundProperty, "Rune.Brush.Background");
         root.SetResourceReference(TextElement.ForegroundProperty, "Rune.Brush.Text");
         root.SetResourceReference(TextElement.FontSizeProperty, "Rune.FontSize.Md");

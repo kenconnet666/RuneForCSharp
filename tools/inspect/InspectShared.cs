@@ -12,13 +12,15 @@ namespace Rune.Inspect;
 /// <param name="Command">list、snapshot、tree、props、uia。</param>
 /// <param name="Key">"组件/示例名"，如 Icon/basic；list 不需要。</param>
 /// <param name="Theme">主题名，同 vue-tsx-pro 的 builtinThemes（light、dark、paper……）。</param>
-/// <param name="Width">示例区域的宽度（设备无关像素）。</param>
+/// <param name="Width">窗口的宽度（设备无关像素，含四周的留白）。</param>
+/// <param name="Padding">示例四周的留白（设备无关像素）：看效果时留 24；和文档站逐像素对照时写 0，宽度写文档站示例区的内容宽度（756）。</param>
 /// <param name="Scale">缩放（DPI / 96）。</param>
+/// <param name="Exact">snapshot：布局不按像素取整（同浏览器的小数像素排版），和文档站逐像素对照时用；WPF 默认就不取整，WinForms 只有整像素。</param>
 /// <param name="Json">输出 JSON 而不是 Markdown。</param>
 /// <param name="Out">截图的路径；不写时放在 artifacts/inspect/&lt;平台&gt;/ 下。</param>
 /// <param name="Count">bench：每轮建几个实例。</param>
 /// <param name="Runs">bench：跑几轮（第一轮预热，不计）。</param>
-sealed record InspectOptions(string Command, string? Key, string Theme, double Width, double Scale, bool Json, string? Out, int Count, int Runs)
+sealed record InspectOptions(string Command, string? Key, string Theme, double Width, double Padding, double Scale, bool Exact, bool Json, string? Out, int Count, int Runs)
 {
     public const string Usage = """
         用法：inspect <命令> [组件/示例] [选项]
@@ -29,7 +31,7 @@ sealed record InspectOptions(string Command, string? Key, string Theme, double W
           uia <组件/示例>             读屏看到的 UI Automation 树
           styles <组件/示例>          每个部件的外观取值（同 tools/ts-styles 的格式：部件按 scope/part#序号，像素与 #AARRGGBB），parity 拿来比对
           bench [组件]                基准：批量建组件，量创建、首次布局、渲染、换主题的耗时与内存（可只跑名字以它开头的）
-        选项：--theme <主题>（默认 light） --width <像素>（默认 800） --scale <倍数>（默认 1） --json --out <路径>
+        选项：--theme <主题>（默认 light） --width <像素>（默认 800） --padding <像素>（默认 24） --scale <倍数>（默认 1） --exact --json --out <路径>
               --count <个数>（bench，默认 1000） --runs <轮数>（bench，默认 6，第一轮预热）
         """;
 
@@ -37,19 +39,22 @@ sealed record InspectOptions(string Command, string? Key, string Theme, double W
     {
         if (args.Length == 0) throw new UsageException("缺少命令");
         string? key = null, theme = null, outPath = null;
-        double width = 800, scale = 1, count = 1000, runs = 6;
+        double width = 800, padding = 24, scale = 1, count = 1000, runs = 6;
         var json = false;
+        var exact = false;
         for (var i = 1; i < args.Length; i++)
         {
             switch (args[i])
             {
                 case "--theme": theme = Value(ref i); break;
                 case "--width": width = Number(ref i); break;
+                case "--padding": padding = double.TryParse(Value(ref i), NumberStyles.Float, CultureInfo.InvariantCulture, out var value) && value >= 0 ? value : throw new UsageException("--padding 要写不小于 0 的数"); break;
                 case "--scale": scale = Number(ref i); break;
                 case "--out": outPath = Value(ref i); break;
                 case "--count": count = Number(ref i); break;
                 case "--runs": runs = Number(ref i); break;
                 case "--json": json = true; break;
+                case "--exact": exact = true; break;
                 case var arg when arg.StartsWith("--", StringComparison.Ordinal): throw new UsageException($"不认识的选项 {arg}");
                 case var arg when key is null: key = arg; break;
                 case var arg: throw new UsageException($"多余的参数 {arg}");
@@ -59,7 +64,7 @@ sealed record InspectOptions(string Command, string? Key, string Theme, double W
         if (command is not ("list" or "snapshot" or "tree" or "props" or "uia" or "styles" or "bench")) throw new UsageException($"不认识的命令 {command}");
         if (command is not ("list" or "bench") && key is null) throw new UsageException($"{command} 要写示例（组件/示例名，如 Icon/basic）");
         if (runs < 2) throw new UsageException("--runs 至少 2（第一轮预热，不计）");
-        return new InspectOptions(command, key, theme ?? "light", width, scale, json, outPath, (int)count, (int)runs);
+        return new InspectOptions(command, key, theme ?? "light", width, padding, scale, exact, json, outPath, (int)count, (int)runs);
 
         string Value(ref int i) => ++i < args.Length ? args[i] : throw new UsageException($"{args[i - 1]} 后面要写值");
 

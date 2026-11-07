@@ -107,3 +107,12 @@ export const BEHAVIOR_NOT_APPLICABLE = {
   Grid: { createGrid: '桌面没有语义标签：别的语义容器从 Grid 派生、改读屏角色（GridList 就是这样，测试覆盖）' },
   Collapse: { '页内搜索命中': '页内搜索命中收起的内容时展开（hidden="until-found"、beforematch）是浏览器的能力，桌面没有页内搜索' },
 };
+
+/** 像素对照（pixels.mjs）默认允许的差异比例：未盖掉文字的像素里，不同的占多少以内算一致 */
+export const DEFAULT_PIXEL_ALLOWANCE = 0.005;
+
+/**
+ * 像素对照里允许更大差异的示例与原因：平台 → 页面 → 示例 → { ratio, reason }；平台写 all 时对三个平台都算。
+ * 只登记查清了原因、决定不改的差异（平台画法的极限、上游示例里有平台没有的内容），改得了的直接改
+ */
+export const PIXEL_ALLOWANCE = {};

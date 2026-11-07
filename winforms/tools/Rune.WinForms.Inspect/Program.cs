@@ -63,7 +63,7 @@ static class Inspector
         };
         form.Show();
         var scale = form.DeviceDpi / 96f;
-        form.Padding = new Padding((int)(24 * scale));
+        form.Padding = new Padding((int)(options.Padding * scale));
         form.ClientSize = new Size((int)(options.Width * scale), form.ClientSize.Height);
         content.Dock = DockStyle.Top;
         form.Controls.Add(content);

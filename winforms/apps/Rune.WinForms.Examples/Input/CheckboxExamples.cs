@@ -115,9 +115,8 @@ static class CheckboxExamples
         foreach (var (value, title, time, price) in options)
         {
             var radio = new RadioControl { Value = value, Text = title, Description = time, PropsLabel = new TextProps { Weight = TextWeight.Semibold } };
-            var row = Build.Flex(new FlexControl { Justify = FlexJustify.Between, Gap = Space.Lg }, radio, new SmallControl { Text = price });
-            row.SetGrow(radio, true);
-            shipping.Controls.Add(row);
+            // 价格紧跟在文字后面（上游的选项内容按自己的宽度，不撑满一行）
+            shipping.Controls.Add(Build.Flex(new FlexControl { Gap = Space.Lg }, radio, new SmallControl { Text = price }));
         }
         var invoice = new RadioGroupControl { Orientation = Orientation.Horizontal };
         invoice.Controls.AddRange([
