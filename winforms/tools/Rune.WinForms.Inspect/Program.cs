@@ -40,7 +40,7 @@ static class Inspector
         if (options.Scale != 1) throw new UsageException("WinForms 按显示器的 DPI 渲染，不支持 --scale");
         RuneTheme.Current.Value = BuiltinThemes.All.FirstOrDefault(theme => theme.Name == options.Theme)
             ?? throw new UsageException($"没有主题 {options.Theme}；可选：{string.Join("、", BuiltinThemes.All.Select(theme => theme.Name))}");
-        using var form = Show(example.Create(), options);
+        using var form = Show(example.Create(), example.Framed ? options with { Padding = 0, MinHeight = 0 } : options);
         var content = form.Controls[0];
         var labels = Labels(content);
         return options.Command switch

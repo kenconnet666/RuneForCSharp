@@ -70,6 +70,22 @@ public class NavListControl : FlexControl
         }
     }
 
+    /// <summary>所在区域要求紧凑（TS 的 NavCompactContext）：AppShellControl 把侧栏收成图标栏时设。</summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    internal bool ScopeCompact
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            Sync();
+        }
+    }
+
+    /// <summary>实际是否紧凑：自己写了 <see cref="Compact"/>，或所在区域要求紧凑。</summary>
+    internal bool IsCompact => Compact || ScopeCompact;
+
     /// <summary>只剩图标的项用的提示。</summary>
     internal TooltipProvider Tips => tips;
 
@@ -261,7 +277,7 @@ public abstract class NavRowControl : FlexControl
     /// <summary>跟着 NavListControl：紧凑时只剩图标；内边距、控件高度按字号。</summary>
     internal virtual void Apply(NavListControl? list)
     {
-        IsIconOnly = list?.Compact == true && Icon is not null;
+        IsIconOnly = list?.IsCompact == true && Icon is not null;
         var em = Em;
         var (inline, block) = ((int)MathF.Round(0.75f * em), (int)MathF.Round(0.25f * em));
         Padding = IsIconOnly ? new Padding(0, block, 0, block) : new Padding(inline, block, inline, block);
@@ -544,10 +560,10 @@ public class NavGroupControl : FlexControl
     internal void Apply(NavListControl owner)
     {
         var current = list.Controls.OfType<NavItemControl>().Any(item => item.IsCurrent);
-        header.SetCurrent(current && owner.Compact);
+        header.SetCurrent(current && owner.IsCompact);
         if (current) IsOpen = true;
         var em = Font.SizeInPoints * DeviceDpi / 72f;
-        list.Padding = new Padding(owner.Compact ? 0 : (int)MathF.Round(Tokens.Space.Lg * em), (int)MathF.Round(Tokens.Space.Xs * em), 0, 0);
+        list.Padding = new Padding(owner.IsCompact ? 0 : (int)MathF.Round(Tokens.Space.Lg * em), (int)MathF.Round(Tokens.Space.Xs * em), 0, 0);
     }
 
     /// <summary>分组的标题行：点了展开、收起；尾部是箭头（展开时转到朝下）。读屏里是可展开的按钮。</summary>
@@ -654,7 +670,7 @@ public class NavSectionControl : FlexControl
     /// <summary>紧凑时只剩图标、居中，上面一条细线；第一节之外上面留 space.lg。</summary>
     internal void Apply(NavListControl owner)
     {
-        var iconOnly = owner.Compact && Icon is not null;
+        var iconOnly = owner.IsCompact && Icon is not null;
         text.Visible = !iconOnly;
         labelRow.Justify = iconOnly ? FlexJustify.Center : FlexJustify.Start;
         labelRow.Divider = iconOnly;

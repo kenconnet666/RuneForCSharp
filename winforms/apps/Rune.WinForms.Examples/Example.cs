@@ -6,7 +6,8 @@ namespace Rune.WinForms.Examples;
 /// <param name="Title">标题。</param>
 /// <param name="Description">说明。</param>
 /// <param name="Create">新建示例的内容（停靠在宿主顶部，宽度随宿主）。</param>
-public sealed record Example(string Component, string Id, string Title, string Description, Func<Control> Create)
+/// <param name="Framed">整页示例（AppShell）：效果区不留内边距，内容贴满（TS 的 frame，示例在 iframe 里）。</param>
+public sealed record Example(string Component, string Id, string Title, string Description, Func<Control> Create, bool Framed = false)
 {
     /// <summary>"组件/示例名"，如 <c>Icon/basic</c>。</summary>
     public string Key => $"{Component}/{Id}";
@@ -16,7 +17,7 @@ public sealed record Example(string Component, string Id, string Title, string D
 public static class ExampleCatalog
 {
     /// <summary>全部示例。</summary>
-    public static IReadOnlyList<Example> All { get; } = [.. IconExamples.All, .. TextExamples.All, .. ListExamples.All, .. SpinnerExamples.All, .. BadgeExamples.All, .. ButtonExamples.All, .. IconButtonExamples.All, .. CardExamples.All, .. AvatarExamples.All, .. EmptyExamples.All, .. ProgressExamples.All, .. ProviderExamples.All, .. CheckboxExamples.All, .. ToggleGroupExamples.All, .. TextFieldExamples.All, .. CodeBlockExamples.All, .. ScrollAreaExamples.All, .. TabsExamples.All, .. TableExamples.All, .. NavListExamples.All, .. PopoverExamples.All];
+    public static IReadOnlyList<Example> All { get; } = [.. IconExamples.All, .. TextExamples.All, .. ListExamples.All, .. SpinnerExamples.All, .. BadgeExamples.All, .. ButtonExamples.All, .. IconButtonExamples.All, .. CardExamples.All, .. AvatarExamples.All, .. EmptyExamples.All, .. ProgressExamples.All, .. ProviderExamples.All, .. CheckboxExamples.All, .. ToggleGroupExamples.All, .. TextFieldExamples.All, .. CodeBlockExamples.All, .. ScrollAreaExamples.All, .. TabsExamples.All, .. TableExamples.All, .. NavListExamples.All, .. PopoverExamples.All, .. AppShellExamples.All];
 
     /// <summary>按"组件/示例名"找（不分大小写）；没有时为 null。</summary>
     /// <param name="key">如 <c>Icon/basic</c>。</param>

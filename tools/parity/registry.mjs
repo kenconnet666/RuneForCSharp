@@ -161,6 +161,11 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     },
     Collapse: { lazy: '收起时子控件隐藏：隐藏的控件不建句柄、不参与布局，本来就是第一次展开才真正创建' },
     Tooltip: { propsArrow: '提示窗口整张是组件库画的位图，箭头没有可改样式的部件' },
+    AppShell: Object.fromEntries(
+      ['propsHeader', 'propsBrand', 'propsHeaderContent', 'propsBody', 'propsSidebar', 'propsSidebarScroll', 'propsMain', 'propsNav', 'propsFooter',
+        'propsCollapse', 'propsAside', 'propsAsideScroll', 'propsMenuButton', 'propsFullscreenButton', 'propsFullscreenExit', 'propsDrawer']
+        .map((prop) => [prop, '各格是 AppShellControl 自己排、自己画的（底色、细线跟主题），按钮的外观走 ProviderControl 的组件定制，没有部件属性可加']),
+    ),
   },
 };
 
@@ -206,6 +211,7 @@ export const PLATFORM_BEHAVIOR_NOT_APPLICABLE = {
     CodeBlock: {
       '部件属性': '代码块是 CodeBlockControl 自己画的，没有部件属性可加（PLATFORM_PROPS_NOT_PORTED）',
     },
+    AppShell: { '部件属性': '各格是 AppShellControl 自己排、自己画的，没有部件属性可加（PLATFORM_PROPS_NOT_PORTED）' },
   },
 };
 
