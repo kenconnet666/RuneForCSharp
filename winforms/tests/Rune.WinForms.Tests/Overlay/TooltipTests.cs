@@ -16,20 +16,20 @@ public class TooltipTests
         var target = new Rectangle(400, 400, 100, 30);
         var panel = new Size(80, 24);
 
-        var (side, rect) = TooltipProvider.Position(FloatingPlacement.Top, false, target, panel, 6, Area);
+        var (side, rect) = FloatingLayout.Position(FloatingPlacement.Top, false, target, panel, 6, Area);
         Assert.Equal(("top", new Rectangle(410, 370, 80, 24)), (side, rect));
-        (side, rect) = TooltipProvider.Position(FloatingPlacement.BottomStart, false, target, panel, 6, Area);
+        (side, rect) = FloatingLayout.Position(FloatingPlacement.BottomStart, false, target, panel, 6, Area);
         Assert.Equal(("bottom", new Rectangle(400, 436, 80, 24)), (side, rect));
-        (side, rect) = TooltipProvider.Position(FloatingPlacement.BottomStart, true, target, panel, 6, Area);
+        (side, rect) = FloatingLayout.Position(FloatingPlacement.BottomStart, true, target, panel, 6, Area);
         Assert.Equal(new Rectangle(420, 436, 80, 24), rect); // 从右到左：start 是右边
-        (side, rect) = TooltipProvider.Position(FloatingPlacement.RightEnd, false, target, panel, 6, Area);
+        (side, rect) = FloatingLayout.Position(FloatingPlacement.RightEnd, false, target, panel, 6, Area);
         Assert.Equal(("right", new Rectangle(506, 406, 80, 24)), (side, rect));
 
         // 上面放不下：翻到下面
-        (side, rect) = TooltipProvider.Position(FloatingPlacement.Top, false, target with { Y = 10 }, panel, 6, Area);
+        (side, rect) = FloatingLayout.Position(FloatingPlacement.Top, false, target with { Y = 10 }, panel, 6, Area);
         Assert.Equal(("bottom", 46), (side, rect.Y));
         // 贴着屏幕左边：挪回来，与边缘隔 8
-        (_, rect) = TooltipProvider.Position(FloatingPlacement.Top, false, target with { X = 0, Width = 20 }, panel, 6, Area);
+        (_, rect) = FloatingLayout.Position(FloatingPlacement.Top, false, target with { X = 0, Width = 20 }, panel, 6, Area);
         Assert.Equal(8, rect.X);
     }
 

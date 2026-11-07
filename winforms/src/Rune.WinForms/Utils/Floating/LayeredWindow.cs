@@ -4,10 +4,11 @@ using System.Runtime.InteropServices;
 namespace Rune.WinForms;
 
 /// <summary>
-/// 提示的窗口：不抢焦点的置顶分层窗口，整张画好的位图（逐像素透明：圆角、伸出面板的箭头抗锯齿）用 UpdateLayeredWindow 贴上去，
-/// 淡入改整体的不透明度。平台的 ToolTip 窗口是系统画的矩形，画不出圆角与箭头。
+/// 浮层的画面窗口（提示整个是它，弹出框的面板、阴影与箭头画在它上面）：不抢焦点的置顶分层窗口，整张画好的位图
+/// （逐像素透明：圆角、阴影、伸出面板的箭头抗锯齿）用 UpdateLayeredWindow 贴上去，淡入改整体的不透明度。
+/// 平台的 ToolTip、普通窗体都是系统画的矩形，画不出圆角、阴影与箭头。
 /// </summary>
-sealed class TooltipWindow : Form
+sealed class LayeredWindow : Form
 {
     const int WsExLayered = 0x80000, WsExToolWindow = 0x80, WsExNoActivate = 0x8000000, WsExTopmost = 0x8;
     const int WsPopup = unchecked((int)0x80000000);
@@ -18,7 +19,7 @@ sealed class TooltipWindow : Form
     System.Diagnostics.Stopwatch? fading;
     TimeSpan fadeDuration;
 
-    public TooltipWindow()
+    public LayeredWindow()
     {
         FormBorderStyle = FormBorderStyle.None;
         ShowInTaskbar = false;
@@ -26,10 +27,10 @@ sealed class TooltipWindow : Form
         fade.Tick += (_, _) => StepFade();
     }
 
-    /// <summary>提示的面板在屏幕上的矩形（设备像素；测试与箭头核对用）。</summary>
+    /// <summary>面板在屏幕上的矩形（设备像素；测试与箭头核对用）。</summary>
     public Rectangle Panel { get; private set; }
 
-    /// <summary>箭头所在的边（top：面板在触发器上方，箭头在面板下边）；没有箭头时为 null。</summary>
+    /// <summary>面板所在的边（top：面板在触发器上方，箭头在面板下边）；没有箭头时为 null。</summary>
     public string? ArrowSide { get; private set; }
 
     /// <summary>现在的整体不透明度（0–255）。</summary>
@@ -50,7 +51,19 @@ sealed class TooltipWindow : Form
         }
     }
 
-    /// <summary>贴上画好的提示并显示；<paramref name="fadeIn"/> 大于 0 时从透明淡入（enter 缓动）。</summary>
+    /// <summary>面板以外（阴影、透明边）的点击穿透到下面的窗口（同一线程的窗口才收得到：浮层下面是自己的窗体）。</summary>
+    protected override void WndProc(ref Message m)
+    {
+        const int WmNcHitTest = 0x84, HtTransparent = -1;
+        if (m.Msg == WmNcHitTest && !Panel.Contains(new Point((short)(long)m.LParam, (short)((long)m.LParam >> 16))))
+        {
+            m.Result = HtTransparent;
+            return;
+        }
+        base.WndProc(ref m);
+    }
+
+    /// <summary>贴上画好的画面并显示；<paramref name="fadeIn"/> 大于 0 时从透明淡入（enter 缓动）。</summary>
     public void Present(Bitmap bitmap, Point at, Rectangle panel, string? arrowSide, TimeSpan fadeIn)
     {
         frame?.Dispose();
@@ -70,7 +83,7 @@ sealed class TooltipWindow : Form
         if (fading is not null) fade.Start();
     }
 
-    /// <summary>藏起来（不销毁窗口，下一个提示接着用）。</summary>
+    /// <summary>藏起来（不销毁窗口，下次接着用）。</summary>
     public void Dismiss()
     {
         fade.Stop();

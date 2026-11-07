@@ -839,13 +839,32 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   12 种位置——`Placement=Custom` 加定位回调（样式里绑定 PlacementTarget，转换器按触发器生成回调），回调给要的那边与对面两个候选，平台挑整个在屏幕里的；
   回调的尺寸是设备像素，按触发器的实际宽度换算。面板与箭头由 `TooltipChrome` 按字号画，有箭头时四周留透明边（弹出窗口外画不出东西）。
   踩过：样式里 `{Binding PlacementTarget.(rune:Tooltip.Arrow)}` 运行时按调用方的程序集解析，找不到类型（PathError）；xmlns 写上程序集又编译不过——改成 TooltipChrome 自己从触发器读。
-- **WinForms**：平台的提示窗口是系统画的矩形，画不出圆角与箭头；`TooltipWindow` 是不抢焦点的置顶分层窗口，整张预乘 ARGB 位图用 UpdateLayeredWindow 贴上，淡入改整体不透明度。
+- **WinForms**：平台的提示窗口是系统画的矩形，画不出圆角与箭头；`LayeredWindow`（`Utils/Floating`，Popover 也用）是不抢焦点的置顶分层窗口，整张预乘 ARGB 位图用 UpdateLayeredWindow 贴上，淡入改整体不透明度。
   文字用 GDI（TextRenderer，同别的元素）画在不透明底上再贴进面板：直接画到透明位图上 GDI 会把文字像素的不透明度写成 0。时机、键盘（消息过滤器记最近的输入是不是键盘，Esc 吃掉）、
   翻转与贴边（与屏幕边隔 8）都是组件库做的；提示文字写进控件的 AccessibleDescription（使用方写了的不动）。提示只能是文字（快捷键写在文字里）。
 - 测试：Avalonia 的 headless 弹出层默认放进窗口模板的覆盖层，测试的窗口没有模板——测试平台开 `OverlayPopups = false` 建成独立窗口；headless 送按键时会清掉焦点，Esc 之后的焦点不核对。
   WPF、WinForms 的位置测试用屏幕上的窗口（弹出层会被挪进屏幕）。上游没有 Tooltip 的单元测试，不标 [Upstream]。
-- 没做：HoverCard（同一套悬停时机，做浮层时一起）；Popover 页的 popover、hover-card、timing 示例；tooltip 示例里"更多格式"的菜单（等 Menu）。
+- 没做：HoverCard（同一套悬停时机，做浮层时一起）；Popover 页的 hover-card、timing 示例；tooltip 示例里"更多格式"的菜单（等 Menu）。
   WPF 键盘聚焦按平台的 InitialShowDelay 才显示（上游立即）；Avalonia 的离场没有淡出（上游也只有 Chromium 有）。
+
+### Popover（2026-11-07）
+
+- 非模态弹出框：点触发器开关，点外面、Esc 关闭；打开时焦点进第一个能聚焦的元素（没有时到面板上），关上后回到触发器（点外面关的不抢回焦点）。
+  `OpenChanged` 带原因（`OpenChangeReason`：Trigger、Outside、Escape、Programmatic；上游的 onOpenChange，parity 里通用改名）。
+  浮层开着时点触发器：平台先按"点了外面"关掉，紧接着这次点击又会打开——刚关掉 300 毫秒内的触发器点击不再打开。
+  面板 surfaceRaised、xs 描边、lg 圆角、lg 阴影、space.md 内边距；位置 `Placement`（默认 bottom-start）、`Offset`（6，有箭头时加箭头伸出的 0.7 倍边长）、`Arrow`。
+  读屏：浮层是对话框（上游的 role="dialog"），以触发器为名称。lazy、role 不移植（内容是控件实例；角色固定）。
+- **Avalonia**：平台的 Popup（IsLightDismissEnabled，点外面那一下不传给下面）；位置换成 PlacementMode、箭头定位与 Tooltip 共用 `FloatingPopup`（`Utils/Floating`）。
+  面板的 em 尺寸（圆角、内边距、箭头）在代码里按字号算，部件样式在 PopoverParts.axaml。
+- **WPF**：Popup（StaysOpen=false、透明、Custom 定位回调同 Tooltip），四周留 16 的透明边给阴影与箭头；阴影画在面板后面单独一层（DropShadowEffect 放在面板上
+  会让里面的文字走软件渲染）。面板是带读屏节点的 Border 子类（Border 没有 AutomationPeer）。焦点：`MoveFocus(First)` 在 Border 上不往里找，自己在可视树里找第一个
+  可聚焦的元素。踩过（又一次）：`new FrameworkPropertyMetadata(null, (d, _) => x.Content = …)` 选中了强制回调的重载，Content 永远是 null。
+- **WinForms**：浮层里要放可交互的子控件，整张位图贴到分层窗口的做法不够：两层窗口。底下 `LayeredWindow` 画阴影、面板、描边与箭头（逐像素透明，
+  阴影是遮罩 + 三遍盒式模糊近似高斯：`Drawing.Shadow(Bitmap…)`，原来一圈圈的近似在 60 像素的模糊上出条纹；面板以外的点击穿透 HTTRANSPARENT）；
+  上面 `FloatingForm` 是普通的无边框窗口，只盖内边距以内（space.md 大于圆角，直角不露出来）。内容窗口激活、拿焦点（宿主窗体标题栏会变成非激活），
+  失去激活即"点了外面"。内容不在宿主的 Parent 链上：`ProviderControl.Of` 遇到 FloatingForm 接着从弹出它的控件往外找，作用域变了也通知进去。
+  控件本身的大小就是触发器的大小（基线也转给触发器）。没有箭头的部件属性。宿主窗口移动时浮层不跟着走（上游滚动时跟着；桌面上点窗口标题栏就关了）。
+- 示例：popover（分享、筛选）；像素只比关着的状态（Avalonia 0.26%，WPF 0.07%，WinForms 1.0%）。
 
 ### Spinner
 

@@ -6,16 +6,79 @@ using PlatformGrid = Avalonia.Controls.Grid;
 namespace Rune.Avalonia.Examples;
 
 /// <summary>
-/// Popover 页的示例（vue-tsx-pro 文档站 overlay/Popover）：先有 Tooltip 的两节。popover、hover-card 要等 Popover、HoverCard；
+/// Popover 页的示例（vue-tsx-pro 文档站 overlay/Popover）：popover 与 Tooltip 的两节。hover-card 要等 HoverCard；
 /// tooltip 里"更多格式"按钮的菜单要等 Menu；timing 要等 HoverCard。
 /// </summary>
 static class PopoverExamples
 {
     public static Example[] All =>
     [
+        new("Popover", "popover", "Popover", "点触发器在旁边弹出一块内容：放筛选条件、简短表单、分享面板。点外面或 Esc 关闭，打开时焦点进到第一个能聚焦的元素，关上后回到触发器；IsOpen 可以双向绑定。浮层以触发器为名称。", Share),
         new("Popover", "tooltip", "Tooltip", "给图标按钮补一句用途和快捷键：写 ToolTip.Tip。指针停一会儿显示，在一排按钮上移动时不用每次都等；键盘聚焦立即显示，Esc 隐藏。提示是触发器的帮助文字，触发器自己要有名称，提示里不放可交互的内容。", Toolbar),
         new("Popover", "placement", "位置与箭头", "rune:Tooltip.Placement 是边加对齐，共 12 种；空间不够时自动翻到另一边。rune:Tooltip.Arrow 显示指向触发器的小箭头。", Placements),
     ];
+
+    static Control Share()
+    {
+        const string link = "https://example.com/s/q3-report";
+        var linkField = new TextField { Text = link, IsReadOnly = true };
+        AutomationProperties.SetName(linkField, "分享链接");
+        Flex.SetGrow(linkField, true);
+        var sharing = new Popover
+        {
+            Placement = FloatingPlacement.BottomStart,
+            Arrow = true,
+            Trigger = new Button { Icon = Lucide.Share2, Content = "分享" },
+            Content = new Flex
+            {
+                Direction = FlexDirection.Column, Gap = Space.Md, Width = 20 * 16,
+                Children =
+                {
+                    new Strong { Text = "分享“第三季度报告”" },
+                    new Flex { Gap = Space.Xs, Children = { linkField, new CopyButton { Value = link } } },
+                    new Switch { Content = "允许查看者评论", IsChecked = true },
+                },
+            },
+        };
+
+        string[] statuses = ["待付款", "备货中", "已发货", "已完成", "已退款"];
+        IReadOnlyList<string> applied = ["待付款", "备货中"];
+        var picked = new CheckboxGroup { Value = applied };
+        foreach (var status in statuses) picked.Items.Add(new Checkbox { Value = status, Content = status });
+        AutomationProperties.SetName(picked, "订单状态");
+        var trigger = new Button { Variant = ButtonVariant.Outline, Tone = StatusTone.Neutral, Icon = Lucide.Funnel };
+        var summary = new Small { Tone = TextTone.Muted };
+        void Show()
+        {
+            trigger.Content = applied.Count > 0 ? $"订单状态（{applied.Count}）" : "订单状态";
+            summary.Text = $"筛选：{(applied.Count > 0 ? string.Join("、", applied) : "全部状态")}";
+        }
+        var clear = new Button { Size = TextSize.Sm, Variant = ButtonVariant.Ghost, Tone = StatusTone.Neutral, Content = "清空" };
+        var apply = new Button { Size = TextSize.Sm, Content = "应用" };
+        var filtering = new Popover
+        {
+            Placement = FloatingPlacement.BottomStart,
+            Trigger = trigger,
+            Content = new Flex
+            {
+                Direction = FlexDirection.Column, Gap = Space.Md,
+                Children = { picked, new Flex { Gap = Space.Sm, Justify = FlexJustify.End, Children = { clear, apply } } },
+            },
+        };
+        clear.Click += (_, _) => picked.Value = [];
+        apply.Click += (_, _) =>
+        {
+            applied = picked.Value;
+            filtering.IsOpen = false;
+            Show();
+        };
+        Show();
+        return new Flex
+        {
+            Direction = FlexDirection.Column, Gap = Space.Md, Align = FlexAlign.Start,
+            Children = { new Flex { Gap = Space.Sm, Wrap = FlexWrap.Wrap, Children = { sharing, filtering } }, summary },
+        };
+    }
 
     static readonly (IconData Icon, string Label, string? Shortcut)[][] Groups =
     [

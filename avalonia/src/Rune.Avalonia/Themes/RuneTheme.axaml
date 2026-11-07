@@ -58,4 +58,5 @@
   <StyleInclude Source="avares://Rune.Avalonia/Navigation/TableOfContents/TableOfContentsParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Patterns/AppShell/AppShellParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Input/Listbox/ListboxParts.axaml" />
+  <StyleInclude Source="avares://Rune.Avalonia/Overlay/Popover/PopoverParts.axaml" />
 </Styles>

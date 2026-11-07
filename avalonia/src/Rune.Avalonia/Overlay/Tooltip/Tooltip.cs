@@ -85,31 +85,7 @@ public static class Tooltip
 
     /// <summary>显示之前：平台的位置按 <see cref="PlacementProperty"/> 与书写方向换算。</summary>
     static void Prepare(Control control) =>
-        control.SetCurrentValue(ToolTip.PlacementProperty, ToPlacementMode(GetPlacement(control), control.FlowDirection == FlowDirection.RightToLeft));
-
-    /// <summary>换成平台弹出层的位置；从右到左排版时上下两边的 start / end 镜像。</summary>
-    /// <param name="placement">位置。</param>
-    /// <param name="rightToLeft">触发器是从右到左排版。</param>
-    static PlacementMode ToPlacementMode(FloatingPlacement placement, bool rightToLeft)
-    {
-        // 上下两边的 start 是行的起始边：从左到右时是左边
-        var startIsLeft = !rightToLeft;
-        return (placement.Side, placement.Align) switch
-        {
-            ("top", "start") => startIsLeft ? PlacementMode.TopEdgeAlignedLeft : PlacementMode.TopEdgeAlignedRight,
-            ("top", "end") => startIsLeft ? PlacementMode.TopEdgeAlignedRight : PlacementMode.TopEdgeAlignedLeft,
-            ("bottom", "start") => startIsLeft ? PlacementMode.BottomEdgeAlignedLeft : PlacementMode.BottomEdgeAlignedRight,
-            ("bottom", "end") => startIsLeft ? PlacementMode.BottomEdgeAlignedRight : PlacementMode.BottomEdgeAlignedLeft,
-            ("bottom", _) => PlacementMode.Bottom,
-            ("left", "start") => PlacementMode.LeftEdgeAlignedTop,
-            ("left", "end") => PlacementMode.LeftEdgeAlignedBottom,
-            ("left", _) => PlacementMode.Left,
-            ("right", "start") => PlacementMode.RightEdgeAlignedTop,
-            ("right", "end") => PlacementMode.RightEdgeAlignedBottom,
-            ("right", _) => PlacementMode.Right,
-            _ => PlacementMode.Top,
-        };
-    }
+        control.SetCurrentValue(ToolTip.PlacementProperty, FloatingPopup.ToPlacementMode(GetPlacement(control), control.FlowDirection == FlowDirection.RightToLeft));
 
     /// <summary>提示的触发器：平台把提示放进一个 Popup，Popup 的目标就是触发器。</summary>
     internal static Control? Owner(ToolTip tip) => (tip.Parent as Popup)?.PlacementTarget;
@@ -143,44 +119,12 @@ public static class Tooltip
         tip.Opacity = 1;
     }
 
-    /// <summary>
-    /// 箭头贴着朝向触发器的那条边、对准触发器的中心（离提示的两端至少一个箭头宽，不画到圆角外）；尖角朝向触发器。
-    /// 边按提示与触发器在屏幕上的实际位置判断：空间不够时平台把提示翻到了另一边。
-    /// </summary>
+    /// <summary>箭头贴着朝向触发器的那条边（<see cref="FloatingPopup.PlaceArrow"/>）。</summary>
     static void PlaceArrow(Control control, ToolTip tip)
     {
         if (tip.GetVisualDescendants().OfType<Border>().FirstOrDefault(part => part.Name == TooltipParts.Arrow) is not { } arrow) return;
         arrow.IsVisible = GetArrow(control);
-        if (!arrow.IsVisible || arrow.GetVisualParent() is not Visual layer) return;
-        if (Screen(layer) is not { } panel || Screen(control) is not { } target) return;
-        // 刚显示出来的箭头还没排版（Bounds 是 0），边长取它的 Width（em）
-        var size = arrow.Width;
-        var side = panel.Bottom <= target.Top + 0.5 ? "top"
-            : panel.Top >= target.Bottom - 0.5 ? "bottom"
-            : panel.Right <= target.Left + 0.5 ? "left"
-            : "right";
-        var vertical = side is "top" or "bottom";
-        var cross = vertical
-            ? Math.Clamp(target.Center.X - panel.X - size / 2, size, Math.Max(size, panel.Width - 2 * size))
-            : Math.Clamp(target.Center.Y - panel.Y - size / 2, size, Math.Max(size, panel.Height - 2 * size));
-        var (left, top, angle) = side switch
-        {
-            "top" => (cross, panel.Height - size / 2, 45),
-            "bottom" => (cross, -size / 2, 225),
-            "left" => (panel.Width - size / 2, cross, -45),
-            _ => (-size / 2, cross, 135),
-        };
-        Canvas.SetLeft(arrow, left);
-        Canvas.SetTop(arrow, top);
-        arrow.RenderTransform = TransformOperations.Parse($"rotate({angle}deg)");
-    }
-
-    /// <summary>元素在屏幕上的矩形（与设备无关的像素）。</summary>
-    static Rect? Screen(Visual visual)
-    {
-        if (TopLevel.GetTopLevel(visual) is not { } top) return null;
-        var origin = visual.PointToScreen(default);
-        return new Rect(origin.X / top.RenderScaling, origin.Y / top.RenderScaling, visual.Bounds.Width, visual.Bounds.Height);
+        if (arrow.IsVisible && arrow.GetVisualParent() is Visual layer) FloatingPopup.PlaceArrow(arrow, layer, control);
     }
 
     /// <summary>键盘（Tab、方向键）聚焦触发器时立即显示：同 :focus-visible，用指针点出来的焦点不显示。</summary>

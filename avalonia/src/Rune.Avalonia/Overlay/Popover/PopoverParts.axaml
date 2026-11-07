@@ -1,0 +1,22 @@
+<!--
+  Popover 部件的默认外观（vue-tsx-pro 的 floatingStyles.surface、popoverStyles.panel、floatingStyles.arrow）：面板 surfaceRaised、xs 宽的 border 描边、
+  lg 阴影、文字 text（lg 圆角、space.md 内边距按 em 在 Popover.cs 里算）；箭头是 0.625em 的小方块，底色同面板，只画右、下两条边（旋转后朝外），压在面板的描边上。
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|Popover Border#PART_Panel">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.SurfaceRaised}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BoxShadow" Value="{DynamicResource Rune.Shadow.Lg}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="FocusAdorner" Value="{x:Null}" />
+  </Style>
+  <Style Selector="rune|Popover Border#PART_Arrow">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.SurfaceRaised}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+    <Setter Property="BorderThickness" Value="0,0,1,1" />
+    <Setter Property="CornerRadius" Value="0,0,2,0" />
+  </Style>
+</Styles>

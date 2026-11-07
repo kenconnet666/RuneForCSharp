@@ -50,11 +50,11 @@ public class ProviderControl : Panel
     /// <summary>这一层看到的语言包。</summary>
     public Lang EffectiveLang => Lang ?? Outer?.EffectiveLang ?? RuneLang.Current.Value;
 
-    /// <summary>控件所在的作用域：控件自己是作用域时就是它，否则沿 Parent 链往外找；没有时为 null。</summary>
+    /// <summary>控件所在的作用域：控件自己是作用域时就是它，否则沿 Parent 链往外找（浮层窗口里的接着从弹出它的控件找）；没有时为 null。</summary>
     /// <param name="control">控件。</param>
     public static ProviderControl? Of(Control? control)
     {
-        for (var node = control; node is not null; node = node.Parent)
+        for (var node = control; node is not null; node = node is FloatingForm floating ? floating.Origin : node.Parent)
             if (node is ProviderControl scope) return scope;
         return null;
     }
@@ -85,16 +85,18 @@ public class ProviderControl : Panel
     /// <summary>这一层变了：里面的组件重新排版、重画（嵌套的作用域也通知，它们看到的合并结果跟着变）。</summary>
     void Changed()
     {
-        Notify(this);
+        NotifyDescendants(this);
         Invalidate(true);
+    }
 
-        static void Notify(Control parent)
+    /// <summary>通知 <paramref name="parent"/> 里面的组件（不含它自己）作用域变了。</summary>
+    /// <param name="parent">容器。</param>
+    internal static void NotifyDescendants(Control parent)
+    {
+        foreach (Control child in parent.Controls)
         {
-            foreach (Control child in parent.Controls)
-            {
-                if (child is IScopeAware aware) aware.ScopeChanged();
-                Notify(child);
-            }
+            if (child is IScopeAware aware) aware.ScopeChanged();
+            NotifyDescendants(child);
         }
     }
 }

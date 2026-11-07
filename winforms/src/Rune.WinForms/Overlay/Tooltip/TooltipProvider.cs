@@ -34,11 +34,8 @@ public class TooltipProvider : Component, IExtenderProvider
     /// <summary>指针离开后多久隐藏：留出移到提示上的时间。</summary>
     const int CloseDelay = 100;
 
-    /// <summary>与屏幕边缘至少留出的距离。</summary>
-    const int ViewportPadding = 8;
-
     /// <summary>所有提示共用一个窗口（同一时间只显示一个）。</summary>
-    static TooltipWindow? window;
+    static LayeredWindow? window;
 
     /// <summary>正显示着提示的控件与它的提供者。</summary>
     static (TooltipProvider Provider, Control Control)? shown;
@@ -160,7 +157,7 @@ public class TooltipProvider : Component, IExtenderProvider
         if (!entries.TryGetValue(control, out var entry) || string.IsNullOrEmpty(entry.Text) || !control.IsHandleCreated) return;
         Schedule(null, 0);
         if (shown is { } previous && previous.Control != control) previous.Provider.Hide();
-        window ??= new TooltipWindow();
+        window ??= new LayeredWindow();
         var (bitmap, at, panel, side) = Render(control, entry);
         var duration = Motion.Enabled ? Tokens.Duration.Md : TimeSpan.Zero;
         window.Present(bitmap, at, panel, side, Current == control ? TimeSpan.Zero : duration);
@@ -181,7 +178,7 @@ public class TooltipProvider : Component, IExtenderProvider
     }
 
     /// <summary>提示窗口（测试用）。</summary>
-    internal static TooltipWindow? Window => window;
+    internal static LayeredWindow? Window => window;
 
     Entry Attach(Control control)
     {
@@ -285,9 +282,9 @@ public class TooltipProvider : Component, IExtenderProvider
 
         var target = control.RectangleToScreen(control is IElementHost ? Deflate(control.ClientRectangle, control.Padding) : control.ClientRectangle);
         var area = Screen.FromControl(control).WorkingArea;
-        var (side, panel) = Position(entry.Placement, context.RightToLeft, target, panelSize, gap, area);
+        var (side, panel) = FloatingLayout.Position(entry.Placement, context.RightToLeft, target, panelSize, gap, area);
 
-        var bitmap = TooltipWindow.Canvas(new Size(panelSize.Width + 2 * overhang, panelSize.Height + 2 * overhang));
+        var bitmap = LayeredWindow.Canvas(new Size(panelSize.Width + 2 * overhang, panelSize.Height + 2 * overhang));
         using (var graphics = Graphics.FromImage(bitmap))
         {
             graphics.SmoothingMode = SmoothingMode.AntiAlias;
@@ -303,53 +300,6 @@ public class TooltipProvider : Component, IExtenderProvider
 
     static Rectangle Deflate(Rectangle bounds, Padding padding) =>
         new(bounds.X + padding.Left, bounds.Y + padding.Top, Math.Max(0, bounds.Width - padding.Horizontal), Math.Max(0, bounds.Height - padding.Vertical));
-
-    /// <summary>面板在屏幕上的位置与最终的边：先试要的那一边，放不下时翻到对面（对面也放不下时留在原边），最后贴着屏幕边挪回来。</summary>
-    internal static (string Side, Rectangle Panel) Position(FloatingPlacement placement, bool rightToLeft, Rectangle target, Size panel, float gap, Rectangle area)
-    {
-        Rectangle At(string side)
-        {
-            var horizontalStart = rightToLeft ? target.Right - panel.Width : target.Left;
-            var horizontalEnd = rightToLeft ? target.Left : target.Right - panel.Width;
-            var x = placement.Align switch
-            {
-                "start" => horizontalStart,
-                "end" => horizontalEnd,
-                _ => target.Left + (target.Width - panel.Width) / 2,
-            };
-            var y = placement.Align switch
-            {
-                "start" => target.Top,
-                "end" => target.Bottom - panel.Height,
-                _ => target.Top + (target.Height - panel.Height) / 2,
-            };
-            var distance = (int)MathF.Round(gap);
-            return side switch
-            {
-                "bottom" => new Rectangle(x, target.Bottom + distance, panel.Width, panel.Height),
-                "left" => new Rectangle(target.Left - distance - panel.Width, y, panel.Width, panel.Height),
-                "right" => new Rectangle(target.Right + distance, y, panel.Width, panel.Height),
-                _ => new Rectangle(x, target.Top - distance - panel.Height, panel.Width, panel.Height),
-            };
-        }
-        bool Fits(Rectangle rect, string side) => side switch
-        {
-            "bottom" => rect.Bottom <= area.Bottom - ViewportPadding,
-            "left" => rect.Left >= area.Left + ViewportPadding,
-            "right" => rect.Right <= area.Right - ViewportPadding,
-            _ => rect.Top >= area.Top + ViewportPadding,
-        };
-        var wanted = placement.Side;
-        var opposite = wanted switch { "bottom" => "top", "left" => "right", "right" => "left", _ => "bottom" };
-        var side = Fits(At(wanted), wanted) || !Fits(At(opposite), opposite) ? wanted : opposite;
-        var rect = At(side);
-        // 贴着屏幕边挪回来（只挪对齐的那条轴，不压到触发器上）
-        if (side is "top" or "bottom")
-            rect.X = Math.Clamp(rect.X, area.Left + ViewportPadding, Math.Max(area.Left + ViewportPadding, area.Right - ViewportPadding - rect.Width));
-        else
-            rect.Y = Math.Clamp(rect.Y, area.Top + ViewportPadding, Math.Max(area.Top + ViewportPadding, area.Bottom - ViewportPadding - rect.Height));
-        return (side, rect);
-    }
 
     /// <summary>箭头：旋转 45° 的小方块，跨在朝向触发器的那条边上、对准触发器的中心（离面板两端至少一个箭头宽），尖角的圆角 2 像素。</summary>
     static void PaintArrow(Graphics graphics, Brush fill, Rectangle inner, string side, Rectangle target, Point panelOnScreen, float size)

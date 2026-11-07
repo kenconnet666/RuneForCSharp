@@ -14,6 +14,8 @@ export const PROP_RENAMES = {
   _fullscreen: 'IsFullscreen',
   _sidebarOpen: 'IsSidebarOpen',
   _sidebarCollapsed: 'IsSidebarCollapsed',
+  // 开关变了是事件（参数里带原因）
+  onOpenChange: 'OpenChanged',
   loading: 'IsLoading',
   readonly: 'IsReadOnly',
   required: 'IsRequired',
@@ -135,6 +137,10 @@ export const PROPS_NOT_PORTED = {
   ScrollArea: { propsContent: '内容就是 Content 本身，平台的滚动呈现器直接排它，中间没有包一层' },
   Table: { propsRoot: '外层的外框与横向滚动区域由 Table 管：外观按密度、样式、斑马纹与主题 token' },
   ...Object.fromEntries(['TableHead', 'TableBody', 'TableFoot', 'TableRow', 'TableCaption', 'TableCell', 'TableHeaderCell'].map((name) => [name, { propsRoot: '行、单元格、各部分本身就是元素：样式直接写在它们身上' }])),
+  Popover: {
+    lazy: '内容是传进来的控件实例，浮层关着时不在可视树里（不排版、不绘制），本来就是打开时才有代价',
+    role: '浮层固定是对话框（Avalonia、WPF 的读屏节点、WinForms 的 AccessibleRole.Dialog）；需要打断操作的确认用对话框组件',
+  },
   Tabs: { lazy: '看不见的面板不排版、不绘制（IsVisible / Visible 为 false），本来就是第一次显示时才有代价' },
   Toolbar: { items: '桌面上没有 CSS 选择器：参与方向键移动的固定是按钮与链接' },
   Skeleton: { variant: '上游已废弃（改名为 shape），新库不带' },
@@ -168,6 +174,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     },
     Collapse: { lazy: '收起时子控件隐藏：隐藏的控件不建句柄、不参与布局，本来就是第一次展开才真正创建' },
     Tooltip: { propsArrow: '提示窗口整张是组件库画的位图，箭头没有可改样式的部件' },
+    Popover: { propsArrow: '面板、阴影与箭头是组件库画在分层窗口上的位图，箭头没有可改样式的部件' },
     Listbox: Object.fromEntries(
       ['empty', 'propsOption', 'propsGroupLabel', 'propsCheck', 'propsEmpty', 'propsSkeleton']
         .map((prop) => [prop, '选项、组名、已选标记是 ListboxControl 画出来的，空状态与骨架是固定的子控件，没有部件属性与自定义内容']),
