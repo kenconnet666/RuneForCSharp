@@ -3,6 +3,7 @@ using System.Windows.Automation.Peers;
 using System.Windows.Automation.Provider;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Rune.Wpf.Tests;
 
@@ -30,6 +31,33 @@ public class DialogTests
         dialog.IsOpen = true;
         WpfUi.Flush();
     }
+
+    [Fact]
+    public Task Draggable_stays_in_the_window_and_recenters_on_open() => WpfUi.Run(() =>
+    {
+        var dialog = new Dialog { Title = "付款信息", Draggable = true, Content = new TextBlock { Text = "核对" } };
+        WpfUi.Show(Host(dialog));
+        Open(dialog);
+        var layer = (FrameworkElement)VisualTreeHelper.GetParent(dialog.Panel);
+        Point Position() => dialog.Panel.TranslatePoint(new Point(), layer);
+        var start = Position();
+
+        Assert.Equal(Cursors.SizeAll, dialog.Header.Cursor);
+        dialog.DragTo(new Vector(60, 40));
+        WpfUi.Flush();
+        Assert.Equal(start + new Vector(60, 40), Position());
+        dialog.DragTo(new Vector(5000, 5000));
+        WpfUi.Flush();
+        Assert.Equal(layer.ActualWidth, Position().X + dialog.Panel.ActualWidth, 1); // 不超出窗口
+        Assert.Equal(layer.ActualHeight, Position().Y + dialog.Panel.ActualHeight, 1);
+
+        dialog.IsOpen = false;
+        WpfUi.Flush();
+        Open(dialog);
+        Assert.Equal(default, dialog.Offset); // 每次打开回到正中
+        Assert.Equal(start, Position());
+        dialog.IsOpen = false;
+    });
 
     [Fact]
     [Upstream("Dialog", "关闭按钮是 close、确认是 confirm、Esc 是 escape")]

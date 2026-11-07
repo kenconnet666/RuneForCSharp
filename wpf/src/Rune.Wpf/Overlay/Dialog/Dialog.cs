@@ -24,7 +24,8 @@ namespace Rune.Wpf;
 /// xl 阴影，宽度档位 <see cref="Size"/>（默认 xs，不超出窗口，四周至少留 1em）。
 /// 打开时焦点移到第一个能聚焦的元素（同原生 dialog：有关闭按钮时就是它），Tab 在对话框里循环，关上后还给打开前的元素。关闭按钮、取消、Esc、点遮罩
 /// （<see cref="Dismissible"/>）都先问 <see cref="BeforeClose"/>；确认返回的任务进行中按钮加载、关不掉，结果为 false 或失败时保持打开。<see cref="OpenChanged"/> 报告原因
-/// （close、confirm、escape、outside；代码里改 IsOpen 不报告）。读屏：对话框，以标题为名称、说明为帮助文字。部件样式键见 <see cref="DialogParts"/>。
+/// （close、confirm、escape、outside；代码里改 IsOpen 不报告）。<see cref="Draggable"/> 时按住标题行能把对话框挪开：从标题行上的按钮、输入框按下不拖，
+/// 拖到哪都不超出窗口，每次打开回到正中。读屏：对话框，以标题为名称、说明为帮助文字。部件样式键见 <see cref="DialogParts"/>。
 /// </summary>
 [ContentProperty(nameof(Content))]
 public class Dialog : FrameworkElement
@@ -69,6 +70,10 @@ public class Dialog : FrameworkElement
     /// <summary>宽度档位，默认 xs（480）；full 占满窗口（四周留 1em）。</summary>
     public static readonly DependencyProperty SizeProperty = DependencyProperty.Register(nameof(Size), typeof(DialogSize), typeof(Dialog),
         new FrameworkPropertyMetadata(DialogSize.Xs, (d, _) => ((Dialog)d).layer.InvalidateMeasure()));
+
+    /// <summary>可以拖动：按住标题行把对话框挪开，不超出窗口；每次打开回到正中。</summary>
+    public static readonly DependencyProperty DraggableProperty = DependencyProperty.Register(nameof(Draggable), typeof(bool), typeof(Dialog),
+        new FrameworkPropertyMetadata(false, (d, e) => ((Dialog)d).header.Cursor = (bool)e.NewValue ? Cursors.SizeAll : null));
 
     readonly Popup popup = new() { StaysOpen = true, AllowsTransparency = true, Placement = PlacementMode.Center };
     readonly DialogLayer layer;
@@ -120,6 +125,10 @@ public class Dialog : FrameworkElement
         close.Click += (_, _) => _ = RequestClose(OpenChangeReason.Close);
         cancel.Click += (_, _) => _ = RequestClose(OpenChangeReason.Close);
         confirm.Click += (_, _) => _ = RunConfirm();
+        header.MouseLeftButtonDown += OnHeaderPressed;
+        header.MouseMove += OnHeaderMoved;
+        header.MouseLeftButtonUp += (_, _) => header.ReleaseMouseCapture();
+        header.LostMouseCapture += (_, _) => dragFrom = null;
         scrim.MouseLeftButtonDown += (_, e) =>
         {
             e.Handled = true;
@@ -174,6 +183,18 @@ public class Dialog : FrameworkElement
 
     /// <summary>宽度档位。</summary>
     public DialogSize Size { get => (DialogSize)GetValue(SizeProperty); set => SetValue(SizeProperty, value); }
+
+    /// <summary>可以拖动。</summary>
+    public bool Draggable { get => (bool)GetValue(DraggableProperty); set => SetValue(DraggableProperty, value); }
+
+    /// <summary>拖出来的位移（测试用）：面板离正中的偏移。</summary>
+    internal Vector Offset { get; private set; }
+
+    /// <summary>标题行（测试用）。</summary>
+    internal Flex Header => header;
+
+    Point? dragFrom;
+    Vector dragOrigin;
 
     /// <summary>用户开、关了（关闭按钮、取消、确认、Esc、点遮罩）；代码里改 IsOpen 时不发。</summary>
     public event EventHandler<OpenChangedEventArgs>? OpenChanged;
@@ -262,6 +283,7 @@ public class Dialog : FrameworkElement
         var reason = pending;
         if (IsOpen)
         {
+            Offset = default;
             host = Window.GetWindow(this);
             returnFocus = Keyboard.FocusedElement;
             popup.PlacementTarget = host?.Content as UIElement;
@@ -289,6 +311,30 @@ public class Dialog : FrameworkElement
         // 尺寸变了的弹出层要重新定位
         popup.HorizontalOffset += 0.01;
         popup.HorizontalOffset -= 0.01;
+    }
+
+    /// <summary>按住标题行开始拖：从按钮、输入框上按下不拖（关闭按钮照常点）。</summary>
+    void OnHeaderPressed(object sender, MouseButtonEventArgs e)
+    {
+        if (!Draggable) return;
+        for (var node = e.OriginalSource as DependencyObject; node is not null && node != header; node = VisualTreeHelper.GetParent(node))
+            if (node is System.Windows.Controls.Primitives.ButtonBase or System.Windows.Controls.Primitives.TextBoxBase) return;
+        dragFrom = e.GetPosition(layer);
+        dragOrigin = Offset;
+        header.CaptureMouse();
+        e.Handled = true;
+    }
+
+    void OnHeaderMoved(object sender, MouseEventArgs e)
+    {
+        if (dragFrom is { } from) DragTo(dragOrigin + (e.GetPosition(layer) - from));
+    }
+
+    /// <summary>挪到离正中这么远（排版时限制在窗口里）。</summary>
+    internal void DragTo(Vector offset)
+    {
+        Offset = offset;
+        layer.InvalidateArrange();
     }
 
     /// <summary>可视树里第一个能聚焦（可用、看得见）的元素（同原生 dialog 的初始焦点）。</summary>
@@ -383,6 +429,11 @@ public class Dialog : FrameworkElement
             var height = owner.Size == DialogSize.Full ? maxHeight : Math.Min(maxHeight, owner.panel.DesiredSize.Height);
             var top = owner.TopFraction is { } fraction ? Math.Min(finalSize.Height * fraction, (finalSize.Height - height) / 2) : (finalSize.Height - height) / 2;
             var box = new Rect((finalSize.Width - width) / 2, top, width, height);
+            // 拖出来的位移：整块不超出窗口
+            owner.Offset = new Vector(
+                Math.Clamp(owner.Offset.X, -box.X, Math.Max(-box.X, finalSize.Width - box.Right)),
+                Math.Clamp(owner.Offset.Y, -box.Y, Math.Max(-box.Y, finalSize.Height - box.Bottom)));
+            box.Offset(owner.Offset);
             owner.shadow.Arrange(box);
             owner.panel.Arrange(box);
             return finalSize;
