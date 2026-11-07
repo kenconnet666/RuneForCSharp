@@ -61,6 +61,7 @@ public class Flex : Panel
     List<FlexLayout.Line> lines = [];
     double[] ascents = [];
     Size measured;
+    double contentMain;
 
     static Flex()
     {
@@ -177,7 +178,9 @@ public class Flex : Panel
             for (var k = 0; k < line.Count; k++)
             {
                 var child = children[line.Start + k];
-                child.Measure(Of(line.Main[k], cross, row));
+                // 分到的就是自己要的（没有伸缩）时照样按不限量：按分到的尺寸量，子元素以后长高了会被这个约束夹住、报不上来
+                var given = line.Main[k];
+                child.Measure(Of(Math.Abs(given - items[line.Start + k].Basis) < 0.01 ? double.PositiveInfinity : given, cross, row));
                 var size = Cross(child.DesiredSize, row);
                 sizes[k] = (size, ascents[line.Start + k] = Baseline(child) ?? size, AlignOf(child));
             }
@@ -206,7 +209,7 @@ public class Flex : Panel
         lines = Compute(children, Main(availableSize, row), Cross(availableSize, row));
         measured = availableSize;
         var gaps = Gaps;
-        var main = lines.Select(line => line.Main.Sum() + gaps.Main * (line.Count - 1)).DefaultIfEmpty().Max();
+        var main = contentMain = lines.Select(line => line.Main.Sum() + gaps.Main * (line.Count - 1)).DefaultIfEmpty().Max();
         var cross = lines.Sum(line => line.Cross) + gaps.Cross * Math.Max(0, lines.Count - 1);
         return Of(main, cross, row);
     }
@@ -217,8 +220,9 @@ public class Flex : Panel
         var row = IsRow;
         var children = Shown();
         var (main, cross) = (Main(finalSize, row), Cross(finalSize, row));
-        // 摆的主轴尺寸和量的时候不一样（父元素拉伸了）：按摆的尺寸重新分
-        if (Math.Abs(main - Main(measured, row)) > 0.01) lines = Compute(children, main, double.IsInfinity(Cross(measured, row)) ? double.PositiveInfinity : cross);
+        // 摆的主轴尺寸和量的时候不一样（父元素拉伸了）：按摆的尺寸重新分。量的时候不限、摆的正好是内容的尺寸时分法不变，
+        // 不重分：重分会按有限的尺寸重量子元素，子元素以后长高了会被这个约束夹住、报不上来
+        if (Math.Abs(main - Main(measured, row)) > 0.01 && Math.Abs(main - contentMain) > 0.01) lines = Compute(children, main, double.IsInfinity(Cross(measured, row)) ? double.PositiveInfinity : cross);
         var gaps = Gaps;
         var wrap = Wrap.Wraps;
         FlexLayout.Stretch(lines, cross, gaps.Cross, wrap);

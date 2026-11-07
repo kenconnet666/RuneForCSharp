@@ -151,4 +151,17 @@ public class FlexTests
         Assert.Equal(AutomationControlType.List, UIElementAutomationPeer.CreatePeerForElement(new FlexOrderedList()).GetAutomationControlType());
         Assert.Equal(80, inline.ActualWidth);
     });
+
+    [Fact]
+    public Task Items_that_grow_after_layout_still_report_their_new_size() => WpfUi.Run(() =>
+    {
+        // 放在定高的宿主里：量的时候主轴有限，各项分到的正好是自己要的；之后长高要报上来，不能被上一次分到的尺寸夹住
+        var box = Box(50, 20);
+        var flex = Show(With(new Flex { Direction = FlexDirection.Column, VerticalAlignment = VerticalAlignment.Top }, box, Box(50, 10)), height: 500);
+
+        box.Height = 30;
+        WpfUi.Flush();
+        Assert.Equal(40, flex.ActualHeight);
+        Assert.Equal(30, box.ActualHeight);
+    });
 }
