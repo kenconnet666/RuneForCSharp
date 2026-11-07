@@ -11,3 +11,6 @@ artifacts/
 
 # 生成工具临时安装的 npm 包
 node_modules/
+
+# Claude Code 子代理的工作树
+.claude/worktrees/
