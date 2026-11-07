@@ -115,6 +115,14 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 | LinkUnderlineContext 的值改成函数：LinkUnderlineScope 的 underline 变了里面的链接跟着变 | 已做 | 我们本来就跟着变：Avalonia 是继承的属性、WPF 在作用域变了时重新强制、WinForms 设作用域时重画里面的链接 |
 | flow-ts-ui 删掉，流程设计器与审批面板改成文档站 patterns/Workflow 页里的组合 | 还没做这些组件 | 做 Workflow 页时照新的 |
 
+### 第八批（2026-11-08 通知，master 到 58c09e7c，276e52e6 是文档修复）
+
+685a7553 的 CI 失败、58c09e7c 还在排队，锁定仍停在 08906695。语言包会多 formSubmit、formReset、formAddRow、formRemoveRow，绿了锁定时重新生成。
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| SchemaForm / SchemaFields：按 useForm 的 zod schema 生成字段（控件映射、meta.group 分组、columns 与 span、对象数组可增删的行），emptyValues、schemaFields、schemaFilters、schemaConditionFields | 还没做 Form（useForm）；桌面上没有 zod | 做 Form 时一起定方案：schema 换成 .NET 这边的描述（特性标注的模型或描述对象），控件映射、分组、栏数、增删行照上游 |
+
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 
 计划：vue-tsx-pro 的 `.claude/reports/style-overhaul-plan.md`（阶段 0 护栏 → 1 引擎 → 2 架构与 API → 3 整理 → 4 美学 → 5 文档）。
