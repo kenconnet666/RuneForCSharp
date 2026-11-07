@@ -1,5 +1,5 @@
 <!--
-  Kbd 的主题（vue-tsx-pro 的 kbdStyles.root）：字号在 Kbd.cs 里按外面的 0.85 倍绑定，这里的 em 都按它算
+  Kbd 的主题（vue-tsx-pro 的 kbdStyles.root）：字号在 Kbd.cs 里按外面的 0.86 倍（相对字号的 xs 档）绑定，这里的 em 都按它算
 -->
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"

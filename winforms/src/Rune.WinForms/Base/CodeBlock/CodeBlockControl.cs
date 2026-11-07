@@ -141,7 +141,7 @@ public class CodeBlockControl : Control
 
     /// <summary>标题栏的高度：至少 0.85em 的控件高度，放得下复制按钮（加一道分隔线）；没有标题时 0。</summary>
     int HeaderHeight => Title is null ? 0
-        : Math.Max((int)MathF.Ceiling(ControlHeight.Of(Context, 0.85f * Em, Tokens_.Control)), Copyable ? copy.GetPreferredSize(Size.Empty).Height : 0) + 1;
+        : Math.Max((int)MathF.Ceiling(ControlHeight.Of(Context, 0.86f * Em, Tokens_.Control)), Copyable ? copy.GetPreferredSize(Size.Empty).Height : 0) + 1;
 
     int ExpandHeight => Collapsible ? (int)MathF.Ceiling(ControlHeight.Of(Context, TextSize.Sm.Pixels!.Value * DeviceDpi / 96f, Tokens_.Control)) + 1 : 0;
 
@@ -232,7 +232,7 @@ public class CodeBlockControl : Control
         var gap = (int)MathF.Round(0.25f * Em);
         copy.Bounds = Title is null
             ? new Rectangle(inner.Right - size.Width - gap, inner.Y + header + gap, size.Width, size.Height)
-            : new Rectangle(inner.Right - size.Width - (int)MathF.Round(0.25f * 0.85f * Em), inner.Y + (header - 1 - size.Height) / 2, size.Width, size.Height);
+            : new Rectangle(inner.Right - size.Width - (int)MathF.Round(0.25f * 0.86f * Em), inner.Y + (header - 1 - size.Height) / 2, size.Width, size.Height);
         copy.BringToFront();
     }
 
@@ -259,8 +259,8 @@ public class CodeBlockControl : Control
             using (var fill = new SolidBrush(colors.SurfaceMuted)) graphics.FillRectangle(fill, header);
             using (var line = new Pen(colors.BorderMuted, LogicalToDeviceUnits(1))) graphics.DrawLine(line, header.Left, header.Bottom + 0.5f, header.Right, header.Bottom + 0.5f);
             graphics.Restore(state);
-            var font = Fonts.Get(MonoFamily, 0.85f * Font.SizeInPoints, FontStyle.Regular);
-            var left = (int)MathF.Round(0.85f * Em);
+            var font = Fonts.Get(MonoFamily, 0.86f * Font.SizeInPoints, FontStyle.Regular);
+            var left = (int)MathF.Round(0.86f * Em);
             var titleBounds = new Rectangle(header.X + left, header.Y, Math.Max(0, header.Width - left - (Copyable ? copy.Width + left : left)), header.Height);
             TextRenderer.DrawText(graphics, Title, font, titleBounds, colors.TextMuted,
                 TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.SingleLine | TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);

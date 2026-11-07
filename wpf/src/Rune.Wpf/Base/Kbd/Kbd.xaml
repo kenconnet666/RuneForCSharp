@@ -1,4 +1,4 @@
-<!-- Kbd 的主题样式（vue-tsx-pro 的 kbdStyles.root）：字号由 EmSize 按外面的 0.85 倍强制，这里的 em 系数都按它算 -->
+<!-- Kbd 的主题样式（vue-tsx-pro 的 kbdStyles.root）：字号由 EmSize 按外面的 0.86 倍（相对字号的 xs 档）强制，这里的 em 系数都按它算 -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:rune="clr-namespace:Rune.Wpf">

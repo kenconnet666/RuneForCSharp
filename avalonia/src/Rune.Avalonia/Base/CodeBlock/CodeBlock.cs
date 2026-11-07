@@ -200,7 +200,7 @@ public class CodeBlock : Control
         base.OnAttachedToVisualTree(e);
         // 代码相对周围的文字略小（等宽字体的字面显得大），标题栏再小一点：是比例不是字号档位
         preFont = FontScale.Bind(pre, this, 0.9);
-        headerFont = FontScale.Bind(header, this, 0.85);
+        headerFont = FontScale.Bind(header, this, 0.86);
         // 挂上树才拿得到作用域的语言包与 token
         ApplyMetrics();
     }

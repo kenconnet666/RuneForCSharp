@@ -11,13 +11,13 @@ namespace Rune.Avalonia;
 /// &lt;rune:Kbd&gt;Ctrl&lt;/rune:Kbd&gt; + &lt;rune:Kbd&gt;K&lt;/rune:Kbd&gt;
 /// &lt;TextBlock&gt;按 &lt;InlineUIContainer&gt;&lt;rune:Kbd&gt;Esc&lt;/rune:Kbd&gt;&lt;/InlineUIContainer&gt; 关闭&lt;/TextBlock&gt;   &lt;!-- 放在一行文字里 --&gt;
 /// </code>
-/// 字号是外面的 0.85 倍（CSS 的 <c>font-size: 0.85em</c>），等宽字体；其余尺寸按自己的字号算（主题里的 em）：
+/// 字号是外面的 0.86 倍（上游 relativeFontSizes.xs，<c>font-size: 0.86em</c>），等宽字体；其余尺寸按自己的字号算（主题里的 em）：
 /// 最小宽度 1.6em、左右内边距 space.xs、圆角 radii.sm、行高 snug；描边 1px、底边 2px，看起来像一个按键。
 /// </summary>
 public class Kbd : ContentControl
 {
     /// <summary>字号相对外面的倍数。</summary>
-    const double Scale = 0.85;
+    const double Scale = 0.86;
 
     IDisposable? fontSize;
 

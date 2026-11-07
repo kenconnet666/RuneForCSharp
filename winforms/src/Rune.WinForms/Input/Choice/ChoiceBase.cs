@@ -146,7 +146,7 @@ public abstract class ChoiceBase : Element
         InvalidateMeasure();
     }
 
-    /// <summary>说明：muted，字号在布局时按 0.875em 给（写了 PropsDescription 的字号时用它）。</summary>
+    /// <summary>说明：muted，字号在布局时按 0.86em 给（相对字号的 xs 档）（写了 PropsDescription 的字号时用它）。</summary>
     void RebuildDescription()
     {
         description = new Text { Content = DescriptionText ?? "", Tone = TextTone.Muted };
@@ -179,8 +179,8 @@ public abstract class ChoiceBase : Element
         var endWidth = HasEnd ? endSize.Width + gap : 0;
         var limit = availableWidth == int.MaxValue ? int.MaxValue : Math.Max(0, availableWidth - (int)MathF.Ceiling(2 * inset + control.Width + gap + endWidth));
         var labelSize = HasLabel ? label.Measure(inner, new Size(limit, int.MaxValue)) : default;
-        if (HasDescription && DescriptionProps?.Size is null && description.Size != (TextSize)(0.875f * inner.Em * 96 / inner.Dpi))
-            description.Size = 0.875f * inner.Em * 96 / inner.Dpi; // 改字号会让宿主重排，只在变了时写
+        if (HasDescription && DescriptionProps?.Size is null && description.Size != (TextSize)(0.86f * inner.Em * 96 / inner.Dpi))
+            description.Size = 0.86f * inner.Em * 96 / inner.Dpi; // 改字号会让宿主重排，只在变了时写
         var descriptionSize = HasDescription ? description.Measure(inner, new Size(limit, int.MaxValue)) : default;
         // 文字的行高按字体算（不是 TS 的 1.5em）：在第一行里居中，多行时上下各留一份
         var labelTop = HasLabel ? MathF.Max(0, (row - Fonts.LineHeight(LabelFont(inner))) / 2) : 0;

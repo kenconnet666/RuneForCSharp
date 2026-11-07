@@ -10,7 +10,7 @@ namespace Rune.Wpf;
 /// &lt;rune:Kbd&gt;Ctrl&lt;/rune:Kbd&gt; + &lt;rune:Kbd&gt;K&lt;/rune:Kbd&gt;
 /// &lt;TextBlock&gt;按 &lt;InlineUIContainer&gt;&lt;rune:Kbd&gt;Esc&lt;/rune:Kbd&gt;&lt;/InlineUIContainer&gt; 关闭&lt;/TextBlock&gt;   &lt;!-- 放在一行文字里 --&gt;
 /// </code>
-/// 字号是外面的 0.85 倍（CSS 的 <c>font-size: 0.85em</c>，EmSize 按继承来的字号强制），等宽字体；其余尺寸按自己的字号算：
+/// 字号是外面的 0.86 倍（上游 relativeFontSizes.xs，<c>font-size: 0.86em</c>，EmSize 按继承来的字号强制），等宽字体；其余尺寸按自己的字号算：
 /// 最小宽度 1.6em、左右内边距 space.xs、圆角 radii.sm、行高 snug；描边 1px、底边 2px，看起来像一个按键。
 /// </summary>
 public class Kbd : ContentControl
@@ -23,7 +23,7 @@ public class Kbd : ContentControl
     {
         DefaultStyleKeyProperty.OverrideMetadata(typeof(Kbd), new FrameworkPropertyMetadata(typeof(Kbd)));
         FocusableProperty.OverrideMetadata(typeof(Kbd), new FrameworkPropertyMetadata(false));
-        EmSize.Register(typeof(Kbd), CornerRadiusProperty, fontScale: 0.85);
+        EmSize.Register(typeof(Kbd), CornerRadiusProperty, fontScale: 0.86);
     }
 
     /// <summary>圆角。</summary>

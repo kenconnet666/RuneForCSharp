@@ -1,6 +1,6 @@
 <!--
   勾选类控件（Checkbox、Radio、Switch）共用的外层与文字（vue-tsx-pro 的 choiceRecipe 的 root、label、description）：
-  整块可点，正文色、行高 normal；不可用时整体变淡，只读时不像能点；文字顶端对齐，说明是 muted（0.875em 在代码里按字号给）。
+  整块可点，正文色、行高 normal；不可用时整体变淡，只读时不像能点；文字顶端对齐，说明是 muted（0.86em 在代码里按字号给）。
   控件部件（方框、圆、轨道）的外观在各组件的 *Parts.axaml
 -->
 <Styles xmlns="https://github.com/avaloniaui"

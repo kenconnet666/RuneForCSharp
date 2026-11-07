@@ -286,15 +286,15 @@ public abstract class ChoiceBase : Control, IFieldControl
     }
 
     /// <summary>
-    /// em 尺寸：文字与说明的行高（TextBlock 的行高是像素数，文字是 ContentPresenter 里生成的 TextBlock，从它继承）、说明小一号（0.875em）；
+    /// em 尺寸：文字与说明的行高（TextBlock 的行高是像素数，文字是 ContentPresenter 里生成的 TextBlock，从它继承）、说明小一号（0.86em，相对字号的 xs 档）；
     /// 派生类加上控件部件的圆角等。
     /// </summary>
     protected virtual void UpdateMetrics()
     {
         var leading = Leading.GetFactor(this);
         label.SetValue(TextBlock.LineHeightProperty, leading * Em);
-        description.SetValue(TextElement.FontSizeProperty, 0.875 * Em);
-        description.SetValue(TextBlock.LineHeightProperty, leading * 0.875 * Em);
+        description.SetValue(TextElement.FontSizeProperty, 0.86 * Em);
+        description.SetValue(TextBlock.LineHeightProperty, leading * 0.86 * Em);
         box?.InvalidateMeasure();
     }
 
@@ -500,7 +500,7 @@ public static class ChoiceBaseParts
     /// <summary>文字（TS 的 propsLabel）：ContentPresenter。</summary>
     public static readonly PartKey Label = new(typeof(ChoiceBase), nameof(Label), typeof(ContentPresenter));
 
-    /// <summary>文字下面的说明（TS 的 propsDescription）：ContentPresenter，muted、0.875em。</summary>
+    /// <summary>文字下面的说明（TS 的 propsDescription）：ContentPresenter，muted、0.86em。</summary>
     public static readonly PartKey Description = new(typeof(ChoiceBase), nameof(Description), typeof(ContentPresenter));
 
     /// <summary>结束边的内容（TS 的 propsEnd：价格、标记）：ContentPresenter，贴着结束边、与文字顶端对齐。</summary>

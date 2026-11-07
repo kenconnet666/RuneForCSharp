@@ -179,14 +179,14 @@ public abstract class ChoiceBase : Control, IFieldControl
     }
 
     /// <summary>
-    /// 说明小一号（0.875em）；文字是普通字符串时 TextBlock 的行高是像素数，按各自的字号乘行高系数（同 Text）。主题样式与使用方的值盖得过。
+    /// 说明小一号（0.86em，相对字号的 xs 档）；文字是普通字符串时 TextBlock 的行高是像素数，按各自的字号乘行高系数（同 Text）。主题样式与使用方的值盖得过。
     /// 新建时也算一次：字号与继承来的一样时不会有变化通知
     /// </summary>
     void UpdateMetrics()
     {
         var leading = Leading.GetFactor(this);
-        description.SetValue(ContentPresenter.FontSizeProperty, 0.875 * Em, BindingPriority.Template);
-        description.SetValue(ContentPresenter.LineHeightProperty, leading * 0.875 * Em, BindingPriority.Template);
+        description.SetValue(ContentPresenter.FontSizeProperty, 0.86 * Em, BindingPriority.Template);
+        description.SetValue(ContentPresenter.LineHeightProperty, leading * 0.86 * Em, BindingPriority.Template);
         label.SetValue(ContentPresenter.LineHeightProperty, leading * Em, BindingPriority.Template);
     }
 
@@ -379,7 +379,7 @@ public static class ChoiceBaseParts
     /// <summary>文字（TS 的 propsLabel）：ContentPresenter。</summary>
     public const string Label = "PART_Label";
 
-    /// <summary>文字下面的说明（TS 的 propsDescription）：ContentPresenter，muted、0.875em。</summary>
+    /// <summary>文字下面的说明（TS 的 propsDescription）：ContentPresenter，muted、0.86em。</summary>
     public const string Description = "PART_Description";
 
     /// <summary>结束边的内容（TS 的 propsEnd：价格、标记）：ContentPresenter，贴着结束边、与文字顶端对齐。</summary>

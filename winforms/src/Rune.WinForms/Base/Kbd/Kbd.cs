@@ -9,20 +9,20 @@ namespace Rune.WinForms;
 /// <code>
 /// new KbdControl { Text = "Ctrl" };
 /// </code>
-/// 字号是宿主的 0.85 倍（CSS 的 <c>font-size: 0.85em</c>），等宽字体；其余尺寸按自己的字号算：最小宽度 1.6em、
+/// 字号是宿主的 0.86 倍（上游 relativeFontSizes.xs，<c>font-size: 0.86em</c>），等宽字体；其余尺寸按自己的字号算：最小宽度 1.6em、
 /// 左右内边距 space.xs、圆角 radii.sm、行高 snug；描边 1px、底边 2px，看起来像一个按键。
 /// </summary>
 public class Kbd : Element
 {
     /// <summary>字号相对宿主的倍数。</summary>
-    const float FontScale = 0.85f;
+    const float FontScale = 0.86f;
 
     readonly Text text = new() { Mono = true, Wrap = TextWrap.NoWrap, Align = TextAlign.Center };
 
     /// <summary>按键上的文字。</summary>
     public string Content { get => text.Content; set { text.Content = value; InvalidateMeasure(); } }
 
-    /// <summary>按键里面的环境：字号 0.85 倍。</summary>
+    /// <summary>按键里面的环境：字号 0.86 倍。</summary>
     static ElementContext Inner(ElementContext context) =>
         context with { Font = Fonts.Get(context.Font.FontFamily.Name, context.Font.SizeInPoints * FontScale, context.Font.Style), ForeColor = context.Theme.Colors.Text };
 

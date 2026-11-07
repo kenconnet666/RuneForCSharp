@@ -175,7 +175,9 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 
 ### 第十三批（2026-11-08 通知，master a3ae9428：焦点环不再被容器裁掉，全站检查清零）
 
-CI 还在排队，锁定停在 95a6c2ee。上游的检查是 apps/docs/src/test/focus-ring.browser.test.ts（键盘聚焦每个元素、算祖先的 overflow 是否裁到焦点环）。
+锁定跟到 a3ae9428（第十二、十三批都绿了；含 91780882 阶段 24.3 相对字号：relativeFontSizes xs 0.86em、sm 0.93em、lg 1.14em、xl 1.29em）。
+生成文件没变；24.3 落到已做的组件上：Kbd、CodeBlock 标题栏 0.85em → 0.86em，勾选项的说明 0.875em → 0.86em（三个平台都改了），Separator 标签、Progress 标签本来就是 0.93em。
+上游的检查是 apps/docs/src/test/focus-ring.browser.test.ts（键盘聚焦每个元素、算祖先的 overflow 是否裁到焦点环）。
 
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
@@ -184,6 +186,16 @@ CI 还在排队，锁定停在 95a6c2ee。上游的检查是 apps/docs/src/test/
 | CodeBlock 复制按钮（标题栏里也是）、SlideCaptcha 刷新、Upload 图片墙缩略图画在里面 | 复制按钮同 IconButton，本来就在里面 | 不涉及 |
 | DataTable 单元格、StatGroup 根 overflow: hidden → overflowX: clip | 还没做 | 做时照新的 |
 | Upload 的文件名链接自己省略；ItemList、PeoplePickerPanel 的内边距调整 | 还没做 | 做时照新的 |
+
+### 第十四批（2026-11-08 通知，master 0e7f08a3：间距多一档 space.xxs = 0.125em）
+
+0e7f08a3 的 CI 还在排队，锁定停在 a3ae9428。
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| 主题加 space.xxs（0.125em，vtp-space 组，在 none 与 xs 之间） | token 由 token-gen 从上游生成；`Space` 档位类型是手写的 | 锁定时重新生成 token，三个平台的 `Space` 加 Xxs |
+| 写死的 2px 间距换成 xxs（ItemList、Checklist、NotificationCenter 标题与说明之间、CalendarBoard、DiagramNode、Upload 图片墙等）；Diagram 连线标签、ProportionBar、DiagramNode、ColorPicker、ImageCropper 的宽度换成 token | 这些组件都还没做 | 做时照新的 |
+| 组件规格 JSON 不含 token，token 照 tokens.ts 核对 | token-gen 本来就读 tokens.ts | 不涉及 |
 
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 

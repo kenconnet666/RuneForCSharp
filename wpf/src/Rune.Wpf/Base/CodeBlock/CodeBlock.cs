@@ -342,7 +342,7 @@ public class CodeBlock : FrameworkElement
     };
 
     /// <summary>
-    /// em 尺寸按各层的字号算：代码 0.9 倍、标题栏 0.85 倍（等宽字体的字面显得大）；圆角 md、标题栏左 1em 右 0.25em 与控件高度、
+    /// em 尺寸按各层的字号算：代码 0.9 倍、标题栏 0.86 倍（等宽字体的字面显得大）；圆角 md、标题栏左 1em 右 0.25em 与控件高度、
     /// pre 上下 0.75em 左右 1em（有复制按钮没有标题时右边让出 space.md + 控件高度；按行显示时左右给每一行）、行高 normal、
     /// 行号至少两个数字宽（约 1.2em）与代码隔 1em、复制按钮离角 0.25em。最后按行数折叠。
     /// </summary>
@@ -350,7 +350,7 @@ public class CodeBlock : FrameworkElement
     {
         var em = TextElement.GetFontSize(this);
         var code = 0.9 * em;
-        var titleSize = 0.85 * em;
+        var titleSize = 0.86 * em;
         TextElement.SetFontSize(pre, code);
         TextElement.SetFontSize(header, titleSize);
         root.CornerRadius = Flush ? default : new CornerRadius((TryFindResource("Rune.Radius.Md") as double? ?? 0.375) * em);

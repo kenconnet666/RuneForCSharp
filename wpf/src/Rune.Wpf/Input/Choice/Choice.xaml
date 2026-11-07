@@ -1,7 +1,7 @@
 <!--
   勾选类控件（Switch、Checkbox、Radio）与复选组、单选组的主题样式（vue-tsx-pro 的 choiceRecipe 的 root、label、description、group 与 defaults）：
   整块可点，正文色、行高 normal，字号档位是触发器；不可用时整体变淡，只读时不像能点；Switch、Checkbox、RadioGroup 的色调默认 accent。
-  文字顶端对齐，说明是 muted（0.875em 在代码里按字号给）。组竖排时 gap xs，横排时换行、列距 lg、行距 xs。
+  文字顶端对齐，说明是 muted（0.86em 在代码里按字号给）。组竖排时 gap xs，横排时换行、列距 lg、行距 xs。
   共用的设置写在 Rune.ChoiceStyle 里，各组件的主题样式 BasedOn 它（同一个文件里 StaticResource 才找得到）。控件部件的外观在各组件的 xaml
 -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
