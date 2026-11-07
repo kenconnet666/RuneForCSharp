@@ -123,5 +123,16 @@ function textBoxes(canvas) {
       texts.push([rect.x - origin.x, rect.y - origin.y, rect.width, rect.height].map((value) => Math.round(value * 100) / 100));
     }
   }
+  // 输入框里的文字（值、占位文字）不是文本节点：取有文字的输入框的内容区（去掉内边距）
+  for (const input of canvas.querySelectorAll('input:not([type=checkbox]):not([type=radio]):not([type=range]), textarea')) {
+    if (!(input.value || input.placeholder)) continue;
+    const style = getComputedStyle(input);
+    if (style.visibility === 'hidden' || style.display === 'none') continue;
+    const rect = input.getBoundingClientRect();
+    const [left, top] = [parseFloat(style.paddingLeft) + parseFloat(style.borderLeftWidth), parseFloat(style.paddingTop) + parseFloat(style.borderTopWidth)];
+    const [right, bottom] = [parseFloat(style.paddingRight) + parseFloat(style.borderRightWidth), parseFloat(style.paddingBottom) + parseFloat(style.borderBottomWidth)];
+    if (rect.width - left - right < 1 || rect.height - top - bottom < 1) continue;
+    texts.push([rect.x + left - origin.x, rect.y + top - origin.y, rect.width - left - right, rect.height - top - bottom].map((value) => Math.round(value * 100) / 100));
+  }
   return { width: origin.width, height: origin.height, texts };
 }
