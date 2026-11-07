@@ -906,6 +906,17 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 没做：远程选项 load（searchable、custom 示例）、renderValue、表单的 name、placement。
 - 示例：basic、tags、appearance（Avalonia 0.12%–1.55%，WPF 0.10%–1.53%，WinForms 4%–5.8%）。
 
+### Dialog（2026-11-07，进行中：Avalonia 已做）
+
+- 模态对话框（上游 Dialog 与内核 ModalCore）：标题行（H2 lg、关闭按钮）、说明（muted，读屏的帮助文字）、正文（ScrollArea，内容长时只滚正文）、页脚（Footer，
+  靠结束边；是布局面板时占满一行；写了 Confirm 时后面是"取消 / 确认"）。面板 surfaceRaised、xs 描边、xl 圆角、xl 阴影，宽度档位 （容器档位加 full，默认 xs），
+  不超出窗口、四周至少 1em；遮罩 overlay。确认是 （进行中加载、关不掉；false 或失败保持打开）， 拿到原因、false 时不关。
+   加了 Close、Confirm。焦点：同原生 dialog 按顺序第一个能聚焦的元素（有关闭按钮时就是它），Tab 在面板里循环，关上后还给打开前的元素。
+- 对话框写在哪里都行：自己不可见、不参与排版（同关着的原生 dialog 是 display: none；不然放在 Flex 里多算一个间距），打开时用一个铺满窗口客户区的弹出层放遮罩与居中的面板
+  （窗口变大小时跟着）。没有用窗口的覆盖层：headless 测试的窗口没有模板，也就没有 OverlayLayer。
+- 没做：进出场动画、命令式打开（useDialog）、AlertDialog；WPF、WinForms 接着做。
+- 示例：dialog（编辑资料，确认时校验与等待）、long-content（宽度档位、长正文、占满一行的页脚）。
+
 ### Spinner
 
 - 第一个带部件的组件（`propsIcon`），三个平台按 §7 的写法各落地一次：

@@ -48,6 +48,8 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 | Sparkline 的柱在 showLast 时最新一根实色，删 variant | 还没做 | 做时照新的 |
 | 静态 Table 的 stickyHeader、单元格的 sticky（9a57a058） | 已做 Table | 等它的 CI 绿了下次锁定时做 |
 | ProportionBar 图例从起始边排、列间距 lg；CommentThread、NotificationCenter 用 RelativeTime | 还没做 | 做时照新的 |
+| Listbox 根元素补上部件标记，border-box 罩得到（ff185e89） | 修了我们报的高度问题 | 下次锁定时重截 listbox multiple |
+| FilterBar / QueryTable 重做（cad81082，作废 a6ffbb54 那版）：标题单独一列，第一排条件 auto-fit 加按钮区（展开、高级筛选、actions、重置、查询、竖线、end），其余条件从第二排 auto-fill；minFieldWidth 默认 14em，加 propsBody、propsRow | 还没做 | 做时照 cad81082 |
 | 文档站合页：NavMenu、NavBar 并进 NavList 页等 | NavList 页现有的示例 id 不变 | 新的 menu、nav-bar 示例等 NavMenu、NavBar |
 
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）

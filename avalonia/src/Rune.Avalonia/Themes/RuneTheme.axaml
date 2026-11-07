@@ -61,4 +61,5 @@
   <StyleInclude Source="avares://Rune.Avalonia/Input/Listbox/ListboxParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Overlay/Popover/PopoverParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Input/Select/SelectParts.axaml" />
+  <StyleInclude Source="avares://Rune.Avalonia/Overlay/Dialog/DialogParts.axaml" />
 </Styles>

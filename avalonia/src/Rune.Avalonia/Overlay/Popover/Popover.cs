@@ -27,6 +27,12 @@ public enum OpenChangeReason
     /// <summary>按了 Esc。</summary>
     Escape,
 
+    /// <summary>点了关闭按钮、取消按钮。</summary>
+    Close,
+
+    /// <summary>点了确认按钮（对话框）。</summary>
+    Confirm,
+
     /// <summary>选中了一项（单选的下拉选中后关闭）。</summary>
     Select,
 
