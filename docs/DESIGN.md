@@ -544,7 +544,7 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   - 基线对齐：直接的文字取第一行的基线（Avalonia 的 TextLayout，WPF 按字体度量，WinForms 是元素的 `Baseline`），其余按底边（CSS 给没有基线的项合成的基线）。
   - grow：Avalonia、WPF 是附加属性 `Flex.Grow`（Flex 自己的 Grow 是同一个属性，放进外层 Flex 时生效）；WinForms 是 IExtenderProvider（同 FlowLayoutPanel 的 FlowBreak），设计器里是"flex1 上的 Grow"。align-self 同样（`Flex.AlignSelf`；WinForms 的组件自带的用 `IFlexItem`，竖向 Separator 用它随行高拉伸）。
   - WinForms 的 stretch 只拉伸自动大小的子控件（关掉 AutoSize 的有自己的大小，同 CSS 写了高度的项）。
-- **Grid**：CSS grid 的子集（等宽列、minItemWidth 自动换列 + auto-fit 收起空列、行列间距、逐行 / 逐列放置与 dense 回填、跨列跨行、align / justify-items）。计算是孪生文件 `GridLayout`。`Length` 类型认 CSS 长度（px、em、rem，rem 按浏览器的 16px）。WinForms 的跨度既能用 GridItemControl 包一层（同 TS），也能用 GridControl 的扩展属性 `SetSpan` / `SetRowSpan`（同 TableLayoutPanel）。
+- **Grid**：CSS grid 的子集（等宽列、minItemWidth 自动换列 + auto-fit 收起空列、balanced 均衡换列（最后一行最多空一格，上游 b0baadf5）、行列间距、逐行 / 逐列放置与 dense 回填、跨列跨行、align / justify-items）。计算是孪生文件 `GridLayout`。`Length` 类型认 CSS 长度（px、em、rem，rem 按浏览器的 16px）。WinForms 的跨度既能用 GridItemControl 包一层（同 TS），也能用 GridControl 的扩展属性 `SetSpan` / `SetRowSpan`（同 TableLayoutPanel）。
 - **Separator**：自绘的线（DESIGN §9 的轻量组件），带文字时文字与两段线是代码组合的子元素；两段线都叫 PART_Line（代码建的元素不登记名字，重名没关系），一条部件样式同时作用于两段（同 TS 的 propsLine）。
 - **Container**：Avalonia 从 Control 派生（Decorator 的 Padding 是 Thickness，和 TS 的 padding 档位撞名），WPF 从 Decorator 派生（没有 Padding）；WinForms 是 `ContainerPanel`（WinForms 自己有 ContainerControl），重写 DisplayRectangle 成居中的一栏，停靠、锚定都在里面；属性叫 ContainerSize、InlinePadding（Size、Padding 被控件占了）。WPF 原来的容器查询档位改名 `Breakpoint`（它是断点，不是容器宽度）。
 - 撞名：Rune 的 Grid、Separator 和 Avalonia、WPF 自带的同名。XAML 里有前缀不受影响；C# 里同时引用两个命名空间时写全名（同 Button）。

@@ -79,4 +79,18 @@ public class TextFieldTests
         field.Count.Count = 5;
         Assert.True(field.Count.IsOver);
     });
+
+    [Fact]
+    public Task Clicking_a_part_that_cannot_take_focus_focuses_the_input() => WinFormsUi.Run(() =>
+    {
+        var field = new TextFieldControl { Icon = Lucide.Search, Clearable = true, Text = "规范", Width = 300 };
+        var before = new TextFieldControl { Width = 300 };
+        using var form = WinFormsUi.Show(before, field);
+        before.Input.Focus();
+
+        var icon = field.Controls.OfType<IconControl>().First(control => control.Visible);
+        typeof(Control).GetMethod("OnMouseDown", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
+            .Invoke(icon, [new MouseEventArgs(MouseButtons.Left, 1, 1, 1, 0)]);
+        Assert.Equal(field.Input, form.ActiveControl);
+    });
 }

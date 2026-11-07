@@ -28,6 +28,10 @@ public class Grid : Panel
     public static readonly DependencyProperty MinItemWidthProperty = DependencyProperty.Register(
         nameof(MinItemWidth), typeof(Length?), typeof(Grid), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsMeasure));
 
+    /// <summary>和 MinItemWidth 一起用：按项数取列数，最后一行最多空一格（4 项放得下 3 列时排 2 + 2，6 项放得下 4 列时排 3 + 3），一排卡片不落单。</summary>
+    public static readonly DependencyProperty BalancedProperty = DependencyProperty.Register(
+        nameof(Balanced), typeof(bool), typeof(Grid), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsMeasure));
+
     /// <summary>间距档位，对应主题的 space。</summary>
     public static readonly DependencyProperty GapProperty = DependencyProperty.Register(
         nameof(Gap), typeof(Space), typeof(Grid), new FrameworkPropertyMetadata(default(Space), OnGapChanged));
@@ -70,6 +74,9 @@ public class Grid : Panel
 
     /// <summary>每项的最小宽度。</summary>
     public Length? MinItemWidth { get => (Length?)GetValue(MinItemWidthProperty); set => SetValue(MinItemWidthProperty, value); }
+
+    /// <summary>均衡换列。</summary>
+    public bool Balanced { get => (bool)GetValue(BalancedProperty); set => SetValue(BalancedProperty, value); }
 
     /// <summary>间距档位。</summary>
     public Space Gap { get => (Space)GetValue(GapProperty); set => SetValue(GapProperty, value); }
@@ -122,7 +129,7 @@ public class Grid : Panel
     {
         var gaps = Gaps;
         var items = children.Select(ItemOf).ToList();
-        var columns = GridLayout.Columns(width, gaps.Column, Columns, MinItemWidth?.Pixels(Em), items.Count);
+        var columns = GridLayout.Columns(width, gaps.Column, Columns, MinItemWidth?.Pixels(Em), items.Count, Balanced);
         var columnFlow = Flow.Value is "column" or "column dense";
         var dense = Flow.Value is "row dense" or "column dense";
         cells = GridLayout.Place(items, columns, columnFlow, dense);

@@ -453,6 +453,12 @@ public sealed partial record Lang
     /// <summary>放到不能放的组、弹回时的播报</summary>
     public required Func<string, string, string> SortableRejected { get; init; }
 
+    /// <summary>错误边界接住错误后的标题，默认“这块内容出错了”</summary>
+    public required string ErrorTitle { get; init; }
+
+    /// <summary>错误边界的重试按钮，默认“重试”</summary>
+    public required string ErrorRetry { get; init; }
+
     /// <summary>结果页的常见状态（403、404、500）的默认标题与说明</summary>
     public required IReadOnlyDictionary<string, (string Title, string Description)> ResultStatus { get; init; }
 
@@ -1059,6 +1065,8 @@ public sealed partial record Lang
         SortableGroupDropped = (item, group, position) => string.Create(CultureInfo.InvariantCulture, $"已把 {item} 放到 {group} 第 {position} 位"),
         SortableGroupCancelled = (item, group, position) => string.Create(CultureInfo.InvariantCulture, $"已取消，{item} 回到 {group} 第 {position} 位"),
         SortableRejected = (item, reason) => $"不能移动：{reason}。{item} 回到原处",
+        ErrorTitle = "这块内容出错了",
+        ErrorRetry = "重试",
         ResultStatus = new Dictionary<string, (string Title, string Description)>
         {
             ["403"] = ("没有访问权限", "这个页面需要更高的权限，可以联系管理员开通。"),
@@ -1437,6 +1445,8 @@ public sealed partial record Lang
         SortableGroupDropped = (item, group, position) => string.Create(CultureInfo.InvariantCulture, $"Dropped {item} in {group}, position {position}"),
         SortableGroupCancelled = (item, group, position) => string.Create(CultureInfo.InvariantCulture, $"Cancelled, {item} returned to {group}, position {position}"),
         SortableRejected = (item, reason) => $"Cannot move: {reason}. {item} returned",
+        ErrorTitle = "Something went wrong here",
+        ErrorRetry = "Try again",
         ResultStatus = new Dictionary<string, (string Title, string Description)>
         {
             ["403"] = ("Access denied", "You need more permissions to see this page. Ask an administrator for access."),

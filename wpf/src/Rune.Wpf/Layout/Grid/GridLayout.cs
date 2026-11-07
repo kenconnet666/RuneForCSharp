@@ -14,13 +14,27 @@ static class GridLayout
 
     /// <summary>
     /// 列数：给了最小宽度时按宽度放得下几列（CSS 的 repeat(auto-fit, minmax(min(最小宽度, 100%), 1fr))），
-    /// 否则是 columns；都没有时一列。宽度无穷时（横向不限的父元素）每项一列。
+    /// <paramref name="balanced"/> 时再按项数均衡（<see cref="BalancedColumns"/>）；否则是 columns；都没有时一列。宽度无穷时（横向不限的父元素）每项一列。
     /// </summary>
-    public static int Columns(double width, double gap, int? columns, double? minItemWidth, int count)
+    public static int Columns(double width, double gap, int? columns, double? minItemWidth, int count, bool balanced = false)
     {
         if (minItemWidth is not { } min) return Math.Max(1, columns ?? 1);
         if (double.IsInfinity(width)) return Math.Max(1, count);
-        return Math.Max(1, (int)Math.Floor((width + gap) / (Math.Min(min, width) + gap)));
+        var fits = Math.Max(1, (int)Math.Floor((width + gap) / (Math.Min(min, width) + gap)));
+        return balanced ? BalancedColumns(count, Math.Min(fits, columns ?? fits)) : fits;
+    }
+
+    /// <summary>放得下 <paramref name="fits"/> 列、共 <paramref name="count"/> 项时排几列：最后一行最多空一格（4 项、3 列 → 2 列；6 项、4 列 → 3 列）。</summary>
+    /// <param name="count">项数。</param>
+    /// <param name="fits">放得下的列数。</param>
+    public static int BalancedColumns(int count, int fits)
+    {
+        for (var columns = Math.Min(fits, count); columns > 1; columns--)
+        {
+            var last = count % columns;
+            if (last == 0 || last >= columns - 1) return columns;
+        }
+        return 1;
     }
 
     /// <summary>

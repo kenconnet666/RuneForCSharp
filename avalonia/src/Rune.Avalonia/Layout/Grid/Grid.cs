@@ -26,6 +26,9 @@ public class Grid : Panel
     /// <summary>每项的最小宽度（14em、9rem、200）：按宽度自动决定列数。</summary>
     public static readonly StyledProperty<Length?> MinItemWidthProperty = AvaloniaProperty.Register<Grid, Length?>(nameof(MinItemWidth));
 
+    /// <summary>和 MinItemWidth 一起用：按项数取列数，最后一行最多空一格（4 项放得下 3 列时排 2 + 2，6 项放得下 4 列时排 3 + 3），一排卡片不落单。</summary>
+    public static readonly StyledProperty<bool> BalancedProperty = AvaloniaProperty.Register<Grid, bool>(nameof(Balanced));
+
     /// <summary>间距档位，对应主题的 space。</summary>
     public static readonly StyledProperty<Space> GapProperty = AvaloniaProperty.Register<Grid, Space>(nameof(Gap));
 
@@ -54,7 +57,7 @@ public class Grid : Panel
 
     static Grid()
     {
-        AffectsMeasure<Grid>(ColumnsProperty, MinItemWidthProperty, FlowProperty, RowGapFactorProperty, ColumnGapFactorProperty, TextElement.FontSizeProperty);
+        AffectsMeasure<Grid>(ColumnsProperty, MinItemWidthProperty, BalancedProperty, FlowProperty, RowGapFactorProperty, ColumnGapFactorProperty, TextElement.FontSizeProperty);
         AffectsArrange<Grid>(AlignProperty, JustifyProperty);
     }
 
@@ -66,6 +69,9 @@ public class Grid : Panel
 
     /// <summary>每项的最小宽度。</summary>
     public Length? MinItemWidth { get => GetValue(MinItemWidthProperty); set => SetValue(MinItemWidthProperty, value); }
+
+    /// <summary>均衡换列。</summary>
+    public bool Balanced { get => GetValue(BalancedProperty); set => SetValue(BalancedProperty, value); }
 
     /// <summary>间距档位。</summary>
     public Space Gap { get => GetValue(GapProperty); set => SetValue(GapProperty, value); }
@@ -116,7 +122,7 @@ public class Grid : Panel
     {
         var gaps = Gaps;
         var items = children.Select(ItemOf).ToList();
-        var columns = GridLayout.Columns(width, gaps.Column, Columns, MinItemWidth?.Pixels(Em), items.Count);
+        var columns = GridLayout.Columns(width, gaps.Column, Columns, MinItemWidth?.Pixels(Em), items.Count, Balanced);
         var columnFlow = Flow.Value is "column" or "column dense";
         var dense = Flow.Value is "row dense" or "column dense";
         cells = GridLayout.Place(items, columns, columnFlow, dense);

@@ -119,4 +119,20 @@ public class GridTests
 
         Assert.Equal((AccessibleRole.List, AccessibleRole.ListItem), (list.AccessibilityObject.Role, item.AccessibilityObject.Role));
     });
+
+    [Upstream("Grid", "balanced：")]
+    [Fact]
+    public Task Balanced_never_leaves_one_item_alone_on_the_last_row() => WinFormsUi.Run(() =>
+    {
+        Assert.Equal([2, 4, 1, 3, 1], new[] { (4, 3), (4, 4), (4, 1), (6, 4), (1, 3) }.Select(pair => GridLayout.BalancedColumns(pair.Item1, pair.Item2)));
+        int Columns(int width)
+        {
+            var grid = Grid(new GridControl { MinItemWidth = 100, Balanced = true }, [.. Enumerable.Range(0, 4).Select(_ => new Box())]);
+            using var form = Show(grid, width * grid.DeviceDpi / 96);
+            return grid.ColumnCount;
+        }
+        Assert.Equal(2, Columns(350)); // 放得下 3 列：2 + 2，不排成 3 + 1
+        Assert.Equal(4, Columns(450));
+        Assert.Equal(1, Columns(120));
+    });
 }

@@ -14,6 +14,17 @@
         <rune:LinkButton Href="https://example.com/guide/import" Variant="soft" Icon="{x:Static rune:Lucide.BookOpen}">导入指南</rune:LinkButton>
         <rune:LinkButton Href="https://vuejs.org" External="True" Variant="ghost" IconEnd="{x:Static rune:Lucide.ArrowRight}">Vue 文档</rune:LinkButton>
       </rune:Flex>
+      <rune:Separator />
+      <!-- 页脚：只有图标的链接用 IconLinkButton -->
+      <rune:Flex Align="center" Justify="between" Gap="md" Wrap="True">
+        <rune:Small Tone="muted">© 2026 vue-tsx-pro</rune:Small>
+        <rune:Flex Gap="xs">
+          <rune:IconLinkButton Href="https://example.com/guide/getting-started" Icon="{x:Static rune:Lucide.BookOpen}" AutomationProperties.Name="文档" />
+          <rune:IconLinkButton Href="https://example.com/feed.xml" External="True" Icon="{x:Static rune:Lucide.Rss}" AutomationProperties.Name="订阅" />
+          <rune:IconLinkButton Href="https://youtube.com" External="True" Icon="{x:Static rune:Lucide.Video}" AutomationProperties.Name="视频教程" />
+          <rune:IconLinkButton Href="mailto:hi@example.com" Icon="{x:Static rune:Lucide.Mail}" AutomationProperties.Name="发邮件" />
+        </rune:Flex>
+      </rune:Flex>
     </rune:Flex>
   </rune:Card>
 </UserControl>

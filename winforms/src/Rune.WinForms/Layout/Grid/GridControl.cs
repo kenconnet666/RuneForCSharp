@@ -43,6 +43,12 @@ public class GridControl : Panel, IExtenderProvider
     [DefaultValue(null)]
     public Length? MinItemWidth { get; set { field = value; PerformLayout(); } }
 
+    /// <summary>和 MinItemWidth 一起用：按项数取列数，最后一行最多空一格（4 项放得下 3 列时排 2 + 2，6 项放得下 4 列时排 3 + 3），一排卡片不落单。</summary>
+    [Category("Layout")]
+    [Description("和 MinItemWidth 一起用：按项数取列数，最后一行最多空一格。")]
+    [DefaultValue(false)]
+    public bool Balanced { get; set { field = value; PerformLayout(); } }
+
     /// <summary>间距档位，对应主题的 space。</summary>
     [Category("Layout")]
     [Description("间距档位（none、xs、sm、md、lg、xl）。")]
@@ -184,7 +190,7 @@ public class GridControl : Panel, IExtenderProvider
             var items = children.Select(child => new GridLayout.Item(owner.GetSpan(child).Count ?? 0, owner.GetRowSpan(child))).ToList();
             var scale = owner.DeviceDpi / 96d;
             var min = owner.MinItemWidth?.Pixels(Em / scale) * scale;
-            var columns = GridLayout.Columns(width, gaps.Column, owner.Columns, min, items.Count);
+            var columns = GridLayout.Columns(width, gaps.Column, owner.Columns, min, items.Count, owner.Balanced);
             var columnFlow = owner.Flow.Value is "column" or "column dense";
             var dense = owner.Flow.Value is "row dense" or "column dense";
             var cells = GridLayout.Place(items, columns, columnFlow, dense);

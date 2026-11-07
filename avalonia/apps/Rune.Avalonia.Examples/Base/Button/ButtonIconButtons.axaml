@@ -1,0 +1,28 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/avalonia"
+             x:Class="Rune.Avalonia.Examples.ButtonIconButtons">
+  <rune:Flex Direction="column" Gap="md" VerticalAlignment="Top">
+    <!-- 编辑器工具栏：默认 ghost、中性色，一组按钮之间用分隔线隔开 -->
+    <rune:Card Padding="xs">
+      <rune:Flex Align="center" Gap="xs" Wrap="True">
+        <rune:IconButton Icon="{x:Static rune:Lucide.LetterB}" AutomationProperties.Name="加粗" />
+        <rune:IconButton Icon="{x:Static rune:Lucide.Italic}" AutomationProperties.Name="斜体" />
+        <rune:IconButton Icon="{x:Static rune:Lucide.Underline}" AutomationProperties.Name="下划线" />
+        <rune:IconButton Icon="{x:Static rune:Lucide.Link2}" AutomationProperties.Name="插入链接" />
+        <rune:Separator Orientation="vertical" />
+        <rune:IconButton Icon="{x:Static rune:Lucide.TextAlignStart}" AutomationProperties.Name="左对齐" />
+        <rune:IconButton Icon="{x:Static rune:Lucide.TextAlignCenter}" AutomationProperties.Name="居中" />
+        <rune:IconButton Icon="{x:Static rune:Lucide.TextAlignEnd}" AutomationProperties.Name="右对齐" />
+      </rune:Flex>
+    </rune:Card>
+    <rune:Flex Align="center" Gap="sm" Wrap="True">
+      <rune:IconButton Icon="{x:Static rune:Lucide.Pencil}" Variant="solid" Tone="accent" AutomationProperties.Name="编辑" />
+      <rune:IconButton Icon="{x:Static rune:Lucide.Share2}" Variant="soft" AutomationProperties.Name="分享" />
+      <rune:IconButton Icon="{x:Static rune:Lucide.Settings}" Variant="surface" AutomationProperties.Name="设置" />
+      <rune:IconButton Icon="{x:Static rune:Lucide.Ellipsis}" Variant="outline" AutomationProperties.Name="更多" />
+      <rune:IconButton Icon="{x:Static rune:Lucide.Heart}" Variant="soft" Tone="danger" Radius="full" AutomationProperties.Name="收藏" />
+      <rune:IconButton Icon="{x:Static rune:Lucide.Trash}" Tone="danger" AutomationProperties.Name="删除" />
+    </rune:Flex>
+  </rune:Flex>
+</UserControl>

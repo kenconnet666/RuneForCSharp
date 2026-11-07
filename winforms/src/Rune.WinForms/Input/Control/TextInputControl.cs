@@ -45,6 +45,12 @@ public abstract class TextInputControl : FlexControl, IFieldControl
         {
             e.Control!.MouseEnter += (_, _) => SetHovered(true);
             e.Control.MouseLeave += (_, _) => SetHovered(ClientRectangle.Contains(PointToClient(Cursor.Position)));
+            // 点在不能聚焦的部件上（图标、前后缀、字数）同点在空白处：焦点交给输入框；按钮这类能聚焦的照常（上游 1cc605e3）
+            var part = e.Control;
+            part.MouseDown += (_, _) =>
+            {
+                if (!part.CanSelect) input.Focus();
+            };
         };
     }
 
@@ -262,7 +268,7 @@ public abstract class TextInputControl : FlexControl, IFieldControl
         SetHovered(ClientRectangle.Contains(PointToClient(Cursor.Position)));
     }
 
-    /// <summary>点在外壳的空白处（内边距、图标、前后缀）：焦点交给输入框。</summary>
+    /// <summary>点在外壳的空白处（内边距）：焦点交给输入框。</summary>
     protected override void OnMouseDown(MouseEventArgs e)
     {
         base.OnMouseDown(e);

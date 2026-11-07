@@ -11,7 +11,7 @@ vue-tsx-pro 那边的会话改了设计时会发通知过来（每完成一个�
 | 日期 | 组件 | 现象与复现 | 建议 | 状态 |
 |---|---|---|---|---|
 | 2026-11-07 | Checkbox、Radio、Switch | 原生 input 不继承字体，方框、轨道的 em 按浏览器给 input 的 13.333px 算，sm、lg 档与文字、滑块对不上 | input 加 `font: 'inherit'` | 已修（9f7be887，0.11.1；锁定跟到 875797ae） |
-| 2026-11-07 | Listbox | multiple 示例写的 `height: 16rem` 落在有 padding: xs 的根元素上，默认 content-box，列表实际高 16rem + 0.5em；桌面上 Height 是整个控件，对照矮 7 像素 | listboxStyles.root 加 `boxSizing: 'border-box'`（同 control、itemStyles），或示例注明不含内边距 | 上游确认（2026-11-07）：全库约 80 个文件同样缺 border-box，打算在样式引擎最低层统一设，提交后通知重截 |
+| 2026-11-07 | Listbox | multiple 示例写的 `height: 16rem` 落在有 padding: xs 的根元素上，默认 content-box，列表实际高 16rem + 0.5em；桌面上 Height 是整个控件，对照矮 7 像素 | listboxStyles.root 加 `boxSizing: 'border-box'`（同 control、itemStyles），或示例注明不含内边距 | 部分修复（313f0e23）：规则只罩带 data-part 的元素，Listbox 的根元素没有，ad4a77ac 上仍高 16rem + 0.5em；已再通知（2026-11-07） |
 
 ## 下一阶段计划（2026-11-07 收到通知，ROADMAP 阶段 25，上游无人值守执行）
 
@@ -35,6 +35,20 @@ vue-tsx-pro 那边的会话改了设计时会发通知过来（每完成一个�
 | 新组件 ErrorBoundary（b61938fb）、语言包 errorTitle、errorRetry | 语言包生成文件会变 | 锁定新提交时重新生成语言包；ErrorBoundary 等 Result |
 | 输入框外壳只在点到空白处时转交焦点（1cc605e3） | 我们的外壳：Avalonia 按下按钮时不转交，WPF、WinForms 点外壳就聚焦里面的输入框 | 锁定新提交时核对三个平台，点在外壳里能聚焦的元素上不转交 |
 | 文档站 IconButton 页并进 Button 页（7c7ac651） | ts-shots 的页名 icon-button 会失效 | 锁定新提交时把 IconButton 的示例挪到 button 页 |
+
+跟进（2026-11-07，锁定 ad4a77ac）：语言包重新生成（ErrorTitle、ErrorRetry），token、图标、配方没变；三个平台的示例照新的 Button 页改（icon-buttons、presets、links 带上页脚的图标链接，删掉 IconButton 页）；
+WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）上时也把焦点交给输入框（Avalonia、WPF 本来如此）；listbox multiple 重截仍高 7 像素，见上游问题表。
+
+### 第二批（2026-11-07 通知，master 到 a6ffbb54）
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| FilterBar 按钮区成为条件栅格的最后一格；QueryTable 查询栏与工具栏分开（a6ffbb54） | 还没做 | 做时照新的 |
+| Grid / GridList 的 balanced（b0baadf5） | 已做 | 跟到 ad4a77ac 时做了：孪生文件 GridLayout 加 BalancedColumns，三个平台的 Grid 加 Balanced |
+| Sparkline 的柱在 showLast 时最新一根实色，删 variant | 还没做 | 做时照新的 |
+| 静态 Table 的 stickyHeader、单元格的 sticky（9a57a058） | 已做 Table | 等它的 CI 绿了下次锁定时做 |
+| ProportionBar 图例从起始边排、列间距 lg；CommentThread、NotificationCenter 用 RelativeTime | 还没做 | 做时照新的 |
+| 文档站合页：NavMenu、NavBar 并进 NavList 页等 | NavList 页现有的示例 id 不变 | 新的 menu、nav-bar 示例等 NavMenu、NavBar |
 
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 

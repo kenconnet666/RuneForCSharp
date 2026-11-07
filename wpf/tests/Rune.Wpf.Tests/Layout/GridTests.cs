@@ -109,4 +109,15 @@ public class GridTests
         Assert.Equal(AutomationControlType.List, UIElementAutomationPeer.CreatePeerForElement(list).GetAutomationControlType());
         Assert.Equal(AutomationControlType.ListItem, UIElementAutomationPeer.CreatePeerForElement(item).GetAutomationControlType());
     });
+
+    [Upstream("Grid", "balanced：")]
+    [Fact]
+    public Task Balanced_never_leaves_one_item_alone_on_the_last_row() => WpfUi.Run(() =>
+    {
+        Assert.Equal([2, 4, 1, 3, 1], new[] { (4, 3), (4, 4), (4, 1), (6, 4), (1, 3) }.Select(pair => GridLayout.BalancedColumns(pair.Item1, pair.Item2)));
+        Grid Four(double width) => Show(With(new Grid { MinItemWidth = 100, Balanced = true }, [.. Enumerable.Range(0, 4).Select(_ => Box())]), width);
+        Assert.Equal(2, Four(350).ColumnCount); // 放得下 3 列：2 + 2，不排成 3 + 1
+        Assert.Equal(4, Four(450).ColumnCount);
+        Assert.Equal(1, Four(120).ColumnCount);
+    });
 }
