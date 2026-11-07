@@ -27,6 +27,7 @@ namespace Rune.Avalonia;
 /// 打开时焦点移到第一个能聚焦的元素（没有时在面板上），Tab 在对话框里循环，关上后还给打开前的元素。关闭按钮、取消、Esc、点遮罩（<see cref="Dismissible"/>）
 /// 都先问 <see cref="BeforeClose"/>；确认返回的任务进行中按钮加载、关不掉，结果为 false 或失败时保持打开。<see cref="OpenChanged"/> 报告原因
 /// （close、confirm、escape、outside；代码里改 IsOpen 不报告）。读屏：对话框，以标题为名称、说明为帮助文字。部件名见 <see cref="DialogParts"/>。
+/// <see cref="Draggable"/> 时按住标题行能把对话框挪开（核对数据时看后面被挡住的内容）：从标题行上的按钮、输入框按下不拖，拖到哪都不超出窗口，每次打开回到正中。
 /// </summary>
 public class Dialog : Control
 {
@@ -69,6 +70,9 @@ public class Dialog : Control
 
     /// <summary>宽度档位，默认 xs（480）；full 占满窗口（四周留 1em）。</summary>
     public static readonly StyledProperty<DialogSize> SizeProperty = AvaloniaProperty.Register<Dialog, DialogSize>(nameof(Size), DialogSize.Xs);
+
+    /// <summary>可以拖动：按住标题行把对话框挪开，不超出窗口；每次打开回到正中。</summary>
+    public static readonly StyledProperty<bool> DraggableProperty = AvaloniaProperty.Register<Dialog, bool>(nameof(Draggable));
 
     readonly Popup popup = new() { WindowManagerAddShadowHint = false, Placement = global::Avalonia.Controls.PlacementMode.Center };
     readonly DialogLayer layer;
@@ -117,6 +121,10 @@ public class Dialog : Control
             e.Handled = true;
             if (Dismissible) _ = RequestClose(OpenChangeReason.Outside);
         };
+        header.PointerPressed += OnHeaderPressed;
+        header.PointerMoved += OnHeaderMoved;
+        header.PointerReleased += (_, _) => dragFrom = null;
+        header.PointerCaptureLost += (_, _) => dragFrom = null;
         layer.AddHandler(KeyDownEvent, (_, e) =>
         {
             if (e.Key != Key.Escape || e.Handled) return;
@@ -168,6 +176,15 @@ public class Dialog : Control
     /// <summary>宽度档位。</summary>
     public DialogSize Size { get => GetValue(SizeProperty); set => SetValue(SizeProperty, value); }
 
+    /// <summary>可以拖动。</summary>
+    public bool Draggable { get => GetValue(DraggableProperty); set => SetValue(DraggableProperty, value); }
+
+    /// <summary>拖出来的位移（测试用）：面板离正中的偏移。</summary>
+    internal Vector Offset { get; private set; }
+
+    Point? dragFrom;
+    Vector dragOrigin;
+
     /// <summary>用户开、关了（关闭按钮、取消、确认、Esc、点遮罩）；代码里改 IsOpen 时不发。</summary>
     public event EventHandler<OpenChangedEventArgs>? OpenChanged;
 
@@ -189,6 +206,9 @@ public class Dialog : Control
     /// <summary>取消、确认按钮（测试用）。</summary>
     internal (Button Cancel, Button Confirm) Actions => (cancel, confirm);
 
+    /// <summary>标题行（测试用）。</summary>
+    internal Flex Header => header;
+
     /// <summary>关闭按钮（测试用）。</summary>
     internal CloseButton CloseButton => close;
 
@@ -200,6 +220,7 @@ public class Dialog : Control
         base.OnPropertyChanged(change);
         if (change.Property == IsOpenProperty) Toggle();
         else if (change.Property == SizeProperty) layer.InvalidateMeasure();
+        else if (change.Property == DraggableProperty) header.Cursor = Draggable ? new Cursor(StandardCursorType.SizeAll) : null;
         else if (change.Property == TextElement.FontSizeProperty) UpdateMetrics();
         else Sync();
     }
@@ -260,6 +281,7 @@ public class Dialog : Control
         PseudoClasses.Set(":open", IsOpen);
         if (IsOpen)
         {
+            Offset = default;
             var top = TopLevel.GetTopLevel(this);
             returnFocus = top?.FocusManager?.GetFocusedElement();
             popup.PlacementTarget = top;
@@ -341,6 +363,25 @@ public class Dialog : Control
         protected override bool IsContentElementCore() => false;
     }
 
+    /// <summary>按住标题行开始拖：从按钮、输入框上按下不拖（关闭按钮照常点）。</summary>
+    void OnHeaderPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (!Draggable || !e.GetCurrentPoint(header).Properties.IsLeftButtonPressed) return;
+        for (var node = e.Source as Visual; node is not null && node != header; node = node.GetVisualParent())
+            if (node is global::Avalonia.Controls.Button or TextBox) return;
+        dragFrom = e.GetPosition(layer);
+        dragOrigin = Offset;
+        e.Pointer.Capture(header);
+        e.Handled = true;
+    }
+
+    void OnHeaderMoved(object? sender, PointerEventArgs e)
+    {
+        if (dragFrom is not { } from) return;
+        Offset = dragOrigin + (e.GetPosition(layer) - from);
+        layer.InvalidateArrange();
+    }
+
     /// <summary>弹出层的根：和窗口的客户区一样大；遮罩铺满，面板居中，宽度按档位、不超出窗口（四周至少 1em），高度按内容、不超出窗口。</summary>
     sealed class DialogLayer(Dialog owner) : Panel
     {
@@ -369,7 +410,12 @@ public class Dialog : Control
             var (width, maxHeight) = PanelLimits(finalSize);
             var height = owner.Size == DialogSize.Full ? maxHeight : Math.Min(maxHeight, owner.panel.DesiredSize.Height);
             var top = owner.TopFraction is { } fraction ? Math.Min(finalSize.Height * fraction, (finalSize.Height - height) / 2) : (finalSize.Height - height) / 2;
-            owner.panel.Arrange(new Rect((finalSize.Width - width) / 2, top, width, height));
+            var box = new Rect((finalSize.Width - width) / 2, top, width, height);
+            // 拖出来的位移：整块不超出窗口
+            owner.Offset = new Vector(
+                Math.Clamp(owner.Offset.X, -box.X, Math.Max(-box.X, finalSize.Width - box.Right)),
+                Math.Clamp(owner.Offset.Y, -box.Y, Math.Max(-box.Y, finalSize.Height - box.Bottom)));
+            owner.panel.Arrange(box.Translate(owner.Offset));
             return finalSize;
         }
     }

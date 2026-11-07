@@ -128,4 +128,44 @@ public class DialogTests
         Assert.Equal(800 - 2 * em, dialog.Panel.Bounds.Width, 0.5);
         dialog.IsOpen = false;
     });
+
+    [Fact]
+    public Task Draggable_moves_by_the_header_stays_in_the_window_and_recenters_on_open() => HeadlessUi.Run(() =>
+    {
+        var dialog = new Dialog { Title = "付款信息", Draggable = true, Content = new TextBlock { Text = "核对" } };
+        var window = HeadlessUi.Show(dialog);
+        dialog.IsOpen = true;
+        HeadlessUi.Flush(window);
+        var root = (Visual)TopLevel.GetTopLevel(dialog.Panel)!;
+        var pointer = new Pointer(1, PointerType.Mouse, true);
+        var pressed = new PointerPointProperties(RawInputModifiers.LeftMouseButton, PointerUpdateKind.LeftButtonPressed);
+        void Drag(global::Avalonia.Interactivity.Interactive source, Point from, Vector by)
+        {
+            source.RaiseEvent(new PointerPressedEventArgs(source, pointer, root, from, 0, pressed, KeyModifiers.None));
+            dialog.Header.RaiseEvent(new PointerEventArgs(InputElement.PointerMovedEvent, dialog.Header, pointer, root, from + by, 1, pressed, KeyModifiers.None));
+            dialog.Header.RaiseEvent(new PointerReleasedEventArgs(dialog.Header, pointer, root, from + by, 2,
+                new PointerPointProperties(RawInputModifiers.None, PointerUpdateKind.LeftButtonReleased), KeyModifiers.None, MouseButton.Left));
+            HeadlessUi.Flush(window);
+        }
+        var start = dialog.Panel.Bounds;
+        var grip = dialog.Header.TranslatePoint(new Point(4, 4), root)!.Value;
+
+        Drag(dialog.Header, grip, new Vector(60, 40));
+        Assert.Equal(new Vector(60, 40), dialog.Offset); // 按住标题行拖
+        Assert.Equal(start.Position + new Vector(60, 40), dialog.Panel.Bounds.Position);
+        Drag(dialog.CloseButton, dialog.CloseButton.TranslatePoint(new Point(4, 4), root)!.Value, new Vector(30, 30));
+        Assert.Equal(new Vector(60, 40), dialog.Offset); // 从关闭按钮上按下不拖
+        Drag(dialog.Header, dialog.Header.TranslatePoint(new Point(4, 4), root)!.Value, new Vector(5000, 5000));
+        var layer = (Control)dialog.Panel.Parent!;
+        Assert.Equal(layer.Bounds.Width, dialog.Panel.Bounds.Right, 1); // 不超出窗口
+        Assert.Equal(layer.Bounds.Height, dialog.Panel.Bounds.Bottom, 1);
+
+        dialog.IsOpen = false;
+        HeadlessUi.Flush(window);
+        dialog.IsOpen = true;
+        HeadlessUi.Flush(window);
+        Assert.Equal(default, dialog.Offset); // 每次打开回到正中
+        Assert.Equal(start, dialog.Panel.Bounds);
+        dialog.IsOpen = false;
+    });
 }
