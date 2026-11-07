@@ -291,11 +291,11 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 模板里**每个内部节点都起部件名**（`PART_Root`、`PART_Icon`、`PART_Track`……），名字照 TS 的部件名，作为公开常量列出（`ButtonParts.Icon`），文档列出每个组件的部件。
 - 部件是本库组件时，模板里直接放那个组件（`rune:Icon`、`rune:TextField`），不要换成平台的基础元素，否则使用方转发不到它的属性与部件。WPF 上它还得从 Control 派生，外层的隐式样式才进得去（见下）。
 - 组件自己给部件的默认外观写在主题里（嵌套样式、部件样式、配方），这样才排在使用方之前；组件状态决定的属性用本地值或模板绑定，作为受管属性。
-- **代码组合的控件**（子元素在代码里建，没有模板：Card、Empty、Progress……）的部件默认外观（2026-11-07 定，Progress 起）：
-  - Avalonia：ControlTheme 里写不了普通子选择器，`BindingPriority.Template` 又高于样式（使用方盖不过），所以写进主题里的普通样式文件（`Progress.axaml` 是 `Styles`，RuneTheme 用 `StyleInclude` 引入，排在使用方的样式之前）。选择器按逻辑父元素：`rune|Progress #PART_Header > rune|Text#PART_ValueLabel`。
-  - WPF：写在部件样式键的主题样式里；随组件状态变的（色调、形状）用祖先绑定的 DataTrigger：`{Binding Tone.Value, RelativeSource={RelativeSource AncestorType=rune:Progress}}`。
-  - WinForms：组件给的默认 `TextProps` / `IconProps` 在下，使用方的 `PropsXxx` 在上，逐字段合并。
-  - 缺口：更早做的 Empty、Card、Avatar、Separator 等把部件默认值写成了本地值（`new Icon { Tone = TextTone.Muted }`），使用方的部件样式盖不过，要按上面的做法统一改。
+- **代码组合的控件**（子元素在代码里建，没有模板：Badge、Indicator、Separator、Card、Avatar、Empty、Progress……）的部件默认外观（2026-11-07 定并统一改过）：
+  - Avalonia：ControlTheme 里写不了普通子选择器，`BindingPriority.Template` 又高于样式（使用方盖不过），所以每个组件一份 `XxxParts.axaml`（`Styles`，RuneTheme 用 `StyleInclude` 引入，排在使用方的样式之前）。选择器按逻辑树写全路径（`rune|Empty > Border > rune|Flex > rune|Icon#PART_Icon`），不碰 Content、Action 里别人的同名部件；跟着组件属性走的值用 `{Binding $parent[rune:Indicator].Palette.Solid}`。
+  - WPF：写在部件样式键的主题样式里；跟着组件属性走的用祖先绑定（`{Binding Thickness, RelativeSource={RelativeSource AncestorType=rune:Separator}}`），随状态变的用祖先绑定的 DataTrigger（Progress 的色调、形状）。每个部件键都要有主题样式（Badge 以前漏了）。
+  - WinForms：组件给的默认 `TextProps` / `IconProps` 在下，使用方的 `PropsXxx` 在上，逐字段合并，改部件属性时重建元素（保留文字）。
+  - 仍在代码里的是受管属性：可见性、按 em 算出来的尺寸与边距、内容。测试：三个平台各有 `PartDefaultsTests` / 部件属性用例，核对"默认值在、使用方盖得过"。
 
 ### 部件的外观与事件
 
