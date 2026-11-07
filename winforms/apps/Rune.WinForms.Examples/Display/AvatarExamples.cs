@@ -11,15 +11,13 @@ static class AvatarExamples
         new("Avatar", "indicator", "角标", "IndicatorControl 包住要标记的控件：计数超过 Max 显示\"99+\"，0 时不显示（ShowZero 时显示 0）；Dot 是小圆点。数字对读屏隐藏，另有一句完整的 Label。WinForms 的角标画不到控件外面，伸出去的一半占位置。", Indicators),
     ];
 
-    static readonly TextSize[] Sizes = [TextSize.Xs, TextSize.Sm, TextSize.Md, TextSize.Lg, TextSize.Xl];
-
     static readonly StatusTone[] Tones = [StatusTone.Accent, StatusTone.Info, StatusTone.Success, StatusTone.Warning, StatusTone.Danger, StatusTone.Neutral];
 
     static FlexControl Row(string label, params Control[] items) =>
         Build.Flex(new FlexControl { Align = FlexAlign.Center, Gap = Space.Md, Wrap = true }, [new TextControl { Text = label, TextSize = TextSize.Xs, Tone = TextTone.Muted }, .. items]);
 
     static Control Basic() => Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Lg },
-        Row("尺寸", [.. Sizes.Select(size => new AvatarControl { TextSize = size, Source = Photos.Members[0].Photo, DisplayName = $"林小满（{size}）" })]),
+        Row("尺寸", [.. Build.Steps.Select(size => new AvatarControl { TextSize = size, Source = Photos.Members[0].Photo, DisplayName = $"林小满（{size}）" })]),
         Row("后备内容",
             new AvatarControl { DisplayName = "吴悠" },
             new AvatarControl { DisplayName = "Zhao Qing" },

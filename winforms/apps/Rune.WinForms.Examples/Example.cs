@@ -23,88 +23,23 @@ public static class ExampleCatalog
     public static Example? Find(string key) => All.FirstOrDefault(example => string.Equals(example.Key, key, StringComparison.OrdinalIgnoreCase));
 }
 
-/// <summary>
-/// 示例里的排版：自动大小的 FlowLayoutPanel 与 Label。Flex、Grid、Text 做出来后换掉。
-/// 间距、宽度写设备无关像素，建控件时按 DPI 换算（代码建的控件没有设计器的自动缩放）；字号写磅值，系统按 DPI 换算。
-/// </summary>
-static class Layout
+/// <summary>设好属性的布局控件放进子控件后返回，表达式里就能嵌套（子控件可以用 [.. 序列] 展开）。</summary>
+static class Build
 {
     /// <summary>示例里的字号档位：同 vue-tsx-pro 文档站的 xs–xl（标题才用的 xxl、xxxl 不列）。</summary>
     public static readonly TextSize[] Steps = [TextSize.Xs, TextSize.Sm, TextSize.Md, TextSize.Lg, TextSize.Xl];
 
-    /// <summary>设备无关像素 → 主显示器上的设备像素（宽度、内边距这类写死的尺寸用它）。</summary>
-    public static int Dip(int value) => (int)Math.Round(value * SystemDpi / 96f);
-
-    static int SystemDpi
+    /// <summary>
+    /// TS 里外面包一层 <c>&lt;Text size tone&gt;</c>：给容器设字体与前景色，里面跟随字体与 ForeColor 的控件
+    /// （Icon、Spinner、Link、没写档位与色调的文字）随之变化。换主题时 Gallery 重建示例，所以色调取当下的主题就够。
+    /// </summary>
+    public static T Styled<T>(T container, TextSize size = default, TextTone tone = default) where T : Control
     {
-        get
-        {
-            if (field != 0) return field;
-            using var probe = new Control();
-            return field = probe.DeviceDpi;
-        }
+        if (size.Pixels is { } pixels) container.Font = new Font(Fonts.Installed(RuneTheme.Current.Peek().Fonts.Sans), pixels * 72 / 96);
+        if (tone != default) container.ForeColor = tone.ColorIn(new ElementContext(container.DeviceDpi, container.Font, container.ForeColor, false));
+        return container;
     }
 
-    /// <summary>一行，放不下时换行（停靠在宿主顶部，宽度随宿主）。</summary>
-    public static FlowLayoutPanel Wrap(int gap, params Control[] children) => Flow(FlowDirection.LeftToRight, true, gap, children);
-
-    /// <summary>一行，不换行。</summary>
-    public static FlowLayoutPanel Row(int gap, params Control[] children) => Flow(FlowDirection.LeftToRight, false, gap, children);
-
-    /// <summary>一列。</summary>
-    public static FlowLayoutPanel Column(int gap, params Control[] children) => Flow(FlowDirection.TopDown, false, gap, children);
-
-    /// <summary>一格：图标在上，说明在下，都居中；写了宽度时每格一样宽（列宽取最宽的子控件，所以加宽的是说明）。</summary>
-    public static FlowLayoutPanel Cell(Control icon, string caption, int width = 0)
-    {
-        icon.Anchor = AnchorStyles.None;
-        var label = Caption(caption);
-        label.Anchor = AnchorStyles.None;
-        if (width > 0)
-        {
-            label.AutoSize = false;
-            label.TextAlign = ContentAlignment.TopCenter;
-            label.Size = new Size(Math.Max(label.LogicalToDeviceUnits(width), label.PreferredWidth), label.PreferredHeight);
-        }
-        return Column(4, icon, label);
-    }
-
-    /// <summary>文字；给了字号（设备无关像素）时按它建字体，否则跟随父控件。</summary>
-    public static Label Text(string text, float? size = null) => new()
-    {
-        Text = text, AutoSize = true, Margin = Padding.Empty,
-        Font = size is { } pixels ? new Font(Fonts.Installed(RuneTheme.Current.Peek().Fonts.Sans), pixels * 72 / 96) : null,
-    };
-
-    /// <summary>说明文字：次要文字的颜色（取当前主题，换主题时 Gallery 重建示例）、sm 字号。</summary>
-    public static Label Caption(string text)
-    {
-        var label = Text(text, Tokens.FontSize.Sm);
-        label.ForeColor = RuneTheme.Current.Peek().Colors.TextMuted;
-        return label;
-    }
-
-    static FlowLayoutPanel Flow(FlowDirection direction, bool wrap, int gap, Control[] children)
-    {
-        var panel = new FlowLayoutPanel
-        {
-            FlowDirection = direction, WrapContents = wrap, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink,
-            Margin = Padding.Empty, Padding = Padding.Empty,
-        };
-        if (wrap) panel.Dock = DockStyle.Top;
-        foreach (var child in children)
-        {
-            var space = panel.LogicalToDeviceUnits(gap);
-            child.Margin = direction == FlowDirection.TopDown ? new Padding(0, 0, 0, space) : new Padding(0, 0, space, wrap ? space : 0);
-            panel.Controls.Add(child);
-        }
-        return panel;
-    }
-}
-
-/// <summary>设好属性的布局控件放进子控件后返回，表达式里就能嵌套（子控件可以用 [.. 序列] 展开）。</summary>
-static class Build
-{
     public static FlexControl Flex(FlexControl flex, params Control[] children)
     {
         flex.Controls.AddRange(children);

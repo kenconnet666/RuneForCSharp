@@ -1,5 +1,3 @@
-using static Rune.WinForms.Examples.Layout;
-
 namespace Rune.WinForms.Examples;
 
 /// <summary>List 的示例（vue-tsx-pro 文档站 base/List）。</summary>
@@ -52,13 +50,11 @@ static class ListExamples
         setup.Controls.AddRange([
             Item(new CodeTextControl { Source = "安装 `@zerodep-dev/vue-tsx-pro-ui`" }),
             Item(new CodeTextControl { Source = "在 Vite 配置里加上 `vueTsxPro()`" }),
-            Item(Row(0, new StrongControl { Text = "createUi" }, new TextControl { Text = " 选好主题与语言" })),
+            Item(Build.Flex(new FlexControl { Align = FlexAlign.Baseline }, new StrongControl { Text = "createUi" }, new TextControl { Text = " 选好主题与语言" })),
         ]);
         var next = Items(new OrderedListControl { Start = 4, Gap = Space.Sm }, "写第一个页面（接着上一列，从 4 开始）", "跑起开发服务器，改代码立即看到效果");
 
-        // TS 的 Grid minItemWidth="16rem" gap="lg"：Grid 做出来前每列定宽 256（高度自动）
-        foreach (var list in new ListBaseControl[] { features, setup, next }) list.MinimumSize = list.MaximumSize = new Size(Dip(256), 0);
-        return Wrap(16, features, setup, next);
+        return Build.Grid(new GridControl { MinItemWidth = "16rem", Gap = Space.Lg }, features, setup, next);
     }
 
     static T Items<T>(T list, params string[] texts) where T : ListBaseControl

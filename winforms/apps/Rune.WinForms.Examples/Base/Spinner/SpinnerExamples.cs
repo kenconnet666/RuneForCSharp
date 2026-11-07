@@ -1,5 +1,3 @@
-using static Rune.WinForms.Examples.Layout;
-
 namespace Rune.WinForms.Examples;
 
 /// <summary>Spinner 的示例（vue-tsx-pro 文档站 feedback/Progress 页的 spinner 一节）。WinForms 里放进窗体的是 SpinnerControl。</summary>
@@ -10,29 +8,21 @@ static class SpinnerExamples
         new("Spinner", "spinner", "旋转指示", "SpinnerControl 默认跟随字体大小与 ForeColor，旁边有文字时是装饰；单独出现时写 Label，读屏当作进度条念出来。", Spinners),
     ];
 
-    static Control Spinners()
-    {
-        var sizes = Wrap(24,
+    static Control Spinners() => Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Lg },
+        Build.Flex(new FlexControl { Align = FlexAlign.Center, Gap = Space.Lg, Wrap = true },
         [
-            .. Steps.Select(size => new SpinnerControl { IconSize = size, Anchor = AnchorStyles.None }),
-            FollowText(TextTone.Accent, "跟随文字颜色", null),
+            .. Build.Steps.Select(size => new SpinnerControl { IconSize = size }),
+            FollowText(TextTone.Accent, "跟随文字颜色"),
             FollowText(TextTone.Success, "同步中", TextSize.Sm),
-        ]);
-        var card = Row(8, new SpinnerControl { Label = "正在生成报表", Anchor = AnchorStyles.None },
-            new SmallControl { Text = "正在生成报表，大约需要 30 秒", Tone = TextTone.Muted, Anchor = AnchorStyles.None });
-        card.Padding = new Padding(Dip(16));
-        card.MinimumSize = new Size(Dip(420), 0);
-        card.BackColor = RuneTheme.Current.Peek().Colors.Surface;
-        card.BorderStyle = BorderStyle.FixedSingle;
-        return Column(24, sizes, card);
-    }
+        ]),
+        Build.Card(new CardControl(), Build.Flex(new FlexControl { Align = FlexAlign.Center, Justify = FlexJustify.Between, Gap = Space.Md },
+            // 单独出现、旁边没有文字时写 Label：读屏当作进度条念出来
+            Build.Flex(new FlexControl { Align = FlexAlign.Center, Gap = Space.Sm },
+                new SpinnerControl { Label = "正在生成报表" },
+                new SmallControl { Text = "正在生成报表，大约需要 30 秒", Tone = TextTone.Muted }),
+            new ButtonControl { Text = "取消", TextSize = TextSize.Sm, Variant = ButtonVariant.Ghost })));
 
-    /// <summary>与文字同一行：颜色、大小跟随这一行的字体与 ForeColor（Text 的 Tone 只管文字，这里给整行设颜色）。</summary>
-    static Control FollowText(TextTone tone, string text, TextSize? size)
-    {
-        var row = Row(4, new SpinnerControl { Anchor = AnchorStyles.None }, new TextControl { Text = text, Anchor = AnchorStyles.None });
-        row.ForeColor = tone.ColorIn(new ElementContext(row.DeviceDpi, row.Font, row.ForeColor, false));
-        if (size?.Pixels is { } pixels) row.Font = new Font(Fonts.Installed(RuneTheme.Current.Peek().Fonts.Sans), pixels * 72 / 96);
-        return row;
-    }
+    /// <summary>与文字同一行：颜色、大小跟随这一行的字体与 ForeColor（TS 里是外面包一层 Text）。</summary>
+    static Control FollowText(TextTone tone, string text, TextSize size = default) =>
+        Build.Styled(Build.Flex(new FlexControl { Align = FlexAlign.Center, Gap = Space.Xs }, new SpinnerControl(), new TextControl { Text = text }), size, tone);
 }
