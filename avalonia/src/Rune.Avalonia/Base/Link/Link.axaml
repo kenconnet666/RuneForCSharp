@@ -28,8 +28,6 @@
       </ControlTemplate>
     </Setter>
     <Style Selector="^:focus-visible /template/ Border#PART_FocusRing"><Setter Property="IsVisible" Value="True" /></Style>
-    <Style Selector="^:underline-always /template/ ContentPresenter#PART_ContentPresenter > TextBlock"><Setter Property="TextDecorations" Value="Underline" /></Style>
-    <Style Selector="^:underline-hover:pointerover:not(:soft-disabled) /template/ ContentPresenter#PART_ContentPresenter > TextBlock"><Setter Property="TextDecorations" Value="Underline" /></Style>
     <Style Selector="^:disabled, ^:soft-disabled">
       <Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" />
       <Setter Property="Cursor" Value="No" />

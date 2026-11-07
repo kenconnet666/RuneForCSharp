@@ -137,7 +137,8 @@ public class Empty : Control
     void UpdateMetrics()
     {
         var em = FontSize;
-        icon.Width = icon.Height = 2.5 * em;
+        // 图标按自己的 Size 画（不看 Width、Height）：设成 2.5em 的像素数
+        icon.Size = 2.5 * em;
         description.MaxWidth = 32 * em;
         action.Margin = new Thickness(0, (double)GetValue(GapFactorProperty) * em, 0, 0);
         root.Padding = new Thickness((double)GetValue(InlineFactorProperty) * em, (double)GetValue(BlockFactorProperty) * em, (double)GetValue(InlineFactorProperty) * em, (double)GetValue(BlockFactorProperty) * em);

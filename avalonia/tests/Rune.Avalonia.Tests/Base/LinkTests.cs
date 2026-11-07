@@ -48,4 +48,16 @@ public class LinkTests
         window.MouseUp(Center(link, window), MouseButton.Left);
         Assert.Single(link.Opened);
     });
+
+    [Fact]
+    public Task Text_is_underlined_by_the_underline_variant() => HeadlessUi.Run(() =>
+    {
+        var always = new Link { Content = "按钮" };
+        var none = new Link { Content = "次要", Underline = LinkUnderline.None };
+        HeadlessUi.Show(new StackPanel { Children = { always, none } });
+        static TextDecorationCollection? Decorations(Link link) => global::Avalonia.VisualTree.VisualExtensions.GetVisualDescendants(link).OfType<TextBlock>().First().TextDecorations;
+
+        Assert.Equal(TextDecorations.Underline, Decorations(always));
+        Assert.Null(Decorations(none));
+    });
 }
