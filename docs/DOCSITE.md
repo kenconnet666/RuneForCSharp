@@ -65,9 +65,9 @@ Chromium（Skia）、Avalonia（Skia）、WPF（DirectWrite）、WinForms（GDI 
 |---|---|---|---|
 | nav-list（含 toc） | 0 / 8（0.10%） | 0 / 8（0.21%） | 4 / 8（2.84%，Switch 那一行、GDI 文字） |
 | table | 0 / 2（0.12%） | 0 / 2（0.38%） | 0 / 2（0.41%） |
-| code（CodeBlock 的四节） | 0 / 8（0.35%） | 2 / 8（1.12%） | 4 / 8（13.53%，Switch 那一行的行高） |
+| code（basic 与 CodeBlock 的四节） | 0 / 10（0.35%） | 2 / 10（1.12%） | 6 / 10（13.53%，Switch 那一行的行高） |
 | tabs（line、soft） | 0 / 4（0.44%） | 0 / 4（0.44%） | 4 / 4（13.69%，行高） |
-| checkbox | 2 / 10（0.76%） | 1 / 10（0.51%） | 10 / 10（17.68%） |
+| checkbox（含 cards） | 4 / 12（6.94%，cards 少折一行） | 3 / 12（6.79%，同左） | 12 / 12（17.68%） |
 | empty | 2 / 2（0.60%） | 1 / 2（0.51%） | 2 / 2（10.71%） |
 | popover（popover、tooltip、placement） | 2 / 6（0.89%） | 4 / 6（0.92%） | 6 / 6（10.02%） |
 | dialog（dialog、long-content） | 4 / 4（1.79%） | 3 / 4（1.20%） | 4 / 4（15.01%，ToggleGroup 的 sm 档偏高） |
@@ -82,7 +82,7 @@ Chromium（Skia）、Avalonia（Skia）、WPF（DirectWrite）、WinForms（GDI 
 | progress | 8 / 8（11.51%） | 8 / 8（11.48%） | 8 / 8（13.92%） |
 | button（2026-11-07 起含图标按钮、预设按钮：上游 IconButton 页并了进来） | 22 / 24（13.10%） | 20 / 24（18.69%） | 24 / 24（29.35%） |
 | text | 14 / 14（20.49%） | 13 / 14（19.74%） | 14 / 14（10.10%） |
-| badge（含 tag、tag-removable） | 8 / 8（41.84%） | 8 / 8（48.30%） | 8 / 8（24.74%） |
+| badge（含 tag、tag-removable、tag-selectable） | 10 / 10（41.84%） | 10 / 10（48.30%） | 10 / 10（24.74%） |
 
 listbox 页（remote 等远程选项）：single Avalonia 0.08%、WPF 0.07%、WinForms 1.40%；multiple 2.6% / 3.0% / 3.2%（上游示例的高度是 content-box，见 DESIGN §14 Listbox）。
 
@@ -108,6 +108,8 @@ DrawToBitmap 截图画不出原生 TextBox 的占位文字。
 - **半像素上的盒子**：间距、内边距带小数（0.75em = 10.5px、0.25em = 3.5px）时，盒子落在半像素上。浏览器的布局是小数，但画边框、底色时把盒子的边吸附到整像素；
   我们（`--exact` 下不取整）按小数画，1 像素的边线压在两行之间发虚、错开一行。已在行线、滑块上按到根的偏移吸附（Table、ToggleGroup）；卡片之类的一般控件还没有，
   候选办法是 WPF 的 SnapsToDevicePixels、Avalonia 的同类做法，全局开要重比所有页。
+- **要等组件的示例**（2026-11-08 跟到 3c0c817b）：上游 scroll-area 的 vertical（收件箱）、tabs 的 line（订单）改用 ItemList，我们还没有 ItemList，
+  这两个示例的差异（15.8%、27.7%）等 ItemList；icon 的 custom 第二行上游还有菜单，等 Menu。
 - **WinForms 的高度**：文字行高按字体算（不是 1.5em），每个控件四周留 4 像素给焦点环，越往下累积越多；外观本身对得上。要单独定方案（行高按 token 算、焦点环画到父级上）。
 
 ## 二、正式文档站要先做好的

@@ -525,6 +525,7 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - Avalonia 的段落里没有能点的行内文字：Link 建在 ButtonBase 上（焦点环、可聚焦的不可用、点击与命令现成），放进段落时用 InlineUIContainer，`BaselineAlignment="Bottom"` 才和段落的文字在同一条基线上；链接文字本身不跨行换行。
 - WinForms 没有行内元素：LinkControl 是单独的控件（Enter 打开，空格不打开，同浏览器）。
 - 三个平台都同 LinkButton：Href 是绝对地址、用系统打开，不可用时不打开；外部链接读屏名称补"在新窗口打开"。TS 的下划线粗细与偏移（textDecorationThickness、textUnderlineOffset）三个平台都用平台默认的下划线。
+- 下划线的作用域（上游 ff221742 的 LinkUnderlineScope）：取值是 Link 上写的 > 所在容器给的 > 主题与 Provider 的默认（defaults.Link）> always。Avalonia、WPF 是继承的附加属性 `Link.UnderlineScope`（Avalonia 按值的优先级判断"写了"：本地值、绑定算写了，主题、Provider 的样式不算；WPF 在 Underline 不是本地值时强制成容器给的，主题的触发器照旧）；WinForms 没有继承的属性：`LinkControl.SetUnderlineScope(容器, 值)` 记在弱表里，Link 元素从宿主控件往上找最近的一层。Card 的页头给 hover（WinForms 的页头文字是画的，给的是 Extra）。ItemList、Stat、Timeline、Descriptions、Checklist 整块给 hover，做这些组件时照做。
 
 ### CodeText、List、Indicator（2026-11-07）
 
@@ -606,6 +607,7 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 取值核对：`styles.mjs` 对 checkbox 页（checkbox、items、switch、radio）Avalonia、WPF 都是 0 差异。inspect 把 Checkbox、Radio、Switch 报成上游的 `choice` 部件（方框、圆、轨道是 input，对勾、圆点、滑块是 indicator，组是 choice/group）；比对工具把"透明或与底色同色的描边"与"不画描边"算作一样，原生 input 的前景色不比，方框、圆、滑块比高度。
 - WinForms：元素 `Checkbox`、`Radio` + 宿主 `CheckboxControl`、`RadioControl`（共用的宿主是 `ChoiceControl<T>`）；方框、圆、圆点、焦点环是画的。Radio 的文字只能是字符串（元素不能放任意内容）：示例里单选的价格放在同一行的另一个控件里。每项四周留 4 像素给焦点环，所以组里各项的间距比上游大一些（同 Switch）。读屏没有"必填""校验未通过"的状态。
 - 示例：checkbox 页五个示例都有了（Field 做好后换掉了先前的标签、说明上下摆放的替代，补了 validation）。
+- 卡片外观（上游 554b7246，2026-11-08）：Checkbox、Radio 的 `Card`（bool?，不写时跟随组）与组的 `Card`、`MinItemWidth`（默认 14em），Checkbox、Radio 的 `End`（结束边的内容，WinForms 是文字加 `PropsEnd`）。卡片：内边距 space.md、xs 描边、md 圆角、surface 底，悬停 borderStrong；勾选时描边是色调的实底、底色是色调 8% 混进 surface（三个平台都在 sRGB 里插值，8% 时与 oklab 差不到一个色阶），卡片占满宽度。组：竖排一列 gap sm；横排按最小宽度 auto-fill（Grid 加了内部的 `AutoFill`：空列不收起），列距 lg、行距 xs——上游卡片的 `gap: sm` 是简写，被排列方向的 columnGap、rowGap 长写盖过。Avalonia、WPF 在 Render / OnRender 里画卡片（画刷是绑到主题的私有属性），组在卡片外观时把 ItemsPanel 换成 Grid；WPF 加了只读的 `IsEffectivelyCard`、`HasEnd` 给主题触发器撑开宽度。WinForms 元素画卡片（半像素偏移，1 像素描边不糊），宿主在卡片时不留画焦点环的 Padding（焦点环贴着方框，在卡片的内边距里）；组横排时用孪生的 GridLayout 算列数，每项定成列宽，竖排的组改成拉满宽度（同上游的 flex 列，结束边的内容才贴得到结束边）。示例：新的 cards，radio 改用 Description 与 End（Avalonia、WPF 6.8%、WinForms 1.6%：上游"谁在什么时候改了什么"差一点放不下、折成两行，我们一行放下了，卡片矮一行）。
 
 ### Field（2026-11-07）
 
@@ -882,6 +884,7 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 顺手修的：WinForms 按钮禁用时文字不变淡——GDI 的 TextRenderer 不认颜色里的不透明度，改成把前景色按 disabled 不透明度混进主题的表面色。
 - 示例：Badge 页的 tag、tag-removable。剩下的差异主要来自字重：上游字体栈以 `system-ui` 开头（Windows 上的 Chrome 有真正的 500），
   我们的字体 token 从 "Segoe UI" 起，medium 落回常规，文字窄一点、横排的标签一路往后错开（DOCSITE"看过的原因"）。
+- 可选中（上游 0f69e5c5，2026-11-08）：`IsSelected`（bool?，Avalonia、WPF 默认双向绑定；WinForms 发 `IsSelectedChanged`）。不是 null 时整个标签是切换按钮（读屏是按钮、按下状态），点击、Enter 按下、空格松开切换，键盘聚焦画 2px 的焦点环；不带移除按钮。没写的色调、字号用 accent、sm，没选中时没写的样式用 surface，选中时一律 solid、前面一个对勾。Avalonia 回退值按模板优先级设，选中的 solid 与对勾按动画优先级（盖过写了的样式与图标，同上游）；WPF 是 Tag 样式里 IsSelected 的触发器（写了的照用）；WinForms 是 Badge 元素内部的 `Selected` 决定取值。示例：Badge 页的 tag-selectable（Avalonia 0.52%–0.79%、WPF 0.51%–0.78%、WinForms 1.37%–1.87%）。
 
 ### Select、SelectedTags（2026-11-07）
 

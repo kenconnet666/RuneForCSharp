@@ -9,6 +9,7 @@ export const PROP_RENAMES = {
   _open: 'IsOpen',
   checked: 'IsChecked',
   _checked: 'IsChecked',
+  _selected: 'IsSelected',
   expanded: 'IsExpanded',
   _expanded: 'IsExpanded',
   _fullscreen: 'IsFullscreen',
