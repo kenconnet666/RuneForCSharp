@@ -2,35 +2,22 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/avalonia"
              x:Class="Rune.Avalonia.Examples.IconBasic">
-  <UserControl.Styles>
-    <Style Selector="WrapPanel > StackPanel">
-      <Setter Property="Width" Value="88" />
-      <Setter Property="Spacing" Value="4" />
-    </Style>
-    <Style Selector="WrapPanel > StackPanel > :is(Control)">
-      <Setter Property="HorizontalAlignment" Value="Center" />
-    </Style>
-    <Style Selector="WrapPanel > StackPanel > TextBlock">
-      <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
-      <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
-    </Style>
-  </UserControl.Styles>
-  <WrapPanel ItemSpacing="12" LineSpacing="12">
-    <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Search}" Size="xl" /><TextBlock Text="Search" /></StackPanel>
-    <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Bell}" Size="xl" /><TextBlock Text="Bell" /></StackPanel>
-    <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Heart}" Size="xl" /><TextBlock Text="Heart" /></StackPanel>
-    <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Settings}" Size="xl" /><TextBlock Text="Settings" /></StackPanel>
-    <StackPanel><rune:Icon Data="{x:Static rune:Lucide.House}" Size="xl" /><TextBlock Text="House" /></StackPanel>
-    <StackPanel><rune:Icon Data="{x:Static rune:Lucide.User}" Size="xl" /><TextBlock Text="User" /></StackPanel>
-    <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Mail}" Size="xl" /><TextBlock Text="Mail" /></StackPanel>
-    <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Calendar}" Size="xl" /><TextBlock Text="Calendar" /></StackPanel>
-    <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Camera}" Size="xl" /><TextBlock Text="Camera" /></StackPanel>
-    <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Cloud}" Size="xl" /><TextBlock Text="Cloud" /></StackPanel>
-    <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Download}" Size="xl" /><TextBlock Text="Download" /></StackPanel>
-    <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Folder}" Size="xl" /><TextBlock Text="Folder" /></StackPanel>
-    <StackPanel><rune:Icon Data="{x:Static rune:Lucide.MapPin}" Size="xl" /><TextBlock Text="MapPin" /></StackPanel>
-    <StackPanel><rune:Icon Data="{x:Static rune:Lucide.ShoppingCart}" Size="xl" /><TextBlock Text="ShoppingCart" /></StackPanel>
-    <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="xl" /><TextBlock Text="Star" /></StackPanel>
-    <StackPanel><rune:Icon Data="{x:Static rune:Lucide.Zap}" Size="xl" /><TextBlock Text="Zap" /></StackPanel>
-  </WrapPanel>
+  <rune:Grid MinItemWidth="5.5rem" Gap="md">
+    <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.Search}" Size="xl" /><rune:Small Tone="muted">Search</rune:Small></rune:Flex>
+    <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.Bell}" Size="xl" /><rune:Small Tone="muted">Bell</rune:Small></rune:Flex>
+    <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.Heart}" Size="xl" /><rune:Small Tone="muted">Heart</rune:Small></rune:Flex>
+    <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.Settings}" Size="xl" /><rune:Small Tone="muted">Settings</rune:Small></rune:Flex>
+    <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.House}" Size="xl" /><rune:Small Tone="muted">House</rune:Small></rune:Flex>
+    <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.User}" Size="xl" /><rune:Small Tone="muted">User</rune:Small></rune:Flex>
+    <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.Mail}" Size="xl" /><rune:Small Tone="muted">Mail</rune:Small></rune:Flex>
+    <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.Calendar}" Size="xl" /><rune:Small Tone="muted">Calendar</rune:Small></rune:Flex>
+    <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.Camera}" Size="xl" /><rune:Small Tone="muted">Camera</rune:Small></rune:Flex>
+    <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.Cloud}" Size="xl" /><rune:Small Tone="muted">Cloud</rune:Small></rune:Flex>
+    <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.Download}" Size="xl" /><rune:Small Tone="muted">Download</rune:Small></rune:Flex>
+    <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.Folder}" Size="xl" /><rune:Small Tone="muted">Folder</rune:Small></rune:Flex>
+    <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.MapPin}" Size="xl" /><rune:Small Tone="muted">MapPin</rune:Small></rune:Flex>
+    <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.ShoppingCart}" Size="xl" /><rune:Small Tone="muted">ShoppingCart</rune:Small></rune:Flex>
+    <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.Star}" Size="xl" /><rune:Small Tone="muted">Star</rune:Small></rune:Flex>
+    <rune:Flex Direction="column" Align="center" Gap="xs"><rune:Icon Data="{x:Static rune:Lucide.Zap}" Size="xl" /><rune:Small Tone="muted">Zap</rune:Small></rune:Flex>
+  </rune:Grid>
 </UserControl>

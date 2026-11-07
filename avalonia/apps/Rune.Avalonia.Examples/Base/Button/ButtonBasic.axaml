@@ -1,0 +1,30 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/avalonia"
+             x:Class="Rune.Avalonia.Examples.ButtonBasic">
+  <rune:Card>
+    <!-- 页脚默认靠结束边排（TS 的 propsFooter.sx）：让页脚里的 Flex 占满一行，删除才能放到另一侧，离主要操作远一点 -->
+    <rune:Card.Styles>
+      <Style Selector="rune|Card Border#PART_Footer > rune|Flex > ContentPresenter">
+        <Setter Property="rune:Flex.Grow" Value="True" />
+      </Style>
+    </rune:Card.Styles>
+    <rune:Card.Header>
+      <rune:Strong>Vue 3.5 的响应式解构</rune:Strong>
+    </rune:Card.Header>
+    <rune:Card.Extra>
+      <rune:Text x:Name="Status" Size="sm" Tone="muted">草稿 · 3 分钟前保存</rune:Text>
+    </rune:Card.Extra>
+    <rune:Card.Footer>
+      <rune:Flex Justify="between" Align="center" Gap="sm" Wrap="True">
+        <rune:Button Variant="ghost" Tone="danger" Icon="{x:Static rune:Lucide.Trash}">删除</rune:Button>
+        <rune:Flex Gap="sm" Wrap="True">
+          <rune:Button Variant="soft" Tone="neutral">取消</rune:Button>
+          <rune:Button Variant="outline" Icon="{x:Static rune:Lucide.Eye}">预览</rune:Button>
+          <rune:Button x:Name="Publish" Icon="{x:Static rune:Lucide.Send}">发布</rune:Button>
+        </rune:Flex>
+      </rune:Flex>
+    </rune:Card.Footer>
+    <rune:Paragraph Tone="muted">一组操作里只有“发布”用实底；“预览”“取消”依次减弱，“删除”放在另一侧，离主要操作远一点。</rune:Paragraph>
+  </rune:Card>
+</UserControl>

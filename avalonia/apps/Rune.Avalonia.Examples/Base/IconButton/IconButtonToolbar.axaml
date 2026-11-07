@@ -2,48 +2,34 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/avalonia"
              x:Class="Rune.Avalonia.Examples.IconButtonToolbar">
-  <UserControl.Styles>
-    <!-- 分隔线：Separator 做出来后换掉 -->
-    <Style Selector="Border.separator">
-      <Setter Property="Width" Value="1" />
-      <Setter Property="Height" Value="20" />
-      <Setter Property="Margin" Value="4,0" />
-      <Setter Property="Background" Value="{DynamicResource Rune.Brush.Border}" />
-    </Style>
-    <Style Selector="rune|Text.label">
-      <Setter Property="Size" Value="xs" />
-      <Setter Property="Tone" Value="muted" />
-      <Setter Property="VerticalAlignment" Value="Center" />
-    </Style>
-  </UserControl.Styles>
-  <StackPanel Spacing="24">
+  <rune:Flex Direction="column" Gap="lg" VerticalAlignment="Top">
     <!-- 编辑器工具栏：默认 ghost，一组按钮之间用分隔线隔开 -->
-    <WrapPanel ItemSpacing="4" LineSpacing="4">
+    <rune:Flex Align="center" Gap="xs" Wrap="True">
       <rune:IconButton Icon="{x:Static rune:Lucide.LetterB}" AutomationProperties.Name="加粗" />
       <rune:IconButton Icon="{x:Static rune:Lucide.Italic}" AutomationProperties.Name="斜体" />
       <rune:IconButton Icon="{x:Static rune:Lucide.Underline}" AutomationProperties.Name="下划线" />
       <rune:IconButton Icon="{x:Static rune:Lucide.Link2}" AutomationProperties.Name="插入链接" />
-      <Border Classes="separator" />
+      <rune:Separator Orientation="vertical" />
       <rune:IconButton Icon="{x:Static rune:Lucide.TextAlignStart}" AutomationProperties.Name="左对齐" />
       <rune:IconButton Icon="{x:Static rune:Lucide.TextAlignCenter}" AutomationProperties.Name="居中" />
       <rune:IconButton Icon="{x:Static rune:Lucide.TextAlignEnd}" AutomationProperties.Name="右对齐" />
-    </WrapPanel>
-    <WrapPanel ItemSpacing="8" LineSpacing="8">
-      <rune:Text Classes="label" Text="样式" />
+    </rune:Flex>
+    <rune:Flex Align="center" Gap="sm" Wrap="True">
+      <rune:Text Size="xs" Tone="muted">样式</rune:Text>
       <rune:IconButton Icon="{x:Static rune:Lucide.Pencil}" Variant="solid" Tone="accent" AutomationProperties.Name="编辑" />
       <rune:IconButton Icon="{x:Static rune:Lucide.Share2}" Variant="soft" AutomationProperties.Name="分享" />
       <rune:IconButton Icon="{x:Static rune:Lucide.Settings}" Variant="surface" AutomationProperties.Name="设置" />
       <rune:IconButton Icon="{x:Static rune:Lucide.Ellipsis}" Variant="outline" AutomationProperties.Name="更多" />
       <rune:IconButton Icon="{x:Static rune:Lucide.Heart}" Variant="soft" Tone="danger" Radius="full" AutomationProperties.Name="收藏" />
       <rune:IconButton Icon="{x:Static rune:Lucide.Trash}" Tone="danger" AutomationProperties.Name="删除" />
-    </WrapPanel>
-    <WrapPanel ItemSpacing="8" LineSpacing="8">
-      <rune:Text Classes="label" Text="尺寸" />
-      <rune:IconButton Icon="{x:Static rune:Lucide.Settings}" Size="xs" Variant="surface" VerticalAlignment="Center" AutomationProperties.Name="设置（xs）" />
-      <rune:IconButton Icon="{x:Static rune:Lucide.Settings}" Size="sm" Variant="surface" VerticalAlignment="Center" AutomationProperties.Name="设置（sm）" />
-      <rune:IconButton Icon="{x:Static rune:Lucide.Settings}" Size="md" Variant="surface" VerticalAlignment="Center" AutomationProperties.Name="设置（md）" />
-      <rune:IconButton Icon="{x:Static rune:Lucide.Settings}" Size="lg" Variant="surface" VerticalAlignment="Center" AutomationProperties.Name="设置（lg）" />
-      <rune:IconButton Icon="{x:Static rune:Lucide.Settings}" Size="xl" Variant="surface" VerticalAlignment="Center" AutomationProperties.Name="设置（xl）" />
-    </WrapPanel>
-  </StackPanel>
+    </rune:Flex>
+    <rune:Flex Align="center" Gap="sm" Wrap="True">
+      <rune:Text Size="xs" Tone="muted">尺寸</rune:Text>
+      <rune:IconButton Icon="{x:Static rune:Lucide.Settings}" Size="xs" Variant="surface" AutomationProperties.Name="设置（xs）" />
+      <rune:IconButton Icon="{x:Static rune:Lucide.Settings}" Size="sm" Variant="surface" AutomationProperties.Name="设置（sm）" />
+      <rune:IconButton Icon="{x:Static rune:Lucide.Settings}" Size="md" Variant="surface" AutomationProperties.Name="设置（md）" />
+      <rune:IconButton Icon="{x:Static rune:Lucide.Settings}" Size="lg" Variant="surface" AutomationProperties.Name="设置（lg）" />
+      <rune:IconButton Icon="{x:Static rune:Lucide.Settings}" Size="xl" Variant="surface" AutomationProperties.Name="设置（xl）" />
+    </rune:Flex>
+  </rune:Flex>
 </UserControl>
