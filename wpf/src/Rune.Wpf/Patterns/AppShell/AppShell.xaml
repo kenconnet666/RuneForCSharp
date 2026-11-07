@@ -1,0 +1,136 @@
+<!--
+  AppShell、AppShellBrand 与窗口按钮的主题样式（vue-tsx-pro 的 appShellStyles、appShellBrandStyles）：外壳整窗是界面基准文字（md、text），底色 background；
+  品牌 lg、加粗、sm 圆角，标志 accentText；窗口按钮 46 像素宽、与顶栏等高，悬停 fillHover、按下 fillActive，关闭悬停 danger 底、dangerContrast 图标。
+  部件：顶栏 surfaceTranslucent 底、下边一条 border；品牌格（与侧栏同宽时）结束边一条 border；侧栏结束边一条 border，底部收起栏上边一条 borderMuted；
+  页脚上边一条 borderMuted，sm、textMuted；全屏的退出按钮 surfaceTranslucent 底，平时 0.6 不透明，悬停、聚焦时 1；
+  窄时的抽屉：overlay 遮罩，面板 surfaceRaised、除起始边外一圈 border、xl 阴影（阴影画在面板后面的一层上，不让面板里的文字走软件渲染）。
+  尺寸与按 em 的内边距随断点、字号变，在 AppShell.cs 里设。
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Rune.Wpf;component/Base/Button/Button.xaml" />
+    <ResourceDictionary Source="/Rune.Wpf;component/Layout/Flex/Flex.xaml" />
+    <ResourceDictionary Source="/Rune.Wpf;component/Layout/ScrollArea/ScrollArea.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+
+  <Style TargetType="rune:AppShell">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Background}" />
+    <Setter Property="TextElement.FontSize" Value="{DynamicResource Rune.FontSize.Md}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+  </Style>
+
+  <Style TargetType="rune:AppShellBrand" BasedOn="{StaticResource {x:Type rune:ButtonBase}}">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Lg}" />
+    <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Semibold}" />
+    <Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.Sm}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Ripple" Value="False" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="rune:AppShellBrand">
+          <Grid>
+            <Border Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}">
+              <rune:Flex Align="center" Gap="sm">
+                <ContentPresenter x:Name="PART_Logo" Content="{TemplateBinding Logo}" VerticalAlignment="Center" />
+                <rune:Icon x:Name="PART_Icon" Data="{TemplateBinding Icon}" Foreground="{DynamicResource Rune.Brush.AccentText}" />
+                <ContentPresenter x:Name="PART_Name" VerticalAlignment="Center" RecognizesAccessKey="True" />
+              </rune:Flex>
+            </Border>
+            <Border x:Name="PART_FocusRing" Visibility="Collapsed" IsHitTestVisible="False" Margin="-2" BorderThickness="2"
+                    BorderBrush="{DynamicResource Rune.Brush.FocusRing}" CornerRadius="{TemplateBinding CornerRadius}" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="rune:AppShellBrand.IsCompact" Value="True"><Setter TargetName="PART_Name" Property="Visibility" Value="Collapsed" /></Trigger>
+            <Trigger Property="IsFocusVisible" Value="True"><Setter TargetName="PART_FocusRing" Property="Visibility" Value="Visible" /></Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style TargetType="rune:WindowCaptionButton" BasedOn="{StaticResource {x:Type rune:ButtonBase}}">
+    <Setter Property="Width" Value="46" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="Cursor" Value="Arrow" />
+    <Setter Property="Ripple" Value="False" />
+    <Style.Triggers>
+      <Trigger Property="IsHovered" Value="True"><Setter Property="Background" Value="{DynamicResource Rune.Brush.FillHover}" /></Trigger>
+      <Trigger Property="IsPushed" Value="True"><Setter Property="Background" Value="{DynamicResource Rune.Brush.FillActive}" /></Trigger>
+      <MultiTrigger>
+        <MultiTrigger.Conditions>
+          <Condition Property="Kind" Value="Close" />
+          <Condition Property="IsHovered" Value="True" />
+        </MultiTrigger.Conditions>
+        <Setter Property="Background" Value="{DynamicResource Rune.Brush.Danger}" />
+        <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.DangerContrast}" />
+      </MultiTrigger>
+      <MultiTrigger>
+        <MultiTrigger.Conditions>
+          <Condition Property="Kind" Value="Close" />
+          <Condition Property="IsPushed" Value="True" />
+        </MultiTrigger.Conditions>
+        <Setter Property="Background" Value="{DynamicResource Rune.Brush.DangerHover}" />
+        <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.DangerContrast}" />
+      </MultiTrigger>
+    </Style.Triggers>
+  </Style>
+
+  <!-- 部件的默认外观写在部件样式里（DESIGN §7） -->
+  <Style x:Key="{x:Static rune:AppShellParts.Header}" TargetType="Border">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.SurfaceTranslucent}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+  </Style>
+  <Style x:Key="{x:Static rune:AppShellParts.MenuButton}" TargetType="rune:IconButton" BasedOn="{StaticResource {x:Type rune:IconButton}}" />
+  <Style x:Key="{x:Static rune:AppShellParts.HeaderContent}" TargetType="rune:Flex" BasedOn="{StaticResource {x:Type rune:Flex}}" />
+  <Style x:Key="{x:Static rune:AppShellParts.FullscreenButton}" TargetType="rune:IconButton" BasedOn="{StaticResource {x:Type rune:IconButton}}" />
+  <Style x:Key="{x:Static rune:AppShellParts.Body}" TargetType="Grid" />
+  <Style x:Key="{x:Static rune:AppShellParts.SidebarScroll}" TargetType="rune:ScrollArea" BasedOn="{StaticResource {x:Type rune:ScrollArea}}" />
+  <Style x:Key="{x:Static rune:AppShellParts.AsideScroll}" TargetType="rune:ScrollArea" BasedOn="{StaticResource {x:Type rune:ScrollArea}}" />
+  <Style x:Key="{x:Static rune:AppShellParts.Brand}" TargetType="Border">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+  </Style>
+  <Style x:Key="{x:Static rune:AppShellParts.Sidebar}" TargetType="Border">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+    <Setter Property="BorderThickness" Value="0,0,1,0" />
+  </Style>
+  <Style x:Key="{x:Static rune:AppShellParts.CollapseBar}" TargetType="Border">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+    <Setter Property="BorderThickness" Value="0,1,0,0" />
+  </Style>
+  <Style x:Key="{x:Static rune:AppShellParts.Collapse}" TargetType="rune:IconButton" BasedOn="{StaticResource {x:Type rune:IconButton}}" />
+  <Style x:Key="{x:Static rune:AppShellParts.Main}" TargetType="Border" />
+  <Style x:Key="{x:Static rune:AppShellParts.Footer}" TargetType="Border">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+    <Setter Property="BorderThickness" Value="0,1,0,0" />
+    <Setter Property="TextElement.FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+  </Style>
+  <Style x:Key="{x:Static rune:AppShellParts.Aside}" TargetType="Border" />
+  <Style x:Key="{x:Static rune:AppShellParts.FullscreenExit}" TargetType="rune:IconButton" BasedOn="{StaticResource {x:Type rune:IconButton}}">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.SurfaceTranslucent}" />
+    <Setter Property="Opacity" Value="0.6" />
+    <Style.Triggers>
+      <Trigger Property="IsMouseOver" Value="True"><Setter Property="Opacity" Value="1" /></Trigger>
+      <Trigger Property="IsFocusVisible" Value="True"><Setter Property="Opacity" Value="1" /></Trigger>
+    </Style.Triggers>
+  </Style>
+  <Style x:Key="{x:Static rune:AppShellParts.Scrim}" TargetType="Border">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Overlay}" />
+  </Style>
+  <Style x:Key="{x:Static rune:AppShellParts.DrawerShadow}" TargetType="Border">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.SurfaceRaised}" />
+    <Setter Property="Effect" Value="{DynamicResource Rune.Shadow.Xl}" />
+  </Style>
+  <Style x:Key="{x:Static rune:AppShellParts.Drawer}" TargetType="Border">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.SurfaceRaised}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+    <Setter Property="BorderThickness" Value="0,1,1,1" />
+  </Style>
+</ResourceDictionary>

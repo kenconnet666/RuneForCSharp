@@ -38,6 +38,10 @@ public class NavList : Flex
     public static readonly DependencyProperty CompactProperty = DependencyProperty.Register(nameof(Compact), typeof(bool), typeof(NavList),
         new FrameworkPropertyMetadata(false, (d, _) => ((NavList)d).Sync()));
 
+    /// <summary>区域里的导航都紧凑（TS 的 NavCompactContext）：沿元素树继承，AppShell 把侧栏收成图标栏时设在侧栏上。</summary>
+    public static readonly DependencyProperty CompactScopeProperty = DependencyProperty.RegisterAttached("CompactScope", typeof(bool), typeof(NavList),
+        new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.Inherits, (d, _) => (d as NavList)?.Sync()));
+
     /// <summary>点了导航项（切换之前）：标记 Handled 时不改 CurrentHref（TS 的路由接管跳转）。</summary>
     public static readonly RoutedEvent NavigateEvent = EventManager.RegisterRoutedEvent(nameof(Navigate), RoutingStrategy.Bubble, typeof(EventHandler<NavigateEventArgs>), typeof(NavList));
 
@@ -54,6 +58,15 @@ public class NavList : Flex
 
     /// <summary>紧凑。</summary>
     public bool Compact { get => (bool)GetValue(CompactProperty); set => SetValue(CompactProperty, value); }
+
+    /// <summary>实际是否紧凑：自己写了 <see cref="Compact"/>，或在紧凑的区域里。</summary>
+    internal bool IsCompact => Compact || (bool)GetValue(CompactScopeProperty);
+
+    /// <summary>区域里的导航是否都紧凑。</summary>
+    public static bool GetCompactScope(DependencyObject element) => (bool)element.GetValue(CompactScopeProperty);
+
+    /// <summary>让区域里的导航都紧凑。</summary>
+    public static void SetCompactScope(DependencyObject element, bool value) => element.SetValue(CompactScopeProperty, value);
 
     /// <summary>点了导航项。</summary>
     public event EventHandler<NavigateEventArgs> Navigate
@@ -191,7 +204,7 @@ public abstract class NavRow : ButtonBase
     /// <summary>跟着 NavList：紧凑时只剩图标。</summary>
     internal virtual void Apply(NavList? list)
     {
-        SetValue(IsIconOnlyKey, list?.Compact == true && Icon is not null);
+        SetValue(IsIconOnlyKey, list?.IsCompact == true && Icon is not null);
         Update();
     }
 
@@ -390,11 +403,11 @@ public class NavGroup : FrameworkElement
     internal void Apply(NavList owner)
     {
         var current = Items.OfType<NavItem>().Any(item => item.IsCurrent);
-        header.SetCurrent(current && owner.Compact);
+        header.SetCurrent(current && owner.IsCompact);
         if (current) SetCurrentValue(IsOpenProperty, true);
         // 子列表左边缩进 space.lg、上面 space.xs；紧凑时不缩进（TS 的 compactNested）
         var em = TextElement.GetFontSize(this);
-        list.Margin = new Thickness(owner.Compact ? 0 : (TryFindResource("Rune.Space.Lg") as double? ?? 1) * em, (TryFindResource("Rune.Space.Xs") as double? ?? 0.25) * em, 0, 0);
+        list.Margin = new Thickness(owner.IsCompact ? 0 : (TryFindResource("Rune.Space.Lg") as double? ?? 1) * em, (TryFindResource("Rune.Space.Xs") as double? ?? 0.25) * em, 0, 0);
     }
 
     /// <summary>展开、收起。</summary>
@@ -592,7 +605,7 @@ public class NavSection : FrameworkElement
     /// <summary>紧凑时只剩图标、居中，上面一条细线；第一节之外上面留 space.lg。</summary>
     internal void Apply(NavList? owner)
     {
-        var iconOnly = owner?.Compact == true && Icon is not null;
+        var iconOnly = owner?.IsCompact == true && Icon is not null;
         text.Visibility = iconOnly ? Visibility.Collapsed : Visibility.Visible;
         labelContent.Justify = iconOnly ? FlexJustify.Center : FlexJustify.Start;
         var em = TextElement.GetFontSize(this);

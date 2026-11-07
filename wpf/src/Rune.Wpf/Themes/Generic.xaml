@@ -43,5 +43,6 @@
     <ResourceDictionary Source="/Rune.Wpf;component/Input/TextField/TextField.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Input/Radio/Radio.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Form/Field/Field.xaml" />
+    <ResourceDictionary Source="/Rune.Wpf;component/Patterns/AppShell/AppShell.xaml" />
   </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>
