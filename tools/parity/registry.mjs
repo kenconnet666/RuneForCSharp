@@ -104,6 +104,7 @@ const BUTTON_TYPE = '表单提交是浏览器的概念；对话框的默认、�
 export const PROPS_NOT_PORTED = {
   NavList: { propsList: 'nav > ul 是 HTML 的结构：NavList 本身就是那一列' },
   NavItem: { propsItem: '外层的 li 是 HTML 列表的结构：桌面上导航项本身就是列表里的一行' },
+  ToggleGroup: { propsIndicator: '滑块是组自己画的（跟着选中项滑动），没有可改样式的部件' },
   Button: { type: BUTTON_TYPE },
   IconButton: { type: BUTTON_TYPE },
   ButtonBase: { type: BUTTON_TYPE },

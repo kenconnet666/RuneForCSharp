@@ -9,7 +9,7 @@ namespace Rune.Avalonia;
 /// <summary>
 /// 漫游焦点（vue-tsx-pro 的 rovingFocus，WAI-ARIA 的 roving tabindex）：一组项里只有一个是 Tab 停靠点，其余不停；
 /// 组内用方向键移动，Home / End 到两端。Toolbar 用它，以后的 Tabs、Menu、ToggleGroup 同样用。
-/// 不可用、隐藏的项跳过；Tab 进入时落在上次聚焦的项，没有时是第一项。从右到左排版时左右键反过来。
+/// 不可用、隐藏的项跳过；Tab 进入时落在上次聚焦的项，没有时是 <see cref="Preferred"/> 选出的项或第一项。从右到左排版时左右键反过来。
 /// </summary>
 sealed class RovingFocus
 {
@@ -34,6 +34,9 @@ sealed class RovingFocus
     /// <summary>到两端后从另一端继续。</summary>
     public bool Loop { get; set; } = true;
 
+    /// <summary>还没聚焦过时优先作 Tab 停靠点的项（分段控件的选中项）；没有时是第一项。</summary>
+    public Func<Control, bool>? Preferred { get; set; }
+
     /// <summary>项：可见、可用（可聚焦的不可用也跳过），不在里面另一个漫游焦点的组里。</summary>
     List<Control> Items() =>
     [
@@ -45,7 +48,8 @@ sealed class RovingFocus
     public void Sync()
     {
         var items = Items();
-        var stop = current is not null && items.Contains(current) ? current : items.FirstOrDefault();
+        var stop = current is not null && items.Contains(current) ? current
+            : Preferred is { } preferred && items.FirstOrDefault(preferred) is { } chosen ? chosen : items.FirstOrDefault();
         foreach (var item in container.GetVisualDescendants().OfType<Control>().Where(isItem))
             KeyboardNavigation.SetIsTabStop(item, item == stop);
     }

@@ -89,6 +89,9 @@ Chromium（Skia）、Avalonia（Skia）、WPF（DirectWrite）、WinForms（GDI 
   Checkbox 的单选示例曾把选项拉满整行，已改）。先对着上游的 demo 改示例。
 - **细描线的抗锯齿**：图标 1.5px 的描线两边灰度不同，每张图 1.5%–2.5%。要么比对时对描线放宽（按上游的图找出细线像素），要么登记。
 - **字宽**：同一字体，浏览器与平台的字宽差零点几像素，横排的项跟着文字往后错开 1–2 像素（Checkbox 的横排复选框）。
+- **半像素上的盒子**：间距、内边距带小数（0.75em = 10.5px、0.25em = 3.5px）时，盒子落在半像素上。浏览器的布局是小数，但画边框、底色时把盒子的边吸附到整像素；
+  我们（`--exact` 下不取整）按小数画，1 像素的边线压在两行之间发虚、错开一行。已在行线、滑块上按到根的偏移吸附（Table、ToggleGroup）；卡片之类的一般控件还没有，
+  候选办法是 WPF 的 SnapsToDevicePixels、Avalonia 的同类做法，全局开要重比所有页。
 - **WinForms 的高度**：文字行高按字体算（不是 1.5em），每个控件四周留 4 像素给焦点环，越往下累积越多；外观本身对得上。要单独定方案（行高按 token 算、焦点环画到父级上）。
 
 ## 二、正式文档站要先做好的
@@ -135,7 +138,7 @@ CodeBlock 的语法高亮先做一个够用的版本（C#、XAML 两种语言）
 ## 三、先后顺序（用户 2026-11-07 定：对照基础之后先做文档站要用的组件）
 
 1. [x] **对照基础**：画布与缩放对齐、`ts-shots`、`pixels.mjs` 与报告、登记表；已做的页面跑出差异总表（见下面"差异基线"）。
-2. [ ] **文档站要用的组件**：~~Tooltip~~、~~CopyButton~~、~~ScrollArea~~、~~CodeBlock~~（2026-11-07 做了，内置简单高亮）、Tabs（核心做了：line、soft、横竖排、键盘；可关闭、排序、全部标签页等 Menu）、~~Table~~（静态表格）、~~NavList~~（紧凑时分组弹出子项等 HoverCard）、~~TableOfContents~~、Select / SegmentedControl、AppShell、CommandPalette。
+2. [ ] **文档站要用的组件**：~~Tooltip~~、~~CopyButton~~、~~ScrollArea~~、~~CodeBlock~~（2026-11-07 做了，内置简单高亮）、Tabs（核心做了：line、soft、横竖排、键盘；可关闭、排序、全部标签页等 Menu）、~~Table~~（静态表格）、~~NavList~~（紧凑时分组弹出子项等 HoverCard）、~~TableOfContents~~、~~ToggleGroup~~（分段控件）、Select、AppShell、CommandPalette。
    每个组件照常过取值、行为、像素三道核对。
 3. [ ] **文档应用**：每个平台一个，替换 Gallery；同时做内容抽取（`docs-gen` 产出页面与示例清单、示例注册改两级、覆盖率），API 表从 XML 文档注释生成。
 4. [ ] **补齐组件与示例**：按上游的层级把 136 页做齐，每页过三道核对。

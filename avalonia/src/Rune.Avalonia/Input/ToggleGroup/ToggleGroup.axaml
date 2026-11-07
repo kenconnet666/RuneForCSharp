@@ -1,0 +1,23 @@
+<!--
+  ToggleItem 的主题（vue-tsx-pro 的 ToggleItem：同按钮的外观，sm 圆角）：只有图标时是方的（宽度 = 控件高度、左右不留内边距）；
+  只读、没选中的项不像能点（悬停也不出底色）。样式、色调、字号由 ToggleGroup 按选中状态写在模板优先级上。组的底色与滑块在 ToggleGroup.cs 里画。
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:ToggleItem}" TargetType="rune:ToggleItem" BasedOn="{StaticResource {x:Type rune:Button}}">
+    <Setter Property="Variant" Value="ghost" />
+    <Setter Property="Tone" Value="neutral" />
+    <Setter Property="Radius" Value="sm" />
+    <Style Selector="^:square">
+      <Setter Property="Padding" Value="{rune:Em 0, 0.25}" />
+      <Setter Property="Width" Value="{rune:ControlHeight}" />
+    </Style>
+    <!-- 只有图标：空的文字位不占地方（不然图标旁边多出一个间距，偏离中心） -->
+    <Style Selector="^:square /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="IsVisible" Value="False" /></Style>
+    <Style Selector="^:readonly:not(:selected)">
+      <Setter Property="Cursor" Value="Arrow" />
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

@@ -1,0 +1,38 @@
+<!--
+  ToggleItem 的主题样式（vue-tsx-pro 的 ToggleItem：同按钮的外观，sm 圆角）：平时中性色的 ghost；选中时品牌色，多选时 surface（单选的底色是组的滑块）。
+  只有图标时是方的（宽度 = 控件高度、左右不留内边距）；只读、没选中的项不像能点（悬停也不出底色）。组的底色与滑块在 ToggleGroup.cs 里画。
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Rune.Wpf;component/Base/Button/Button.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <Style TargetType="rune:ToggleItem" BasedOn="{StaticResource {x:Type rune:Button}}">
+    <Setter Property="Variant" Value="ghost" />
+    <Setter Property="Tone" Value="neutral" />
+    <Setter Property="Radius" Value="sm" />
+    <Style.Triggers>
+      <Trigger Property="IsSelected" Value="True"><Setter Property="Tone" Value="accent" /></Trigger>
+      <MultiTrigger>
+        <MultiTrigger.Conditions>
+          <Condition Property="IsSelected" Value="True" />
+          <Condition Property="IsSliding" Value="False" />
+        </MultiTrigger.Conditions>
+        <Setter Property="Variant" Value="surface" />
+      </MultiTrigger>
+      <Trigger Property="Content" Value="{x:Null}">
+        <Setter Property="rune:EmSize.Padding" Value="0,0.25" />
+        <Setter Property="rune:ControlHeight.Width" Value="True" />
+      </Trigger>
+      <MultiTrigger>
+        <MultiTrigger.Conditions>
+          <Condition Property="IsGroupReadOnly" Value="True" />
+          <Condition Property="IsSelected" Value="False" />
+        </MultiTrigger.Conditions>
+        <Setter Property="Cursor" Value="Arrow" />
+        <Setter Property="Background" Value="Transparent" />
+      </MultiTrigger>
+    </Style.Triggers>
+  </Style>
+</ResourceDictionary>

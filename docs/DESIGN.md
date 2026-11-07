@@ -695,6 +695,23 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   指示条 2 像素宽、圆角、品牌色，盖住细线，对准当前链接，第一次直接到位、之后滑过去（durations.md、standard）。
 - 像素对照（nav-list 页的 toc）：Avalonia、WPF 0.01%；WinForms 0.9%–1.0%（GDI 的文字换行宽度与行高）。
 
+### ToggleGroup（2026-11-07）
+
+- 照上游：ToggleGroup（SelectionMode、Value / Values、IsRequired、IsReadOnly、Orientation、Size、Ripple）> ToggleItem（Value、Icon、文字）。TS 的 `_value`
+  按选择方式是字符串或数组，C# 拆成单选的 `Value` 与多选的 `Values`（同平台的 SelectedItem / SelectedItems）。选择规则（`Selection.Toggle`，TS 的 toggleSelection）
+  与 `SelectionMode` 是孪生文件 `Utils/Data/Selection.cs`（以后 Listbox、Select 共用），`ToggleGroupOrientation` 是 `Input/ToggleGroup/ToggleGroupVariants.cs`。
+- 外观：组 fill 底、md 圆角、四周与项之间 space.xs；项同按钮——没选中是中性色的 ghost，选中时品牌色：单选时底色是组画的滑块（accentSoft 底、accentBorder 描边，
+  切换时滑过去），多选时项自己是 surface。只有图标的项是方的。滑块的边吸附到设备像素（WPF 用 GuidelineSet，Avalonia 按到根的偏移取整）。
+- 焦点：整组一个 Tab 停靠点（选中项；漫游焦点加了 `Preferred`：还没聚焦过时优先的项），方向键在组内移动；放进 Toolbar 时不另管焦点（交给工具栏）。
+  放进 Field 时以标签为名称，沿用必填、只读（不可用由平台的 IsEnabled 继承）。读屏里每项是切换按钮（Avalonia、WPF 的 Toggle 模式；WinForms 是按下的按钮）。
+- **Avalonia**：ToggleItem 从 Button 派生，外观（样式、色调、字号、波纹）写在模板优先级上：主题的默认值之上、使用方的样式之下。Button 模板里空的文字位
+  在只有图标时要藏掉，不然多一个间距、图标偏离中心。平台没有 Rect 的过渡：滑块用一个插值过渡（InterpolatingTransitionBase）。
+- **WPF**：外观在主题样式里按只读的 IsSelected、IsSliding、IsGroupReadOnly 触发；滑块用 RectAnimation。
+- **WinForms**：ToggleGroupControl、ToggleItemControl（ButtonControl 加 ToggleItem 元素）；WinForms 的按钮四周各留了焦点环的位置，分段控件因此偏大
+  （同 button 页，WinForms 焦点环留白那项统一处理）。
+- 像素对照：Avalonia segmented 0.26%、vertical 0.13%，WPF 0.30% / 0.11%；multiple 两个平台约 0.7%–2.7%：卡片在 0.75em 的间距之后落在半像素上，
+  浏览器画盒子时把边吸附到整像素，我们按小数画、边线发虚（DOCSITE 记着这类）。做的时候查出 WPF 的 FieldLabel 设了行高却没按块排行，标签按字体的自然行高撑高了 1 像素多，已修。
+
 ### CodeBlock（2026-11-07）
 
 - 标题栏（surfaceMuted、等宽 0.85em、下边分隔线）、代码区（等宽 0.9em、行高 normal、上下 0.75em 左右 1em，ScrollArea 横向滚动，Wrap 时换行）、
