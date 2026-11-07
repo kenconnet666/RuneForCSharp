@@ -3,9 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/wpf"
              xmlns:local="clr-namespace:Rune.Wpf.Examples">
-  <rune:Flex Gap="xl" Align="center">
-    <rune:Icon Data="{x:Static local:IconCustom.Logo}" Size="40" AutomationProperties.Name="站点标志" />
-    <rune:Icon Data="{x:Static local:IconCustom.Verified}" Size="40" Tone="accent" AutomationProperties.Name="已认证" />
-    <rune:Icon Data="{x:Static local:IconCustom.Wave}" Size="40" Tone="info" AutomationProperties.Name="信号" />
+  <rune:Flex Direction="column" Gap="lg">
+    <rune:Flex Gap="xl" Align="center">
+      <rune:Icon Data="{x:Static local:IconCustom.Logo}" Size="40" AutomationProperties.Name="站点标志" />
+      <rune:Icon Data="{x:Static local:IconCustom.Verified}" Size="40" Tone="accent" AutomationProperties.Name="已认证" />
+      <rune:Icon Data="{x:Static local:IconCustom.Wave}" Size="40" Tone="info" AutomationProperties.Name="信号" />
+    </rune:Flex>
+    <rune:Flex Gap="sm" Align="center" Wrap="True">
+      <rune:Button Icon="{x:Static local:IconCustom.Logo}">回到首页</rune:Button>
+      <rune:IconButton Icon="{x:Static local:IconCustom.Wave}" Variant="outline" AutomationProperties.Name="网络状态" />
+      <rune:Tag Icon="{x:Static local:IconCustom.Verified}" Tone="success">已认证供应商</rune:Tag>
+    </rune:Flex>
   </rune:Flex>
 </UserControl>

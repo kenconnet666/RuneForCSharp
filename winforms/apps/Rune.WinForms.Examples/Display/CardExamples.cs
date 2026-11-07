@@ -18,10 +18,59 @@ static class CardExamples
         (CardVariant.Ghost, "没有边框与底色：只用来分组与留白"),
     ];
 
-    static Control Variants() => Build.Grid(new GridControl { MinItemWidth = "13em", Gap = Space.Md },
-        [.. Kinds.Select(kind => Build.Card(new CardControl { Variant = kind.Variant },
-            new StrongControl { Text = kind.Variant.Value },
-            new ParagraphControl { Text = kind.Description, TextSize = TextSize.Sm, Tone = TextTone.Muted }))]);
+    static Control Variants()
+    {
+        var grid = Build.Grid(new GridControl { MinItemWidth = "11em", Balanced = true, Gap = Space.Md, Dock = DockStyle.Top },
+            [.. Kinds.Select(kind => Build.Card(new CardControl { Variant = kind.Variant },
+                new StrongControl { Text = kind.Variant.Value },
+                new ParagraphControl { Text = kind.Description, TextSize = TextSize.Sm, Tone = TextTone.Muted }))]);
+        var stage = new Stage();
+        stage.Controls.Add(grid);
+        return stage;
+    }
+
+    /// <summary>四种样式放在同一块有底色的舞台上对比：outline 没有底色、ghost 连边框也没有，在白底上看不出区别（内边距 space.lg、圆角 radii.lg）。</summary>
+    sealed class Stage : Panel
+    {
+        public Stage()
+        {
+            AutoSize = true;
+            SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw | ControlStyles.SupportsTransparentBackColor, true);
+            BackColor = Color.Transparent;
+        }
+
+        float Em => Font.SizeInPoints * DeviceDpi / 72f;
+
+        public override Size GetPreferredSize(Size proposedSize)
+        {
+            var padding = (int)MathF.Round(Tokens.Space.Lg * Em);
+            var width = proposedSize.Width > 0 ? proposedSize.Width : Width;
+            var inner = Controls.Count > 0 ? Controls[0].GetPreferredSize(new Size(Math.Max(0, width - 2 * padding), 0)) : Size.Empty;
+            return new Size(width, inner.Height + 2 * padding);
+        }
+
+        protected override void OnLayout(LayoutEventArgs levent)
+        {
+            Padding = new Padding((int)MathF.Round(Tokens.Space.Lg * Em));
+            base.OnLayout(levent);
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+            var theme = ElementContext.Of(this).Theme;
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            var diameter = 2 * theme.Radii.Lg * Em;
+            using var path = new System.Drawing.Drawing2D.GraphicsPath();
+            path.AddArc(0, 0, diameter, diameter, 180, 90);
+            path.AddArc(Width - diameter - 1, 0, diameter, diameter, 270, 90);
+            path.AddArc(Width - diameter - 1, Height - diameter - 1, diameter, diameter, 0, 90);
+            path.AddArc(0, Height - diameter - 1, diameter, diameter, 90, 90);
+            path.CloseFigure();
+            using var brush = new SolidBrush(theme.Colors.SurfaceMuted);
+            e.Graphics.FillPath(brush, path);
+        }
+    }
 
     static Control Extra() => Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Md },
         Build.Card(new CardControl { Variant = CardVariant.Outline, CardPadding = Space.Md, Header = "超时最久的项目", Extra = new LinkControl { Text = "全部超时", External = true } },

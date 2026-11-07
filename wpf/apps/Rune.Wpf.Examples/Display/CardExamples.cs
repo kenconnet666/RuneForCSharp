@@ -24,14 +24,23 @@ static class CardExamples
 
     static FrameworkElement Variants()
     {
-        var grid = new Grid { MinItemWidth = "13em", Gap = Space.Md };
+        var grid = new Grid { MinItemWidth = "11em", Balanced = true, Gap = Space.Md };
         foreach (var (variant, description) in Kinds)
             grid.Children.Add(new Card
             {
                 Variant = variant,
                 Content = new StackPanel { Children = { new Strong { Text = variant.Value }, new Paragraph { Text = description, Size = TextSize.Sm, Tone = TextTone.Muted } } },
             });
-        return grid;
+        // 四种样式放在同一块有底色的舞台上对比：outline 没有底色、ghost 连边框也没有，在白底上看不出区别（内边距 space.lg、圆角 radii.lg）
+        var stage = new Border { Child = grid };
+        stage.SetResourceReference(Border.BackgroundProperty, "Rune.Brush.SurfaceMuted");
+        stage.Loaded += (_, _) =>
+        {
+            var em = stage.TryFindResource("Rune.FontSize.Md") as double? ?? 14;
+            stage.Padding = new Thickness((stage.TryFindResource("Rune.Space.Lg") as double? ?? 1) * em);
+            stage.CornerRadius = new CornerRadius((stage.TryFindResource("Rune.Radius.Lg") as double? ?? 0.7) * em);
+        };
+        return stage;
     }
 
     static FrameworkElement Extra() => new Flex

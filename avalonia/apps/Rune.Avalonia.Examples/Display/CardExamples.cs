@@ -23,13 +23,23 @@ static class CardExamples
 
     static Control Variants()
     {
-        var grid = new Grid { MinItemWidth = "13em", Gap = Space.Md };
+        var grid = new Grid { MinItemWidth = "11em", Balanced = true, Gap = Space.Md };
         grid.Children.AddRange(Kinds.Select(kind => new Card
         {
             Variant = kind.Variant,
             Content = new StackPanel { Children = { new Strong { Text = kind.Variant.Value }, new Paragraph { Text = kind.Description, Size = TextSize.Sm, Tone = TextTone.Muted } } },
         }));
-        return grid;
+        // 四种样式放在同一块有底色的舞台上对比：outline 没有底色、ghost 连边框也没有，在白底上看不出区别（内边距 space.lg、圆角 radii.lg）
+        var stage = new Border { Child = grid };
+        stage.AttachedToVisualTree += (_, _) =>
+        {
+            T Resource<T>(string key, T fallback) => stage.TryFindResource(key, stage.ActualThemeVariant, out var value) && value is T typed ? typed : fallback;
+            var em = Resource("Rune.FontSize.Md", 14d);
+            stage.Padding = new global::Avalonia.Thickness(Resource("Rune.Space.Lg", 1d) * em);
+            stage.CornerRadius = new global::Avalonia.CornerRadius(Resource("Rune.Radius.Lg", 0.7) * em);
+            stage.Background = Resource<global::Avalonia.Media.IBrush?>("Rune.Brush.SurfaceMuted", null);
+        };
+        return stage;
     }
 
     static Control Extra() => new Flex

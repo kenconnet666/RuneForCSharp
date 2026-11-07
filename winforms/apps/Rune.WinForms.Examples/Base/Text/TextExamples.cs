@@ -59,7 +59,7 @@ static class TextExamples
         new TextControl { Text = "超时 11 天", Numeric = true, Tone = TextTone.Danger, Weight = TextWeight.Semibold },
     ]);
 
-    static Control Overflow() => Build.Grid(new GridControl { MinItemWidth = "18em", Gap = Space.Md },
+    static Control Overflow() => Build.Grid(new GridControl { MinItemWidth = "18em", Gap = Space.Md, Balanced = true },
         Build.Card(new CardControl(), Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Xs },
             new SmallControl { Text = "Truncate：单行省略", Tone = TextTone.Muted },
             new StrongControl { Text = "vue-tsx-pro / packages / ui / src / display / VirtualList.tsx", Truncate = true },

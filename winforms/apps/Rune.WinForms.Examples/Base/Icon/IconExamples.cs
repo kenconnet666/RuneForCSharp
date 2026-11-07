@@ -11,7 +11,7 @@ static class IconExamples
         new("Icon", "basic", "基础用法", "从 Lucide 类按名取图标交给 Data；设计器的属性窗口里按名字选。全部图标都在 Lucide 类里，第一次用到时才创建。", Basic),
         new("Icon", "sizes", "尺寸与线宽", "不写 IconSize 时是 1em，跟随控件的字体；档位对应主题字号，数字是像素。StrokeWidth 调线宽，大图标用细一点的线更精致。", Sizes),
         new("Icon", "tones", "色调", "不写 Tone 时跟随 ForeColor；状态图标用 success、warning、danger 等色调，和提示条、标记的颜色一致。", Tones),
-        new("Icon", "custom", "自定义图标", "按 Lucide 的格式写 24 格画布上的路径（绝对坐标的 M、L、C、Z）；实心的部分写在 fillPath 里，颜色仍跟随文字。", Custom),
+        new("Icon", "custom", "自定义图标", "按 Lucide 的格式写 24 格画布上的路径（绝对坐标的 M、L、C、Z）；实心的部分写在 fillPath 里，颜色仍跟随文字。写好的图标数据和 Lucide 的一样用：Icon、按钮、标签都认（上游这一行还有菜单，等 Menu）。", Custom),
         new("Icon", "with-text", "与文字、按钮搭配", "图标与文字基线对齐，不撑高行距；按钮、标记、链接里的图标由组件排好间距。WinForms 的文字是整段画的，句子里的图标是一行 FlexControl：IconControl 与 TextControl 按基线（FlexAlign.Baseline）对齐。", WithText),
         new("Icon", "direction", "从右到左", "FlipInRtl 让图标在从右到左（RightToLeft）的排版里水平翻转：箭头、chevron、“返回”这类有方向的图标要翻，时钟、勾号不翻。", Direction),
         new("Icon", "accessibility", "装饰与含义", "旁边已有文字时图标只是装饰，不写名称；单独出现、表达含义的图标要给 AccessibleName。", Accessibility),
@@ -58,10 +58,15 @@ static class IconExamples
             new TextControl { Text = item.Label, TextSize = TextSize.Sm })),
     ]);
 
-    static Control Custom() => Build.Flex(new FlexControl { Align = FlexAlign.Center, Gap = Space.Xl },
-        new IconControl { Data = CustomIcons.Logo, IconSize = 40, AccessibleName = "站点标志" },
-        new IconControl { Data = CustomIcons.Verified, IconSize = 40, Tone = TextTone.Accent, AccessibleName = "已认证" },
-        new IconControl { Data = CustomIcons.Wave, IconSize = 40, Tone = TextTone.Info, AccessibleName = "信号" });
+    static Control Custom() => Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Lg },
+        Build.Flex(new FlexControl { Align = FlexAlign.Center, Gap = Space.Xl },
+            new IconControl { Data = CustomIcons.Logo, IconSize = 40, AccessibleName = "站点标志" },
+            new IconControl { Data = CustomIcons.Verified, IconSize = 40, Tone = TextTone.Accent, AccessibleName = "已认证" },
+            new IconControl { Data = CustomIcons.Wave, IconSize = 40, Tone = TextTone.Info, AccessibleName = "信号" }),
+        Build.Flex(new FlexControl { Align = FlexAlign.Center, Gap = Space.Sm, Wrap = true },
+            new ButtonControl { Icon = CustomIcons.Logo, Text = "回到首页" },
+            new IconButtonControl { Icon = CustomIcons.Wave, Variant = ButtonVariant.Outline, AccessibleName = "网络状态" },
+            new TagControl { Icon = CustomIcons.Verified, Tone = StatusTone.Success, Text = "已认证供应商" }));
 
     static Control WithText() => Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Md },
         Build.Flex(new FlexControl { Gap = Space.Lg, Wrap = true },

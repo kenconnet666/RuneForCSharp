@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/wpf"
              xmlns:local="clr-namespace:Rune.Wpf.Examples">
-  <rune:Grid MinItemWidth="18em" Gap="md">
+  <rune:Grid MinItemWidth="18em" Balanced="True" Gap="md">
     <rune:Card>
       <rune:Flex Direction="column" Gap="xs">
         <rune:Small Tone="muted">Truncate：单行省略</rune:Small>
