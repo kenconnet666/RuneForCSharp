@@ -15,7 +15,7 @@ public class TextareaTests
     static T Part<T>(Control owner, string name) where T : Control => owner.GetVisualDescendants().OfType<T>().First(part => part.Name == name);
 
     [Fact]
-    [Upstream("TextField", "有内容时显示清空按钮，清空后回到空字符串")]
+    [Upstream("Textarea", "有内容时显示清空按钮，清空后回到空字符串")]
     public Task Clearing_a_textarea_empties_it() => HeadlessUi.Run(() =>
     {
         var note = new Textarea { Text = "第一行\n第二行", Clearable = true };

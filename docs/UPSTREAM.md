@@ -125,15 +125,28 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 
 ### 第九批（2026-11-08 通知，master 8c2f40a8，阶段 24.4 删旧写法，破坏性）
 
-8c2f40a8 的 CI 还在排队，锁定仍停在 08906695。没有新的 token 与语言包条目。
+8c2f40a8 的 CI 绿了之后锁定跟到它（含第七、八批）：语言包多了 FormSubmit、FormReset、FormAddRow、FormRemoveRow；token、图标、配方没变。
 
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
 | createUi / Provider 去掉 defaults、styles 两个选项，只用 components（`{ Button: { defaults, styles, variants } }`），styles.Tab 别名删 | Avalonia、WPF 的 Provider 是平台的样式与资源字典；WinForms 的 ProviderControl 是按组件分的强类型记录（`Defaults.Set(new ButtonDefaults …)`、`Styles.Set(new ButtonSx …)`），本来就按组件归，不是旧写法的别名 | 不改；以后做变体（variants）时再看要不要并成一个按组件的入口 |
-| Skeleton 的 variant → shape（SkeletonVariants 删） | 我们没带 variant（registry 登记为“上游已废弃”） | 锁定到这一提交时删掉 registry 里这一条 |
+| Skeleton 的 variant → shape（SkeletonVariants 删） | 我们没带 variant | registry 里“上游已废弃”那一条删了 |
 | WaveGrid 的 variant → type，TimelineChart 系列 variant → type | 还没做 | 做时照新名 |
 | Tones / Tone → TextTones / TextTone | 我们的色调类型本来叫 TextTone | 不涉及 |
 | tsx 的 Theme → VarTheme；配方 compound 的 when → match | 当前锁定已经全是 match | ts-inspect 读组合条件改认 match（原来找 when，组合的条件读不出来） |
+
+跟进时顺带：上游把“有内容时显示清空按钮，清空后回到空字符串”挪到了 `describe('Textarea 的 clearable')` 下（TextField 那条改名为“未声明的属性落到 input；外壳用 propsRoot；清空后写回并聚焦 input”）：
+三个平台的 Textarea 测试改标 Textarea，TextField 测试上旧名的标记删掉（行为对照 193 条、55 条没对上）。
+
+### 第十批（2026-11-08 通知，master 83ee1aac…4a7a0d4e，阶段 24.1 第五批部件补齐）
+
+这些提交的 CI 还在跑或失败，锁定停在 8c2f40a8。
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| 组件内部节点统一带 data-scope / data-part，[data-part] 一律 border-box；部件属性按“默认 < 使用方的 < 组件管的（值、无障碍、事件）”合并 | 网页的标记与盒模型；部件的合并顺序我们本来如此（DESIGN §7） | 不涉及 |
+| 新增部件属性：CommentThread、CommentComposer、Checklist、Cascader、KanbanBoard、CalendarBoard、ColorPicker、DiagramNode | 这些组件都还没做 | 做时照新的部件 |
+| AppShell、FilterBar、Timeline、Tree、ItemList 等只补了标记 | AppShell 已做，部件属性不变 | 不涉及 |
 
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 

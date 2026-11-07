@@ -171,7 +171,6 @@ export const PROPS_NOT_PORTED = {
   },
   Tabs: { lazy: '看不见的面板不排版、不绘制（IsVisible / Visible 为 false），本来就是第一次显示时才有代价' },
   Toolbar: { items: '桌面上没有 CSS 选择器：参与方向键移动的固定是按钮与链接' },
-  Skeleton: { variant: '上游已废弃（改名为 shape），新库不带' },
   Progress: { propsRoot: '外层就是 Progress 自己（读屏的进度条也是它）：样式直接写在 Progress 上' },
   Switch: { propsRoot: '外层（TS 的 label）就是 Switch 自己：样式直接写在 Switch 上' },
   Checkbox: { propsRoot: '外层（TS 的 label）就是 Checkbox 自己：样式直接写在 Checkbox 上' },

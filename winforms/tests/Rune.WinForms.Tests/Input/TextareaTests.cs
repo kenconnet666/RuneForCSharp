@@ -7,7 +7,7 @@ namespace Rune.WinForms.Tests;
 public class TextareaTests
 {
     [Fact]
-    [Upstream("TextField", "有内容时显示清空按钮，清空后回到空字符串")]
+    [Upstream("Textarea", "有内容时显示清空按钮，清空后回到空字符串")]
     public Task Clearing_a_textarea_empties_it() => WinFormsUi.Run(() =>
     {
         var note = new TextareaControl { Text = "第一行\r\n第二行", Clearable = true, Width = 300 };

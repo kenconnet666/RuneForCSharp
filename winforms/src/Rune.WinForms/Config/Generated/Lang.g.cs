@@ -204,6 +204,18 @@ public sealed partial record Lang
     /// <summary>错误汇总里的一项：`('邮箱', '格式不对')` → “邮箱：格式不对”</summary>
     public required Func<string, string, string> FormErrorItem { get; init; }
 
+    /// <summary>SchemaForm 的提交按钮，默认“提交”</summary>
+    public required string FormSubmit { get; init; }
+
+    /// <summary>SchemaForm 的重置按钮，默认“重置”</summary>
+    public required string FormReset { get; init; }
+
+    /// <summary>SchemaForm 列表字段加一行的按钮：`('联系人')` → “添加联系人”</summary>
+    public required Func<string, string> FormAddRow { get; init; }
+
+    /// <summary>SchemaForm 列表字段删一行的按钮：`('联系人', 2)` → “删除第 2 个联系人”</summary>
+    public required Func<string, double, string> FormRemoveRow { get; init; }
+
     /// <summary>未保存离开时确认对话框的标题，默认“离开这个页面？”</summary>
     public required string LeaveTitle { get; init; }
 
@@ -1078,6 +1090,10 @@ public sealed partial record Lang
         FormRequired = "必填",
         FormErrorSummary = count => string.Create(CultureInfo.InvariantCulture, $"有 {count} 项需要修改"),
         FormErrorItem = (label, message) => $"{label}：{message}",
+        FormSubmit = "提交",
+        FormReset = "重置",
+        FormAddRow = label => $"添加{label}",
+        FormRemoveRow = (label, index) => string.Create(CultureInfo.InvariantCulture, $"删除第 {index} 个{label}"),
         LeaveTitle = "离开这个页面？",
         LeaveDescription = "有未保存的修改，离开后会丢失。",
         LeaveConfirm = "离开",
@@ -1490,6 +1506,10 @@ public sealed partial record Lang
         FormRequired = "Required",
         FormErrorSummary = count => (count == 1 ? "There is 1 problem" : string.Create(CultureInfo.InvariantCulture, $"There are {count} problems")),
         FormErrorItem = (label, message) => $"{label}: {message}",
+        FormSubmit = "Submit",
+        FormReset = "Reset",
+        FormAddRow = label => $"Add {label}",
+        FormRemoveRow = (label, index) => string.Create(CultureInfo.InvariantCulture, $"Remove {label} {index}"),
         LeaveTitle = "Leave this page?",
         LeaveDescription = "You have unsaved changes that will be lost.",
         LeaveConfirm = "Leave",

@@ -7,7 +7,6 @@ namespace Rune.WinForms.Tests;
 public class TextFieldTests
 {
     [Fact]
-    [Upstream("TextField", "有内容时显示清空按钮，清空后回到空字符串")]
     [Upstream("TextField", "未声明的属性落到 input；外壳用 propsRoot；清空后写回并聚焦 input")]
     public Task Clearing_writes_back_an_empty_string_and_focuses_the_input() => WinFormsUi.Run(() =>
     {
