@@ -291,6 +291,11 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 模板里**每个内部节点都起部件名**（`PART_Root`、`PART_Icon`、`PART_Track`……），名字照 TS 的部件名，作为公开常量列出（`ButtonParts.Icon`），文档列出每个组件的部件。
 - 部件是本库组件时，模板里直接放那个组件（`rune:Icon`、`rune:TextField`），不要换成平台的基础元素，否则使用方转发不到它的属性与部件。WPF 上它还得从 Control 派生，外层的隐式样式才进得去（见下）。
 - 组件自己给部件的默认外观写在主题里（嵌套样式、部件样式、配方），这样才排在使用方之前；组件状态决定的属性用本地值或模板绑定，作为受管属性。
+- **代码组合的控件**（子元素在代码里建，没有模板：Card、Empty、Progress……）的部件默认外观（2026-11-07 定，Progress 起）：
+  - Avalonia：ControlTheme 里写不了普通子选择器，`BindingPriority.Template` 又高于样式（使用方盖不过），所以写进主题里的普通样式文件（`Progress.axaml` 是 `Styles`，RuneTheme 用 `StyleInclude` 引入，排在使用方的样式之前）。选择器按逻辑父元素：`rune|Progress #PART_Header > rune|Text#PART_ValueLabel`。
+  - WPF：写在部件样式键的主题样式里；随组件状态变的（色调、形状）用祖先绑定的 DataTrigger：`{Binding Tone.Value, RelativeSource={RelativeSource AncestorType=rune:Progress}}`。
+  - WinForms：组件给的默认 `TextProps` / `IconProps` 在下，使用方的 `PropsXxx` 在上，逐字段合并。
+  - 缺口：更早做的 Empty、Card、Avatar、Separator 等把部件默认值写成了本地值（`new Icon { Tone = TextTone.Muted }`），使用方的部件样式盖不过，要按上面的做法统一改。
 
 ### 部件的外观与事件
 
@@ -562,6 +567,15 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 页内搜索命中时展开（`hidden="until-found"`、beforematch）是浏览器的能力，登记为不适用。lazy：Avalonia、WPF 第一次展开才把内容放进内容层；WinForms 不要（隐藏的子控件本来就不建句柄、不参与布局），parity 加了按平台的 `PLATFORM_PROPS_NOT_PORTED`。
 - 测试：Avalonia 12 的无头平台推不动动画时钟（连普通的 Opacity 动画也在第 3 帧停住，`ForceRenderTimerTick` 也不行），所以 Avalonia 用作用域里时长 token 设 0 测终态、另测"收起时立即仍可见"；WPF、WinForms 的动画在测试里能真实走完。
 - Collapsible（触发器 + Collapse）的触发器 API（TS 是渲染函数，拿到 aria-expanded、aria-controls 与点击）和 Accordion 一起定；文档页的示例要等 Field、TextField、NumberField、Select。
+
+### Progress（2026-11-07）
+
+- 取值是 `decimal?`（TS 的 number、bigint、Decimal 都能精确表示）：按原值夹在 0–Max 之间比较，`ValueText` 拿到原值；比例与读屏的数值用 double。百分比按语言包的 `Code` 格式化（`P0`）。
+- 结构同 TS：条形 = 可选的标签行（0.93em，标签在起始边、数值在结束边，间距 space.sm）+ 轨道（space.xs × 1.5 粗，圆角裁剪）里的进度与目标线；环形 = 5em 的环（按 100 × 100 画布：线宽 10、半径 45，从正上方顺时针）+ 中间的数值（0.93em、半粗）+ 下方的标签（0.93em、次要色）。环形按内容宽（TS 的 inline-grid）：Avalonia 用模板优先级、WPF 用主题触发器把水平对齐设成靠左。
+- 条形占满一行：不限宽时只取标签行的宽度；放进横向 Flex 时给 Grow（TS 里 width:100% 的 flex 项缩到剩下的空间，效果相同）。
+- 进度比例在 durations.md 内过渡；不确定进度条形 1.4 秒、环形 1 秒一轮，系统关闭动画时变慢到 3 秒（TS 的"它本身就是信息，不随 durations 变 0"）。WinForms 的不确定动画读 FrameClock（同 Spinner），只有在画的控件驱动时钟。
+- 读屏：整个 Progress 是进度条（TS 有标签行时外层不是 progressbar，桌面上合成一个元素，里面的文字对读屏隐藏），名称是 AutomationProperties.Name 或 Label，取值文字在 Value 模式里；Avalonia、WPF 另给 RangeValue（最小、最大、当前），WinForms 的自定义控件给不了。状态：Avalonia 伪类 `:indeterminate`、`:complete`，WPF、WinForms 的 `State`。
+- 部件：Indicator（条形的进度，Border）、Header、Label、ValueLabel；propsRoot 不移植（外层就是 Progress 自己）。WinForms 有 PropsLabel、PropsValueLabel（新的 `TextProps` 记录），propsIndicator、propsHeader 等部件记录（自绘的部分没有元素）。
 
 ### Spinner
 
