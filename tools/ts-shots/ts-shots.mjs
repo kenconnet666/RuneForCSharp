@@ -107,32 +107,49 @@ function alignToPixels(canvas) {
   if (extra) canvas.style.paddingBottom = `${parseFloat(style.paddingBottom) + extra}px`;
 }
 
-/** 效果区的宽高与里面每段可见文字的盒子（逐行；CSS 像素，相对效果区的左上角） */
+/**
+ * 效果区的宽高与里面每段可见文字的盒子（逐行；CSS 像素，相对效果区的左上角）。
+ * 整页示例（AppShell）在 iframe 里：同源，进到 iframe 的文档里收，按 iframe 内容区的位置换算过来。
+ */
 function textBoxes(canvas) {
   const origin = canvas.getBoundingClientRect();
   const texts = [];
-  const walker = document.createTreeWalker(canvas, NodeFilter.SHOW_TEXT);
-  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-    if (!node.textContent.trim()) continue;
-    const style = getComputedStyle(node.parentElement);
-    if (style.visibility === 'hidden' || style.opacity === '0') continue;
-    const range = document.createRange();
-    range.selectNodeContents(node);
-    for (const rect of range.getClientRects()) {
-      if (rect.width < 1 || rect.height < 1) continue;
-      texts.push([rect.x - origin.x, rect.y - origin.y, rect.width, rect.height].map((value) => Math.round(value * 100) / 100));
+  const push = (x, y, width, height) => texts.push([x - origin.x, y - origin.y, width, height].map((value) => Math.round(value * 100) / 100));
+  collect(canvas, 0, 0);
+  return { width: origin.width, height: origin.height, texts };
+
+  function collect(root, dx, dy) {
+    const document = root.ownerDocument;
+    const view = document.defaultView;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      if (!node.textContent.trim()) continue;
+      const style = view.getComputedStyle(node.parentElement);
+      if (style.visibility === 'hidden' || style.opacity === '0') continue;
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      for (const rect of range.getClientRects()) {
+        if (rect.width < 1 || rect.height < 1) continue;
+        push(rect.x + dx, rect.y + dy, rect.width, rect.height);
+      }
+    }
+    // 输入框里的文字（值、占位文字）不是文本节点：取有文字的输入框的内容区（去掉内边距）
+    for (const input of root.querySelectorAll('input:not([type=checkbox]):not([type=radio]):not([type=range]), textarea')) {
+      if (!(input.value || input.placeholder)) continue;
+      const style = view.getComputedStyle(input);
+      if (style.visibility === 'hidden' || style.display === 'none') continue;
+      const rect = input.getBoundingClientRect();
+      const [left, top] = [parseFloat(style.paddingLeft) + parseFloat(style.borderLeftWidth), parseFloat(style.paddingTop) + parseFloat(style.borderTopWidth)];
+      const [right, bottom] = [parseFloat(style.paddingRight) + parseFloat(style.borderRightWidth), parseFloat(style.paddingBottom) + parseFloat(style.borderBottomWidth)];
+      if (rect.width - left - right < 1 || rect.height - top - bottom < 1) continue;
+      push(rect.x + left + dx, rect.y + top + dy, rect.width - left - right, rect.height - top - bottom);
+    }
+    for (const frame of root.querySelectorAll('iframe')) {
+      const body = frame.contentDocument?.body;
+      if (!body) continue;
+      const rect = frame.getBoundingClientRect();
+      const style = view.getComputedStyle(frame);
+      collect(body, dx + rect.x + parseFloat(style.borderLeftWidth) + parseFloat(style.paddingLeft), dy + rect.y + parseFloat(style.borderTopWidth) + parseFloat(style.paddingTop));
     }
   }
-  // 输入框里的文字（值、占位文字）不是文本节点：取有文字的输入框的内容区（去掉内边距）
-  for (const input of canvas.querySelectorAll('input:not([type=checkbox]):not([type=radio]):not([type=range]), textarea')) {
-    if (!(input.value || input.placeholder)) continue;
-    const style = getComputedStyle(input);
-    if (style.visibility === 'hidden' || style.display === 'none') continue;
-    const rect = input.getBoundingClientRect();
-    const [left, top] = [parseFloat(style.paddingLeft) + parseFloat(style.borderLeftWidth), parseFloat(style.paddingTop) + parseFloat(style.borderTopWidth)];
-    const [right, bottom] = [parseFloat(style.paddingRight) + parseFloat(style.borderRightWidth), parseFloat(style.paddingBottom) + parseFloat(style.borderBottomWidth)];
-    if (rect.width - left - right < 1 || rect.height - top - bottom < 1) continue;
-    texts.push([rect.x + left - origin.x, rect.y + top - origin.y, rect.width - left - right, rect.height - top - bottom].map((value) => Math.round(value * 100) / 100));
-  }
-  return { width: origin.width, height: origin.height, texts };
 }
