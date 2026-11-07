@@ -189,11 +189,13 @@ public class SwitchTests
     [Fact]
     public Task Loading_shows_the_spinner_after_a_delay_and_disabled_switches_fade() => WpfUi.Run(() =>
     {
-        var toggle = new Switch { IsLoading = true };
+        var toggle = new Switch();
         var disabled = new Switch { IsEnabled = false };
         Show(toggle, disabled);
         var spinner = Part<Spinner>(toggle, SwitchParts.Spinner);
 
+        // 显示以后再开始加载：等待从这里算起（显示本身慢的机器上，建好时就开始的话可能已经过了 200 毫秒）
+        toggle.IsLoading = true;
         Assert.Equal(Visibility.Collapsed, spinner.Visibility); // 很快完成的切换不闪加载指示
         WpfUi.Wait(TimeSpan.FromMilliseconds(350));
         Assert.Equal(Visibility.Visible, spinner.Visibility);
