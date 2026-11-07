@@ -1,0 +1,22 @@
+<!--
+  Dialog 部件的默认外观（vue-tsx-pro 的 modalPartStyles、transitions.backdrop）：遮罩 overlay；面板 surfaceRaised、xs 宽的 border 描边、文字 text
+  （xl 圆角、各部件的内边距按 em 在 Dialog.cs 里算）；xl 阴影画在面板后面的一层上。
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <Style x:Key="{x:Static rune:DialogParts.Scrim}" TargetType="Border">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Overlay}" />
+  </Style>
+  <Style x:Key="{x:Static rune:DialogParts.Panel}" TargetType="Border">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.SurfaceRaised}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="ClipToBounds" Value="True" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+  </Style>
+  <Style x:Key="{x:Static rune:DialogParts.Shadow}" TargetType="Border">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.SurfaceRaised}" />
+    <Setter Property="Effect" Value="{DynamicResource Rune.Shadow.Xl}" />
+  </Style>
+</ResourceDictionary>
