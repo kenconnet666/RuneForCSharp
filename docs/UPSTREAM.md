@@ -54,7 +54,7 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 
 ### 第三批（2026-11-07 通知，master 到 ff221742）
 
-锁定跟到 d386edd8（当时 CI 绿的最新提交，含 554b7246、0950975c、0f69e5c5）；6160d6d2、ff221742 的 CI 还没跑完，下次锁定。语言包、token、图标、配方都没变。
+锁定先跟到 d386edd8（当时 CI 绿的最新提交，含 554b7246、0950975c、0f69e5c5），6160d6d2、ff221742 的 CI 绿了之后再跟到 3c0c817b（含这一批的全部）。两次锁定语言包、token、图标、配方都没变。
 
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
@@ -62,8 +62,8 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 | ItemList 整条可点、selected、disabled（0950975c） | 还没做 | 做时照新的 |
 | 可选中的 Tag（0f69e5c5）：_selected 时是按钮（aria-pressed），没选中 surface、选中 solid 加对勾，默认 accent、sm | 已做 Tag | 这次做 |
 | 静态 Table 的 stickyHeader、sticky（9a57a058，这次锁定才进来） | 已做 Table | 这次做 |
-| ScrollArea 各部件带标记、border-box（6160d6d2） | 网页的盒模型，桌面上本来就是 | CI 绿后锁定，核对 scroll-area 的像素 |
-| 链接下划线 LinkUnderlineScope（ff221742）：显式 > 容器给的 > defaults.Link > always；ItemList、Stat、Timeline 等整块 hover，Card 只给页头 | 已做 Link、Card | CI 绿后锁定时做 |
+| ScrollArea 各部件带标记、border-box（6160d6d2） | 网页的部件标记与盒模型，桌面上本来就是 border-box | 不涉及 |
+| 链接下划线 LinkUnderlineScope（ff221742）：显式 > 容器给的 > defaults.Link > always；ItemList、Stat、Timeline 等整块 hover，Card 只给页头 | 已做 Link、Card | 这次做；ItemList、Stat、Timeline、Descriptions、Checklist 做时照做 |
 | Upload 接父级放进来的待上传文件（ff221742） | 还没做 | 做时照新的 |
 | 文档：ButtonBase 页换成"长得不像按钮的按钮"；Upload、Timeline、Code 合并示例 | Code 页的示例变了 | 跟着像素差异改示例 |
 
