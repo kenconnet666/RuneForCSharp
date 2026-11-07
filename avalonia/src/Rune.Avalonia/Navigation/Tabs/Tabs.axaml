@@ -1,0 +1,57 @@
+<!--
+  Tab、TabPanel 的主题（vue-tsx-pro 的 tabsRecipe、tabPanelStyles）：标签中等字重，平时 textMuted、悬停与选中 text，控件高度、左右 space.md、sm 圆角；
+  line 时底边留 2 像素的透明边（指示条画在列表上）并压住列表的分隔线（-1），竖排时在结束边；soft 时选中的标签 surface 底。
+  面板 sm 圆角，键盘聚焦时外面一圈焦点环。TabList 的分隔线、指示条与 soft 底色在 Tabs.cs 里画。
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:Tab}" TargetType="rune:Tab" BasedOn="{StaticResource {x:Type rune:ButtonBase}}">
+    <Setter Property="MinHeight" Value="{rune:ControlHeight}" />
+    <Setter Property="Padding" Value="{rune:Em 0.75, 0}" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+    <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
+    <Setter Property="CornerRadius" Value="{rune:Em Resource=Rune.Radius.Sm}" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Style Selector="^:pointerover">
+      <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    </Style>
+    <Style Selector="^:selected">
+      <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    </Style>
+    <Style Selector="^:line">
+      <Setter Property="BorderThickness" Value="0,0,0,2" />
+      <Setter Property="Margin" Value="0,0,0,-1" />
+    </Style>
+    <Style Selector="^:line:vertical">
+      <Setter Property="BorderThickness" Value="0,0,2,0" />
+      <Setter Property="Margin" Value="0,0,-1,0" />
+      <Setter Property="HorizontalContentAlignment" Value="Left" />
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" />
+    </Style>
+    <Style Selector="^:soft:selected">
+      <Setter Property="Background" Value="{DynamicResource Rune.Brush.Surface}" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type rune:TabPanel}" TargetType="rune:TabPanel">
+    <Setter Property="Focusable" Value="True" />
+    <Setter Property="CornerRadius" Value="{rune:Em Resource=Rune.Radius.Sm}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Padding="{TemplateBinding Padding}" CornerRadius="{TemplateBinding CornerRadius}" />
+          <Border Name="PART_FocusRing" IsVisible="False" IsHitTestVisible="False" Margin="-4" BorderThickness="2"
+                  BorderBrush="{DynamicResource Rune.Brush.FocusRing}" CornerRadius="{TemplateBinding CornerRadius}" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>
