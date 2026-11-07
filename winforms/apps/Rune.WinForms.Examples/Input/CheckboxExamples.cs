@@ -1,8 +1,8 @@
 namespace Rune.WinForms.Examples;
 
 /// <summary>
-/// vue-tsx-pro 文档站 input/Checkbox 页的示例：复选框、选项来自数据、开关、单选、必选与出错。
-/// WinForms 的 Radio 文字是字符串：单选的价格放在同一行的另一个控件里。
+/// vue-tsx-pro 文档站 input/Checkbox 页的示例：复选框、选项来自数据、卡片外观、开关、单选、必选与出错。
+/// WinForms 的文字、说明、结束边都是字符串，字重、字号写在部件属性里。
 /// </summary>
 static class CheckboxExamples
 {
@@ -10,8 +10,9 @@ static class CheckboxExamples
     [
         new("Checkbox", "checkbox", "复选框", "单个复选框绑 IsChecked；一组用 CheckboxGroupControl，Value 是勾选项的值。全选框部分勾选时写 IsIndeterminate，读屏念“混合”。", Permissions),
         new("Checkbox", "items", "选项来自数据", "CheckboxGroupControl、RadioGroupControl 的 ItemsSource 可以是 ListboxOption（值、文字、说明、不可用）、字符串，或任意数据加 ToOption。Description 显示在文字下方，读屏作为帮助文字；单独的 Checkbox、Radio 也能写。", Items),
+        new("Checkbox", "cards", "卡片外观", "组上写 Card：每个选项是一张卡片，整块可点，选中时边框与底色换成色调色（Tone），组里的每一项都跟着（单项也能写 Card）。横排时按宽度分列，每张不窄于 MinItemWidth（默认 14em）。End 放在结束边（价格、标记）。键盘与读屏同普通的单选、复选。", Cards),
         new("Checkbox", "switch", "开关", "Switch 是立即生效的设置（需要提交才生效的用 Checkbox）。切换要等接口时写 IsLoading：滑块里转圈、点击无效；在 Toggling 里拦下切换，接口回来后再改 IsChecked。轨道里可以放图标或文字，对读屏隐藏。", Settings),
-        new("Checkbox", "radio", "单选", "整组一个 Tab 位置，停在选中项；方向键在组内移动并选中。Orientation = Horizontal 横排。", Shipping),
+        new("Checkbox", "radio", "单选", "整组一个 Tab 位置，停在选中项；方向键在组内移动并选中。说明写在 Description，价格这类放在结束边的写 End；Orientation = Horizontal 横排。", Shipping),
         new("Checkbox", "validation", "必选与出错", "提交时才检查：FieldControl 的 IsRequired 标出必填，Error 让整组标红并把错误作为帮助文字念出；单个复选框（同意条款）同样包在字段里显示错误。", Validation),
     ];
 
@@ -113,11 +114,7 @@ static class CheckboxExamples
         ];
         var shipping = new RadioGroupControl { Value = "express" };
         foreach (var (value, title, time, price) in options)
-        {
-            var radio = new RadioControl { Value = value, Text = title, Description = time, PropsLabel = new TextProps { Weight = TextWeight.Semibold } };
-            // 价格紧跟在文字后面（上游的选项内容按自己的宽度，不撑满一行）
-            shipping.Controls.Add(Build.Flex(new FlexControl { Gap = Space.Lg }, radio, new SmallControl { Text = price }));
-        }
+            shipping.Controls.Add(new RadioControl { Value = value, Text = title, Description = time, End = price, PropsEnd = new TextProps { Size = TextSize.Xs } });
         var invoice = new RadioGroupControl { Orientation = Orientation.Horizontal };
         invoice.Controls.AddRange([
             new RadioControl { Value = "none", Text = "不开发票" },
@@ -127,6 +124,33 @@ static class CheckboxExamples
         var invoiceField = new FieldControl { Label = "发票", IsRequired = true, Error = "请选择发票类型", Content = invoice };
         invoice.ValueChanged += (_, _) => invoiceField.Error = invoice.Value is null ? "请选择发票类型" : null;
         return Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Lg }, new FieldControl { Label = "配送方式", Content = shipping }, invoiceField);
+    }
+
+    static readonly (string Id, string Name, string Price, string Detail)[] Plans =
+    [
+        ("free", "个人版", "免费", "3 个项目 · 1 GB 存储"),
+        ("team", "团队版", "¥99 / 月", "不限项目 · 50 GB · 10 人"),
+        ("business", "企业版", "¥499 / 月", "SSO 登录 · 审计日志 · 专属支持"),
+    ];
+
+    static readonly (string Id, string Name, string Price, string Detail)[] Addons =
+    [
+        ("backup", "异地备份", "+¥20 / 月", "每天一次，保留 30 天"),
+        ("audit", "操作审计", "+¥50 / 月", "谁在什么时候改了什么"),
+    ];
+
+    static Control Cards()
+    {
+        var strong = new TextProps { Weight = TextWeight.Semibold };
+        var plan = new RadioGroupControl { Value = "team", Card = true };
+        foreach (var (id, name, price, detail) in Plans)
+            plan.Controls.Add(new RadioControl { Value = id, Text = name, PropsLabel = strong, Description = detail, End = price, PropsEnd = strong });
+        var extras = new CheckboxGroupControl { Value = ["backup"], Card = true, Orientation = Orientation.Horizontal };
+        foreach (var (id, name, price, detail) in Addons)
+            extras.Controls.Add(new CheckboxControl { Value = id, Text = name, Description = detail, End = price, PropsEnd = new TextProps { Size = TextSize.Xs } });
+        return Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Lg },
+            new FieldControl { Label = "套餐", Content = plan },
+            new FieldControl { Label = "附加服务", Description = "可以多选，按月计费", Content = extras });
     }
 
     static Control Validation()

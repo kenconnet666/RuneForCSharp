@@ -245,4 +245,30 @@ public class ChoiceTests
 
         Assert.Equal((StatusTone.Danger, StatusTone.Info, StatusTone.Danger), (checkbox.Tone, explicitTone.Tone, group.Tone));
     });
+
+    [Fact]
+    public Task Card_flows_from_the_group_and_draws_the_tone_when_checked() => WinFormsUi.Run(() =>
+    {
+        var basic = new RadioControl { Value = "basic", Text = "基础版", End = "¥0" };
+        var pro = new RadioControl { Value = "pro", Text = "专业版", Description = "团队协作", End = "¥99" };
+        var plain = new RadioControl { Value = "plain", Text = "不要卡片", Card = false };
+        var plans = new RadioGroupControl { Value = "basic", Card = true, Orientation = Orientation.Horizontal, Width = 720 };
+        plans.Controls.AddRange([basic, pro, plain]);
+        using var form = WinFormsUi.Show(plans);
+        WinFormsUi.Pump();
+
+        Assert.True(basic.Element.AsCard); // 组的 Card 交给每一项
+        Assert.False(plain.Element.AsCard); // 单项写的优先
+        Assert.Equal(basic.Width, pro.Width); // 横排按最小宽度分列，每张一样宽
+        Assert.Equal(0, basic.Padding.All); // 卡片的边就是控件的边
+        var colors = ContextOf(basic).Theme.Colors;
+        var tone = ToneFill.Colors(StatusTone.Accent, colors).Fill;
+        using var bitmap = new Bitmap(basic.Width, basic.Height);
+        basic.DrawToBitmap(bitmap, new Rectangle(Point.Empty, basic.Size));
+        var edge = bitmap.GetPixel(basic.Width / 2, (int)(ContextOf(basic).Scale(Tokens.BorderWidth.Xs) / 2));
+        Assert.True(Math.Abs(edge.B - tone.B) + Math.Abs(edge.R - tone.R) < 60, $"描边 {edge}，色调 {tone}"); // 勾选的卡片描边是色调色
+        AssertNear(Drawing.Mix(colors.Surface, tone, 0.08), bitmap.GetPixel(basic.Width / 2, basic.Height - 6)); // 底色是色调 8% 混进 surface
+        Click(pro);
+        Assert.Equal("pro", plans.Value);
+    });
 }

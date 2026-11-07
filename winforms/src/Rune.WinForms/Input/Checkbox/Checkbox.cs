@@ -39,6 +39,18 @@ public class Checkbox : ChoiceBase
     /// <summary>说明部件的属性（TS 的 propsDescription）。</summary>
     public TextProps? PropsDescription { get => DescriptionProps; set => DescriptionProps = value; }
 
+    /// <summary>卡片外观：整块是一张带边框的卡片，勾选时边框与底色换成色调色；null 时跟随所在组的 Card。</summary>
+    public bool? Card { get => card; set { card = value; InvalidateMeasure(); } }
+
+    /// <summary>结束边的文字（价格、标记），卡片外观时常用。</summary>
+    public string? End { get => EndText; set => EndText = value; }
+
+    /// <summary>结束边文字的部件属性（TS 的 propsEnd：字重、字号）。</summary>
+    public TextProps? PropsEnd { get => EndProps; set => EndProps = value; }
+
+    /// <inheritdoc />
+    internal override bool AsCard => card ?? Group?.Card ?? false;
+
     /// <summary>对勾 / 横线部件的属性（TS 的 propsIndicator）。</summary>
     public IconProps? PropsIndicator { get; set { field = value; Invalidate(); } }
 
@@ -165,6 +177,23 @@ public class CheckboxControl : ChoiceControl<Checkbox>
     [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public TextProps? PropsDescription { get => Element.PropsDescription; set => Element.PropsDescription = value; }
+
+    /// <summary>卡片外观；null 时跟随所在组。</summary>
+    [Category("Appearance")]
+    [Description("卡片外观：整块是一张带边框的卡片，勾选时边框与底色换成色调色；空着时跟随所在组。")]
+    [DefaultValue(null)]
+    public bool? Card { get => Element.Card; set { Element.Card = value; PerformLayout(); } }
+
+    /// <summary>结束边的文字（价格、标记）。</summary>
+    [Category("Appearance")]
+    [Description("结束边的文字（价格、标记），卡片外观时常用。")]
+    [DefaultValue(null)]
+    public string? End { get => Element.End; set => Element.End = value; }
+
+    /// <summary>结束边文字的部件属性（代码里设）。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public TextProps? PropsEnd { get => Element.PropsEnd; set => Element.PropsEnd = value; }
 
     /// <summary>对勾 / 横线部件的属性（代码里设）。</summary>
     [Browsable(false)]

@@ -51,6 +51,7 @@ public class CheckboxGroupControl : ChoiceGroupControl
         {
             checkbox.Element.Group = this;
             if (checkbox.Value is { } value) checkbox.IsChecked = Value.Contains(value);
+            checkbox.Element.Relayout();
             checkbox.Invalidate();
         }
     }

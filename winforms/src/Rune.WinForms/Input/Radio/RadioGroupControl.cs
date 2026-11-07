@@ -84,6 +84,7 @@ public class RadioGroupControl : ChoiceGroupControl
         {
             radio.Element.Group = this;
             radio.Element.IsChecked = radio.Value is not null && radio.Value == Value;
+            radio.Element.Relayout();
             radio.PerformLayout();
             radio.Invalidate();
         }

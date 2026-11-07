@@ -98,6 +98,28 @@ public abstract class ChoiceControl<T> : ElementControl<T>, IFieldControl where 
         Element.IsEnabled = Enabled;
     }
 
+    /// <summary>卡片外观时不留画焦点环的 Padding：焦点环贴着方框，画在卡片的内边距里；卡片的边就是控件的边。</summary>
+    protected override void OnLayout(LayoutEventArgs levent)
+    {
+        var padding = Element.AsCard ? 0 : LogicalToDeviceUnits(4);
+        if (Padding.All != padding) Padding = new Padding(padding);
+        base.OnLayout(levent);
+    }
+
+    /// <inheritdoc />
+    protected override void OnMouseEnter(EventArgs e)
+    {
+        base.OnMouseEnter(e);
+        Element.IsHovered = true;
+    }
+
+    /// <inheritdoc />
+    protected override void OnMouseLeave(EventArgs e)
+    {
+        base.OnMouseLeave(e);
+        Element.IsHovered = false;
+    }
+
     /// <inheritdoc />
     protected override void OnMouseDown(MouseEventArgs e)
     {

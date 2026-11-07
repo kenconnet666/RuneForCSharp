@@ -7,6 +7,8 @@ namespace Rune.WinForms;
 /// 复选组、单选组共用的容器（vue-tsx-pro 的 choiceRecipe 的 group）：一个 <see cref="FlexControl"/>，竖排（gap xs）或横排换行（列距 lg、行距 xs）；
 /// 整组只读、出错，项可以直接放在里面（也可以套在别的布局容器里），也可以来自 <see cref="ItemsSource"/>（ListboxOption、字符串，
 /// 或任意数据加 <see cref="ToOption"/>）。整组不可用写 Enabled。项沿 Parent 链找到最近的组。
+/// 卡片外观（<see cref="Card"/>）时每项是一张卡片：竖排一列（gap sm），横排按 <see cref="MinItemWidth"/>（默认 14em）auto-fill 分列（列距 lg、行距 xs），
+/// 列数与列宽同 GridControl（孪生的 GridLayout），每项定成列宽。
 /// </summary>
 public abstract class ChoiceGroupControl : FlexControl, IFieldControl
 {
@@ -33,7 +35,25 @@ public abstract class ChoiceGroupControl : FlexControl, IFieldControl
     [DefaultValue(false)]
     public bool IsInvalid { get => invalid ?? false; set { invalid = value; Sync(); } }
 
+    /// <summary>卡片外观：每项是一张带边框的卡片，勾选时边框与底色换成色调色；组里的项都跟着（项自己写了 Card 的除外）。</summary>
+    [Category("Appearance")]
+    [Description("卡片外观：每项是一张带边框的卡片；组里的项都跟着。")]
+    [DefaultValue(false)]
+    public bool Card { get; set { field = value; ApplyOrientation(); Sync(); } }
+
+    /// <summary>卡片外观横排时每张的最小宽度，放得下几张就几列（auto-fill）；默认 14em。</summary>
+    [Category("Layout")]
+    [Description("卡片外观横排时每张的最小宽度（14em、200）。")]
+    public Length MinItemWidth { get => field.Value is null ? DefaultMinItemWidth : field; set { field = value; PerformLayout(); } }
+
+    static readonly Length DefaultMinItemWidth = "14em";
+
+    bool ShouldSerializeMinItemWidth() => MinItemWidth != DefaultMinItemWidth;
+
     bool? readOnly, invalid;
+
+    /// <summary>项的宽度是组按列宽定的（换回非卡片、竖排时还原）。</summary>
+    bool columnsApplied;
 
     /// <summary>整组只读：自己写了的优先，其次所在字段的。</summary>
     internal bool ReadOnly => readOnly ?? FieldControl.Of(this)?.IsReadOnly ?? false;
@@ -53,13 +73,39 @@ public abstract class ChoiceGroupControl : FlexControl, IFieldControl
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public IEnumerable? ItemsSource { get; set { field = value; Generate(); } }
 
+    /// <summary>
+    /// 竖排 gap xs（卡片 sm），项拉满宽度（同上游的 flex 列：结束边的文字贴得到结束边）；横排换行、列距 lg、行距 xs（上游排列方向的长写盖过卡片的 gap: sm）。
+    /// </summary>
     void ApplyOrientation()
     {
         var horizontal = Orientation == Orientation.Horizontal;
         Direction = horizontal ? FlexDirection.Row : FlexDirection.Column;
         Wrap = horizontal ? FlexWrap.Wrap : FlexWrap.NoWrap;
-        Gap = Space.Xs;
+        Gap = Card && !horizontal ? Space.Sm : Space.Xs;
         ColumnGap = horizontal ? Space.Lg : default;
+        Align = horizontal ? default : FlexAlign.Stretch;
+        if (!columnsApplied || (Card && horizontal)) return;
+        columnsApplied = false;
+        foreach (Control child in Controls) child.MinimumSize = child.MaximumSize = Size.Empty;
+    }
+
+    /// <summary>卡片外观横排：按最小宽度算列数（auto-fill，同 Grid），每项定成列宽，换行的 Flex 就排成栅格。</summary>
+    protected override void OnLayout(LayoutEventArgs levent)
+    {
+        if (Card && Orientation == Orientation.Horizontal && Controls.Count > 0)
+        {
+            var em = Font.SizeInPoints * DeviceDpi / 72f;
+            var width = ClientSize.Width - Padding.Horizontal;
+            var gap = Tokens.Space.Lg * em;
+            var columns = GridLayout.Columns(width, gap, null, MinItemWidth.Pixels(em), Controls.Count, false);
+            var column = (int)Math.Floor((width - (columns - 1) * gap) / columns);
+            var size = new Size(Math.Max(0, column), 0);
+            columnsApplied = true;
+            foreach (Control child in Controls)
+                if (child.MinimumSize != size)
+                    child.MinimumSize = child.MaximumSize = size;
+        }
+        base.OnLayout(levent);
     }
 
     /// <summary>按 <see cref="ItemsSource"/> 重新生成项：值、文字、说明、不可用取自选项。</summary>

@@ -9,11 +9,14 @@ namespace Rune.WinForms;
 /// 不可用时整体 opacities.disabled（颜色混进宿主往上第一个不透明的背景色）。
 /// 部件：<see cref="PropsLabel"/>、说明的 PropsDescription（Checkbox、Radio；<see cref="TextProps"/>）；控件部件是画出来的（DESIGN §7）。
 /// 只读、必填、出错、色调、字号、说明由派生类按上游的 props 公开（Radio 的这些来自单选组）。
+/// 卡片外观（Checkbox、Radio 的 Card，或跟随组）：整块是一张卡片（内边距 space.md、xs 描边、md 圆角、surface 底，悬停时描边 borderStrong），
+/// 勾选时描边是色调的实底、底色是色调 8% 混进 surface。结束边的文字（End，价格、标记）贴着结束边、与文字的第一行对齐。
 /// </summary>
 public abstract class ChoiceBase : Element
 {
     Text label = new();
     Text description = new();
+    Text end = new();
 
     /// <summary>值变了（点击、空格、读屏、代码里写）：数据绑定认 <c>IsCheckedChanged</c>。</summary>
     public event EventHandler? IsCheckedChanged;
@@ -58,6 +61,24 @@ public abstract class ChoiceBase : Element
 
     /// <summary>说明部件的属性（TS 的 propsDescription）。</summary>
     private protected TextProps? DescriptionProps { get => field; set { field = value; RebuildDescription(); } }
+
+    /// <summary>派生类公开的卡片外观（Checkbox、Radio）；null 是没写，跟随所在组。</summary>
+    private protected bool? card;
+
+    /// <summary>卡片外观：自己写了的优先，其次所在组的。</summary>
+    internal virtual bool AsCard => card ?? false;
+
+    /// <summary>结束边的文字（Checkbox、Radio 公开；TS 的 end）。</summary>
+    private protected string? EndText { get => field; set { field = value; RebuildEnd(); } }
+
+    /// <summary>结束边文字的部件属性（TS 的 propsEnd）。</summary>
+    private protected TextProps? EndProps { get => field; set { field = value; RebuildEnd(); } }
+
+    /// <summary>指针在上面（宿主设）：卡片的描边换成 borderStrong。</summary>
+    internal bool IsHovered { get; set { if (field == value) return; field = value; if (AsCard) Invalidate(); } }
+
+    /// <summary>卡片外观、所在组变了：重新量。</summary>
+    internal void Relayout() => InvalidateMeasure();
 
     /// <summary>所在的字段：在复选组、单选组里时字段归组（项不接字段）。</summary>
     internal FieldControl? Field => InGroup || Host is not Control host ? null : FieldControl.Of(host);
@@ -109,6 +130,15 @@ public abstract class ChoiceBase : Element
 
     bool HasDescription => !string.IsNullOrEmpty(DescriptionText);
 
+    bool HasEnd => !string.IsNullOrEmpty(EndText);
+
+    void RebuildEnd()
+    {
+        end = new Text { Content = EndText ?? "" };
+        EndProps?.ApplyTo(end);
+        InvalidateMeasure();
+    }
+
     void RebuildLabel()
     {
         label = new Text { Content = Content ?? "" };
@@ -144,14 +174,17 @@ public abstract class ChoiceBase : Element
         var control = ControlSize(inner);
         var row = MathF.Max(1.5f * inner.Em, control.Height);
         var gap = Tokens.Space.Sm * inner.Em;
-        var limit = availableWidth == int.MaxValue ? int.MaxValue : Math.Max(0, availableWidth - (int)MathF.Ceiling(control.Width + gap));
+        var inset = AsCard ? Tokens.Space.Md * inner.Em + inner.Scale(Tokens.BorderWidth.Xs) : 0;
+        var endSize = HasEnd ? end.Measure(inner, new Size(int.MaxValue, int.MaxValue)) : default;
+        var endWidth = HasEnd ? endSize.Width + gap : 0;
+        var limit = availableWidth == int.MaxValue ? int.MaxValue : Math.Max(0, availableWidth - (int)MathF.Ceiling(2 * inset + control.Width + gap + endWidth));
         var labelSize = HasLabel ? label.Measure(inner, new Size(limit, int.MaxValue)) : default;
         if (HasDescription && DescriptionProps?.Size is null && description.Size != (TextSize)(0.875f * inner.Em * 96 / inner.Dpi))
             description.Size = 0.875f * inner.Em * 96 / inner.Dpi; // 改字号会让宿主重排，只在变了时写
         var descriptionSize = HasDescription ? description.Measure(inner, new Size(limit, int.MaxValue)) : default;
         // 文字的行高按字体算（不是 TS 的 1.5em）：在第一行里居中，多行时上下各留一份
         var labelTop = HasLabel ? MathF.Max(0, (row - Fonts.LineHeight(LabelFont(inner))) / 2) : 0;
-        return new Metrics(control, row, gap, labelSize, descriptionSize, labelTop);
+        return new Metrics(control, row, gap, labelSize, descriptionSize, labelTop, inset, endSize);
     }
 
     Font LabelFont(ElementContext inner) =>
@@ -163,15 +196,17 @@ public abstract class ChoiceBase : Element
         var inner = context.Sized(ResolvedSize);
         var metrics = Layout(inner, available.Width);
         var text = Math.Max(metrics.Label.Width, metrics.Description.Width);
-        var width = metrics.Control.Width + (text > 0 ? metrics.Gap + text : 0);
+        var width = metrics.Control.Width + (text > 0 ? metrics.Gap + text : 0) + (HasEnd ? metrics.Gap + metrics.End.Width : 0) + 2 * metrics.Inset;
         var textHeight = HasLabel || HasDescription ? metrics.LabelTop * 2 + metrics.Label.Height + metrics.Description.Height : 0;
-        var height = MathF.Max(context.Scale(Tokens.Size.MinTarget), MathF.Max(metrics.Row, textHeight));
+        var height = MathF.Max(context.Scale(Tokens.Size.MinTarget), MathF.Max(metrics.Row, textHeight) + 2 * metrics.Inset);
         return new Size((int)MathF.Ceiling(width), (int)MathF.Ceiling(height));
     }
 
     /// <inheritdoc />
     protected internal override int? Baseline(ElementContext context) =>
-        HasLabel ? (int)MathF.Round(Layout(context.Sized(ResolvedSize), Bounds.Width).LabelTop) + label.Baseline(context.Sized(ResolvedSize)) : null;
+        HasLabel && Layout(context.Sized(ResolvedSize), Bounds.Width) is var metrics
+            ? (int)MathF.Round(metrics.Inset + metrics.LabelTop) + label.Baseline(context.Sized(ResolvedSize))
+            : null;
 
     /// <inheritdoc />
     protected internal override void Paint(Graphics graphics, ElementContext context)
@@ -184,6 +219,7 @@ public abstract class ChoiceBase : Element
         try
         {
             graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            if (AsCard) PaintCard(graphics, context, inner, dim);
             PaintControl(graphics, context, inner, ControlRect(context, metrics), dim);
         }
         finally
@@ -191,8 +227,14 @@ public abstract class ChoiceBase : Element
             graphics.Restore(state);
         }
 
-        var x = (int)MathF.Round(FromStart(context, metrics.Control.Width + metrics.Gap, Math.Max(metrics.Label.Width, metrics.Description.Width)));
-        var y = (int)MathF.Round(Bounds.Y + metrics.LabelTop);
+        var x = (int)MathF.Round(FromStart(context, metrics.Inset + metrics.Control.Width + metrics.Gap, Math.Max(metrics.Label.Width, metrics.Description.Width)));
+        var y = (int)MathF.Round(Bounds.Y + metrics.Inset + metrics.LabelTop);
+        if (HasEnd)
+        {
+            var endX = (int)MathF.Round(FromStart(context, Bounds.Width - metrics.Inset - metrics.End.Width, metrics.End.Width));
+            end.Bounds = new Rectangle(endX, y, metrics.End.Width, metrics.End.Height);
+            end.Paint(graphics, inner with { ForeColor = dim(inner.ForeColor) });
+        }
         if (HasLabel)
         {
             label.Bounds = new Rectangle(context.RightToLeft ? x + Math.Max(metrics.Label.Width, metrics.Description.Width) - metrics.Label.Width : x, y, metrics.Label.Width, metrics.Label.Height);
@@ -207,7 +249,24 @@ public abstract class ChoiceBase : Element
 
     /// <summary>控件部件在宿主里的位置：起始边，垂直居中在第一行里。</summary>
     RectangleF ControlRect(ElementContext context, Metrics metrics) =>
-        new(FromStart(context, 0, metrics.Control.Width), Bounds.Y + (metrics.Row - metrics.Control.Height) / 2, metrics.Control.Width, metrics.Control.Height);
+        new(FromStart(context, metrics.Inset, metrics.Control.Width), Bounds.Y + metrics.Inset + (metrics.Row - metrics.Control.Height) / 2, metrics.Control.Width, metrics.Control.Height);
+
+    /// <summary>卡片：md 圆角、xs 描边；勾选时描边是色调的实底、底色是色调 8% 混进 surface，没勾选时 surface 底、border 描边（悬停 borderStrong）。</summary>
+    void PaintCard(Graphics graphics, ElementContext context, ElementContext inner, Func<Color, Color> dim)
+    {
+        var colors = context.Theme.Colors;
+        var tone = ToneFill.Colors(ResolvedTone, colors).Fill;
+        var (fill, stroke) = IsChecked ? (Drawing.Mix(colors.Surface, tone, 0.08), tone) : (colors.Surface, IsHovered && IsEnabled ? colors.BorderStrong : colors.Border);
+        var line = context.Scale(Tokens.BorderWidth.Xs);
+        var radius = (Radius.Md.In(context.Theme.Radii) ?? 0) * inner.Em;
+        // 半像素偏移：1 像素的描边落在整像素上，不被抗锯齿糊成两行（同 ControlShell）
+        graphics.PixelOffsetMode = PixelOffsetMode.Half;
+        var box = RectangleF.Inflate(Bounds, -line / 2, -line / 2);
+        using var path = Drawing.RoundedRectangle(box, MathF.Max(0, radius - line / 2));
+        using (var brush = new SolidBrush(dim(fill))) graphics.FillPath(brush, path);
+        using var pen = new Pen(dim(stroke), line);
+        graphics.DrawPath(pen, path);
+    }
 
     /// <summary>控件部件的位置（测试用）。</summary>
     internal RectangleF ControlBounds(ElementContext context) => ControlRect(context, Layout(context.Sized(ResolvedSize), Bounds.Width));
@@ -242,7 +301,7 @@ public abstract class ChoiceBase : Element
         graphics.DrawPath(pen, outline);
     }
 
-    readonly record struct Metrics(SizeF Control, float Row, float Gap, Size Label, Size Description, float LabelTop);
+    readonly record struct Metrics(SizeF Control, float Row, float Gap, Size Label, Size Description, float LabelTop, float Inset, Size End);
 }
 
 /// <summary>勾选类控件要切换时的参数：<see cref="IsChecked"/> 是要切到的值，设 Cancel 不改。</summary>
