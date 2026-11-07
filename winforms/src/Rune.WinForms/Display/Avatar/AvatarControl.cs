@@ -43,22 +43,17 @@ public class Avatar : Element
         Invalidate();
     }
 
-    /// <summary>头像自己的环境：字号档位换掉宿主的字号。</summary>
-    ElementContext Inner(ElementContext context) => Size.Pixels is { } pixels
-        ? context with { Font = Fonts.Get(context.Font.FontFamily.Name, pixels * 72 / 96, context.Font.Style) }
-        : context;
-
     /// <inheritdoc />
     protected internal override Size Measure(ElementContext context, Size available)
     {
-        var side = (int)MathF.Round(2.5f * Inner(context).Em);
+        var side = (int)MathF.Round(2.5f * context.Sized(Size).Em);
         return new Size(side, side);
     }
 
     /// <inheritdoc />
     protected internal override void Paint(Graphics graphics, ElementContext context)
     {
-        var inner = Inner(context);
+        var inner = context.Sized(Size);
         var side = Math.Min(Bounds.Width, Bounds.Height);
         var box = new RectangleF(Bounds.X, Bounds.Y, side, side);
         var radius = Radius.Value == "full" ? side / 2f : (Radius.In(context.Theme.Radii) ?? 0) * inner.Em;

@@ -116,10 +116,6 @@ public class Progress : Element
         Invalidate();
     }
 
-    /// <summary>字号档位改过的宿主环境（em 尺寸都按它算）。</summary>
-    ElementContext Sized(ElementContext context) =>
-        Size.Pixels is { } pixels ? context with { Font = Fonts.Get(context.Font.FontFamily.Name, pixels * 72 / 96, context.Font.Style) } : context;
-
     /// <summary>标签与数值的字号：0.93em（像素数，档位 TextSize 是设备无关像素）。</summary>
     void SizeTexts(ElementContext context)
     {
@@ -136,7 +132,7 @@ public class Progress : Element
     /// <inheritdoc />
     protected internal override Size Measure(ElementContext context, Size available)
     {
-        context = Sized(context);
+        context = context.Sized(Size);
         SizeTexts(context);
         var gap = Gap(context);
         if (Circle)
@@ -165,7 +161,7 @@ public class Progress : Element
     /// <inheritdoc />
     protected internal override void Paint(Graphics graphics, ElementContext context)
     {
-        context = Sized(context);
+        context = context.Sized(Size);
         SizeTexts(context);
         var colors = context.Theme.Colors;
         var indicatorColor = Tone.Value switch
