@@ -32,4 +32,17 @@ public class LinkTests
         link.PerformClick();
         Assert.Single(link.Opened);
     });
+
+    [Fact]
+    public Task Baseline_lines_up_with_text_in_a_baseline_flex() => WinFormsUi.Run(() =>
+    {
+        var before = new TextControl { Text = "放在句子中间，" };
+        var link = new LinkControl { Text = "查看设计规范", External = true };
+        var row = new FlexControl { Align = FlexAlign.Baseline, Dock = DockStyle.Top };
+        row.Controls.AddRange([before, link]);
+        using var form = WinFormsUi.Show(row);
+
+        int Baseline(Control control) => control.Top + ((IBaseline)control).Baseline!.Value;
+        Assert.Equal(Baseline(before), Baseline(link)); // 外链图标比文字高时，链接的文字也落在同一条基线上
+    });
 }

@@ -54,6 +54,15 @@ public class Link : Element
         return new Size(size.Width + (int)MathF.Ceiling(0.1f * inner.Em) + glyph.Width, Math.Max(size.Height, glyph.Height));
     }
 
+    /// <summary>文字的基线：文字在元素里竖直居中（外链图标比文字高时下移），再加文字自己的上伸部。Flex 按基线对齐时用。</summary>
+    protected internal override int? Baseline(ElementContext context)
+    {
+        var inner = Inner(context);
+        var size = text.Measure(inner, new Size(int.MaxValue, int.MaxValue));
+        var height = Bounds.Height > 0 ? Bounds.Height : Measure(context, new Size(int.MaxValue, int.MaxValue)).Height;
+        return (height - size.Height) / 2 + text.Baseline(inner);
+    }
+
     /// <inheritdoc />
     protected internal override void Paint(Graphics graphics, ElementContext context)
     {

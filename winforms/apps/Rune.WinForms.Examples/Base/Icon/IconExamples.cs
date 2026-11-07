@@ -68,8 +68,8 @@ static class IconExamples
             Build.Styled(Line(new IconControl { Data = Lucide.MapPin }, new TextControl { Text = "上海·徐汇" }), tone: TextTone.Muted),
             Build.Styled(Line(new IconControl { Data = Lucide.Clock }, new TextControl { Text = "3 分钟前" }), tone: TextTone.Muted),
             Build.Styled(Line(new IconControl { Data = Lucide.Users }, new TextControl { Text = "128 人参与" }), tone: TextTone.Muted)),
-        // 一句话里的图标：链接自带外链图标（External）。LinkControl 还没有基线，按基线对齐时会比前后的文字高一点，所以这里居中
-        Build.Flex(new FlexControl { Align = FlexAlign.Center, Wrap = true },
+        // 一句话里的图标：链接自带外链图标（External），按基线和前后的文字对齐
+        Build.Flex(new FlexControl { Align = FlexAlign.Baseline, Wrap = true },
             new TextControl { Text = "图标跟随文字的字号与颜色，和文字基线对齐；" },
             new TextControl { Text = "放在句子中间也不会撑高行距，" },
             new LinkControl { Text = "查看设计规范", Href = new Uri("https://example.com/guide/design"), External = true },
