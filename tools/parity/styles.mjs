@@ -34,8 +34,8 @@ const COMPARED = [
   'RadiusTopLeft', 'RadiusTopRight', 'RadiusBottomRight', 'RadiusBottomLeft',
   'Background', 'Foreground', 'FontSize', 'FontWeight', 'LineHeight', 'LetterSpacing', 'Opacity',
 ];
-/** 部件的宽高不取决于文字时才比：控件根的高度、图标的边长 */
-const SIZED = (key) => /\/(root|icon|iconEnd|spinner|dot)#|^@svg#/.test(key);
+/** 部件的宽高不取决于文字时才比：控件根的高度、图标的边长、勾选类的方框与轨道、滑块 */
+const SIZED = (key) => /\/(root|icon|iconEnd|spinner|dot|input|indicator)#|^@svg#/.test(key);
 const TOLERANCE = 0.5;
 
 const INSPECT = {
@@ -75,7 +75,9 @@ function compare(theirs, ours) {
     const mine = byKey.get(part.key);
     if (!mine) continue;
     // 图标只看大小与颜色：svg 上的字号、字重不影响画出来的样子
-    const props = part.key.startsWith('@svg#') ? ['Width', 'Height', 'Foreground', 'Opacity'] : [...COMPARED, ...(SIZED(part.key) ? ['Height'] : [])];
+    const props = part.key.startsWith('@svg#') ? ['Width', 'Height', 'Foreground', 'Opacity']
+      // 原生 input（勾选类的方框、轨道）里没有文字，前景色画不出来
+      : [...COMPARED, ...(SIZED(part.key) ? ['Height'] : [])].filter((prop) => !(part.tag === 'input' && prop === 'Foreground'));
     for (const prop of props) {
       const [a, b] = [part.props[prop], mine.props[prop]];
       if (a === undefined || b === undefined || same(prop, a, b, part.props, mine.props)) continue;
@@ -90,6 +92,8 @@ function compare(theirs, ours) {
 }
 
 function same(prop, a, b, props, mine) {
+  // 看不出来的描边（透明，或与底色相同）：CSS 的底色铺到描边下面，画出来就是同样大的一块底色，平台上不画描边是一样的
+  if (prop.startsWith('Border') && invisibleBorder(props) && !mine.BorderTop && !mine.BorderRight && !mine.BorderBottom && !mine.BorderLeft) return true;
   // 行内元素没有高度（auto）：不比
   if (prop === 'Height' && a === 'auto') return true;
   // CSS 的 min-width / min-height 没写时是 auto、letter-spacing 是 normal，平台上是 0
@@ -105,6 +109,11 @@ function same(prop, a, b, props, mine) {
   if (prop === 'BorderColor' && !props.BorderTop) return true;
   if (typeof a === 'string' && typeof b === 'string' && a.startsWith('#00') && b.startsWith('#00')) return true;
   return String(a).toUpperCase() === String(b).toUpperCase();
+}
+
+function invisibleBorder(props) {
+  const color = String(props.BorderColor ?? '').toUpperCase();
+  return color.startsWith('#00') || color === String(props.Background ?? '').toUpperCase();
 }
 
 if (options.json) process.stdout.write(`${JSON.stringify(results, null, 2)}\n`);

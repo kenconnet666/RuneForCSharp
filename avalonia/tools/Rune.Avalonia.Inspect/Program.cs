@@ -175,7 +175,8 @@ static class Inspector
         }
         return report;
 
-        static bool IsComponent(Control element) => element.GetType().Namespace == typeof(RuneTheme).Namespace;
+        // 组件内部组合用的面板（SwitchStack）不公开，不算组件：部件的归属越过它找到公开的组件
+        static bool IsComponent(Control element) => element.GetType() is { IsVisible: true } type && type.Namespace == typeof(RuneTheme).Namespace;
 
         static Control? Owner(Control element) =>
             element.TemplatedParent as Control ?? element.GetVisualAncestors().OfType<Control>().FirstOrDefault(IsComponent);

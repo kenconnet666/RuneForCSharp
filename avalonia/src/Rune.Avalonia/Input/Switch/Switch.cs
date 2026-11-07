@@ -77,7 +77,7 @@ public class Switch : Control
     static readonly StyledProperty<double> MinTargetProperty = AvaloniaProperty.Register<Switch, double>("MinTarget", 24);
 
     readonly SwitchStack control;
-    readonly Border track = new() { Name = "PART_Track" };
+    readonly Border track = new() { Name = SwitchParts.Track };
     readonly Border focusRing = new() { Name = "PART_FocusRing", IsHitTestVisible = false };
     readonly Border onContent = new() { Name = SwitchParts.Content, Classes = { "on" } };
     readonly Border offContent = new() { Name = SwitchParts.Content, Classes = { "off" } };
@@ -418,6 +418,9 @@ public static class SwitchParts
 {
     /// <summary>叠放层（TS 的 propsControl）：轨道、文字、滑块叠在一起。</summary>
     public const string Control = "PART_Control";
+
+    /// <summary>轨道（TS 的 input）：Border，关时 borderStrong、开时色调实底、出错时描边是危险色。</summary>
+    public const string Track = "PART_Track";
 
     /// <summary>滑块（TS 的 propsThumb）：Border。</summary>
     public const string Thumb = "PART_Thumb";

@@ -231,6 +231,15 @@ sealed class StyleReport
         ["IconLinkButton"] = "button",
         ["CloseButton"] = "button",
         ["ClearButton"] = "button",
+        // 上游的勾选类（Switch，以后的 Checkbox、Radio）共用 choice 的部件标记
+        ["Switch"] = "choice",
+    };
+
+    /// <summary>部件在上游叫别的名字：API 名（propsThumb）与部件标记（data-part="indicator"）不同的。</summary>
+    static readonly Dictionary<(string Component, string Part), string> PartAliases = new()
+    {
+        [("Switch", "PART_Track")] = "input",
+        [("Switch", "PART_Thumb")] = "indicator",
     };
 
     /// <summary>TS 里没有部件标记的组件（css.create 写的）：按渲染出的标签配对，<c>@p#0</c>，同 tools/ts-styles。</summary>
@@ -259,7 +268,8 @@ sealed class StyleReport
     {
         if (partName is null && Tags.TryGetValue(componentType, out var tag)) return tag;
         var scope = ScopeAliases.GetValueOrDefault(componentType) ?? Kebab(componentType);
-        var part = partName is null ? "root" : char.ToLowerInvariant(partName["PART_".Length]) + partName["PART_".Length..][1..];
+        var part = partName is null ? "root"
+            : PartAliases.GetValueOrDefault((componentType, partName)) ?? char.ToLowerInvariant(partName["PART_".Length]) + partName["PART_".Length..][1..];
         return $"{scope}/{part}";
     }
 

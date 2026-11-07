@@ -90,13 +90,13 @@ public class Switch : Control
         "MinTarget", typeof(double), typeof(Switch), new FrameworkPropertyMetadata(24d, FrameworkPropertyMetadataOptions.AffectsMeasure));
 
     readonly SwitchStack control;
-    readonly Border track = new();
+    readonly Border track = new() { Name = "PART_Track" };
     readonly Border focusRing = new() { Visibility = Visibility.Collapsed, IsHitTestVisible = false };
     readonly Border onContent = new();
     readonly Border offContent = new();
     readonly ContentPresenter onText = new();
     readonly ContentPresenter offText = new();
-    readonly Border thumb = new();
+    readonly Border thumb = new() { Name = "PART_Thumb" };
     readonly Spinner spinner = new() { Visibility = Visibility.Collapsed };
     readonly ContentPresenter label = new();
     readonly DelayedLoading loading;
@@ -114,7 +114,7 @@ public class Switch : Control
     /// <summary>新建：关闭；部件的外观引用主题的部件样式，间距、色调绑到主题。</summary>
     public Switch()
     {
-        control = new SwitchStack(this);
+        control = new SwitchStack(this) { Name = "PART_Control" };
         control.SetResourceReference(StyleProperty, SwitchParts.Control);
         track.SetResourceReference(StyleProperty, SwitchParts.Track);
         focusRing.SetResourceReference(StyleProperty, SwitchParts.FocusRing);

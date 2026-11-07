@@ -182,7 +182,8 @@ static class Inspector
             for (var i = 0; i < VisualTreeHelper.GetChildrenCount(node); i++) Walk(VisualTreeHelper.GetChild(node, i));
         }
 
-        static bool IsComponent(FrameworkElement element) => element.GetType().Namespace == typeof(RuneTheme).Namespace;
+        // 组件内部组合用的面板（SwitchStack）不公开，不算组件：部件的归属越过它找到公开的组件
+        static bool IsComponent(FrameworkElement element) => element.GetType() is { IsVisible: true } type && type.Namespace == typeof(RuneTheme).Namespace;
 
         static FrameworkElement? Owner(FrameworkElement element)
         {
