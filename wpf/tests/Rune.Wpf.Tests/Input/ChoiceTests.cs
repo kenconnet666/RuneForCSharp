@@ -214,4 +214,32 @@ public class ChoiceTests
         var pro = WpfUi.Descendants(plans).OfType<Radio>().ElementAt(1);
         Assert.Equal(("pro", "专业版", "¥99 / 月"), (pro.Value, pro.Content as string, pro.Description as string));
     });
+
+    [Fact]
+    public Task Card_flows_from_the_group_and_end_sits_at_the_end_edge() => WpfUi.Run(() =>
+    {
+        var basic = new Radio { Value = "basic", Content = "基础版", End = "¥0" };
+        var pro = new Radio { Value = "pro", Content = "专业版", Description = "团队协作", End = "¥99" };
+        var plain = new Radio { Value = "plain", Content = "不要卡片", Card = false };
+        var plans = new RadioGroup { Value = "basic", Card = true, Orientation = Orientation.Horizontal, Items = { basic, pro, plain } };
+        var sso = new Checkbox { Value = "sso", Content = "单点登录" };
+        var features = new CheckboxGroup { Card = true, Items = { sso } };
+        var host = Show(plans, features);
+        host.Width = 720;
+        WpfUi.Flush();
+
+        Assert.True(basic.IsEffectivelyCard); // 组的 Card 交给每一项
+        Assert.False(plain.IsEffectivelyCard); // 单项写的优先
+        Assert.Equal(HorizontalAlignment.Stretch, basic.HorizontalAlignment);
+        Assert.Equal(basic.ActualWidth, pro.ActualWidth); // 横排按最小宽度分列，每张一样宽
+        var end = WpfUi.Descendants(pro).OfType<ContentPresenter>().Single(part => part.Name == "PART_End");
+        var right = end.TranslatePoint(new Point(end.ActualWidth, 0), pro).X;
+        Assert.Equal(pro.ActualWidth - (0.75 * pro.FontSize + 1), right, 1); // 贴着结束边（卡片的内边距与描边之内）
+        Click(pro);
+        Assert.Equal("pro", plans.Value);
+
+        Assert.True(sso.IsEffectivelyCard);
+        Click(sso);
+        Assert.Equal(["sso"], features.Value);
+    });
 }

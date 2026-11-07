@@ -32,6 +32,10 @@ public class Grid : Panel
     public static readonly DependencyProperty BalancedProperty = DependencyProperty.Register(
         nameof(Balanced), typeof(bool), typeof(Grid), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsMeasure));
 
+    /// <summary>按最小宽度分列时保留空列（auto-fill，项少时不拉宽；卡片外观的复选组、单选组）；默认收起（auto-fit）。</summary>
+    internal static readonly DependencyProperty AutoFillProperty = DependencyProperty.Register(
+        "AutoFill", typeof(bool), typeof(Grid), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsMeasure));
+
     /// <summary>间距档位，对应主题的 space。</summary>
     public static readonly DependencyProperty GapProperty = DependencyProperty.Register(
         nameof(Gap), typeof(Space), typeof(Grid), new FrameworkPropertyMetadata(default(Space), OnGapChanged));
@@ -134,7 +138,7 @@ public class Grid : Panel
         var dense = Flow.Value is "row dense" or "column dense";
         cells = GridLayout.Place(items, columns, columnFlow, dense);
         // auto-fit：项目比放得下的列数少时，空列收起
-        if (MinItemWidth is not null && !double.IsInfinity(width) && GridLayout.UsedColumns(cells) is var used && used < columns)
+        if (MinItemWidth is not null && !(bool)GetValue(AutoFillProperty) && !double.IsInfinity(width) && GridLayout.UsedColumns(cells) is var used && used < columns)
             cells = GridLayout.Place(items, columns = used, columnFlow, dense);
         ColumnCount = Math.Max(columns, GridLayout.UsedColumns(cells));
         if (double.IsInfinity(width))

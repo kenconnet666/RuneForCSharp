@@ -17,6 +17,9 @@
     <Setter Property="FocusVisualStyle" Value="{x:Null}" />
     <Style.Triggers>
       <Trigger Property="IsEffectivelyReadOnly" Value="True"><Setter Property="Cursor" Value="Arrow" /></Trigger>
+      <!-- 卡片占满宽度；有结束边内容时同样撑开，结束边的内容才贴得到结束边（TS 里组是 flex 列、项被拉伸） -->
+      <Trigger Property="IsEffectivelyCard" Value="True"><Setter Property="HorizontalAlignment" Value="Stretch" /></Trigger>
+      <Trigger Property="HasEnd" Value="True"><Setter Property="HorizontalAlignment" Value="Stretch" /></Trigger>
       <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" /></Trigger>
     </Style.Triggers>
   </Style>
@@ -55,6 +58,10 @@
 
   <Style x:Key="{x:Static rune:ChoiceBaseParts.Description}" TargetType="ContentPresenter">
     <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+  </Style>
+
+  <Style x:Key="{x:Static rune:ChoiceBaseParts.End}" TargetType="ContentPresenter">
+    <Setter Property="VerticalAlignment" Value="Top" />
   </Style>
 
   <Style x:Key="Rune.ChoiceGroupStyle" TargetType="rune:ChoiceGroup">

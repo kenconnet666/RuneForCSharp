@@ -15,7 +15,7 @@ public abstract class ChoiceGroup : ItemsControl, IFieldControl
 {
     /// <summary>排列方向；默认竖排。</summary>
     public static readonly DependencyProperty OrientationProperty = DependencyProperty.Register(
-        nameof(Orientation), typeof(Orientation), typeof(ChoiceGroup), new PropertyMetadata(Orientation.Vertical));
+        nameof(Orientation), typeof(Orientation), typeof(ChoiceGroup), new PropertyMetadata(Orientation.Vertical, OnLayoutChanged));
 
     /// <summary>整组只读：能聚焦、读屏念"只读"，选择不能改（查看详情、审批时）；外观照常。</summary>
     public static readonly DependencyProperty IsReadOnlyProperty = DependencyProperty.Register(
@@ -24,6 +24,14 @@ public abstract class ChoiceGroup : ItemsControl, IFieldControl
     /// <summary>整组校验未通过（如"至少选一项"）。</summary>
     public static readonly DependencyProperty IsInvalidProperty = DependencyProperty.Register(
         nameof(IsInvalid), typeof(bool), typeof(ChoiceGroup), new PropertyMetadata(false, (d, _) => ((ChoiceGroup)d).Sync()));
+
+    /// <summary>卡片外观：每项是一张带边框的卡片，勾选时边框与底色换成色调色；组里的项都跟着（项自己写了 Card 的除外）。</summary>
+    public static readonly DependencyProperty CardProperty = DependencyProperty.Register(
+        nameof(Card), typeof(bool), typeof(ChoiceGroup), new PropertyMetadata(false, OnLayoutChanged));
+
+    /// <summary>卡片外观横排时每张的最小宽度，放得下几张就几列（auto-fill）；默认 14em。</summary>
+    public static readonly DependencyProperty MinItemWidthProperty = DependencyProperty.Register(
+        nameof(MinItemWidth), typeof(Length), typeof(ChoiceGroup), new PropertyMetadata(new Length("14em"), OnLayoutChanged));
 
     /// <summary>ItemsSource 的数据 → 选项（值、文字、说明、不可用）；数据是 ListboxOption、字符串时不用写。</summary>
     public static readonly DependencyProperty ToOptionProperty = DependencyProperty.Register(
@@ -41,8 +49,48 @@ public abstract class ChoiceGroup : ItemsControl, IFieldControl
 
     void IFieldControl.FieldChanged() => Sync();
 
+    static void OnLayoutChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        var group = (ChoiceGroup)d;
+        group.UpdatePanel();
+        if (e.Property == CardProperty) group.Sync();
+    }
+
+    /// <summary>
+    /// 卡片外观时换成栅格：竖排一列（gap sm），横排按最小宽度 auto-fill（列距 lg、行距 xs：上游排列方向的 columnGap、rowGap 是长写，盖过卡片的 gap: sm）；
+    /// 不是卡片时用主题里的排列。
+    /// </summary>
+    void UpdatePanel()
+    {
+        if (!Card)
+        {
+            ClearValue(ItemsPanelProperty);
+            return;
+        }
+        var grid = new FrameworkElementFactory(typeof(Grid));
+        if (Orientation == Orientation.Horizontal)
+        {
+            grid.SetValue(Grid.ColumnGapProperty, Space.Lg);
+            grid.SetValue(Grid.RowGapProperty, Space.Xs);
+            grid.SetValue(Grid.MinItemWidthProperty, (Length?)MinItemWidth);
+            grid.SetValue(Grid.AutoFillProperty, true);
+        }
+        else
+        {
+            grid.SetValue(Grid.GapProperty, Space.Sm);
+            grid.SetValue(Grid.ColumnsProperty, (int?)1);
+        }
+        ItemsPanel = new ItemsPanelTemplate(grid);
+    }
+
     /// <summary>排列方向。</summary>
     public Orientation Orientation { get => (Orientation)GetValue(OrientationProperty); set => SetValue(OrientationProperty, value); }
+
+    /// <summary>卡片外观。</summary>
+    public bool Card { get => (bool)GetValue(CardProperty); set => SetValue(CardProperty, value); }
+
+    /// <summary>卡片外观横排时每张的最小宽度。</summary>
+    public Length MinItemWidth { get => (Length)GetValue(MinItemWidthProperty); set => SetValue(MinItemWidthProperty, value); }
 
     /// <summary>整组只读。</summary>
     public bool IsReadOnly { get => (bool)GetValue(IsReadOnlyProperty); set => SetValue(IsReadOnlyProperty, value); }
