@@ -2,7 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/wpf">
-  <!-- 页脚默认靠结束边排；删除放到另一侧，离主要操作远一点：页脚里放一行两端对齐的 Flex（撑满一行见 ButtonExamples.xaml.cs） -->
+  <!-- 页脚默认靠结束边排；删除放到另一侧，离主要操作远一点：页脚里放一行两端对齐的 Flex（布局容器撑满页脚） -->
   <rune:Card>
     <!-- TS 在页头里写一行两端对齐的 Flex；WPF 的页头行已经是这样排的，操作放 Extra -->
     <rune:Card.Header><rune:Strong>Vue 3.5 的响应式解构</rune:Strong></rune:Card.Header>

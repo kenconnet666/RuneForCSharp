@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Styling;
@@ -79,5 +80,18 @@ public class CardTests
         Pump(TimeSpan.FromMilliseconds(600));
         Assert.False(card.SkeletonShown);
         Assert.True(card.Revealing); // 出现过骨架：换回正文时淡入
+    });
+
+    [Fact]
+    public Task Footer_layouts_fill_the_row_and_single_controls_sit_at_the_end() => HeadlessUi.Run(() =>
+    {
+        var row = new Flex { Justify = FlexJustify.Between, Children = { new Button { Content = "删除" }, new Button { Content = "发布" } } };
+        var single = new Button { Content = "查看" };
+        var (withRow, withButton) = (new Card { Footer = row, Content = "正文" }, new Card { Footer = single, Content = "正文" });
+        HeadlessUi.Show(new StackPanel { Width = 400, Children = { withRow, withButton } });
+
+        Assert.True(row.Bounds.Width > 300); // 布局容器撑满页脚（减去内边距），两端对齐由它自己排
+        Assert.True(single.TranslatePoint(new Point(single.Bounds.Width, 0), withButton)!.Value.X > 350); // 单个控件靠结束边
+        Assert.True(single.Bounds.Width < 100);
     });
 }

@@ -29,16 +29,6 @@ public partial class ButtonBasic : UserControl
     public ButtonBasic()
     {
         InitializeComponent();
-        // 页脚行是 Flex，里面的内容按自身宽度靠结束边排；给装内容的 ContentPresenter 加 Flex.Grow，里面的 Flex 才能撑满一行、把删除推到另一侧
-        Actions.Loaded += (_, _) =>
-        {
-            for (DependencyObject? node = Actions; node is not null; node = VisualTreeHelper.GetParent(node))
-            {
-                if (node is not ContentPresenter presenter) continue;
-                Flex.SetGrow(presenter, true);
-                break;
-            }
-        };
         Publish.Click += (_, _) =>
         {
             var published = Publish.Content is "发布";

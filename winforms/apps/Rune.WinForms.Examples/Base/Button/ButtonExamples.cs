@@ -32,10 +32,7 @@ static class ButtonExamples
     /// <summary>几行竖着排。</summary>
     static FlexControl Rows(params Control[] rows) => Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Md }, rows);
 
-    /// <summary>
-    /// 卡片的页头在上、操作在页脚。Card 的页脚是一个控件、靠结束边放，不撑满卡片宽度：删除放到另一侧靠间距拉开（Gap = xl），
-    /// 而不是 TS 里的 space-between。
-    /// </summary>
+    /// <summary>卡片的页头在上、操作在页脚：页脚放一行两端对齐的 FlexControl（布局容器撑满页脚），删除放到另一侧。</summary>
     static Control Basic()
     {
         var published = false;
@@ -47,7 +44,7 @@ static class ButtonExamples
             publish.Text = published ? "撤回" : "发布";
             state.Text = published ? "已发布" : "草稿 · 3 分钟前保存";
         };
-        var footer = Build.Flex(new FlexControl { Align = FlexAlign.Center, Justify = FlexJustify.Between, Gap = Space.Xl, Wrap = true },
+        var footer = Build.Flex(new FlexControl { Align = FlexAlign.Center, Justify = FlexJustify.Between, Gap = Space.Sm, Wrap = true },
             new ButtonControl { Text = "删除", Variant = ButtonVariant.Ghost, Tone = StatusTone.Danger, Icon = Lucide.Trash },
             Build.Flex(new FlexControl { Align = FlexAlign.Center, Gap = Space.Sm, Wrap = true },
                 new ButtonControl { Text = "取消", Variant = ButtonVariant.Soft, Tone = StatusTone.Neutral },

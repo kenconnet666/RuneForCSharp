@@ -167,6 +167,8 @@ public class Card : Control
         header.IsVisible = Header is not null || Extra is not null;
         bodyContent.Content = Content;
         footerContent.Content = Footer;
+        // 页脚是布局容器（一组按钮、两端对齐的一行）时撑满一行由它自己排，单个控件靠结束边（TS 的页脚是 justify-content: flex-end 的一行）
+        Flex.SetGrow(footerContent, Footer is Panel);
         footer.IsVisible = Footer is not null;
     }
 

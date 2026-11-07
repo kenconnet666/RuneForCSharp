@@ -3,12 +3,7 @@
              xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/avalonia"
              x:Class="Rune.Avalonia.Examples.ButtonBasic">
   <rune:Card>
-    <!-- 页脚默认靠结束边排（TS 的 propsFooter.sx）：让页脚里的 Flex 占满一行，删除才能放到另一侧，离主要操作远一点 -->
-    <rune:Card.Styles>
-      <Style Selector="rune|Card Border#PART_Footer > rune|Flex > ContentPresenter">
-        <Setter Property="rune:Flex.Grow" Value="True" />
-      </Style>
-    </rune:Card.Styles>
+    <!-- 页脚放一行两端对齐的 Flex（布局容器撑满页脚），删除放到另一侧，离主要操作远一点 -->
     <rune:Card.Header>
       <rune:Strong>Vue 3.5 的响应式解构</rune:Strong>
     </rune:Card.Header>

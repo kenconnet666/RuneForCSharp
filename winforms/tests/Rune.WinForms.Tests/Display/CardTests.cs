@@ -57,4 +57,19 @@ public class CardTests
         Assert.True(content.Visible);
         Assert.False(card.AccessibilityObject.State.HasFlag(AccessibleStates.Busy));
     });
+
+    [Fact]
+    public Task Footer_layouts_fill_the_row_and_single_controls_sit_at_the_end() => WinFormsUi.Run(() =>
+    {
+        var row = new FlexControl { Justify = FlexJustify.Between };
+        row.Controls.AddRange([new ButtonControl { Text = "删除" }, new ButtonControl { Text = "发布" }]);
+        var single = new ButtonControl { Text = "查看" };
+        var withRow = new CardControl { Footer = row, Dock = DockStyle.Top };
+        var withButton = new CardControl { Footer = single, Dock = DockStyle.Top };
+        using var form = WinFormsUi.Show(withButton, withRow);
+
+        Assert.True(row.Width > withRow.Width * 3 / 4); // 布局容器撑满页脚（减去内边距），两端对齐由它自己排
+        Assert.True(single.Right > withButton.Width * 3 / 4); // 单个控件靠结束边
+        Assert.True(single.Width < withButton.Width / 4);
+    });
 }

@@ -204,6 +204,8 @@ public class Card : FrameworkElement
         header.Visibility = Header is null && Extra is null ? Visibility.Collapsed : Visibility.Visible;
         bodyContent.Content = Content;
         footerContent.Content = Footer;
+        // 页脚是布局容器（一组按钮、两端对齐的一行）时撑满一行由它自己排，单个控件靠结束边（TS 的页脚是 justify-content: flex-end 的一行）
+        Flex.SetGrow(footerContent, Footer is System.Windows.Controls.Panel);
         footer.Visibility = Footer is null ? Visibility.Collapsed : Visibility.Visible;
     }
 

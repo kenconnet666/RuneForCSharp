@@ -291,7 +291,9 @@ public class CardControl : Panel
             {
                 FooterTop = y;
                 y += line;
+                // 页脚是布局容器（一组按钮、两端对齐的一行）时撑满一行由它自己排，单个控件靠结束边（TS 的页脚是 justify-content: flex-end 的一行）
                 var size = SizeOf(footer, inner);
+                if (footer is Panel) size.Width = inner;
                 if (arrange) footer.SetBounds(X(line + inset + inner - size.Width, size.Width), y + inset, size.Width, size.Height);
                 y += 2 * inset + size.Height;
             }
