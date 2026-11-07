@@ -13,6 +13,8 @@
     <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
     <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
     <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Tight}" />
+    <!-- 行高就是行盒的高度（同 CSS），不按字体的行距再撑高 -->
+    <Setter Property="TextBlock.LineStackingStrategy" Value="BlockLineHeight" />
     <Setter Property="HorizontalAlignment" Value="Left" />
     <Setter Property="Focusable" Value="False" />
     <Style.Triggers>
