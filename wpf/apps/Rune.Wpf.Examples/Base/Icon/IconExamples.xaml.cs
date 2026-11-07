@@ -37,6 +37,13 @@ public partial class IconAccessibility : UserControl
     public IconAccessibility() => InitializeComponent();
 }
 
+/// <summary>Icon/with-text：与文字、按钮搭配。</summary>
+public partial class IconWithText : UserControl
+{
+    /// <summary>加载示例。</summary>
+    public IconWithText() => InitializeComponent();
+}
+
 /// <summary>Icon/custom：自己的图标，写成 24 格画布上的路径（三个库都认的写法：绝对坐标的 M、L、C、Z）。</summary>
 public partial class IconCustom : UserControl
 {

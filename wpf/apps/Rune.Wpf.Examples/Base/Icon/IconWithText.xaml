@@ -1,0 +1,18 @@
+<UserControl x:Class="Rune.Wpf.Examples.IconWithText"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/wpf">
+  <rune:Flex Direction="column" Gap="md">
+    <rune:Flex Gap="lg" Wrap="True">
+      <rune:Text Tone="muted"><InlineUIContainer BaselineAlignment="Center"><rune:Icon Data="{x:Static rune:Lucide.MapPin}" /></InlineUIContainer> 上海·徐汇</rune:Text>
+      <rune:Text Tone="muted"><InlineUIContainer BaselineAlignment="Center"><rune:Icon Data="{x:Static rune:Lucide.Clock}" /></InlineUIContainer> 3 分钟前</rune:Text>
+      <rune:Text Tone="muted"><InlineUIContainer BaselineAlignment="Center"><rune:Icon Data="{x:Static rune:Lucide.Users}" /></InlineUIContainer> 128 人参与</rune:Text>
+    </rune:Flex>
+    <rune:Paragraph>图标跟随文字的字号与颜色，和文字基线对齐；放在句子中间也不会撑高行距，<rune:Link Href="https://example.com/guide/design">查看设计规范 <InlineUIContainer BaselineAlignment="Center"><rune:Icon Data="{x:Static rune:Lucide.ExternalLink}" /></InlineUIContainer></rune:Link>。</rune:Paragraph>
+    <rune:Flex Gap="sm" Wrap="True" Align="center">
+      <rune:Button Icon="{x:Static rune:Lucide.Plus}">新建项目</rune:Button>
+      <rune:Button Variant="ghost" IconEnd="{x:Static rune:Lucide.ArrowRight}">继续</rune:Button>
+      <rune:Badge Tone="warning" Icon="{x:Static rune:Lucide.Star}">精选</rune:Badge>
+    </rune:Flex>
+  </rune:Flex>
+</UserControl>
