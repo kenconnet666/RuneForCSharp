@@ -1,0 +1,103 @@
+<!--
+  TextField 与 CharacterCount 的主题（vue-tsx-pro 的 inputRecipe、characterCountStyles）：外壳控件高度、左右 space.md、xs 宽的 border 描边（悬停 borderStrong）、
+  md 圆角、surface 底、行高 normal，图标与文字隔 space.sm；soft 时 fill 底、没有描边；只读时 borderMuted 描边、fill 底；出错时 danger 描边与焦点环；
+  不可用时半透明。里面有焦点时焦点环压住边框（往外 1 像素、往里 1 像素）。前后的图标、前后缀 textMuted；占位文字 textPlaceholder。
+  字数：sm、textMuted，超出上限时 dangerText。
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:TextField}" TargetType="rune:TextField">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Surface}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{rune:Em Resolved=Radius}" />
+    <Setter Property="Padding" Value="{rune:Em 0.75, 0}" />
+    <Setter Property="MinHeight" Value="{rune:ControlHeight}" />
+    <Setter Property="CaretBrush" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="SelectionBrush" Value="{DynamicResource Rune.Brush.AccentSoftHover}" />
+    <Setter Property="SelectionForegroundBrush" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="PlaceholderForeground" Value="{DynamicResource Rune.Brush.TextPlaceholder}" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="LineHeight" Value="{rune:Em Resource=Rune.LineHeight.Normal}" />
+    <Setter Property="Cursor" Value="Ibeam" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border Name="PART_Root" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
+            <rune:Flex Align="center" Gap="sm">
+              <rune:Icon Name="PART_Icon" Data="{TemplateBinding Icon}" IsVisible="{TemplateBinding Icon, Converter={x:Static ObjectConverters.IsNotNull}}" />
+              <TextBlock Name="PART_Prefix" Text="{TemplateBinding Prefix}" IsVisible="{TemplateBinding Prefix, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                         VerticalAlignment="Center" />
+              <Panel rune:Flex.Grow="True" ClipToBounds="True" VerticalAlignment="Center">
+                <TextBlock Name="PART_Placeholder" Text="{TemplateBinding PlaceholderText}" Foreground="{TemplateBinding PlaceholderForeground}"
+                           IsVisible="False" IsHitTestVisible="False" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                <TextPresenter Name="PART_TextPresenter"
+                               Text="{TemplateBinding Text, Mode=TwoWay}"
+                               CaretBlinkInterval="{TemplateBinding CaretBlinkInterval}"
+                               CaretIndex="{TemplateBinding CaretIndex}"
+                               SelectionStart="{TemplateBinding SelectionStart}"
+                               SelectionEnd="{TemplateBinding SelectionEnd}"
+                               TextAlignment="{TemplateBinding TextAlignment}"
+                               TextWrapping="NoWrap"
+                               LineHeight="{TemplateBinding LineHeight}"
+                               PasswordChar="{TemplateBinding PasswordChar}"
+                               RevealPassword="{TemplateBinding RevealPassword}"
+                               SelectionBrush="{TemplateBinding SelectionBrush}"
+                               SelectionForegroundBrush="{TemplateBinding SelectionForegroundBrush}"
+                               CaretBrush="{TemplateBinding CaretBrush}"
+                               VerticalAlignment="Center" />
+              </Panel>
+              <TextBlock Name="PART_Suffix" Text="{TemplateBinding Suffix}" IsVisible="{TemplateBinding Suffix, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                         VerticalAlignment="Center" />
+              <rune:ClearButton Name="PART_Clear" Radius="full" IsVisible="False" Cursor="Hand" />
+              <rune:IconButton Name="PART_Reveal" Radius="full" IsVisible="False" Cursor="Hand" />
+              <rune:CharacterCount Name="PART_Count" IsVisible="False" VerticalAlignment="Center" />
+              <rune:Icon Name="PART_IconEnd" Data="{TemplateBinding IconEnd}" IsVisible="{TemplateBinding IconEnd, Converter={x:Static ObjectConverters.IsNotNull}}" />
+            </rune:Flex>
+          </Border>
+          <Border Name="PART_FocusRing" IsVisible="False" IsHitTestVisible="False" Margin="-1" BorderThickness="2"
+                  BorderBrush="{DynamicResource Rune.Brush.FocusRing}" CornerRadius="{TemplateBinding CornerRadius}" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:empty /template/ TextBlock#PART_Placeholder"><Setter Property="IsVisible" Value="True" /></Style>
+    <Style Selector="^ /template/ rune|Icon#PART_Icon"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" /></Style>
+    <Style Selector="^ /template/ rune|Icon#PART_IconEnd"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" /></Style>
+    <Style Selector="^ /template/ TextBlock#PART_Prefix"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" /></Style>
+    <Style Selector="^ /template/ TextBlock#PART_Suffix"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" /></Style>
+    <!-- 框里的小按钮：比独立的图标按钮紧凑（1.5em，不小于 24px），左右各收进 space.xs -->
+    <Style Selector="^ /template/ rune|ClearButton#PART_Clear, ^ /template/ rune|IconButton#PART_Reveal">
+      <Setter Property="Width" Value="{rune:Em 1.5, Min=24}" />
+      <Setter Property="MinHeight" Value="{rune:Em 1.5, Min=24}" />
+      <Setter Property="Margin" Value="{rune:Em -0.25, 0}" />
+    </Style>
+    <Style Selector="^:pointerover"><Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderStrong}" /></Style>
+    <Style Selector="^:focus-within /template/ Border#PART_FocusRing"><Setter Property="IsVisible" Value="True" /></Style>
+    <Style Selector="^:soft">
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="Background" Value="{DynamicResource Rune.Brush.Fill}" />
+    </Style>
+    <Style Selector="^:readonly">
+      <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+      <Setter Property="Background" Value="{DynamicResource Rune.Brush.Fill}" />
+    </Style>
+    <Style Selector="^:invalid">
+      <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Danger}" />
+    </Style>
+    <Style Selector="^:invalid /template/ Border#PART_FocusRing"><Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Danger}" /></Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" />
+      <Setter Property="Cursor" Value="No" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type rune:CharacterCount}" TargetType="rune:CharacterCount">
+    <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+    <Setter Property="FontFeatures" Value="+tnum" />
+    <Style Selector="^:over"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.DangerText}" /></Style>
+  </ControlTheme>
+</ResourceDictionary>

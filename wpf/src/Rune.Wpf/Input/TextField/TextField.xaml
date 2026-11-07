@@ -1,0 +1,95 @@
+<!--
+  TextField 与 CharacterCount 的主题样式（vue-tsx-pro 的 inputRecipe、characterCountStyles）：外壳控件高度、左右 space.md、xs 宽的 border 描边（悬停 borderStrong）、
+  md 圆角、surface 底，图标与文字隔 space.sm；soft 时 fill 底、没有描边；只读时 borderMuted 描边、fill 底；出错时 danger 描边与焦点环；不可用时半透明。
+  里面有焦点时焦点环压住边框（往外 1 像素、往里 1 像素）。前后的图标、前后缀 textMuted；占位文字 textPlaceholder。字数：sm、textMuted，超出上限时 dangerText。
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <Style TargetType="rune:TextField">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Surface}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="rune:EmSize.Padding" Value="0.75,0" />
+    <Setter Property="rune:ControlHeight.MinHeight" Value="True" />
+    <Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.Md}" />
+    <Setter Property="CaretBrush" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="SelectionBrush" Value="{DynamicResource Rune.Brush.Accent}" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+    <Setter Property="Cursor" Value="IBeam" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="rune:TextField">
+          <Grid>
+            <Border x:Name="PART_Root" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
+              <rune:Flex Align="center" Gap="sm">
+                <rune:Icon x:Name="PART_Icon" Data="{TemplateBinding Icon}" Foreground="{DynamicResource Rune.Brush.TextMuted}" />
+                <TextBlock x:Name="PART_Prefix" Text="{TemplateBinding Prefix}" Foreground="{DynamicResource Rune.Brush.TextMuted}" VerticalAlignment="Center" />
+                <Grid rune:Flex.Grow="True" VerticalAlignment="Center">
+                  <TextBlock x:Name="PART_Placeholder" Text="{TemplateBinding PlaceholderText}" Foreground="{DynamicResource Rune.Brush.TextPlaceholder}"
+                             Visibility="Collapsed" IsHitTestVisible="False" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                  <ScrollViewer x:Name="PART_ContentHost" Focusable="False" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"
+                                VerticalAlignment="Center" />
+                  <PasswordBox x:Name="PART_Password" Visibility="Collapsed" BorderThickness="0" Background="Transparent" Padding="0"
+                               Foreground="{TemplateBinding Foreground}" CaretBrush="{TemplateBinding CaretBrush}" VerticalAlignment="Center" />
+                </Grid>
+                <TextBlock x:Name="PART_Suffix" Text="{TemplateBinding Suffix}" Foreground="{DynamicResource Rune.Brush.TextMuted}" VerticalAlignment="Center" />
+                <rune:ClearButton x:Name="PART_Clear" Radius="full" Visibility="Collapsed" Cursor="Hand" />
+                <rune:IconButton x:Name="PART_Reveal" Radius="full" Visibility="Collapsed" Cursor="Hand" />
+                <rune:CharacterCount x:Name="PART_Count" Visibility="Collapsed" VerticalAlignment="Center" />
+                <rune:Icon x:Name="PART_IconEnd" Data="{TemplateBinding IconEnd}" Foreground="{DynamicResource Rune.Brush.TextMuted}" />
+              </rune:Flex>
+            </Border>
+            <Border x:Name="PART_FocusRing" Visibility="Collapsed" IsHitTestVisible="False" Margin="-1" BorderThickness="2"
+                    BorderBrush="{DynamicResource Rune.Brush.FocusRing}" CornerRadius="{TemplateBinding CornerRadius}" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="Icon" Value="{x:Null}"><Setter TargetName="PART_Icon" Property="Visibility" Value="Collapsed" /></Trigger>
+            <Trigger Property="IconEnd" Value="{x:Null}"><Setter TargetName="PART_IconEnd" Property="Visibility" Value="Collapsed" /></Trigger>
+            <Trigger Property="Prefix" Value="{x:Null}"><Setter TargetName="PART_Prefix" Property="Visibility" Value="Collapsed" /></Trigger>
+            <Trigger Property="Suffix" Value="{x:Null}"><Setter TargetName="PART_Suffix" Property="Visibility" Value="Collapsed" /></Trigger>
+            <Trigger Property="Text" Value=""><Setter TargetName="PART_Placeholder" Property="Visibility" Value="Visible" /></Trigger>
+            <Trigger Property="IsKeyboardFocusWithin" Value="True"><Setter TargetName="PART_FocusRing" Property="Visibility" Value="Visible" /></Trigger>
+            <Trigger Property="ShowsInvalid" Value="True"><Setter TargetName="PART_FocusRing" Property="BorderBrush" Value="{DynamicResource Rune.Brush.Danger}" /></Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <Style.Triggers>
+      <Trigger Property="Size" Value="xs"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xs}" /></Trigger>
+      <Trigger Property="Size" Value="sm"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" /></Trigger>
+      <Trigger Property="Size" Value="md"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Md}" /></Trigger>
+      <Trigger Property="Size" Value="lg"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Lg}" /></Trigger>
+      <Trigger Property="Size" Value="xl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xl}" /></Trigger>
+      <Trigger Property="Radius" Value="none"><Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.None}" /></Trigger>
+      <Trigger Property="Radius" Value="xs"><Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.Xs}" /></Trigger>
+      <Trigger Property="Radius" Value="sm"><Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.Sm}" /></Trigger>
+      <Trigger Property="Radius" Value="lg"><Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.Lg}" /></Trigger>
+      <Trigger Property="Radius" Value="xl"><Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.Xl}" /></Trigger>
+      <Trigger Property="Radius" Value="full"><Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.Full}" /></Trigger>
+      <Trigger Property="IsMouseOver" Value="True"><Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderStrong}" /></Trigger>
+      <Trigger Property="Variant" Value="soft">
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Background" Value="{DynamicResource Rune.Brush.Fill}" />
+      </Trigger>
+      <Trigger Property="ShowsReadOnly" Value="True">
+        <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+        <Setter Property="Background" Value="{DynamicResource Rune.Brush.Fill}" />
+      </Trigger>
+      <Trigger Property="ShowsInvalid" Value="True"><Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Danger}" /></Trigger>
+      <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" /></Trigger>
+    </Style.Triggers>
+  </Style>
+
+  <Style TargetType="rune:CharacterCount">
+    <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+    <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
+    <Style.Triggers>
+      <Trigger Property="IsOver" Value="True"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.DangerText}" /></Trigger>
+    </Style.Triggers>
+  </Style>
+</ResourceDictionary>

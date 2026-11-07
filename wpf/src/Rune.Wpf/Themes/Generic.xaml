@@ -40,6 +40,7 @@
     <ResourceDictionary Source="/Rune.Wpf;component/Input/Switch/Switch.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Input/Checkbox/Checkbox.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Input/ToggleGroup/ToggleGroup.xaml" />
+    <ResourceDictionary Source="/Rune.Wpf;component/Input/TextField/TextField.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Input/Radio/Radio.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Form/Field/Field.xaml" />
   </ResourceDictionary.MergedDictionaries>

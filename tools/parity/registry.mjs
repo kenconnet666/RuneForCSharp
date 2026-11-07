@@ -27,6 +27,8 @@ export const PROP_RENAMES = {
 /** 只对某个组件的改名（C# 的成员不能与类同名：Icon 的 icon 叫 Data） */
 export const COMPONENT_PROP_RENAMES = {
   Icon: { icon: 'Data' },
+  // 文本框的值是平台 TextBox 的 Text（WinForms 是 Control.Text）
+  TextField: { _value: 'Text' },
   // Text 是 TextBlock 自己的属性
   CodeText: { text: 'Source' },
   // Measure 是布局的方法
@@ -105,6 +107,10 @@ export const PROPS_NOT_PORTED = {
   NavList: { propsList: 'nav > ul 是 HTML 的结构：NavList 本身就是那一列' },
   NavItem: { propsItem: '外层的 li 是 HTML 列表的结构：桌面上导航项本身就是列表里的一行' },
   ToggleGroup: { propsIndicator: '滑块是组自己画的（跟着选中项滑动），没有可改样式的部件' },
+  CharacterCount: {
+    propsValue: '看得见的字数就是控件自己的文字，读屏读的是控件的名称（完整的句子），不另分部件',
+    propsLabel: '看得见的字数就是控件自己的文字，读屏读的是控件的名称（完整的句子），不另分部件',
+  },
   Button: { type: BUTTON_TYPE },
   IconButton: { type: BUTTON_TYPE },
   ButtonBase: { type: BUTTON_TYPE },
@@ -169,6 +175,10 @@ export const PLATFORM_PROPS = new Set([
   'ToolTipService.InitialShowDelay',
   'ToolTipService.IsEnabled',
   'ToolTipOpening',
+  // 文本框从平台的 TextBox 派生：值、只读、长度上限是平台的
+  'Text',
+  'IsReadOnly',
+  'MaxLength',
 ]);
 
 /** 桌面上不做的组件与原因（ROADMAP 阶段 3） */

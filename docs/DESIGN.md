@@ -712,6 +712,22 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 像素对照：Avalonia segmented 0.26%、vertical 0.13%，WPF 0.30% / 0.11%；multiple 两个平台约 0.7%–2.7%：卡片在 0.75em 的间距之后落在半像素上，
   浏览器画盒子时把边吸附到整像素，我们按小数画、边线发虚（DOCSITE 记着这类）。做的时候查出 WPF 的 FieldLabel 设了行高却没按块排行，标签按字体的自然行高撑高了 1 像素多，已修。
 
+### TextField 与 CharacterCount（2026-11-07）
+
+- TextField 从平台的文字输入派生（Avalonia、WPF 是 TextBox；WinForms 的 TextFieldControl 是外壳里放无边框的 TextBox）：值是 `Text`（TS 的 _value），
+  只读、长度上限、撤销、输入法都是平台的。外壳（vue-tsx-pro 的 inputRecipe）：控件高度、左右 space.md、xs 描边（悬停 borderStrong）、md 圆角、surface 底，
+  图标与文字隔 space.sm；soft 是 fill 底、没有描边；只读 borderMuted 与 fill 底；出错 danger 描边与焦点环；里面有焦点时 2 像素的焦点环压住边框。
+  `Variant`（ControlVariant，孪生文件 `Input/Control/ControlVariants.cs`，以后 Textarea、Select 共用）、`Size`、`Radius`、`Icon`、`IconEnd`、`Prefix`、`Suffix`、
+  `Clearable`、`ShowCount`、`Type`（TextFieldType，孪生文件；桌面上只有 password 不同）、`IsInvalid`、`IsRequired`。放进 Field 时以标签为名称，沿用出错、只读。
+- 密码：Avalonia 用 TextBox 的 PasswordChar / RevealPassword；WPF 的 TextBox 不能显示圆点，模板里叠一个 PasswordBox（password 且没显示原文时代替文字输入，
+  与 Text 双向同步）；WinForms 是 UseSystemPasswordChar。显示密码的按钮名称不变（"显示密码"），按下切换显示。
+- CharacterCount：显示"12 / 100"、超出上限时 dangerText；读屏的名称是完整的句子（语言包的 characterCount），看得见的字数不另分部件。
+- **Avalonia**：TextBox 的模板只要求 PART_TextPresenter；单行没有放 ScrollViewer（测试只加载 RuneTheme，平台的 ScrollViewer 没有模板），长文字不跟着光标滚动，
+  以后换成 ScrollArea。框里的按钮点击不把焦点交给输入框。
+- **WinForms**：平台的 TextBox 不能透明，底色跟着外壳的状态换；默认的读屏名称会取 Text（输入的值），改成只认 AccessibleName 与字段的标签。
+  放在 FieldControl 这类不是 FlexControl 的容器里时要自己并上最小高度。
+- 没做：`format`（手机号、身份证号、银行卡号的分组显示）、Textarea、form 示例（要 Form）。
+
 ### CodeBlock（2026-11-07）
 
 - 标题栏（surfaceMuted、等宽 0.85em、下边分隔线）、代码区（等宽 0.9em、行高 normal、上下 0.75em 左右 1em，ScrollArea 横向滚动，Wrap 时换行）、
