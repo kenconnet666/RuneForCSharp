@@ -16,7 +16,7 @@ namespace Rune.WinForms;
 [ToolboxItem(true)]
 [DefaultProperty(nameof(Code))]
 [Description("代码块：高亮、复制、标题栏、行号、行高亮、增删、长代码折叠。")]
-public class CodeBlockControl : Control
+public class CodeBlockControl : Control, IScopeAware
 {
     readonly CodeView view;
     readonly ScrollAreaControl scroll = new() { Axis = ScrollAreaAxis.X };
@@ -70,20 +70,17 @@ public class CodeBlockControl : Control
     [DefaultValue(null)]
     public string? Title { get; set { field = value; Relayout(); } }
 
-    /// <summary>长行自动换行，而不是横向滚动。</summary>
+    /// <summary>长行自动换行，而不是横向滚动；不写时取作用域的默认值（<see cref="CodeBlockDefaults"/>），再没有时 false。</summary>
     [Category("Behavior")]
-    [DefaultValue(false)]
-    public bool Wrap { get; set { field = value; scroll.Axis = value ? ScrollAreaAxis.Y : ScrollAreaAxis.X; Relayout(); } }
+    public bool Wrap { get => wrap ?? ScopeDefaults?.Wrap ?? false; set { wrap = value; Relayout(); } }
 
-    /// <summary>显示复制按钮，默认 true。</summary>
+    /// <summary>显示复制按钮；不写时取作用域的默认值，再没有时 true。</summary>
     [Category("Behavior")]
-    [DefaultValue(true)]
-    public bool Copyable { get; set { field = value; Relayout(); } } = true;
+    public bool Copyable { get => copyable ?? ScopeDefaults?.Copyable ?? true; set { copyable = value; Relayout(); } }
 
-    /// <summary>显示行号。</summary>
+    /// <summary>显示行号；不写时取作用域的默认值，再没有时 false。</summary>
     [Category("Appearance")]
-    [DefaultValue(false)]
-    public bool LineNumbers { get; set { field = value; Relayout(); } }
+    public bool LineNumbers { get => lineNumbers ?? ScopeDefaults?.LineNumbers ?? false; set { lineNumbers = value; Relayout(); } }
 
     /// <summary>强调的行：<c>"2,4-5"</c>。</summary>
     [Category("Appearance")]
@@ -100,15 +97,50 @@ public class CodeBlockControl : Control
     [DefaultValue(null)]
     public string? RemovedLines { get; set { field = value; Relayout(); } }
 
-    /// <summary>超过这么多行时折叠，底部的按钮展开；不写时不折叠。</summary>
+    /// <summary>超过这么多行时折叠，底部的按钮展开；不写时取作用域的默认值，再没有时不折叠。</summary>
     [Category("Behavior")]
-    [DefaultValue(null)]
-    public int? MaxLines { get; set { field = value; Relayout(); } }
+    public int? MaxLines { get => maxLines.Written ? maxLines.Value : ScopeDefaults?.MaxLines; set { maxLines = (true, value); Relayout(); } }
 
-    /// <summary>嵌在已经有外框的容器里：去掉自己的边框、圆角和底色。</summary>
+    /// <summary>嵌在已经有外框的容器里：去掉自己的边框、圆角和底色；不写时取作用域的默认值，再没有时 false。</summary>
     [Category("Appearance")]
-    [DefaultValue(false)]
-    public bool Flush { get; set { field = value; Relayout(); } }
+    public bool Flush { get => flush ?? ScopeDefaults?.Flush ?? false; set { flush = value; Relayout(); } }
+
+    bool? wrap, copyable, lineNumbers, flush;
+    (bool Written, int? Value) maxLines;
+
+    /// <summary>作用域合并的默认值（上游 components.CodeBlock.defaults）：没写的档位取它。</summary>
+    CodeBlockDefaults? ScopeDefaults => ProviderControl.Of(this)?.ResolveDefaults<CodeBlockDefaults>();
+
+    bool ShouldSerializeWrap() => wrap is not null;
+
+    void ResetWrap() => wrap = null;
+
+    bool ShouldSerializeCopyable() => copyable is not null;
+
+    void ResetCopyable() => copyable = null;
+
+    bool ShouldSerializeLineNumbers() => lineNumbers is not null;
+
+    void ResetLineNumbers() => lineNumbers = null;
+
+    bool ShouldSerializeMaxLines() => maxLines.Written;
+
+    void ResetMaxLines() => maxLines = default;
+
+    bool ShouldSerializeFlush() => flush is not null;
+
+    void ResetFlush() => flush = null;
+
+    /// <summary>所在作用域的默认值、主题变了：重新排版、重画。</summary>
+    void IScopeAware.ScopeChanged() => Relayout();
+
+    /// <inheritdoc />
+    protected override void OnParentChanged(EventArgs e)
+    {
+        base.OnParentChanged(e);
+        // 换了位置可能换了作用域
+        Relayout();
+    }
 
     /// <summary>展开着（折叠的长代码）。</summary>
     [Browsable(false)]
@@ -203,6 +235,7 @@ public class CodeBlockControl : Control
 
     void Relayout()
     {
+        scroll.Axis = Wrap ? ScrollAreaAxis.Y : ScrollAreaAxis.X;
         copy.Visible = Copyable;
         expand.Visible = Collapsible;
         view.Reset();
@@ -493,4 +526,33 @@ public class CodeBlockControl : Control
             graphics.Restore(state);
         }
     }
+}
+
+/// <summary>CodeBlock 在作用域里的默认值（上游 <c>components.CodeBlock.defaults</c>，CodeBlockOptions）：<c>scope.Defaults.Set(new CodeBlockDefaults { LineNumbers = true });</c></summary>
+public sealed record CodeBlockDefaults : IScopeRecord<CodeBlockDefaults>
+{
+    /// <summary>长行自动换行。</summary>
+    public bool? Wrap { get; init; }
+
+    /// <summary>显示复制按钮。</summary>
+    public bool? Copyable { get; init; }
+
+    /// <summary>显示行号。</summary>
+    public bool? LineNumbers { get; init; }
+
+    /// <summary>超过这么多行时折叠。</summary>
+    public int? MaxLines { get; init; }
+
+    /// <summary>去掉自己的边框、圆角和底色。</summary>
+    public bool? Flush { get; init; }
+
+    /// <inheritdoc />
+    public CodeBlockDefaults Merge(CodeBlockDefaults? over) => over is null ? this : new()
+    {
+        Wrap = over.Wrap ?? Wrap,
+        Copyable = over.Copyable ?? Copyable,
+        LineNumbers = over.LineNumbers ?? LineNumbers,
+        MaxLines = over.MaxLines ?? MaxLines,
+        Flush = over.Flush ?? Flush,
+    };
 }

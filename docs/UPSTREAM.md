@@ -230,7 +230,7 @@ NavBar（root、list、item）补了部件标记。这些组件都还没做，�
 |---|---|---|
 | 0.14.0：焦点环不被裁、space.xxs、部件名 camelCase、图表数据表等 | 已在前几批跟进 | 不涉及 |
 | 新的单元测试（ac894f2c 等）：ButtonBase 的 type、不可用、加载中；Label 的星号与 data-disabled、for 指向一组时聚焦第一个控件；SelectedTags 单独用时对读屏隐藏、移除按钮不进 Tab、数字的 maxTagCount；Tooltip 的描述、延时、Esc、触屏不显示 | 行为对照多了 10 条没对上（203 条、65 条），多数是我们已有的行为没标记，Label 的“一组”与 SelectedTags 单独使用要先核对 | 并进行为对照的整理：逐条对上已有测试、补测试或登记不适用 |
-| Timeline、Stat、CodeBlock、Tour 成为配方组件（components.Xxx 设默认值、按部件追加样式）；CodeBlock 部件标记 header、title、body、pre、code、line、lineNumber；CodeBlockOptions：wrap、copyable、lineNumbers、maxLines、flush | 我们 CodeBlock 的部件名本来就是这些；Avalonia、WPF 的默认值用平台样式就能设；WinForms 按组件的默认值记录还没有 CodeBlock 的 | 56e28b39 绿了锁定时：WinForms 加 CodeBlockDefaults（Wrap、Copyable、LineNumbers、MaxLines、Flush），重跑 code 页的取值对照 |
+| Timeline、Stat、CodeBlock、Tour 成为配方组件（components.Xxx 设默认值、按部件追加样式）；CodeBlock 部件标记 header、title、body、pre、code、line、lineNumber；CodeBlockOptions：wrap、copyable、lineNumbers、maxLines、flush | 我们 CodeBlock 的部件名本来就是这些；Avalonia、WPF 的默认值用平台样式就能设 | 已做（锁定跟到 56e28b39）：WinForms 加 CodeBlockDefaults（Wrap、Copyable、LineNumbers、MaxLines、Flush），CodeBlockControl 跟着作用域变 |
 | Stat 的部件标记、TimelineOptions、StatOptions、TourOptions | 还没做 | 做时照新的 |
 
 ### 第十九批（2026-11-08 通知，master 5cbdd9cd..ffc6d190，0.14.0 之后）
@@ -241,6 +241,12 @@ NavBar（root、list、item）补了部件标记。这些组件都还没做，�
 |---|---|---|
 | 日历成为配方组件 Calendar（CalendarView、RangeCalendar、日期选择的弹出层、QuarterCalendar 共用）：部件 root、months、month、header、heading、grid、weekday、weekNumber、cell、cellButton、footer；data-scope 统一为 calendar；CalendarOptions（size、showWeekNumbers、fixedWeeks）可按组件设默认值 | 日历还没做 | 做时照新的 |
 | P12 复合组件转发里面基础组件的部件属性：Timeline（propsAvatar、propsPending）、PeoplePickerPanel（propsAvatar、propsCheckbox、propsSelectAll、propsDrill、propsClear、propsRemove）、DataImport（propsTemplate、propsPrevious、propsNext、propsAgain、propsOnlyErrors）；合并顺序 默认 < 使用方 < 组件管的 | 这些组件还没做；合并顺序我们本来如此（DESIGN §7） | 做时照新的；上游的候选清单在 .claude/reports/p12-candidates.md，已做的组件出现在里面时跟进 |
+
+### 第二十批（2026-11-08 通知，master cfccec47..c5bafc10：P12 第二批）
+
+复合组件转发里面的按钮、复选框、链接的部件属性（SchemaFields、SchemaForm、Upload、ConditionBuilder、Breadcrumbs、CommentThread、FilterBar、SlideCaptcha、
+QueryTable、ErrorBoundary、JsonViewer、ImageCropper、QuarterCalendar、Carousel、TabList 的 propsScrollButton、Transfer、XY 图表、MapChart）。
+这些里面只有 TabList 是已做的，但我们的 TabList 还没有滚动按钮（连同 onAdd、onReorder、showAllMenu 等，parity 缺 6/8）：做 TabList 的这些功能时一起加 PropsScrollButton。CI 还在跑，锁定停在 56e28b39。
 
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 

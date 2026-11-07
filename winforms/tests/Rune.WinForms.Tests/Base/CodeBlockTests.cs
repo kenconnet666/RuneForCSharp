@@ -119,4 +119,20 @@ public class CodeBlockTests
     [Fact]
     [Upstream("CodeBlock", "行号写法：逗号分隔、区间、数组")]
     public void Line_specs_accept_lists_and_ranges() => Assert.Equal([1, 3, 4], CodeHighlighting.ParseLines("1,3-4").Order());
+
+    [Fact]
+    public Task Scope_defaults_fill_unwritten_options() => WinFormsUi.Run(() =>
+    {
+        var plain = new CodeBlockControl { Code = string.Join('\n', "a", "b", "c") };
+        var noCopy = new CodeBlockControl { Code = "a", Copyable = true, LineNumbers = false }; // 显式写成组件默认值也要赢过作用域
+        var scope = new ProviderControl { Dock = DockStyle.Fill };
+        scope.Defaults.Set(new CodeBlockDefaults { LineNumbers = true, Copyable = false, MaxLines = 2, Wrap = true });
+        scope.Controls.AddRange([plain, noCopy]);
+        using var form = WinFormsUi.Show(scope);
+
+        Assert.Equal((true, false, 2, true, false), (plain.LineNumbers, plain.Copyable, plain.MaxLines, plain.Wrap, plain.Flush)); // 没写的取作用域，Flush 是组件默认
+        Assert.Equal((false, true), (noCopy.LineNumbers, noCopy.Copyable));
+        plain.MaxLines = null; // 显式写成不折叠
+        Assert.Null(plain.MaxLines);
+    });
 }
