@@ -14,6 +14,8 @@ namespace Rune.Avalonia;
 /// Avalonia 的段落里没有可点击的行内文字：Link 是一个控件，放进一段文字时用 InlineUIContainer，链接文字本身不跨行换行。
 /// 同 <see cref="LinkButton"/>：<see cref="Href"/> 是绝对地址，点击后用系统打开；外部链接末尾一个外链图标、读屏名称后补"在新窗口打开"。
 /// 键盘聚焦有焦点环，不可用（含可聚焦的不可用）时不打开。
+/// 界面里的链接（卡片页头的操作）一列下来都带下划线太重：所在容器用 <see cref="UnderlineScopeProperty"/>（继承）给里面的链接默认的下划线
+/// （上游的 LinkUnderlineScope）。取值：Link 上写的（本地值、绑定）> 所在容器给的 > 主题与 Provider 的默认（defaults.Link）> always。
 /// </summary>
 public class Link : ButtonBase
 {
@@ -28,6 +30,10 @@ public class Link : ButtonBase
 
     /// <summary>下划线，主题里默认 always。</summary>
     public static readonly StyledProperty<LinkUnderline> UnderlineProperty = AvaloniaProperty.Register<Link, LinkUnderline>(nameof(Underline));
+
+    /// <summary>所在容器给里面的链接的默认下划线（继承；上游的 LinkUnderlineScope）：Link 上写了 Underline 时照写的。</summary>
+    public static readonly AttachedProperty<LinkUnderline?> UnderlineScopeProperty =
+        AvaloniaProperty.RegisterAttached<Link, Control, LinkUnderline?>("UnderlineScope", inherits: true);
 
     readonly TemplateResources resources;
 
@@ -50,15 +56,32 @@ public class Link : ButtonBase
     /// <summary>下划线。</summary>
     public LinkUnderline Underline { get => GetValue(UnderlineProperty); set => SetValue(UnderlineProperty, value); }
 
+    /// <summary>容器给里面的链接的默认下划线。</summary>
+    /// <param name="control">容器。</param>
+    public static LinkUnderline? GetUnderlineScope(Control control) => control.GetValue(UnderlineScopeProperty);
+
+    /// <inheritdoc cref="GetUnderlineScope" />
+    /// <param name="control">容器。</param>
+    /// <param name="value">下划线；null 时不改。</param>
+    public static void SetUnderlineScope(Control control, LinkUnderline? value) => control.SetValue(UnderlineScopeProperty, value);
+
+    /// <summary>实际的下划线：Link 上写的（本地值、绑定）优先，其次所在容器给的，再其次主题与 Provider 的。</summary>
+    LinkUnderline EffectiveUnderline =>
+        global::Avalonia.Diagnostics.AvaloniaObjectExtensions.GetDiagnostic(this, UnderlineProperty).Priority > global::Avalonia.Data.BindingPriority.LocalValue && GetValue(UnderlineScopeProperty) is { } scoped ? scoped : Underline;
+
+    LinkUnderline shownUnderline;
+
     /// <inheritdoc />
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
         // 色调的文字色按模板优先级（同 Text），带类或伪类的样式盖得过
         if (change.Property == ToneProperty) resources.Bind(ForegroundProperty, (Tone.Value is null ? TextTone.Accent : Tone).BrushKey);
-        else if (change.Property == UnderlineProperty)
+        else if (change.Property == UnderlineProperty || change.Property == UnderlineScopeProperty)
         {
-            PseudoClasses.Swap(Pseudo(change.GetOldValue<LinkUnderline>()), Pseudo(Underline));
+            var next = EffectiveUnderline;
+            PseudoClasses.Swap(Pseudo(shownUnderline), Pseudo(next));
+            shownUnderline = next;
             UpdateUnderline();
         }
         else if (change.Property == IsPointerOverProperty || change.Property == IsEnabledProperty || change.Property == IsEffectivelyEnabledProperty) UpdateUnderline();
@@ -84,7 +107,8 @@ public class Link : ButtonBase
         underline?.Dispose();
         underline = null;
         if (presenter is null) return;
-        var shown = Underline.Value is null or "always" || (Underline.Value == "hover" && IsPointerOver && !IsDisabled);
+        var effective = EffectiveUnderline;
+        var shown = effective.Value is null or "always" || (effective.Value == "hover" && IsPointerOver && !IsDisabled);
         if (shown) underline = presenter.SetValue(global::Avalonia.Controls.Documents.Inline.TextDecorationsProperty, global::Avalonia.Media.TextDecorations.Underline, global::Avalonia.Data.BindingPriority.Template);
     }
 

@@ -13,6 +13,8 @@ namespace Rune.Wpf;
 /// </code>
 /// 同 <see cref="LinkButton"/>：<see cref="Href"/> 是绝对地址，点击后用系统打开；外部链接末尾一个外链图标、读屏名称后补"在新窗口打开"。
 /// 色调（默认 accent）、下划线（always / hover / none）是主题样式的触发器。
+/// 界面里的链接（卡片页头的操作）一列下来都带下划线太重：所在容器用 <see cref="UnderlineScopeProperty"/>（继承）给里面的链接默认的下划线
+/// （上游的 LinkUnderlineScope）。取值：Link 上写的（本地值、绑定）> 所在容器给的 > 主题与 Provider 的默认（defaults.Link）> always。
 /// </summary>
 public class Link : Hyperlink
 {
@@ -27,7 +29,25 @@ public class Link : Hyperlink
     public static readonly DependencyProperty ToneProperty = DependencyProperty.Register(nameof(Tone), typeof(TextTone), typeof(Link));
 
     /// <summary>下划线，主题里默认 always。</summary>
-    public static readonly DependencyProperty UnderlineProperty = DependencyProperty.Register(nameof(Underline), typeof(LinkUnderline), typeof(Link));
+    public static readonly DependencyProperty UnderlineProperty = DependencyProperty.Register(nameof(Underline), typeof(LinkUnderline), typeof(Link),
+        new FrameworkPropertyMetadata(default(LinkUnderline), null, CoerceUnderline));
+
+    /// <summary>所在容器给里面的链接的默认下划线（继承；上游的 LinkUnderlineScope）：Link 上写了 Underline 时照写的。</summary>
+    public static readonly DependencyProperty UnderlineScopeProperty = DependencyProperty.RegisterAttached("UnderlineScope", typeof(LinkUnderline?), typeof(Link),
+        new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits, (d, _) => (d as Link)?.CoerceValue(UnderlineProperty)));
+
+    /// <summary>容器给里面的链接的默认下划线。</summary>
+    /// <param name="element">容器。</param>
+    public static LinkUnderline? GetUnderlineScope(DependencyObject element) => (LinkUnderline?)element.GetValue(UnderlineScopeProperty);
+
+    /// <inheritdoc cref="GetUnderlineScope" />
+    /// <param name="element">容器。</param>
+    /// <param name="value">下划线；null 时不改。</param>
+    public static void SetUnderlineScope(DependencyObject element, LinkUnderline? value) => element.SetValue(UnderlineScopeProperty, value);
+
+    /// <summary>Link 上写的（本地值、绑定）照用；否则所在容器给了就用它，再否则是主题与 Provider 的。</summary>
+    static object CoerceUnderline(DependencyObject d, object baseValue) =>
+        DependencyPropertyHelper.GetValueSource(d, UnderlineProperty).BaseValueSource != BaseValueSource.Local && GetUnderlineScope(d) is { } scoped ? scoped : baseValue;
 
     InlineUIContainer? icon;
 

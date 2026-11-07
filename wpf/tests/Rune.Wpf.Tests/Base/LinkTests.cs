@@ -44,4 +44,36 @@ public class LinkTests
         Assert.Equal(AutomationControlType.Hyperlink, peer.GetAutomationControlType());
         Assert.EndsWith(Provider.GetLang(text).LinkNewWindow, peer.GetName());
     });
+
+    [Fact]
+    [Upstream("Link", "下划线：容器（LinkUnderlineScope、卡片页头）给的默认是 hover")]
+    public Task Containers_give_hover_underline_unless_the_link_says_otherwise() => WpfUi.Run(() =>
+    {
+        static (Link Link, Paragraph Text) Make(string text, LinkUnderline? underline = null)
+        {
+            var link = new Link();
+            link.Inlines.Add(new Run(text));
+            if (underline is { } value) link.Underline = value;
+            var paragraph = new Paragraph();
+            paragraph.Inlines.Add(link);
+            return (link, paragraph);
+        }
+        var body = Make("正文");
+        var scoped = Make("容器里");
+        var explicitAlways = Make("容器里显式", LinkUnderline.Always);
+        var scope = new StackPanel { Children = { scoped.Text, explicitAlways.Text } };
+        Link.SetUnderlineScope(scope, LinkUnderline.Hover);
+        var header = Make("页头");
+        var cardBody = Make("卡片正文");
+        var host = new StackPanel { Children = { body.Text, scope, new Card { Header = header.Text, Content = cardBody.Text } } };
+        host.Resources.MergedDictionaries.Add(new RuneTheme());
+        WpfUi.Show(host);
+
+        Assert.Equal(TextDecorations.Underline, body.Link.TextDecorations);
+        Assert.Equal(LinkUnderline.Hover, scoped.Link.Underline); // 容器给 hover：没指着时没有下划线
+        Assert.Null(scoped.Link.TextDecorations);
+        Assert.Equal(TextDecorations.Underline, explicitAlways.Link.TextDecorations); // 显式写的优先
+        Assert.Null(header.Link.TextDecorations); // 卡片页头
+        Assert.Equal(TextDecorations.Underline, cardBody.Link.TextDecorations); // 卡片正文照旧
+    });
 }

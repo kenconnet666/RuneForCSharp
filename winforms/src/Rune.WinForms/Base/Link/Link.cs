@@ -9,6 +9,8 @@ namespace Rune.WinForms;
 /// 文字链接（vue-tsx-pro 的 Link）：默认带下划线，正文里的链接不能只靠颜色区分（WCAG 1.4.1）。无窗口元素，放进窗体用 <see cref="LinkControl"/>。
 /// 色调默认 accent；下划线 always / hover / none；外部链接末尾一个外链图标（0.1em 的间距）。WinForms 的文字是整段画的，
 /// 链接是单独的控件，不跟着一段文字换行。
+/// 界面里的链接（卡片页头的操作）一列下来都带下划线太重：所在容器用 <see cref="LinkControl.SetUnderlineScope"/> 给里面的链接默认的下划线
+/// （上游的 LinkUnderlineScope）。取值：Link 上写的 > 所在容器给的 > 作用域的默认值（defaults.Link）> always。
 /// </summary>
 public class Link : Element
 {
@@ -23,8 +25,12 @@ public class Link : Element
     /// <summary>色调；不写时取作用域的默认值（<see cref="LinkDefaults"/>），再没有时 accent。</summary>
     public TextTone Tone { get => tone.Or(ScopeDefaults?.Tone, TextTone.Accent); set { tone = value; Invalidate(); } }
 
-    /// <summary>下划线；不写时取作用域的默认值，再没有时 always。</summary>
-    public LinkUnderline Underline { get => underline.Or(ScopeDefaults?.Underline, LinkUnderline.Always); set { underline = value; Invalidate(); } }
+    /// <summary>下划线；不写时取所在容器给的（<see cref="LinkControl.SetUnderlineScope"/>），再其次作用域的默认值，再没有时 always。</summary>
+    public LinkUnderline Underline
+    {
+        get => underline.Value is not null ? underline : (Host as Control is { } host ? LinkControl.UnderlineScopeOf(host) : null) ?? underline.Or(ScopeDefaults?.Underline, LinkUnderline.Always);
+        set { underline = value; Invalidate(); }
+    }
 
     /// <summary>实例上写过的档位（设计器只序列化这些）。</summary>
     internal (bool Tone, bool Underline) Explicit => (tone.Value is not null, underline.Value is not null);
@@ -111,6 +117,32 @@ public class Link : Element
 /// </summary>
 public class LinkControl : ElementControl<Link>
 {
+    static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Control, object> UnderlineScopes = [];
+
+    /// <summary>
+    /// 容器给里面的链接默认的下划线（上游的 LinkUnderlineScope；Link 上写了 Underline 时照写的）：卡片页头的操作链接给 hover。
+    /// 容器自己与它里面的 LinkControl 都算；设了之后里面的链接重画。
+    /// </summary>
+    /// <param name="container">容器（也可以是链接控件自己）。</param>
+    /// <param name="value">下划线；null 时去掉。</param>
+    public static void SetUnderlineScope(Control container, LinkUnderline? value)
+    {
+        UnderlineScopes.Remove(container);
+        if (value is { } underline) UnderlineScopes.Add(container, underline);
+        foreach (var link in Descendants(container).OfType<LinkControl>()) link.Invalidate();
+
+        static IEnumerable<Control> Descendants(Control control) => [control, .. control.Controls.Cast<Control>().SelectMany(Descendants)];
+    }
+
+    /// <summary>控件所在的容器给的下划线：从它自己往上找最近的一层；没有时 null。</summary>
+    /// <param name="control">链接的宿主。</param>
+    internal static LinkUnderline? UnderlineScopeOf(Control control)
+    {
+        for (Control? node = control; node is not null; node = node.Parent)
+            if (UnderlineScopes.TryGetValue(node, out var value)) return (LinkUnderline)value;
+        return null;
+    }
+
     /// <summary>新建：能聚焦，指针是手形。</summary>
     public LinkControl()
     {

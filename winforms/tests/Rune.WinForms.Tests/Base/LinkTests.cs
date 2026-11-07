@@ -45,4 +45,29 @@ public class LinkTests
         int Baseline(Control control) => control.Top + ((IBaseline)control).Baseline!.Value;
         Assert.Equal(Baseline(before), Baseline(link)); // 外链图标比文字高时，链接的文字也落在同一条基线上
     });
+
+    [Fact]
+    [Upstream("Link", "下划线：容器（LinkUnderlineScope、卡片页头）给的默认是 hover")]
+    public Task Containers_give_hover_underline_unless_the_link_says_otherwise() => WinFormsUi.Run(() =>
+    {
+        var body = new LinkControl { Text = "正文" };
+        var scoped = new LinkControl { Text = "容器里" };
+        var explicitAlways = new LinkControl { Text = "容器里显式", Underline = LinkUnderline.Always };
+        var scope = new FlexControl();
+        scope.Controls.AddRange([scoped, explicitAlways]);
+        LinkControl.SetUnderlineScope(scope, LinkUnderline.Hover);
+        var extra = new LinkControl { Text = "全部" };
+        var cardBody = new LinkControl { Text = "卡片正文" };
+        var card = new CardControl { Header = "最近订单", Extra = extra };
+        card.Controls.Add(cardBody);
+        using var form = WinFormsUi.Show(body, scope, card);
+
+        Assert.Equal(LinkUnderline.Always, body.Underline);
+        Assert.Equal(LinkUnderline.Hover, scoped.Underline); // 容器给 hover
+        Assert.Equal(LinkUnderline.Always, explicitAlways.Underline); // 显式写的优先
+        Assert.Equal(LinkUnderline.Hover, extra.Underline); // 卡片页头的操作
+        Assert.Equal(LinkUnderline.Always, cardBody.Underline); // 卡片正文照旧
+        card.Extra = null;
+        Assert.Equal(LinkUnderline.Always, extra.Underline); // 拿出页头就不算了
+    });
 }

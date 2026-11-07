@@ -94,6 +94,8 @@ public class Card : Control
         surface.Bind(Border.BoxShadowProperty, this.GetObservable(BoxShadowProperty));
         headerRow.Children.AddRange([headerContent, extraContent]);
         header.Child = headerRow;
+        // 页头的操作链接（"全部"）悬停才有下划线；正文里的链接照旧（上游 Card 页头的 LinkUnderlineScope）
+        Link.SetUnderlineScope(header, LinkUnderline.Hover);
         body.Child = bodyContent;
         footerRow.Children.Add(footerContent);
         footer.Child = footerRow;

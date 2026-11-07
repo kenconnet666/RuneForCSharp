@@ -63,4 +63,26 @@ public class LinkTests
         Assert.Null(Decorations(none));
         Assert.Equal(TextDecorations.Underline, Decorations(mixed));
     });
+
+    [Fact]
+    [Upstream("Link", "下划线：容器（LinkUnderlineScope、卡片页头）给的默认是 hover")]
+    public Task Containers_give_hover_underline_unless_the_link_says_otherwise() => HeadlessUi.Run(() =>
+    {
+        var body = new Link { Content = "正文" };
+        var scoped = new Link { Content = "容器里" };
+        var explicitAlways = new Link { Content = "容器里显式", Underline = LinkUnderline.Always };
+        var scope = new StackPanel { Children = { scoped, explicitAlways } };
+        Link.SetUnderlineScope(scope, LinkUnderline.Hover);
+        var header = new Link { Content = "页头" };
+        var cardBody = new Link { Content = "卡片正文" };
+        HeadlessUi.Show(new StackPanel { Children = { body, scope, new Card { Header = header, Content = cardBody } } });
+
+        static TextDecorationCollection? Decorations(Link link) => global::Avalonia.VisualTree.VisualExtensions.GetVisualDescendants(link).OfType<TextBlock>().First().TextDecorations;
+        Assert.Equal(TextDecorations.Underline, Decorations(body));
+        Assert.Null(Decorations(scoped)); // 容器给 hover：没指着时没有下划线
+        Assert.Contains(":underline-hover", scoped.Classes);
+        Assert.Equal(TextDecorations.Underline, Decorations(explicitAlways)); // 显式写的优先
+        Assert.Null(Decorations(header)); // 卡片页头
+        Assert.Equal(TextDecorations.Underline, Decorations(cardBody)); // 卡片正文照旧
+    });
 }

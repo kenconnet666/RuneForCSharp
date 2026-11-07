@@ -80,7 +80,17 @@ public class CardControl : Panel, IScopeAware
     /// <summary>页头结束边的控件（"全部"、按钮、筛选）。</summary>
     [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public Control? Extra { get; set => Replace(ref field, value); }
+    public Control? Extra
+    {
+        get;
+        set
+        {
+            // 页头的操作链接（"全部"）悬停才有下划线；正文里的链接照旧（上游 Card 页头的 LinkUnderlineScope）
+            if (field is not null) LinkControl.SetUnderlineScope(field, null);
+            Replace(ref field, value);
+            if (value is not null) LinkControl.SetUnderlineScope(value, LinkUnderline.Hover);
+        }
+    }
 
     /// <summary>页脚里靠结束边的控件（按钮、一组按钮）。</summary>
     [Browsable(false)]

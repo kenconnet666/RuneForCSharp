@@ -108,6 +108,8 @@ public class Card : FrameworkElement
         Bind(surface, Border.BackgroundProperty, nameof(Background));
         Bind(surface, Border.BorderBrushProperty, nameof(BorderBrush));
         header.SetResourceReference(StyleProperty, CardParts.Header);
+        // 页头的操作链接（"全部"）悬停才有下划线；正文里的链接照旧（上游 Card 页头的 LinkUnderlineScope）
+        Link.SetUnderlineScope(header, LinkUnderline.Hover);
         body.SetResourceReference(StyleProperty, CardParts.Body);
         footer.SetResourceReference(StyleProperty, CardParts.Footer);
         skeleton.SetResourceReference(StyleProperty, CardParts.Skeleton);
