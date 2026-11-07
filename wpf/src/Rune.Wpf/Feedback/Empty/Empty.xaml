@@ -14,9 +14,18 @@
       <Trigger Property="Size" Value="xxxl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xxxl}" /></Trigger>
     </Style.Triggers>
   </Style>
-  <!-- 部件样式键总要有一个样式（同 SpinnerParts.Icon），使用方同键的样式叠在上面 -->
-  <Style x:Key="{x:Static rune:EmptyParts.Icon}" TargetType="rune:Icon" />
-  <Style x:Key="{x:Static rune:EmptyParts.Title}" TargetType="rune:Text" />
-  <Style x:Key="{x:Static rune:EmptyParts.Description}" TargetType="rune:Paragraph" />
+  <!-- 部件的默认外观写在部件样式里（DESIGN §7），使用方同键的样式叠在上面，盖得过 -->
+  <Style x:Key="{x:Static rune:EmptyParts.Icon}" TargetType="rune:Icon">
+    <Setter Property="Tone" Value="muted" />
+    <Setter Property="StrokeWidth" Value="{DynamicResource Rune.StrokeWidth.Sm}" />
+  </Style>
+  <Style x:Key="{x:Static rune:EmptyParts.Title}" TargetType="rune:Text">
+    <Setter Property="Weight" Value="medium" />
+    <Setter Property="Align" Value="center" />
+  </Style>
+  <Style x:Key="{x:Static rune:EmptyParts.Description}" TargetType="rune:Paragraph">
+    <Setter Property="Tone" Value="muted" />
+    <Setter Property="Align" Value="center" />
+  </Style>
   <Style x:Key="{x:Static rune:EmptyParts.Action}" TargetType="ContentPresenter" />
 </ResourceDictionary>

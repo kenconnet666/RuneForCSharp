@@ -70,7 +70,7 @@ public class Indicator : Control
         nameof(BadgeForeground), typeof(Brush), typeof(Indicator), new FrameworkPropertyMetadata(null));
 
     readonly IndicatorBadge badge = new() { Name = "PART_Badge" };
-    readonly TextBlock count = new() { Name = "PART_Count", TextAlignment = TextAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
+    readonly TextBlock count = new() { Name = "PART_Count" };
     readonly List<UIElement> parts = [];
 
     static Indicator()
@@ -85,13 +85,6 @@ public class Indicator : Control
     {
         badge.SetResourceReference(StyleProperty, IndicatorParts.Badge);
         count.SetResourceReference(StyleProperty, IndicatorParts.Count);
-        badge.SetBinding(Border.BackgroundProperty, new Binding(nameof(BadgeBackground)) { Source = this });
-        count.SetBinding(TextBlock.ForegroundProperty, new Binding(nameof(BadgeForeground)) { Source = this });
-        // 一圈页面底色（borderWidths.sm）：角标外面多 2px 的边，和被标记的元素分开
-        badge.SetResourceReference(Border.BorderBrushProperty, "Rune.Brush.Background");
-        badge.BorderThickness = new Thickness(Ring);
-        count.FontWeight = FontWeights.SemiBold;
-        System.Windows.Documents.Typography.SetNumeralAlignment(count, FontNumeralAlignment.Tabular);
         badge.Child = count;
         parts.Add(badge);
         AddVisualChild(badge);

@@ -175,7 +175,6 @@ public class Badge : Control
         if (Icon is null && Dot)
         {
             dotPart ??= Adopt(new Border { Name = BadgeParts.Dot, VerticalAlignment = VerticalAlignment.Center });
-            dotPart.Bind(Border.BackgroundProperty, this.GetObservable(ForegroundProperty));
         }
         else dotPart = Release(dotPart);
     }
@@ -187,7 +186,7 @@ public class Badge : Control
         {
             null => null,
             Control control => Adopt(control),
-            var value => Adopt(new Text { Text = value.ToString(), Weight = TextWeight.Medium, Wrap = TextWrap.NoWrap, VerticalAlignment = VerticalAlignment.Center }),
+            var value => Adopt(new Text { Text = value.ToString(), Wrap = TextWrap.NoWrap, VerticalAlignment = VerticalAlignment.Center }),
         };
     }
 

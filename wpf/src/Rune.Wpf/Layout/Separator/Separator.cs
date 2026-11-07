@@ -125,8 +125,6 @@ public class Separator : Control
         {
             var line = new LineSegment { VerticalAlignment = VerticalAlignment.Center };
             line.SetResourceReference(StyleProperty, SeparatorParts.Line);
-            line.SetBinding(Border.BackgroundProperty, new Binding(nameof(Background)) { Source = this });
-            line.SetBinding(HeightProperty, new Binding(nameof(Thickness)) { Source = this });
             return line;
         }
     }

@@ -1,0 +1,8 @@
+<!-- Badge 部件的默认外观：圆点与文字同色（DESIGN §7 代码组合的控件） -->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|Badge > Border#PART_Dot">
+    <Setter Property="Background" Value="{Binding $parent[rune:Badge].Foreground}" />
+  </Style>
+</Styles>

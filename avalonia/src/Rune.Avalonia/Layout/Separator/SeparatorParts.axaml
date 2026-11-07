@@ -1,0 +1,9 @@
+<!-- Separator 部件的默认外观：线的颜色、粗细跟 Separator 的 Background、Thickness（DESIGN §7 代码组合的控件） -->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|Separator > Border#PART_Line">
+    <Setter Property="Background" Value="{Binding $parent[rune:Separator].Background}" />
+    <Setter Property="Height" Value="{Binding $parent[rune:Separator].Thickness}" />
+  </Style>
+</Styles>

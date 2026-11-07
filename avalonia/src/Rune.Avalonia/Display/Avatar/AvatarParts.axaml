@@ -1,0 +1,12 @@
+<!-- Avatar 部件的默认外观：图片铺满并裁剪（object-fit: cover），后备内容居中（DESIGN §7 代码组合的控件） -->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|Avatar > Border > Panel > Image#PART_Image">
+    <Setter Property="Stretch" Value="UniformToFill" />
+  </Style>
+  <Style Selector="rune|Avatar > Border > Panel > ContentPresenter#PART_Fallback">
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+</Styles>

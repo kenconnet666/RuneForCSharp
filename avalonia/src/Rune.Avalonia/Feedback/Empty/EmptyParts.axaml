@@ -1,0 +1,20 @@
+<!--
+  Empty 部件的默认外观（vue-tsx-pro 的 emptyRecipe）：图标次要色、细线（strokeWidths.sm），标题中等字重，说明次要色，都居中。
+  写成主题里的样式（DESIGN §7 代码组合的控件），使用方的部件样式排在后面，盖得过；选择器沿逻辑树写全，不碰 Content、Action 里的同名部件
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|Empty > Border > rune|Flex > rune|Icon#PART_Icon">
+    <Setter Property="Tone" Value="muted" />
+    <Setter Property="StrokeWidth" Value="{DynamicResource Rune.StrokeWidth.Sm}" />
+  </Style>
+  <Style Selector="rune|Empty > Border > rune|Flex > rune|Text#PART_Title">
+    <Setter Property="Weight" Value="medium" />
+    <Setter Property="Align" Value="{x:Static rune:TextAlign.Center}" />
+  </Style>
+  <Style Selector="rune|Empty > Border > rune|Flex > rune|Paragraph#PART_Description">
+    <Setter Property="Tone" Value="muted" />
+    <Setter Property="Align" Value="{x:Static rune:TextAlign.Center}" />
+  </Style>
+</Styles>

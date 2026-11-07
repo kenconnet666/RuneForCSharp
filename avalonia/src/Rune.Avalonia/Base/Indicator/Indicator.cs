@@ -59,7 +59,7 @@ public class Indicator : Control
     static readonly StyledProperty<Color> RingProperty = AvaloniaProperty.Register<Indicator, Color>("Ring");
 
     readonly IndicatorBadge badge = new() { Name = IndicatorParts.Badge };
-    readonly TextBlock count = new() { Name = IndicatorParts.Count, TextAlignment = TextAlignment.Center };
+    readonly TextBlock count = new() { Name = IndicatorParts.Count };
     readonly TemplateResources resources;
     Control? contentPart;
 
@@ -74,8 +74,6 @@ public class Indicator : Control
     {
         resources = new TemplateResources(this);
         resources.Bind(RingProperty, "Rune.Color.Background");
-        count.FontWeight = FontWeight.SemiBold;
-        count.FontFeatures = FontFeatureCollection.Parse("tnum");
         AutomationProperties.SetAccessibilityView(count, AccessibilityView.Raw);
         badge.Child = count;
         VisualChildren.Add(badge);
@@ -154,9 +152,6 @@ public class Indicator : Control
         badge.IsVisible = Visible;
         count.IsVisible = !Dot;
         count.Text = Count is not { } n ? "" : n > Max ? $"{Max}+" : n.ToString(System.Globalization.CultureInfo.CurrentCulture);
-        // 模板优先级：使用方的部件样式盖得过
-        badge.SetValue(Border.BackgroundProperty, Palette?.Solid, global::Avalonia.Data.BindingPriority.Template);
-        count.SetValue(TextBlock.ForegroundProperty, Palette?.Contrast, global::Avalonia.Data.BindingPriority.Template);
         // 一圈页面底色（borderWidths.sm），和被标记的元素分开
         badge.BoxShadow = new BoxShadows(new BoxShadow { Spread = 2, Color = GetValue(RingProperty) });
         AutomationProperties.SetName(badge, Visible ? Description : null);

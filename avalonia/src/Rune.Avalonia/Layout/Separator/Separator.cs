@@ -115,8 +115,6 @@ public class Separator : Control
         Border Line()
         {
             var line = new Border { Name = SeparatorParts.Line, VerticalAlignment = VerticalAlignment.Center };
-            line.Bind(Border.BackgroundProperty, this.GetObservable(BackgroundProperty));
-            line.Bind(HeightProperty, this.GetObservable(ThicknessProperty));
             AutomationProperties.SetAccessibilityView(line, AccessibilityView.Raw);
             return line;
         }

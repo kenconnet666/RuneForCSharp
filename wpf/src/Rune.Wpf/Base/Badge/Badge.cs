@@ -139,7 +139,6 @@ public class Badge : Control
                 dotPart = Adopt(new Border { Name = "PART_Dot", VerticalAlignment = VerticalAlignment.Center }, 0);
                 dotPart.SetResourceReference(StyleProperty, BadgeParts.Dot);
             }
-            dotPart.SetBinding(Border.BackgroundProperty, new Binding(nameof(Foreground)) { Source = this });
         }
         else dotPart = Release(dotPart);
     }
@@ -151,7 +150,7 @@ public class Badge : Control
         {
             null => null,
             UIElement element => Adopt(element, parts.Count),
-            var value => Adopt(new Text { Text = value.ToString(), Weight = TextWeight.Medium, Wrap = TextWrap.NoWrap, VerticalAlignment = VerticalAlignment.Center }, parts.Count),
+            var value => Adopt(new Text { Text = value.ToString(), Wrap = TextWrap.NoWrap, VerticalAlignment = VerticalAlignment.Center }, parts.Count),
         };
     }
 

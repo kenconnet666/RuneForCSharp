@@ -1,0 +1,13 @@
+<!-- Card 部件的默认外观（vue-tsx-pro 的 cardRecipe）：页头下边、页脚上边一道 borderMuted 的分隔线（DESIGN §7 代码组合的控件） -->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|Card > Border > StackPanel > Border#PART_Header">
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+  </Style>
+  <Style Selector="rune|Card > Border > StackPanel > Border#PART_Footer">
+    <Setter Property="BorderThickness" Value="0,1,0,0" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+  </Style>
+</Styles>

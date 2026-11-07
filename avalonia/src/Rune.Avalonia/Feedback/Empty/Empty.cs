@@ -47,9 +47,9 @@ public class Empty : Control
 
     readonly Border root = new();
     readonly Flex column = new() { Direction = FlexDirection.Column, Align = FlexAlign.Center, Gap = Space.Sm };
-    readonly Icon icon = new() { Name = EmptyParts.Icon, Tone = TextTone.Muted };
-    readonly Text title = new() { Name = EmptyParts.Title, Weight = TextWeight.Medium, Align = TextAlign.Center };
-    readonly Paragraph description = new() { Name = EmptyParts.Description, Tone = TextTone.Muted, Align = TextAlign.Center };
+    readonly Icon icon = new() { Name = EmptyParts.Icon };
+    readonly Text title = new() { Name = EmptyParts.Title };
+    readonly Paragraph description = new() { Name = EmptyParts.Description };
     readonly ContentPresenter content = new();
     readonly ContentPresenter action = new() { Name = EmptyParts.Action };
     readonly TemplateResources resources;
@@ -60,7 +60,6 @@ public class Empty : Control
     public Empty()
     {
         resources = new TemplateResources(this);
-        icon.Bind(Rune.Avalonia.Icon.StrokeWidthProperty, icon.GetResourceObservable("Rune.StrokeWidth.Sm"));
         column.Children.AddRange([icon, title, description, content, action]);
         root.Child = column;
         LogicalChildren.Add(root);

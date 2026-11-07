@@ -21,5 +21,9 @@
   </Style>
   <!-- 部件样式键总要有一个样式（同 SpinnerParts.Icon），使用方同键的样式叠在上面 -->
   <Style x:Key="{x:Static rune:SeparatorParts.Label}" TargetType="rune:Text" />
-  <Style x:Key="{x:Static rune:SeparatorParts.Line}" TargetType="Border" />
+  <!-- 线的颜色、粗细跟 Separator 的 Background、Thickness -->
+  <Style x:Key="{x:Static rune:SeparatorParts.Line}" TargetType="Border">
+    <Setter Property="Background" Value="{Binding Background, RelativeSource={RelativeSource AncestorType=rune:Separator}}" />
+    <Setter Property="Height" Value="{Binding Thickness, RelativeSource={RelativeSource AncestorType=rune:Separator}}" />
+  </Style>
 </ResourceDictionary>

@@ -512,7 +512,7 @@ public class Progress : Control
 
 /// <summary>
 /// Progress 的部件名（代码组合的子元素）：<c>rune|Progress Border#PART_Indicator</c>。外层（TS 的 propsRoot）就是 Progress 自己。
-/// 部件的默认外观在 Progress.axaml 的样式里（数值等宽、标签行的数值次要色、环形的数值半粗）。
+/// 部件的默认外观在 ProgressParts.axaml 的样式里（数值等宽、标签行的数值次要色、环形的数值半粗）。
 /// </summary>
 public static class ProgressParts
 {

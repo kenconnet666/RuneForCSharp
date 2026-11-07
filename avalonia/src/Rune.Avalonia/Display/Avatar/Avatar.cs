@@ -55,8 +55,8 @@ public class Avatar : Control
 
     readonly Border root = new() { ClipToBounds = true };
     readonly Panel layers = new();
-    readonly Image image = new() { Name = AvatarParts.Image, Stretch = Stretch.UniformToFill, IsVisible = false };
-    readonly ContentPresenter fallback = new() { Name = AvatarParts.Fallback, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
+    readonly Image image = new() { Name = AvatarParts.Image, IsVisible = false };
+    readonly ContentPresenter fallback = new() { Name = AvatarParts.Fallback };
     readonly TemplateResources resources;
 
     static Avatar() => AffectsMeasure<Avatar>(FontSizeProperty);

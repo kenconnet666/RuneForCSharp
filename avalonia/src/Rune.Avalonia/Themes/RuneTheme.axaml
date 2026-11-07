@@ -29,6 +29,12 @@
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>
-  <!-- 代码组合控件的部件默认外观（ControlTheme 写不了子选择器） -->
-  <StyleInclude Source="avares://Rune.Avalonia/Feedback/Progress/Progress.axaml" />
+  <!-- 代码组合控件的部件默认外观（ControlTheme 写不了子选择器，DESIGN §7） -->
+  <StyleInclude Source="avares://Rune.Avalonia/Base/Badge/BadgeParts.axaml" />
+  <StyleInclude Source="avares://Rune.Avalonia/Base/Indicator/IndicatorParts.axaml" />
+  <StyleInclude Source="avares://Rune.Avalonia/Layout/Separator/SeparatorParts.axaml" />
+  <StyleInclude Source="avares://Rune.Avalonia/Display/Card/CardParts.axaml" />
+  <StyleInclude Source="avares://Rune.Avalonia/Display/Avatar/AvatarParts.axaml" />
+  <StyleInclude Source="avares://Rune.Avalonia/Feedback/Empty/EmptyParts.axaml" />
+  <StyleInclude Source="avares://Rune.Avalonia/Feedback/Progress/ProgressParts.axaml" />
 </Styles>

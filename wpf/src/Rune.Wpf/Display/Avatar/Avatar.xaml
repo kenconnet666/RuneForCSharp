@@ -25,7 +25,13 @@
       <Trigger Property="Size" Value="xxxl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xxxl}" /></Trigger>
     </Style.Triggers>
   </Style>
-  <!-- 部件样式键总要有一个样式（同 SpinnerParts.Icon），使用方同键的样式叠在上面 -->
-  <Style x:Key="{x:Static rune:AvatarParts.Image}" TargetType="Image" />
-  <Style x:Key="{x:Static rune:AvatarParts.Fallback}" TargetType="ContentPresenter" />
+  <!-- 部件的默认外观写在部件样式里（DESIGN §7），使用方同键的样式叠在上面，盖得过 -->
+  <!-- 图片铺满并裁剪（object-fit: cover），后备内容居中 -->
+  <Style x:Key="{x:Static rune:AvatarParts.Image}" TargetType="Image">
+    <Setter Property="Stretch" Value="UniformToFill" />
+  </Style>
+  <Style x:Key="{x:Static rune:AvatarParts.Fallback}" TargetType="ContentPresenter">
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
 </ResourceDictionary>

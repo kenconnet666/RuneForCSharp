@@ -47,9 +47,9 @@ public class Empty : Control
 
     readonly Border root = new();
     readonly Flex column = new() { Direction = FlexDirection.Column, Align = FlexAlign.Center, Gap = Space.Sm };
-    readonly Icon icon = new() { Tone = TextTone.Muted };
-    readonly Text title = new() { Weight = TextWeight.Medium, Align = TextAlign.Center };
-    readonly Paragraph description = new() { Tone = TextTone.Muted, Align = TextAlign.Center };
+    readonly Icon icon = new();
+    readonly Text title = new();
+    readonly Paragraph description = new();
     readonly ContentPresenter content = new();
     readonly ContentPresenter action = new();
 
@@ -64,7 +64,6 @@ public class Empty : Control
     /// <summary>新建：图标、标题、说明、内容、操作排成一列。</summary>
     public Empty()
     {
-        icon.SetResourceReference(Rune.Wpf.Icon.StrokeWidthProperty, "Rune.StrokeWidth.Sm");
         icon.SetResourceReference(StyleProperty, EmptyParts.Icon);
         title.SetResourceReference(StyleProperty, EmptyParts.Title);
         description.SetResourceReference(StyleProperty, EmptyParts.Description);

@@ -68,14 +68,14 @@ public class Card : Control
 
     readonly Border surface = new() { BorderThickness = new Thickness(1), ClipToBounds = true };
     readonly StackPanel layout = new();
-    readonly Border header = new() { Name = CardParts.Header, BorderThickness = new Thickness(0, 0, 0, 1) };
+    readonly Border header = new() { Name = CardParts.Header };
     readonly Flex headerRow = new() { Wrap = true, Align = FlexAlign.Center, Justify = FlexJustify.Between, Gap = Space.Sm };
     readonly ContentPresenter headerContent = new();
     readonly ContentPresenter extraContent = new();
     readonly Border body = new() { Name = CardParts.Body };
     readonly ContentPresenter bodyContent = new();
     readonly SkeletonText skeleton = new() { Name = CardParts.Skeleton };
-    readonly Border footer = new() { Name = CardParts.Footer, BorderThickness = new Thickness(0, 1, 0, 0) };
+    readonly Border footer = new() { Name = CardParts.Footer };
     readonly Flex footerRow = new() { Justify = FlexJustify.End, Gap = Space.Sm };
     readonly ContentPresenter footerContent = new();
     readonly TemplateResources resources;
@@ -92,7 +92,6 @@ public class Card : Control
         surface.Bind(Border.BackgroundProperty, this.GetObservable(BackgroundProperty));
         surface.Bind(Border.BorderBrushProperty, this.GetObservable(BorderBrushProperty));
         surface.Bind(Border.BoxShadowProperty, this.GetObservable(BoxShadowProperty));
-        foreach (var divider in new[] { header, footer }) divider.Bind(Border.BorderBrushProperty, divider.GetResourceObservable("Rune.Brush.BorderMuted"));
         headerRow.Children.AddRange([headerContent, extraContent]);
         header.Child = headerRow;
         body.Child = bodyContent;

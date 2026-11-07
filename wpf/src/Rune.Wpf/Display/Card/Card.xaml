@@ -27,9 +27,16 @@
       </Trigger>
     </Style.Triggers>
   </Style>
-  <!-- 部件样式键总要有一个样式（同 SpinnerParts.Icon），使用方同键的样式叠在上面 -->
-  <Style x:Key="{x:Static rune:CardParts.Header}" TargetType="Border" />
+  <!-- 部件的默认外观写在部件样式里（DESIGN §7），使用方同键的样式叠在上面，盖得过 -->
+  <!-- 页头下边、页脚上边一道 borderMuted 的分隔线 -->
+  <Style x:Key="{x:Static rune:CardParts.Header}" TargetType="Border">
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+  </Style>
   <Style x:Key="{x:Static rune:CardParts.Body}" TargetType="Border" />
-  <Style x:Key="{x:Static rune:CardParts.Footer}" TargetType="Border" />
+  <Style x:Key="{x:Static rune:CardParts.Footer}" TargetType="Border">
+    <Setter Property="BorderThickness" Value="0,1,0,0" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+  </Style>
   <Style x:Key="{x:Static rune:CardParts.Skeleton}" TargetType="rune:SkeletonText" />
 </ResourceDictionary>

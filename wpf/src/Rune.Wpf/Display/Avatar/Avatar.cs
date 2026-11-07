@@ -54,8 +54,8 @@ public class Avatar : Control
     readonly Border root = new();
     // 写全名：Rune.Wpf.Grid 是 CSS 的网格布局
     readonly System.Windows.Controls.Grid layers = new();
-    readonly Image image = new() { Stretch = Stretch.UniformToFill, Visibility = Visibility.Collapsed };
-    readonly ContentPresenter fallback = new() { HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
+    readonly Image image = new() { Visibility = Visibility.Collapsed };
+    readonly ContentPresenter fallback = new();
     bool failed;
 
     static Avatar()

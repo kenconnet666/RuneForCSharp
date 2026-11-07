@@ -79,14 +79,14 @@ public class Card : FrameworkElement
     readonly Border shadow = new();
     readonly Border surface = new() { BorderThickness = new Thickness(1) };
     readonly StackPanel layout = new();
-    readonly Border header = new() { BorderThickness = new Thickness(0, 0, 0, 1) };
+    readonly Border header = new();
     readonly Flex headerRow = new() { Wrap = true, Align = FlexAlign.Center, Justify = FlexJustify.Between, Gap = Space.Sm };
     readonly ContentPresenter headerContent = new();
     readonly ContentPresenter extraContent = new();
     readonly Border body = new();
     readonly ContentPresenter bodyContent = new();
     readonly SkeletonText skeleton = new();
-    readonly Border footer = new() { BorderThickness = new Thickness(0, 1, 0, 0) };
+    readonly Border footer = new();
     readonly Flex footerRow = new() { Justify = FlexJustify.End, Gap = Space.Sm };
     readonly ContentPresenter footerContent = new();
     DelayedLoading loading;
@@ -107,8 +107,6 @@ public class Card : FrameworkElement
         Bind(shadow, EffectProperty, nameof(Shadow));
         Bind(surface, Border.BackgroundProperty, nameof(Background));
         Bind(surface, Border.BorderBrushProperty, nameof(BorderBrush));
-        header.SetResourceReference(Border.BorderBrushProperty, "Rune.Brush.BorderMuted");
-        footer.SetResourceReference(Border.BorderBrushProperty, "Rune.Brush.BorderMuted");
         header.SetResourceReference(StyleProperty, CardParts.Header);
         body.SetResourceReference(StyleProperty, CardParts.Body);
         footer.SetResourceReference(StyleProperty, CardParts.Footer);

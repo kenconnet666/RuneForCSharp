@@ -1,0 +1,17 @@
+<!--
+  Indicator 部件的默认外观（vue-tsx-pro 的 indicatorRecipe）：角标是色调的实底，计数是对比色、半粗、等宽数字、居中。
+  颜色绑到 Indicator 解析出的调色板（Palette）；写成主题里的样式，使用方的部件样式盖得过（DESIGN §7）
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|Indicator > Border#PART_Badge">
+    <Setter Property="Background" Value="{Binding $parent[rune:Indicator].Palette.Solid}" />
+  </Style>
+  <Style Selector="rune|Indicator > Border#PART_Badge > TextBlock#PART_Count">
+    <Setter Property="Foreground" Value="{Binding $parent[rune:Indicator].Palette.Contrast}" />
+    <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Semibold}" />
+    <Setter Property="FontFeatures" Value="tnum" />
+    <Setter Property="TextAlignment" Value="Center" />
+  </Style>
+</Styles>

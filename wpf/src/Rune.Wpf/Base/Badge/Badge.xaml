@@ -34,4 +34,10 @@
       <Trigger Property="Size" Value="xxxl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xxxl}" /></Trigger>
     </Style.Triggers>
   </Style>
+  <!-- 部件的默认外观写在部件样式里（DESIGN §7），使用方同键的样式叠在上面，盖得过 -->
+  <Style x:Key="{x:Static rune:BadgeParts.Icon}" TargetType="rune:Icon" />
+  <!-- 圆点与文字同色 -->
+  <Style x:Key="{x:Static rune:BadgeParts.Dot}" TargetType="Border">
+    <Setter Property="Background" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=rune:Badge}}" />
+  </Style>
 </ResourceDictionary>
