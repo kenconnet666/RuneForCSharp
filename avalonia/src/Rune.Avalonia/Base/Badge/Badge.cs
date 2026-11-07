@@ -269,10 +269,14 @@ public class Badge : Control
     {
         var width = BorderThickness.Left;
         var bounds = new Rect(Bounds.Size).Deflate(width / 2);
-        var radius = Math.Min(GetValue(RadiusCoefficientProperty) * Em, bounds.Height / 2);
+        var radius = CornerRadius(bounds.Height);
         var pen = GetValue(BorderBrushProperty) is { } border && width > 0 ? new Pen(border, width) : null;
         context.DrawRectangle(GetValue(BackgroundProperty), pen, bounds, radius, radius);
     }
+
+    /// <summary>圆角：主题的 radii 按字号，不超过高度的一半。</summary>
+    /// <param name="height">要画的高度。</param>
+    private protected double CornerRadius(double height) => Math.Min(GetValue(RadiusCoefficientProperty) * Em, height / 2);
 
     /// <inheritdoc />
     protected override AutomationPeer OnCreateAutomationPeer() => new BadgeAutomationPeer(this);

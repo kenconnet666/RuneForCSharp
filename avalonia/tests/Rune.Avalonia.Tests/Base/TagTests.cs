@@ -72,4 +72,32 @@ public class TagTests
         // 末端：0.25em（3）代替 0.5em（6），中间隔 0.25em
         Assert.Equal(plain.Bounds.Width - 6 + 3 + 3 + 18, removable.Bounds.Width, 0.5);
     });
+
+    [Fact]
+    [Upstream("Tag", "_selected：整个标签是按钮")]
+    public Task Selectable_tag_is_a_toggle_button_with_a_check_when_selected() => HeadlessUi.Run(() =>
+    {
+        var urgent = new Tag { Content = "加急", IsSelected = false, Variant = StatusVariant.Soft };
+        urgent.RemoveRequested += (_, _) => { };
+        var window = HeadlessUi.Show(urgent);
+
+        var peer = urgent.Peer();
+        Assert.Equal(global::Avalonia.Automation.Peers.AutomationControlType.Button, peer.GetAutomationControlType());
+        Assert.Equal(ToggleState.Off, ((IToggleProvider)peer).ToggleState);
+        Assert.Null(urgent.Icon);
+        Assert.Null(RemoveButton(urgent)); // 可选中的标签不带移除按钮
+        Assert.Equal((StatusTone.Accent, TextSize.Sm, StatusVariant.Soft), (urgent.Tone, urgent.Size, urgent.Variant)); // 没写的色调、字号取 accent、sm
+        Assert.True(urgent.Focusable);
+
+        ((IToggleProvider)peer).Toggle();
+        Assert.True(urgent.IsSelected);
+        Assert.Equal(ToggleState.On, ((IToggleProvider)peer).ToggleState);
+        Assert.Same(Lucide.Check, urgent.Icon); // 选中时前面一个对勾
+        Assert.Equal(StatusVariant.Solid, urgent.Variant); // 选中一律实底
+
+        urgent.Focus();
+        urgent.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyUpEvent, Key = Key.Space, Source = urgent });
+        Assert.False(urgent.IsSelected);
+        Assert.Equal(StatusVariant.Soft, urgent.Variant);
+    });
 }

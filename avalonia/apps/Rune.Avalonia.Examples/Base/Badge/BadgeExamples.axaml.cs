@@ -12,7 +12,33 @@ static class BadgeExamples
         new("Badge", "shapes", "尺寸、形状与图标", "Size 默认 xs；Radius=\"full\" 是胶囊，计数常用实底；Icon 放在文字前，Dot 是同色的小圆点，表格里比整块底色更轻。", () => new BadgeShapes()),
         new("Badge", "tag", "Tag 标签", "Tag 的外观选项与 Badge 相同，作用域里 Badge 的默认值一起改两者；技能、分类、关键词这类成组出现的短文字用它。", TagBasic),
         new("Badge", "tag-removable", "可移除的标签", "订阅了 RemoveRequested 就有移除按钮：先淡出，离场结束才发；按钮的读屏名称是“移除 + 标签文字”，RemoveLabel 可以改。", TagRemovable),
+        new("Badge", "tag-selectable", "可选中的标签", "写了 IsSelected 时整个标签是切换按钮，点一下切换：没选中时有描边，选中时实底色、前面一个对勾（不只靠颜色），不写色调时用 accent。筛选条件这类一排可选的短文字用它；要“只能选一个”的分段控件用 ToggleGroup。", TagSelectable),
     ];
+
+    static readonly string[] Conditions = ["加急", "待我审批", "已逾期", "本周到期", "有附件"];
+
+    static Control TagSelectable()
+    {
+        var picked = new HashSet<string> { "加急", "已逾期" };
+        var summary = new Small { Tone = TextTone.Muted };
+        void Sync() => summary.Text = $"已选：{(picked.Count == 0 ? "（无）" : string.Join("、", Conditions.Where(picked.Contains)))}";
+        var row = new Flex { Gap = Space.Xs, Wrap = FlexWrap.Wrap };
+        global::Avalonia.Automation.AutomationProperties.SetName(row, "筛选");
+        foreach (var option in Conditions)
+        {
+            var tag = new Tag { Content = option, IsSelected = picked.Contains(option) };
+            tag.PropertyChanged += (_, e) =>
+            {
+                if (e.Property != Tag.IsSelectedProperty) return;
+                if (tag.IsSelected == true) picked.Add(option);
+                else picked.Remove(option);
+                Sync();
+            };
+            row.Children.Add(tag);
+        }
+        Sync();
+        return new Flex { Direction = FlexDirection.Column, Gap = Space.Sm, Children = { row, summary } };
+    }
 
     static Control TagBasic()
     {
