@@ -293,13 +293,6 @@ public abstract class NavRowControl : FlexControl
         Invalidate(true);
     }
 
-    /// <summary>不小于控件高度（FlexControl 自己算想要的大小，平台的最小尺寸要再并上）。</summary>
-    public override Size GetPreferredSize(Size proposedSize)
-    {
-        var size = base.GetPreferredSize(proposedSize);
-        return new Size(Math.Max(size.Width, MinimumSize.Width), Math.Max(size.Height, MinimumSize.Height));
-    }
-
     void SetHovered(bool value)
     {
         if (hovered == value) return;
@@ -685,13 +678,6 @@ public class NavSectionControl : FlexControl
             AutoSize = true;
             SetStyle(ControlStyles.UserPaint | ControlStyles.ResizeRedraw | ControlStyles.SupportsTransparentBackColor, true);
             BackColor = Color.Transparent;
-        }
-
-        /// <summary>不小于最小高度（FlexControl 自己算想要的大小，平台的最小尺寸要再并上）。</summary>
-        public override Size GetPreferredSize(Size proposedSize)
-        {
-            var size = base.GetPreferredSize(proposedSize);
-            return new Size(size.Width, Math.Max(size.Height, MinimumSize.Height));
         }
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]

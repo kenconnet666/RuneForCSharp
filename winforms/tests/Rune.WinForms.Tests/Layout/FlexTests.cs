@@ -156,4 +156,17 @@ public class FlexTests
 
         Assert.Equal((AccessibleRole.List, AccessibleRole.List), (list.AccessibilityObject.Role, ordered.AccessibilityObject.Role));
     });
+
+    [Fact]
+    public Task Minimum_and_maximum_sizes_count_when_placing_items() => WinFormsUi.Run(() =>
+    {
+        // 平台设边界时按最小、最大尺寸夹：排的时候也要并上，不然后面的项按没夹的大小摆、叠上来
+        var (wide, narrow, next) = (new Box(40, 10) { MinimumSize = new Size(100, 0) }, new Box(80, 10) { MaximumSize = new Size(50, 0) }, new Box(20, 10));
+        var flex = Flex(new FlexControl { Align = FlexAlign.Start }, wide, narrow, next);
+        using var form = Show(flex, 300);
+
+        Assert.Equal(new Rectangle(0, 0, 100, 10), wide.Bounds);
+        Assert.Equal(new Rectangle(100, 0, 50, 10), narrow.Bounds);
+        Assert.Equal(150, next.Left);
+    });
 }

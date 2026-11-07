@@ -376,13 +376,6 @@ public class TabItemControl : FlexControl
         Invalidate();
     }
 
-    /// <summary>不小于控件高度（FlexControl 自己算想要的大小，平台的最小尺寸要再并上）。</summary>
-    public override Size GetPreferredSize(Size proposedSize)
-    {
-        var size = base.GetPreferredSize(proposedSize);
-        return new Size(Math.Max(size.Width, MinimumSize.Width), Math.Max(size.Height, MinimumSize.Height));
-    }
-
     /// <inheritdoc />
     public override Color ForeColor
     {

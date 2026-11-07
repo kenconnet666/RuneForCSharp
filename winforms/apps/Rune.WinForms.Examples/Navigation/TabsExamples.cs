@@ -58,7 +58,7 @@ static class TabsExamples
             foreach (var order in orders)
             {
                 var row = new OrderRow();
-                // 订单号一列宽 6rem：固定大小（Flex 按自动大小的子控件想要的宽度排，不看最小尺寸）
+                // 订单号一列宽 6rem：固定大小
                 var id = new StrongControl { Text = order.Id };
                 id.Size = new Size(id.LogicalToDeviceUnits(96), id.GetPreferredSize(Size.Empty).Height);
                 id.AutoSize = false;

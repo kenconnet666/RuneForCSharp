@@ -642,7 +642,7 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - **WPF**：同样的结构，指示条用 DoubleAnimation；标签的外观在 Tabs.xaml 里按只读的 Variant、Orientation、IsSelected 触发。合成的按键事件不改
   InputManager 的"最近的输入设备"，自动切换改在 TabList 处理完方向键之后看焦点在哪个标签上。
 - **WinForms**：平台自带 TabControl、TabPage，组件库的叫 TabsControl、TabListControl、TabItemControl（标签，里面放文字或子控件）、TabPanelControl。
-  FlexControl 的想要的大小不并最小尺寸、只量自动大小的子控件：标签自己并上控件高度，示例里的固定宽度列关掉 AutoSize。没有波纹。
+  FlexControl 只量自动大小的子控件（关掉 AutoSize 的按自己的大小）：示例里的固定宽度列关掉 AutoSize。没有波纹。
 - 没做：可关闭（Delete、中键、关闭按钮）、新建按钮、拖动与 Alt + 方向键排序、"全部标签页"菜单、propsIndicator / propsBar / propsAdd——等 Menu 一起做。
   vertical 示例的面板要 TextField。
 

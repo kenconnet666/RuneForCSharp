@@ -200,7 +200,10 @@ public class FlexControl : Panel, IExtenderProvider
 
         List<Control> Shown() => [.. owner.Controls.Cast<Control>().Where(child => child.Visible || !owner.Visible)];
 
-        /// <summary>子控件在主轴上给了 main 时的大小（自动大小的按宽度取高度；main 为无穷时是自然大小）。</summary>
+        /// <summary>
+        /// 子控件在主轴上给了 main 时的大小（自动大小的按宽度取高度；main 为无穷时是自然大小），夹在它的最小、最大尺寸之间
+        /// （平台设边界时也会这样夹，排的时候不并上的话位置就按没夹的大小算，后面的项叠上来）。
+        /// </summary>
         Size SizeOf(Control child, double main, double cross)
         {
             if (!child.AutoSize) return child.Size;
@@ -208,7 +211,11 @@ public class FlexControl : Panel, IExtenderProvider
             var proposed = row
                 ? new Size(double.IsInfinity(main) ? 0 : (int)Math.Round(main), 0)
                 : new Size(double.IsInfinity(cross) ? 0 : (int)Math.Round(cross), 0);
-            return child.GetPreferredSize(proposed);
+            var size = child.GetPreferredSize(proposed);
+            var (min, max) = (child.MinimumSize, child.MaximumSize);
+            var width = Math.Max(size.Width, min.Width);
+            var height = Math.Max(size.Height, min.Height);
+            return new Size(max.Width > 0 ? Math.Min(width, max.Width) : width, max.Height > 0 ? Math.Min(height, max.Height) : height);
         }
 
         double Main(Size size) => IsRow ? size.Width : size.Height;
