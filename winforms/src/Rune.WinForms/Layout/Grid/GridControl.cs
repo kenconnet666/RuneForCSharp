@@ -182,7 +182,8 @@ public class GridControl : Panel, IExtenderProvider
         {
             var gaps = Gaps;
             var items = children.Select(child => new GridLayout.Item(owner.GetSpan(child).Count ?? 0, owner.GetRowSpan(child))).ToList();
-            var min = owner.MinItemWidth?.Pixels(Em) * owner.DeviceDpi / 96;
+            var scale = owner.DeviceDpi / 96d;
+            var min = owner.MinItemWidth?.Pixels(Em / scale) * scale;
             var columns = GridLayout.Columns(width, gaps.Column, owner.Columns, min, items.Count);
             var columnFlow = owner.Flow.Value is "column" or "column dense";
             var dense = owner.Flow.Value is "row dense" or "column dense";

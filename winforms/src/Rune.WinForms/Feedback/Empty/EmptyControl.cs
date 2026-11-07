@@ -92,6 +92,9 @@ public class EmptyControl : Panel, IElementHost
 
     float Em => Font.SizeInPoints * DeviceDpi / 72f;
 
+    /// <summary>图标元素（测试用）。</summary>
+    internal Icon IconElement => icon;
+
     ElementContext Context => new(DeviceDpi, Font, ForeColor, RightToLeft == RightToLeft.Yes);
 
     void ApplyTextSize()
@@ -175,6 +178,8 @@ public class EmptyControl : Panel, IElementHost
             if (owner.icon.Data is not null)
             {
                 var side = (int)MathF.Round(2.5f * em);
+                // 图标按自己的 Size 画（不看 Bounds）：PropsIcon 没写 Size 时设成 2.5em
+                if (owner.PropsIcon?.Size is null) owner.icon.Size = side * 96f / owner.DeviceDpi;
                 if (arrange) owner.icon.Bounds = new Rectangle(Center(side), y + (first ? 0 : gap), side, side);
                 Next(side);
             }

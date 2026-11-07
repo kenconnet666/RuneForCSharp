@@ -83,9 +83,38 @@ static class Inspector
         var path = Report.SnapshotPath("winforms", options);
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         using var bitmap = new Bitmap(form.ClientSize.Width, form.ClientSize.Height);
-        form.DrawToBitmap(bitmap, new Rectangle(Point.Empty, form.ClientSize));
+        using (var graphics = Graphics.FromImage(bitmap))
+            Render(form, graphics, Point.Empty, new Rectangle(Point.Empty, form.ClientSize));
         bitmap.Save(path, ImageFormat.Png);
         return $"{path}（{bitmap.Width}×{bitmap.Height}，DPI {form.DeviceDpi}）{Environment.NewLine}";
+    }
+
+    /// <summary>
+    /// 画一个控件，再从下往上把子控件逐个盖上去（按自己的 Region 裁剪）。DrawToBitmap 让 Windows 画子控件，
+    /// 它从最上面的画起，叠在上面的控件（角标）反而被盖住；这里每层都用正确的 z 序重画一遍。
+    /// PrintWindow 取 DWM 合成的画面，屏幕外的窗体常取到没画完的黑块，所以不用它。
+    /// </summary>
+    static void Render(Control control, Graphics graphics, Point origin, Rectangle clip)
+    {
+        clip.Intersect(new Rectangle(origin, control.Size));
+        if (clip.IsEmpty) return;
+        using (var image = new Bitmap(control.Width, control.Height))
+        using (var shape = control.Region?.Clone() ?? new Region(new Rectangle(Point.Empty, control.Size)))
+        {
+            control.DrawToBitmap(image, new Rectangle(Point.Empty, control.Size));
+            shape.Translate(origin.X, origin.Y);
+            shape.Intersect(clip);
+            graphics.Clip = shape;
+            graphics.DrawImageUnscaled(image, origin);
+            graphics.ResetClip();
+        }
+        // 客户区相对控件左上角的偏移（边框、标题栏）
+        var window = control.Parent is { } parent ? parent.PointToScreen(control.Location) : control.Location;
+        var client = control.Parent is null ? Point.Empty : control.PointToScreen(Point.Empty) - (Size)window;
+        var area = new Rectangle(origin + (Size)client, control.ClientSize);
+        area.Intersect(clip);
+        foreach (var child in control.Controls.Cast<Control>().Where(child => child.Visible).Reverse())
+            Render(child, graphics, origin + (Size)client + (Size)child.Location, area);
     }
 
     static ReportTable Tree(Control root, Dictionary<object, string> labels)
