@@ -27,16 +27,16 @@ public abstract class ButtonCore : Element
     protected ButtonCore() => delayed = new DelayedLoading(_ => InvalidateMeasure());
 
     /// <summary>样式；不写时取作用域的默认值（<see cref="ButtonDefaults"/>），再没有时取组件的默认（<see cref="DefaultVariant"/>）。</summary>
-    public ButtonVariant Variant { get => variant.Value is not null ? variant : ScopeDefaults?.Variant ?? DefaultVariant; set { variant = value; InvalidateMeasure(); } }
+    public ButtonVariant Variant { get => variant.Or(ScopeDefaults?.Variant, DefaultVariant); set { variant = value; InvalidateMeasure(); } }
 
     /// <summary>色调；不写时取作用域的默认值，再没有时取组件的默认（<see cref="DefaultTone"/>）。</summary>
-    public StatusTone Tone { get => tone.Value is not null ? tone : ScopeDefaults?.Tone ?? DefaultTone; set { tone = value; Invalidate(); } }
+    public StatusTone Tone { get => tone.Or(ScopeDefaults?.Tone, DefaultTone); set { tone = value; Invalidate(); } }
 
     /// <summary>字号档位，内部尺寸随之缩放；不写时取作用域的默认值，再没有时跟随宿主的字体。</summary>
-    public TextSize Size { get => size.Value is not null ? size : ScopeDefaults?.Size ?? default; set { size = value; InvalidateMeasure(); } }
+    public TextSize Size { get => size.Or(ScopeDefaults?.Size, default); set { size = value; InvalidateMeasure(); } }
 
     /// <summary>圆角；不写时取作用域的默认值，再没有时 md。</summary>
-    public Radius Radius { get => radius.Value is not null ? radius : ScopeDefaults?.Radius ?? Radius.Md; set { radius = value; Invalidate(); } }
+    public Radius Radius { get => radius.Or(ScopeDefaults?.Radius, Radius.Md); set { radius = value; Invalidate(); } }
 
     /// <summary>外观覆盖（上游的 sx）：盖过作用域的 <see cref="ButtonSx"/> 与配方。</summary>
     public ButtonSx? Sx { get; set { field = value; InvalidateMeasure(); Invalidate(); } }

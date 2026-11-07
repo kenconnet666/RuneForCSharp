@@ -30,14 +30,23 @@ public class Progress : Element
     /// <summary>目标值（与 Value 同一单位）。</summary>
     public decimal? Target { get; set { field = value; Update(); } }
 
-    /// <summary>色调；不写时 accent。</summary>
-    public StatusTone Tone { get => field.Value is null ? StatusTone.Accent : field; set { field = value; Invalidate(); } }
+    /// <summary>色调；不写时取作用域的默认值（<see cref="ProgressDefaults"/>），再没有时 accent。</summary>
+    public StatusTone Tone { get => tone.Or(ScopeDefaults?.Tone, StatusTone.Accent); set { tone = value; Invalidate(); } }
 
     /// <summary>字号档位：粗细、直径随之缩放；不写时跟随宿主的字体。</summary>
-    public TextSize Size { get; set { field = value; InvalidateMeasure(); } }
+    public TextSize Size { get => size.Or(ScopeDefaults?.Size, default); set { size = value; InvalidateMeasure(); } }
 
-    /// <summary>圆角；不写时 full。</summary>
-    public Radius Radius { get => field.Value is null ? Radius.Full : field; set { field = value; Invalidate(); } }
+    /// <summary>圆角；不写时取作用域的默认值，再没有时 full。</summary>
+    public Radius Radius { get => radius.Or(ScopeDefaults?.Radius, Radius.Full); set { radius = value; Invalidate(); } }
+
+    /// <summary>实例上写过的档位（设计器只序列化这些）。</summary>
+    internal (bool Tone, bool Size, bool Radius) Explicit => (tone.Value is not null, size.Value is not null, radius.Value is not null);
+
+    ProgressDefaults? ScopeDefaults => Scope?.ResolveDefaults<ProgressDefaults>();
+
+    StatusTone tone;
+    TextSize size;
+    Radius radius;
 
     /// <summary>读屏念的取值文字（参数是夹过的值与最大值）；默认是百分比。</summary>
     public Func<decimal, decimal, string>? ValueText { get; set; }
@@ -379,15 +388,15 @@ public class ProgressControl : ElementControl<Progress>
 
     void ResetShape() => Shape = default;
 
-    bool ShouldSerializeTone() => Tone != StatusTone.Accent;
+    bool ShouldSerializeTone() => Element.Explicit.Tone;
 
     void ResetTone() => Tone = default;
 
-    bool ShouldSerializeTextSize() => TextSize.Value is not null;
+    bool ShouldSerializeTextSize() => Element.Explicit.Size;
 
     void ResetTextSize() => TextSize = default;
 
-    bool ShouldSerializeRadius() => Radius != Radius.Full;
+    bool ShouldSerializeRadius() => Element.Explicit.Radius;
 
     void ResetRadius() => Radius = default;
 
@@ -441,4 +450,20 @@ public readonly record struct ProgressShape(string Value) : IVariant<ProgressSha
 
     /// <inheritdoc />
     public override string ToString() => Value;
+}
+
+/// <summary>Progress 在作用域里的默认值（上游的 <c>defaults.Progress</c>）。</summary>
+public sealed record ProgressDefaults : IScopeRecord<ProgressDefaults>
+{
+    /// <summary>色调。</summary>
+    public StatusTone? Tone { get; init; }
+
+    /// <summary>字号档位。</summary>
+    public TextSize? Size { get; init; }
+
+    /// <summary>圆角。</summary>
+    public Radius? Radius { get; init; }
+
+    /// <inheritdoc />
+    public ProgressDefaults Merge(ProgressDefaults? over) => over is null ? this : new() { Tone = over.Tone ?? Tone, Size = over.Size ?? Size, Radius = over.Radius ?? Radius };
 }

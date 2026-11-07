@@ -103,15 +103,17 @@ public class EmptyControl : Panel, IElementHost, IScopeAware
         }
     }
 
-    /// <summary>字号档位，内部尺寸随之缩放；放在下拉框、小卡片里用 sm。不写时跟随字体。</summary>
+    /// <summary>字号档位，内部尺寸随之缩放；放在下拉框、小卡片里用 sm。不写时取作用域的默认值（<see cref="EmptyDefaults"/>），再没有时跟随字体。</summary>
     [Category("Appearance")]
     [Description("字号档位，内部尺寸随之缩放；不写时跟随字体。")]
-    public TextSize TextSize { get; set { field = value; ApplyTextSize(); } }
+    public TextSize TextSize { get => textSize.Or(ProviderControl.Of(this)?.ResolveDefaults<EmptyDefaults>()?.Size, default); set { textSize = value; ApplyTextSize(); } }
+
+    TextSize textSize;
 
     /// <inheritdoc />
     public override LayoutEngine LayoutEngine => engine;
 
-    bool ShouldSerializeTextSize() => TextSize.Value is not null;
+    bool ShouldSerializeTextSize() => textSize.Value is not null;
 
     void ResetTextSize() => TextSize = default;
 
@@ -128,7 +130,8 @@ public class EmptyControl : Panel, IElementHost, IScopeAware
     /// <summary>所在作用域的主题、默认值变了：重新排版、重画。</summary>
     void IScopeAware.ScopeChanged()
     {
-        PerformLayout();
+        // 字号档位可能来自作用域：换成新的字体再排
+        ApplyTextSize();
         Invalidate(true);
     }
 
@@ -259,4 +262,14 @@ public class EmptyControl : Panel, IElementHost, IScopeAware
             return owner.AutoSize;
         }
     }
+}
+
+/// <summary>Empty 在作用域里的默认值（上游的 <c>defaults.Empty</c>）。</summary>
+public sealed record EmptyDefaults : IScopeRecord<EmptyDefaults>
+{
+    /// <summary>字号档位。</summary>
+    public TextSize? Size { get; init; }
+
+    /// <inheritdoc />
+    public EmptyDefaults Merge(EmptyDefaults? over) => over is null ? this : new() { Size = over.Size ?? Size };
 }

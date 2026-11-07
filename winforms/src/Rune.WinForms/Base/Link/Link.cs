@@ -21,10 +21,10 @@ public class Link : Element
     public string Content { get => text.Content; set { text.Content = value; InvalidateMeasure(); } }
 
     /// <summary>色调；不写时取作用域的默认值（<see cref="LinkDefaults"/>），再没有时 accent。</summary>
-    public TextTone Tone { get => tone.Value is not null ? tone : ScopeDefaults?.Tone ?? TextTone.Accent; set { tone = value; Invalidate(); } }
+    public TextTone Tone { get => tone.Or(ScopeDefaults?.Tone, TextTone.Accent); set { tone = value; Invalidate(); } }
 
     /// <summary>下划线；不写时取作用域的默认值，再没有时 always。</summary>
-    public LinkUnderline Underline { get => underline.Value is not null ? underline : ScopeDefaults?.Underline ?? LinkUnderline.Always; set { underline = value; Invalidate(); } }
+    public LinkUnderline Underline { get => underline.Or(ScopeDefaults?.Underline, LinkUnderline.Always); set { underline = value; Invalidate(); } }
 
     /// <summary>实例上写过的档位（设计器只序列化这些）。</summary>
     internal (bool Tone, bool Underline) Explicit => (tone.Value is not null, underline.Value is not null);

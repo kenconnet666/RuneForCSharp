@@ -20,6 +20,7 @@ public class IndicatorControl : Panel
 {
     readonly IndicatorBadge badge;
     readonly IndicatorLayout layout;
+    StatusTone tone;
 
     /// <summary>新建：自动大小，角标叠在最上面。</summary>
     public IndicatorControl()
@@ -56,10 +57,10 @@ public class IndicatorControl : Panel
     [DefaultValue(false)]
     public bool ShowZero { get; set { field = value; UpdateBadge(); } }
 
-    /// <summary>色调；不写时 danger。</summary>
+    /// <summary>色调；不写时取作用域的默认值（<see cref="IndicatorDefaults"/>），再没有时 danger。</summary>
     [Category("Appearance")]
     [Description("色调，默认 danger。")]
-    public StatusTone Tone { get => field.Value is null ? StatusTone.Danger : field; set { field = value; badge.Invalidate(); } }
+    public StatusTone Tone { get => tone.Or(ProviderControl.Of(this)?.ResolveDefaults<IndicatorDefaults>()?.Tone, StatusTone.Danger); set { tone = value; badge.Invalidate(); } }
 
     /// <summary>位置；不写时 top-end。</summary>
     [Category("Appearance")]
@@ -97,7 +98,7 @@ public class IndicatorControl : Panel
     /// <summary>角标外面一圈页面底色的宽度（borderWidths.sm）。</summary>
     int Ring => (int)MathF.Round(Tokens.BorderWidth.Sm * DeviceDpi / 96f);
 
-    bool ShouldSerializeTone() => Tone != StatusTone.Danger;
+    bool ShouldSerializeTone() => tone.Value is not null;
 
     void ResetTone() => Tone = default;
 
@@ -321,4 +322,14 @@ public readonly record struct IndicatorOverlap(string Value) : IVariant<Indicato
 
     /// <inheritdoc />
     public override string ToString() => Value;
+}
+
+/// <summary>Indicator 在作用域里的默认值（上游的 <c>defaults.Indicator</c>）。</summary>
+public sealed record IndicatorDefaults : IScopeRecord<IndicatorDefaults>
+{
+    /// <summary>色调。</summary>
+    public StatusTone? Tone { get; init; }
+
+    /// <inheritdoc />
+    public IndicatorDefaults Merge(IndicatorDefaults? over) => over is null ? this : new() { Tone = over.Tone ?? Tone };
 }

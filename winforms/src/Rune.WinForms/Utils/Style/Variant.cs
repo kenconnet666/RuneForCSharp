@@ -50,6 +50,14 @@ public sealed class VariantConverter<T> : TypeConverter where T : struct, IVaria
 /// <summary>档位类型共用的小工具。</summary>
 static class Variants
 {
+    /// <summary>
+    /// 档位的取值顺序（DESIGN §4"WinForms：分层解析"）：实例上写了的，其次作用域合并的默认值（<see cref="ProviderControl.Defaults"/>），最后组件默认。
+    /// </summary>
+    /// <param name="own">实例上写的（default 是没写）。</param>
+    /// <param name="scoped">作用域的默认值；没有时为 null。</param>
+    /// <param name="fallback">组件默认。</param>
+    public static T Or<T>(this T own, T? scoped, T fallback) where T : struct, IVariant<T> => own.Value is not null ? own : scoped ?? fallback;
+
     /// <summary>写错的取值不会报错，只是没有样式：Debug 构建里遇到不在常用取值里的，记一条输出方便查。</summary>
     [Conditional("DEBUG")]
     public static void WarnIfUnknown<T>(T value) where T : struct, IVariant<T>

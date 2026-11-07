@@ -66,11 +66,19 @@ public class Switch : Element
     /// <summary>文字（TS 的 children），在轨道右边（从右到左时在左边）。</summary>
     public string? Content { get; set { field = value; RebuildLabel(); } }
 
-    /// <summary>打开时轨道的色调；不写时 accent。</summary>
-    public StatusTone Tone { get => field.Value is null ? StatusTone.Accent : field; set { field = value; Invalidate(); } }
+    /// <summary>打开时轨道的色调；不写时取作用域的默认值（<see cref="ChoiceDefaults"/>），再没有时 accent。</summary>
+    public StatusTone Tone { get => tone.Or(ScopeDefaults?.Tone, StatusTone.Accent); set { tone = value; Invalidate(); } }
 
-    /// <summary>字号档位：轨道、滑块、文字随之缩放；不写时跟随宿主的字体。</summary>
-    public TextSize Size { get; set { field = value; InvalidateMeasure(); } }
+    /// <summary>字号档位：轨道、滑块、文字随之缩放；不写时取作用域的默认值，再没有时跟随宿主的字体。</summary>
+    public TextSize Size { get => size.Or(ScopeDefaults?.Size, default); set { size = value; InvalidateMeasure(); } }
+
+    /// <summary>实例上写过的档位（设计器只序列化这些）。</summary>
+    internal (bool Tone, bool Size) Explicit => (tone.Value is not null, size.Value is not null);
+
+    ChoiceDefaults? ScopeDefaults => Scope?.ResolveDefaults<ChoiceDefaults>();
+
+    StatusTone tone;
+    TextSize size;
 
     /// <summary>文字部件的属性（TS 的 propsLabel）。</summary>
     public TextProps? PropsLabel { get; set { field = value; RebuildLabel(); } }
@@ -430,11 +438,11 @@ public class SwitchControl : ElementControl<Switch>
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public IconProps? PropsSpinner { get => Element.PropsSpinner; set => Element.PropsSpinner = value; }
 
-    bool ShouldSerializeTone() => Tone != StatusTone.Accent;
+    bool ShouldSerializeTone() => Element.Explicit.Tone;
 
     void ResetTone() => Tone = default;
 
-    bool ShouldSerializeTextSize() => TextSize != default;
+    bool ShouldSerializeTextSize() => Element.Explicit.Size;
 
     void ResetTextSize() => TextSize = default;
 
@@ -567,4 +575,17 @@ public class SwitchControl : ElementControl<Switch>
 
         public override void DoDefaultAction() => owner.Toggle();
     }
+}
+
+/// <summary>勾选类控件（Switch，以后的 Checkbox、Radio）在作用域里的默认值（上游的 <c>defaults.Choice</c>）。</summary>
+public sealed record ChoiceDefaults : IScopeRecord<ChoiceDefaults>
+{
+    /// <summary>字号档位。</summary>
+    public TextSize? Size { get; init; }
+
+    /// <summary>选中时的色调。</summary>
+    public StatusTone? Tone { get; init; }
+
+    /// <inheritdoc />
+    public ChoiceDefaults Merge(ChoiceDefaults? over) => over is null ? this : new() { Size = over.Size ?? Size, Tone = over.Tone ?? Tone };
 }

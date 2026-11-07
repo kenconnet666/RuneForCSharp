@@ -26,16 +26,16 @@ public class Badge : Element
     public string Content { get => text.Content; set { text.Content = value; InvalidateMeasure(); } }
 
     /// <summary>样式；不写时取作用域的默认值（<see cref="BadgeDefaults"/>），再没有时 soft。</summary>
-    public StatusVariant Variant { get => variant.Value is not null ? variant : ScopeDefaults?.Variant ?? StatusVariant.Soft; set { variant = value; Invalidate(); } }
+    public StatusVariant Variant { get => variant.Or(ScopeDefaults?.Variant, StatusVariant.Soft); set { variant = value; Invalidate(); } }
 
     /// <summary>色调；不写时取作用域的默认值，再没有时 neutral。</summary>
-    public StatusTone Tone { get => tone.Value is not null ? tone : ScopeDefaults?.Tone ?? StatusTone.Neutral; set { tone = value; Invalidate(); } }
+    public StatusTone Tone { get => tone.Or(ScopeDefaults?.Tone, StatusTone.Neutral); set { tone = value; Invalidate(); } }
 
     /// <summary>字号档位；不写时取作用域的默认值，再没有时 xs。</summary>
-    public TextSize Size { get => size.Value is not null ? size : ScopeDefaults?.Size ?? TextSize.Xs; set { size = value; InvalidateMeasure(); } }
+    public TextSize Size { get => size.Or(ScopeDefaults?.Size, TextSize.Xs); set { size = value; InvalidateMeasure(); } }
 
     /// <summary>圆角；不写时取作用域的默认值，再没有时 sm。表格、密集列表里的状态常用 none。</summary>
-    public Radius Radius { get => radius.Value is not null ? radius : ScopeDefaults?.Radius ?? Radius.Sm; set { radius = value; Invalidate(); } }
+    public Radius Radius { get => radius.Or(ScopeDefaults?.Radius, Radius.Sm); set { radius = value; Invalidate(); } }
 
     /// <summary>外观覆盖（上游的 sx）：盖过作用域的 <see cref="BadgeSx"/> 与配方。</summary>
     public BadgeSx? Sx { get; set { field = value; Invalidate(); } }

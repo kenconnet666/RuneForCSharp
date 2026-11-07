@@ -41,17 +41,17 @@ public class CardControl : Panel, IScopeAware
     /// <summary>样式；不写时 surface。</summary>
     [Category("Appearance")]
     [Description("样式：surface（默认）、outline、elevated、ghost。")]
-    public CardVariant Variant { get => field.Value is null ? CardVariant.Surface : field; set { field = value; Invalidate(); } }
+    public CardVariant Variant { get => variant.Or(ScopeDefaults?.Variant, CardVariant.Surface); set { variant = value; Invalidate(); } }
 
     /// <summary>页头、正文、页脚的内边距档位；不写时 lg。控件自己有 Padding，TS 的 padding 在这里叫 CardPadding。</summary>
     [Category("Layout")]
     [Description("页头、正文、页脚的内边距档位，默认 lg。")]
-    public Space CardPadding { get => field.Value is null ? Space.Lg : field; set { field = value; PerformLayout(); Invalidate(); } }
+    public Space CardPadding { get => padding.Or(ScopeDefaults?.Padding, Space.Lg); set { padding = value; PerformLayout(); Invalidate(); } }
 
     /// <summary>圆角；不写时 lg。</summary>
     [Category("Appearance")]
     [Description("圆角，默认 lg。")]
-    public Radius Radius { get => field.Value is null ? Radius.Lg : field; set { field = value; Invalidate(); } }
+    public Radius Radius { get => radius.Or(ScopeDefaults?.Radius, Radius.Lg); set { radius = value; Invalidate(); } }
 
     /// <summary>页头的文字（semibold）；读屏里是卡片的名称。</summary>
     [Category("Appearance")]
@@ -110,15 +110,15 @@ public class CardControl : Panel, IScopeAware
     /// <inheritdoc />
     public override LayoutEngine LayoutEngine => engine;
 
-    bool ShouldSerializeVariant() => Variant != CardVariant.Surface;
+    bool ShouldSerializeVariant() => variant.Value is not null;
 
     void ResetVariant() => Variant = default;
 
-    bool ShouldSerializeCardPadding() => CardPadding != Space.Lg;
+    bool ShouldSerializeCardPadding() => padding.Value is not null;
 
     void ResetCardPadding() => CardPadding = default;
 
-    bool ShouldSerializeRadius() => Radius != Radius.Lg;
+    bool ShouldSerializeRadius() => radius.Value is not null;
 
     void ResetRadius() => Radius = default;
 
@@ -129,6 +129,13 @@ public class CardControl : Panel, IScopeAware
     int Line => Math.Max(1, (int)MathF.Round(Tokens.BorderWidth.Xs * DeviceDpi / 96f));
 
     ElementContext Context => ElementContext.Of(this);
+
+    /// <summary>作用域合并的默认值（<see cref="CardDefaults"/>）：没写的样式、内边距、圆角取它。</summary>
+    CardDefaults? ScopeDefaults => ProviderControl.Of(this)?.ResolveDefaults<CardDefaults>();
+
+    CardVariant variant;
+    Space padding;
+    Radius radius;
 
     /// <summary>所在作用域的主题、默认值变了：重新排版、重画。</summary>
     void IScopeAware.ScopeChanged()
@@ -359,4 +366,20 @@ public readonly record struct CardVariant(string Value) : IVariant<CardVariant>
 
     /// <inheritdoc />
     public override string ToString() => Value;
+}
+
+/// <summary>Card 在作用域里的默认值（上游的 <c>defaults.Card</c>）。</summary>
+public sealed record CardDefaults : IScopeRecord<CardDefaults>
+{
+    /// <summary>样式。</summary>
+    public CardVariant? Variant { get; init; }
+
+    /// <summary>内边距档位（控件上叫 CardPadding）。</summary>
+    public Space? Padding { get; init; }
+
+    /// <summary>圆角。</summary>
+    public Radius? Radius { get; init; }
+
+    /// <inheritdoc />
+    public CardDefaults Merge(CardDefaults? over) => over is null ? this : new() { Variant = over.Variant ?? Variant, Padding = over.Padding ?? Padding, Radius = over.Radius ?? Radius };
 }

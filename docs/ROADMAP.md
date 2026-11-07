@@ -210,7 +210,7 @@
 - [x] DESIGN 写明各平台的定制入口与不稳定的资源键（§4"定制入口"）。
 - [~] 工作包 3：Provider 合成照上游的分段语义。WPF 做了（`StyleCloner` 把外层的条件值带进内层的普通值，150 组随机分层对参考模型）；Avalonia 见"待定的决定"。
 - [x] 工作包 4：Badge 色调取共用色表（Avalonia 取调色板对象，WPF、WinForms 由 recipe-gen 生成 Badge 配方；`StatusColors` 删掉）。
-- [~] 工作包 5（2026-11-07 做了作用域、默认值、Sx：`ProviderControl`，按钮家族、Badge、Link 已接上，其余组件照同一写法接；见 DESIGN §4"WinForms：分层解析"）：WinForms 的定制入口：并进 M1 的 WinForms Provider（作用域控件、默认值信号、`Sx` 记录，"平台化的约定"已定的形状），一开始就按上游语义逐属性合并。
+- [~] 工作包 5（2026-11-07 做了作用域、默认值、Sx：`ProviderControl`，按钮家族、Badge、Link、Indicator、Avatar、Card、Progress、Empty、Switch 的默认值已接上，`Sx` 只有按钮家族与 Badge；见 DESIGN §4"WinForms：分层解析"）：WinForms 的定制入口：并进 M1 的 WinForms Provider（作用域控件、默认值信号、`Sx` 记录，"平台化的约定"已定的形状），一开始就按上游语义逐属性合并。
 - [x] 按钮字重 600 → 500。
 - [x] 控件高度收成每个平台一处 `ControlHeight`（`max(round(系数 × 字号 ÷ 4) × 4, 24)`，xs 档系数 2，Avalonia、WPF 的系数继承；DESIGN §14 Button 家族）。
 - [x] `ts-styles`（文档站每个示例、每个部件的计算样式，亮暗、悬停 / 聚焦 / 按下）与 `inspect styles`（Avalonia、WPF，同一种格式），`tools/parity/styles.mjs` 逐项比对。Button 的 variants、tones、sizes、radius 两个平台在亮暗主题下都一致（顺手修了按钮文字的行高与竖直对齐）。

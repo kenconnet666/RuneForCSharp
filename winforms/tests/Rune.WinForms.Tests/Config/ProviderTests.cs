@@ -87,6 +87,46 @@ public class ProviderTests
     });
 
     [Fact]
+    public Task Display_feedback_and_choice_components_take_their_defaults_from_the_scope() => WinFormsUi.Run(() =>
+    {
+        var indicator = new IndicatorControl();
+        var avatar = new AvatarControl { Text = "林" };
+        var card = new CardControl { Radius = Radius.None }; // 显式写的仍然赢
+        var progress = new ProgressControl { Value = 40 };
+        var empty = new EmptyControl();
+        var toggle = new SwitchControl { Text = "通知" };
+        var scope = new ProviderControl { Dock = DockStyle.Fill };
+        scope.Defaults.Set(new IndicatorDefaults { Tone = StatusTone.Success });
+        scope.Defaults.Set(new AvatarDefaults { Variant = AvatarVariant.Solid, Radius = Radius.Md });
+        scope.Defaults.Set(new CardDefaults { Variant = CardVariant.Outline, Padding = Space.Sm, Radius = Radius.Sm });
+        scope.Defaults.Set(new ProgressDefaults { Tone = StatusTone.Warning });
+        scope.Defaults.Set(new EmptyDefaults { Size = TextSize.Sm });
+        scope.Defaults.Set(new ChoiceDefaults { Tone = StatusTone.Danger, Size = TextSize.Lg });
+        scope.Controls.AddRange([indicator, avatar, card, progress, empty, toggle]);
+        using var form = WinFormsUi.Show(scope);
+
+        Assert.Equal(StatusTone.Success, indicator.Tone);
+        Assert.Equal((AvatarVariant.Solid, Radius.Md, StatusTone.Accent), (avatar.Variant, avatar.Radius, avatar.Tone));
+        Assert.Equal((CardVariant.Outline, Space.Sm, Radius.None), (card.Variant, card.CardPadding, card.Radius));
+        Assert.Equal((StatusTone.Warning, Radius.Full), (progress.Tone, progress.Radius));
+        Assert.Equal(TextSize.Sm, empty.TextSize);
+        Assert.Equal((StatusTone.Danger, TextSize.Lg), (toggle.Tone, toggle.TextSize));
+    });
+
+    [Fact]
+    public Task Empty_re_applies_a_size_that_comes_from_the_scope() => WinFormsUi.Run(() =>
+    {
+        var empty = new EmptyControl();
+        var scope = new ProviderControl { Dock = DockStyle.Fill };
+        scope.Controls.Add(empty);
+        using var form = WinFormsUi.Show(scope);
+        var before = empty.Font.Size;
+
+        scope.Defaults.Set(new EmptyDefaults { Size = TextSize.Xl });
+        Assert.True(empty.Font.Size > before); // 作用域换了字号档位，空状态的字体跟着换
+    });
+
+    [Fact]
     public Task Changing_scope_defaults_resizes_the_components() => WinFormsUi.Run(() =>
     {
         var button = new ButtonControl { Text = "保存" };

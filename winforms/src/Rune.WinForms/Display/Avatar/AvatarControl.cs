@@ -22,17 +22,27 @@ public class Avatar : Element
     /// <summary>后备文字；不写时是名字的首字母，没有名字时是人像图标。</summary>
     public string? Fallback { get; set { field = value; UpdateText(); } }
 
-    /// <summary>字号档位，头像边长是它的 2.5 倍；不写时跟随宿主。</summary>
-    public TextSize Size { get; set { field = value; InvalidateMeasure(); } }
+    /// <summary>字号档位，头像边长是它的 2.5 倍；不写时取作用域的默认值（<see cref="AvatarDefaults"/>），再没有时跟随宿主。</summary>
+    public TextSize Size { get => size.Or(ScopeDefaults?.Size, default); set { size = value; InvalidateMeasure(); } }
 
-    /// <summary>圆角；不写时 full（圆形）。</summary>
-    public Radius Radius { get => field.Value is null ? Radius.Full : field; set { field = value; Invalidate(); } }
+    /// <summary>圆角；不写时取作用域的默认值，再没有时 full（圆形）。</summary>
+    public Radius Radius { get => radius.Or(ScopeDefaults?.Radius, Radius.Full); set { radius = value; Invalidate(); } }
 
-    /// <summary>后备内容的底色样式；不写时 soft。</summary>
-    public AvatarVariant Variant { get => field.Value is null ? AvatarVariant.Soft : field; set { field = value; Invalidate(); } }
+    /// <summary>后备内容的底色样式；不写时取作用域的默认值，再没有时 soft。</summary>
+    public AvatarVariant Variant { get => variant.Or(ScopeDefaults?.Variant, AvatarVariant.Soft); set { variant = value; Invalidate(); } }
 
-    /// <summary>后备内容的色调；不写时 accent。</summary>
-    public StatusTone Tone { get => field.Value is null ? StatusTone.Accent : field; set { field = value; Invalidate(); } }
+    /// <summary>后备内容的色调；不写时取作用域的默认值，再没有时 accent。</summary>
+    public StatusTone Tone { get => tone.Or(ScopeDefaults?.Tone, StatusTone.Accent); set { tone = value; Invalidate(); } }
+
+    /// <summary>实例上写过的档位（设计器只序列化这些）。</summary>
+    internal (bool Size, bool Radius, bool Variant, bool Tone) Explicit => (size.Value is not null, radius.Value is not null, variant.Value is not null, tone.Value is not null);
+
+    AvatarDefaults? ScopeDefaults => Scope?.ResolveDefaults<AvatarDefaults>();
+
+    TextSize size;
+    Radius radius;
+    AvatarVariant variant;
+    StatusTone tone;
 
     /// <summary>画出来的后备文字（没有时画人像图标）。</summary>
     internal string FallbackText => initials.Content;
@@ -149,19 +159,19 @@ public class AvatarControl : ElementControl<Avatar>
     [Description("后备内容的色调，默认 accent。")]
     public StatusTone Tone { get => Element.Tone; set => Element.Tone = value; }
 
-    bool ShouldSerializeTextSize() => TextSize.Value is not null;
+    bool ShouldSerializeTextSize() => Element.Explicit.Size;
 
     void ResetTextSize() => TextSize = default;
 
-    bool ShouldSerializeRadius() => Radius != Radius.Full;
+    bool ShouldSerializeRadius() => Element.Explicit.Radius;
 
     void ResetRadius() => Radius = default;
 
-    bool ShouldSerializeVariant() => Variant != AvatarVariant.Soft;
+    bool ShouldSerializeVariant() => Element.Explicit.Variant;
 
     void ResetVariant() => Variant = default;
 
-    bool ShouldSerializeTone() => Tone != StatusTone.Accent;
+    bool ShouldSerializeTone() => Element.Explicit.Tone;
 
     void ResetTone() => Tone = default;
 
@@ -197,4 +207,23 @@ public readonly record struct AvatarVariant(string Value) : IVariant<AvatarVaria
 
     /// <inheritdoc />
     public override string ToString() => Value;
+}
+
+/// <summary>Avatar 在作用域里的默认值（上游的 <c>defaults.Avatar</c>）。</summary>
+public sealed record AvatarDefaults : IScopeRecord<AvatarDefaults>
+{
+    /// <summary>字号档位。</summary>
+    public TextSize? Size { get; init; }
+
+    /// <summary>圆角。</summary>
+    public Radius? Radius { get; init; }
+
+    /// <summary>后备内容的底色样式。</summary>
+    public AvatarVariant? Variant { get; init; }
+
+    /// <summary>后备内容的色调。</summary>
+    public StatusTone? Tone { get; init; }
+
+    /// <inheritdoc />
+    public AvatarDefaults Merge(AvatarDefaults? over) => over is null ? this : new() { Size = over.Size ?? Size, Radius = over.Radius ?? Radius, Variant = over.Variant ?? Variant, Tone = over.Tone ?? Tone };
 }
