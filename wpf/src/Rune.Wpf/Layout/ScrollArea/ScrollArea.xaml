@@ -1,0 +1,109 @@
+<!--
+  ScrollArea 的主题样式（vue-tsx-pro 的 scrollAreaStyles、scrollAreaBarStyles）：视口占满，两条滚动条浮在内容上方（右边、底边）；
+  滑块是 textMuted 的半透明圆条（悬停时更深），离轨道两侧各 2 像素，至少 20 像素长。粗细、让出的角、淡入淡出在 ScrollArea.cs 里。
+  轨道、滑块的外观在部件样式里（ScrollAreaParts），Provider 能改；键盘聚焦时里侧 2 像素的焦点环（focusRingStyles.inset）。
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <!-- 轨道的空白处：点一下翻一页（平台 Track 的翻页按钮），本身不画东西 -->
+  <Style x:Key="Rune.ScrollArea.Page" TargetType="RepeatButton">
+    <Setter Property="Focusable" Value="False" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="RepeatButton">
+          <Border Background="Transparent" />
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="{x:Static rune:ScrollAreaParts.Thumb}" TargetType="Thumb">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.TextMuted}" />
+    <Setter Property="Opacity" Value="0.5" />
+    <Setter Property="Margin" Value="2" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Thumb">
+          <Border Background="{TemplateBinding Background}" CornerRadius="999" />
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <Style.Triggers>
+      <Trigger Property="IsMouseOver" Value="True"><Setter Property="Opacity" Value="0.75" /></Trigger>
+      <Trigger Property="IsDragging" Value="True"><Setter Property="Opacity" Value="0.75" /></Trigger>
+    </Style.Triggers>
+  </Style>
+
+  <Style x:Key="{x:Static rune:ScrollAreaParts.Scrollbar}" TargetType="ScrollBar">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="MinWidth" Value="0" />
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ScrollBar">
+          <Track x:Name="PART_Track" IsDirectionReversed="True">
+            <Track.DecreaseRepeatButton>
+              <RepeatButton Style="{StaticResource Rune.ScrollArea.Page}" Command="ScrollBar.PageUpCommand" />
+            </Track.DecreaseRepeatButton>
+            <Track.IncreaseRepeatButton>
+              <RepeatButton Style="{StaticResource Rune.ScrollArea.Page}" Command="ScrollBar.PageDownCommand" />
+            </Track.IncreaseRepeatButton>
+            <Track.Thumb>
+              <Thumb MinHeight="20" Style="{DynamicResource {x:Static rune:ScrollAreaParts.Thumb}}" />
+            </Track.Thumb>
+          </Track>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <Style.Triggers>
+      <Trigger Property="Orientation" Value="Horizontal">
+        <Setter Property="Template">
+          <Setter.Value>
+            <ControlTemplate TargetType="ScrollBar">
+              <Track x:Name="PART_Track">
+                <Track.DecreaseRepeatButton>
+                  <RepeatButton Style="{StaticResource Rune.ScrollArea.Page}" Command="ScrollBar.PageLeftCommand" />
+                </Track.DecreaseRepeatButton>
+                <Track.IncreaseRepeatButton>
+                  <RepeatButton Style="{StaticResource Rune.ScrollArea.Page}" Command="ScrollBar.PageRightCommand" />
+                </Track.IncreaseRepeatButton>
+                <Track.Thumb>
+                  <Thumb MinWidth="20" Style="{DynamicResource {x:Static rune:ScrollAreaParts.Thumb}}" />
+                </Track.Thumb>
+              </Track>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+      </Trigger>
+    </Style.Triggers>
+  </Style>
+
+  <Style TargetType="rune:ScrollArea">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="rune:ScrollArea">
+          <Grid Background="{TemplateBinding Background}">
+            <ScrollContentPresenter x:Name="PART_ScrollContentPresenter" Margin="{TemplateBinding Padding}"
+                                    CanContentScroll="{TemplateBinding CanContentScroll}" />
+            <ScrollBar x:Name="PART_VerticalScrollBar" Orientation="Vertical" HorizontalAlignment="Right" Opacity="0"
+                       Style="{DynamicResource {x:Static rune:ScrollAreaParts.Scrollbar}}"
+                       Value="{TemplateBinding VerticalOffset}" Maximum="{TemplateBinding ScrollableHeight}"
+                       ViewportSize="{TemplateBinding ViewportHeight}" Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}" />
+            <ScrollBar x:Name="PART_HorizontalScrollBar" Orientation="Horizontal" VerticalAlignment="Bottom" Opacity="0"
+                       Style="{DynamicResource {x:Static rune:ScrollAreaParts.Scrollbar}}"
+                       Value="{TemplateBinding HorizontalOffset}" Maximum="{TemplateBinding ScrollableWidth}"
+                       ViewportSize="{TemplateBinding ViewportWidth}" Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}" />
+            <Border x:Name="PART_FocusRing" Visibility="Collapsed" IsHitTestVisible="False" BorderThickness="2" BorderBrush="{DynamicResource Rune.Brush.FocusRing}" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsFocusVisible" Value="True"><Setter TargetName="PART_FocusRing" Property="Visibility" Value="Visible" /></Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+</ResourceDictionary>

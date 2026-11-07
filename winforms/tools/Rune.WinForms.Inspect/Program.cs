@@ -106,7 +106,8 @@ static class Inspector
     static void Render(Control control, Graphics graphics, Point origin, Rectangle clip)
     {
         clip.Intersect(new Rectangle(origin, control.Size));
-        if (clip.IsEmpty) return;
+        // Rectangle.IsEmpty 要四个值都是 0：宽或高为 0、位置不在原点的控件（还没排版的子控件）也要跳过
+        if (clip.Width <= 0 || clip.Height <= 0) return;
         using (var image = new Bitmap(control.Width, control.Height))
         using (var shape = control.Region?.Clone() ?? new Region(new Rectangle(Point.Empty, control.Size)))
         {

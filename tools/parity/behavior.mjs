@@ -10,7 +10,7 @@ import { basename, join, relative } from 'node:path';
 import { parseArgs } from 'node:util';
 import { table } from '../lib/markdown.mjs';
 import { openVue, repoRoot } from '../lib/vue.mjs';
-import { BEHAVIOR_NOT_APPLICABLE, TYPE_RENAMES } from './registry.mjs';
+import { BEHAVIOR_NOT_APPLICABLE, PLATFORM_BEHAVIOR_NOT_APPLICABLE, TYPE_RENAMES } from './registry.mjs';
 
 const { values: options, positionals } = parseArgs({ allowPositionals: true, options: { json: { type: 'boolean', default: false }, vue: { type: 'string' } } });
 
@@ -104,7 +104,10 @@ for (const component of components) {
         row.platforms[platformName] = '（组件还没做）';
         continue;
       }
-      row.platforms[platformName] = p.marks.filter((m) => m.component === component && name.startsWith(m.prefix)).map((m) => m.method).join('、') || null;
+      const marked = p.marks.filter((m) => m.component === component && name.startsWith(m.prefix)).map((m) => m.method).join('、');
+      // 只在这个平台上不适用的用例（登记在 PLATFORM_BEHAVIOR_NOT_APPLICABLE）
+      const platformNa = Object.entries(PLATFORM_BEHAVIOR_NOT_APPLICABLE[p.library]?.[component] ?? {}).find(([prefix]) => name.startsWith(prefix));
+      row.platforms[platformName] = marked || (platformNa ? `不适用：${platformNa[1]}` : null);
     }
     results.push(row);
   }

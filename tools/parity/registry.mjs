@@ -36,6 +36,8 @@ export const COMPONENT_PROP_RENAMES = {
   // 平台的 ItemsControl 自己有 Items（直接写的项）；数据给 ItemsSource
   CheckboxGroup: { items: 'ItemsSource' },
   RadioGroup: { items: 'ItemsSource' },
+  // 平台控件自己有 Focusable（能不能聚焦）：内容超出时才可聚焦的开关另起名
+  ScrollArea: { focusable: 'IsViewportFocusable' },
   // Avalonia、WPF 沿用平台的提示（ToolTip.Tip、ToolTipService），组件库只补位置、距离、箭头
   Tooltip: {
     children: 'ToolTip.Tip',
@@ -101,6 +103,7 @@ export const PROPS_NOT_PORTED = {
   ClearButton: { type: BUTTON_TYPE },
   CopyButton: { type: BUTTON_TYPE },
   Tooltip: { trigger: '提示挂在触发器上（Avalonia、WPF 的 ToolTip 附加属性，WinForms 的扩展属性），不用渲染函数' },
+  ScrollArea: { propsContent: '内容就是 Content 本身，平台的滚动呈现器直接排它，中间没有包一层' },
   Toolbar: { items: '桌面上没有 CSS 选择器：参与方向键移动的固定是按钮与链接' },
   Skeleton: { variant: '上游已废弃（改名为 shape），新库不带' },
   Progress: { propsRoot: '外层就是 Progress 自己（读屏的进度条也是它）：样式直接写在 Progress 上' },
@@ -113,7 +116,18 @@ export const PROPS_NOT_PORTED = {
 
 /** 某个平台上不移植的 prop 与原因（盖在 PROPS_NOT_PORTED 上）：库 → { 组件: { prop: 原因 } } */
 export const PLATFORM_PROPS_NOT_PORTED = {
+  Avalonia: {
+    ScrollArea: { propsScrollbar: '两条滚动条是平台 ScrollViewer 认的固定部件名：样式里用 ScrollAreaParts.VerticalScrollbar、HorizontalScrollbar 选中' },
+  },
+  WPF: {
+    ScrollArea: { propsViewport: '视口就是 ScrollArea 自己：读屏名称、焦点都在它身上；滚动呈现器没有部件样式' },
+  },
   WinForms: {
+    ScrollArea: {
+      propsViewport: '视口就是 ScrollAreaControl 自己：读屏名称、焦点都在它身上',
+      propsScrollbar: '滚动条是组件库画的滑块子控件，没有可改的部件属性',
+      propsThumb: '滚动条是组件库画的滑块子控件，没有可改的部件属性',
+    },
     Collapse: { lazy: '收起时子控件隐藏：隐藏的控件不建句柄、不参与布局，本来就是第一次展开才真正创建' },
     Tooltip: { propsArrow: '提示窗口整张是组件库画的位图，箭头没有可改样式的部件' },
   },
@@ -150,6 +164,13 @@ export const EXCLUDED = {
  * 桌面上不适用的 vue-tsx-pro 测试用例（tools/parity/behavior.mjs）：组件 → { it 名字的开头: 原因 }。
  * 其余用例要有测试标了 [Upstream("组件", "名字开头")]
  */
+/** 只在某个平台上不适用的上游测试用例：库 → { 组件: { 用例名的开头: 原因 } } */
+export const PLATFORM_BEHAVIOR_NOT_APPLICABLE = {
+  WinForms: {
+    ScrollArea: { '内容层、滚动条、滑块都能加属性': '滚动条是组件库画的滑块子控件，没有部件属性可加（PLATFORM_PROPS_NOT_PORTED）' },
+  },
+};
+
 export const BEHAVIOR_NOT_APPLICABLE = {
   LinkButton: { '站内链接经 router 跳转': '桌面没有站内地址：Href 是绝对地址，用系统打开（ROADMAP 平台化的约定）' },
   IconLinkButton: { '站内链接经 router 跳转': '桌面没有站内地址：Href 是绝对地址，用系统打开（ROADMAP 平台化的约定）' },

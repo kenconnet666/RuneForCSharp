@@ -628,6 +628,22 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 测试的等待：Avalonia `HeadlessUi.Until` / `Pump`，WPF `WpfUi.Until`（三处测试都要等异步结果，收进了测试的基础设施）。
 - 示例：上游的 CopyButton 在 icon-button 页的 states（还要 Tooltip、focusableWhenDisabled）与 presets（还要 TextField）里，这两个示例等这些组件做好再补。
 
+### ScrollArea（2026-11-07）
+
+- 浮层滚动条：滚动仍是平台的，滚动条浮在内容上方、出现消失不占位。粗 0.5em + 两侧各 2 像素，滑块 textMuted 半透明（悬停、拖动 75%），至少 20 像素长；
+  两个方向时各自让出右下角。`Axis`（y / x / both）换成平台滚动条的 Auto / Disabled；`Type`（hover / scroll / always）、`HideDelay`（600 毫秒）决定显示时机；
+  内容超出时可以 Tab 聚焦（`IsViewportFocusable`，上游的 focusable：平台控件自己有 Focusable），键盘聚焦时里侧 2 像素的焦点环。档位类型 `ScrollAreaAxis`、
+  `ScrollbarType` 是孪生文件（`Layout/ScrollArea/ScrollAreaVariants.cs`）。
+- **Avalonia**：从 ScrollViewer 派生，自己的 ControlTheme：视口占满，两条 ScrollBar 叠在上面（`Rune.ScrollArea.Bar`：Track、透明的翻页按钮、圆条 Thumb）；
+  `:active` 伪类时显示并接收指针，淡入淡出是代码里挂的 Transitions（durations.md、standard，系统关闭动画时不挂）。隐藏的等待用 Task.Delay（headless 不走 DispatcherTimer）。
+- **WPF**：从 ScrollViewer 派生，Generic.xaml 里的模板同样叠放；轨道、滑块是部件样式（`ScrollAreaParts.Scrollbar`、`Thumb`），翻页、拖动走 ScrollBar 的命令与 Scroll 事件；
+  显示状态是只读的 `IsScrollbarVisible`，淡入淡出用 DoubleAnimation。
+- **WinForms**：`ScrollAreaControl` 放一个内容控件（`Content`），自己算内容的大小与滚动位置（纵向：宽同区域、高按内容要的；横向反过来）；滚轮、键盘、拖动滑块、
+  内容里的控件得到焦点时滚到看得见。滑块是叠在内容上的子控件（Region 圆角，颜色按底色混出半透明的效果），焦点环是四条细子控件——WinForms 的子控件不能半透明、
+  画在区域自己身上会被内容盖住。出入：没有淡入淡出；点击轨道的空白处不翻页（空白处是内容）。区域本身透明（卡片里显示卡片的表面色）。
+- 示例：vertical、horizontal、types（封面的渐变按上游的 oklch 换算成 sRGB）；both（宽表格、表头与行号固定）等 Table。
+- behavior.mjs 多了 `PLATFORM_BEHAVIOR_NOT_APPLICABLE`（只在某个平台不适用的用例）。
+
 ### Tooltip（2026-11-07）
 
 - 第一个浮层。上游是包着触发器的组件（trigger 渲染函数），桌面上沿用平台的写法：Avalonia 的 `ToolTip.Tip`、WPF 的 `ToolTip`、WinForms 的扩展组件

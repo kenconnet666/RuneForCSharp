@@ -1,0 +1,87 @@
+<!--
+  ScrollArea 的主题（vue-tsx-pro 的 scrollAreaStyles、scrollAreaBarStyles）：视口占满，两条滚动条浮在内容上方（右边、底边），
+  隐藏时透明且不接收指针；滑块是 textMuted 的半透明圆条（悬停时更深），离轨道两侧各 2 像素。粗细与让出的角在 ScrollArea.cs 里按字号算，
+  淡入淡出（durations.md、standard）也在那里。聚焦时里侧 2 像素的焦点环（focusRingStyles.inset）。
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <!-- 轨道的空白处：点一下翻一页（平台 Track 的翻页按钮），本身不画东西 -->
+  <ControlTheme x:Key="Rune.ScrollArea.Page" TargetType="RepeatButton">
+    <Setter Property="Focusable" Value="False" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="Transparent" />
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <ControlTheme x:Key="Rune.ScrollArea.Thumb" TargetType="Thumb">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.TextMuted}" />
+    <Setter Property="Opacity" Value="0.5" />
+    <Setter Property="Margin" Value="2" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="{TemplateBinding Background}" CornerRadius="999" />
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pointerover">
+      <Setter Property="Opacity" Value="0.75" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="Rune.ScrollArea.Bar" TargetType="ScrollBar">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Track Name="PART_Track" Minimum="{TemplateBinding Minimum}" Maximum="{TemplateBinding Maximum}" ViewportSize="{TemplateBinding ViewportSize}"
+               Orientation="{TemplateBinding Orientation}" Value="{TemplateBinding Value, Mode=TwoWay}"
+               DeferThumbDrag="{TemplateBinding ScrollViewer.IsDeferredScrollingEnabled}">
+          <Track.DecreaseButton>
+            <RepeatButton Name="PART_PageUpButton" Theme="{StaticResource Rune.ScrollArea.Page}" />
+          </Track.DecreaseButton>
+          <Track.IncreaseButton>
+            <RepeatButton Name="PART_PageDownButton" Theme="{StaticResource Rune.ScrollArea.Page}" />
+          </Track.IncreaseButton>
+          <!-- 滑块至少 20 像素长：内容再长也抓得住 -->
+          <Thumb Name="PART_Thumb" Theme="{StaticResource Rune.ScrollArea.Thumb}" MinWidth="20" MinHeight="20" />
+        </Track>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type rune:ScrollArea}" TargetType="rune:ScrollArea">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <ScrollContentPresenter Name="PART_ContentPresenter" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}"
+                                  ScrollViewer.IsScrollInertiaEnabled="{TemplateBinding IsScrollInertiaEnabled}">
+            <ScrollContentPresenter.GestureRecognizers>
+              <ScrollGestureRecognizer CanHorizontallyScroll="{Binding CanHorizontallyScroll, ElementName=PART_ContentPresenter}"
+                                       CanVerticallyScroll="{Binding CanVerticallyScroll, ElementName=PART_ContentPresenter}"
+                                       IsScrollInertiaEnabled="{Binding (ScrollViewer.IsScrollInertiaEnabled), ElementName=PART_ContentPresenter}"
+                                       Offset="{Binding Offset, ElementName=PART_ContentPresenter}"
+                                       Viewport="{Binding Viewport, ElementName=PART_ContentPresenter}"
+                                       Extent="{Binding Extent, ElementName=PART_ContentPresenter}" />
+            </ScrollContentPresenter.GestureRecognizers>
+          </ScrollContentPresenter>
+          <ScrollBar Name="PART_VerticalScrollBar" Orientation="Vertical" HorizontalAlignment="Right" Theme="{StaticResource Rune.ScrollArea.Bar}" />
+          <ScrollBar Name="PART_HorizontalScrollBar" Orientation="Horizontal" VerticalAlignment="Bottom" Theme="{StaticResource Rune.ScrollArea.Bar}" />
+          <Border Name="PART_FocusRing" IsVisible="False" IsHitTestVisible="False" BorderThickness="2" BorderBrush="{DynamicResource Rune.Brush.FocusRing}" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^ /template/ ScrollBar">
+      <Setter Property="Opacity" Value="0" />
+      <Setter Property="IsHitTestVisible" Value="False" />
+    </Style>
+    <Style Selector="^:active /template/ ScrollBar">
+      <Setter Property="Opacity" Value="1" />
+      <Setter Property="IsHitTestVisible" Value="True" />
+    </Style>
+    <Style Selector="^:focus-visible /template/ Border#PART_FocusRing">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>
