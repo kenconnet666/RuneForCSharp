@@ -1,8 +1,8 @@
 namespace Rune.WinForms.Examples;
 
 /// <summary>
-/// NavList 的示例（vue-tsx-pro 文档站 navigation/NavList）。toc 在 TableOfContents 做好后补。
-/// WinForms 里是 NavListControl、NavItemControl、NavGroupControl、NavSectionControl。
+/// NavList 的示例（vue-tsx-pro 文档站 navigation/NavList，本页目录 TableOfContents 也在这页）。
+/// WinForms 里是 NavListControl、NavItemControl、NavGroupControl、NavSectionControl、TableOfContentsControl。
 /// </summary>
 static class NavListExamples
 {
@@ -11,6 +11,7 @@ static class NavListExamples
         new("NavList", "groups", "后台导航", "当前页按 NavListControl 的 CurrentHref 判断（也可以用 Active 指定），读屏里是选中的链接，并且高亮；含当前页的 NavGroupControl 自动展开。End 放计数之类的尾部内容。", Groups),
         new("NavList", "compact", "窄侧栏：只显示图标", "Compact 时各项只剩图标，名称留给读屏、悬停或聚焦时用提示显示；NavSectionControl 的 Icon 是小节标题前的标记（不能点），紧凑时代替标题。NavItemControl 的 Badge 是计数角标，展开时在文字后面，紧凑时是图标上的小圆点。", Compact),
         new("NavList", "sections", "文档站导航", "NavSectionControl 是带小标题、不能收起的一组：链接多、按主题分组的侧栏。不可用的项不能点、不能聚焦，End 放在项的末尾（计数、标记）。", Sections),
+        new("NavList", "toc", "本页目录", "TableOfContentsControl 列出各节标题，滚动时高亮正在读的一节，指示条滑过去；当前节在读屏里是选中的链接。目录项的 Id 是标题控件的 Name；正文所在的 ScrollAreaControl 给 ScrollRoot。", Contents),
     ];
 
     /// <summary>定宽的卡片（侧栏的宽度，rem 按根字号 16）：最小、最大宽度都设成它（Flex 按想要的大小排，平台再按最小、最大尺寸夹）。</summary>
@@ -92,5 +93,38 @@ static class NavListExamples
         toggle.IsCheckedChanged += (_, _) => Apply();
         Apply();
         return Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Md, Align = FlexAlign.Start }, toggle, card);
+    }
+
+    /// <summary>本页目录：名字带前缀（同一页上的名字不能重复）。</summary>
+    static readonly HeadingEntry[] Headings =
+    [
+        new("toc-demo-install", "安装", 2),
+        new("toc-demo-npm", "用 npm 安装", 3),
+        new("toc-demo-cdn", "用 CDN 引入", 3),
+        new("toc-demo-usage", "使用", 2),
+        new("toc-demo-theme", "主题", 2),
+        new("toc-demo-faq", "常见问题", 2),
+    ];
+
+    const string Filler = "组件库按需引入，样式在用到时才生成，页面只带用到的部分。每个组件都可以用 sx 覆盖样式，用 propsXxx 给内部的部件加属性。";
+
+    static Control Contents()
+    {
+        var article = new FlexControl { Direction = FlexDirection.Column, Gap = Space.Md, AutoSize = true };
+        foreach (var heading in Headings)
+        {
+            Control title = heading.Level == 2 ? new H3Control { Text = heading.Label, TextSize = TextSize.Lg } : new H4Control { Text = heading.Label, TextSize = TextSize.Md };
+            title.Name = heading.Id;
+            article.Controls.AddRange([title, new ParagraphControl { Text = Filler, TextSize = TextSize.Sm }, new ParagraphControl { Text = Filler, TextSize = TextSize.Sm }]);
+        }
+        article.Padding = new Padding(0, 0, article.LogicalToDeviceUnits(11), 0);
+        // 18rem 高的正文、9rem 宽的目录，中间隔 space.lg（rem 按根字号 16）
+        var scroll = new ScrollAreaControl { Content = article, AccessibleName = "文章" };
+        scroll.Height = scroll.LogicalToDeviceUnits(18 * 16);
+        var toc = new TableOfContentsControl { Items = Headings, ScrollRoot = scroll, Title = "本文目录" };
+        SetWidth(toc, 9);
+        var row = Build.Flex(new FlexControl { Align = FlexAlign.Start, Gap = Space.Lg }, scroll, toc);
+        row.SetGrow(scroll, true);
+        return Build.Card(new CardControl(), row);
     }
 }

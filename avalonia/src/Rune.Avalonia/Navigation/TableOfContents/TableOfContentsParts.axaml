@@ -1,0 +1,25 @@
+<!--
+  TableOfContents 部件的默认外观（vue-tsx-pro 的 tableOfContentsStyles）：标题 sm、加粗、下面留 space.sm；列表左边一条 xs 宽的 border 细线；
+  指示条 sm 宽、圆角、品牌色，盖住细线（往左挪一个细线宽）。
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|TableOfContents TextBlock#PART_Title">
+    <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
+    <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Semibold}" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="LineHeight" Value="{rune:Em Resource=Rune.LineHeight.Normal}" />
+    <Setter Property="Margin" Value="{rune:Em 0, 0, 0, 0.5}" />
+  </Style>
+  <Style Selector="rune|TableOfContents Border#PART_List">
+    <Setter Property="BorderThickness" Value="1,0,0,0" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+  </Style>
+  <Style Selector="rune|TableOfContents Border#PART_Indicator">
+    <Setter Property="Width" Value="2" />
+    <Setter Property="Margin" Value="-1,0,0,0" />
+    <Setter Property="CornerRadius" Value="1" />
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Accent}" />
+  </Style>
+</Styles>

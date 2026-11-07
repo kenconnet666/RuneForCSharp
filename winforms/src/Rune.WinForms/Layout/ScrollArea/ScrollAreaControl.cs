@@ -57,6 +57,10 @@ public class ScrollAreaControl : Control
     /// <summary>横向的滑块（测试用）。</summary>
     internal Control HorizontalThumb => horizontal;
 
+    /// <summary>滚动位置或内容的排版变了（同平台 ScrollViewer 的 ScrollChanged）。</summary>
+    [Category("Action")]
+    public event EventHandler? ScrollChanged;
+
     /// <summary>内容在某个方向超出了区域。</summary>
     [Browsable(false)]
     public bool IsOverflowing { get; private set; }
@@ -203,6 +207,7 @@ public class ScrollAreaControl : Control
         focusRing[1].Bounds = new Rectangle(0, view.Height - ring, view.Width, ring);
         focusRing[2].Bounds = new Rectangle(0, 0, ring, view.Height);
         focusRing[3].Bounds = new Rectangle(view.Width - ring, 0, ring, view.Height);
+        ScrollChanged?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>滚动或指针进入：显示一阵（scroll 型只认滚动），停下后按 <see cref="HideDelay"/> 隐藏。</summary>

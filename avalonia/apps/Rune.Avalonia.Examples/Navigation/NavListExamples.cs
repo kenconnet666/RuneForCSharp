@@ -5,7 +5,7 @@ using Avalonia.Layout;
 
 namespace Rune.Avalonia.Examples;
 
-/// <summary>NavList 的示例（vue-tsx-pro 文档站 navigation/NavList）。toc 在 TableOfContents 做好后补。</summary>
+/// <summary>NavList 的示例（vue-tsx-pro 文档站 navigation/NavList，本页目录 TableOfContents 也在这页）。</summary>
 static class NavListExamples
 {
     public static Example[] All =>
@@ -13,6 +13,7 @@ static class NavListExamples
         new("NavList", "groups", "后台导航", "当前页按 NavList 的 CurrentHref 判断（也可以用 Active 指定），读屏的项状态是\"当前页\"，并且高亮；含当前页的 NavGroup 自动展开。End 放计数之类的尾部内容。", Groups),
         new("NavList", "compact", "窄侧栏：只显示图标", "Compact 时各项只剩图标，名称留给读屏、悬停或聚焦时用提示显示；NavSection 的 Icon 是小节标题前的标记（不能点），紧凑时代替标题。NavItem 的 Badge 是计数角标，展开时在文字后面，紧凑时是图标上的小圆点。", Compact),
         new("NavList", "sections", "文档站导航", "NavSection 是带小标题、不能收起的一组：链接多、按主题分组的侧栏。不可用的项不能点、不能聚焦，End 放在项的末尾（计数、标记）。", Sections),
+        new("NavList", "toc", "本页目录", "TableOfContents 列出各节标题，滚动时高亮正在读的一节，指示条滑过去；当前节的读屏项状态是\"当前位置\"。目录项的 Id 是标题控件的 Name；正文所在的滚动区域给 ScrollRoot。", Contents),
     ];
 
     /// <summary>15rem（根字号 16）宽的卡片：侧栏的宽度。</summary>
@@ -95,5 +96,36 @@ static class NavListExamples
         };
         Apply();
         return new Flex { Direction = FlexDirection.Column, Gap = Space.Md, Align = FlexAlign.Start, Children = { toggle, card } };
+    }
+
+    /// <summary>本页目录：名字带前缀（同一页上的名字不能重复）。</summary>
+    static readonly HeadingEntry[] Headings =
+    [
+        new("toc-demo-install", "安装", 2),
+        new("toc-demo-npm", "用 npm 安装", 3),
+        new("toc-demo-cdn", "用 CDN 引入", 3),
+        new("toc-demo-usage", "使用", 2),
+        new("toc-demo-theme", "主题", 2),
+        new("toc-demo-faq", "常见问题", 2),
+    ];
+
+    const string Filler = "组件库按需引入，样式在用到时才生成，页面只带用到的部分。每个组件都可以用 sx 覆盖样式，用 propsXxx 给内部的部件加属性。";
+
+    static Control Contents()
+    {
+        var article = new Flex { Direction = FlexDirection.Column, Gap = Space.Md, Margin = new Thickness(0, 0, 0.75 * 14, 0) };
+        foreach (var heading in Headings)
+        {
+            Control title = heading.Level == 2 ? new H3 { Text = heading.Label, Size = TextSize.Lg } : new H4 { Text = heading.Label, Size = TextSize.Md };
+            title.Name = heading.Id;
+            article.Children.AddRange([title, new Paragraph { Text = Filler, Size = TextSize.Sm }, new Paragraph { Text = Filler, Size = TextSize.Sm }]);
+        }
+        // 18rem 高的正文、9rem 宽的目录，中间隔 space.lg（rem 按根字号 16）
+        var scroll = new ScrollArea { Height = 18 * 16, Content = article };
+        AutomationProperties.SetName(scroll, "文章");
+        var toc = new TableOfContents { Items = Headings, ScrollRoot = scroll, Title = "本文目录", Width = 9 * 16, Margin = new Thickness(14, 0, 0, 0), VerticalAlignment = VerticalAlignment.Top };
+        var layout = new DockPanel { Children = { toc, scroll } };
+        DockPanel.SetDock(toc, Dock.Right);
+        return new Card { Content = layout };
     }
 }

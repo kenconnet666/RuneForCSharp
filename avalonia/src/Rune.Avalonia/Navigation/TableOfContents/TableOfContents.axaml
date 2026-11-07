@@ -1,0 +1,24 @@
+<!--
+  TableOfContents 的主题（vue-tsx-pro 的 tableOfContentsStyles）：目录链接 sm 字号、行高 snug、xs 圆角，平时 textMuted、悬停 text，当前节 accentText（悬停也是），
+  颜色在 durations.sm 内过渡；内边距（左边按级别缩进）在 TableOfContents.cs 里按字号算。标题、列表、指示条的部件在 TableOfContentsParts.axaml。
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:TableOfContentsLink}" TargetType="rune:TableOfContentsLink" BasedOn="{StaticResource {x:Type rune:ButtonBase}}">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+    <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
+    <Setter Property="TextBlock.LineHeight" Value="{rune:Em Resource=Rune.LineHeight.Snug}" />
+    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Snug}" />
+    <Setter Property="CornerRadius" Value="{rune:Em Resource=Rune.Radius.Xs}" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Left" />
+    <Setter Property="Ripple" Value="False" />
+    <Style Selector="^:pointerover">
+      <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    </Style>
+    <Style Selector="^:current">
+      <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.AccentText}" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

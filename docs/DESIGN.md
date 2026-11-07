@@ -684,6 +684,17 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 做的时候查出 Flex 的一处问题（Avalonia、WPF）：分到的正好是自然尺寸时，第二遍仍按这个有限值量子元素，布局系统之后按这个旧约束重量，子元素长高报不上来
   （嵌套的竖排、卡片矮几像素）。没有伸缩的项改成按不限量，摆的尺寸等于内容尺寸时不重分。
 
+### TableOfContents（2026-11-07）
+
+- `Items` 是 `HeadingEntry(Id, Label, Level)`（TS 的 HeadingEntry；Id 是标题控件的 Name——WPF 的 Name 只能是标识符，示例里用下划线）；`ScrollRoot` 是正文所在的
+  滚动区域（Avalonia、WPF 是 ScrollViewer，ScrollArea 本来就是；WinForms 是 ScrollAreaControl，为此补了 `ScrollChanged` 事件）。标题默认取语言包，同时是导航的名称。
+- 滚动高亮照 TS 的 useScrollSpy：当前节 = 顶边已经越过视口顶边（+1）的最后一节；滚到底时取视口里的最后一节。滚动之后、滚动区域排版之后都重算
+  （Avalonia 挂 LayoutUpdated，WPF 的 ScrollChanged 本来就带范围与视口的变化，加载后再算一次；WinForms 的 ScrollChanged 在每次摆放内容后发）。
+  点目录项把那一节滚到视口顶上（TS 的页内锚点）。当前节的链接 accentText，读屏的项状态是"当前位置"（WinForms 是选中的链接）。
+- 外观：标题 sm、加粗、下面 space.sm；列表左边一条 border 细线；链接 sm、行高 snug、左边按级别缩进（2 级一档，每深一级多一档，每档 0.75em）；
+  指示条 2 像素宽、圆角、品牌色，盖住细线，对准当前链接，第一次直接到位、之后滑过去（durations.md、standard）。
+- 像素对照（nav-list 页的 toc）：Avalonia、WPF 0.01%；WinForms 0.9%–1.0%（GDI 的文字换行宽度与行高）。
+
 ### CodeBlock（2026-11-07）
 
 - 标题栏（surfaceMuted、等宽 0.85em、下边分隔线）、代码区（等宽 0.9em、行高 normal、上下 0.75em 左右 1em，ScrollArea 横向滚动，Wrap 时换行）、
