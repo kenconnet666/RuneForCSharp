@@ -42,6 +42,23 @@
     <Setter Property="Background" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=rune:Badge}}" />
   </Style>
   <!-- 标签：外观同 Badge（BasedOn 主题样式）；移除按钮的尺寸按字号在 Tag.cs 里算，部件样式默认是空的 -->
-  <Style TargetType="rune:Tag" BasedOn="{StaticResource {x:Type rune:Badge}}" />
+  <!-- 可选中（IsSelected 不是 null）：没写的色调 accent、字号 sm；没选中 surface，选中 solid、前面一个对勾（触发器：写了的照用） -->
+  <Style TargetType="rune:Tag" BasedOn="{StaticResource {x:Type rune:Badge}}">
+    <Style.Triggers>
+      <Trigger Property="IsSelected" Value="False">
+        <Setter Property="Variant" Value="surface" />
+        <Setter Property="Tone" Value="accent" />
+        <Setter Property="Size" Value="sm" />
+        <Setter Property="Cursor" Value="Hand" />
+      </Trigger>
+      <Trigger Property="IsSelected" Value="True">
+        <Setter Property="Variant" Value="solid" />
+        <Setter Property="Tone" Value="accent" />
+        <Setter Property="Size" Value="sm" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Icon" Value="{x:Static rune:Lucide.Check}" />
+      </Trigger>
+    </Style.Triggers>
+  </Style>
   <Style x:Key="{x:Static rune:TagParts.Remove}" TargetType="rune:CloseButton" BasedOn="{StaticResource {x:Type rune:CloseButton}}" />
 </ResourceDictionary>

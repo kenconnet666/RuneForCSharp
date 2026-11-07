@@ -1,5 +1,7 @@
 using System.Windows;
 using System.Windows.Automation;
+using System.Windows.Automation.Peers;
+using System.Windows.Automation.Provider;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -19,12 +21,25 @@ namespace Rune.Wpf;
 /// 字号与颜色同标签，读屏名称是"移除 + 标签文字"（<see cref="RemoveLabel"/> 能改）。点它时标签先淡出缩小到 0.8（durations.sm、exit），
 /// 离场结束才发 RemoveRequested。使用方移除了标签时，原来在移除按钮上的焦点交给同一容器里下一个（没有就上一个）能聚焦的元素；
 /// 没移除（如拒绝删除）时淡入复原。部件样式键：<see cref="TagParts"/>。
+/// 可选中（筛选条件的一排标签）：写了 <see cref="IsSelected"/> 时整个标签是切换按钮（读屏念"已按下 / 未按下"），点击、空格、Enter 切换；
+/// 没选中时是 surface（有描边），选中时 solid 实底并在前面加一个对勾（不只靠颜色）；没写的色调、字号用 accent、sm（主题样式的触发器，写了的照用）。
+/// 可选中的标签不带移除按钮。一排放在有名称的容器里（AutomationProperties.Name）。
+/// <code>
+/// &lt;rune:Tag IsSelected="{Binding Urgent}"&gt;加急&lt;/rune:Tag&gt;
+/// </code>
 /// </summary>
 public class Tag : Badge
 {
     /// <summary>移除按钮的读屏名称；不写时是"移除"加上标签文字（内容是文字时）。</summary>
     public static readonly DependencyProperty RemoveLabelProperty = DependencyProperty.Register(nameof(RemoveLabel), typeof(string), typeof(Tag),
         new FrameworkPropertyMetadata(null, (d, _) => ((Tag)d).UpdateRemoveLabel()));
+
+    /// <summary>可选中：null 时是普通标签；true / false 时整个标签是切换按钮（默认双向绑定），点一下切换。</summary>
+    public static readonly DependencyProperty IsSelectedProperty = DependencyProperty.Register(nameof(IsSelected), typeof(bool?), typeof(Tag),
+        new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (d, _) => ((Tag)d).SyncSelectable()));
+
+    static readonly DependencyProperty FocusRingProperty = DependencyProperty.Register("FocusRing", typeof(Brush), typeof(Tag),
+        new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
 
     /// <summary>出现的程度：1 是完全显示，0 是离场的终点（透明、缩到 0.8）。</summary>
     static readonly DependencyProperty PresenceProperty = DependencyProperty.Register("Presence", typeof(double), typeof(Tag),
@@ -33,6 +48,8 @@ public class Tag : Badge
     EventHandler? removeRequested;
     CloseButton? remove;
     bool dismissing;
+    bool focusVisible;
+    bool pressed;
 
     static Tag()
     {
@@ -42,7 +59,121 @@ public class Tag : Badge
     }
 
     /// <summary>新建：变形以中心为原点（缩小时向中间收）。</summary>
-    public Tag() => RenderTransformOrigin = new Point(0.5, 0.5);
+    public Tag()
+    {
+        RenderTransformOrigin = new Point(0.5, 0.5);
+        SetResourceReference(FocusRingProperty, "Rune.Brush.FocusRing");
+    }
+
+    /// <summary>可选中。</summary>
+    public bool? IsSelected { get => (bool?)GetValue(IsSelectedProperty); set => SetValue(IsSelectedProperty, value); }
+
+    /// <summary>可选中时能聚焦；不带移除按钮。</summary>
+    void SyncSelectable()
+    {
+        Focusable = IsSelected is not null;
+        SyncRemove();
+    }
+
+    /// <summary>切换选中（可选中时）。</summary>
+    void ToggleSelected()
+    {
+        if (IsSelected is { } selected && IsEnabled) SetCurrentValue(IsSelectedProperty, !selected);
+    }
+
+    /// <inheritdoc />
+    protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
+    {
+        base.OnMouseLeftButtonDown(e);
+        if (IsSelected is null) return;
+        pressed = true;
+        Focus();
+        e.Handled = true;
+    }
+
+    /// <summary>在上面按下、没离开过就松开才切换。</summary>
+    protected override void OnMouseLeftButtonUp(MouseButtonEventArgs e)
+    {
+        base.OnMouseLeftButtonUp(e);
+        if (!pressed) return;
+        pressed = false;
+        e.Handled = true;
+        ToggleSelected();
+    }
+
+    /// <inheritdoc />
+    protected override void OnMouseLeave(MouseEventArgs e)
+    {
+        base.OnMouseLeave(e);
+        pressed = false;
+    }
+
+    /// <summary>Enter 按下时、空格松开时切换（同原生按钮）。</summary>
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+        if (IsSelected is null || e.Key is not (Key.Enter or Key.Space)) return;
+        e.Handled = true;
+        if (e.Key == Key.Enter) ToggleSelected();
+    }
+
+    /// <inheritdoc />
+    protected override void OnKeyUp(KeyEventArgs e)
+    {
+        base.OnKeyUp(e);
+        if (IsSelected is null || e.Key != Key.Space) return;
+        e.Handled = true;
+        ToggleSelected();
+    }
+
+    /// <summary>焦点环只在键盘聚焦时显示（同 :focus-visible）。</summary>
+    protected override void OnGotKeyboardFocus(KeyboardFocusChangedEventArgs e)
+    {
+        base.OnGotKeyboardFocus(e);
+        focusVisible = InputManager.Current.MostRecentInputDevice is KeyboardDevice;
+        InvalidateVisual();
+    }
+
+    /// <inheritdoc />
+    protected override void OnLostKeyboardFocus(KeyboardFocusChangedEventArgs e)
+    {
+        base.OnLostKeyboardFocus(e);
+        focusVisible = false;
+        InvalidateVisual();
+    }
+
+    /// <summary>可选中时键盘聚焦画焦点环（2px focusRing，压在边上，同按钮）。</summary>
+    protected override void OnRender(DrawingContext drawingContext)
+    {
+        base.OnRender(drawingContext);
+        if (IsSelected is null || !focusVisible || GetValue(FocusRingProperty) is not Brush ring) return;
+        var bounds = new Rect(RenderSize);
+        bounds.Inflate(-1, -1);
+        if (bounds.Width <= 0 || bounds.Height <= 0) return;
+        var radius = CornerRadius(bounds.Height);
+        drawingContext.DrawRoundedRectangle(null, new Pen(ring, 2), bounds, radius, radius);
+    }
+
+    /// <summary>可选中时读屏是切换按钮（名称取文字）；否则同 Badge，直接读里面的文字。</summary>
+    protected override AutomationPeer OnCreateAutomationPeer() => new TagAutomationPeer(this);
+
+    sealed class TagAutomationPeer(Tag owner) : FrameworkElementAutomationPeer(owner), IToggleProvider
+    {
+        protected override string GetClassNameCore() => nameof(Tag);
+
+        protected override AutomationControlType GetAutomationControlTypeCore() => owner.IsSelected is null ? AutomationControlType.Text : AutomationControlType.Button;
+
+        protected override bool IsControlElementCore() => owner.IsSelected is not null;
+
+        protected override string GetNameCore() => base.GetNameCore() is { Length: > 0 } name ? name : owner.Content as string ?? "";
+
+        public override object? GetPattern(PatternInterface patternInterface) =>
+            patternInterface == PatternInterface.Toggle && owner.IsSelected is not null ? this : base.GetPattern(patternInterface);
+
+        public ToggleState ToggleState => owner.IsSelected == true ? ToggleState.On : ToggleState.Off;
+
+        public void Toggle() => owner.ToggleSelected();
+    }
 
     /// <summary>移除按钮的读屏名称。</summary>
     public string? RemoveLabel { get => (string?)GetValue(RemoveLabelProperty); set => SetValue(RemoveLabelProperty, value); }
@@ -85,7 +216,7 @@ public class Tag : Badge
     /// <summary>有订阅时放上移除按钮，没有时拿掉。</summary>
     void SyncRemove()
     {
-        if (removeRequested is null)
+        if (removeRequested is null || IsSelected is not null)
         {
             Trailing = remove = null;
             return;

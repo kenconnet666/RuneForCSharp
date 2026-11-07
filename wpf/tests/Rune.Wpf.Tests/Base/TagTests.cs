@@ -84,4 +84,30 @@ public class TagTests
         // 末端：0.25em（3）代替 0.5em（6），中间隔 0.25em
         Assert.Equal(plain.DesiredSize.Width - 6 + 3 + 3 + 18, removable.DesiredSize.Width, 0.5);
     });
+
+    [Fact]
+    [Upstream("Tag", "_selected：整个标签是按钮")]
+    public Task Selectable_tag_is_a_toggle_button_with_a_check_when_selected() => WpfUi.Run(() =>
+    {
+        var urgent = new Tag { Content = "加急", IsSelected = false };
+        urgent.RemoveRequested += (_, _) => { };
+        WpfUi.Show(Host(urgent));
+        WpfUi.Flush();
+
+        var peer = urgent.Peer();
+        var toggle = (IToggleProvider)peer.GetPattern(PatternInterface.Toggle);
+        Assert.Equal(AutomationControlType.Button, peer.GetAutomationControlType());
+        Assert.Equal(ToggleState.Off, toggle.ToggleState);
+        Assert.Null(urgent.Icon);
+        Assert.Null(RemoveButton(urgent)); // 可选中的标签不带移除按钮
+        Assert.Equal((StatusTone.Accent, TextSize.Sm, StatusVariant.Surface), (urgent.Tone, urgent.Size, urgent.Variant)); // 没写的色调、字号取 accent、sm
+        Assert.True(urgent.Focusable);
+
+        toggle.Toggle();
+        WpfUi.Flush();
+        Assert.True(urgent.IsSelected);
+        Assert.Equal(ToggleState.On, toggle.ToggleState);
+        Assert.Same(Lucide.Check, urgent.Icon); // 选中时前面一个对勾
+        Assert.Equal(StatusVariant.Solid, urgent.Variant);
+    });
 }
