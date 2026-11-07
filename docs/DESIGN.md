@@ -555,6 +555,14 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - **Empty**：Avalonia、WPF 代码组合；WinForms 画图标、标题、说明，子控件与 Action 排在下面。图标默认 Inbox，设成 null 不显示（TS 的 icon={false}）。
 - 上游用例归属：behavior.mjs 把用例归到外层 describe 写的组件（display.test.tsx 里的 Card、Avatar），也认 it.each。
 
+### Collapse（2026-11-07）
+
+- 高度过渡照 TS（durations.md、easings.standard）：一个 0–1 的"展开比例"驱动想要的高度 = 内容高度 × 比例，内容一直按完整高度排、裁掉露不出来的部分（TS 用 grid-template-rows 0fr ↔ 1fr）。Avalonia 用 `Animation.RunAsync`，WPF 用 `DoubleAnimation`（FillBehavior.Stop，先写终值），WinForms 用 `Animator` 补间一个信号、每帧让父容器重排。没挂上（Avalonia 无 VisualRoot、WPF 未 Loaded、WinForms 无父容器或句柄）时直接到位。
+- 完全收起（过渡结束）后内容隐藏：Avalonia `IsVisible = false`、WPF `Visibility.Collapsed`、WinForms 子控件 `Visible = false`（同 Card 的正文），等价于 TS 的 inert——不能 Tab 聚焦、读屏读不到；收起的过程中仍可见。
+- 页内搜索命中时展开（`hidden="until-found"`、beforematch）是浏览器的能力，登记为不适用。lazy：Avalonia、WPF 第一次展开才把内容放进内容层；WinForms 不要（隐藏的子控件本来就不建句柄、不参与布局），parity 加了按平台的 `PLATFORM_PROPS_NOT_PORTED`。
+- 测试：Avalonia 12 的无头平台推不动动画时钟（连普通的 Opacity 动画也在第 3 帧停住，`ForceRenderTimerTick` 也不行），所以 Avalonia 用作用域里时长 token 设 0 测终态、另测"收起时立即仍可见"；WPF、WinForms 的动画在测试里能真实走完。
+- Collapsible（触发器 + Collapse）的触发器 API（TS 是渲染函数，拿到 aria-expanded、aria-controls 与点击）和 Accordion 一起定；文档页的示例要等 Field、TextField、NumberField、Select。
+
 ### Spinner
 
 - 第一个带部件的组件（`propsIcon`），三个平台按 §7 的写法各落地一次：
