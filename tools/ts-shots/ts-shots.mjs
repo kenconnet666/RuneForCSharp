@@ -78,6 +78,7 @@ for (const theme of options.themes.split(',')) {
       await page.mouse.move(0, 0);
       await page.evaluate(() => document.activeElement instanceof HTMLElement && document.activeElement.blur());
       await page.waitForTimeout(150);
+      await canvas.evaluate(alignToPixels);
       await canvas.screenshot({ path: join(out, `${id}-${theme}@${scale}x.png`), animations: 'disabled' });
       if (scale === 1) writeFileSync(join(out, `${id}-${theme}.json`), `${JSON.stringify(await canvas.evaluate(textBoxes), null, 1)}\n`);
       count++;
@@ -87,6 +88,24 @@ for (const theme of options.themes.split(',')) {
 }
 await browser.close();
 console.log(`${count} 张截图在 ${out}`);
+
+/**
+ * 把效果区对到整 CSS 像素上。它可能落在半像素上（上面说明文字的行高带小数），这时 Chrome 把里面的边线、底色吸附到
+ * 四舍五入的像素，与原生平台在整像素原点上的渲染差半个像素的相位（行线总差一行）；元素截图还会多截进上面一行的边线。
+ * 用 margin 挪（另一边补回去，后面的布局不变）：不改包含块、不建合成层，文字的抗锯齿不变。
+ * 高度带小数时底部补到整像素（同原生平台的画布），不然截图的最后一行是下面元素的边线。
+ */
+function alignToPixels(canvas) {
+  const { x, y, height } = canvas.getBoundingClientRect();
+  const [dx, dy, extra] = [Math.round(x) - x, Math.round(y) - y, Math.ceil(height) - height];
+  const style = getComputedStyle(canvas);
+  if (dx || dy) {
+    canvas.style.margin = [
+      parseFloat(style.marginTop) + dy, parseFloat(style.marginRight) - dx, parseFloat(style.marginBottom) - dy, parseFloat(style.marginLeft) + dx,
+    ].map((value) => `${value}px`).join(' ');
+  }
+  if (extra) canvas.style.paddingBottom = `${parseFloat(style.paddingBottom) + extra}px`;
+}
 
 /** 效果区的宽高与里面每段可见文字的盒子（逐行；CSS 像素，相对效果区的左上角） */
 function textBoxes(canvas) {

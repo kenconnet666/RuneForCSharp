@@ -87,6 +87,9 @@ static class Inspector
         Dispatcher.PushFrame(frame);
         area.Margin = new Thickness(0, CenterOffset(root.ActualHeight - 2 * options.Padding - area.ActualHeight, options.Scale), 0, 0);
         root.UpdateLayout();
+        // 高度带小数时补到整像素（同 ts-shots）：不然最后一行只盖了一半底色
+        root.Height = Math.Ceiling(root.ActualHeight * options.Scale) / options.Scale;
+        root.UpdateLayout();
         return (window, root);
     }
 

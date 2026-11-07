@@ -114,6 +114,13 @@ static class Inspector
     static string Snapshot(Window window, InspectOptions options)
     {
         if (options.Exact) Unrounded(window);
+        // 高度带小数时补到整像素（同 ts-shots）：不然最后一行只盖了一半底色
+        if (window.Content is Border root)
+        {
+            root.Height = Math.Ceiling(root.Bounds.Height * options.Scale) / options.Scale;
+            window.UpdateLayout();
+            Dispatcher.UIThread.RunJobs();
+        }
         var path = Report.SnapshotPath("avalonia", options);
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         using var frame = window.CaptureRenderedFrame() ?? throw new InvalidOperationException("headless 窗口没有渲染出帧");
