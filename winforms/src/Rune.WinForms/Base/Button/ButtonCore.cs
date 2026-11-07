@@ -35,8 +35,8 @@ public abstract class ButtonCore : Element
     /// <summary>字号档位，内部尺寸随之缩放；不写时取作用域的默认值，再没有时跟随宿主的字体。</summary>
     public TextSize Size { get => size.Or(ScopeDefaults?.Size, default); set { size = value; InvalidateMeasure(); } }
 
-    /// <summary>圆角；不写时取作用域的默认值，再没有时 md。</summary>
-    public Radius Radius { get => radius.Or(ScopeDefaults?.Radius, Radius.Md); set { radius = value; Invalidate(); } }
+    /// <summary>圆角；不写时取作用域的默认值，再没有时取组件的默认（<see cref="DefaultRadius"/>）。</summary>
+    public Radius Radius { get => radius.Or(ScopeDefaults?.Radius, DefaultRadius); set { radius = value; Invalidate(); } }
 
     /// <summary>外观覆盖（上游的 sx）：盖过作用域的 <see cref="ButtonSx"/> 与配方。</summary>
     public ButtonSx? Sx { get; set { field = value; InvalidateMeasure(); Invalidate(); } }
@@ -47,7 +47,7 @@ public abstract class ButtonCore : Element
     ButtonDefaults? ScopeDefaults => Scope?.ResolveDefaults<ButtonDefaults>();
 
     /// <summary>合并好的外观覆盖：作用域的在下，实例的在上。</summary>
-    ButtonSx? ResolvedSx => Scope?.ResolveStyles(Sx) ?? Sx;
+    private protected ButtonSx? ResolvedSx => Scope?.ResolveStyles(Sx) ?? Sx;
 
     /// <summary>加载中：显示旋转指示，宽度不变，点击无效（宿主拦下）。</summary>
     public bool IsLoading { get; set { field = value; delayed.Update(value); Invalidate(); } }
@@ -81,6 +81,9 @@ public abstract class ButtonCore : Element
 
     /// <summary>组件的默认色调（Button 是 accent，IconButton 是 neutral）。</summary>
     protected abstract StatusTone DefaultTone { get; }
+
+    /// <summary>组件的默认圆角（按钮家族是 md，UserButton 的胶囊是 full）。</summary>
+    protected virtual Radius DefaultRadius => Radius.Md;
 
     /// <summary>宽高相等（IconButton）：宽度取控件高度（<see cref="ControlHeight"/>），左右没有内边距。</summary>
     protected virtual bool Square => false;
@@ -162,11 +165,12 @@ public abstract class ButtonCore : Element
         return (sx.Background ?? recipe.Background, sx.Foreground ?? recipe.Foreground, sx.BorderColor ?? recipe.Border);
     }
 
-    /// <summary>左右、上下的内边距：上下 0.25em；左右 1em，链接与方形按钮没有；外观覆盖写了的换掉。</summary>
-    (float Inline, float Block) Padding(float em)
+    /// <summary>起始边、结束边、上下的内边距：上下 0.25em；左右 1em，链接与方形按钮没有；外观覆盖写了的换掉。</summary>
+    private protected virtual (float Start, float End, float Block) Padding(float em)
     {
         var sx = ResolvedSx;
-        return ((sx?.PaddingInline ?? (Variant == ButtonVariant.Link || Square ? 0 : 1)) * em, (sx?.PaddingBlock ?? 0.25f) * em);
+        var inline = (sx?.PaddingInline ?? (Variant == ButtonVariant.Link || Square ? 0 : 1)) * em;
+        return (inline, inline, (sx?.PaddingBlock ?? 0.25f) * em);
     }
 
     /// <inheritdoc />
@@ -176,8 +180,8 @@ public abstract class ButtonCore : Element
         var em = inner.Em;
         var border = Border(context);
         var content = MeasureContent(inner);
-        var (inline, block) = Padding(em);
-        var width = content.Width + 2 * (inline + border);
+        var (start, end, block) = Padding(em);
+        var width = content.Width + start + end + 2 * border;
         var height = content.Height + 2 * (block + border);
         // 控件高度：最小高度（链接没有）与方形按钮的宽度
         var control = ControlHeight.Of(context, em, ControlHeight.Factor(Size));
@@ -218,8 +222,9 @@ public abstract class ButtonCore : Element
             }
             else
             {
-                var (inline, block) = Padding(em);
-                var inset = Rectangle.Round(RectangleF.Inflate(Bounds, -(inline + border), -(block + border)));
+                var (start, end, block) = Padding(em);
+                var left = (context.RightToLeft ? end : start) + border;
+                var inset = Rectangle.Round(new RectangleF(Bounds.X + left, Bounds.Y + block + border, Bounds.Width - start - end - 2 * border, Bounds.Height - 2 * (block + border)));
                 PaintContent(graphics, inner, inset);
             }
             if (IsFocusVisible)

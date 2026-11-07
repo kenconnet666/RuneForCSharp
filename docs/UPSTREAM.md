@@ -12,6 +12,7 @@ vue-tsx-pro 那边的会话改了设计时会发通知过来（每完成一个�
 | 日期 | 组件 | 现象与复现 | 建议 | 状态 |
 |---|---|---|---|---|
 | 2026-11-07 | Checkbox、Radio、Switch | 原生 input 不继承字体，方框、轨道的 em 按浏览器给 input 的 13.333px 算，sm、lg 档与文字、滑块对不上 | input 加 `font: 'inherit'` | 已修（9f7be887，0.11.1；锁定跟到 875797ae） |
+| 2026-11-08 | UserButton | 样式引擎按 StyleX 的优先级排（长属性 3000 > 简写 2000）：compact 变体的 `padding: _xs` 压不过基础的 `paddingInlineEnd: _sm`，整行 compound 的 `paddingInline: _sm` 压不过 `paddingInlineStart: _xs`；compact 右边 7px、整行左边 3.5px，两边不对称 | 变体、compound 改写成同级的长属性（`paddingInlineStart`、`paddingInlineEnd`）；recipe 的开发期检查可以提示被压住的简写。我们按配方本意做 | 已开 [#5](https://github.com/kenconnet666/vue-tsx-pro/issues/5) |
 | 2026-11-07 | Listbox | multiple 示例写的 `height: 16rem` 落在有 padding: xs 的根元素上，默认 content-box，列表实际高 16rem + 0.5em；桌面上 Height 是整个控件，对照矮 7 像素 | listboxStyles.root 加 `boxSizing: 'border-box'`（同 control、itemStyles），或示例注明不含内边距 | 部分修复（313f0e23）：规则只罩带 data-part 的元素，Listbox 的根元素没有，ad4a77ac 上仍高 16rem + 0.5em；已再通知（2026-11-07） |
 
 ## 下一阶段计划（2026-11-07 收到通知，ROADMAP 阶段 25，上游无人值守执行）
@@ -260,12 +261,16 @@ QueryTable、ErrorBoundary、JsonViewer、ImageCropper、QuarterCalendar、Carou
 
 锁定跟到 e18a29a6（含 P12 第二批，7c019043 还在跑）：生成文件没变；parity 的 TabList 多缺一个 propsScrollButton（同上，等滚动按钮），行为对照 204 条、66 条没对上（并进整理）。
 
+跟进（2026-11-08，锁定 d99ab483）：三个平台做了 UserButton（TS 的 name、src 叫 DisplayName、Source，`indicator={false}` 是 ShowIndicator=False）与 Avatar 页的 user-button 示例（账号菜单等 Menu），
+测试对上前三条用例，第四条（菜单的触发器）等 Menu。Avalonia、WPF 建在 ButtonBase 上、内容在代码里组合（WPF 的部件是 PartKey 样式键）；WinForms 建在按钮内核上（ghost、neutral），
+内核加了 DefaultRadius 与两边可以不同的内边距。取值对照里只差上游 compact、整行的内边距（见上游问题 #5）；inspect 的部件归属改成往上找声明了这个部件名的组件，越过组件内部组合用的 Flex。
+
 ### 第二十二批（2026-11-08 通知，master d99ab483：Countdown 的数字块外观；f98eb920 是文档）
 
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
 | Countdown 成为配方组件，variant: 'text'（默认）或 'blocks'（天数单独一格、时分秒各一格、格间“:”；部件 root、segment、separator，segment 最小 2em、accent 底、accentContrast 字、semibold） | Countdown 还没做 | 做时照新的 |
-| AppShell、NotificationCenter 的示例改用 UserButton 做账号菜单（f98eb920） | AppShell 已做，示例里的账号区会跟着变 | 做 UserButton 时一起改 AppShell 的示例（菜单还没有） |
+| AppShell、NotificationCenter 的示例改用 UserButton 做账号菜单（f98eb920） | 我们的 AppShell 页只有 fullscreen（admin 等 Stat，mixed 等 NavBar） | 已跟：fullscreen 的效果区 28rem → 24rem；admin、mixed 做时照新的（顶栏用 UserButton，菜单等 Menu） |
 
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 

@@ -43,6 +43,7 @@ export const COMPONENT_PROP_RENAMES = {
   Prose: { measure: 'LimitLineLength' },
   // Name 是控件名；图片给平台的图片对象
   Avatar: { name: 'DisplayName', src: 'Source' },
+  UserButton: { name: 'DisplayName', src: 'Source' },
   // 移除由使用方做：事件是"请求移除"（离场结束才发）
   Tag: { onRemove: 'RemoveRequested' },
   SelectedTags: { onRemove: 'RemoveRequested' },
@@ -147,6 +148,7 @@ export const PROPS_NOT_PORTED = {
   CloseButton: { type: BUTTON_TYPE },
   ClearButton: { type: BUTTON_TYPE },
   CopyButton: { type: BUTTON_TYPE },
+  UserButton: { type: BUTTON_TYPE },
   Tooltip: { trigger: '提示挂在触发器上（Avalonia、WPF 的 ToolTip 附加属性，WinForms 的扩展属性），不用渲染函数' },
   ScrollArea: { propsContent: '内容就是 Content 本身，平台的滚动呈现器直接排它，中间没有包一层' },
   Table: { propsRoot: '外层的外框与横向滚动区域由 Table 管：外观按密度、样式、斑马纹与主题 token' },
@@ -192,6 +194,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     CommandPalette: Object.fromEntries(['propsInput', 'propsListbox'].map((prop) => [prop, '面板里的搜索框、列表是 CommandPalette 建的，外观跟着 TextField、Listbox 的主题样式；部件样式键只有搜索行'])),
   },
   WinForms: {
+    UserButton: { propsAvatar: '头像是 UserButton 画的 Avatar 元素，WinForms 还没有头像的部件属性记录（AvatarProps）；尺寸是 sm，配色跟着 Avatar 的作用域默认值' },
     Tabs: { ripple: '标签是组件库画的容器控件（里面放文字与计数），没有按下的波纹' },
     NavItem: { ripple: '导航行是组件库画的容器控件（里面放图标、文字与计数），没有按下的波纹' },
     CodeBlock: Object.fromEntries(

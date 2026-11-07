@@ -562,6 +562,9 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - **Card**：Avalonia、WPF 都是代码组合的子元素（页头里的标题与 Extra 是换行的 Flex，页脚是靠结束边的 Flex，正文在骨架与内容之间换），不从 TemplatedControl / Control 派生——它们的 Padding 是 Thickness，和 TS 的 padding 档位撞名（同 Container）。WPF 的阴影单独一层（DropShadowEffect 套在正文上会连文字一起投影），正文按圆角裁剪。加载：挂上时已经在加载就立即显示骨架，之后的切换走 DelayedLoading 防闪烁；出现过骨架之后互换时淡入。读屏的项状态是"加载中"（WinForms 是 Busy 状态）。WinForms 的 CardControl 自己画表面与页头文字，子控件是正文；Header 是文字，Extra、Footer 各是一个控件；TS 的 padding 叫 CardPadding。
 - **Avatar**：TS 的 name、src 叫 DisplayName、Source（Name 是控件名）；Source 是平台的图片对象，WPF 等 BitmapSource 下载完、失败时退回后备内容。首字母算法 `AvatarInitials` 是孪生文件。WPF 的 soft / solid × 色调是 recipe-gen 生成的触发器，WinForms 直接用 BadgeRecipe 的这两档。
 - **Empty**：Avalonia、WPF 代码组合；WinForms 画图标、标题、说明，子控件与 Action 排在下面。图标默认 Inbox，设成 null 不显示（TS 的 icon={false}）。
+- **UserButton**（2026-11-08）：TS 的 name、src 同 Avatar 叫 DisplayName、Source；`indicator={false}` 是 ShowIndicator=False（Indicator 只放图标）。Avalonia、WPF 建在 ButtonBase 上，内容是代码组合的 Flex（头像、名字与说明、箭头）；
+  胶囊、整行、compact 三种形态：Avalonia 在代码里按 em 设内边距与圆角，WPF 是主题样式的触发器（只读的 IsDescribed）。名字只在整行时 grow：Flex 量尺寸时 grow 的子元素会占满可用宽度，胶囊就不按内容的宽了。
+  WinForms 是按钮内核上的元素（ghost、neutral 正是正文色、悬停 fillHover），内核为它加了 DefaultRadius（同 DefaultVariant）与起始边、结束边可以不同的内边距；整行时量出宿主给的宽度（同 Button 的 FullWidth）。读屏名称是名字，说明是帮助文字 / 说明（compact 时没有）。
 - 上游用例归属：behavior.mjs 把用例归到外层 describe 写的组件（display.test.tsx 里的 Card、Avatar），也认 it.each。
 
 ### Collapse（2026-11-07）

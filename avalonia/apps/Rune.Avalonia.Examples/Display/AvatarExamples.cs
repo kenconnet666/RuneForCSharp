@@ -4,14 +4,34 @@ using Avalonia.Media;
 
 namespace Rune.Avalonia.Examples;
 
-/// <summary>Avatar 的示例（vue-tsx-pro 文档站 display/Avatar）。group（头像组）要等 AvatarGroup。</summary>
+/// <summary>Avatar 的示例（vue-tsx-pro 文档站 display/Avatar）。group（头像组）要等 AvatarGroup；user-button 的账号菜单要等 Menu。</summary>
 static class AvatarExamples
 {
     public static Example[] All =>
     [
         new("Avatar", "basic", "基础用法", "DisplayName 是读屏念的名称，也用来生成首字母；没有图片时显示后备内容。Radius=\"md\" 用于团队、组织；后备内容的 Variant 与 Tone 同 Badge。", Basic),
+        new("Avatar", "user-button", "用户按钮", "UserButton 是头像 + 名字 + 箭头，做账号菜单的触发器（菜单还没有：点它时打开自己的菜单）。写了 Description 时多一行说明、占满一行，适合侧栏底部；Compact 只剩头像，名字成为按钮的名称。", Account),
         new("Avatar", "indicator", "角标", "Indicator 包住要标记的元素：计数超过 Max 显示\"99+\"，0 时不显示（ShowZero 时显示 0）；Dot 是小圆点。数字对读屏隐藏，另有一句完整的 Label。", Indicators),
     ];
+
+    static Control Account()
+    {
+        var me = Photos.Members[0];
+        return new Flex
+        {
+            Direction = FlexDirection.Column, Gap = Space.Md, Align = FlexAlign.Start,
+            Children =
+            {
+                new Flex
+                {
+                    Align = FlexAlign.Center, Gap = Space.Md, Wrap = true,
+                    Children = { new UserButton { DisplayName = me.Name, Source = me.Photo }, new UserButton { DisplayName = me.Name, Source = me.Photo, Compact = true } },
+                },
+                new Card { Padding = Space.Sm, Width = 16 * 16, Content = new UserButton { DisplayName = me.Name, Source = me.Photo, Description = "采购部 · 管理员" } },
+                new Small { Tone = TextTone.Muted, Text = "顶栏、只剩头像、侧栏底部三种写法" },
+            },
+        };
+    }
 
     static readonly TextSize[] Sizes = [TextSize.Xs, TextSize.Sm, TextSize.Md, TextSize.Lg, TextSize.Xl];
 

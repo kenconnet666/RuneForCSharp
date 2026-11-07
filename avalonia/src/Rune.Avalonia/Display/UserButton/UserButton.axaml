@@ -1,0 +1,12 @@
+<!--
+  UserButton 的主题（vue-tsx-pro 的 userButtonRecipe）：正文色，悬停 fillHover 底；内边距、圆角与整行的形态按 em 在 UserButton.cs 里算，说明与箭头的 textMuted 用部件的 Tone。
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:UserButton}" TargetType="rune:UserButton" BasedOn="{StaticResource {x:Type rune:ButtonBase}}">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Style Selector="^:pointerover"><Setter Property="Background" Value="{DynamicResource Rune.Brush.FillHover}" /></Style>
+  </ControlTheme>
+</ResourceDictionary>

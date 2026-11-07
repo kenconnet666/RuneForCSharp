@@ -2,12 +2,13 @@ using System.Drawing.Drawing2D;
 
 namespace Rune.WinForms.Examples;
 
-/// <summary>Avatar 的示例（vue-tsx-pro 文档站 display/Avatar）。group（头像组）要等 AvatarGroup。</summary>
+/// <summary>Avatar 的示例（vue-tsx-pro 文档站 display/Avatar）。group（头像组）要等 AvatarGroup；user-button 的账号菜单要等 Menu。</summary>
 static class AvatarExamples
 {
     public static Example[] All =>
     [
         new("Avatar", "basic", "基础用法", "DisplayName 是读屏念的名称，也用来生成首字母；没有图片时显示后备内容。Radius=md 用于团队、组织；后备内容的 Variant 与 Tone 同 Badge。", Basic),
+        new("Avatar", "user-button", "用户按钮", "UserButtonControl 是头像 + 名字 + 箭头，做账号菜单的触发器（菜单还没有：在 Click 里打开自己的菜单）。写了 Description 时多一行说明、占满一行，适合侧栏底部；Compact 只剩头像，名字成为按钮的名称。", Account),
         new("Avatar", "indicator", "角标", "IndicatorControl 包住要标记的控件：计数超过 Max 显示\"99+\"，0 时不显示（ShowZero 时显示 0）；Dot 是小圆点。数字对读屏隐藏，另有一句完整的 Label。WinForms 的角标画不到控件外面，伸出去的一半占位置。", Indicators),
     ];
 
@@ -28,6 +29,19 @@ static class AvatarExamples
             .. Tones.Select(tone => new AvatarControl { DisplayName = tone.Value, Tone = tone }),
             .. Tones.Select(tone => new AvatarControl { DisplayName = tone.Value, Tone = tone, Variant = AvatarVariant.Solid }),
         ]));
+
+    static Control Account()
+    {
+        var me = Photos.Members[0];
+        var sidebar = Build.Card(new CardControl { CardPadding = Space.Sm }, new UserButtonControl { DisplayName = me.Name, Source = me.Photo, Description = "采购部 · 管理员" });
+        sidebar.MinimumSize = sidebar.MaximumSize = new Size(sidebar.LogicalToDeviceUnits(16 * 16), 0);
+        return Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Md, Align = FlexAlign.Start },
+            Build.Flex(new FlexControl { Align = FlexAlign.Center, Gap = Space.Md, Wrap = true },
+                new UserButtonControl { DisplayName = me.Name, Source = me.Photo },
+                new UserButtonControl { DisplayName = me.Name, Source = me.Photo, Compact = true }),
+            sidebar,
+            new SmallControl { Text = "顶栏、只剩头像、侧栏底部三种写法", Tone = TextTone.Muted });
+    }
 
     static IndicatorControl Mark(Control content, Action<IndicatorControl> setup)
     {

@@ -108,6 +108,9 @@ public abstract class ButtonControlBase<T> : ElementControl<T>, IButtonControl w
     /// <summary>没写 AccessibleName（也没有文字）时的读屏名称（预设按钮取语言包）。</summary>
     protected virtual string? DefaultAccessibleName => null;
 
+    /// <summary>没写 AccessibleDescription 时的读屏说明（UserButton 的说明行）。</summary>
+    protected virtual string? DefaultAccessibleDescription => null;
+
     /// <summary>窗体把它设成或取消默认按钮时调用（同 WinForms 的 Button）。</summary>
     public void NotifyDefault(bool value) => Invalidate();
 
@@ -247,6 +250,8 @@ public abstract class ButtonControlBase<T> : ElementControl<T>, IButtonControl w
             }
             set => base.Name = value;
         }
+
+        public override string? Description => base.Description is { Length: > 0 } own ? own : owner.DefaultAccessibleDescription;
 
         public override AccessibleRole Role => Owner is { AccessibleRole: not AccessibleRole.Default } control ? control.AccessibleRole
             : owner.Element is ILink ? AccessibleRole.Link : AccessibleRole.PushButton;

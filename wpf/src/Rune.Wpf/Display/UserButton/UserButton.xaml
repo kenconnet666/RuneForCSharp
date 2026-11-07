@@ -1,0 +1,56 @@
+<!--
+  UserButton 的主题样式（vue-tsx-pro 的 userButtonRecipe）：正文色，悬停 fillHover 底。没有说明时是胶囊（上下与起始边 space.xs、结束边 space.sm，圆角 full，按内容的宽）；
+  有说明且不 compact 时占满一行（左右 space.sm、上下 space.xs，圆角 md）；compact 只剩头像（四周 space.xs）。
+  部件样式：头像 sm；名字 medium、说明 textMuted，放不下时省略；箭头 textMuted。名字 0.93em、说明 0.86em 的相对字号在 UserButton.cs 里随字号算。
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Rune.Wpf;component/Base/Button/Button.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+
+  <Style TargetType="rune:UserButton" BasedOn="{StaticResource {x:Type rune:ButtonBase}}">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="rune:EmSize.Padding" Value="0.25,0.25,0.5,0.25" />
+    <Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.Full}" />
+    <Style.Triggers>
+      <MultiTrigger>
+        <MultiTrigger.Conditions><Condition Property="IsDescribed" Value="True" /><Condition Property="Compact" Value="False" /></MultiTrigger.Conditions>
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="rune:EmSize.Padding" Value="0.5,0.25" />
+        <Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.Md}" />
+      </MultiTrigger>
+      <Trigger Property="Compact" Value="True"><Setter Property="rune:EmSize.Padding" Value="0.25" /></Trigger>
+      <MultiTrigger>
+        <MultiTrigger.Conditions><Condition Property="IsMouseOver" Value="True" /><Condition Property="IsDisabled" Value="False" /></MultiTrigger.Conditions>
+        <Setter Property="Background" Value="{DynamicResource Rune.Brush.FillHover}" />
+      </MultiTrigger>
+    </Style.Triggers>
+  </Style>
+
+  <Style x:Key="{x:Static rune:UserButtonParts.Avatar}" TargetType="rune:Avatar">
+    <Setter Property="Size" Value="sm" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
+  <Style x:Key="{x:Static rune:UserButtonParts.Text}" TargetType="StackPanel">
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
+  <Style x:Key="{x:Static rune:UserButtonParts.Name}" TargetType="rune:Text">
+    <Setter Property="Weight" Value="medium" />
+    <Setter Property="Truncate" Value="True" />
+  </Style>
+
+  <Style x:Key="{x:Static rune:UserButtonParts.Description}" TargetType="rune:Text">
+    <Setter Property="Tone" Value="muted" />
+    <Setter Property="Truncate" Value="True" />
+  </Style>
+
+  <Style x:Key="{x:Static rune:UserButtonParts.Indicator}" TargetType="rune:Icon">
+    <Setter Property="Tone" Value="muted" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+</ResourceDictionary>
