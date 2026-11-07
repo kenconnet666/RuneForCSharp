@@ -20,4 +20,18 @@ public class EmptyTests
         Assert.Equal(empty.IconElement.Bounds.Width * 96f / empty.DeviceDpi, empty.IconElement.Size.Pixels!.Value, 0.01f);
         Assert.Equal((AccessibleRole.Grouping, "还没有订单"), (empty.AccessibilityObject.Role, empty.AccessibilityObject.Name));
     });
+
+    [Fact]
+    public Task Part_props_merge_over_the_defaults() => WinFormsUi.Run(() =>
+    {
+        var empty = new EmptyControl { Title = "还没有订单", Description = "下单后会显示在这里。" };
+        Assert.Equal((TextWeight.Medium, TextTone.Muted), (empty.TextElements.Title.Weight, empty.TextElements.Description.Tone));
+
+        // 只改写了的字段，文字与没写的默认（居中）保留
+        empty.PropsTitle = new TextProps { Tone = TextTone.Danger };
+        empty.PropsDescription = new TextProps { Tone = TextTone.Accent };
+        var (title, description) = empty.TextElements;
+        Assert.Equal(("还没有订单", TextTone.Danger, TextWeight.Medium, TextAlign.Center), (title.Content, title.Tone, title.Weight, title.Align));
+        Assert.Equal(("下单后会显示在这里。", TextTone.Accent), (description.Content, description.Tone));
+    });
 }

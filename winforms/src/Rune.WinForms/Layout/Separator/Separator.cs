@@ -9,7 +9,7 @@ namespace Rune.WinForms;
 /// </summary>
 public class Separator : Element
 {
-    readonly Text label = new() { Wrap = TextWrap.NoWrap, Tone = TextTone.Muted };
+    Text label = new() { Wrap = TextWrap.NoWrap, Tone = TextTone.Muted };
 
     /// <summary>方向；不写时 horizontal。</summary>
     public SeparatorOrientation Orientation { get => field.Value is null ? SeparatorOrientation.Horizontal : field; set { field = value; InvalidateMeasure(); } }
@@ -19,6 +19,22 @@ public class Separator : Element
 
     /// <summary>线上的文字（只用于横线）。</summary>
     public string Content { get => label.Content; set { label.Content = value; InvalidateMeasure(); } }
+
+    /// <summary>文字元素（测试用）。</summary>
+    internal Text LabelPart => label;
+
+    /// <summary>文字的部件属性（TS 的 propsLabel），逐字段盖在默认的次要文字色上。</summary>
+    public TextProps? PropsLabel
+    {
+        get;
+        set
+        {
+            field = value;
+            label = new Text { Content = label.Content, Wrap = TextWrap.NoWrap };
+            new TextProps { Tone = TextTone.Muted }.Merge(value).ApplyTo(label);
+            InvalidateMeasure();
+        }
+    }
 
     bool IsVertical => Orientation.Value == "vertical";
 
@@ -104,6 +120,11 @@ public class SeparatorControl : ElementControl<Separator>, IFlexItem
     /// <summary>线上的文字（只用于横线）。</summary>
     [AllowNull]
     public override string Text { get => base.Text; set => base.Text = value; }
+
+    /// <summary>文字部件的属性（代码里设）。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public TextProps? PropsLabel { get => Element.PropsLabel; set => Element.PropsLabel = value; }
 
     FlexAlign IFlexItem.AlignSelf => Orientation.Value == "vertical" ? FlexAlign.Stretch : default;
 

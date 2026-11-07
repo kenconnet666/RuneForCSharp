@@ -40,4 +40,15 @@ public class SeparatorTests
         Assert.Equal((0, 30), (line.Top, line.Height));
         Assert.Equal(Math.Max(1, (int)MathF.Round(line.DeviceDpi / 96f)), line.Width);
     });
+
+    [Fact]
+    public Task Label_props_merge_over_the_muted_default() => WinFormsUi.Run(() =>
+    {
+        var separator = new SeparatorControl { Text = "或" };
+        Assert.Equal(TextTone.Muted, separator.Element.LabelPart.Tone);
+
+        separator.PropsLabel = new TextProps { Tone = TextTone.Accent, Weight = TextWeight.Semibold };
+        var label = separator.Element.LabelPart;
+        Assert.Equal(("或", TextTone.Accent, TextWeight.Semibold, TextWrap.NoWrap), (label.Content, label.Tone, label.Weight, label.Wrap));
+    });
 }

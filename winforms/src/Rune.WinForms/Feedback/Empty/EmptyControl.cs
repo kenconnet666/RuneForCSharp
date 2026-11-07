@@ -17,8 +17,8 @@ public class EmptyControl : Panel, IElementHost
     readonly EmptyEngine engine;
     readonly Effect paint;
     Icon icon = new();
-    readonly Text title = new() { Weight = TextWeight.Medium, Align = TextAlign.Center };
-    readonly Text description = new() { Tone = TextTone.Muted, Align = TextAlign.Center };
+    Text title = new();
+    Text description = new();
 
     /// <summary>新建：高度跟着内容。</summary>
     public EmptyControl()
@@ -29,8 +29,8 @@ public class EmptyControl : Panel, IElementHost
         AccessibleRole = AccessibleRole.Grouping;
         engine = new EmptyEngine(this);
         paint = new Effect(Invalidate);
-        title.Host = description.Host = this;
         RebuildIcon();
+        RebuildTexts();
     }
 
     /// <summary>图标，默认 Inbox；null 不显示。</summary>
@@ -49,6 +49,31 @@ public class EmptyControl : Panel, IElementHost
         icon = new Icon { Host = this };
         new IconProps { Data = Icon, Tone = TextTone.Muted, StrokeWidth = Tokens.StrokeWidth.Sm }.Merge(PropsIcon).ApplyTo(icon);
         Relayout();
+    }
+
+    /// <summary>标题的部件属性（TS 的 propsTitle），逐字段盖在默认的中等字重、居中上。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public TextProps? PropsTitle { get; set { field = value; RebuildTexts(); } }
+
+    /// <summary>说明的部件属性（TS 的 propsDescription），逐字段盖在默认的次要文字色、居中上。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public TextProps? PropsDescription { get; set { field = value; RebuildTexts(); } }
+
+    /// <summary>新建标题、说明元素（保留文字），套上合并后的部件属性。</summary>
+    void RebuildTexts()
+    {
+        title = Rebuilt(title, new TextProps { Weight = TextWeight.Medium, Align = TextAlign.Center }.Merge(PropsTitle));
+        description = Rebuilt(description, new TextProps { Tone = TextTone.Muted, Align = TextAlign.Center }.Merge(PropsDescription));
+        Relayout();
+
+        Text Rebuilt(Text old, TextProps props)
+        {
+            var text = new Text { Host = this, Content = old.Content };
+            props.ApplyTo(text);
+            return text;
+        }
     }
 
     /// <summary>标题；读屏里是这一组的名称。</summary>
@@ -94,6 +119,9 @@ public class EmptyControl : Panel, IElementHost
 
     /// <summary>图标元素（测试用）。</summary>
     internal Icon IconElement => icon;
+
+    /// <summary>标题与说明元素（测试用）。</summary>
+    internal (Text Title, Text Description) TextElements => (title, description);
 
     ElementContext Context => new(DeviceDpi, Font, ForeColor, RightToLeft == RightToLeft.Yes);
 
