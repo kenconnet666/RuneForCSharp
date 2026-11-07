@@ -13,6 +13,8 @@ export const PROP_RENAMES = {
   _expanded: 'IsExpanded',
   loading: 'IsLoading',
   readonly: 'IsReadOnly',
+  required: 'IsRequired',
+  invalid: 'IsInvalid',
   disabled: 'IsEnabled',
   children: 'Content',
   _value: 'Value',
@@ -59,6 +61,7 @@ export const PROPS_NOT_PORTED = {
   Toolbar: { items: '桌面上没有 CSS 选择器：参与方向键移动的固定是按钮与链接' },
   Skeleton: { variant: '上游已废弃（改名为 shape），新库不带' },
   Progress: { propsRoot: '外层就是 Progress 自己（读屏的进度条也是它）：样式直接写在 Progress 上' },
+  Switch: { propsRoot: '外层（TS 的 label）就是 Switch 自己：样式直接写在 Switch 上' },
 };
 
 /** 某个平台上不移植的 prop 与原因（盖在 PROPS_NOT_PORTED 上）：库 → { 组件: { prop: 原因 } } */

@@ -1,0 +1,21 @@
+<!--
+  Switch 的主题（vue-tsx-pro 的 choiceRecipe 外层）：默认 accent，整块可点，正文色、行高 normal；不可用时整体变淡，只读时不像能点
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:Switch}" TargetType="rune:Switch">
+    <Setter Property="Tone" Value="accent" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Normal}" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Style Selector="^:readonly">
+      <Setter Property="Cursor" Value="Arrow" />
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

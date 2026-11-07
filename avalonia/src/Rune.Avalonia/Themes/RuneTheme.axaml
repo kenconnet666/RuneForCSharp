@@ -26,6 +26,7 @@
         <ResourceInclude Source="avares://Rune.Avalonia/Navigation/Toolbar/Toolbar.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Display/Card/Card.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Display/Avatar/Avatar.axaml" />
+        <ResourceInclude Source="avares://Rune.Avalonia/Input/Switch/Switch.axaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>
@@ -37,4 +38,5 @@
   <StyleInclude Source="avares://Rune.Avalonia/Display/Avatar/AvatarParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Feedback/Empty/EmptyParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Feedback/Progress/ProgressParts.axaml" />
+  <StyleInclude Source="avares://Rune.Avalonia/Input/Switch/SwitchParts.axaml" />
 </Styles>

@@ -1,0 +1,58 @@
+<!--
+  Switch 部件的默认外观（vue-tsx-pro 的 switchStyles 与 choiceInputStyles）：关时轨道是 borderStrong、滑块是页面底色加小阴影；
+  开时轨道是色调实底（ToneFill）、滑块是其上的颜色（ToneOnFill）；出错时轨道描边是危险色。轨道里的文字 fontSizes.xs、半粗，
+  开时是实底上的颜色，关时是正文色。写成主题里的样式（DESIGN §7 代码组合的控件），使用方的部件样式盖得过
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|Switch > #PART_Control > Border#PART_Track">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.BorderStrong}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="2" />
+  </Style>
+  <Style Selector="rune|Switch:checked > #PART_Control > Border#PART_Track">
+    <Setter Property="Background" Value="{Binding $parent[rune:Switch].ToneFill}" />
+    <Setter Property="BorderBrush" Value="{Binding $parent[rune:Switch].ToneFill}" />
+  </Style>
+  <Style Selector="rune|Switch:invalid > #PART_Control > Border#PART_Track">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Danger}" />
+  </Style>
+  <Style Selector="rune|Switch > #PART_Control > Border#PART_Thumb">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Background}" />
+    <Setter Property="BoxShadow" Value="{DynamicResource Rune.Shadow.Sm}" />
+  </Style>
+  <Style Selector="rune|Switch:checked > #PART_Control > Border#PART_Thumb">
+    <Setter Property="Background" Value="{Binding $parent[rune:Switch].ToneOnFill}" />
+  </Style>
+  <Style Selector="rune|Switch > #PART_Control > Border#PART_Thumb > rune|Spinner#PART_Spinner">
+    <Setter Property="Foreground" Value="{Binding $parent[rune:Switch].ToneFill}" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="rune|Switch > #PART_Control > Border#PART_Content">
+    <Setter Property="IsHitTestVisible" Value="False" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+  </Style>
+  <Style Selector="rune|Switch > #PART_Control > Border#PART_Content.on">
+    <Setter Property="TextElement.Foreground" Value="{Binding $parent[rune:Switch].ToneOnFill}" />
+  </Style>
+  <Style Selector="rune|Switch > #PART_Control > Border#PART_Content > ContentPresenter#PART_ContentText">
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xs}" />
+    <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Semibold}" />
+  </Style>
+  <!-- 焦点环：键盘聚焦时贴着轨道（focusRingStyles.tight） -->
+  <Style Selector="rune|Switch > #PART_Control > Border#PART_FocusRing">
+    <Setter Property="IsVisible" Value="False" />
+    <Setter Property="BorderThickness" Value="2" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.FocusRing}" />
+  </Style>
+  <Style Selector="rune|Switch:focus-visible > #PART_Control > Border#PART_FocusRing">
+    <Setter Property="IsVisible" Value="True" />
+  </Style>
+  <Style Selector="rune|Switch > ContentPresenter#PART_Label">
+    <Setter Property="VerticalAlignment" Value="Top" />
+  </Style>
+</Styles>
