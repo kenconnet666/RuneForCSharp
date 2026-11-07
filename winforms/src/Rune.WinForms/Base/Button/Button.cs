@@ -18,6 +18,9 @@ public class Button : ButtonCore
     /// <summary>占满宿主给的宽度。</summary>
     public bool FullWidth { get; set { field = value; InvalidateMeasure(); } }
 
+    /// <summary>贴着结束边的部件（命令面板默认触发按钮里快捷键的 Kbd）：有它时内容靠开始边，多出的宽度留在文字之后。</summary>
+    internal Element? Trailing { get; set { field = value; InvalidateMeasure(); } }
+
     /// <summary>后置图标部件的属性。</summary>
     public IconProps? PropsIconEnd { get; set { field = value; RebuildIconEnd(); } }
 
@@ -45,6 +48,7 @@ public class Button : ButtonCore
         if (IconPart is not null) yield return IconPart;
         if (text.Content.Length > 0) yield return text;
         if (iconEnd is not null) yield return iconEnd;
+        if (Trailing is not null) yield return Trailing;
     }
 
     /// <summary>部件的大小（不限宽，不换行）。</summary>
@@ -74,9 +78,10 @@ public class Button : ButtonCore
         var em = inner.Em;
         var parts = Measured(inner);
         var width = parts.Sum(p => p.Size.Width) + Math.Max(0, parts.Count - 1) * 0.5f * em;
-        var x = bounds.X + (bounds.Width - width) / 2;
+        var x = Trailing is null ? bounds.X + (bounds.Width - width) / 2 : bounds.X;
         foreach (var (part, size) in parts)
         {
+            if (part == Trailing) x = bounds.Right - size.Width;
             part.Bounds = new Rectangle((int)MathF.Round(x), bounds.Y + (bounds.Height - size.Height) / 2, size.Width, size.Height);
             part.Paint(graphics, inner);
             x += size.Width + 0.5f * em;

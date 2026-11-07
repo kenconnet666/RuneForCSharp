@@ -225,6 +225,10 @@ public abstract class ButtonControlBase<T> : ElementControl<T>, IButtonControl w
         releaseKeyRipple = null;
     }
 
+    /// <summary>读屏念的快捷键（aria-keyshortcuts，如 Control+K）；null 时没有。</summary>
+    [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+    internal string? KeyboardShortcut { get; set; }
+
     /// <inheritdoc />
     protected override AccessibleObject CreateAccessibilityInstance() => new ButtonAccessibleObject(this);
 
@@ -248,6 +252,8 @@ public abstract class ButtonControlBase<T> : ElementControl<T>, IButtonControl w
             : owner.Element is ILink ? AccessibleRole.Link : AccessibleRole.PushButton;
 
         public override string DefaultAction => "按下";
+
+        public override string? KeyboardShortcut => owner.KeyboardShortcut ?? base.KeyboardShortcut;
 
         public override AccessibleStates State => Owner is ButtonControlBase<T> { IsLoading: true } ? base.State | AccessibleStates.Busy : base.State;
 

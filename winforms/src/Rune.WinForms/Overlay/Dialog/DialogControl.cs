@@ -145,6 +145,24 @@ public class DialogControl : Control
     /// <summary>用户开、关了（关闭按钮、取消、确认、Esc、点遮罩）；代码里改 IsOpen 时不发。</summary>
     public event EventHandler<OpenChangedEventArgs>? OpenChanged;
 
+    /// <summary>标题行只给读屏（命令面板：标题是面板的名称，不显示）。</summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    internal bool HeaderHidden { get; set { field = value; Sync(); } }
+
+    /// <summary>面板顶边离窗体顶的比例（命令面板停在上部：结果变多变少时输入框不跳）；null 时居中。</summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    internal float? TopFraction { get; set; }
+
+    /// <summary>正文不留内边距（命令面板的搜索行、列表贴边）。</summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    internal bool BodyFlush { get; set; }
+
+    /// <summary>内容的高度变了（命令面板过滤后）：开着时重新摆面板。</summary>
+    internal void Relayout()
+    {
+        if (open) PresentPanel();
+    }
+
     /// <summary>放面板内容的窗口（测试用）。</summary>
     internal FloatingSurface Surface => surface;
 
@@ -163,7 +181,8 @@ public class DialogControl : Control
         description.Visible = !string.IsNullOrEmpty(Description);
         surface.Form.AccessibleName = Title;
         surface.Form.AccessibleDescription = Description;
-        close.Visible = Closable;
+        close.Visible = Closable && !HeaderHidden;
+        title.Visible = !HeaderHidden;
         cancel.Text = CancelText ?? lang.Cancel;
         confirm.Text = ConfirmText ?? lang.Confirm;
         confirm.Tone = Tone;
@@ -212,7 +231,7 @@ public class DialogControl : Control
 
     void OnHostChanged(object? sender, EventArgs e) => Present();
 
-    /// <summary>遮罩铺满宿主窗体的客户区；面板宽度按档位、不超出（四周至少 1em），高度按内容、不超出，居中。</summary>
+    /// <summary>遮罩铺满宿主窗体的客户区，再摆面板。</summary>
     void Present()
     {
         if (host is null || !host.IsHandleCreated) return;
@@ -222,7 +241,15 @@ public class DialogControl : Control
         using (var graphics = Graphics.FromImage(bitmap)) graphics.Clear(context.Theme.Colors.Overlay);
         if (scrim.Owner != host) scrim.Owner = host;
         scrim.Present(bitmap, area.Location, new Rectangle(area.Location, area.Size), null, TimeSpan.Zero);
+        PresentPanel();
+    }
 
+    /// <summary>面板宽度按档位、不超出（四周至少 1em），高度按内容、不超出；居中（或停在 <see cref="TopFraction"/>）。</summary>
+    void PresentPanel()
+    {
+        if (host is null || !host.IsHandleCreated) return;
+        var context = ElementContext.Of(this);
+        var area = host.RectangleToScreen(host.ClientRectangle);
         var em = context.Em;
         var border = FloatingSurface.Border(context);
         var margin = (int)MathF.Ceiling(em);
@@ -234,7 +261,8 @@ public class DialogControl : Control
         for (var pass = 0; pass < 2; pass++)
         {
             var height = DialogSize == DialogSize.Full ? maxHeight : Math.Min(maxHeight, layout.PreferredHeight(width - 2 * border) + 2 * border);
-            var panel = new Rectangle(area.X + (area.Width - width) / 2, area.Y + (area.Height - height) / 2, width, height);
+            var top = TopFraction is { } fraction ? Math.Min((int)(area.Height * fraction), (area.Height - height) / 2) : (area.Height - height) / 2;
+            var panel = new Rectangle(area.X + (area.Width - width) / 2, area.Y + top, width, height);
             if (pass > 0 && surface.Backdrop?.Panel == panel) break;
             surface.Show(panel, border, context, null, FloatingSurface.Elevation.Xl);
         }
@@ -337,7 +365,7 @@ public class DialogControl : Control
 
         int Px(float space) => (int)MathF.Round(space * Em);
 
-        Padding BodyPadding => new(Px(Tokens.Space.Xl), Px(Tokens.Space.Lg), Px(Tokens.Space.Xl), Px(Tokens.Space.Lg));
+        Padding BodyPadding => owner.BodyFlush ? Padding.Empty : new(Px(Tokens.Space.Xl), Px(Tokens.Space.Lg), Px(Tokens.Space.Xl), Px(Tokens.Space.Lg));
 
         // 有没有说明、页脚按属性判断：窗口显示之前子控件的 Visible 一律是 false
         (int Header, int Description, int Footer) Bands(int width)
@@ -346,7 +374,7 @@ public class DialogControl : Control
             var inner = Math.Max(0, width - 2 * xl);
             var closeSize = owner.Closable ? owner.close.GetPreferredSize(Size.Empty) : Size.Empty;
             var titleHeight = owner.title.GetPreferredSize(new Size(Math.Max(0, inner - closeSize.Width), 0)).Height;
-            var header = xl + Math.Max(titleHeight, closeSize.Height - 2 * xs);
+            var header = owner.HeaderHidden ? 0 : xl + Math.Max(titleHeight, closeSize.Height - 2 * xs);
             var description = !string.IsNullOrEmpty(owner.Description) ? xs + owner.description.GetPreferredSize(new Size(inner, 0)).Height : 0;
             var footer = owner.Footer is not null || owner.Confirm is not null ? owner.footer.GetPreferredSize(new Size(inner, 0)).Height + xl : 0;
             return (header, description, footer);

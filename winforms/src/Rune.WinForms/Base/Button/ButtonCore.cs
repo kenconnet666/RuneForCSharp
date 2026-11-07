@@ -150,10 +150,14 @@ public abstract class ButtonCore : Element
         return context with { Font = Fonts.Get(host.FontFamily.Name, points, style), ForeColor = fore };
     }
 
+    /// <summary>文字与图标用 textMuted（命令面板的默认触发按钮画成输入框外壳）；外观覆盖写了前景色时仍以它为准。</summary>
+    internal bool MutedForeground { get; set { field = value; Invalidate(); } }
+
     /// <summary>配方的颜色，外观覆盖写了的换掉（写了底色时悬停也用它）。</summary>
     (Color? Background, Color Foreground, Color? Border) Colors(ThemeColors colors)
     {
         var recipe = ButtonRecipe.Colors(Variant.Value, Tone.Value, IsHovered && IsEnabled, colors);
+        if (MutedForeground) recipe.Foreground = colors.TextMuted;
         if (ResolvedSx is not { } sx) return recipe;
         return (sx.Background ?? recipe.Background, sx.Foreground ?? recipe.Foreground, sx.BorderColor ?? recipe.Border);
     }

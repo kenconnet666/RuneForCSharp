@@ -225,14 +225,17 @@ public class Listbox : Control, IFieldControl
         empty.Content = Empty ?? new Empty { Size = TextSize.Sm, Description = Provider.GetLang(this).SelectEmpty };
     }
 
-    /// <summary>按 em 的尺寸：内边距 space.xs，自己滚动时最高 20em，骨架行高 1em、上下 0.625em、宽度依次递减。</summary>
+    /// <summary>自己滚动时的最高高度（设备无关像素）；null 时 20em（命令面板换成 min(24rem, 窗口高度一半)）。</summary>
+    internal double? ScrollMaxHeight { get; set { field = value; UpdateMetrics(); } }
+
+    /// <summary>按 em 的尺寸：内边距 space.xs，自己滚动时最高 20em（或 <see cref="ScrollMaxHeight"/>），骨架行高 1em、上下 0.625em、宽度依次递减。</summary>
     void UpdateMetrics()
     {
         var em = TextElement.GetFontSize(this);
         var xs = this.Resource("Rune.Space.Xs", 0.25) * em;
         var sm = this.Resource("Rune.Space.Sm", 0.5) * em;
         ((Panel)scroll.Content!).Margin = new Thickness(xs);
-        scroll.MaxHeight = double.IsNaN(Height) ? 20 * em : double.PositiveInfinity;
+        scroll.MaxHeight = double.IsNaN(Height) ? ScrollMaxHeight ?? 20 * em : double.PositiveInfinity;
         foreach (var bar in skeleton.Children.OfType<Skeleton>())
         {
             bar.Height = em;

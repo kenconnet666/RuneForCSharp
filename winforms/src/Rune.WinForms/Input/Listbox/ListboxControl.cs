@@ -237,7 +237,11 @@ public class ListboxControl : Control, IFieldControl
         }
     }
 
-    /// <summary>没写高度时按内容（行、骨架或空状态），最高 20em。</summary>
+    /// <summary>自己滚动时的最高高度（设备像素）；null 时 20em（命令面板换成 min(24rem, 窗体高度一半)）。</summary>
+    [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+    internal int? ScrollMaxHeight { get; set; }
+
+    /// <summary>没写高度时按内容（行、骨架或空状态），最高 20em（或 <see cref="ScrollMaxHeight"/>）。</summary>
     public override Size GetPreferredSize(Size proposedSize)
     {
         var em = Em;
@@ -246,7 +250,7 @@ public class ListboxControl : Control, IFieldControl
         var inner = skeleton.Visible ? skeleton.GetPreferredSize(new Size(width, 0)).Height
             : empty.Visible ? empty.GetPreferredSize(new Size(width, 0)).Height
             : view.TotalHeight;
-        return new Size(width, Math.Min(inner + 2 * xs, (int)MathF.Round(20 * em)));
+        return new Size(width, Math.Min(inner + 2 * xs, ScrollMaxHeight ?? (int)MathF.Round(20 * em)));
     }
 
     /// <inheritdoc />

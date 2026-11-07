@@ -176,6 +176,10 @@ public abstract class TextInputControl : FlexControl, IFieldControl
 
     bool ShouldSerializeRadius() => Radius != Radius.Md;
 
+    /// <summary>只要输入、不要外壳（没有边框、底色、左右内边距与焦点环，高度照旧；命令面板的搜索行）：输入框的底色是浮层面板的 surfaceRaised。</summary>
+    [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+    internal bool Bare { get; set { field = value; Sync(); } }
+
     /// <summary>里面的输入框。</summary>
     internal TextBox Input => input;
 
@@ -228,10 +232,11 @@ public abstract class TextInputControl : FlexControl, IFieldControl
     protected virtual void Sync()
     {
         ControlShell.Layout(this, Em);
+        if (Bare) Padding = Padding.Empty;
         ControlShell.FitInnerButton(clear, Em);
         input.ReadOnly = ReadOnly;
         var colors = ProviderControl.ThemeOf(this).Colors;
-        input.BackColor = ControlShell.Fill(colors, Variant, ReadOnly);
+        input.BackColor = Bare ? colors.SurfaceRaised : ControlShell.Fill(colors, Variant, ReadOnly);
         input.ForeColor = colors.Text;
         clear.Visible = Clearable && Enabled && !ReadOnly && Text.Length > 0;
         count.Visible = ShowCount;
@@ -279,7 +284,7 @@ public abstract class TextInputControl : FlexControl, IFieldControl
     protected override void OnPaint(PaintEventArgs e)
     {
         base.OnPaint(e);
-        ControlShell.Paint(e.Graphics, this, Em, Radius, Variant, (ReadOnly, Invalid, hovered, ContainsFocus));
+        if (!Bare) ControlShell.Paint(e.Graphics, this, Em, Radius, Variant, (ReadOnly, Invalid, hovered, ContainsFocus));
     }
 
     /// <inheritdoc />

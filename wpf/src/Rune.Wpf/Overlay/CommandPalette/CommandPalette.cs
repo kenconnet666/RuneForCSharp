@@ -229,7 +229,7 @@ public class CommandPalette : FrameworkElement
         double Resource(string key, double fallback) => TryFindResource(key) as double? ?? fallback;
         search.Padding = new Thickness(Resource("Rune.Space.Md", 0.75) * em, Resource("Rune.Space.Sm", 0.5) * em, Resource("Rune.Space.Md", 0.75) * em, Resource("Rune.Space.Sm", 0.5) * em);
         TextElement.SetFontSize(search, Resource("Rune.FontSize.Lg", 18));
-        listbox.MaxHeight = Math.Min(24 * 16, (host?.ActualHeight ?? 800) / 2);
+        listbox.ScrollMaxHeight = Math.Min(24 * 16, (host?.ActualHeight ?? 800) / 2);
         defaultTrigger.MinWidth = 12 * 16;
     }
 
