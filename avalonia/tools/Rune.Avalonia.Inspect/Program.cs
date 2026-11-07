@@ -66,7 +66,7 @@ static class Inspector
             ?? throw new UsageException($"没有主题 {options.Theme}；可选：{string.Join("、", RuneThemeVariants.All.Select(variant => variant.Key))}");
         Application.Current!.RequestedThemeVariant = theme;
         var content = example.Create();
-        var window = Show(content, options);
+        var window = Show(content, example.Framed ? options with { Padding = 0, MinHeight = 0 } : options);
         try
         {
             var labels = Labels(content);

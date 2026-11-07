@@ -1,0 +1,60 @@
+<!--
+  AppShell、AppShellBrand 与窗口按钮的主题（vue-tsx-pro 的 appShellStyles、appShellBrandStyles）：外壳整窗是界面基准文字（md、text），底色 background；
+  品牌 lg、加粗、sm 圆角，标志 accentText；窗口按钮 46 像素宽、与顶栏等高，悬停 fillHover、按下 fillActive，关闭悬停 danger 底、dangerContrast 图标。
+  外壳各部件的外观在 AppShellParts.axaml。
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:AppShell}" TargetType="rune:AppShell">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Background}" />
+    <Setter Property="TextElement.FontSize" Value="{DynamicResource Rune.FontSize.Md}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type rune:AppShellBrand}" TargetType="rune:AppShellBrand" BasedOn="{StaticResource {x:Type rune:ButtonBase}}">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Lg}" />
+    <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Semibold}" />
+    <Setter Property="CornerRadius" Value="{rune:Em Resource=Rune.Radius.Sm}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Ripple" Value="False" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border Name="PART_Root" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}">
+            <rune:Flex Align="center" Gap="sm">
+              <ContentPresenter Name="PART_Logo" Content="{TemplateBinding Logo}" VerticalAlignment="Center" />
+              <rune:Icon Name="PART_Icon" Data="{TemplateBinding Icon}" Foreground="{DynamicResource Rune.Brush.AccentText}" />
+              <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
+                                VerticalAlignment="Center" />
+            </rune:Flex>
+          </Border>
+          <Border Name="PART_FocusRing" IsVisible="False" IsHitTestVisible="False" Margin="-2"
+                  BorderThickness="2" BorderBrush="{DynamicResource Rune.Brush.FocusRing}" CornerRadius="{TemplateBinding CornerRadius}" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:focus-visible /template/ Border#PART_FocusRing"><Setter Property="IsVisible" Value="True" /></Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type rune:WindowCaptionButton}" TargetType="rune:WindowCaptionButton" BasedOn="{StaticResource {x:Type rune:ButtonBase}}">
+    <Setter Property="Width" Value="46" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="Cursor" Value="Arrow" />
+    <Setter Property="Ripple" Value="False" />
+    <Style Selector="^:pointerover"><Setter Property="Background" Value="{DynamicResource Rune.Brush.FillHover}" /></Style>
+    <Style Selector="^:pressed"><Setter Property="Background" Value="{DynamicResource Rune.Brush.FillActive}" /></Style>
+    <Style Selector="^:close:pointerover">
+      <Setter Property="Background" Value="{DynamicResource Rune.Brush.Danger}" />
+      <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.DangerContrast}" />
+    </Style>
+    <Style Selector="^:close:pressed">
+      <Setter Property="Background" Value="{DynamicResource Rune.Brush.DangerHover}" />
+      <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.DangerContrast}" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

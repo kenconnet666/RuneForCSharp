@@ -35,6 +35,7 @@
         <ResourceInclude Source="avares://Rune.Avalonia/Display/Avatar/Avatar.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Input/Choice/Choice.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Overlay/Tooltip/Tooltip.axaml" />
+        <ResourceInclude Source="avares://Rune.Avalonia/Patterns/AppShell/AppShell.axaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>
@@ -54,4 +55,5 @@
   <StyleInclude Source="avares://Rune.Avalonia/Form/Field/FieldParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Navigation/NavList/NavListParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Navigation/TableOfContents/TableOfContentsParts.axaml" />
+  <StyleInclude Source="avares://Rune.Avalonia/Patterns/AppShell/AppShellParts.axaml" />
 </Styles>

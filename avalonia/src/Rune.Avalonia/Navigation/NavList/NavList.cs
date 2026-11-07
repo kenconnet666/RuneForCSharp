@@ -40,6 +40,9 @@ public class NavList : Flex
     /// <summary>紧凑：只显示图标。</summary>
     public static readonly StyledProperty<bool> CompactProperty = AvaloniaProperty.Register<NavList, bool>(nameof(Compact));
 
+    /// <summary>区域里的导航都紧凑（TS 的 NavCompactContext）：沿逻辑树继承，AppShell 把侧栏收成图标栏时设在侧栏上。</summary>
+    public static readonly AttachedProperty<bool> CompactScopeProperty = AvaloniaProperty.RegisterAttached<NavList, Control, bool>("CompactScope", inherits: true);
+
     /// <summary>点了导航项（切换之前）：标记 Handled 时不改 CurrentHref（TS 的路由接管跳转）。</summary>
     public static readonly RoutedEvent<NavigateEventArgs> NavigateEvent = RoutedEvent.Register<NavList, NavigateEventArgs>(nameof(Navigate), RoutingStrategies.Bubble);
 
@@ -56,6 +59,15 @@ public class NavList : Flex
 
     /// <summary>紧凑。</summary>
     public bool Compact { get => GetValue(CompactProperty); set => SetValue(CompactProperty, value); }
+
+    /// <summary>实际是否紧凑：自己写了 <see cref="Compact"/>，或在紧凑的区域里。</summary>
+    internal bool IsCompact => Compact || GetValue(CompactScopeProperty);
+
+    /// <summary>区域里的导航是否都紧凑。</summary>
+    public static bool GetCompactScope(Control control) => control.GetValue(CompactScopeProperty);
+
+    /// <summary>让区域里的导航都紧凑。</summary>
+    public static void SetCompactScope(Control control, bool value) => control.SetValue(CompactScopeProperty, value);
 
     /// <summary>点了导航项。</summary>
     public event EventHandler<NavigateEventArgs>? Navigate
@@ -74,7 +86,7 @@ public class NavList : Flex
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
-        if (change.Property == CurrentHrefProperty || change.Property == CompactProperty) Sync();
+        if (change.Property == CurrentHrefProperty || change.Property == CompactProperty || change.Property == CompactScopeProperty) Sync();
     }
 
     /// <inheritdoc />
@@ -165,7 +177,7 @@ public abstract class NavRow : ButtonBase
     /// <summary>跟着 NavList：紧凑时只剩图标（分组弹出的内容里不紧凑）。</summary>
     internal virtual void Apply(NavList? list)
     {
-        IsIconOnly = list?.Compact == true && Icon is not null;
+        IsIconOnly = list?.IsCompact == true && Icon is not null;
         Update();
     }
 
@@ -369,11 +381,11 @@ public class NavGroup : Control
     internal void Apply(NavList owner)
     {
         var current = Items.OfType<NavItem>().Any(item => item.IsCurrent);
-        header.SetCurrent(current && owner.Compact);
+        header.SetCurrent(current && owner.IsCompact);
         if (current) SetCurrentValue(IsOpenProperty, true);
         // 子列表左边缩进 space.lg、上面 space.xs；紧凑时不缩进（TS 的 compactNested）
         var em = TextElement.GetFontSize(this);
-        list.Margin = new Thickness(owner.Compact ? 0 : this.Resource("Rune.Space.Lg", 1.0) * em, this.Resource("Rune.Space.Xs", 0.25) * em, 0, 0);
+        list.Margin = new Thickness(owner.IsCompact ? 0 : this.Resource("Rune.Space.Lg", 1.0) * em, this.Resource("Rune.Space.Xs", 0.25) * em, 0, 0);
     }
 
     /// <summary>展开、收起。</summary>
@@ -525,7 +537,7 @@ public class NavSection : Control
     /// <summary>紧凑时只剩图标、居中，上面一条细线；第一节之外上面留 space.lg。</summary>
     internal void Apply(NavList? owner)
     {
-        var iconOnly = owner?.Compact == true && Icon is not null;
+        var iconOnly = owner?.IsCompact == true && Icon is not null;
         PseudoClasses.Set(":icon-only", iconOnly);
         text.IsVisible = !iconOnly;
         labelContent.Justify = iconOnly ? FlexJustify.Center : FlexJustify.Start;

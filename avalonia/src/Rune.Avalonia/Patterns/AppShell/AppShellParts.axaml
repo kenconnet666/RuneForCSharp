@@ -1,0 +1,88 @@
+<!--
+  AppShell 部件的默认外观（vue-tsx-pro 的 appShellStyles）：顶栏 surfaceTranslucent 底、下边一条 border；品牌格（与侧栏同宽时）结束边一条 border；
+  侧栏结束边一条 border，内容上下 space.xl、左右 space.md（图标栏时左右 space.xs），底部收起栏 space.sm 内边距、上边一条 borderMuted；
+  正文 space.xl 内边距；页脚上下 space.lg、左右 space.xl，上边一条 borderMuted，sm、textMuted；右侧栏内容上下 space.xl、左右 space.lg。
+  全屏的退出按钮贴着右上角（上 space.sm、右 space.lg），surfaceTranslucent 底，平时 0.6 不透明，悬停、聚焦时 1。
+  窄时的抽屉：overlay 遮罩，面板 surfaceRaised、除起始边外一圈 border、xl 阴影，标题行上 space.xl、左右 space.xl，内容上下 space.lg、左右 space.xl。
+  尺寸（顶栏高、侧栏宽、品牌格的内边距）随断点变，在 AppShell.cs 里设。
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|AppShell Border#PART_Header">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.SurfaceTranslucent}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+    <!-- 顶栏兼作标题栏时整条是拖动区（只在内容延伸进标题栏时生效）；里面能聚焦的控件（按钮、输入框、导航项）照常收输入 -->
+    <Setter Property="(WindowDecorationProperties.ElementRole)" Value="TitleBar" />
+  </Style>
+  <Style Selector="rune|AppShell Border#PART_Header :is(InputElement)[Focusable=True]">
+    <Setter Property="(WindowDecorationProperties.ElementRole)" Value="User" />
+  </Style>
+  <Style Selector="rune|AppShell Border#PART_Brand">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+  </Style>
+  <!-- 侧栏收起成图标栏：产品名不显示，仍是品牌按钮的名称 -->
+  <Style Selector="rune|AppShell:rail rune|AppShellBrand /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="IsVisible" Value="False" />
+  </Style>
+  <Style Selector="rune|AppShell Border#PART_Sidebar">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+    <Setter Property="BorderThickness" Value="0,0,1,0" />
+  </Style>
+  <Style Selector="rune|AppShell ContentPresenter#PART_SidebarContent">
+    <Setter Property="Padding" Value="{rune:Em 0.75, 1.5}" />
+  </Style>
+  <Style Selector="rune|AppShell:rail ContentPresenter#PART_SidebarContent">
+    <Setter Property="Padding" Value="{rune:Em 0.25, 1.5}" />
+  </Style>
+  <Style Selector="rune|AppShell Border#PART_CollapseBar">
+    <Setter Property="Padding" Value="{rune:Em 0.5}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+    <Setter Property="BorderThickness" Value="0,1,0,0" />
+  </Style>
+  <Style Selector="rune|AppShell rune|IconButton#PART_Collapse">
+    <Setter Property="Variant" Value="ghost" />
+  </Style>
+  <Style Selector="rune|AppShell ContentPresenter#PART_Main">
+    <Setter Property="Padding" Value="{rune:Em 1.5}" />
+  </Style>
+  <Style Selector="rune|AppShell ContentPresenter#PART_Footer">
+    <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+    <Setter Property="Padding" Value="{rune:Em 1.5, 1}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+    <Setter Property="BorderThickness" Value="0,1,0,0" />
+  </Style>
+  <Style Selector="rune|AppShell ContentPresenter#PART_AsideContent">
+    <Setter Property="Padding" Value="{rune:Em 1, 1.5}" />
+  </Style>
+  <Style Selector="rune|AppShell rune|IconButton#PART_FullscreenExit">
+    <Setter Property="HorizontalAlignment" Value="Right" />
+    <Setter Property="VerticalAlignment" Value="Top" />
+    <Setter Property="Margin" Value="{rune:Em 0, 0.5, 1, 0}" />
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.SurfaceTranslucent}" />
+    <Setter Property="Opacity" Value="0.6" />
+  </Style>
+  <Style Selector="rune|AppShell rune|IconButton#PART_FullscreenExit:pointerover, rune|AppShell rune|IconButton#PART_FullscreenExit:focus-visible">
+    <Setter Property="Opacity" Value="1" />
+  </Style>
+  <Style Selector="rune|AppShell Border#PART_Scrim">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Overlay}" />
+  </Style>
+  <Style Selector="rune|AppShell Border#PART_Drawer">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.SurfaceRaised}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+    <Setter Property="BorderThickness" Value="0,1,1,1" />
+    <Setter Property="BoxShadow" Value="{DynamicResource Rune.Shadow.Xl}" />
+  </Style>
+  <Style Selector="rune|AppShell rune|Flex#PART_DrawerHeader">
+    <Setter Property="Margin" Value="{rune:Em 1.5, 1.5, 1.5, 0}" />
+  </Style>
+  <Style Selector="rune|AppShell rune|CloseButton#PART_DrawerClose">
+    <Setter Property="Margin" Value="{rune:Em 0, -0.25, -0.5, -0.25}" />
+  </Style>
+  <Style Selector="rune|AppShell ContentPresenter#PART_DrawerContent">
+    <Setter Property="Padding" Value="{rune:Em 1.5, 1}" />
+  </Style>
+</Styles>
