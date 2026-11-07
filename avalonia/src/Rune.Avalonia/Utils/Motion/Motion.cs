@@ -17,6 +17,14 @@ public static partial class Motion
     /// <param name="duration">时长 token。</param>
     public static TimeSpan Duration(TimeSpan duration) => Enabled ? duration : TimeSpan.Zero;
 
+    /// <summary>
+    /// 从控件所在作用域查时长 token（Provider 改了时长、局部关闭动效都按最近的一层）；系统关闭了动画时为 0。同 WPF 的 Motion.Duration。
+    /// </summary>
+    /// <param name="control">从这个控件往上查。</param>
+    /// <param name="key">时长 token 的资源键。</param>
+    /// <param name="fallback">查不到时的时长。</param>
+    public static TimeSpan Duration(global::Avalonia.Controls.Control control, string key, TimeSpan fallback) => Duration(control.Resource(key, fallback));
+
     // 用 DllImport 而不是 LibraryImport：后者要开 AllowUnsafeBlocks，为一个调用不值得
     [DllImport("user32.dll", EntryPoint = "SystemParametersInfoW")]
     [return: MarshalAs(UnmanagedType.Bool)]

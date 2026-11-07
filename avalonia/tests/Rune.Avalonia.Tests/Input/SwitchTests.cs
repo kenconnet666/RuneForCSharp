@@ -14,13 +14,7 @@ namespace Rune.Avalonia.Tests;
 /// <summary>Switch：点击、空格切换；读屏的 Toggle；只读与切换中不切换；轨道里的文字只显示当前那份、对读屏隐藏；尺寸按 em；色调实底。</summary>
 public class SwitchTests
 {
-    static T Part<T>(Switch owner, string name) where T : Control => owner.GetLogicalDescendants().OfType<T>().First(part => part.Name == name);
-
     /// <summary>主题资源的颜色（按控件的主题变体查）。</summary>
-    static Color Resource(Switch owner, string key) => owner.TryFindResource(key, owner.ActualThemeVariant, out var value) && value is ISolidColorBrush brush ? brush.Color : default;
-
-    static Color ColorOf(IBrush? brush) => brush is ISolidColorBrush solid ? solid.Color : default;
-
     static IToggleProvider Toggle(Switch owner) => (IToggleProvider)ControlAutomationPeer.CreatePeerForElement(owner);
 
     [Fact]
@@ -33,13 +27,13 @@ public class SwitchTests
         Assert.Equal(AutomationControlType.Button, ControlAutomationPeer.CreatePeerForElement(toggle).GetAutomationControlType());
         Assert.Equal("接收通知", ControlAutomationPeer.CreatePeerForElement(toggle).GetName());
         Assert.Equal(ToggleState.Off, Toggle(toggle).ToggleState);
-        Assert.Equal(Resource(toggle, "Rune.Brush.Danger"), ColorOf(Part<Border>(toggle, "PART_Track").BorderBrush)); // 出错：轨道描边是危险色
+        Assert.Equal(toggle.ThemeColor("Rune.Brush.Danger"), Lookup.ColorOf(toggle.Part<Border>("PART_Track").BorderBrush)); // 出错：轨道描边是危险色
 
         window.MouseDown(new Point(10, 10), MouseButton.Left);
         window.MouseUp(new Point(10, 10), MouseButton.Left);
         Assert.True(toggle.IsChecked);
         Assert.Contains(":checked", toggle.Classes);
-        Assert.Same(toggle.ToneFill, Part<Border>(toggle, "PART_Track").Background); // 开：色调实底
+        Assert.Same(toggle.ToneFill, toggle.Part<Border>("PART_Track").Background); // 开：色调实底
 
         toggle.Focus();
         window.KeyPressQwerty(PhysicalKey.Space, RawInputModifiers.None);
@@ -96,17 +90,17 @@ public class SwitchTests
         var window = HeadlessUi.Show(new StackPanel { Children = { plain, wide } });
         var em = plain.FontSize;
 
-        var track = Part<Border>(plain, "PART_Track");
+        var track = plain.Part<Border>("PART_Track");
         Assert.Equal(2.25 * em, track.Bounds.Width, tolerance: 0.6);
         Assert.Equal(1.25 * em, track.Bounds.Height, tolerance: 0.6);
-        Assert.Equal(0.875 * em, Part<Border>(plain, SwitchParts.Thumb).Bounds.Width, tolerance: 0.6);
-        Assert.Equal(0.1875 * em, Part<Border>(plain, SwitchParts.Thumb).Bounds.X, tolerance: 0.6);
+        Assert.Equal(0.875 * em, plain.Part<Border>(SwitchParts.Thumb).Bounds.Width, tolerance: 0.6);
+        Assert.Equal(0.1875 * em, plain.Part<Border>(SwitchParts.Thumb).Bounds.X, tolerance: 0.6);
         Assert.True(plain.Bounds.Height >= 24); // 可点击区域不小于 24px
-        Assert.True(Part<Border>(wide, "PART_Track").Bounds.Width > 2.25 * em);
+        Assert.True(wide.Part<Border>("PART_Track").Bounds.Width > 2.25 * em);
 
         plain.IsChecked = true;
         HeadlessUi.Flush(window);
-        Assert.Equal(2.25 * em - 1.0625 * em, Part<Border>(plain, SwitchParts.Thumb).Bounds.X, tolerance: 0.6); // 滑到结束边
+        Assert.Equal(2.25 * em - 1.0625 * em, plain.Part<Border>(SwitchParts.Thumb).Bounds.X, tolerance: 0.6); // 滑到结束边
     });
 
     [Fact]
@@ -118,6 +112,6 @@ public class SwitchTests
 
         Toggle(toggle).Toggle();
         Assert.False(toggle.IsChecked); // 拦下了：接口回来再写 IsChecked
-        Assert.Equal(Resource(toggle, "Rune.Brush.SuccessText"), ColorOf(toggle.ToneFill));
+        Assert.Equal(toggle.ThemeColor("Rune.Brush.SuccessText"), Lookup.ColorOf(toggle.ToneFill));
     });
 }

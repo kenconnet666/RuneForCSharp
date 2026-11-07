@@ -178,14 +178,13 @@ public abstract class ChoiceBase : Element
     {
         var inner = context.Sized(ResolvedSize);
         var metrics = Layout(inner, Bounds.Width);
-        var back = IsEnabled ? default : BackColor(context.Theme.Colors);
-        Color Dim(Color color) => IsEnabled ? color : Drawing.Mix(back, color, Tokens.Opacity.Disabled);
+        var dim = Dimmer(IsEnabled, context.Theme.Colors);
 
         var state = graphics.Save();
         try
         {
             graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            PaintControl(graphics, context, inner, ControlRect(context, metrics), Dim);
+            PaintControl(graphics, context, inner, ControlRect(context, metrics), dim);
         }
         finally
         {
@@ -197,12 +196,12 @@ public abstract class ChoiceBase : Element
         if (HasLabel)
         {
             label.Bounds = new Rectangle(context.RightToLeft ? x + Math.Max(metrics.Label.Width, metrics.Description.Width) - metrics.Label.Width : x, y, metrics.Label.Width, metrics.Label.Height);
-            label.Paint(graphics, inner with { ForeColor = Dim(inner.ForeColor) });
+            label.Paint(graphics, inner with { ForeColor = dim(inner.ForeColor) });
         }
         if (HasDescription)
         {
             description.Bounds = new Rectangle(context.RightToLeft ? x + Math.Max(metrics.Label.Width, metrics.Description.Width) - metrics.Description.Width : x, y + metrics.Label.Height, metrics.Description.Width, metrics.Description.Height);
-            description.Paint(graphics, inner with { ForeColor = Dim(inner.ForeColor) });
+            description.Paint(graphics, inner with { ForeColor = dim(inner.ForeColor) });
         }
     }
 
@@ -241,14 +240,6 @@ public abstract class ChoiceBase : Element
         using var outline = Drawing.RoundedRectangle(edge, MathF.Max(0, radius - width / 2));
         using var pen = new Pen(dim(invalid ? colors.Danger : border ?? colors.BorderStrong), width);
         graphics.DrawPath(pen, outline);
-    }
-
-    /// <summary>宿主往上第一个不透明的背景色（不可用时把颜色按 opacities.disabled 混进它，等于整体半透明）。</summary>
-    Color BackColor(ThemeColors colors)
-    {
-        for (var control = Host as Control; control is not null; control = control.Parent)
-            if (control.BackColor.A == 255) return control.BackColor;
-        return colors.Background;
     }
 
     readonly record struct Metrics(SizeF Control, float Row, float Gap, Size Label, Size Description, float LabelTop);

@@ -17,14 +17,6 @@ namespace Rune.Avalonia.Tests;
 /// </summary>
 public class ChoiceTests
 {
-    static T Part<T>(Control owner, string name) where T : Control => owner.GetLogicalDescendants().OfType<T>().First(part => part.Name == name);
-
-    static Color Resource(Control owner, string key) => owner.TryFindResource(key, owner.ActualThemeVariant, out var value) && value is ISolidColorBrush brush ? brush.Color : default;
-
-    static Color ColorOf(IBrush? brush) => brush is ISolidColorBrush solid ? solid.Color : default;
-
-    static AutomationPeer Peer(Control control) => ControlAutomationPeer.CreatePeerForElement(control);
-
     static void Click(Window window, Control control)
     {
         var point = control.TranslatePoint(new Point(4, control.Bounds.Height / 2), window)!.Value;
@@ -46,20 +38,20 @@ public class ChoiceTests
         var all = new Checkbox { Content = "全选", IsIndeterminate = true };
         var window = HeadlessUi.Show(new StackPanel { Children = { agree, all } });
 
-        Assert.Equal(AutomationControlType.CheckBox, Peer(agree).GetAutomationControlType());
-        Assert.Equal("同意", Peer(agree).GetName());
+        Assert.Equal(AutomationControlType.CheckBox, agree.Peer().GetAutomationControlType());
+        Assert.Equal("同意", agree.Peer().GetName());
         Click(window, agree);
         Assert.True(agree.IsChecked);
-        Assert.Equal(ToggleState.On, ((IToggleProvider)Peer(agree)).ToggleState);
+        Assert.Equal(ToggleState.On, ((IToggleProvider)agree.Peer()).ToggleState);
 
         agree.Focus();
         Press(window, PhysicalKey.Space);
         Assert.False(agree.IsChecked);
 
-        Assert.Equal(ToggleState.Indeterminate, ((IToggleProvider)Peer(all)).ToggleState);
-        Assert.Same(Lucide.Minus, Part<Icon>(all, CheckboxParts.Indicator).Data); // 部分勾选：横线
-        Assert.Equal(1, Part<Icon>(all, CheckboxParts.Indicator).Opacity);
-        Assert.Equal(0, Part<Icon>(agree, CheckboxParts.Indicator).Opacity); // 没勾：标记不显示（仍占位）
+        Assert.Equal(ToggleState.Indeterminate, ((IToggleProvider)all.Peer()).ToggleState);
+        Assert.Same(Lucide.Minus, all.Part<Icon>(CheckboxParts.Indicator).Data); // 部分勾选：横线
+        Assert.Equal(1, all.Part<Icon>(CheckboxParts.Indicator).Opacity);
+        Assert.Equal(0, agree.Part<Icon>(CheckboxParts.Indicator).Opacity); // 没勾：标记不显示（仍占位）
     });
 
     [Fact]
@@ -70,12 +62,12 @@ public class ChoiceTests
         var bad = new Checkbox { IsChecked = true, IsInvalid = true };
         HeadlessUi.Show(new StackPanel { Children = { plain, on, bad } });
 
-        Assert.Equal(Resource(plain, "Rune.Brush.BorderStrong"), ColorOf(Part<Border>(plain, CheckboxParts.Box).BorderBrush));
-        Assert.Equal(Resource(plain, "Rune.Brush.Surface"), ColorOf(Part<Border>(plain, CheckboxParts.Box).Background));
-        Assert.Equal(Resource(on, "Rune.Brush.SuccessText"), ColorOf(Part<Border>(on, CheckboxParts.Box).Background)); // 绿色的实底用文字色
-        Assert.Same(on.ToneOnFill, Part<Icon>(on, CheckboxParts.Indicator).Foreground);
-        Assert.Equal(Resource(bad, "Rune.Brush.Danger"), ColorOf(Part<Border>(bad, CheckboxParts.Box).BorderBrush)); // 出错盖过勾选
-        Assert.Equal(1.125 * plain.FontSize, Part<Border>(plain, CheckboxParts.Box).Bounds.Width, tolerance: 0.5); // 布局按像素取整
+        Assert.Equal(plain.ThemeColor("Rune.Brush.BorderStrong"), Lookup.ColorOf(plain.Part<Border>(CheckboxParts.Box).BorderBrush));
+        Assert.Equal(plain.ThemeColor("Rune.Brush.Surface"), Lookup.ColorOf(plain.Part<Border>(CheckboxParts.Box).Background));
+        Assert.Equal(on.ThemeColor("Rune.Brush.SuccessText"), Lookup.ColorOf(on.Part<Border>(CheckboxParts.Box).Background)); // 绿色的实底用文字色
+        Assert.Same(on.ToneOnFill, on.Part<Icon>(CheckboxParts.Indicator).Foreground);
+        Assert.Equal(bad.ThemeColor("Rune.Brush.Danger"), Lookup.ColorOf(bad.Part<Border>(CheckboxParts.Box).BorderBrush)); // 出错盖过勾选
+        Assert.Equal(1.125 * plain.FontSize, plain.Part<Border>(CheckboxParts.Box).Bounds.Width, tolerance: 0.5); // 布局按像素取整
     });
 
     [Fact]
@@ -87,7 +79,7 @@ public class ChoiceTests
         var group = new CheckboxGroup { Value = ["email"], Items = { email, sms } };
         var window = HeadlessUi.Show(group);
 
-        Assert.Equal(AutomationControlType.Group, Peer(group).GetAutomationControlType());
+        Assert.Equal(AutomationControlType.Group, group.Peer().GetAutomationControlType());
         Assert.Equal((true, false), (email.IsChecked, sms.IsChecked));
         Click(window, sms);
         Assert.Equal(["email", "sms"], group.Value);
@@ -110,12 +102,12 @@ public class ChoiceTests
         var group = new RadioGroup { Value = "express", Items = { express, pickup } };
         var window = HeadlessUi.Show(group);
 
-        Assert.Equal(AutomationControlType.RadioButton, Peer(express).GetAutomationControlType());
+        Assert.Equal(AutomationControlType.RadioButton, express.Peer().GetAutomationControlType());
         Assert.Equal((true, false), (express.IsChecked, pickup.IsChecked));
         Click(window, pickup);
         Assert.Equal("pickup", group.Value);
         Assert.Equal((false, true), (express.IsChecked, pickup.IsChecked));
-        Assert.True(((ISelectionItemProvider)Peer(pickup)).IsSelected);
+        Assert.True(((ISelectionItemProvider)pickup.Peer()).IsSelected);
 
         group.IsEnabled = false;
         Assert.False(express.IsEffectivelyEnabled || pickup.IsEffectivelyEnabled);
@@ -152,11 +144,11 @@ public class ChoiceTests
         var group = new RadioGroup { Value = "x", Tone = StatusTone.Warning, Items = { on, off } };
         HeadlessUi.Show(group);
 
-        Assert.Equal(Resource(on, "Rune.Brush.WarningText"), ColorOf(Part<Border>(on, RadioParts.Circle).Background));
-        Assert.Same(on.ToneOnFill, Part<Border>(on, RadioParts.Indicator).Background);
-        Assert.Equal(TransformOperations.Identity, Part<Border>(on, RadioParts.Indicator).RenderTransform);
-        Assert.NotEqual(TransformOperations.Identity, Part<Border>(off, RadioParts.Indicator).RenderTransform); // 没选中：圆点缩成 0
-        Assert.Equal(Resource(off, "Rune.Brush.BorderStrong"), ColorOf(Part<Border>(off, RadioParts.Circle).BorderBrush));
+        Assert.Equal(on.ThemeColor("Rune.Brush.WarningText"), Lookup.ColorOf(on.Part<Border>(RadioParts.Circle).Background));
+        Assert.Same(on.ToneOnFill, on.Part<Border>(RadioParts.Indicator).Background);
+        Assert.Equal(TransformOperations.Identity, on.Part<Border>(RadioParts.Indicator).RenderTransform);
+        Assert.NotEqual(TransformOperations.Identity, off.Part<Border>(RadioParts.Indicator).RenderTransform); // 没选中：圆点缩成 0
+        Assert.Equal(off.ThemeColor("Rune.Brush.BorderStrong"), Lookup.ColorOf(off.Part<Border>(RadioParts.Circle).BorderBrush));
     });
 
     [Fact]
@@ -197,8 +189,8 @@ public class ChoiceTests
         Assert.Equal(["email", "sms", "app"], items.Select(item => item.Value));
         Assert.True(items[0].IsChecked);
         Assert.False(items[1].IsEnabled);
-        Assert.Equal("每天汇总一封", Peer(items[0]).GetHelpText());
-        Assert.True(Part<global::Avalonia.Controls.Presenters.ContentPresenter>(items[0], ChoiceBaseParts.Description).IsVisible);
+        Assert.Equal("每天汇总一封", items[0].Peer().GetHelpText());
+        Assert.True(items[0].Part<global::Avalonia.Controls.Presenters.ContentPresenter>(ChoiceBaseParts.Description).IsVisible);
         Click(window, items[2]);
         Assert.Equal(["email", "app"], group.Value);
     });

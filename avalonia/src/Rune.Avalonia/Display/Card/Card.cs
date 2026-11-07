@@ -186,9 +186,9 @@ public class Card : Control
         body.Child = shown ? skeleton : bodyContent;
         if (shown) revealing = true;
         if (!revealing) return;
-        var duration = Motion.Duration(this.TryFindResource("Rune.Duration.Lg", ActualThemeVariant, out var value) && value is TimeSpan lg ? lg : TimeSpan.FromMilliseconds(300));
+        var duration = Motion.Duration(this, "Rune.Duration.Lg", TimeSpan.FromMilliseconds(300));
         if (duration <= TimeSpan.Zero) return;
-        var easing = this.TryFindResource("Rune.Easing.Enter", ActualThemeVariant, out var found) && found is Easing enter ? enter : new CubicEaseOut();
+        var easing = this.Resource<Easing>("Rune.Easing.Enter", new CubicEaseOut());
         _ = new Animation
         {
             Duration = duration,

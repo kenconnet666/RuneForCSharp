@@ -156,13 +156,13 @@ public class Switch : ChoiceBase
         slide = null;
         SetValue(PositionProperty, to);
         var duration = VisualRoot is null ? TimeSpan.Zero
-            : Motion.Duration(this.TryFindResource("Rune.Duration.Sm", ActualThemeVariant, out var value) && value is TimeSpan sm ? sm : TimeSpan.FromMilliseconds(120));
+            : Motion.Duration(this, "Rune.Duration.Sm", TimeSpan.FromMilliseconds(120));
         if (duration <= TimeSpan.Zero) return;
         slide = new CancellationTokenSource();
         _ = new Animation
         {
             Duration = duration,
-            Easing = this.TryFindResource("Rune.Easing.Standard", ActualThemeVariant, out var found) && found is Easing standard ? standard : new CubicEaseInOut(),
+            Easing = this.Resource<Easing>("Rune.Easing.Standard", new CubicEaseInOut()),
             Children =
             {
                 new KeyFrame { Cue = new Cue(0), Setters = { new Setter(PositionProperty, from) } },

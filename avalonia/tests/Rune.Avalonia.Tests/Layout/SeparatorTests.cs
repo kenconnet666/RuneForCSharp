@@ -7,8 +7,6 @@ namespace Rune.Avalonia.Tests;
 /// <summary>Separator：默认装饰性；有语义时是分隔符；带文字时文字给读屏、两段线隐藏；竖线在 Flex 里随行高拉伸。</summary>
 public class SeparatorTests
 {
-    static AutomationPeer Peer(Control control) => ControlAutomationPeer.CreatePeerForElement(control);
-
     static List<Border> Lines(Separator separator) => [.. separator.GetLogicalChildren().OfType<Border>().Where(b => b.Name == SeparatorParts.Line)];
 
     [Upstream("Separator", "默认装饰性")]
@@ -18,7 +16,7 @@ public class SeparatorTests
         var separator = new Separator();
         HeadlessUi.Show(new StackPanel { Width = 200, Children = { separator } });
 
-        Assert.False(Peer(separator).IsControlElement());
+        Assert.False(separator.Peer().IsControlElement());
         Assert.Equal((200d, 1d), (separator.Bounds.Width, separator.Bounds.Height));
     });
 
@@ -30,8 +28,8 @@ public class SeparatorTests
         var vertical = new Separator { Decorative = false, Orientation = SeparatorOrientation.Vertical };
         HeadlessUi.Show(new StackPanel { Children = { horizontal, vertical } });
 
-        Assert.Equal((true, AutomationControlType.Separator), (Peer(horizontal).IsControlElement(), Peer(horizontal).GetAutomationControlType()));
-        Assert.Equal(AutomationControlType.Separator, Peer(vertical).GetAutomationControlType());
+        Assert.Equal((true, AutomationControlType.Separator), (horizontal.Peer().IsControlElement(), horizontal.Peer().GetAutomationControlType()));
+        Assert.Equal(AutomationControlType.Separator, vertical.Peer().GetAutomationControlType());
     });
 
     [Upstream("Separator", "带文字")]
@@ -54,8 +52,8 @@ public class SeparatorTests
         var gap = 0.75 * center.GetValue(global::Avalonia.Controls.Documents.TextElement.FontSizeProperty);
         Assert.InRange(label.Bounds.X - left.Bounds.Right, gap - 1.5, gap + 1.5); // 布局取整
         // 有语义时以文字为名称
-        Assert.Equal("更改后", Peer(start).GetName());
-        Assert.True(Peer(start).IsControlElement());
+        Assert.Equal("更改后", start.Peer().GetName());
+        Assert.True(start.Peer().IsControlElement());
     });
 
     [Fact]

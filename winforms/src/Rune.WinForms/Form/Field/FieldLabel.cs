@@ -48,27 +48,18 @@ public class FieldLabel : Element
     {
         var inner = Inner(context);
         var colors = context.Theme.Colors;
-        var back = IsEnabled ? default : BackColor(colors);
-        Color Dim(Color color) => IsEnabled ? color : Drawing.Mix(back, color, Tokens.Opacity.Disabled);
+        var dim = Dimmer(IsEnabled, colors);
         var (side, gap) = Mark(inner);
         var size = text.Measure(inner, new Size(Math.Max(0, Bounds.Width - (IsRequired ? (int)MathF.Ceiling(side + gap) : 0)), int.MaxValue));
         var x = context.RightToLeft ? Bounds.Right - size.Width : Bounds.X;
         text.Bounds = new Rectangle(x, Bounds.Y, size.Width, size.Height);
-        text.Paint(graphics, inner with { ForeColor = Dim(colors.Text) });
+        text.Paint(graphics, inner with { ForeColor = dim(colors.Text) });
         if (!IsRequired) return;
         required.Size = side * 96 / inner.Dpi;
         var mark = required.Measure(inner, new Size(int.MaxValue, int.MaxValue));
         var markX = context.RightToLeft ? x - gap - mark.Width : x + size.Width + gap;
         required.Bounds = new Rectangle((int)MathF.Round(markX), Bounds.Y, mark.Width, mark.Height);
-        required.Paint(graphics, inner with { ForeColor = Dim(colors.DangerText) });
-    }
-
-    /// <summary>宿主往上第一个不透明的背景色（不可用时把颜色混进它，等于整体半透明）。</summary>
-    Color BackColor(ThemeColors colors)
-    {
-        for (var control = Host as Control; control is not null; control = control.Parent)
-            if (control.BackColor.A == 255) return control.BackColor;
-        return colors.Background;
+        required.Paint(graphics, inner with { ForeColor = dim(colors.DangerText) });
     }
 }
 

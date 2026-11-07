@@ -30,6 +30,25 @@ public abstract class Element
     /// <summary>宿主所在的作用域（<see cref="ProviderControl"/>）；宿主不是控件、或不在作用域里时为 null。</summary>
     protected internal ProviderControl? Scope => Host is Control host ? ProviderControl.Of(host) : null;
 
+    /// <summary>
+    /// 画颜色用的"变淡"：不可用时把颜色按 opacities.disabled 混进宿主往上第一个不透明的背景色（GDI 的文字不认 alpha，混色等于整体半透明）；
+    /// 可用时原样返回。
+    /// </summary>
+    /// <param name="enabled">元素可用。</param>
+    /// <param name="colors">主题颜色（宿主往上都透明时用页面底色）。</param>
+    private protected Func<Color, Color> Dimmer(bool enabled, ThemeColors colors)
+    {
+        if (enabled) return color => color;
+        var back = colors.Background;
+        for (var control = Host as Control; control is not null; control = control.Parent)
+            if (control.BackColor.A == 255)
+            {
+                back = control.BackColor;
+                break;
+            }
+        return color => Drawing.Mix(back, color, Tokens.Opacity.Disabled);
+    }
+
     /// <summary>所在作用域的语言包（没有作用域时应用级的）。</summary>
     protected internal Lang CurrentLang => Scope?.EffectiveLang ?? RuneLang.Current.Value;
 

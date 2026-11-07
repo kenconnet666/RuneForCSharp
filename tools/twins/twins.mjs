@@ -10,7 +10,7 @@ const TWINS = [
   ['avalonia/src/Rune.Avalonia/Layout/Flex/FlexLayout.cs', 'wpf/src/Rune.Wpf/Layout/Flex/FlexLayout.cs', 'winforms/src/Rune.WinForms/Layout/Flex/FlexLayout.cs'],
   ['avalonia/src/Rune.Avalonia/Layout/Grid/GridLayout.cs', 'wpf/src/Rune.Wpf/Layout/Grid/GridLayout.cs', 'winforms/src/Rune.WinForms/Layout/Grid/GridLayout.cs'],
   ['avalonia/src/Rune.Avalonia/Utils/Data/StatusMap.cs', 'wpf/src/Rune.Wpf/Utils/Data/StatusMap.cs', 'winforms/src/Rune.WinForms/Utils/Data/StatusMap.cs'],
-  ['avalonia/src/Rune.Avalonia/Utils/Data/ListboxOption.cs', 'wpf/src/Rune.Wpf/Utils/Data/ListboxOption.cs', 'winforms/src/Rune.WinForms/Utils/Data/ListboxOption.cs'],
+  ['avalonia/src/Rune.Avalonia/Input/ListState/ListboxOption.cs', 'wpf/src/Rune.Wpf/Input/ListState/ListboxOption.cs', 'winforms/src/Rune.WinForms/Input/ListState/ListboxOption.cs'],
   ['avalonia/src/Rune.Avalonia/Display/Avatar/AvatarInitials.cs', 'wpf/src/Rune.Wpf/Display/Avatar/AvatarInitials.cs', 'winforms/src/Rune.WinForms/Display/Avatar/AvatarInitials.cs'],
 ];
 

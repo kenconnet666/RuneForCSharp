@@ -87,7 +87,7 @@ public class Collapse : Control
         // 先写终值：过渡在动画优先级上盖住它，结束或被打断后留下的就是终值
         SetValue(OpennessProperty, open ? 1d : 0d);
         var duration = VisualRoot is null ? TimeSpan.Zero
-            : Motion.Duration(this.TryFindResource("Rune.Duration.Md", ActualThemeVariant, out var value) && value is TimeSpan md ? md : TimeSpan.FromMilliseconds(200));
+            : Motion.Duration(this, "Rune.Duration.Md", TimeSpan.FromMilliseconds(200));
         if (duration <= TimeSpan.Zero)
         {
             Settle();
@@ -102,7 +102,7 @@ public class Collapse : Control
         await new Animation
         {
             Duration = duration,
-            Easing = this.TryFindResource("Rune.Easing.Standard", ActualThemeVariant, out var found) && found is Easing standard ? standard : new CubicEaseInOut(),
+            Easing = this.Resource<Easing>("Rune.Easing.Standard", new CubicEaseInOut()),
             Children =
             {
                 new KeyFrame { Cue = new Cue(0), Setters = { new Setter(OpennessProperty, from) } },

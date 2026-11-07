@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Controls;
@@ -214,7 +213,7 @@ public class Field : Control
 
     double Em => FontSize;
 
-    double Spacing(string key, double fallback) => (this.TryFindResource(key, ActualThemeVariant, out var value) && value is double factor ? factor : fallback) * Em;
+    double Spacing(string key, double fallback) => this.Resource(key, fallback) * Em;
 
     double LabelColumn => double.IsNaN(LabelWidth) ? 8 * Em : LabelWidth;
 
@@ -321,58 +320,6 @@ interface IFieldControl
 {
     /// <summary>字段的出错、必填、只读、标签、说明变了。</summary>
     void FieldChanged();
-}
-
-/// <summary>标签放在哪（vue-tsx-pro 的 FieldLabelPlacements）。</summary>
-/// <param name="Value">取值（top、start）。</param>
-[TypeConverter(typeof(VariantConverter<FieldLabelPlacement>))]
-public readonly record struct FieldLabelPlacement(string Value) : IVariant<FieldLabelPlacement>
-{
-    /// <summary>控件上方（默认）：窄容器、标签很长时。</summary>
-    public static readonly FieldLabelPlacement Top = new("top");
-
-    /// <summary>控件的起始边：宽屏的长表单，标签一列对齐、省纵向空间。</summary>
-    public static readonly FieldLabelPlacement Start = new("start");
-
-    /// <inheritdoc />
-    public static IReadOnlyList<FieldLabelPlacement> Known { get; } = [Top, Start];
-
-    /// <inheritdoc />
-    public static FieldLabelPlacement Parse(string value)
-    {
-        var placement = new FieldLabelPlacement(value);
-        Variants.WarnIfUnknown(placement);
-        return placement;
-    }
-
-    /// <inheritdoc />
-    public override string ToString() => Value;
-}
-
-/// <summary>标签在起始边时文字的对齐（vue-tsx-pro 的 FieldLabelAligns）。</summary>
-/// <param name="Value">取值（start、end）。</param>
-[TypeConverter(typeof(VariantConverter<FieldLabelAlign>))]
-public readonly record struct FieldLabelAlign(string Value) : IVariant<FieldLabelAlign>
-{
-    /// <summary>靠起始边。</summary>
-    public static readonly FieldLabelAlign Start = new("start");
-
-    /// <summary>靠结束边、贴着控件（默认）：标签长短不一时，标签与控件之间的距离一致。</summary>
-    public static readonly FieldLabelAlign End = new("end");
-
-    /// <inheritdoc />
-    public static IReadOnlyList<FieldLabelAlign> Known { get; } = [Start, End];
-
-    /// <inheritdoc />
-    public static FieldLabelAlign Parse(string value)
-    {
-        var align = new FieldLabelAlign(value);
-        Variants.WarnIfUnknown(align);
-        return align;
-    }
-
-    /// <inheritdoc />
-    public override string ToString() => Value;
 }
 
 /// <summary>Field 的部件名（代码组合的子元素）：<c>rune|Field &gt; rune|Text#PART_Description</c>。外层（TS 的 root）就是 Field 自己，控件是 Content。</summary>

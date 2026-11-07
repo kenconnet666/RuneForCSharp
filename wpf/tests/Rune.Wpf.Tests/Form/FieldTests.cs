@@ -21,10 +21,6 @@ public class FieldTests
         return host;
     }
 
-    static T Part<T>(FrameworkElement owner, string name) where T : FrameworkElement => WpfUi.Descendants(owner).OfType<T>().First(part => part.Name == name);
-
-    static AutomationPeer Peer(UIElement element) => UIElementAutomationPeer.CreatePeerForElement(element);
-
     [Fact]
     [Upstream("Field", "标签的 for 指向控件")]
     public Task Label_description_and_error_are_tied_to_the_control() => WpfUi.Run(() =>
@@ -34,13 +30,13 @@ public class FieldTests
         var field = new Field { Label = "通知方式", Description = "至少选一种", Error = "请至少选一种", IsRequired = true, Content = group };
         Show(field);
 
-        Assert.Equal("通知方式", Peer(group).GetName()); // 组以字段的标签为名称
-        Assert.Equal("至少选一种 请至少选一种", Peer(group).GetHelpText());
-        Assert.Equal(Visibility.Visible, Part<Icon>(field, "PART_Required").Visibility); // 必填的星号
-        Assert.Equal(Visibility.Visible, Part<Flex>(field, "PART_Error").Visibility);
+        Assert.Equal("通知方式", group.Peer().GetName()); // 组以字段的标签为名称
+        Assert.Equal("至少选一种 请至少选一种", group.Peer().GetHelpText());
+        Assert.Equal(Visibility.Visible, field.Part<Icon>("PART_Required").Visibility); // 必填的星号
+        Assert.Equal(Visibility.Visible, field.Part<Flex>("PART_Error").Visibility);
         Assert.True(email.IsEffectivelyInvalid); // 有错误：控件出错
 
-        var label = Part<FieldLabel>(field, "PART_Label");
+        var label = field.Part<FieldLabel>("PART_Label");
         label.RaiseEvent(new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left) { RoutedEvent = Mouse.MouseDownEvent });
         Assert.True(email.IsFocused); // 点标签聚焦组里的第一项
     });
@@ -56,7 +52,7 @@ public class FieldTests
         var readOnly = new Field { IsReadOnly = true, Content = inherited };
         Show(quiet, loud, readOnly);
 
-        Assert.Equal(Visibility.Collapsed, Part<Flex>(quiet, "PART_Error").Visibility);
+        Assert.Equal(Visibility.Collapsed, quiet.Part<Flex>("PART_Error").Visibility);
         Assert.False(((Switch)quiet.Content!).IsEffectivelyInvalid);
         Assert.False(own.IsEffectivelyInvalid); // 控件上写了 false
         Assert.False(own.IsEffectivelyReadOnly);
@@ -71,11 +67,11 @@ public class FieldTests
         var field = new Field { Label = "", Description = "", Error = "", Content = checkbox };
         Show(field);
 
-        Assert.Equal(Visibility.Collapsed, Part<FieldLabel>(field, "PART_Label").Visibility);
-        Assert.Equal(Visibility.Collapsed, Part<Text>(field, "PART_Description").Visibility);
-        Assert.Equal(Visibility.Collapsed, Part<Flex>(field, "PART_Error").Visibility);
+        Assert.Equal(Visibility.Collapsed, field.Part<FieldLabel>("PART_Label").Visibility);
+        Assert.Equal(Visibility.Collapsed, field.Part<Text>("PART_Description").Visibility);
+        Assert.Equal(Visibility.Collapsed, field.Part<Flex>("PART_Error").Visibility);
         Assert.False(checkbox.IsEffectivelyInvalid);
-        Assert.Equal("", Peer(checkbox).GetHelpText());
+        Assert.Equal("", checkbox.Peer().GetHelpText());
     });
 
     [Fact]
@@ -85,9 +81,9 @@ public class FieldTests
         var field = new Field { Label = "允许的操作", Content = new StackPanel { Children = { first, second } } };
         Show(field);
 
-        Assert.Equal("允许的操作", Peer(first).GetName());
-        Assert.Equal("委派", Peer(second).GetName());
-        Assert.Same(first, Part<FieldLabel>(field, "PART_Label").Target);
+        Assert.Equal("允许的操作", first.Peer().GetName());
+        Assert.Equal("委派", second.Peer().GetName());
+        Assert.Same(first, field.Part<FieldLabel>("PART_Label").Target);
     });
 
     [Fact]
@@ -96,7 +92,7 @@ public class FieldTests
         var toggle = new Switch { Content = "开工前三天通知店长" };
         var field = new Field { Label = "通知门店", LabelPlacement = FieldLabelPlacement.Start, Description = "可多选", Content = toggle };
         Show(field);
-        var label = Part<FieldLabel>(field, "PART_Label");
+        var label = field.Part<FieldLabel>("PART_Label");
         var em = field.FontSize;
         double Top(FrameworkElement element) => element.TranslatePoint(default, field).Y;
         double Left(FrameworkElement element) => element.TranslatePoint(default, field).X;
@@ -104,7 +100,7 @@ public class FieldTests
         Assert.Equal(8 * em + (double)field.FindResource("Rune.Space.Md") * em, Left(toggle), 0.5); // 标签列 8em + 列距 md
         Assert.Equal(8 * em, Left(label) + label.ActualWidth, 0.5); // 标签贴着控件（end）
         Assert.Equal(Field.FirstBaseline(toggle)!.Value + Top(toggle), label.Baseline!.Value + Top(label), tolerance: 1); // 第一行基线对齐
-        Assert.True(Left(Part<Text>(field, "PART_Description")) >= Left(toggle)); // 说明在控件列
+        Assert.True(Left(field.Part<Text>("PART_Description")) >= Left(toggle)); // 说明在控件列
     });
 
     [Fact]
@@ -114,8 +110,8 @@ public class FieldTests
         var field = new Field { Label = "周期", IsLabelHidden = true, LabelPlacement = FieldLabelPlacement.Start, Content = group };
         Show(field);
 
-        Assert.Equal(Visibility.Collapsed, Part<FieldLabel>(field, "PART_Label").Visibility);
+        Assert.Equal(Visibility.Collapsed, field.Part<FieldLabel>("PART_Label").Visibility);
         Assert.Equal(0, group.TranslatePoint(default, field).X); // 不占标签列
-        Assert.Equal("周期", Peer(group).GetName());
+        Assert.Equal("周期", group.Peer().GetName());
     });
 }

@@ -13,8 +13,6 @@ namespace Rune.Avalonia.Tests;
 /// </summary>
 public class PartDefaultsTests
 {
-    static T Part<T>(Control owner, string name) where T : Control => owner.GetLogicalDescendants().OfType<T>().First(part => part.Name == name);
-
     /// <summary>给实例加一条部件样式（TS 的 propsXxx）。</summary>
     static TOwner Styled<TOwner, TPart>(TOwner owner, string name, AvaloniaProperty property, object value) where TOwner : Control where TPart : Control
     {
@@ -29,11 +27,11 @@ public class PartDefaultsTests
         var styled = Styled<Empty, Icon>(new Empty { Title = "还没有订单" }, EmptyParts.Icon, Icon.ToneProperty, TextTone.Danger);
         HeadlessUi.Show(new StackPanel { Children = { plain, styled } });
 
-        Assert.Equal(TextTone.Muted, Part<Icon>(plain, EmptyParts.Icon).Tone);
-        Assert.Equal(1.5, Part<Icon>(plain, EmptyParts.Icon).StrokeWidth); // strokeWidths.sm
-        Assert.Equal(TextWeight.Medium, Part<Text>(plain, EmptyParts.Title).Weight);
-        Assert.Equal(TextTone.Muted, Part<Paragraph>(plain, EmptyParts.Description).Tone);
-        Assert.Equal(TextTone.Danger, Part<Icon>(styled, EmptyParts.Icon).Tone);
+        Assert.Equal(TextTone.Muted, plain.Part<Icon>(EmptyParts.Icon).Tone);
+        Assert.Equal(1.5, plain.Part<Icon>(EmptyParts.Icon).StrokeWidth); // strokeWidths.sm
+        Assert.Equal(TextWeight.Medium, plain.Part<Text>(EmptyParts.Title).Weight);
+        Assert.Equal(TextTone.Muted, plain.Part<Paragraph>(EmptyParts.Description).Tone);
+        Assert.Equal(TextTone.Danger, styled.Part<Icon>(EmptyParts.Icon).Tone);
     });
 
     [Fact]
@@ -43,11 +41,11 @@ public class PartDefaultsTests
         var styled = Styled<Indicator, Border>(new Indicator { Count = 3, Content = new Border { Width = 20, Height = 20 } }, IndicatorParts.Badge, Border.BackgroundProperty, Brushes.Purple);
         HeadlessUi.Show(new StackPanel { Children = { plain, styled } });
 
-        Assert.Same(plain.Palette!.Solid, Part<Border>(plain, IndicatorParts.Badge).Background);
-        var count = Part<TextBlock>(plain, IndicatorParts.Count);
+        Assert.Same(plain.Palette!.Solid, plain.Part<Border>(IndicatorParts.Badge).Background);
+        var count = plain.Part<TextBlock>(IndicatorParts.Count);
         Assert.Equal((FontWeight.SemiBold, TextAlignment.Center), (count.FontWeight, count.TextAlignment));
         Assert.Same(plain.Palette.Contrast, count.Foreground);
-        Assert.Same(Brushes.Purple, Part<Border>(styled, IndicatorParts.Badge).Background);
+        Assert.Same(Brushes.Purple, styled.Part<Border>(IndicatorParts.Badge).Background);
     });
 
     [Fact]
@@ -57,9 +55,9 @@ public class PartDefaultsTests
         var styled = Styled<Avatar, Image>(new Avatar { DisplayName = "吴悠" }, AvatarParts.Image, Image.StretchProperty, Stretch.Uniform);
         HeadlessUi.Show(new StackPanel { Children = { plain, styled } });
 
-        Assert.Equal(Stretch.UniformToFill, Part<Image>(plain, AvatarParts.Image).Stretch);
-        Assert.Equal(global::Avalonia.Layout.HorizontalAlignment.Center, Part<ContentPresenter>(plain, AvatarParts.Fallback).HorizontalAlignment);
-        Assert.Equal(Stretch.Uniform, Part<Image>(styled, AvatarParts.Image).Stretch);
+        Assert.Equal(Stretch.UniformToFill, plain.Part<Image>(AvatarParts.Image).Stretch);
+        Assert.Equal(global::Avalonia.Layout.HorizontalAlignment.Center, plain.Part<ContentPresenter>(AvatarParts.Fallback).HorizontalAlignment);
+        Assert.Equal(Stretch.Uniform, styled.Part<Image>(AvatarParts.Image).Stretch);
     });
 
     [Fact]
@@ -69,10 +67,10 @@ public class PartDefaultsTests
         var styled = Styled<Card, Border>(new Card { Header = "页头", Content = "正文" }, CardParts.Header, Border.BorderThicknessProperty, new Thickness(0));
         HeadlessUi.Show(new StackPanel { Children = { plain, styled } });
 
-        Assert.Equal(new Thickness(0, 0, 0, 1), Part<Border>(plain, CardParts.Header).BorderThickness);
-        Assert.Equal(new Thickness(0, 1, 0, 0), Part<Border>(plain, CardParts.Footer).BorderThickness);
-        Assert.NotNull(Part<Border>(plain, CardParts.Header).BorderBrush);
-        Assert.Equal(new Thickness(0), Part<Border>(styled, CardParts.Header).BorderThickness);
+        Assert.Equal(new Thickness(0, 0, 0, 1), plain.Part<Border>(CardParts.Header).BorderThickness);
+        Assert.Equal(new Thickness(0, 1, 0, 0), plain.Part<Border>(CardParts.Footer).BorderThickness);
+        Assert.NotNull(plain.Part<Border>(CardParts.Header).BorderBrush);
+        Assert.Equal(new Thickness(0), styled.Part<Border>(CardParts.Header).BorderThickness);
     });
 
     [Fact]
@@ -82,10 +80,10 @@ public class PartDefaultsTests
         var styled = Styled<Separator, Border>(new Separator { Content = "或" }, SeparatorParts.Line, Border.BackgroundProperty, Brushes.Red);
         HeadlessUi.Show(new StackPanel { Width = 300, Children = { plain, styled } });
 
-        var line = Part<Border>(plain, SeparatorParts.Line);
+        var line = plain.Part<Border>(SeparatorParts.Line);
         Assert.Same(plain.Background, line.Background);
         Assert.Equal(plain.Thickness, line.Height);
-        Assert.Same(Brushes.Red, Part<Border>(styled, SeparatorParts.Line).Background);
+        Assert.Same(Brushes.Red, styled.Part<Border>(SeparatorParts.Line).Background);
     });
 
     [Fact]
@@ -95,7 +93,7 @@ public class PartDefaultsTests
         var styled = Styled<Badge, Border>(new Badge { Dot = true, Content = "运行中" }, BadgeParts.Dot, Border.BackgroundProperty, Brushes.Red);
         HeadlessUi.Show(new StackPanel { Children = { plain, styled } });
 
-        Assert.Same(plain.Foreground, Part<Border>(plain, BadgeParts.Dot).Background);
-        Assert.Same(Brushes.Red, Part<Border>(styled, BadgeParts.Dot).Background);
+        Assert.Same(plain.Foreground, plain.Part<Border>(BadgeParts.Dot).Background);
+        Assert.Same(Brushes.Red, styled.Part<Border>(BadgeParts.Dot).Background);
     });
 }

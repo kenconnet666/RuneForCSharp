@@ -14,10 +14,6 @@ namespace Rune.Avalonia.Tests;
 /// </summary>
 public class FieldTests
 {
-    static T Part<T>(Control owner, string name) where T : Control => owner.GetLogicalDescendants().OfType<T>().First(part => part.Name == name);
-
-    static AutomationPeer Peer(Control control) => ControlAutomationPeer.CreatePeerForElement(control);
-
     [Fact]
     [Upstream("Field", "标签的 for 指向控件")]
     public Task Label_description_and_error_are_tied_to_the_control() => HeadlessUi.Run(() =>
@@ -27,13 +23,13 @@ public class FieldTests
         var field = new Field { Label = "通知方式", Description = "至少选一种", Error = "请至少选一种", IsRequired = true, Content = group };
         var window = HeadlessUi.Show(field);
 
-        Assert.Equal("通知方式", Peer(group).GetName()); // 组以字段的标签为名称
-        Assert.Equal("至少选一种 请至少选一种", Peer(group).GetHelpText());
-        Assert.True(Part<Icon>(field, FieldLabelParts.Required).IsVisible); // 必填的星号
-        Assert.True(Part<Flex>(field, FieldParts.Error).IsVisible);
+        Assert.Equal("通知方式", group.Peer().GetName()); // 组以字段的标签为名称
+        Assert.Equal("至少选一种 请至少选一种", group.Peer().GetHelpText());
+        Assert.True(field.Part<Icon>(FieldLabelParts.Required).IsVisible); // 必填的星号
+        Assert.True(field.Part<Flex>(FieldParts.Error).IsVisible);
         Assert.Contains(":invalid", email.Classes); // 有错误：控件出错
 
-        var label = Part<FieldLabel>(field, FieldParts.Label);
+        var label = field.Part<FieldLabel>(FieldParts.Label);
         var point = label.TranslatePoint(new Point(4, 4), window)!.Value;
         window.MouseDown(point, MouseButton.Left);
         window.MouseUp(point, MouseButton.Left);
@@ -51,7 +47,7 @@ public class FieldTests
         var readOnly = new Field { IsReadOnly = true, Content = inherited };
         HeadlessUi.Show(new StackPanel { Children = { quiet, loud, readOnly } });
 
-        Assert.False(Part<Flex>(quiet, FieldParts.Error).IsVisible);
+        Assert.False(quiet.Part<Flex>(FieldParts.Error).IsVisible);
         Assert.DoesNotContain(":invalid", ((Switch)quiet.Content!).Classes);
         Assert.DoesNotContain(":invalid", own.Classes); // 控件上写了 false
         Assert.DoesNotContain(":readonly", own.Classes);
@@ -66,11 +62,11 @@ public class FieldTests
         var field = new Field { Label = "", Description = "", Error = "", Content = checkbox };
         HeadlessUi.Show(field);
 
-        Assert.False(Part<FieldLabel>(field, FieldParts.Label).IsVisible);
-        Assert.False(Part<Text>(field, FieldParts.Description).IsVisible);
-        Assert.False(Part<Flex>(field, FieldParts.Error).IsVisible);
+        Assert.False(field.Part<FieldLabel>(FieldParts.Label).IsVisible);
+        Assert.False(field.Part<Text>(FieldParts.Description).IsVisible);
+        Assert.False(field.Part<Flex>(FieldParts.Error).IsVisible);
         Assert.DoesNotContain(":invalid", checkbox.Classes);
-        Assert.True(string.IsNullOrEmpty(Peer(checkbox).GetHelpText()));
+        Assert.True(string.IsNullOrEmpty(checkbox.Peer().GetHelpText()));
     });
 
     [Fact]
@@ -80,9 +76,9 @@ public class FieldTests
         var field = new Field { Label = "允许的操作", Content = new StackPanel { Children = { first, second } } };
         HeadlessUi.Show(field);
 
-        Assert.Equal("允许的操作", Peer(first).GetName());
-        Assert.Equal("委派", Peer(second).GetName());
-        Assert.Same(first, Part<FieldLabel>(field, FieldParts.Label).Target);
+        Assert.Equal("允许的操作", first.Peer().GetName());
+        Assert.Equal("委派", second.Peer().GetName());
+        Assert.Same(first, field.Part<FieldLabel>(FieldParts.Label).Target);
     });
 
     [Fact]
@@ -91,13 +87,13 @@ public class FieldTests
         var toggle = new Switch { Content = "开工前三天通知店长" };
         var field = new Field { Label = "通知门店", LabelPlacement = FieldLabelPlacement.Start, Description = "可多选", Content = toggle };
         HeadlessUi.Show(field);
-        var label = Part<FieldLabel>(field, FieldParts.Label);
+        var label = field.Part<FieldLabel>(FieldParts.Label);
         var em = field.FontSize;
 
-        Assert.Equal(8 * em + field.FindResource<double>("Rune.Space.Md") * em, toggle.Bounds.X, tolerance: 0.5); // 标签列 8em + 列距 md
+        Assert.Equal(8 * em + field.Resource("Rune.Space.Md", 0d) * em, toggle.Bounds.X, tolerance: 0.5); // 标签列 8em + 列距 md
         Assert.Equal(8 * em, label.Bounds.Right, tolerance: 0.5); // 标签贴着控件（end）
         Assert.Equal(Field.FirstBaseline(toggle)!.Value + toggle.Bounds.Y, label.Baseline!.Value + label.Bounds.Y, tolerance: 1); // 第一行基线对齐
-        Assert.True(Part<Text>(field, FieldParts.Description).Bounds.X >= toggle.Bounds.X); // 说明在控件列
+        Assert.True(field.Part<Text>(FieldParts.Description).Bounds.X >= toggle.Bounds.X); // 说明在控件列
     });
 
     [Fact]
@@ -107,15 +103,8 @@ public class FieldTests
         var field = new Field { Label = "周期", IsLabelHidden = true, LabelPlacement = FieldLabelPlacement.Start, Content = group };
         HeadlessUi.Show(field);
 
-        Assert.False(Part<FieldLabel>(field, FieldParts.Label).IsVisible);
+        Assert.False(field.Part<FieldLabel>(FieldParts.Label).IsVisible);
         Assert.Equal(0, group.Bounds.X); // 不占标签列
-        Assert.Equal("周期", Peer(group).GetName());
+        Assert.Equal("周期", group.Peer().GetName());
     });
-}
-
-static class ResourceExtensions
-{
-    /// <summary>按控件的主题变体查资源。</summary>
-    public static T FindResource<T>(this Control control, string key) =>
-        control.TryFindResource(key, control.ActualThemeVariant, out var value) && value is T typed ? typed : throw new KeyNotFoundException(key);
 }

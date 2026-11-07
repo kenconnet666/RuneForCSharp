@@ -9,8 +9,6 @@ namespace Rune.Wpf.Tests;
 /// <summary>Separator：默认装饰性；有语义时是分隔符（竖向带朝向）；带文字时文字给读屏、两段线隐藏；竖线在 Flex 里随行高拉伸。</summary>
 public class SeparatorTests
 {
-    static AutomationPeer Peer(UIElement element) => UIElementAutomationPeer.CreatePeerForElement(element);
-
     static List<Border> Lines(Separator separator) => [.. LogicalTreeHelper.GetChildren(separator).OfType<Border>()];
 
     static T Themed<T>(T root) where T : FrameworkElement
@@ -26,7 +24,7 @@ public class SeparatorTests
         var separator = new Separator();
         WpfUi.Show(Themed(new StackPanel { Width = 200, Children = { separator } }));
 
-        Assert.False(Peer(separator).IsControlElement());
+        Assert.False(separator.Peer().IsControlElement());
         Assert.Equal(new Size(200, 1), separator.RenderSize);
     });
 
@@ -38,8 +36,8 @@ public class SeparatorTests
         var vertical = new Separator { Decorative = false, Orientation = SeparatorOrientation.Vertical };
         WpfUi.Show(Themed(new StackPanel { Children = { horizontal, vertical } }));
 
-        Assert.Equal((true, AutomationControlType.Separator), (Peer(horizontal).IsControlElement(), Peer(horizontal).GetAutomationControlType()));
-        Assert.Equal(AutomationOrientation.Vertical, Peer(vertical).GetOrientation());
+        Assert.Equal((true, AutomationControlType.Separator), (horizontal.Peer().IsControlElement(), horizontal.Peer().GetAutomationControlType()));
+        Assert.Equal(AutomationOrientation.Vertical, vertical.Peer().GetOrientation());
     });
 
     [Upstream("Separator", "带文字")]
@@ -54,14 +52,14 @@ public class SeparatorTests
         Assert.Equal(2, Lines(center).Count);
         Assert.Single(Lines(start));
         Assert.Single(Lines(end));
-        Assert.All(Lines(center), line => Assert.Null(Peer(line)));
+        Assert.All(Lines(center), line => Assert.Null(line.Peer()));
         // 文字在两段线中间；两段线一样长，和文字隔 0.75em（文字是外面的 0.93 倍）
         var label = LogicalTreeHelper.GetChildren(center).OfType<Text>().Single();
         var (left, right) = (Lines(center)[0], Lines(center)[1]);
         Assert.Equal(left.ActualWidth, right.ActualWidth, 3);
         Assert.Equal(0.75 * center.FontSize, label.TranslatePoint(default, center).X - left.ActualWidth, 3);
         Assert.Equal(0.93 * System.Windows.Documents.TextElement.GetFontSize((StackPanel)center.Parent), center.FontSize, 3);
-        Assert.Equal("更改后", Peer(start).GetName());
+        Assert.Equal("更改后", start.Peer().GetName());
     });
 
     [Fact]

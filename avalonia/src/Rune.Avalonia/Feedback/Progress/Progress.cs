@@ -269,7 +269,7 @@ public class Progress : Control
         fill = null;
         SetValue(FractionProperty, to);
         var duration = VisualRoot is null ? TimeSpan.Zero
-            : Motion.Duration(this.TryFindResource("Rune.Duration.Md", ActualThemeVariant, out var value) && value is TimeSpan md ? md : TimeSpan.FromMilliseconds(200));
+            : Motion.Duration(this, "Rune.Duration.Md", TimeSpan.FromMilliseconds(200));
         if (duration <= TimeSpan.Zero || Math.Abs(from - to) < 1e-9) return;
         fill = new CancellationTokenSource();
         _ = new Animation
@@ -284,7 +284,7 @@ public class Progress : Control
         }.RunAsync(this, fill.Token);
     }
 
-    Easing Standard => this.TryFindResource("Rune.Easing.Standard", ActualThemeVariant, out var found) && found is Easing standard ? standard : new CubicEaseInOut();
+    Easing Standard => this.Resource<Easing>("Rune.Easing.Standard", new CubicEaseInOut());
 
     /// <summary>不确定进度：挂在可视树上时一直循环（条形 1.4 秒、环形 1 秒；系统关闭动画时 3 秒）。</summary>
     void Spin()

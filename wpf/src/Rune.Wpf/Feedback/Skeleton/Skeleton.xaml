@@ -3,5 +3,4 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:rune="clr-namespace:Rune.Wpf">
   <Style x:Key="{x:Static rune:SkeletonParts.Content}" TargetType="Border" />
-  <Style x:Key="{x:Static rune:SkeletonTextParts.Line}" TargetType="rune:Skeleton" />
 </ResourceDictionary>
