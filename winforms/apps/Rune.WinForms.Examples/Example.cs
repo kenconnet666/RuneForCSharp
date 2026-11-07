@@ -16,7 +16,7 @@ public sealed record Example(string Component, string Id, string Title, string D
 public static class ExampleCatalog
 {
     /// <summary>全部示例。</summary>
-    public static IReadOnlyList<Example> All { get; } = [.. IconExamples.All, .. TextExamples.All, .. ListExamples.All, .. SpinnerExamples.All, .. BadgeExamples.All, .. ButtonExamples.All, .. IconButtonExamples.All];
+    public static IReadOnlyList<Example> All { get; } = [.. IconExamples.All, .. TextExamples.All, .. ListExamples.All, .. SpinnerExamples.All, .. BadgeExamples.All, .. ButtonExamples.All, .. IconButtonExamples.All, .. CardExamples.All, .. AvatarExamples.All, .. EmptyExamples.All];
 
     /// <summary>按"组件/示例名"找（不分大小写）；没有时为 null。</summary>
     /// <param name="key">如 <c>Icon/basic</c>。</param>
@@ -99,5 +99,27 @@ static class Layout
             panel.Controls.Add(child);
         }
         return panel;
+    }
+}
+
+/// <summary>设好属性的布局控件放进子控件后返回，表达式里就能嵌套（子控件可以用 [.. 序列] 展开）。</summary>
+static class Build
+{
+    public static FlexControl Flex(FlexControl flex, params Control[] children)
+    {
+        flex.Controls.AddRange(children);
+        return flex;
+    }
+
+    public static GridControl Grid(GridControl grid, params Control[] children)
+    {
+        grid.Controls.AddRange(children);
+        return grid;
+    }
+
+    public static CardControl Card(CardControl card, params Control[] body)
+    {
+        card.Controls.AddRange(body);
+        return card;
     }
 }

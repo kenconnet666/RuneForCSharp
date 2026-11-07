@@ -2,13 +2,42 @@ using static Rune.WinForms.Examples.Layout;
 
 namespace Rune.WinForms.Examples;
 
-/// <summary>List 的示例（vue-tsx-pro 文档站 base/List）。icons（功能清单）要等 Card、Flex、Grid。</summary>
+/// <summary>List 的示例（vue-tsx-pro 文档站 base/List）。</summary>
 static class ListExamples
 {
     public static Example[] All =>
     [
         new("List", "basic", "无序、有序与嵌套", "正文里的列表：UnorderedListControl 是圆点（WinForms 自己有 ListControl），OrderedListControl 是编号（Start 从几开始），Gap 调项之间的间距。ListItemControl 的 Text 是项的文字，嵌套的列表加成它的子控件。", Basic),
+        new("List", "icons", "图标代替圆点", "Icon 让每项前面画一个图标（功能清单的对勾），PropsIcon 改图标颜色；ListItemControl 的 Icon、PropsIcon 逐项覆盖。图标是装饰，读屏照常念\"列表，几项\"。TextSize 是字号档位。", Features),
     ];
+
+    static readonly (string Name, string Price, (string Feature, bool Included)[] Features)[] Plans =
+    [
+        ("专业版", "¥39 / 月", [("不限项目数", true), ("100 GB 存储", true), ("版本历史 30 天", true), ("单点登录", false)]),
+        ("团队版", "¥99 / 人 / 月", [("专业版的全部功能", true), ("共享空间与权限", true), ("版本历史 1 年", true), ("单点登录", true)]),
+    ];
+
+    /// <summary>功能清单：包含的打勾（success），不包含的画减号、文字淡一些（muted）。</summary>
+    static Control Features() => Build.Grid(new GridControl { MinItemWidth = "14em", Gap = Space.Md },
+        [.. Plans.Select(plan =>
+        {
+            var list = new UnorderedListControl { Icon = Lucide.Check, PropsIcon = new() { Tone = TextTone.Success }, Gap = Space.Sm, TextSize = TextSize.Sm };
+            list.Controls.AddRange([.. plan.Features.Select(entry => entry.Included
+                ? Item(new TextControl { Text = entry.Feature })
+                : Muted(Item(new TextControl { Text = entry.Feature, Tone = TextTone.Muted })))]);
+            return Build.Card(new CardControl(), Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Md },
+                Build.Flex(new FlexControl { Direction = FlexDirection.Column },
+                    new StrongControl { Text = plan.Name, TextSize = TextSize.Lg },
+                    new TextControl { Text = plan.Price, Tone = TextTone.Muted, TextSize = TextSize.Sm }),
+                list));
+        })]);
+
+    static ListItemControl Muted(ListItemControl item)
+    {
+        item.Icon = Lucide.Minus;
+        item.PropsIcon = new() { Tone = TextTone.Muted };
+        return item;
+    }
 
     static Control Basic()
     {
