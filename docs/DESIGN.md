@@ -179,10 +179,10 @@ WPF 没有这个问题：主题样式（DefaultStyleKey）的触发器整体低�
 
 | | Avalonia | WPF | WinForms |
 |---|---|---|---|
-| 默认值（defaults） | 应用或 `rune:Provider` 的 Styles 里按类型写 Setter（`rune\|Button` 设 Variant、Tone、Size） | `Provider.Styles` 里按类型写 Style（合成 BasedOn 链） | 做 WinForms Provider 时定（M1，工作包 5） |
-| 外观（styles） | 同上；要盖过档位给的颜色时选择器带类或伪类（"待定的决定"里的做法 A）；整片换色调设 `Palette` | 同上；任何 setter 都盖过主题样式的档位，内层普通值连外层条件值一起替换 | 同上 |
+| 默认值（defaults） | 应用或 `rune:Provider` 的 Styles 里按类型写 Setter（`rune\|Button` 设 Variant、Tone、Size） | `Provider.Styles` 里按类型写 Style（合成 BasedOn 链） | 作用域控件 `ProviderControl` 的 `Defaults.Set(new ButtonDefaults { … })`（每种组件一个记录） |
+| 外观（styles） | 同上；要盖过档位给的颜色时选择器带类或伪类（"待定的决定"里的做法 A）；整片换色调设 `Palette` | 同上；任何 setter 都盖过主题样式的档位，内层普通值连外层条件值一起替换 | `ProviderControl.Styles.Set(new ButtonSx { … })` |
 | 部件（propsXxx） | `/template/` 选择器、代码组合部件的子选择器（第 7 节） | 部件样式键 `ButtonParts.Icon`（`PartKey`） | 部件属性记录 `PropsIcon` |
-| 单个实例（sx） | 实例的 Styles、Classes | 实例的 Style | `Sx` 记录（M1） |
+| 单个实例（sx） | 实例的 Styles、Classes | 实例的 Style、元素上的附加 `Provider.Styles` | 实例的 `Sx` 记录（`ButtonSx`、`BadgeSx`） |
 
 稳定的名字：组件的公开属性、部件名常量与部件样式键（`ButtonParts.*`、`*Parts`）、token 资源键（`Rune.Brush.*`、`Rune.FontSize.*`……，由 token-gen 按上游生成）、`Rune.Palette.*`。
 **不保证稳定**的组装用资源键：Avalonia 的 `Rune.ButtonCore`（按钮家族共用的 ControlTheme）、WPF 的 `Rune.ButtonCore` 与 `Rune.Recipe.*`（生成的配方触发器）。XAML 的资源键藏不住，所以写在这里；要改按钮家族的外观，写类型键的样式，不要 BasedOn 这些键。
@@ -190,7 +190,9 @@ WPF 没有这个问题：主题样式（DefaultStyleKey）的触发器整体低�
 ### WinForms：分层解析
 
 - 没有样式系统。外观是一个"字段可空"的记录，按"Sx > 内层作用域 > 外层作用域 > 配方"逐字段取第一个非空值（已实测）。
-- 作用域控件沿 Parent 链查找，作用域里的样式与默认值都是信号。解析结果是 `Computed`，绘制时读取它（第 10 节）。
+- 已做（2026-11-07）：作用域控件 `ProviderControl`（`Config/`）：`Theme`、`Lang`（null 沿用外层，最外层是应用级信号）、`Defaults`、`Styles`（每种组件一个记录，`IScopeRecord<T>.Merge` 逐字段合并）。组件沿 Parent 链取最近一层：元素经 `ElementContext.Scope`（宿主用 `ElementContext.Of(control)` 建环境），控件用 `ProviderControl.ThemeOf / LangOf`。档位的取值是"实例写了的 > 作用域合并的默认值 > 组件默认"；实例写了的单独存，设计器只序列化它们（以前按"不等于组件默认"判断，显式写成默认值会被作用域盖掉）。作用域里任何一项变了，就通知里面的宿主（`IScopeAware`）重新排版、重画；宿主换了父级时也重新解析。已接上的组件：按钮家族（`ButtonDefaults`、`ButtonSx`）、Badge（`BadgeDefaults`、`BadgeSx`）、Link（`LinkDefaults`）；其余组件照同一写法接。
+- 没做：解析结果按（档位组合, 作用域）共享 `Computed`（现在每次取值沿 Parent 链合并，作用域变了靠通知而不是信号）；作用域的部件属性（如 `PropsIcon` 的默认值）；上游的 `components.X.variants`；语言包的部分覆盖（上游 `lang` 是 Partial，三个平台都还是整份替换）。
+- 原设想：作用域控件沿 Parent 链查找，作用域里的样式与默认值都是信号。解析结果是 `Computed`，绘制时读取它（第 10 节）。
 - 配方结果**按（档位组合, 作用域）共享一个 `Computed`**，不要每个元素一个：主题 token 的订阅者从"元素数 × token 数"降到"组合数 × token 数"（3000 个元素读 3 个 token：8100 → 18，第 9 节）。
 
 ## 5. 默认值
