@@ -40,6 +40,12 @@ public class Checkbox : ChoiceBase
     /// <summary>文字下方的说明（读屏的帮助文字）。</summary>
     public static readonly StyledProperty<object?> DescriptionProperty = DescriptionCoreProperty.AddOwner<Checkbox>();
 
+    /// <summary>卡片外观：整块是一张带边框的卡片，勾选时边框与底色换成色调色；不写时跟随所在组的 Card。</summary>
+    public static readonly StyledProperty<bool?> CardProperty = CardCoreProperty.AddOwner<Checkbox>();
+
+    /// <summary>结束边的内容（价格、标记），卡片外观时常用。</summary>
+    public static readonly StyledProperty<object?> EndProperty = EndCoreProperty.AddOwner<Checkbox>();
+
     /// <summary>部分勾选（"全选"下面只选了一部分）：显示横线。</summary>
     public static readonly StyledProperty<bool> IsIndeterminateProperty = AvaloniaProperty.Register<Checkbox, bool>(nameof(IsIndeterminate));
 
@@ -85,6 +91,12 @@ public class Checkbox : ChoiceBase
     /// <summary>说明。</summary>
     public object? Description { get => GetValue(DescriptionProperty); set => SetValue(DescriptionProperty, value); }
 
+    /// <summary>卡片外观。</summary>
+    public bool? Card { get => GetValue(CardProperty); set => SetValue(CardProperty, value); }
+
+    /// <summary>结束边的内容。</summary>
+    public object? End { get => GetValue(EndProperty); set => SetValue(EndProperty, value); }
+
     /// <summary>部分勾选。</summary>
     public bool IsIndeterminate { get => GetValue(IsIndeterminateProperty); set => SetValue(IsIndeterminateProperty, value); }
 
@@ -93,6 +105,9 @@ public class Checkbox : ChoiceBase
 
     /// <inheritdoc />
     private protected override bool InGroup => group is not null;
+
+    /// <inheritdoc />
+    private protected override ChoiceGroup? OwnerGroup => group;
 
     /// <inheritdoc />
     protected override bool ReadOnly => base.ReadOnly || group?.ReadOnly == true;

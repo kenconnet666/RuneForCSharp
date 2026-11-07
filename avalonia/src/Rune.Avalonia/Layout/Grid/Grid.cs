@@ -109,6 +109,9 @@ public class Grid : Panel
         }
     }
 
+    /// <summary>按最小宽度分列时保留空列（auto-fill，项少时不拉宽；卡片外观的复选组、单选组）；默认收起（auto-fit）。</summary>
+    internal bool AutoFill { get; set { field = value; InvalidateMeasure(); } }
+
     List<Control> Shown() => [.. Children.Where(child => child.IsVisible)];
 
     static GridLayout.Item ItemOf(Control child) => child is GridItem item
@@ -127,7 +130,7 @@ public class Grid : Panel
         var dense = Flow.Value is "row dense" or "column dense";
         cells = GridLayout.Place(items, columns, columnFlow, dense);
         // auto-fit：项目比放得下的列数少时，空列收起
-        if (MinItemWidth is not null && !double.IsInfinity(width) && GridLayout.UsedColumns(cells) is var used && used < columns)
+        if (MinItemWidth is not null && !AutoFill && !double.IsInfinity(width) && GridLayout.UsedColumns(cells) is var used && used < columns)
             cells = GridLayout.Place(items, columns = used, columnFlow, dense);
         ColumnCount = Math.Max(columns, GridLayout.UsedColumns(cells));
         if (double.IsInfinity(width))

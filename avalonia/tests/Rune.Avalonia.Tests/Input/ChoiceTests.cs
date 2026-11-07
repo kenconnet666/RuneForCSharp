@@ -211,4 +211,29 @@ public class ChoiceTests
         var pro = plans.GetLogicalDescendants().OfType<Radio>().ElementAt(1);
         Assert.Equal(("pro", "专业版", "¥99 / 月"), (pro.Value, pro.Content as string, pro.Description as string));
     });
+
+    [Fact]
+    public Task Card_flows_from_the_group_and_end_sits_at_the_end_edge() => HeadlessUi.Run(() =>
+    {
+        var basic = new Radio { Value = "basic", Content = "基础版", End = "¥0" };
+        var pro = new Radio { Value = "pro", Content = "专业版", Description = "团队协作", End = "¥99" };
+        var plain = new Radio { Value = "plain", Content = "不要卡片", Card = false };
+        var plans = new RadioGroup { Value = "basic", Card = true, Orientation = global::Avalonia.Layout.Orientation.Horizontal, Items = { basic, pro, plain } };
+        var features = new CheckboxGroup { Card = true, Items = { new Checkbox { Value = "sso", Content = "单点登录" } } };
+        var window = HeadlessUi.Show(new StackPanel { Width = 720, Children = { plans, features } });
+
+        Assert.True(basic.AsCard); // 组的 Card 交给每一项
+        Assert.False(plain.AsCard); // 单项写的优先
+        Assert.Contains(":card", basic.Classes);
+        Assert.Equal(basic.Bounds.Width, pro.Bounds.Width); // 横排按最小宽度分列，每张一样宽
+        var end = pro.Part<global::Avalonia.Controls.Presenters.ContentPresenter>(ChoiceBaseParts.End);
+        Assert.Equal(pro.Bounds.Width - (0.75 * pro.FontSize + 1), end.Bounds.Right, 1); // 贴着结束边（卡片的内边距与描边之内）
+        Click(window, pro);
+        Assert.Equal("pro", plans.Value);
+
+        var sso = features.GetLogicalDescendants().OfType<Checkbox>().Single();
+        Assert.True(sso.AsCard);
+        Click(window, sso);
+        Assert.Equal(["sso"], features.Value);
+    });
 }

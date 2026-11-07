@@ -26,6 +26,12 @@ public class Radio : ChoiceBase
     /// <summary>文字下方的说明（读屏的帮助文字）。</summary>
     public static readonly StyledProperty<object?> DescriptionProperty = DescriptionCoreProperty.AddOwner<Radio>();
 
+    /// <summary>卡片外观：整块是一张带边框的卡片，勾选时边框与底色换成色调色；不写时跟随所在组的 Card。</summary>
+    public static readonly StyledProperty<bool?> CardProperty = CardCoreProperty.AddOwner<Radio>();
+
+    /// <summary>结束边的内容（价格、标记），卡片外观时常用。</summary>
+    public static readonly StyledProperty<object?> EndProperty = EndCoreProperty.AddOwner<Radio>();
+
     /// <summary>这一项的值。</summary>
     public static readonly StyledProperty<string?> ValueProperty = AvaloniaProperty.Register<Radio, string?>(nameof(Value));
 
@@ -48,6 +54,12 @@ public class Radio : ChoiceBase
     /// <summary>说明。</summary>
     public object? Description { get => GetValue(DescriptionProperty); set => SetValue(DescriptionProperty, value); }
 
+    /// <summary>卡片外观。</summary>
+    public bool? Card { get => GetValue(CardProperty); set => SetValue(CardProperty, value); }
+
+    /// <summary>结束边的内容。</summary>
+    public object? End { get => GetValue(EndProperty); set => SetValue(EndProperty, value); }
+
     /// <summary>这一项的值。</summary>
     public string? Value { get => GetValue(ValueProperty); set => SetValue(ValueProperty, value); }
 
@@ -56,6 +68,9 @@ public class Radio : ChoiceBase
 
     /// <inheritdoc />
     private protected override bool InGroup => group is not null;
+
+    /// <inheritdoc />
+    private protected override ChoiceGroup? OwnerGroup => group;
 
     /// <inheritdoc />
     protected override bool ReadOnly => group?.ReadOnly == true;

@@ -13,6 +13,10 @@
     <Setter Property="HorizontalAlignment" Value="Left" />
     <Setter Property="VerticalAlignment" Value="Center" />
   </Style>
+  <!-- 卡片占满宽度；有结束边内容时同样撑开，结束边的内容才贴得到结束边（TS 里组是 flex 列、项被拉伸） -->
+  <Style Selector=":is(rune|ChoiceBase):card, :is(rune|ChoiceBase):end">
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+  </Style>
   <Style Selector=":is(rune|ChoiceBase):readonly">
     <Setter Property="Cursor" Value="Arrow" />
   </Style>

@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
+using Avalonia.Controls.Templates;
 using Avalonia.Layout;
 using Avalonia.LogicalTree;
 
@@ -10,9 +11,10 @@ namespace Rune.Avalonia;
 /// <summary>
 /// 复选组、单选组共用的部分（vue-tsx-pro 的 choiceRecipe 的 group）：竖排（gap xs）或横排换行（列距 lg、行距 xs），
 /// 整组只读、出错，项可以直接写在里面，也可以来自 ItemsSource（ListboxOption、字符串，或任意数据加 <see cref="ToOption"/>）。
-/// 整组不可用写 IsEnabled。排列由主题里的 ItemsPanel 给（ChoiceGroup.axaml）。
+/// 整组不可用写 IsEnabled。排列由主题里的 ItemsPanel 给（ChoiceGroup.axaml）。卡片外观（<see cref="Card"/>）时每项是一张卡片、组排成栅格：
+/// 竖排一列（gap sm），横排按 <see cref="MinItemWidth"/>（默认 14em）auto-fill 分列（列距 lg、行距 xs）。
 /// </summary>
-[PseudoClasses(":horizontal", ":readonly", ":invalid")]
+[PseudoClasses(":horizontal", ":readonly", ":invalid", ":card")]
 public abstract class ChoiceGroup : ItemsControl, IFieldControl
 {
     /// <summary>排列方向；默认竖排。</summary>
@@ -26,6 +28,18 @@ public abstract class ChoiceGroup : ItemsControl, IFieldControl
 
     /// <summary>ItemsSource 的数据 → 选项（值、文字、说明、不可用）；数据是 ListboxOption、字符串时不用写。</summary>
     public static readonly StyledProperty<Func<object?, ListboxOption>?> ToOptionProperty = AvaloniaProperty.Register<ChoiceGroup, Func<object?, ListboxOption>?>(nameof(ToOption));
+
+    /// <summary>卡片外观：每项是一张带边框的卡片，勾选时边框与底色换成色调色；组里的项都跟着（项自己写了 Card 的除外）。</summary>
+    public static readonly StyledProperty<bool> CardProperty = AvaloniaProperty.Register<ChoiceGroup, bool>(nameof(Card));
+
+    /// <summary>卡片外观横排时每张的最小宽度，放得下几张就几列（auto-fill）；默认 14em。</summary>
+    public static readonly StyledProperty<Length> MinItemWidthProperty = AvaloniaProperty.Register<ChoiceGroup, Length>(nameof(MinItemWidth), Length.Parse("14em"));
+
+    /// <summary>卡片外观。</summary>
+    public bool Card { get => GetValue(CardProperty); set => SetValue(CardProperty, value); }
+
+    /// <summary>卡片外观横排时每张的最小宽度。</summary>
+    public Length MinItemWidth { get => GetValue(MinItemWidthProperty); set => SetValue(MinItemWidthProperty, value); }
 
     /// <summary>排列方向。</summary>
     public Orientation Orientation { get => GetValue(OrientationProperty); set => SetValue(OrientationProperty, value); }
@@ -52,11 +66,32 @@ public abstract class ChoiceGroup : ItemsControl, IFieldControl
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
-        if (change.Property == OrientationProperty) PseudoClasses.Set(":horizontal", Orientation == Orientation.Horizontal);
+        if (change.Property == OrientationProperty || change.Property == CardProperty || change.Property == MinItemWidthProperty)
+        {
+            PseudoClasses.Set(":horizontal", Orientation == Orientation.Horizontal);
+            PseudoClasses.Set(":card", Card);
+            UpdatePanel();
+            if (change.Property == CardProperty) Sync();
+        }
         else if (change.Property == IsReadOnlyProperty || change.Property == IsInvalidProperty || change.Property == Field.OwnerProperty) Refresh();
     }
 
     void IFieldControl.FieldChanged() => Refresh();
+
+    /// <summary>卡片外观时换成栅格（gap sm；横排按最小宽度 auto-fill，竖排一列）；不是卡片时用主题里的排列。</summary>
+    void UpdatePanel()
+    {
+        if (!Card)
+        {
+            ClearValue(ItemsPanelProperty);
+            return;
+        }
+        var (horizontal, minWidth) = (Orientation == Orientation.Horizontal, MinItemWidth);
+        // 横排时列距 lg、行距 xs（上游排列方向的 columnGap、rowGap 是长写，盖过卡片的 gap: sm），竖排 gap sm
+        ItemsPanel = new FuncTemplate<Panel?>(() => horizontal
+            ? new Grid { ColumnGap = Space.Lg, RowGap = Space.Xs, MinItemWidth = minWidth, AutoFill = true }
+            : new Grid { Gap = Space.Sm, Columns = 1 });
+    }
 
     void Refresh()
     {
