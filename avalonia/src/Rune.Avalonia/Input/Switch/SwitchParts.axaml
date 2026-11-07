@@ -8,15 +8,14 @@
         xmlns:rune="clr-namespace:Rune.Avalonia">
   <Style Selector="rune|Switch > #PART_Control > Border#PART_Track">
     <Setter Property="Background" Value="{DynamicResource Rune.Brush.BorderStrong}" />
-    <Setter Property="BorderBrush" Value="Transparent" />
-    <Setter Property="BorderThickness" Value="2" />
   </Style>
   <Style Selector="rune|Switch:checked > #PART_Control > Border#PART_Track">
     <Setter Property="Background" Value="{Binding $parent[rune:Switch].ToneFill}" />
-    <Setter Property="BorderBrush" Value="{Binding $parent[rune:Switch].ToneFill}" />
   </Style>
+  <!-- 只在出错时画描边：Border 的底色只铺在描边里面，透明描边会让关着的轨道小一圈（CSS 的底色铺到描边下面） -->
   <Style Selector="rune|Switch:invalid > #PART_Control > Border#PART_Track">
     <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Danger}" />
+    <Setter Property="BorderThickness" Value="2" />
   </Style>
   <Style Selector="rune|Switch > #PART_Control > Border#PART_Thumb">
     <Setter Property="Background" Value="{DynamicResource Rune.Brush.Background}" />
