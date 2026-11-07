@@ -258,6 +258,15 @@ QueryTable、ErrorBoundary、JsonViewer、ImageCropper、QuarterCalendar、Carou
 |---|---|---|
 | 新组件 UserButton | ButtonBase、Avatar 都已做，三个平台都能直接组合 | CI 绿后锁定，三个平台照做，补 Avatar 页的示例 |
 
+锁定跟到 e18a29a6（含 P12 第二批，7c019043 还在跑）：生成文件没变；parity 的 TabList 多缺一个 propsScrollButton（同上，等滚动按钮），行为对照 204 条、66 条没对上（并进整理）。
+
+### 第二十二批（2026-11-08 通知，master d99ab483：Countdown 的数字块外观；f98eb920 是文档）
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| Countdown 成为配方组件，variant: 'text'（默认）或 'blocks'（天数单独一格、时分秒各一格、格间“:”；部件 root、segment、separator，segment 最小 2em、accent 底、accentContrast 字、semibold） | Countdown 还没做 | 做时照新的 |
+| AppShell、NotificationCenter 的示例改用 UserButton 做账号菜单（f98eb920） | AppShell 已做，示例里的账号区会跟着变 | 做 UserButton 时一起改 AppShell 的示例（菜单还没有） |
+
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 
 计划：vue-tsx-pro 的 `.claude/reports/style-overhaul-plan.md`（阶段 0 护栏 → 1 引擎 → 2 架构与 API → 3 整理 → 4 美学 → 5 文档）。
