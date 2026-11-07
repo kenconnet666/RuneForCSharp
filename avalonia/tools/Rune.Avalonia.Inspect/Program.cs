@@ -192,7 +192,7 @@ static class Inspector
         {
             // 组件在代码里组合的子组件（Badge 里的文字）不单独记：TS 里那是组件自己的文字节点
             var composed = element is TextBlock && element.GetVisualParent() is Control parent && IsComponent(parent) && parent is not TextBlock;
-            var name = element.Name is { } part && Owner(element) is { } owner && StyleReport.IsScoped(owner.GetType().Name) && DeclaredParts(owner.GetType()).Contains(part)
+            var name = element.Name is { } part && Owner(element, part) is { } owner && StyleReport.IsScoped(owner.GetType().Name)
                 ? StyleReport.Name(owner.GetType().Name, part)
                 : IsComponent(element) && !composed && StyleReport.IsScoped(element.GetType().Name) ? StyleReport.Name(element.GetType().Name, null) : null;
             if (name is not null) report.Add(name, element.GetType().Name, Values(element));
@@ -202,8 +202,10 @@ static class Inspector
         // 组件内部组合用的面板（SwitchStack）不公开，不算组件：部件的归属越过它找到公开的组件
         static bool IsComponent(Control element) => element.GetType() is { IsVisible: true } type && type.Namespace == typeof(RuneTheme).Namespace;
 
-        static Control? Owner(Control element) =>
-            element.TemplatedParent as Control ?? element.GetVisualAncestors().OfType<Control>().FirstOrDefault(IsComponent);
+        // 部件的主人：声明了这个部件名的模板主人或组件祖先，越过组件内部组合用的组件（UserButton 内容里的 Flex）
+        static Control? Owner(Control element, string part) =>
+            (element.TemplatedParent is Control parent ? [parent] : element.GetVisualAncestors().OfType<Control>().Where(IsComponent))
+            .FirstOrDefault(owner => DeclaredParts(owner.GetType()).Contains(part));
     }
 
     /// <summary>组件声明的部件名：它与基类各自的 <c>&lt;类型&gt;Parts</c> 类里的常量（ButtonParts.Icon = "PART_Icon"）。</summary>

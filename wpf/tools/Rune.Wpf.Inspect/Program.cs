@@ -191,7 +191,7 @@ static class Inspector
             {
                 // 组件在代码里组合的子组件（Badge 里的文字）不单独记：TS 里那是组件自己的文字节点
                 var composed = element is TextBlock && VisualTreeHelper.GetParent(element) is FrameworkElement parent && IsComponent(parent) && parent is not TextBlock;
-                var name = element.Name is { Length: > 0 } part && Owner(element) is { } owner && StyleReport.IsScoped(owner.GetType().Name) && DeclaredParts(owner.GetType()).Contains(part)
+                var name = element.Name is { Length: > 0 } part && Owner(element, part) is { } owner && StyleReport.IsScoped(owner.GetType().Name)
                     ? StyleReport.Name(owner.GetType().Name, part)
                     : IsComponent(element) && !composed && StyleReport.IsScoped(element.GetType().Name) ? StyleReport.Name(element.GetType().Name, null) : null;
                 if (name is not null) report.Add(name, element.GetType().Name, Values(element));
@@ -202,11 +202,12 @@ static class Inspector
         // 组件内部组合用的面板（SwitchStack）不公开，不算组件：部件的归属越过它找到公开的组件
         static bool IsComponent(FrameworkElement element) => element.GetType() is { IsVisible: true } type && type.Namespace == typeof(RuneTheme).Namespace;
 
-        static FrameworkElement? Owner(FrameworkElement element)
+        // 部件的主人：声明了这个部件名的模板主人或组件祖先，越过组件内部组合用的组件（UserButton 内容里的 Flex）
+        static FrameworkElement? Owner(FrameworkElement element, string part)
         {
-            if (element.TemplatedParent is FrameworkElement parent) return parent;
+            if (element.TemplatedParent is FrameworkElement parent) return DeclaredParts(parent.GetType()).Contains(part) ? parent : null;
             for (var node = VisualTreeHelper.GetParent(element); node is not null; node = VisualTreeHelper.GetParent(node))
-                if (node is FrameworkElement ancestor && IsComponent(ancestor)) return ancestor;
+                if (node is FrameworkElement ancestor && IsComponent(ancestor) && DeclaredParts(ancestor.GetType()).Contains(part)) return ancestor;
             return null;
         }
     }

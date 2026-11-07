@@ -50,6 +50,8 @@ for (const [id, example] of Object.entries(upstream.examples)) {
     let ours;
     try {
       ours = JSON.parse(inspect(['styles', `${component}/${id}`, '--theme', theme, '--width', String(upstream.width ?? 800), '--json'])).parts;
+      // 平台的 inspect 没有 styles 命令（WinForms）时输出里没有 parts：同样算没取到
+      if (!ours) throw new Error('inspect 没有输出部件');
     } catch {
       results.push({ example: id, theme, missing: true, diffs: [], only: { theirs: [], ours: [] } });
       continue;
