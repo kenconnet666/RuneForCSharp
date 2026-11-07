@@ -102,6 +102,8 @@ const BUTTON_TYPE = '表单提交是浏览器的概念；对话框的默认、�
 
 /** 某个组件不移植的 prop 与原因（平台上没有对应的概念）：parity 不报缺 */
 export const PROPS_NOT_PORTED = {
+  NavList: { propsList: 'nav > ul 是 HTML 的结构：NavList 本身就是那一列' },
+  NavItem: { propsItem: '外层的 li 是 HTML 列表的结构：桌面上导航项本身就是列表里的一行' },
   Button: { type: BUTTON_TYPE },
   IconButton: { type: BUTTON_TYPE },
   ButtonBase: { type: BUTTON_TYPE },
@@ -133,6 +135,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
   },
   WinForms: {
     Tabs: { ripple: '标签是组件库画的容器控件（里面放文字与计数），没有按下的波纹' },
+    NavItem: { ripple: '导航行是组件库画的容器控件（里面放图标、文字与计数），没有按下的波纹' },
     CodeBlock: Object.fromEntries(
       ['propsCode', 'propsRoot', 'propsHeader', 'propsTitle', 'propsBody', 'propsLine', 'propsLineNumber', 'propsCopy', 'propsScroll', 'propsExpand', 'propsExpandIcon']
         .map((prop) => [prop, '外层、标题栏、代码与行号、展开按钮都是 CodeBlockControl 自己画的，没有可改的部件']),

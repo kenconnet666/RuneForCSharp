@@ -664,6 +664,26 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 像素对照（plans）：Avalonia 0.08% / 0.12%、WPF 0.05% / 0.38%、WinForms 0.32% / 0.41%。剩下的主要是表头那一行：上游是文字加行内的徽标（vertical-align: middle），
   行盒撑到 21.99，我们的 Flex 是 21，下面的行线差半个像素。示例：plans；invoice 要等 ToggleGroup，column-table 要等 ColumnTable。
 
+### NavList（2026-11-07）
+
+- 照上游：NavList > NavItem / NavGroup（可展开）/ NavSection（带小标题、一直展开）。桌面上没有路由：NavList 的 `CurrentHref` 是当前地址（TS 路由适配的 isActive
+  按它判断：地址相同的项是当前页，NavItem 的 `Active` 可以直接指定），点击先发项自己的 Click，再发 NavList 的 `Navigate`（TS 交给路由的 navigate），
+  没有被处理就把 CurrentHref 改成那一项的地址。含当前页的分组自动展开（离开时不收起）。当前页读屏：Avalonia、WPF 的项状态是"当前页"，WinForms 是选中的链接。
+- 导航行（NavItem 与分组标题共用，TS 的 itemStyles.row 加 navListStyles.row）：控件高度、上下 space.xs、左右 space.md、md 圆角、图标与文字隔 space.sm，
+  中等字重，textMuted / 悬停 text 与 fillHover / 当前页 accentSoft、accentText。`Badge` 是计数角标：展开时是文字后面的实心徽标，紧凑时是图标上的小圆点（Indicator）。
+- `Compact`：项只剩图标、居中，名称在提示里（右边、200 毫秒）；小节标题只剩图标，上面一条 borderMuted 的细线；分组的子列表不缩进。
+  没做：紧凑时分组悬停弹出子项（TS 用 HoverCard，等它）；AppShell 的侧栏收成图标栏时自动紧凑（等 AppShell）。
+- **Avalonia**：导航行是 ButtonBase 派生的 `NavRow`（模板里图标套在 Indicator 里、文字、尾部内容、徽标、箭头），分组标题 `NavGroupHeader`。
+  分组、小节是 Control，里面的标题行与列表是代码组合的（Items 转进内部列表，逻辑父是列表）；部件名 NavRowParts、NavGroupParts、NavSectionParts。
+  ControlTheme 里不能写后代选择器：小节的部件样式在 NavListParts.axaml（Styles）。
+- **WPF**：同样的结构，部件是样式键。`new FrameworkPropertyMetadata(null, (d, _) => x.P = y)` 会选中 (PropertyChangedCallback, CoerceValueCallback) 的重载
+  （赋值表达式有返回值，lambda 能当强制回调），属性被强制成旧值：属性回调里只调 void 方法。显式部件样式替掉了隐式样式，部件是 Text、NavRow 这类有主题样式的要 BasedOn。
+- **WinForms**：NavListControl、NavItemControl、NavGroupControl（Items 是内部列表的子控件）、NavSectionControl；导航行是 FlexControl（图标、文字、徽标是子控件），
+  提示用 NavListControl 自带的 TooltipProvider。内边距、控件高度按字号：从窗体继承来的字体到得晚，字体或 DPI 变了重新同步。分组的箭头换图形（GDI 的图标不转）。
+- 像素对照（groups、sections、compact）：Avalonia、WPF ≤0.1%；WinForms groups、sections ≤0.2%，compact 2.6%（Switch 那一行四周的焦点环留白）。示例：toc 等 TableOfContents。
+- 做的时候查出 Flex 的一处问题（Avalonia、WPF）：分到的正好是自然尺寸时，第二遍仍按这个有限值量子元素，布局系统之后按这个旧约束重量，子元素长高报不上来
+  （嵌套的竖排、卡片矮几像素）。没有伸缩的项改成按不限量，摆的尺寸等于内容尺寸时不重分。
+
 ### CodeBlock（2026-11-07）
 
 - 标题栏（surfaceMuted、等宽 0.85em、下边分隔线）、代码区（等宽 0.9em、行高 normal、上下 0.75em 左右 1em，ScrollArea 横向滚动，Wrap 时换行）、

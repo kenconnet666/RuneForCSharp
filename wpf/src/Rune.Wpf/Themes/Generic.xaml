@@ -22,6 +22,7 @@
     <ResourceDictionary Source="/Rune.Wpf;component/Layout/ScrollArea/ScrollArea.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Navigation/Toolbar/Toolbar.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Navigation/Tabs/Tabs.xaml" />
+    <ResourceDictionary Source="/Rune.Wpf;component/Navigation/NavList/NavList.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Table/Table.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Feedback/Skeleton/Skeleton.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Feedback/SkeletonText/SkeletonText.xaml" />

@@ -26,6 +26,7 @@
         <ResourceInclude Source="avares://Rune.Avalonia/Layout/ScrollArea/ScrollArea.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Navigation/Toolbar/Toolbar.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Navigation/Tabs/Tabs.axaml" />
+        <ResourceInclude Source="avares://Rune.Avalonia/Navigation/NavList/NavList.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Table/Table.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Display/Card/Card.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Display/Avatar/Avatar.axaml" />
@@ -48,4 +49,5 @@
   <StyleInclude Source="avares://Rune.Avalonia/Input/Checkbox/CheckboxParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Input/Radio/RadioParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Form/Field/FieldParts.axaml" />
+  <StyleInclude Source="avares://Rune.Avalonia/Navigation/NavList/NavListParts.axaml" />
 </Styles>

@@ -1,0 +1,83 @@
+<!--
+  NavList 的主题（vue-tsx-pro 的 itemStyles.row、navListStyles）：导航行控件高度、上下 space.xs、左右 space.md、md 圆角、图标与文字隔 space.sm，
+  中等字重、行高 normal，平时 textMuted，悬停 text 与 fillHover 底；当前页 accentSoft 底（悬停 accentSoftHover）、accentText；不可用时半透明、没有悬停底色。
+  只剩图标时居中、左右不留内边距，文字与尾部内容隐藏（名称留给读屏与提示）。分组标题的箭头在 durations.sm 内转动。
+  小节标题的部件在 NavListParts.axaml。
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:NavRow}" TargetType="rune:NavRow" BasedOn="{StaticResource {x:Type rune:ButtonBase}}">
+    <Setter Property="MinHeight" Value="{rune:ControlHeight}" />
+    <Setter Property="Padding" Value="{rune:Em 0.75, 0.25}" />
+    <Setter Property="CornerRadius" Value="{rune:Em Resource=Rune.Radius.Md}" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+    <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="TextBlock.LineHeight" Value="{rune:Em Resource=Rune.LineHeight.Normal}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border Name="PART_Root" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" ClipToBounds="True">
+            <Panel>
+              <Canvas Name="PART_Ripples" IsHitTestVisible="False" />
+              <rune:Flex Name="PART_Row" Align="Center" Gap="sm" Margin="{TemplateBinding Padding}">
+                <rune:Indicator Name="PART_Indicator" VerticalAlignment="Center">
+                  <rune:Icon Name="PART_Icon" Data="{TemplateBinding Icon}" />
+                </rune:Indicator>
+                <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
+                                  VerticalAlignment="Center" rune:Flex.Grow="True" TextTrimming="CharacterEllipsis" />
+                <ContentPresenter Name="PART_End" Content="{TemplateBinding End}" VerticalAlignment="Center" />
+                <rune:Badge Name="PART_Badge" Size="xs" Variant="solid" Radius="full" IsVisible="False" />
+                <rune:Icon Name="PART_Chevron" Data="{x:Static rune:Lucide.ChevronRight}" IsVisible="False" />
+              </rune:Flex>
+            </Panel>
+          </Border>
+          <Border Name="PART_FocusRing" IsVisible="False" IsHitTestVisible="False"
+                  BorderThickness="2" BorderBrush="{DynamicResource Rune.Brush.FocusRing}" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:focus-visible /template/ Border#PART_FocusRing"><Setter Property="IsVisible" Value="True" /></Style>
+    <Style Selector="^:not(:has-icon) /template/ rune|Indicator#PART_Indicator"><Setter Property="IsVisible" Value="False" /></Style>
+    <Style Selector="^:pointerover">
+      <Setter Property="Background" Value="{DynamicResource Rune.Brush.FillHover}" />
+      <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    </Style>
+    <Style Selector="^:current">
+      <Setter Property="Background" Value="{DynamicResource Rune.Brush.AccentSoft}" />
+      <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.AccentText}" />
+    </Style>
+    <Style Selector="^:current:pointerover">
+      <Setter Property="Background" Value="{DynamicResource Rune.Brush.AccentSoftHover}" />
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Cursor" Value="No" />
+    </Style>
+    <Style Selector="^:icon-only /template/ rune|Flex#PART_Row">
+      <Setter Property="Justify" Value="center" />
+      <Setter Property="Margin" Value="0" />
+    </Style>
+    <Style Selector="^:icon-only /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="IsVisible" Value="False" /></Style>
+    <Style Selector="^:icon-only /template/ ContentPresenter#PART_End"><Setter Property="IsVisible" Value="False" /></Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type rune:NavItem}" TargetType="rune:NavItem" BasedOn="{StaticResource {x:Type rune:NavRow}}" />
+
+  <ControlTheme x:Key="{x:Type rune:NavGroupHeader}" TargetType="rune:NavGroupHeader" BasedOn="{StaticResource {x:Type rune:NavRow}}">
+    <Style Selector="^ /template/ rune|Icon#PART_Chevron">
+      <Setter Property="IsVisible" Value="True" />
+      <Setter Property="Transitions">
+        <Transitions>
+          <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.12" Easing="0.2,0,0,1" />
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="^:icon-only /template/ rune|Icon#PART_Chevron"><Setter Property="IsVisible" Value="False" /></Style>
+  </ControlTheme>
+</ResourceDictionary>
