@@ -13,6 +13,18 @@ vue-tsx-pro 那边的会话改了设计时会发通知过来（每完成一个�
 | 2026-11-07 | Checkbox、Radio、Switch | 原生 input 不继承字体，方框、轨道的 em 按浏览器给 input 的 13.333px 算，sm、lg 档与文字、滑块对不上 | input 加 `font: 'inherit'` | 已修（9f7be887，0.11.1；锁定跟到 875797ae） |
 | 2026-11-07 | Listbox | multiple 示例写的 `height: 16rem` 落在有 padding: xs 的根元素上，默认 content-box，列表实际高 16rem + 0.5em；桌面上 Height 是整个控件，对照矮 7 像素 | listboxStyles.root 加 `boxSizing: 'border-box'`（同 control、itemStyles），或示例注明不含内边距 | 上游确认（2026-11-07）：全库约 80 个文件同样缺 border-box，打算在样式引擎最低层统一设，提交后通知重截 |
 
+## 下一阶段计划（2026-11-07 收到通知，ROADMAP 阶段 25，上游无人值守执行）
+
+上游每批推送照常通知，整个计划完成后再整体跟进一遍；下游问题以后用 GitHub issue（标签 parity）跟踪，会话消息只用来通知。
+
+| 上游的定法 | 对我们 | 做法 |
+|---|---|---|
+| 还没有使用方：旧 API 直接删、不留 deprecated；每批 CI 绿了从 master 发版 | 我们同样没有使用方 | 跟到新版本时直接改名、删旧写法 |
+| 样式引擎最低层统一 `box-sizing: border-box` | 修我们报的 Listbox 高度问题 | 等提交号，重截 listbox multiple |
+| 组件里的导航链接部件（ItemList 标题、Card 页头操作、StatGroup 操作、Timeline 附件）默认悬停才有下划线 | 正文 Link 不变 | 做这些组件时照做 |
+| P3 新组件：ChoiceCard、ItemList 可选中的行、ColorPicker、ImageCropper、Carousel、Dialog 拖动、Tag 加 selected、QRCode、FloatButton 组、JsonViewer、SignaturePad、DataTable 横向虚拟化 | Tag 刚做完 | selected 发版后补 |
+| P10 把组件规格（属性、默认值、部件、档位、键盘）导成 JSON | 可以在 CI 里比对 | 出来后让 parity 工具改读它 |
+
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 
 计划：vue-tsx-pro 的 `.claude/reports/style-overhaul-plan.md`（阶段 0 护栏 → 1 引擎 → 2 架构与 API → 3 整理 → 4 美学 → 5 文档）。

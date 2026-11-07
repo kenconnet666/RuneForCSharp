@@ -62,6 +62,15 @@ public class Badge : Element
 
     float DotSize => PropsDot?.Size ?? 0.5f;
 
+    /// <summary>文字后面留给 <see cref="TagControl"/> 移除按钮的宽度（em 系数，0 是没有）：中间隔 0.25em，末端的内边距收成 0.25em。</summary>
+    internal float TrailingEm { get; set { field = value; InvalidateMeasure(); } }
+
+    /// <summary>文字与图标的颜色（移除按钮跟着它）。</summary>
+    internal Color ForegroundIn(ElementContext context) => Resolve(context).Colors.Foreground;
+
+    /// <summary>Badge 的字号（移除按钮的 em 按它）。</summary>
+    internal float EmIn(ElementContext context) => Resolve(context).Inner.Em;
+
     /// <summary>合并好的图标部件；没有图标时为 null（测试用）。</summary>
     internal Icon? IconPart => icon;
 
@@ -92,7 +101,9 @@ public class Badge : Element
         var unbounded = new Size(int.MaxValue, int.MaxValue);
         var sizes = Parts().Select(part => part.Measure(inner, unbounded)).ToList();
         var leading = icon is null && Dot ? DotSize * em + 0.25f * em : 0;
-        var width = sizes.Sum(size => size.Width) + (sizes.Count - 1) * 0.25f * em + leading + 2 * (0.5f * em + BorderWidth(inner));
+        // 中间多隔 0.25em、末端内边距少 0.25em，相抵后只多出按钮的宽度
+        var trailing = TrailingEm * em;
+        var width = sizes.Sum(size => size.Width) + (sizes.Count - 1) * 0.25f * em + leading + 2 * (0.5f * em + BorderWidth(inner)) + trailing;
         var height = Math.Max(1.75f * em, sizes.Max(size => size.Height) + 2 * BorderWidth(inner));
         return new Size((int)MathF.Ceiling(width), (int)MathF.Ceiling(height));
     }

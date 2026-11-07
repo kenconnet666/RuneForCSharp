@@ -188,7 +188,8 @@ public abstract class ButtonCore : Element
         var colors = Colors(context.Theme.Colors);
         if (colors != target) Retarget(animate: false);
         var dim = IsEnabled ? 1f : Tokens.Opacity.Disabled;
-        var inner = Inner(context, Fade(colors.Foreground, dim));
+        // 上游禁用时整个按钮半透明；文字是 GDI 画的，颜色里的不透明度不起作用：混进按钮背后的颜色（取主题的表面色）
+        var inner = Inner(context, dim >= 1 ? colors.Foreground : Drawing.Mix(context.Theme.Colors.Surface, colors.Foreground, dim));
         var em = inner.Em;
         var border = Border(context);
         var bounds = new RectangleF(Bounds.X + border / 2, Bounds.Y + border / 2, Bounds.Width - border, Bounds.Height - border);

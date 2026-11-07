@@ -74,6 +74,7 @@ public class Badge : Control
     Icon? iconPart;
     Border? dotPart;
     Control? contentPart;
+    Control? trailingPart;
 
     /// <summary>新建标记。</summary>
     public Badge() => resources = new TemplateResources(this);
@@ -129,6 +130,19 @@ public class Badge : Control
     public TonePalette? Palette { get => GetValue(PaletteProperty); set => SetValue(PaletteProperty, value); }
 
     double Em => FontSize;
+
+    /// <summary>文字后面的部件（<see cref="Tag"/> 的移除按钮）；有它时末端的内边距收成 0.25em（按钮自己留了空）。</summary>
+    protected Control? Trailing
+    {
+        get => trailingPart;
+        set
+        {
+            Release(trailingPart);
+            trailingPart = value is null ? null : Adopt(value);
+        }
+    }
+
+    Thickness EffectivePadding => trailingPart is null ? Padding : new Thickness(Padding.Left, Padding.Top, 0.25 * Em, Padding.Bottom);
 
     /// <inheritdoc />
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -212,6 +226,7 @@ public class Badge : Control
         if (iconPart is not null) yield return iconPart;
         if (dotPart is not null) yield return dotPart;
         if (contentPart is not null) yield return contentPart;
+        if (trailingPart is not null) yield return trailingPart;
     }
 
     /// <inheritdoc />
@@ -230,7 +245,7 @@ public class Badge : Control
             height = Math.Max(height, part.DesiredSize.Height);
         }
         var gaps = Math.Max(0, Parts().Count() - 1) * 0.25 * Em;
-        var (padding, border) = (Padding, BorderThickness);
+        var (padding, border) = (EffectivePadding, BorderThickness);
         return new LayoutSize(
             width + gaps + padding.Left + padding.Right + border.Left + border.Right,
             Math.Max(1.75 * Em, height + padding.Top + padding.Bottom + border.Top + border.Bottom));
@@ -239,7 +254,7 @@ public class Badge : Control
     /// <inheritdoc />
     protected override LayoutSize ArrangeOverride(LayoutSize finalSize)
     {
-        var x = Padding.Left + BorderThickness.Left;
+        var x = EffectivePadding.Left + BorderThickness.Left;
         foreach (var part in Parts())
         {
             var size = part.DesiredSize;

@@ -866,6 +866,23 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   控件本身的大小就是触发器的大小（基线也转给触发器）。没有箭头的部件属性。宿主窗口移动时浮层不跟着走（上游滚动时跟着；桌面上点窗口标题栏就关了）。
 - 示例：popover（分享、筛选）；像素只比关着的状态（Avalonia 0.26%，WPF 0.07%，WinForms 1.0%）。
 
+### Tag（2026-11-07）
+
+- 外观同 Badge：三个平台都从 Badge 派生（WinForms 是 `TagControl : BadgeControl`），Badge 多了"文字后面的部件"（Avalonia、WPF 的 protected `Trailing`，
+  WinForms 元素的 `TrailingEm`），有它时末端内边距收成 0.25em。上游给了 onRemove 才有移除按钮：桌面上是 `RemoveRequested` 事件，有订阅才放按钮
+  （自定义 add / remove 访问器）。移除按钮是圆形 CloseButton：字号与颜色同标签（本地值盖过按钮自己的字号档位与 ghost 的前景色），宽、最小高 1.5em，
+  上下外边距 -0.25em；读屏名称"移除 + 文字"，`RemoveLabel` 能改。
+- 离场（上游 useDismissible）：淡出、缩到 0.8（durations.sm、exit）后才发 RemoveRequested；布局之后还在界面上就淡入复原。焦点原来在移除按钮上、
+  标签被移除了时交给同一容器（最近的 Panel：Flex、项面板）里下一个、没有就上一个能 Tab 聚焦的元素（上游 focusAfterRemoval）。
+- **Avalonia**：出现程度是私有属性，动画改 Opacity 与缩放；离场的"结束"用同样时长的 Task.Delay 计（headless 的动画时钟不走，
+  `ForceRenderTimerTick` 也推不动），到点停掉动画、留下终值。
+- **WPF**：DoubleAnimation（FillBehavior.Stop，先写终值）的 Completed。移除按钮的部件样式 BasedOn CloseButton 的主题样式，Badge.xaml 合并了 Button.xaml。
+- **WinForms**：移除按钮是 CloseButtonControl 子控件（四周画焦点环的 Padding 超出标签的部分被裁掉）。子控件不能半透明：没有离场动画，点了就请求移除。
+  没有 propsRemove。
+- 顺手修的：WinForms 按钮禁用时文字不变淡——GDI 的 TextRenderer 不认颜色里的不透明度，改成把前景色按 disabled 不透明度混进主题的表面色。
+- 示例：Badge 页的 tag、tag-removable。剩下的差异主要来自字重：上游字体栈以 `system-ui` 开头（Windows 上的 Chrome 有真正的 500），
+  我们的字体 token 从 "Segoe UI" 起，medium 落回常规，文字窄一点、横排的标签一路往后错开（DOCSITE"看过的原因"）。
+
 ### Spinner
 
 - 第一个带部件的组件（`propsIcon`），三个平台按 §7 的写法各落地一次：

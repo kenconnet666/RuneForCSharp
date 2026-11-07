@@ -60,6 +60,7 @@ public class Badge : Control
     Icon? iconPart;
     Border? dotPart;
     UIElement? contentPart;
+    UIElement? trailingPart;
 
     static Badge()
     {
@@ -98,6 +99,19 @@ public class Badge : Control
     protected override int VisualChildrenCount => parts.Count;
 
     double Em => FontSize;
+
+    /// <summary>文字后面的部件（<see cref="Tag"/> 的移除按钮）；有它时末端的内边距收成 0.25em（按钮自己留了空）。</summary>
+    protected UIElement? Trailing
+    {
+        get => trailingPart;
+        set
+        {
+            Release(trailingPart);
+            trailingPart = value is null ? null : Adopt(value, parts.Count);
+        }
+    }
+
+    Thickness EffectivePadding => trailingPart is null ? Padding : new Thickness(Padding.Left, Padding.Top, 0.25 * Em, Padding.Bottom);
 
     /// <inheritdoc />
     protected override Visual GetVisualChild(int index) => parts[index];
@@ -149,10 +163,13 @@ public class Badge : Control
         contentPart = Content switch
         {
             null => null,
-            UIElement element => Adopt(element, parts.Count),
-            var value => Adopt(new Text { Text = value.ToString(), Wrap = TextWrap.NoWrap, VerticalAlignment = VerticalAlignment.Center }, parts.Count),
+            UIElement element => Adopt(element, ContentIndex),
+            var value => Adopt(new Text { Text = value.ToString(), Wrap = TextWrap.NoWrap, VerticalAlignment = VerticalAlignment.Center }, ContentIndex),
         };
     }
+
+    /// <summary>内容排在前面的部件之后、文字后面的部件之前。</summary>
+    int ContentIndex => trailingPart is null ? parts.Count : parts.IndexOf(trailingPart);
 
     T Adopt<T>(T child, int index) where T : UIElement
     {
@@ -192,7 +209,7 @@ public class Badge : Control
             height = Math.Max(height, part.DesiredSize.Height);
         }
         var gaps = Math.Max(0, parts.Count - 1) * 0.25 * Em;
-        var (padding, border) = (Padding, BorderThickness);
+        var (padding, border) = (EffectivePadding, BorderThickness);
         return new Size(
             width + gaps + padding.Left + padding.Right + border.Left + border.Right,
             Math.Max(1.75 * Em, height + padding.Top + padding.Bottom + border.Top + border.Bottom));
@@ -201,7 +218,7 @@ public class Badge : Control
     /// <inheritdoc />
     protected override Size ArrangeOverride(Size arrangeBounds)
     {
-        var x = Padding.Left + BorderThickness.Left;
+        var x = EffectivePadding.Left + BorderThickness.Left;
         foreach (var part in parts)
         {
             var size = part.DesiredSize;

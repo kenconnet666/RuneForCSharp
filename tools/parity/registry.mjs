@@ -42,6 +42,8 @@ export const COMPONENT_PROP_RENAMES = {
   Prose: { measure: 'LimitLineLength' },
   // Name 是控件名；图片给平台的图片对象
   Avatar: { name: 'DisplayName', src: 'Source' },
+  // 移除由使用方做：事件是"请求移除"（离场结束才发）
+  Tag: { onRemove: 'RemoveRequested' },
   // 平台的 ItemsControl 自己有 Items（直接写的项）；数据给 ItemsSource
   CheckboxGroup: { items: 'ItemsSource' },
   RadioGroup: { items: 'ItemsSource' },
@@ -174,6 +176,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     },
     Collapse: { lazy: '收起时子控件隐藏：隐藏的控件不建句柄、不参与布局，本来就是第一次展开才真正创建' },
     Tooltip: { propsArrow: '提示窗口整张是组件库画的位图，箭头没有可改样式的部件' },
+    Tag: { propsRemove: '移除按钮是 CloseButtonControl 子控件，颜色、字号跟着标签；没有部件属性记录' },
     Popover: { propsArrow: '面板、阴影与箭头是组件库画在分层窗口上的位图，箭头没有可改样式的部件' },
     Listbox: Object.fromEntries(
       ['empty', 'propsOption', 'propsGroupLabel', 'propsCheck', 'propsEmpty', 'propsSkeleton']

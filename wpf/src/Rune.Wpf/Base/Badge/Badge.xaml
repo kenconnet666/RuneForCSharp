@@ -8,6 +8,7 @@
                     xmlns:rune="clr-namespace:Rune.Wpf">
   <ResourceDictionary.MergedDictionaries>
     <ResourceDictionary Source="/Rune.Wpf;component/Base/Badge/BadgeRecipe.g.xaml" />
+    <ResourceDictionary Source="/Rune.Wpf;component/Base/Button/Button.xaml" />
   </ResourceDictionary.MergedDictionaries>
   <Style TargetType="rune:Badge" BasedOn="{StaticResource Rune.Recipe.Badge}">
     <Setter Property="Variant" Value="soft" />
@@ -40,4 +41,7 @@
   <Style x:Key="{x:Static rune:BadgeParts.Dot}" TargetType="Border">
     <Setter Property="Background" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=rune:Badge}}" />
   </Style>
+  <!-- 标签：外观同 Badge（BasedOn 主题样式）；移除按钮的尺寸按字号在 Tag.cs 里算，部件样式默认是空的 -->
+  <Style TargetType="rune:Tag" BasedOn="{StaticResource {x:Type rune:Badge}}" />
+  <Style x:Key="{x:Static rune:TagParts.Remove}" TargetType="rune:CloseButton" BasedOn="{StaticResource {x:Type rune:CloseButton}}" />
 </ResourceDictionary>

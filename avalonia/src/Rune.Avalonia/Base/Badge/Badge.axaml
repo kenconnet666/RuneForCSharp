@@ -21,4 +21,6 @@
     <Setter Property="VerticalAlignment" Value="Center" />
     <Setter Property="HorizontalAlignment" Value="Left" />
   </ControlTheme>
+  <!-- 标签：外观同 Badge，移除按钮的尺寸按字号在 Tag.cs 里算 -->
+  <ControlTheme x:Key="{x:Type rune:Tag}" TargetType="rune:Tag" BasedOn="{StaticResource {x:Type rune:Badge}}" />
 </ResourceDictionary>
