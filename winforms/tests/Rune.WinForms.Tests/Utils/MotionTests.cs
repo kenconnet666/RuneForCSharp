@@ -65,6 +65,8 @@ public class AnimatorTests
     [Fact]
     public Task Zero_duration_writes_the_target_immediately() => WinFormsUi.Run(() =>
     {
+        // Animator 是全局的：先等别的测试留下的补间播完
+        for (var waited = 0; Animator.IsRunning && waited < 100; waited++) WinFormsUi.Wait(TimeSpan.FromMilliseconds(20));
         var value = new Signal<double>(0);
 
         Animator.Animate(value, 10, TimeSpan.Zero);

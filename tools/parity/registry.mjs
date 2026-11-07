@@ -90,8 +90,8 @@ export const TYPE_RENAMES = {
   Avalonia: { Label: 'FieldLabel' },
   WPF: { Label: 'FieldLabel' },
   // WinForms 自己有 ListControl（ListBox、ComboBox 的基类）
-  // WinForms 的提示是扩展组件（同平台的 ToolTip 组件），不是控件
-  WinForms: { List: 'UnorderedList', Container: 'ContainerPanel', Label: 'FieldLabel', Tooltip: 'TooltipProvider' },
+  // WinForms 的提示是扩展组件（同平台的 ToolTip 组件），不是控件；平台自带 TabControl、TabPage：标签叫 TabItemControl
+  WinForms: { List: 'UnorderedList', Container: 'ContainerPanel', Label: 'FieldLabel', Tooltip: 'TooltipProvider', Tab: 'TabItem' },
 };
 
 const FORM_NAME = '表单提交的字段名是浏览器的概念；值经 Value 绑定，单选组的互斥由组自己管';
@@ -108,6 +108,7 @@ export const PROPS_NOT_PORTED = {
   CopyButton: { type: BUTTON_TYPE },
   Tooltip: { trigger: '提示挂在触发器上（Avalonia、WPF 的 ToolTip 附加属性，WinForms 的扩展属性），不用渲染函数' },
   ScrollArea: { propsContent: '内容就是 Content 本身，平台的滚动呈现器直接排它，中间没有包一层' },
+  Tabs: { lazy: '看不见的面板不排版、不绘制（IsVisible / Visible 为 false），本来就是第一次显示时才有代价' },
   Toolbar: { items: '桌面上没有 CSS 选择器：参与方向键移动的固定是按钮与链接' },
   Skeleton: { variant: '上游已废弃（改名为 shape），新库不带' },
   Progress: { propsRoot: '外层就是 Progress 自己（读屏的进度条也是它）：样式直接写在 Progress 上' },
@@ -127,6 +128,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     ScrollArea: { propsViewport: '视口就是 ScrollArea 自己：读屏名称、焦点都在它身上；滚动呈现器没有部件样式' },
   },
   WinForms: {
+    Tabs: { ripple: '标签是组件库画的容器控件（里面放文字与计数），没有按下的波纹' },
     CodeBlock: Object.fromEntries(
       ['propsCode', 'propsRoot', 'propsHeader', 'propsTitle', 'propsBody', 'propsLine', 'propsLineNumber', 'propsCopy', 'propsScroll', 'propsExpand', 'propsExpandIcon']
         .map((prop) => [prop, '外层、标题栏、代码与行号、展开按钮都是 CodeBlockControl 自己画的，没有可改的部件']),
@@ -183,6 +185,10 @@ export const PLATFORM_BEHAVIOR_NOT_APPLICABLE = {
 };
 
 export const BEHAVIOR_NOT_APPLICABLE = {
+  Tabs: {
+    '只当导航用（没有 TabPanel）时标签不写 aria-controls': '桌面的读屏没有 aria-controls：标签与面板的关系由面板的名称（对应标签的文字）表达',
+    'lazy：面板第一次显示时才渲染内容': '看不见的面板不排版、不绘制，本来就是懒的（PROPS_NOT_PORTED）',
+  },
   LinkButton: { '站内链接经 router 跳转': '桌面没有站内地址：Href 是绝对地址，用系统打开（ROADMAP 平台化的约定）' },
   IconLinkButton: { '站内链接经 router 跳转': '桌面没有站内地址：Href 是绝对地址，用系统打开（ROADMAP 平台化的约定）' },
   Flex: { createFlex: '桌面没有语义标签：别的语义容器从 Flex 派生、改读屏角色（FlexList、FlexOrderedList 就是这样，测试覆盖）' },

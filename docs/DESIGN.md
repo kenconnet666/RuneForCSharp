@@ -628,6 +628,24 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 测试的等待：Avalonia `HeadlessUi.Until` / `Pump`，WPF `WpfUi.Until`（三处测试都要等异步结果，收进了测试的基础设施）。
 - 示例：上游的 CopyButton 在 icon-button 页的 states（还要 Tooltip、focusableWhenDisabled）与 presets（还要 TextField）里，这两个示例等这些组件做好再补。
 
+### Tabs（2026-11-07，核心部分）
+
+- 照上游拆成四层：Tabs（状态：Value、Orientation、Activation、Variant、Size、Ripple）> TabList（一排标签）> Tab；TabPanel 与标签按 Value 对应。
+  成员按"逻辑树上最近的那组 Tabs"认领（不进到里面另一组）；没有值时选第一个标签，只显示当前标签的面板（看不见的面板不排版、不绘制——上游的 lazy 不移植）。
+  档位类型 `TabsOrientation`、`TabsActivation`、`TabsVariant` 是孪生文件（`Navigation/Tabs/TabsVariants.cs`）。
+- 外观：标签中等字重、textMuted（悬停与选中 text）、控件高度、左右 space.md、sm 圆角；line 时标签底边留 2 像素、列表画 borderMuted 分隔线与 2 像素的品牌色指示条
+  （跟着当前标签滑过去，durations.md、standard，第一次直接到位）；soft 时列表 fill 底、xs 内边距、md 圆角，宽度按标签，选中的标签 surface 底；不可用的标签半透明。
+- 键盘：漫游焦点（整组一个 Tab 停靠点，方向键跳过不可用项，到两端后从另一端继续）；automatic 时焦点到哪个切到哪个，manual 时 Enter / 空格才切换。
+  点击先发 Click（Avalonia、WPF；WinForms 是 TabClick），处理里标记 Handled / Cancel 可以拦下切换（上游的 preventDefault）。
+- **Avalonia**：Tabs、TabList 从 Flex 派生。Avalonia 12 的 Panel.Render 是密封的：TabList 插一个只做绘制的子元素（不在 Children 里、不参加 Flex 排版，ZIndex -1）。
+  Flex 没有 Padding：soft 的内边距在 TabList 的量、排两步里收进去再挪过去。面板在横排时不能 Grow（不限高的容器里会往下撑满）。
+- **WPF**：同样的结构，指示条用 DoubleAnimation；标签的外观在 Tabs.xaml 里按只读的 Variant、Orientation、IsSelected 触发。合成的按键事件不改
+  InputManager 的"最近的输入设备"，自动切换改在 TabList 处理完方向键之后看焦点在哪个标签上。
+- **WinForms**：平台自带 TabControl、TabPage，组件库的叫 TabsControl、TabListControl、TabItemControl（标签，里面放文字或子控件）、TabPanelControl。
+  FlexControl 的想要的大小不并最小尺寸、只量自动大小的子控件：标签自己并上控件高度，示例里的固定宽度列关掉 AutoSize。没有波纹。
+- 没做：可关闭（Delete、中键、关闭按钮）、新建按钮、拖动与 Alt + 方向键排序、"全部标签页"菜单、propsIndicator / propsBar / propsAdd——等 Menu 一起做。
+  vertical 示例的面板要 TextField。
+
 ### CodeBlock（2026-11-07）
 
 - 标题栏（surfaceMuted、等宽 0.85em、下边分隔线）、代码区（等宽 0.9em、行高 normal、上下 0.75em 左右 1em，ScrollArea 横向滚动，Wrap 时换行）、

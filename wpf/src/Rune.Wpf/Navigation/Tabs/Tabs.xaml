@@ -1,0 +1,63 @@
+<!--
+  Tab、TabPanel 的主题样式（vue-tsx-pro 的 tabsRecipe、tabPanelStyles）：标签中等字重，平时 textMuted、悬停与选中 text，控件高度、左右 space.md、sm 圆角；
+  line 时底边留 2 像素的透明边（指示条画在列表上）并压住列表的分隔线（-1），竖排时在结束边；soft 时选中的标签 surface 底；不可用时半透明。
+  面板 sm 圆角，键盘聚焦时外面一圈焦点环。TabList 的分隔线、指示条与 soft 底色在 Tabs.cs 里画。
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Rune.Wpf;component/Base/Button/Button.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <Style TargetType="rune:Tab" BasedOn="{StaticResource {x:Type rune:ButtonBase}}">
+    <Setter Property="rune:ControlHeight.MinHeight" Value="True" />
+    <Setter Property="rune:EmSize.Padding" Value="0.75,0" />
+    <Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.Sm}" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+    <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="BorderThickness" Value="0,0,0,2" />
+    <Setter Property="Margin" Value="0,0,0,-1" />
+    <Style.Triggers>
+      <Trigger Property="IsMouseOver" Value="True"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" /></Trigger>
+      <Trigger Property="IsSelected" Value="True"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" /></Trigger>
+      <Trigger Property="Orientation" Value="vertical">
+        <Setter Property="BorderThickness" Value="0,0,2,0" />
+        <Setter Property="Margin" Value="0,0,-1,0" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+      </Trigger>
+      <Trigger Property="Variant" Value="soft">
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Margin" Value="0" />
+      </Trigger>
+      <MultiTrigger>
+        <MultiTrigger.Conditions>
+          <Condition Property="Variant" Value="soft" />
+          <Condition Property="IsSelected" Value="True" />
+        </MultiTrigger.Conditions>
+        <Setter Property="Background" Value="{DynamicResource Rune.Brush.Surface}" />
+      </MultiTrigger>
+      <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" /></Trigger>
+    </Style.Triggers>
+  </Style>
+
+  <Style TargetType="rune:TabPanel">
+    <Setter Property="Focusable" Value="True" />
+    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="rune:TabPanel">
+          <Grid>
+            <ContentPresenter Margin="{TemplateBinding Padding}" />
+            <Border x:Name="PART_FocusRing" Visibility="Collapsed" IsHitTestVisible="False" Margin="-4" BorderThickness="2" CornerRadius="4"
+                    BorderBrush="{DynamicResource Rune.Brush.FocusRing}" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="PART_FocusRing" Property="Visibility" Value="Visible" /></Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+</ResourceDictionary>
