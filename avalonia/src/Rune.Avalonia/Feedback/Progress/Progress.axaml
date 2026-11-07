@@ -1,0 +1,23 @@
+<!--
+  Progress 部件的默认外观（vue-tsx-pro 的 progressRecipe）。部件是代码组合的子元素，ControlTheme 里写不了子选择器，
+  所以写成主题里的普通样式：使用方（Provider、实例的 Styles）的部件样式排在后面，盖得过
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <!-- 数值宽度不跳：等宽数字 -->
+  <Style Selector="rune|Progress rune|Text#PART_ValueLabel">
+    <Setter Property="Numeric" Value="True" />
+  </Style>
+  <Style Selector="rune|Progress #PART_Header > rune|Text#PART_ValueLabel">
+    <Setter Property="Tone" Value="muted" />
+  </Style>
+  <Style Selector="rune|Progress #PART_Circle > rune|Text#PART_ValueLabel">
+    <Setter Property="Weight" Value="semibold" />
+  </Style>
+  <!-- 环形下方的标签 -->
+  <Style Selector="rune|Progress > rune|Text#PART_Label">
+    <Setter Property="Tone" Value="muted" />
+    <Setter Property="Align" Value="{x:Static rune:TextAlign.Center}" />
+  </Style>
+</Styles>

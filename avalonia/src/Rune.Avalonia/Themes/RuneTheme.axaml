@@ -29,4 +29,6 @@
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>
+  <!-- 代码组合控件的部件默认外观（ControlTheme 写不了子选择器） -->
+  <StyleInclude Source="avares://Rune.Avalonia/Feedback/Progress/Progress.axaml" />
 </Styles>
