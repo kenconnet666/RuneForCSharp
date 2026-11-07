@@ -48,6 +48,13 @@
       <Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" />
       <Setter Property="Cursor" Value="No" />
     </Style>
+    <!-- 只要输入、不要外壳（命令面板的搜索行）：没有边框、底色、内边距与焦点环 -->
+    <Style Selector="^:bare">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="Padding" Value="0" />
+    </Style>
+    <Style Selector="^:bare:focus-within /template/ Border#PART_FocusRing"><Setter Property="IsVisible" Value="False" /></Style>
   </ControlTheme>
 
   <ControlTheme x:Key="{x:Type rune:TextField}" TargetType="rune:TextField" BasedOn="{StaticResource Rune.TextInput}">

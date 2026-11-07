@@ -1,0 +1,18 @@
+<!--
+  CommandPalette 部件的默认外观（vue-tsx-pro 的 commandPaletteStyles）：搜索行下边一条 border 分隔线，放大镜 textMuted；默认触发按钮画成输入框外壳，文字 textMuted。
+  搜索行的内边距、字号与列表的高度按 em 在 CommandPalette.cs 里算。
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|CommandPalette Border#PART_Search">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+  </Style>
+  <Style Selector="rune|CommandPalette Border#PART_Search rune|Icon">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+  </Style>
+  <Style Selector="rune|CommandPalette rune|Button#PART_Trigger">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+  </Style>
+</Styles>

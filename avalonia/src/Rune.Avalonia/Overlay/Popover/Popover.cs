@@ -38,6 +38,9 @@ public enum OpenChangeReason
 
     /// <summary>焦点离开了（Tab 移走）。</summary>
     Focus,
+
+    /// <summary>代码调用：快捷键打开（命令面板）、命令式打开的对话框。</summary>
+    Imperative,
 }
 
 /// <summary>浮层开关变了的事件参数。</summary>

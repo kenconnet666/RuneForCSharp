@@ -70,6 +70,9 @@ public abstract class TextInputBase : TextBox, IFieldControl
     /// <summary>必填。</summary>
     public bool? IsRequired { get => GetValue(IsRequiredProperty); set => SetValue(IsRequiredProperty, value); }
 
+    /// <summary>只要输入、不要外壳（没有边框、底色、内边距与焦点环；命令面板的搜索行）：伪类 <c>:bare</c>。</summary>
+    internal bool Bare { get; set { field = value; PseudoClasses.Set(":bare", value); } }
+
     /// <summary>出错：自己写了的优先，其次所在字段的。</summary>
     internal bool Invalid => IsInvalid ?? Field.Of(this)?.Invalid ?? false;
 
