@@ -924,6 +924,26 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   （Badge、Button、Card、Icon 等的属性落点、Provider 默认值），原来被算成"组件还没做"，待逐条对应或登记不适用。
 - 示例：dialog（编辑资料，确认时校验与等待）、long-content（宽度档位、长正文、占满一行的页脚）。
 
+### CommandPalette（2026-11-07）
+
+- 快捷键或触发按钮打开的搜索对话框：sm 宽、停在窗口上部 12% 的 Dialog（Dialog 加了三个内部开关：标题行只给读屏 `HeaderHidden`、`TopFraction`、正文不留内边距
+  `BodyFlush`），里面一行搜索框（lg 字号、上下 space.sm、左右 space.md、下边一条 border）与不可聚焦的 Listbox（最高 min(24rem, 窗口高度一半)：Listbox 加了内部的
+  `ScrollMaxHeight` 换掉自己滚动时的 20em）。焦点一直在搜索框，↑↓、Page Up / Down 移动高亮，Enter 执行；Home / End、空格留给输入。面板不记选择：
+  执行就是选中，`ItemInvoked` 报告那一项、面板关闭。默认按文字与说明过滤（`SelectSearch.Matches`），远程搜索时 Filter 一律返回 true、读 `InputText` 取数据、给 IsLoading。
+  每次打开清空输入；输入、结果变了高亮第一个。搜索框是"只要输入、不要外壳"的 TextField（内部的 `Bare`：没有边框、底色、左右内边距与焦点环，高度照旧）。
+- 快捷键：孪生文件 `Hotkey`（解析 Mod+K 这类写法，Mod 在 Windows 上是 Ctrl；显示 Ctrl+K、读屏 Control+K）。Avalonia 在 TopLevel、WPF 在 Window 上隧道接 KeyDown，
+  WinForms 用应用的消息过滤器（焦点在所在窗体或面板里时），所以输入框里也有效。打开的原因是新加的 `OpenChangeReason.Imperative`，执行是 Select。
+- 默认触发按钮画成输入框外壳：surface、neutral 的按钮，放大镜、占位文字（textMuted，占满）、快捷键的 Kbd，至少 12rem；名称是占位文字，快捷键给读屏的快捷键属性。
+  `Trigger` 换成自己的控件（里面按钮的 Click 打开，同 Popover），null 时只用快捷键。窄屏只留图标的断点不做。
+- **Avalonia**：列表在弹出层里，进了逻辑树才建选项：打开之后（Loaded 优先级）再高亮第一个。
+- **WPF**：快捷键的修饰键状态造不出来，测试直接调内部的 `OnHotkey`。默认触发按钮的 textMuted 是本地值（按钮配方里样式 × 色调的触发器会盖过部件样式的 Setter）。
+  Inspect 工具补了 DispatcherSynchronizationContext（同应用里的 Application），异步取数据的示例 await 之后才回得到界面线程。
+- **WinForms**：`CommandPaletteControl`；Button 元素加了内部的 `Trailing`（贴结束边的 Kbd，有它时内容靠开始边）与 `MutedForeground`，ButtonControl 加了读屏的
+  `KeyboardShortcut`。DialogControl 加了 `Relayout`：过滤后只重新摆面板，不重画遮罩。选项是画出来的，没有 ItemTemplate；没有匹配时的说明是 `EmptyText`；
+  InputText 变了发 `InputTextChanged`。顺带修了 ElementControl 的 GetPreferredSize 不认 MinimumSize（平台 Control 本来会认）。
+- 不转交对话框的属性（上游没声明的属性落到 Dialog 上）：面板里的对话框是固定的一种。
+- 示例：commands、remote、custom（Avalonia 0.02%–0.50%，WPF 0.03%–0.46%，WinForms 0.14%–0.97%；commands 少了"macOS 上 ⌘+J"半句）。
+
 ### Spinner
 
 - 第一个带部件的组件（`propsIcon`），三个平台按 §7 的写法各落地一次：

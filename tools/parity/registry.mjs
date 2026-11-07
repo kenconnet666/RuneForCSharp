@@ -47,6 +47,8 @@ export const COMPONENT_PROP_RENAMES = {
   SelectedTags: { onRemove: 'RemoveRequested' },
   // 数据是平台的 ItemsSource；自定义选项内容是数据模板；新建是事件（Control 自己有 Created）
   Select: { items: 'ItemsSource', children: 'ItemTemplate', onCreate: 'OptionCreated' },
+  // 数据是平台的 ItemsSource；执行了一项是事件；输入框的文字同 TextBox 叫 Text；自定义选项内容是数据模板
+  CommandPalette: { items: 'ItemsSource', onAction: 'ItemInvoked', _inputValue: 'InputText', renderOption: 'ItemTemplate' },
   // 平台的 ItemsControl 自己有 Items（直接写的项）；数据给 ItemsSource
   CheckboxGroup: { items: 'ItemsSource' },
   RadioGroup: { items: 'ItemsSource' },
@@ -92,6 +94,8 @@ export const PLATFORM_COMPONENT_PROP_RENAMES = {
     Select: { placeholder: 'PlaceholderText' },
     // 控件自己有 Size
     Dialog: { size: 'DialogSize' },
+    // 选项是画出来的，没有匹配时只能换说明文字
+    CommandPalette: { empty: 'EmptyText' },
     // 扩展组件：每个控件多出的属性前面带 Tooltip（设计器里是"Tooltip 在 tooltipProvider1 上"）
     Tooltip: {
       children: 'Tooltip',
@@ -155,6 +159,10 @@ export const PROPS_NOT_PORTED = {
     propsTag: '标签是 SelectedTags 建的 sm、soft 的 Tag：样式写在 Tag 的主题或部件上',
   },
   SelectedTags: { propsTag: '标签固定是 sm、soft 的 Tag：样式写在 Tag 的主题或部件上' },
+  // 上游没声明的属性落到对话框上：桌面上命令面板的对话框是固定的一种
+  CommandPalette: Object.fromEntries(['closable', 'dismissible', 'beforeClose', 'onConfirm', 'confirmText', 'cancelText', 'tone', 'lazy', 'size',
+    'propsConfirm', 'propsCancel', 'propsHeader', 'propsTitle', 'propsDescription', 'propsClose', 'propsBody', 'propsFooter']
+    .map((prop) => [prop, '面板里的对话框是 CommandPalette 建的固定一种（sm 宽、停在上部、没有标题行与页脚，Esc 与点遮罩关闭），不转交对话框的属性'])),
   Dialog: { lazy: '正文是传进来的控件实例，对话框关着时不在可视树里（不排版、不绘制），本来就是打开时才有代价' },
   Popover: {
     lazy: '内容是传进来的控件实例，浮层关着时不在可视树里（不排版、不绘制），本来就是打开时才有代价',
@@ -181,6 +189,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     Dialog: Object.fromEntries(['propsHeader', 'propsTitle', 'propsClose', 'propsDescription', 'propsBody', 'propsFooter', 'propsCancel', 'propsConfirm']
       .map((prop) => [prop, '标题行、标题、关闭按钮、说明、正文、页脚、按钮是 Dialog 代码组合的子元素，部件样式键只有面板、遮罩与阴影；外观跟着各自组件的主题样式'])),
     Select: Object.fromEntries(['propsListbox', 'propsSearch'].map((prop) => [prop, '弹出层里的列表、搜索框是 Select 建的，外观跟着 Listbox、TextField 的主题样式'])),
+    CommandPalette: Object.fromEntries(['propsInput', 'propsListbox'].map((prop) => [prop, '面板里的搜索框、列表是 CommandPalette 建的，外观跟着 TextField、Listbox 的主题样式；部件样式键只有搜索行'])),
   },
   WinForms: {
     Tabs: { ripple: '标签是组件库画的容器控件（里面放文字与计数），没有按下的波纹' },
@@ -204,6 +213,10 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     },
     Dialog: Object.fromEntries(['propsHeader', 'propsTitle', 'propsClose', 'propsDescription', 'propsBody', 'propsFooter', 'propsCancel', 'propsConfirm']
       .map((prop) => [prop, '标题行、正文、页脚是 DialogControl 组合的子控件，面板与遮罩是两层窗口画的，没有部件属性记录'])),
+    CommandPalette: {
+      renderOption: 'WinForms 的选项是 ListboxControl 画出来的，没有自定义内容',
+      ...Object.fromEntries(['propsTrigger', 'propsInput', 'propsListbox'].map((prop) => [prop, '默认触发按钮、搜索框、列表是 CommandPaletteControl 组合的子控件，没有部件属性记录'])),
+    },
     Tag: { propsRemove: '移除按钮是 CloseButtonControl 子控件，颜色、字号跟着标签；没有部件属性记录' },
     Popover: { propsArrow: '面板、阴影与箭头是组件库画在分层窗口上的位图，箭头没有可改样式的部件' },
     Listbox: Object.fromEntries(
