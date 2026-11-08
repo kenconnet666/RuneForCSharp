@@ -214,6 +214,23 @@ public class ChoiceTests
         Assert.Equal(["email", "app"], group.Value);
     });
 
+    /// <summary>TS 的 propsItem 是 ItemGenerated：按这一项的数据改生成的控件，值仍由组管理。</summary>
+    [Fact]
+    public Task Item_generated_customizes_items_and_the_group_keeps_values() => WinFormsUi.Run(() =>
+    {
+        var group = new RadioGroupControl { ItemsSource = new[] { "a", "b" } };
+        group.ItemGenerated += (_, e) =>
+        {
+            e.Control.Name = $"radio-{e.Item}";
+            ((RadioControl)e.Control).Value = "x";
+        };
+        using var form = WinFormsUi.Show(group);
+        var radios = group.Controls.OfType<RadioControl>().ToList();
+
+        Assert.Equal(["radio-a", "radio-b"], radios.Select(radio => radio.Name)); // 订阅时重新生成，已有的项也跟着变
+        Assert.Equal(["a", "b"], radios.Select(radio => radio.Value));
+    });
+
     [Fact]
     [Upstream("RadioGroup", "RadioGroup 的 items")]
     public Task Radio_group_items_come_from_strings_or_mapped_data() => WinFormsUi.Run(() =>

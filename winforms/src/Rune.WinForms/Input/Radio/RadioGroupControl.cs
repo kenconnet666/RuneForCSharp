@@ -76,6 +76,9 @@ public class RadioGroupControl : ChoiceGroupControl
     /// <inheritdoc />
     private protected override Control CreateItem(ListboxOption option) => new RadioControl { Value = option.Value, Description = option.Description };
 
+    /// <inheritdoc />
+    private protected override void AssignValue(Control control, string value) => ((RadioControl)control).Value = value;
+
     /// <summary>各项按组的值选中；Tab 停在选中项，没有选中（或选中项不可用）时停在第一个可用项。</summary>
     internal override void Sync()
     {

@@ -44,6 +44,9 @@ public class CheckboxGroupControl : ChoiceGroupControl
     /// <inheritdoc />
     private protected override Control CreateItem(ListboxOption option) => new CheckboxControl { Value = option.Value, Description = option.Description };
 
+    /// <inheritdoc />
+    private protected override void AssignValue(Control control, string value) => ((CheckboxControl)control).Value = value;
+
     /// <summary>各项按组的值勾选，只读、出错随组。</summary>
     internal override void Sync()
     {

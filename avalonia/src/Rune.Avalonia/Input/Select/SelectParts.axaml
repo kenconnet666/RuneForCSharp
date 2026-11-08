@@ -1,6 +1,7 @@
 <!--
   Select 弹出层的部件（vue-tsx-pro 的 floatingStyles.surface、listPopoverStyles）：面板 surfaceRaised、xs 宽的 border 描边、lg 阴影、文字 text，没有内边距
   （列表自己留 space.xs；lg 圆角在 Select.cs 里按字号算）；顶部搜索框那一行下边一条 borderMuted 分隔线。弹出层在逻辑上仍是 Select 的后代。
+  SelectedTags 的"+N"标签（propsMore）：sm、soft，同其余的标签。
 -->
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -12,6 +13,10 @@
     <Setter Property="BoxShadow" Value="{DynamicResource Rune.Shadow.Lg}" />
     <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
     <Setter Property="Cursor" Value="Arrow" />
+  </Style>
+  <Style Selector="rune|SelectedTags > rune|Tag#PART_More">
+    <Setter Property="Size" Value="sm" />
+    <Setter Property="Variant" Value="soft" />
   </Style>
   <Style Selector="rune|Select Border#PART_Header">
     <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />

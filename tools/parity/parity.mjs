@@ -96,7 +96,7 @@ function compareProps(vue, name, members, parts, library) {
     .filter((prop) => !PROPS_NOT_PORTED[name]?.[prop.name] && !PLATFORM_PROPS_NOT_PORTED[library]?.[name]?.[prop.name])
     .map((prop) => ({ prop: prop.name, cs: csName(name, prop.name), alias: PLATFORM_COMPONENT_PROP_RENAMES[library]?.[name]?.[prop.name] ?? PLATFORM_PROP_RENAMES[library]?.[prop.name] }));
   const isPart = (cs) => cs.startsWith('Props') && parts?.has(cs.slice('Props'.length));
-  const missing = expected.filter(({ cs, alias }) => !members.has(cs) && !members.has(alias) && !PLATFORM_PROPS.has(cs) && !isPart(cs));
+  const missing = expected.filter(({ cs, alias }) => !members.has(cs) && !members.has(alias) && !PLATFORM_PROPS.has(cs) && !PLATFORM_PROPS.has(alias) && !isPart(cs));
   const known = new Set(expected.flatMap(({ cs, alias }) => (alias ? [cs, alias] : [cs])));
   return { missing, expected: expected.length, extra: [...members].filter((member) => !known.has(member)) };
 }

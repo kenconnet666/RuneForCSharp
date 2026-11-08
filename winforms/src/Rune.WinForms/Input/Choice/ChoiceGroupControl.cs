@@ -74,6 +74,18 @@ public abstract class ChoiceGroupControl : FlexControl, IFieldControl
     public IEnumerable? ItemsSource { get; set { field = value; Generate(); } }
 
     /// <summary>
+    /// 按 <see cref="ItemsSource"/> 生成了一项（TS 的 propsItem，对象或按项计算）：按这一项的数据改生成的控件。
+    /// 值仍由组管理：处理完之后按选项写回。订阅、退订时重新生成，已经生成的项也跟着变。
+    /// </summary>
+    public event EventHandler<ChoiceItemEventArgs>? ItemGenerated
+    {
+        add { itemGenerated += value; Generate(); }
+        remove { itemGenerated -= value; Generate(); }
+    }
+
+    EventHandler<ChoiceItemEventArgs>? itemGenerated;
+
+    /// <summary>
     /// 竖排 gap xs（卡片 sm），项拉满宽度（同上游的 flex 列：结束边的文字贴得到结束边）；横排换行、列距 lg、行距 xs（上游排列方向的长写盖过卡片的 gap: sm）。
     /// </summary>
     void ApplyOrientation()
@@ -124,6 +136,11 @@ public abstract class ChoiceGroupControl : FlexControl, IFieldControl
             var control = CreateItem(option);
             control.Text = option.Label;
             control.Enabled = !option.IsDisabled;
+            if (itemGenerated is { } handler)
+            {
+                handler(this, new ChoiceItemEventArgs(item, control));
+                AssignValue(control, option.Value);
+            }
             generated.Add(control);
             Controls.Add(control);
         }
@@ -132,6 +149,11 @@ public abstract class ChoiceGroupControl : FlexControl, IFieldControl
     /// <summary>派生类按选项新建一项（值、说明）。</summary>
     /// <param name="option">选项。</param>
     private protected abstract Control CreateItem(ListboxOption option);
+
+    /// <summary>派生类把值写回生成的项（<see cref="ItemGenerated"/> 之后，值由组管理）。</summary>
+    /// <param name="control">生成的项。</param>
+    /// <param name="value">选项的值。</param>
+    private protected abstract void AssignValue(Control control, string value);
 
     /// <summary>组的值、只读、出错变了，或加了项：让里面的项跟上。</summary>
     internal abstract void Sync();
@@ -186,4 +208,16 @@ public abstract class ChoiceGroupControl : FlexControl, IFieldControl
 
         public override string? Help => base.Help ?? FieldControl.Of(owner)?.HelpText;
     }
+}
+
+/// <summary>按数据生成了一个勾选项的事件参数。</summary>
+/// <param name="item">这一项的数据（ItemsSource 里的元素）。</param>
+/// <param name="control">生成的项（CheckboxControl 或 RadioControl）。</param>
+public sealed class ChoiceItemEventArgs(object? item, Control control) : EventArgs
+{
+    /// <summary>这一项的数据。</summary>
+    public object? Item { get; } = item;
+
+    /// <summary>生成的项。</summary>
+    public Control Control { get; } = control;
 }

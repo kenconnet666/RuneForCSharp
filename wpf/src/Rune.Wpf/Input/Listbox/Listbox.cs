@@ -450,11 +450,11 @@ public class ListboxItem : Control
     readonly Border root = new();
     readonly Flex layout = new() { Align = FlexAlign.Center, Gap = Space.Sm };
     readonly Icon icon = new();
-    readonly StackPanel content = new();
+    readonly StackPanel content = new() { Name = "PART_Content" };
     readonly TextBlock label = new() { TextTrimming = TextTrimming.CharacterEllipsis, LineStackingStrategy = LineStackingStrategy.BlockLineHeight };
     readonly Text description = new() { Size = TextSize.Sm, Tone = TextTone.Muted, TextWrapping = TextWrapping.Wrap };
     readonly ContentPresenter custom = new();
-    readonly Icon check = new() { Data = Lucide.Check };
+    readonly Icon check = new() { Name = "PART_Check", Data = Lucide.Check };
     bool pressed;
 
     static ListboxItem()
@@ -469,6 +469,7 @@ public class ListboxItem : Control
     {
         this.owner = owner;
         check.SetResourceReference(StyleProperty, ListboxParts.Check);
+        content.SetResourceReference(StyleProperty, ListboxParts.Content);
         content.Children.Add(label);
         content.Children.Add(description);
         content.Children.Add(custom);
@@ -626,6 +627,9 @@ public static class ListboxParts
 
     /// <summary>加载中的骨架行（TS 的 propsSkeleton）。</summary>
     public static readonly PartKey Skeleton = new(typeof(Listbox), nameof(Skeleton), typeof(StackPanel));
+
+    /// <summary>选项里文字与说明的那一列。</summary>
+    public static readonly PartKey Content = new(typeof(Listbox), nameof(Content), typeof(StackPanel));
 
     /// <summary>已选标记（TS 的 propsCheck）。</summary>
     public static readonly PartKey Check = new(typeof(Listbox), nameof(Check), typeof(Icon));

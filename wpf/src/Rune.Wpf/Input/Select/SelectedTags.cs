@@ -26,7 +26,7 @@ public sealed class SelectedTagEventArgs(string value) : EventArgs
 /// </code>
 /// 标签是 sm、soft 的 <see cref="Tag"/>，间隔 space.xs、上下各留 space.xs；订阅了 <see cref="RemoveRequested"/> 才有移除按钮（只读、不可用时不订阅）。
 /// 这排标签只给指针用：读屏看不到（下拉自己念全部已选），移除按钮不能聚焦、按下不抢焦点。<see cref="MaxTagCount"/> 是数字时只显示前几个，
-/// <see cref="TagLimit.Responsive"/> 时排成一行按宽度放（至少一个），其余收进"+N"。
+/// <see cref="TagLimit.Responsive"/> 时排成一行按宽度放（至少一个），其余收进"+N"。"+N"的部件样式键是 <see cref="SelectedTagsParts.More"/>（TS 的 propsMore）。
 /// </summary>
 public class SelectedTags : Panel
 {
@@ -38,13 +38,14 @@ public class SelectedTags : Panel
     public static readonly DependencyProperty MaxTagCountProperty = DependencyProperty.Register(nameof(MaxTagCount), typeof(TagLimit?), typeof(SelectedTags),
         new FrameworkPropertyMetadata(null, (d, _) => ((SelectedTags)d).Rebuild()));
 
-    readonly Tag more = new() { Size = TextSize.Sm, Variant = StatusVariant.Soft };
+    readonly Tag more = new() { Name = "PART_More" };
     EventHandler<SelectedTagEventArgs>? removeRequested;
 
     /// <summary>新建：没有标签。</summary>
     public SelectedTags()
     {
         ClipToBounds = true;
+        more.SetResourceReference(StyleProperty, SelectedTagsParts.More);
         Rebuild();
     }
 
@@ -192,4 +193,11 @@ public class SelectedTags : Panel
 
         protected override List<AutomationPeer>? GetChildrenCore() => null;
     }
+}
+
+/// <summary>SelectedTags 的部件样式键：Provider.Styles 里写 <c>&lt;Style x:Key="{x:Static rune:SelectedTagsParts.More}" TargetType="rune:Tag"&gt;</c>。</summary>
+public static class SelectedTagsParts
+{
+    /// <summary>收起其余标签的"+N"（TS 的 propsMore）：Tag，sm、soft。</summary>
+    public static readonly PartKey More = new(typeof(SelectedTags), nameof(More), typeof(Tag));
 }

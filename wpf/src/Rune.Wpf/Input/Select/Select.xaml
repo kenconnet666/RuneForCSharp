@@ -91,6 +91,12 @@
     <Setter Property="Background" Value="{DynamicResource Rune.Brush.SurfaceRaised}" />
     <Setter Property="Effect" Value="{DynamicResource Rune.Shadow.Lg}" />
   </Style>
+  <!-- SelectedTags 的"+N"标签（propsMore）：sm、soft，同其余的标签 -->
+  <Style x:Key="{x:Static rune:SelectedTagsParts.More}" TargetType="rune:Tag">
+    <Setter Property="Size" Value="sm" />
+    <Setter Property="Variant" Value="soft" />
+  </Style>
+
   <Style x:Key="{x:Static rune:SelectParts.Header}" TargetType="Border">
     <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
     <Setter Property="BorderThickness" Value="0,0,0,1" />

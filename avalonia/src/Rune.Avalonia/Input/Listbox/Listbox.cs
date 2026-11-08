@@ -381,7 +381,7 @@ public class ListboxItem : Control
     readonly Border root = new() { Name = ListboxParts.Option };
     readonly Flex layout = new() { Align = FlexAlign.Center, Gap = Space.Sm };
     readonly Icon icon = new();
-    readonly StackPanel content = new();
+    readonly StackPanel content = new() { Name = ListboxParts.Content };
     readonly TextBlock label = new() { TextTrimming = TextTrimming.CharacterEllipsis };
     readonly Text description = new() { Size = TextSize.Sm, Tone = TextTone.Muted, TextWrapping = TextWrapping.Wrap };
     readonly ContentPresenter custom = new();
@@ -523,6 +523,9 @@ public static class ListboxParts
 
     /// <summary>选项的外框（TS 的 propsOption：底色、圆角、内边距）。</summary>
     public const string Option = "PART_Option";
+
+    /// <summary>选项里文字与说明的那一列（StackPanel）。</summary>
+    public const string Content = "PART_Content";
 
     /// <summary>已选标记（TS 的 propsCheck）。</summary>
     public const string Check = "PART_Check";

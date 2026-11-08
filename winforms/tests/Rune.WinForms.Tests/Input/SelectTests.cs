@@ -126,6 +126,7 @@ public class SelectTests
 
     [Fact]
     [Upstream("Select", "多选：标签在触发按钮外")]
+    [Upstream("Select", "Select 的搜索框：组合中的退格不删已选的项")]
     public Task Multiple_shows_removable_tags_and_backspace_removes_the_last() => WinFormsUi.Run(() =>
     {
         var select = new SelectControl { ItemsSource = Cities, SelectionMode = SelectionMode.Multiple, Values = ["北京", "上海", "广州"] };
@@ -141,6 +142,8 @@ public class SelectTests
             remove.PerformClick();
             Assert.Equal(["上海", "广州"], select.Values);
 
+            Press(select, Keys.ProcessKey); // 输入法组合中的退格：平台报 ProcessKey，交给输入法
+            Assert.Equal(["上海", "广州"], select.Values);
             Press(select, Keys.Back);
             Assert.Equal(["上海"], select.Values);
         }, select);

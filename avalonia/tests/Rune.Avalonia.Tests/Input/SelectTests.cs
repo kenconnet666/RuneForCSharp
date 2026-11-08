@@ -3,6 +3,7 @@ using Avalonia.Automation.Provider;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
+using Avalonia.Styling;
 using Avalonia.VisualTree;
 
 namespace Rune.Avalonia.Tests;
@@ -102,6 +103,7 @@ public class SelectTests
 
     [Fact]
     [Upstream("Select", "多选：标签在触发按钮外")]
+    [Upstream("Select", "Select 的搜索框：组合中的退格不删已选的项")]
     public Task Multiple_shows_removable_tags_and_backspace_removes_the_last() => HeadlessUi.Run(() =>
     {
         var select = new Select { ItemsSource = Cities, SelectionMode = SelectionMode.Multiple, Values = ["北京", "上海", "广州"] };
@@ -118,6 +120,8 @@ public class SelectTests
         HeadlessUi.Until(() => select.Values!.Count == 2);
         Assert.Equal(["上海", "广州"], select.Values);
 
+        Press(select, Key.ImeProcessed); // 输入法组合中的退格：平台报 ImeProcessed，交给输入法
+        Assert.Equal(["上海", "广州"], select.Values);
         Press(select, Key.Back);
         HeadlessUi.Flush(window);
         Assert.Equal(["上海"], select.Values);
@@ -135,6 +139,23 @@ public class SelectTests
         Assert.Equal(2, select.TagRow.HiddenCount);
         Assert.Contains(select.TagRow.Children.OfType<Tag>(), tag => tag.IsVisible && (string?)tag.Content == "+2");
         Assert.Empty(readOnly.TagRow!.ShownTags.SelectMany(tag => tag.GetVisualChildren().OfType<CloseButton>()));
+    });
+
+    [Fact]
+    [Upstream("SelectedTags", "“+N”标签的部件属性（propsMore）合并到它上面")]
+    public Task The_more_tag_is_a_part_styles_can_reach() => HeadlessUi.Run(() =>
+    {
+        SelectedTag[] tags = [new("a", "甲"), new("b", "乙"), new("c", "丙")];
+        var plain = new SelectedTags { Tags = tags, MaxTagCount = 1 };
+        var styled = new SelectedTags { Tags = tags, MaxTagCount = 1 };
+        styled.Styles.Add(new Style(x => x.OfType<Tag>().Name(SelectedTagsParts.More)) { Setters = { new Setter(Tag.ToneProperty, StatusTone.Danger) } });
+        HeadlessUi.Show(new StackPanel { Children = { plain, styled } });
+        static Tag More(SelectedTags row) => row.Children.OfType<Tag>().Single(tag => tag.Name == SelectedTagsParts.More);
+
+        Assert.Equal("+2", More(styled).Content);
+        Assert.Equal((TextSize.Sm, StatusVariant.Soft), (More(plain).Size, More(plain).Variant)); // 主题给的默认
+        Assert.Equal(StatusTone.Danger, More(styled).Tone);
+        Assert.Equal((TextSize.Sm, StatusVariant.Soft), (More(styled).Size, More(styled).Variant)); // 没改的仍是默认
     });
 
     [Fact]

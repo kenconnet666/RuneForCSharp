@@ -77,7 +77,15 @@ export const PLATFORM_PROP_RENAMES = {
 
 /** 某个平台上某个组件改了名的 prop（盖过 PLATFORM_PROP_RENAMES）：WinForms 的控件自己有 Size、Padding */
 export const PLATFORM_COMPONENT_PROP_RENAMES = {
+  // 按数据生成的项的属性（propsItem）：平台的项容器主题，按项不同时绑定到容器的 DataContext（这一项）
+  Avalonia: {
+    CheckboxGroup: { propsItem: 'ItemContainerTheme' },
+    RadioGroup: { propsItem: 'ItemContainerTheme' },
+  },
   WPF: {
+    // 同上：项容器的样式，按项不同时用 ItemContainerStyleSelector 或绑定
+    CheckboxGroup: { propsItem: 'ItemContainerStyle' },
+    RadioGroup: { propsItem: 'ItemContainerStyle' },
     // FrameworkElement 自己有 Language（界面文字的语言）
     CodeBlock: { lang: 'CodeLanguage' },
     // 平台的提示：FrameworkElement.ToolTip 与 ToolTipService
@@ -90,6 +98,9 @@ export const PLATFORM_COMPONENT_PROP_RENAMES = {
     },
   },
   WinForms: {
+    // 组自己生成控件：生成一项时的事件，处理完之后值由组写回
+    CheckboxGroup: { propsItem: 'ItemGenerated' },
+    RadioGroup: { propsItem: 'ItemGenerated' },
     Container: { size: 'ContainerSize', padding: 'InlinePadding' },
     Card: { padding: 'CardPadding' },
     // 同 TextFieldControl
@@ -195,6 +206,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
   },
   WinForms: {
     UserButton: { propsAvatar: '头像是 UserButton 画的 Avatar 元素，WinForms 还没有头像的部件属性记录（AvatarProps）；尺寸是 sm，配色跟着 Avatar 的作用域默认值' },
+    SelectedTags: { propsMore: '“+N”同其余标签是 SelectedTagsControl 建的 sm、soft 的 TagControl（同 propsTag），WinForms 没有部件样式' },
     Tabs: { ripple: '标签是组件库画的容器控件（里面放文字与计数），没有按下的波纹' },
     NavItem: { ripple: '导航行是组件库画的容器控件（里面放图标、文字与计数），没有按下的波纹' },
     CodeBlock: Object.fromEntries(
@@ -249,6 +261,9 @@ export const PLATFORM_PROPS = new Set([
   'Tag',
   'AutomationProperties.Name',
   'ItemsSource',
+  // ItemsControl 的项容器主题（Avalonia）、样式（WPF）：组的 propsItem
+  'ItemContainerTheme',
+  'ItemContainerStyle',
   // 平台的提示：Avalonia 的 ToolTip.*，WPF 的 ToolTip 与 ToolTipService.*（WPF 的映射见 PLATFORM_COMPONENT_PROP_RENAMES）
   'ToolTip.Tip',
   'ToolTip.IsOpen',

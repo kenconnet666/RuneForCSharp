@@ -46,6 +46,7 @@
     </Setter>
   </Style>
   <Style x:Key="{x:Static rune:ListboxParts.Skeleton}" TargetType="StackPanel" />
+  <Style x:Key="{x:Static rune:ListboxParts.Content}" TargetType="StackPanel" />
   <Style x:Key="{x:Static rune:ListboxParts.GroupLabel}" TargetType="rune:Text" BasedOn="{StaticResource {x:Type rune:Text}}">
     <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
   </Style>

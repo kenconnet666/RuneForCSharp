@@ -215,6 +215,21 @@ public class ChoiceTests
         Assert.Equal(("pro", "专业版", "¥99 / 月"), (pro.Value, pro.Content as string, pro.Description as string));
     });
 
+    /// <summary>TS 的 propsItem 是平台的 ItemContainerStyle（按项不同时用 ItemContainerStyleSelector 或绑定）；值由组管理，样式改不了。</summary>
+    [Fact]
+    public Task Item_container_style_reaches_generated_items_and_the_group_keeps_values() => WpfUi.Run(() =>
+    {
+        var style = new Style(typeof(Radio));
+        style.Setters.Add(new Setter(AutomationProperties.AutomationIdProperty, new System.Windows.Data.Binding(".") { StringFormat = "radio-{0}" }));
+        style.Setters.Add(new Setter(Radio.ValueProperty, "x"));
+        var group = new RadioGroup { ItemsSource = new[] { "a", "b" }, ItemContainerStyle = style };
+        Show(group);
+        var radios = WpfUi.Descendants(group).OfType<Radio>().ToList();
+
+        Assert.Equal(["radio-a", "radio-b"], radios.Select(AutomationProperties.GetAutomationId));
+        Assert.Equal(["a", "b"], radios.Select(radio => radio.Value));
+    });
+
     [Fact]
     public Task Card_flows_from_the_group_and_end_sits_at_the_end_edge() => WpfUi.Run(() =>
     {

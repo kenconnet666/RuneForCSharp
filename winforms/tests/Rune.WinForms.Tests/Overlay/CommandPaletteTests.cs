@@ -83,6 +83,7 @@ public class CommandPaletteTests
     });
 
     [Fact]
+    [Upstream("CommandPalette", "CommandPalette：组合中的 ↓ 不移动高亮、Enter 不执行；组合结束后照常")]
     public Task Arrows_move_and_enter_invokes_and_closes() => WinFormsUi.Run(() =>
     {
         object? invoked = null;
@@ -98,6 +99,9 @@ public class CommandPaletteTests
             Assert.True(palette.IsOpen);
             Assert.True(palette.Input.Input.Focused);
             Assert.Equal("/button", palette.List.State.Active); // 打开时高亮第一个
+            Press(palette.Input.Input, Keys.ProcessKey); // 输入法组合中的 ↓、Enter：平台报 ProcessKey，交给输入法
+            Assert.Equal("/button", palette.List.State.Active);
+            Assert.Null(invoked);
             Press(palette.Input.Input, Keys.Down);
             Press(palette.Input.Input, Keys.Enter);
             WinFormsUi.Pump();

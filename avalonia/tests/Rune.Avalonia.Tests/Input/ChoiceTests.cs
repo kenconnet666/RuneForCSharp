@@ -8,6 +8,8 @@ using Avalonia.Input;
 using Avalonia.LogicalTree;
 using Avalonia.Media;
 using Avalonia.Media.Transformation;
+using Avalonia.Data;
+using Avalonia.Styling;
 
 namespace Rune.Avalonia.Tests;
 
@@ -210,6 +212,32 @@ public class ChoiceTests
         Assert.Equal(["日", "周", "月"], plain.GetLogicalDescendants().OfType<Radio>().Select(radio => radio.Content as string));
         var pro = plans.GetLogicalDescendants().OfType<Radio>().ElementAt(1);
         Assert.Equal(("pro", "专业版", "¥99 / 月"), (pro.Value, pro.Content as string, pro.Description as string));
+    });
+
+    /// <summary>TS 的 propsItem 是平台的 ItemContainerTheme：按项计算用绑定（容器的 DataContext 是这一项）；值由组管理，样式改不了。</summary>
+    [Fact]
+    public Task Item_container_theme_reaches_generated_items_and_the_group_keeps_values() => HeadlessUi.Run(() =>
+    {
+        Application.Current!.TryGetResource(typeof(Radio), ThemeVariant.Light, out var radioTheme);
+        var group = new RadioGroup
+        {
+            ItemsSource = new[] { "a", "b" },
+            ItemContainerTheme = new ControlTheme(typeof(Radio))
+            {
+                BasedOn = (ControlTheme)radioTheme!,
+                Setters =
+                {
+                    new Setter(AutomationProperties.AutomationIdProperty, new Binding(".") { StringFormat = "radio-{0}" }),
+                    new Setter(Radio.ValueProperty, "x"),
+                },
+            },
+        };
+        HeadlessUi.Show(group);
+        var radios = group.GetLogicalDescendants().OfType<Radio>().ToList();
+
+        Assert.Equal(["radio-a", "radio-b"], radios.Select(AutomationProperties.GetAutomationId));
+        Assert.Equal(["a", "b"], radios.Select(radio => radio.Value));
+        Assert.NotNull(radios[0].Part<global::Avalonia.Controls.Presenters.ContentPresenter>(ChoiceBaseParts.Label)); // 基于默认主题，模板还在
     });
 
     [Fact]

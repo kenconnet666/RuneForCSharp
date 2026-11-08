@@ -26,7 +26,8 @@ public sealed class SelectedTagEventArgs(string value) : EventArgs
 /// </code>
 /// 标签是 sm、soft 的 <see cref="Tag"/>，间隔 space.xs、上下各留 space.xs；订阅了 <see cref="RemoveRequested"/> 才有移除按钮（只读、不可用时不订阅）。
 /// 这排标签只给指针用：读屏看不到（下拉自己念全部已选），移除按钮不能聚焦、按下不抢焦点。<see cref="MaxTagCount"/> 是数字时只显示前几个，
-/// <see cref="TagLimit.Responsive"/> 时排成一行按宽度放（至少一个），其余收进"+N"。
+/// <see cref="TagLimit.Responsive"/> 时排成一行按宽度放（至少一个），其余收进"+N"。"+N"是部件 <see cref="SelectedTagsParts.More"/>（TS 的 propsMore），
+/// 默认的 sm、soft 在主题里，样式能改：<c>rune|SelectedTags rune|Tag#PART_More</c>。
 /// </summary>
 public class SelectedTags : Panel
 {
@@ -36,7 +37,7 @@ public class SelectedTags : Panel
     /// <summary>最多显示几个；null 时全部显示（会换行）。</summary>
     public static readonly StyledProperty<TagLimit?> MaxTagCountProperty = AvaloniaProperty.Register<SelectedTags, TagLimit?>(nameof(MaxTagCount));
 
-    readonly Tag more = new() { Size = TextSize.Sm, Variant = StatusVariant.Soft };
+    readonly Tag more = new() { Name = SelectedTagsParts.More };
     EventHandler<SelectedTagEventArgs>? removeRequested;
 
     /// <summary>新建：没有标签。</summary>
@@ -195,4 +196,11 @@ public class SelectedTags : Panel
 
         protected override IReadOnlyList<AutomationPeer>? GetChildrenCore() => null;
     }
+}
+
+/// <summary>SelectedTags 的部件名（代码里组合的元素）：<c>rune|SelectedTags rune|Tag#PART_More</c>。</summary>
+public static class SelectedTagsParts
+{
+    /// <summary>收起其余标签的"+N"（TS 的 propsMore）。</summary>
+    public const string More = "PART_More";
 }
