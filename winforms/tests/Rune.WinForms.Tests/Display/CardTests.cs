@@ -34,6 +34,24 @@ public class CardTests
         Assert.Equal("订单 #1024", card.AccessibilityObject.Name);
     });
 
+    [Fact]
+    public Task Padding_none_keeps_the_body_flush_but_pads_header_and_footer() => WinFormsUi.Run(() =>
+    {
+        var action = new ButtonControl { Text = "查看" };
+        var content = new ParagraphControl { Text = "内容" };
+        var card = new CardControl { Header = "订单 #1024", Footer = action, CardPadding = Space.None };
+        card.Controls.Add(content);
+        Show(card, out var form);
+        using var _ = form;
+        var em = card.Font.SizeInPoints * card.DeviceDpi / 72f;
+        var line = Math.Max(1, (int)MathF.Round(card.DeviceDpi / 96f));
+
+        Assert.Equal(line, content.Left); // 正文贴着边框
+        Assert.Equal(card.ClientSize.Width - line, content.Right);
+        Assert.Equal(card.ClientSize.Width - line - (int)MathF.Round(0.75f * em), action.Right); // 页脚左右 md
+        Assert.Equal(card.ClientSize.Height - line - (int)MathF.Round(0.5f * em), action.Bottom); // 上下 sm
+    });
+
     [Upstream("Card", "loading：正文换成对读屏隐藏的骨架")]
     [Fact]
     public Task Loading_swaps_the_body_for_a_skeleton() => WinFormsUi.Run(() =>

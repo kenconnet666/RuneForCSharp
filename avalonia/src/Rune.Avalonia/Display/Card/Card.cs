@@ -174,11 +174,17 @@ public class Card : Control
         footer.IsVisible = Footer is not null;
     }
 
-    /// <summary>内边距 = space 系数 × 字号；圆角 = radii 系数 × 字号（full 按高度的一半）。</summary>
+    /// <summary>
+    /// 内边距 = space 系数 × 字号；none 时只有正文贴边（表格、列表），页头、页脚的文字不能贴着边框，上下 sm、左右 md。
+    /// 圆角 = radii 系数 × 字号（full 按高度的一半）。
+    /// </summary>
     void UpdateMetrics()
     {
         var padding = new Thickness(GetValue(PaddingFactorProperty) * FontSize);
-        header.Padding = body.Padding = footer.Padding = padding;
+        body.Padding = padding;
+        header.Padding = footer.Padding = Padding == Space.None
+            ? new Thickness(this.Resource("Rune.Space.Md", 0.75) * FontSize, this.Resource("Rune.Space.Sm", 0.5) * FontSize)
+            : padding;
         surface.CornerRadius = new CornerRadius(Radius.Value == "full" ? 9999 : GetValue(RadiusFactorProperty) * FontSize);
     }
 

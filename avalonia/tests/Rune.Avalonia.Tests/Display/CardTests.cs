@@ -32,6 +32,18 @@ public class CardTests
         Assert.Equal(1, Part(full, CardParts.Header).BorderThickness.Bottom);
     });
 
+    [Fact]
+    public Task Padding_none_keeps_the_body_flush_but_pads_header_and_footer() => HeadlessUi.Run(() =>
+    {
+        var card = new Card { Header = "标题", Footer = "操作", Content = "内容", Padding = Space.None };
+        HeadlessUi.Show(new StackPanel { Width = 300, Children = { card } });
+
+        var em = card.FontSize;
+        Assert.Equal(new Thickness(0), Part(card, CardParts.Body).Padding);
+        Assert.Equal(new Thickness(0.75 * em, 0.5 * em), Part(card, CardParts.Header).Padding); // 上下 sm、左右 md
+        Assert.Equal(Part(card, CardParts.Header).Padding, Part(card, CardParts.Footer).Padding);
+    });
+
     [Upstream("Card", "loading：正文换成对读屏隐藏的骨架")]
     [Fact]
     public Task Loading_swaps_the_body_for_a_skeleton() => HeadlessUi.Run(() =>

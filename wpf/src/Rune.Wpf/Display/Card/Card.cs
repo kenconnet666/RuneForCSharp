@@ -189,6 +189,8 @@ public class Card : FrameworkElement
     {
         if (Padding.ResourceKey is { } key) SetResourceReference(PaddingFactorProperty, key);
         else ClearValue(PaddingFactorProperty);
+        // 页头、页脚的内边距还看档位本身（none）：系数没变时也要重算
+        UpdateMetrics();
     }
 
     void BindRadius()
@@ -211,11 +213,16 @@ public class Card : FrameworkElement
         footer.Visibility = Footer is null ? Visibility.Collapsed : Visibility.Visible;
     }
 
-    /// <summary>内边距 = space 系数 × 字号；圆角 = radii 系数 × 字号（full 按高度的一半）。</summary>
+    /// <summary>
+    /// 内边距 = space 系数 × 字号；none 时只有正文贴边（表格、列表），页头、页脚的文字不能贴着边框，上下 sm、左右 md。
+    /// 圆角 = radii 系数 × 字号（full 按高度的一半）。
+    /// </summary>
     void UpdateMetrics()
     {
         var padding = new Thickness((double)GetValue(PaddingFactorProperty) * Em);
-        header.Padding = body.Padding = footer.Padding = padding;
+        body.Padding = padding;
+        var (inline, block) = ((TryFindResource("Rune.Space.Md") as double? ?? 0.75) * Em, (TryFindResource("Rune.Space.Sm") as double? ?? 0.5) * Em);
+        header.Padding = footer.Padding = Padding == Space.None ? new Thickness(inline, block, inline, block) : padding;
         var radius = new CornerRadius(Radius.Value == "full" ? 9999 : (double)GetValue(RadiusFactorProperty) * Em);
         surface.CornerRadius = shadow.CornerRadius = radius;
         InvalidateArrange();

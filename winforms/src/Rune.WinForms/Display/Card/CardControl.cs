@@ -142,7 +142,13 @@ public class CardControl : Panel, IScopeAware
 
     float Em => Font.SizeInPoints * DeviceDpi / 72f;
 
+    /// <summary>正文的内边距：space 系数 × 字号。</summary>
     int Inset => (int)MathF.Round((CardPadding.Factor ?? 0) * Em);
+
+    /// <summary>页头、页脚的左右、上下内边距：同正文；none 时只有正文贴边（表格、列表），页头、页脚的文字不能贴着边框，上下 sm、左右 md。</summary>
+    (int Inline, int Block) EdgeInset => CardPadding == Space.None
+        ? ((int)MathF.Round(Tokens.Space.Md * Em), (int)MathF.Round(Tokens.Space.Sm * Em))
+        : (Inset, Inset);
 
     int Line => Math.Max(1, (int)MathF.Round(Tokens.BorderWidth.Xs * DeviceDpi / 96f));
 
@@ -290,8 +296,9 @@ public class CardControl : Panel, IScopeAware
         /// <summary>按宽度排一遍；arrange 为 false 时只算高度。</summary>
         int Run(int width, bool arrange)
         {
-            var (inset, line) = (owner.Inset, owner.Line);
+            var (inset, edge, line) = (owner.Inset, owner.EdgeInset, owner.Line);
             var inner = Math.Max(0, width - 2 * line - 2 * inset);
+            var edgeInner = Math.Max(0, width - 2 * line - 2 * edge.Inline);
             var gap = (int)MathF.Round(Tokens.Space.Sm * owner.Em);
             var rtl = owner.RightToLeft == RightToLeft.Yes;
             int X(int left, int w) => rtl ? width - left - w : left;
@@ -300,23 +307,23 @@ public class CardControl : Panel, IScopeAware
             if (owner.HasHeader)
             {
                 var context = owner.Context;
-                var text = owner.Header.Length == 0 ? Size.Empty : owner.title.Measure(context, new Size(inner, int.MaxValue));
-                var extra = owner.Extra is { } e ? SizeOf(e, inner) : Size.Empty;
+                var text = owner.Header.Length == 0 ? Size.Empty : owner.title.Measure(context, new Size(edgeInner, int.MaxValue));
+                var extra = owner.Extra is { } e ? SizeOf(e, edgeInner) : Size.Empty;
                 // 文字与 Extra 一行放得下时并排、交叉轴居中；放不下时 Extra 换到下一行（flex-wrap）
-                var together = text.Width + (extra.Width > 0 ? gap + extra.Width : 0) <= inner;
+                var together = text.Width + (extra.Width > 0 ? gap + extra.Width : 0) <= edgeInner;
                 var row = together ? Math.Max(text.Height, extra.Height) : text.Height + (extra.Height > 0 ? gap + extra.Height : 0);
                 if (arrange)
                 {
-                    var top = y + inset;
-                    owner.title.Bounds = new Rectangle(X(line + inset, text.Width), top + (together ? (row - text.Height) / 2 : 0), text.Width, text.Height);
+                    var top = y + edge.Block;
+                    owner.title.Bounds = new Rectangle(X(line + edge.Inline, text.Width), top + (together ? (row - text.Height) / 2 : 0), text.Width, text.Height);
                     if (owner.Extra is { } control)
                     {
                         var ey = together ? top + (row - extra.Height) / 2 : top + text.Height + gap;
-                        var ex = together ? line + inset + inner - extra.Width : line + inset;
+                        var ex = together ? line + edge.Inline + edgeInner - extra.Width : line + edge.Inline;
                         control.SetBounds(X(ex, extra.Width), ey, extra.Width, extra.Height);
                     }
                 }
-                y += 2 * inset + row;
+                y += 2 * edge.Block + row;
                 HeaderBottom = y;
                 y += line;
             }
@@ -335,10 +342,10 @@ public class CardControl : Panel, IScopeAware
                 FooterTop = y;
                 y += line;
                 // 页脚是布局容器（一组按钮、两端对齐的一行）时撑满一行由它自己排，单个控件靠结束边（TS 的页脚是 justify-content: flex-end 的一行）
-                var size = SizeOf(footer, inner);
-                if (footer is Panel) size.Width = inner;
-                if (arrange) footer.SetBounds(X(line + inset + inner - size.Width, size.Width), y + inset, size.Width, size.Height);
-                y += 2 * inset + size.Height;
+                var size = SizeOf(footer, edgeInner);
+                if (footer is Panel) size.Width = edgeInner;
+                if (arrange) footer.SetBounds(X(line + edge.Inline + edgeInner - size.Width, size.Width), y + edge.Block, size.Width, size.Height);
+                y += 2 * edge.Block + size.Height;
             }
             return y + line;
         }

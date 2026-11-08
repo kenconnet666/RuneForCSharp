@@ -12,7 +12,7 @@ vue-tsx-pro 那边的会话改了设计时会发通知过来（每完成一个�
 | 日期 | 组件 | 现象与复现 | 建议 | 状态 |
 |---|---|---|---|---|
 | 2026-11-07 | Checkbox、Radio、Switch | 原生 input 不继承字体，方框、轨道的 em 按浏览器给 input 的 13.333px 算，sm、lg 档与文字、滑块对不上 | input 加 `font: 'inherit'` | 已修（9f7be887，0.11.1；锁定跟到 875797ae） |
-| 2026-11-08 | UserButton | 样式引擎按 StyleX 的优先级排（长属性 3000 > 简写 2000）：compact 变体的 `padding: _xs` 压不过基础的 `paddingInlineEnd: _sm`，整行 compound 的 `paddingInline: _sm` 压不过 `paddingInlineStart: _xs`；compact 右边 7px、整行左边 3.5px，两边不对称 | 变体、compound 改写成同级的长属性（`paddingInlineStart`、`paddingInlineEnd`）；recipe 的开发期检查可以提示被压住的简写。我们按配方本意做 | 已开 [#5](https://github.com/kenconnet666/vue-tsx-pro/issues/5) |
+| 2026-11-08 | UserButton | 样式引擎按 StyleX 的优先级排（长属性 3000 > 简写 2000）：compact 变体的 `padding: _xs` 压不过基础的 `paddingInlineEnd: _sm`，整行 compound 的 `paddingInline: _sm` 压不过 `paddingInlineStart: _xs`；compact 右边 7px、整行左边 3.5px，两边不对称 | 变体、compound 改写成同级的长属性（`paddingInlineStart`、`paddingInlineEnd`）；recipe 的开发期检查可以提示被压住的简写。我们按配方本意做 | 已修（84e6cde2：样式合并时后写的简写重设前面片段的长属性，[#5](https://github.com/kenconnet666/vue-tsx-pro/issues/5) 已关）；锁定到它之后重截 avatar 核对 |
 | 2026-11-07 | Listbox | multiple 示例写的 `height: 16rem` 落在有 padding: xs 的根元素上，默认 content-box，列表实际高 16rem + 0.5em；桌面上 Height 是整个控件，对照矮 7 像素 | listboxStyles.root 加 `boxSizing: 'border-box'`（同 control、itemStyles），或示例注明不含内边距 | 部分修复（313f0e23）：规则只罩带 data-part 的元素，Listbox 的根元素没有，ad4a77ac 上仍高 16rem + 0.5em；已再通知（2026-11-07） |
 
 ## 下一阶段计划（2026-11-07 收到通知，ROADMAP 阶段 25，上游无人值守执行）
@@ -293,9 +293,18 @@ Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
 | NotificationList、NotificationCenter 配方；“只看未读”靠结束边（b70cbd69） | 还没做 | 做时照新的 |
-| Card padding="none"：正文贴边，页头、页脚上下 sm、左右 md（b70cbd69） | Card 已做 | 1d07b19d 的 CI 绿后锁定，三个平台照改 |
+| Card padding="none"：正文贴边，页头、页脚上下 sm、左右 md（b70cbd69） | Card 已做 | 已跟：三个平台的页头、页脚在 none 时留上下 sm、左右 md，正文贴边 |
 | FilterBar 配方（839dd5e4）、Upload 配方（028b5f61） | 还没做 | 做时照新的 |
-| 列表行状态改条件别名：键盘高亮 data-highlighted（fillHover）、选中 aria-selected（accentText）、当前 aria-current / data-current（accentSoft 底）；Listbox、Tree 的 data-active 换成 data-highlighted（053d9658） | 外观不变；Listbox 的状态名 | 锁定时核对 Listbox 的取值与行为用例 |
+| 列表行状态改条件别名：键盘高亮 data-highlighted（fillHover）、选中 aria-selected（accentText）、当前 aria-current / data-current（accentSoft 底）；Listbox、Tree 的 data-active 换成 data-highlighted（053d9658） | 外观不变；Listbox 的状态名 | 不涉及：我们的状态是控件属性（IsHighlighted 等），行为用例没变 |
+
+锁定跟到 0.15.0（7a5667d4，只改版本号）再到 1d07b19d：生成文件、parity、行为对照都没变。
+
+### 第二十五批（2026-11-08 通知，master 84e6cde2、066ad66e）
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| 样式合并时后写的简写重设前面片段的长属性（84e6cde2，修 #5）：UserButton 的 compact 四边 xs、整行左右 sm 生效 | 我们本来就按本意做 | 066ad66e 的 CI 绿后锁定，重截 avatar user-button 核对 |
+| ItemList 的已选、不可用按 data-selected / data-disabled，NavBar 的当前页按 aria-current（066ad66e） | ItemList、NavBar 还没做；外观不变 | 做时照新的 |
 
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 

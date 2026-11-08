@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Automation.Peers;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Markup;
 using System.Windows.Media;
 
@@ -16,6 +17,20 @@ public class CardTests
         foreach (var child in children) host.Children.Add(child);
         return host;
     }
+
+    static Border Part(Card card, PartKey key) => WpfUi.Descendants(card).OfType<Border>().Single(border => border.Style == card.FindResource(key));
+
+    [Fact]
+    public Task Padding_none_keeps_the_body_flush_but_pads_header_and_footer() => WpfUi.Run(() =>
+    {
+        var card = new Card { Header = "标题", Footer = "操作", Content = "内容", Padding = Space.None };
+        WpfUi.Show(Themed(card));
+
+        var em = TextElement.GetFontSize(card);
+        Assert.Equal(new Thickness(0), Part(card, CardParts.Body).Padding);
+        Assert.Equal(new Thickness(0.75 * em, 0.5 * em, 0.75 * em, 0.5 * em), Part(card, CardParts.Header).Padding); // 上下 sm、左右 md
+        Assert.Equal(Part(card, CardParts.Header).Padding, Part(card, CardParts.Footer).Padding);
+    });
 
     static IEnumerable<string> Texts(DependencyObject root) => WpfUi.Descendants(root).OfType<TextBlock>().Where(text => text.IsVisible).Select(text => text.Text);
 
