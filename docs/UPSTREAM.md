@@ -321,6 +321,13 @@ Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_
 |---|---|---|
 | 图表共用部分统一 data-scope="chart"（root、header、legend、legendItem、swatch、plot、tooltip*、grid、tick、bars/bar、lines/line、areas/area、dots/dot、band、target、event、mark、crosshair、zoom 等），各图自己的部分用自己的 scope（graph-chart、map-chart、donut-chart、sparkline……）；改名 GraphChart 的 linkGroup、panelBox，Donut 的 centerTitle | 图表还没做 | 做时部件名照新的（inspect 的 Chart* 归到 chart 作用域） |
 
+### 第二十八批（2026-11-08 通知，master 5e9f0735：32 个文件的内部节点补部件标记）
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| Listbox 补 content（选项内容）、sizer、row（虚拟滚动的撑高层与行），根标记改成 listboxPart('root') | Listbox 已做；外观不变，取值对照里会多出上游独有的部件 | 锁定时跑 listbox 的取值，能对上的在 inspect 里配上（sizer、row 是网页虚拟滚动的结构，我们没有） |
+| ThemeCustomizer、Diagram、QueryTable、Tree、ItemList、DatePicker、Splitter 等 30 个组件的内部节点补标记 | 都还没做 | 做时部件名照新的 |
+
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 
 计划：vue-tsx-pro 的 `.claude/reports/style-overhaul-plan.md`（阶段 0 护栏 → 1 引擎 → 2 架构与 API → 3 整理 → 4 美学 → 5 文档）。
