@@ -1,6 +1,7 @@
 <!--
   NavSection 部件的默认外观（vue-tsx-pro 的 navListStyles.sectionLabel、sectionText、sectionIcon）：标题文字 sm、中等字重、字距 wide、行高 normal、text 颜色，
   图标 textMuted；紧凑时标题行上面一条 borderMuted 的细线。内边距、间距在 NavList.cs 里按字号算。
+  选择器经过标题行（Border#PART_Label）：小节里的导航项也有 PART_Icon，不能被这里的颜色盖住（当前页的图标是 accentText）。
 -->
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -8,14 +9,14 @@
   <Style Selector="rune|NavSection Border#PART_Label">
     <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
   </Style>
-  <Style Selector="rune|NavSection TextBlock#PART_Text">
+  <Style Selector="rune|NavSection Border#PART_Label TextBlock#PART_Text">
     <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
     <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
     <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
     <Setter Property="LetterSpacing" Value="{rune:Em Resource=Rune.LetterSpacing.Wide}" />
     <Setter Property="LineHeight" Value="{rune:Em Resource=Rune.LineHeight.Normal}" />
   </Style>
-  <Style Selector="rune|NavSection rune|Icon#PART_Icon">
+  <Style Selector="rune|NavSection Border#PART_Label rune|Icon#PART_Icon">
     <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
   </Style>
 </Styles>

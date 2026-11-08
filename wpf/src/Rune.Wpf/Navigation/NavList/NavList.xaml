@@ -52,7 +52,6 @@
             <Trigger Property="Icon" Value="{x:Null}"><Setter TargetName="PART_Indicator" Property="Visibility" Value="Collapsed" /></Trigger>
             <Trigger Property="IsIconOnly" Value="True">
               <Setter TargetName="PART_Row" Property="Justify" Value="center" />
-              <Setter TargetName="PART_Row" Property="Margin" Value="0" />
               <Setter TargetName="PART_Label" Property="Visibility" Value="Collapsed" />
               <Setter TargetName="PART_End" Property="Visibility" Value="Collapsed" />
             </Trigger>
@@ -61,6 +60,8 @@
       </Setter.Value>
     </Setter>
     <Style.Triggers>
+      <!-- 只剩图标：左右不留内边距，图标居中（navListStateStyles.compactRow） -->
+      <Trigger Property="IsIconOnly" Value="True"><Setter Property="rune:EmSize.Padding" Value="0,0.25" /></Trigger>
       <Trigger Property="IsMouseOver" Value="True">
         <Setter Property="Background" Value="{DynamicResource Rune.Brush.FillHover}" />
         <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />

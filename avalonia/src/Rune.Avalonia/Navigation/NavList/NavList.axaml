@@ -59,10 +59,8 @@
       <Setter Property="Background" Value="Transparent" />
       <Setter Property="Cursor" Value="No" />
     </Style>
-    <Style Selector="^:icon-only /template/ rune|Flex#PART_Row">
-      <Setter Property="Justify" Value="center" />
-      <Setter Property="Margin" Value="0" />
-    </Style>
+    <Style Selector="^:icon-only"><Setter Property="Padding" Value="{rune:Em 0, 0.25}" /></Style>
+    <Style Selector="^:icon-only /template/ rune|Flex#PART_Row"><Setter Property="Justify" Value="center" /></Style>
     <Style Selector="^:icon-only /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="IsVisible" Value="False" /></Style>
     <Style Selector="^:icon-only /template/ ContentPresenter#PART_End"><Setter Property="IsVisible" Value="False" /></Style>
   </ControlTheme>

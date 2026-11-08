@@ -272,6 +272,31 @@ QueryTable、ErrorBoundary、JsonViewer、ImageCropper、QuarterCalendar、Carou
 | Countdown 成为配方组件，variant: 'text'（默认）或 'blocks'（天数单独一格、时分秒各一格、格间“:”；部件 root、segment、separator，segment 最小 2em、accent 底、accentContrast 字、semibold） | Countdown 还没做 | 做时照新的 |
 | AppShell、NotificationCenter 的示例改用 UserButton 做账号菜单（f98eb920） | 我们的 AppShell 页只有 fullscreen（admin 等 Stat，mixed 等 NavBar） | 已跟：fullscreen 的效果区 28rem → 24rem；admin、mixed 做时照新的（顶栏用 UserButton，菜单等 Menu） |
 
+### 第二十三批（2026-11-08 通知，master f4065afc..68ef26a9：NavList、Menu、Toaster、AppShell、Transfer 改成配方组件）
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| NavList、NavItem、NavGroup、NavSection 共用配方 navListRecipe，部件 root、list、item、link、icon、label、badge、group、trigger、chevron、groupList、flyout、section、sectionLabel、sectionIcon、sectionText（f4065afc） | 外观不变；inspect 的部件名对不上了 | 已跟：inspect 把 NavRow、NavItem、NavGroupHeader、NavGroup、NavSection 归到 nav-list（NavItem 是 link、NavGroup 是 group、NavSection 是 section，分组的列表是 groupList，小节的标题行、图标、文字是 sectionLabel、sectionIcon、sectionText）；WPF 的 NavRowParts 补上 Chevron 的名字 |
+| Menu 配方（档位 size，部件 panel、content、item……）、Toaster 配方（档位 placement、max、stack、progress） | 还没做 | 做时照新的 |
+| AppShell 配方：档位 sidebarCollapsible、fullscreenable、skipLink、pageScrollbar 可在 components.AppShell 给默认，22 个部件（5785adb4） | 档位已有；部件名还没逐个对 | 跟 AppShell 的 admin、mixed 示例时对部件 |
+| Transfer 配方（68ef26a9） | 还没做 | 做时照新的 |
+| Text 截断与换行补一张 wrap="pretty" 的卡片，四张两行两列（aecc847d） | 三个平台的示例 | 已跟：加了第四张（桌面上 Pretty 同普通换行） |
+| Select、Upload 两列示例挪齐（f3ea7cda）；Menu 右键菜单示例改用 RadioGroup 卡片（26187227） | Select 的示例已对过；Menu 还没做 | 不涉及 / 做 Menu 时照新的 |
+
+锁定跟到 68ef26a9：生成文件没变，parity、行为对照都没变。对照中发现并修了：
+ts-styles 记了 display: none 的元素（NavList 紧凑时没打开的弹出卡片），按序号配对全错了位——现在跳过没渲染的元素（同 inspect 不记看不见的）；
+Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_Icon`）也选中了小节里导航项的图标，当前页的图标没变成 accentText——改成经过标题行；
+紧凑时导航行的左右内边距 Avalonia、WPF 改成 0（上游的 compactRow，原来是排版层的边距清零，外观一样、取值对不上）。nav-list 的取值只剩 toc 的滚动区高度（上游 18rem 的文章外层 360，待查）与 WPF 角标圆点的外圈（描边画在盒子里，上游是盒子外的阴影，看起来一样），像素都在 0.21% 以内。
+
+### 第二十四批（2026-11-08 通知，0.15.0 发版 7a5667d4；之后 1d07b19d 合进下面几批）
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| NotificationList、NotificationCenter 配方；“只看未读”靠结束边（b70cbd69） | 还没做 | 做时照新的 |
+| Card padding="none"：正文贴边，页头、页脚上下 sm、左右 md（b70cbd69） | Card 已做 | 1d07b19d 的 CI 绿后锁定，三个平台照改 |
+| FilterBar 配方（839dd5e4）、Upload 配方（028b5f61） | 还没做 | 做时照新的 |
+| 列表行状态改条件别名：键盘高亮 data-highlighted（fillHover）、选中 aria-selected（accentText）、当前 aria-current / data-current（accentSoft 底）；Listbox、Tree 的 data-active 换成 data-highlighted（053d9658） | 外观不变；Listbox 的状态名 | 锁定时核对 Listbox 的取值与行为用例 |
+
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 
 计划：vue-tsx-pro 的 `.claude/reports/style-overhaul-plan.md`（阶段 0 护栏 → 1 引擎 → 2 架构与 API → 3 整理 → 4 美学 → 5 文档）。
