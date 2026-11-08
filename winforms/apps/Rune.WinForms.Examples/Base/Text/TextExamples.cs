@@ -68,6 +68,9 @@ static class TextExamples
             new SmallControl { Text = "LineClamp = 2：最多两行", Tone = TextTone.Muted },
             new ParagraphControl { Text = Long, LineClamp = 2 })),
         Build.Card(new CardControl(), Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Xs },
+            new SmallControl { Text = "Wrap = Pretty：桌面上同普通换行", Tone = TextTone.Muted },
+            new ParagraphControl { Text = "验收完成后 10 个工作日内付款；逾期按日万分之五计收违约金，由采购部统一结算。" })),
+        Build.Card(new CardControl(), Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Xs },
             new SmallControl { Text = "Wrap = Balance：桌面上同普通换行", Tone = TextTone.Muted },
             new ParagraphControl { Text = "用更自然的 TSX 写 Vue 组件，符文让状态读写像普通变量", Wrap = TextWrap.Balance, TextSize = TextSize.Lg, Weight = TextWeight.Semibold, Align = TextAlign.Center })));
 

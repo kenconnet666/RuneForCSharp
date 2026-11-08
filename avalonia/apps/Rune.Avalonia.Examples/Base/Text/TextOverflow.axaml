@@ -19,6 +19,12 @@
     </rune:Card>
     <rune:Card>
       <rune:Flex Direction="column" Gap="xs">
+        <rune:Small Tone="muted">Wrap="Pretty"：桌面上同普通换行</rune:Small>
+        <rune:Paragraph>验收完成后 10 个工作日内付款；逾期按日万分之五计收违约金，由采购部统一结算。</rune:Paragraph>
+      </rune:Flex>
+    </rune:Card>
+    <rune:Card>
+      <rune:Flex Direction="column" Gap="xs">
         <rune:Small Tone="muted">Wrap="Balance"：桌面上同普通换行</rune:Small>
         <rune:Paragraph Wrap="Balance" Size="lg" Weight="semibold" Align="Center">用更自然的 TSX 写 Vue 组件，符文让状态读写像普通变量</rune:Paragraph>
       </rune:Flex>
