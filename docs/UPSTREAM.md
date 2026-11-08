@@ -12,7 +12,7 @@ vue-tsx-pro 那边的会话改了设计时会发通知过来（每完成一个�
 | 日期 | 组件 | 现象与复现 | 建议 | 状态 |
 |---|---|---|---|---|
 | 2026-11-07 | Checkbox、Radio、Switch | 原生 input 不继承字体，方框、轨道的 em 按浏览器给 input 的 13.333px 算，sm、lg 档与文字、滑块对不上 | input 加 `font: 'inherit'` | 已修（9f7be887，0.11.1；锁定跟到 875797ae） |
-| 2026-11-08 | UserButton | 样式引擎按 StyleX 的优先级排（长属性 3000 > 简写 2000）：compact 变体的 `padding: _xs` 压不过基础的 `paddingInlineEnd: _sm`，整行 compound 的 `paddingInline: _sm` 压不过 `paddingInlineStart: _xs`；compact 右边 7px、整行左边 3.5px，两边不对称 | 变体、compound 改写成同级的长属性（`paddingInlineStart`、`paddingInlineEnd`）；recipe 的开发期检查可以提示被压住的简写。我们按配方本意做 | 已修（84e6cde2：样式合并时后写的简写重设前面片段的长属性，[#5](https://github.com/kenconnet666/vue-tsx-pro/issues/5) 已关）；锁定到它之后重截 avatar 核对 |
+| 2026-11-08 | UserButton | 样式引擎按 StyleX 的优先级排（长属性 3000 > 简写 2000）：compact 变体的 `padding: _xs` 压不过基础的 `paddingInlineEnd: _sm`，整行 compound 的 `paddingInline: _sm` 压不过 `paddingInlineStart: _xs`；compact 右边 7px、整行左边 3.5px，两边不对称 | 变体、compound 改写成同级的长属性（`paddingInlineStart`、`paddingInlineEnd`）；recipe 的开发期检查可以提示被压住的简写。我们按配方本意做 | 已修（84e6cde2，[#5](https://github.com/kenconnet666/vue-tsx-pro/issues/5) 已关；锁定 5e9f0735 后重截：user-button Avalonia 0.39%、WPF 0.18%） |
 | 2026-11-07 | Listbox | multiple 示例写的 `height: 16rem` 落在有 padding: xs 的根元素上，默认 content-box，列表实际高 16rem + 0.5em；桌面上 Height 是整个控件，对照矮 7 像素 | listboxStyles.root 加 `boxSizing: 'border-box'`（同 control、itemStyles），或示例注明不含内边距 | 部分修复（313f0e23）：规则只罩带 data-part 的元素，Listbox 的根元素没有，ad4a77ac 上仍高 16rem + 0.5em；已再通知（2026-11-07） |
 
 ## 下一阶段计划（2026-11-07 收到通知，ROADMAP 阶段 25，上游无人值守执行）
@@ -325,7 +325,25 @@ Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_
 
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
-| Listbox 补 content（选项内容）、sizer、row（虚拟滚动的撑高层与行），根标记改成 listboxPart('root') | Listbox 已做；外观不变，取值对照里会多出上游独有的部件 | 锁定时跑 listbox 的取值，能对上的在 inspect 里配上（sizer、row 是网页虚拟滚动的结构，我们没有） |
+| Listbox 补 content（选项内容）、sizer、row（虚拟滚动的撑高层与行），根标记改成 listboxPart('root') | Listbox 已做；外观不变，取值对照里会多出上游独有的部件 | 已跟：选项里文字与说明那一列成了部件 ListboxParts.Content（WPF 是部件样式键，顺手给已选标记补了元素名 PART_Check），取值对照配得上；sizer、row 是网页虚拟滚动的结构，我们没有 |
+
+锁定跟到 5e9f0735（含 84e6cde2、066ad66e、2bdf378e、82e5548a）：生成文件、parity、行为对照都没变。
+
+### 第二十九批（2026-11-08 通知，master a2dc40b2、3842bbb6、930a754d）
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| 图表的 svg 根、坐标轴文字等补标记；选择框一族的 value、placeholder 用 data-scope="select"（a2dc40b2） | 图表还没做；Select 的 value 部件已有 | 不涉及 / 做图表时照新的 |
+| RadioGroup、CheckboxGroup 的 propsItem（对象或按项计算，值由组管理）（3842bbb6） | 组已做 | 已跟：Avalonia 是平台的 ItemContainerTheme、WPF 是 ItemContainerStyle（按项不同时绑定到容器的 DataContext，WPF 也能用 ItemContainerStyleSelector），值是组写的本地值、样式改不了；WinForms 加了 ItemGenerated 事件，处理完之后组把值写回 |
+| SelectedTags 的 propsMore（“+N”标签） | SelectedTags 已做 | 已跟：Avalonia、WPF 的“+N”成了部件（SelectedTagsParts.More，默认的 sm、soft 移进主题）；WinForms 同 propsTag 不移植 |
+| NavItem 的 propsBadge、FilterBar 的 count、ColumnSettings 的 propsCheckbox、DatePicker 的 propsPreset、CommandPalette 的 hotkey 标记 | NavItem 的角标 Avalonia、WPF 已是部件；其余没做 | WinForms 的 NavItem 部件属性（icon、badge、label）仍是缺口 |
+| 输入法组合中 NumberField 不加减不提交、Select 搜索框的退格不删已选项（930a754d），CommandPalette 组合中 ↓、Enter 不处理 | 平台把组合中的按键报成 ImeProcessed（WinForms 是 ProcessKey），我们的按键处理本来就不认 | 补了测试对上 CommandPalette、Select 的两条用例；NumberField 还没做 |
+
+### 第三十批（2026-11-08 通知，master bf6d5afd：暗色主题的实色悬停改成调亮）
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| dark 的 accentHover #3758d4 → #4a6ddf；dark、midnight、ember、cyberpunk 的 dangerHover #a33b3e → #bd5356 | token 是生成的 | CI 绿后锁定，token-gen 重新生成 |
 | ThemeCustomizer、Diagram、QueryTable、Tree、ItemList、DatePicker、Splitter 等 30 个组件的内部节点补标记 | 都还没做 | 做时部件名照新的 |
 
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
