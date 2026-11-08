@@ -315,6 +315,12 @@ Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_
 
 先在 2bdf378e 上预跑：parity、行为对照都没变；CI 绿后连同 066ad66e 一起锁定。
 
+### 第二十七批（2026-11-08 通知，master 82e5548a：图表内部节点补部件标记）
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| 图表共用部分统一 data-scope="chart"（root、header、legend、legendItem、swatch、plot、tooltip*、grid、tick、bars/bar、lines/line、areas/area、dots/dot、band、target、event、mark、crosshair、zoom 等），各图自己的部分用自己的 scope（graph-chart、map-chart、donut-chart、sparkline……）；改名 GraphChart 的 linkGroup、panelBox，Donut 的 centerTitle | 图表还没做 | 做时部件名照新的（inspect 的 Chart* 归到 chart 作用域） |
+
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 
 计划：vue-tsx-pro 的 `.claude/reports/style-overhaul-plan.md`（阶段 0 护栏 → 1 引擎 → 2 架构与 API → 3 整理 → 4 美学 → 5 文档）。
