@@ -306,6 +306,15 @@ Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_
 | 样式合并时后写的简写重设前面片段的长属性（84e6cde2，修 #5）：UserButton 的 compact 四边 xs、整行左右 sm 生效 | 我们本来就按本意做 | 066ad66e 的 CI 绿后锁定，重截 avatar user-button 核对 |
 | ItemList 的已选、不可用按 data-selected / data-disabled，NavBar 的当前页按 aria-current（066ad66e） | ItemList、NavBar 还没做；外观不变 | 做时照新的 |
 
+### 第二十六批（2026-11-08 通知，master 2bdf378e：24.2 收尾）
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| 按钮家族的不可用按 disabled / aria-disabled（buttonSx 去掉 disabled 参数） | 外观不变；我们的不可用是控件状态（IsDisabled，含可聚焦的不可用） | 不涉及 |
+| DataTable 已选、正在看的行按 aria-selected / aria-current（压过行色调）；CalendarBoard 选中、不可用按 aria-selected / aria-disabled，不可用格悬停不再有底色 | 还没做 | 做时照新的（不可用格没有悬停底色） |
+
+先在 2bdf378e 上预跑：parity、行为对照都没变；CI 绿后连同 066ad66e 一起锁定。
+
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 
 计划：vue-tsx-pro 的 `.claude/reports/style-overhaul-plan.md`（阶段 0 护栏 → 1 引擎 → 2 架构与 API → 3 整理 → 4 美学 → 5 文档）。
