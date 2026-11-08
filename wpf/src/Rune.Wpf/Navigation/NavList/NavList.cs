@@ -641,4 +641,7 @@ public static class NavRowParts
 
     /// <summary>文字。</summary>
     public static readonly PartKey Label = new(typeof(NavRow), nameof(Label), typeof(ContentPresenter));
+
+    /// <summary>分组标题的箭头（模板里的元素名，没有样式键）。</summary>
+    public const string Chevron = "PART_Chevron";
 }

@@ -145,7 +145,9 @@ function collect({ PROPS, only, UNMARKED }) {
     if (!canvas) continue;
     const counts = {};
     const parts = [];
+    // 没渲染的元素（自己或祖先 display: none，如收起的弹出层）不记：平台那边看不见的元素也不记
     for (const element of canvas.querySelectorAll('[data-scope][data-part]')) {
+      if (!element.checkVisibility()) continue;
       const name = `${element.getAttribute('data-scope')}/${element.getAttribute('data-part')}`;
       const index = (counts[name] = (counts[name] ?? -1) + 1);
       element.setAttribute('data-ts-styles', `${heading.id}|${name}#${index}`);
@@ -159,7 +161,7 @@ function collect({ PROPS, only, UNMARKED }) {
     // 文字元素只算直接含文字的；svg 只算最外层的
     const tagCounts = {};
     for (const element of canvas.querySelectorAll(UNMARKED)) {
-      if (element.hasAttribute('data-part') || element.parentElement.closest('svg')) continue;
+      if (element.hasAttribute('data-part') || element.parentElement.closest('svg') || !element.checkVisibility()) continue;
       const tag = element.tagName.toLowerCase();
       if (tag !== 'svg' && ![...element.childNodes].some((node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim())) continue;
       const name = `@${tag}`;

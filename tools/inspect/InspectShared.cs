@@ -244,6 +244,12 @@ sealed class StyleReport
         ["Checkbox"] = "choice",
         ["Radio"] = "choice",
         ["ChoiceBase"] = "choice",
+        // 上游 NavList、NavItem、NavGroup、NavSection 共用 nav-list 一个配方（f4065afc）
+        ["NavRow"] = "nav-list",
+        ["NavItem"] = "nav-list",
+        ["NavGroupHeader"] = "nav-list",
+        ["NavGroup"] = "nav-list",
+        ["NavSection"] = "nav-list",
     };
 
     /// <summary>
@@ -260,6 +266,10 @@ sealed class StyleReport
     {
         ["CheckboxGroup"] = "choice/group",
         ["RadioGroup"] = "choice/group",
+        // 导航项是可点的那一行（TS 的 link；外层的 li 是 item，我们没有）
+        ["NavItem"] = "nav-list/link",
+        ["NavGroup"] = "nav-list/group",
+        ["NavSection"] = "nav-list/section",
     };
 
     /// <summary>部件在上游叫别的名字：API 名（propsThumb）与部件标记（data-part="indicator"）不同的。</summary>
@@ -269,6 +279,12 @@ sealed class StyleReport
         [("Switch", "PART_Thumb")] = "indicator",
         [("Checkbox", "PART_Box")] = "input",
         [("Radio", "PART_Circle")] = "input",
+        [("NavItem", "PART_ContentPresenter")] = "label",
+        [("NavGroupHeader", "PART_ContentPresenter")] = "label",
+        [("NavGroup", "PART_List")] = "groupList",
+        [("NavSection", "PART_Label")] = "sectionLabel",
+        [("NavSection", "PART_Icon")] = "sectionIcon",
+        [("NavSection", "PART_Text")] = "sectionText",
     };
 
     /// <summary>TS 里没有部件标记的组件（css.create 写的）：按渲染出的标签配对，<c>@p#0</c>，同 tools/ts-styles。</summary>
