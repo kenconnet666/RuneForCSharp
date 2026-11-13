@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing.Drawing2D;
 
@@ -215,7 +214,7 @@ public class LinkControl : ElementControl<Link>
 
     /// <summary>用系统打开链接。</summary>
     /// <param name="href">绝对地址。</param>
-    protected virtual void Navigate(Uri href) => Process.Start(new ProcessStartInfo(href.AbsoluteUri) { UseShellExecute = true })?.Dispose();
+    protected virtual void Navigate(Uri href) => LinkLauncher.Open(href);
 
     /// <inheritdoc />
     protected override void OnTextChanged(EventArgs e)

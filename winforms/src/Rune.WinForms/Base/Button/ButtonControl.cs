@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Diagnostics;
 
 namespace Rune.WinForms;
 
@@ -128,7 +127,7 @@ public abstract class ButtonControlBase<T> : ElementControl<T>, IButtonControl w
 
     /// <summary>用系统打开链接（Shell 的默认程序：浏览器、邮件……）。</summary>
     /// <param name="href">绝对地址。</param>
-    protected virtual void Navigate(Uri href) => Process.Start(new ProcessStartInfo(href.AbsoluteUri) { UseShellExecute = true })?.Dispose();
+    protected virtual void Navigate(Uri href) => LinkLauncher.Open(href);
 
     /// <inheritdoc />
     protected override void OnEnabledChanged(EventArgs e)
