@@ -37,6 +37,15 @@ export const RECIPES = {
       outline: { Foreground: 'text', BorderBrush: 'border' },
     },
   },
+  Alert: {
+    // 提示条（vue-tsx-pro 的 alertRecipe：statusToneCompound 的 soft、surface、outline）。WinForms 直接用 BadgeRecipe 的这三档
+    file: 'wpf/src/Rune.Wpf/Feedback/Alert/AlertRecipe.g.xaml',
+    variants: {
+      soft: { Background: 'soft', Foreground: 'text' },
+      surface: { Background: 'surface', Foreground: 'text', BorderBrush: 'border' },
+      outline: { Foreground: 'text', BorderBrush: 'border' },
+    },
+  },
   Avatar: {
     // 头像的后备内容（首字母、图标）：vue-tsx-pro 的 statusToneStyles 的 soft、solid。WinForms 直接用 BadgeRecipe 的这两档
     file: 'wpf/src/Rune.Wpf/Display/Avatar/AvatarRecipe.g.xaml',
