@@ -27,6 +27,7 @@ public class ListboxControl : Control, IFieldControl
     readonly FlexControl skeleton = new() { Direction = FlexDirection.Column, Visible = false };
     readonly DelayedLoading loading;
     bool syncing;
+    bool loadingMore;
 
     /// <summary>新建：列表状态、画出来的行、骨架与空状态。</summary>
     public ListboxControl()
@@ -45,6 +46,7 @@ public class ListboxControl : Control, IFieldControl
             UpdateBody();
         });
         Controls.AddRange([scroll, skeleton, empty]);
+        scroll.ScrollChanged += (_, _) => CheckReached();
         foreach (Control child in Controls) child.MouseDown += (_, _) => FocusUnlessEmbedded();
     }
 
@@ -129,7 +131,31 @@ public class ListboxControl : Control, IFieldControl
     /// <summary>加载中：选项换成骨架行（很快完成时不闪）。</summary>
     [Category("Behavior")]
     [DefaultValue(false)]
-    public bool IsLoading { get; set { field = value; loading.Update(value); } }
+    public bool IsLoading { get; set { field = value; loading.Update(value || loadingMore); } }
+
+    /// <summary>正在取下一页（远程选项分页）：骨架少两行、接在行的下面（TS 的 loading="more"）。</summary>
+    [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+    internal bool IsLoadingMore
+    {
+        get => loadingMore;
+        set
+        {
+            if (loadingMore == value) return;
+            loadingMore = value;
+            for (var index = 2; index < skeleton.Controls.Count; index++) skeleton.Controls[index].Visible = !value;
+            loading.Update(IsLoading || value);
+        }
+    }
+
+    /// <summary>滚到了离末尾不远的地方（5 行以内，含内容不满一屏）：参数是最后一项的序号。远程选项据此取下一页。</summary>
+    internal event Action<int>? Reached;
+
+    void CheckReached()
+    {
+        if (Reached is null || State.Options.Count == 0 || !scroll.Visible) return;
+        var remaining = view.TotalHeight - scroll.ScrollOffset.Y - scroll.ClientSize.Height;
+        if (remaining <= 5 * Tokens.Size.Control * Em) Reached(State.Options.Count - 1);
+    }
 
     /// <summary>单选的值变了。</summary>
     public event EventHandler? ValueChanged;
@@ -211,7 +237,7 @@ public class ListboxControl : Control, IFieldControl
     void UpdateBody()
     {
         var hasRows = State.Options.Count > 0;
-        scroll.Visible = !skeleton.Visible && hasRows;
+        scroll.Visible = (!skeleton.Visible || loadingMore) && hasRows;
         empty.Visible = !skeleton.Visible && !hasRows && !IsLoading;
         empty.Description = EmptyText ?? ProviderControl.LangOf(this).SelectEmpty;
         PerformLayout();
@@ -224,10 +250,12 @@ public class ListboxControl : Control, IFieldControl
         var em = Em;
         var xs = (int)MathF.Round(Tokens.Space.Xs * em);
         var area = new Rectangle(xs, xs, Math.Max(0, ClientSize.Width - 2 * xs), Math.Max(0, ClientSize.Height - 2 * xs));
-        scroll.Bounds = new Rectangle(0, 0, ClientSize.Width, ClientSize.Height);
+        // 取下一页时骨架接在行的下面：行让出骨架的高度
+        var more = loadingMore && skeleton.Visible ? skeleton.GetPreferredSize(new Size(area.Width, 0)).Height : 0;
+        scroll.Bounds = new Rectangle(0, 0, ClientSize.Width, Math.Max(0, ClientSize.Height - more));
         view.Padding = new Padding(xs);
         empty.Bounds = area;
-        skeleton.Bounds = area;
+        skeleton.Bounds = more > 0 ? new Rectangle(xs, ClientSize.Height - xs - more, area.Width, more) : area;
         var sm = (int)MathF.Round(Tokens.Space.Sm * em);
         foreach (var bar in skeleton.Controls.OfType<SkeletonControl>())
         {
@@ -235,6 +263,7 @@ public class ListboxControl : Control, IFieldControl
             var width = (int)Math.Max(0, (area.Width - 4 * em) * (double)bar.Tag!);
             bar.MinimumSize = bar.MaximumSize = new Size(width, (int)MathF.Round(em));
         }
+        CheckReached();
     }
 
     /// <summary>自己滚动时的最高高度（设备像素）；null 时 20em（命令面板换成 min(24rem, 窗体高度一半)）。</summary>
@@ -247,9 +276,9 @@ public class ListboxControl : Control, IFieldControl
         var em = Em;
         var xs = (int)MathF.Round(Tokens.Space.Xs * em);
         var width = proposedSize.Width > 0 ? proposedSize.Width : Width;
-        var inner = skeleton.Visible ? skeleton.GetPreferredSize(new Size(width, 0)).Height
+        var inner = skeleton.Visible && !loadingMore ? skeleton.GetPreferredSize(new Size(width, 0)).Height
             : empty.Visible ? empty.GetPreferredSize(new Size(width, 0)).Height
-            : view.TotalHeight;
+            : view.TotalHeight + (loadingMore && skeleton.Visible ? skeleton.GetPreferredSize(new Size(width, 0)).Height : 0);
         return new Size(width, Math.Min(inner + 2 * xs, ScrollMaxHeight ?? (int)MathF.Round(20 * em)));
     }
 

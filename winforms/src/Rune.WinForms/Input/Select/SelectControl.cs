@@ -17,6 +17,9 @@ namespace Rune.WinForms;
 /// 打开后焦点在里面（弹出层激活，宿主窗体的标题栏变成非激活），输入就过滤（按显示文字，忽略大小写与重音，或 <see cref="Filter"/>）；
 /// <see cref="Creatable"/> 时自带搜索框，输入的文字没有对应的选项时末尾多一项"新建"，选中后值就是这段文字，<see cref="OptionCreated"/> 报告它。
 /// 单选的值是空字符串时算没有选中。出入：没有自定义选项内容（选项是画出来的）；宿主窗口移动时关闭。
+/// 远程选项：给了 <see cref="Load"/> 时打开就按搜索词请求，输入停下 300 毫秒再请求，只采用最后一次，结果代替 ItemsSource（ItemsSource 是第一次结果之前的选项，
+/// 编辑页放上已选的那一项）；搜索交给服务端，不在本地过滤。返回的一页带 Next 时分页：列表滚到离末尾不到 5 项取下一页，骨架接在后面。
+/// 加载失败时列表里提示"加载失败，请重试"。已选项的文字记着见过的选项：搜索换掉了结果，触发框照样显示文字。
 /// </summary>
 [DefaultEvent(nameof(ValueChanged))]
 public class SelectControl : FlexControl, IFieldControl
@@ -33,6 +36,8 @@ public class SelectControl : FlexControl, IFieldControl
     readonly HeaderPanel header = new() { Dock = DockStyle.Top, Visible = false };
     readonly TextFieldControl search = new() { Icon = Lucide.Search, Variant = ControlVariant.Soft, Dock = DockStyle.Fill };
     readonly ListboxControl listbox = new() { Embedded = true, Dock = DockStyle.Fill };
+    readonly RemoteOptions remote;
+    readonly Dictionary<string, string> seen = [];
     IReadOnlyList<object?> all = [];
     Dictionary<string, string>? labels;
     bool hovered;
@@ -43,6 +48,8 @@ public class SelectControl : FlexControl, IFieldControl
     /// <summary>新建：外壳、部件与弹出层（搜索框、列表）。</summary>
     public SelectControl()
     {
+        remote = new RemoteOptions(item => ListboxOption.From(item, ToOption).Value, OnRemoteChanged);
+        listbox.Reached += last => remote.Reached(last);
         Align = FlexAlign.Center;
         Gap = Space.Sm;
         AutoSize = true;
@@ -90,6 +97,19 @@ public class SelectControl : FlexControl, IFieldControl
     [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public Func<object?, ListboxOption>? ToOption { get; set { field = value; OnItemsChanged(); } }
+
+    /// <summary>远程选项的加载函数（TS 的 load）：搜索词、第几页 → 一页选项。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public OptionsLoader? Load
+    {
+        get => remote.Load;
+        set
+        {
+            remote.Load = value;
+            OnRemoteChanged();
+        }
+    }
 
     /// <summary>单选或多选，默认单选。</summary>
     [Category("Behavior")]
@@ -204,7 +224,7 @@ public class SelectControl : FlexControl, IFieldControl
     /// <summary>正在取选项：列表换成骨架行。</summary>
     [Category("Behavior")]
     [DefaultValue(false)]
-    public bool IsLoading { get => listbox.IsLoading; set => listbox.IsLoading = value; }
+    public bool IsLoading { get; set { field = value; listbox.IsLoading = value || remote.Loading; } }
 
     bool ShouldSerializeSelectionMode() => SelectionMode != SelectionMode.Single;
 
@@ -327,8 +347,24 @@ public class SelectControl : FlexControl, IFieldControl
     void UpdateItems()
     {
         listbox.ToOption = OptionOf;
-        listbox.ItemsSource = WithSearch ? SelectSearch.Shown(all, item => ListboxOption.From(item, ToOption), search.Text, localFilter: true, Filter, Creatable) : all;
-        listbox.EmptyText = search.Text.Length > 0 ? ProviderControl.LangOf(this).SelectNoMatch : null;
+        listbox.ItemsSource = WithSearch ? SelectSearch.Shown(Source, item => ListboxOption.From(item, ToOption), search.Text, localFilter: Load is null, Filter, Creatable) : Source;
+        var lang = ProviderControl.LangOf(this);
+        listbox.EmptyText = remote.Failed ? lang.ListLoadFailed : search.Text.Length > 0 ? lang.SelectNoMatch : null;
+    }
+
+    /// <summary>当前的数据：远程请求到的，没有时是 ItemsSource。</summary>
+    IReadOnlyList<object?> Source => remote.ItemsOr(all);
+
+    /// <summary>远程选项变了（请求到了、开始或停止加载、失败了）：列表、加载状态、已选项的文字跟着变，弹出层跟着列表变高、变矮。</summary>
+    void OnRemoteChanged()
+    {
+        labels = null;
+        listbox.IsLoading = IsLoading || remote.Loading;
+        listbox.IsLoadingMore = remote.LoadingMore;
+        if (!IsHandleCreated) return;
+        UpdateItems();
+        Sync();
+        if (open) Present();
     }
 
     /// <summary>值 → 列表、触发框（文字或标签）、清空按钮、外壳尺寸。</summary>
@@ -365,7 +401,7 @@ public class SelectControl : FlexControl, IFieldControl
     }
 
     /// <summary>
-    /// 已选项的文字取自全部数据（被过滤掉的也在）；数据里没有时（新建了还没加进来）就是值本身。值 → 文字的表按数据建一次：
+    /// 已选项的文字取自全部数据（被过滤掉的也在）；数据里没有时取见过的（远程搜索换掉了结果），再没有时（新建了还没加进来）就是值本身。值 → 文字的表按数据建一次：
     /// 已选项很多时逐个在数据里找是 O(n²)（上游的性能用例：三万个全选）。初始化器里 ToOption 可能还没设：认不出的数据先跳过。
     /// </summary>
     string LabelOf(string value)
@@ -373,13 +409,14 @@ public class SelectControl : FlexControl, IFieldControl
         if (labels is null)
         {
             labels = [];
-            foreach (var item in all)
+            foreach (var item in Source)
             {
                 var option = ToOption?.Invoke(item) ?? item switch { ListboxOption known => known, string text => new ListboxOption(text, text), _ => null };
                 if (option is not null) labels.TryAdd(option.Value, option.Label);
             }
         }
-        return labels.TryGetValue(value, out var label) ? label : value;
+        if (labels.TryGetValue(value, out var label)) return seen[value] = label;
+        return seen.TryGetValue(value, out var remembered) ? remembered : value;
     }
 
     void SetSelected(IReadOnlyList<string> next)
@@ -415,6 +452,7 @@ public class SelectControl : FlexControl, IFieldControl
 
     void OnSearchChanged()
     {
+        remote.SetQuery(search.Text);
         UpdateItems();
         // 输入搜索词：高亮第一个匹配的（打开时清空搜索词不算：那时高亮的是已选项）；弹出层跟着列表变高、变矮
         if (search.Text.Length > 0) listbox.State.MoveToEnd(last: false);
@@ -444,6 +482,7 @@ public class SelectControl : FlexControl, IFieldControl
     {
         if (next == open) return;
         open = next;
+        remote.SetOpen(next);
         if (next) Present();
         else
         {
