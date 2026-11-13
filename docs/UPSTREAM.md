@@ -346,6 +346,40 @@ Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_
 | dark 的 accentHover #3758d4 → #4a6ddf；dark、midnight、ember、cyberpunk 的 dangerHover #a33b3e → #bd5356 | token 是生成的 | CI 绿后锁定，token-gen 重新生成 |
 | ThemeCustomizer、Diagram、QueryTable、Tree、ItemList、DatePicker、Splitter 等 30 个组件的内部节点补标记 | 都还没做 | 做时部件名照新的 |
 
+### 第三十一批（2026-11-08 至 11-13 通知，0.16.0 到 0.21.0：交互状态 P2.5、表单模块、FilterBar、AppShell 收起按钮）
+
+2026-11-08 起上游连续推送，按用户的意思先只记下；2026-11-13 用户要求继续跟进，一次对齐到 0.21.0（9afdc156）。
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| 状态层 stateLayerStyles：ghost（悬停 14%、按下 22% 文字色）给 Alert、Banner、Tag 的关闭按钮；overlay（悬停叠 8%）给可选中的 Tag（f5e4c5a6、e48a7c38） | Tag 已做；Alert、Banner 还没做 | 已跟：Tag 三个平台。按下沿用按钮本来的波纹（文字色的 22%）。Alert、Banner 做时照新的 |
+| Link：下划线平时 50% 文字色、悬停实色；tone=muted 悬停换正文色（d8e0429f、f5e4c5a6） | Link 已做 | 已跟：三个平台（WinForms 的下划线改成自己画） |
+| Switch 轨道悬停混进正文色（关 15%、开 12%，oklab）；输入外壳 soft 悬停 fillHover（bbdf86c9） | 已做 | 已跟：Switch 的 TrackHover（sRGB 里混，差不到一个色阶），TextField、Select 的 soft 悬停 |
+| Checklist、KanbanBoard、Upload、色块、Image、Carousel、Splitter 的悬停（bbdf86c9），Splitter / ResizeHandle 的悬停聚焦拖动（1046ed37） | 还没做 | 做时照新的 |
+| TabList 横排可滚时可滚的一头渐隐（604d1334） | TabList 还不能横向滚动 | 做滚动（连同滚动按钮）时一起做 |
+| Steps 横排连接线对齐圆圈中线（4a257b71） | 还没做 | 做时照新的 |
+| AppShell：收起按钮从侧栏底部挪到品牌格结束边，收起后品牌格只放居中的展开按钮，AppShellBrand 不再按收起隐藏产品名（cb28b280） | 已做 | 已跟：三个平台，去掉 CollapseBar 部件、WPF 的 AppShellBrand.IsCompact 附加属性、WinForms 的 IsCompact |
+| 横排单选、复选组至少控件高、竖直居中，卡片组 stretch（d7af9b3d）；choice 根按基线排（0255a355） | 组已做 | 已跟横排的高度与居中；基线对齐我们的 Field 本来按文字基线排 |
+| Card 正文 flex-grow:1（e066fd2a）；padding=none 页头页脚留内边距（b70cbd69） | Card 已做 | 已跟：三个平台 |
+| Tabs：值转 id 不撞（dfb688b2）；整组卸载不另选、不写回（fe17e18c）；TabPanel 听 beforematch | Tabs 已做 | 我们按值关联、没有"另选旁边"的逻辑，补了测试对上两条用例；beforematch 是网页的 |
+| Listbox、Tree 的虚拟行改成网格叠放（c11dd9a3）；列表行状态的属性（053d9658、066ad66e、2bdf378e） | 网页结构 | 不涉及 |
+| FilterBar 一排放不下收进"展开"、两排同宽、按钮区窄屏换行（88da2f39、2f27376f、6fad7bfc）；QueryTable 工具栏 | 还没做 | 做时照新的 |
+| 表单模块：SchemaForm 条件与权限、明细表、数据来源、页签、SchemaView、useForm 校验（d815645c 等）；FormDialog 的 group、多选初始值（1fde03ee、88943ae0）；语言包 form* 键 | 还没做；语言包已重新生成 | 做表单时照新的 |
+| 触屏输入框字号不小于 16px（touchInputStyles） | 桌面不涉及 | 不涉及 |
+| NavBar 下拉面板（fe3d4607，已被 130a8a74 撤回） | — | 不做 |
+
+锁定跟到 0.21.0（9afdc156）：重新生成了暗色主题的实色悬停（accentHover、dangerHover 调亮）与语言包的 form* 键；parity 只多出 NavItem 的 propsBadge（WinForms 的部件属性缺口），行为对照对上了新的用例。
+同时修了审查出的问题：WPF Tag 移除按钮的 DependencyPropertyDescriptor 订阅不退订（泄漏）；Avalonia UserButton 按本地值写形态、两个平台覆盖使用方的读屏名称；
+按数据生成的勾选项的不可用、说明改成默认层（ItemContainerTheme / ItemContainerStyle 盖得过，同上游 propsItem）。
+
+### 第三十二批（2026-11-13 通知，95ceb0d8 待发 0.22.0：审查修复）
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| 部件属性合并：undefined 不表态、null 才清掉；aria-describedby 拼接去重；嵌套 propsXxx 递归合并；同名事件合成 | WinForms 的部件属性记录本来就是 null = 不改、逐字段合并；Avalonia、WPF 用样式 | 锁定时核对 |
+| Listbox disabled 时点选项不改值、不触发 onPick；Link external 的 target、rel 是默认层；Popconfirm、TagsInput、日期、Pagination、Rating、Splitter 等一批行为修正；输入法组合中 DataTable、Cascader 等不处理按键 | Listbox 已做，其余还没做 | CI 绿后锁定，核对 Listbox；其余做时照新的 |
+| 新部件属性：NavBar、QuarterCalendar、DataTable 表头按钮、ImageCropper、QueryTable | 还没做 | 做时照新的 |
+
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 
 计划：vue-tsx-pro 的 `.claude/reports/style-overhaul-plan.md`（阶段 0 护栏 → 1 引擎 → 2 架构与 API → 3 整理 → 4 美学 → 5 文档）。
