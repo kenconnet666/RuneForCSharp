@@ -1,5 +1,8 @@
 using global::Avalonia;
+using global::Avalonia.Automation;
 using global::Avalonia.Automation.Peers;
+using global::Avalonia.Automation.Provider;
+using global::Avalonia.LogicalTree;
 using global::Avalonia.Animation;
 using global::Avalonia.Animation.Easings;
 using global::Avalonia.Controls;
@@ -205,10 +208,30 @@ public static class ButtonBaseParts
 /// （TS 的 aria-busy：UIA 的按钮没有忙碌状态，读屏念 ItemStatus）。
 /// </summary>
 /// <param name="owner">按钮。</param>
-public class ButtonBaseAutomationPeer(ButtonBase owner) : ButtonAutomationPeer(owner)
+public class ButtonBaseAutomationPeer(ButtonBase owner) : ButtonAutomationPeer(owner), IExpandCollapseProvider
 {
     /// <inheritdoc />
     protected override bool IsEnabledCore() => !owner.IsDisabled;
+
+    // 弹出框、菜单的触发器（TS 的 aria-expanded、aria-haspopup）：开着时展开；不是触发器时不能展开（LeafNode）
+    ExpandCollapseState IExpandCollapseProvider.ExpandCollapseState => owner.GetValue(Popover.TriggerExpandedProperty) switch
+    {
+        true => ExpandCollapseState.Expanded,
+        false => ExpandCollapseState.Collapsed,
+        null => ExpandCollapseState.LeafNode,
+    };
+
+    bool IExpandCollapseProvider.ShowsMenu => owner.GetValue(Popover.TriggerExpandedProperty) is not null && owner.FindLogicalAncestorOfType<Menu>() is not null;
+
+    void IExpandCollapseProvider.Expand()
+    {
+        if (owner.GetValue(Popover.TriggerExpandedProperty) == false) ((IInvokeProvider)this).Invoke();
+    }
+
+    void IExpandCollapseProvider.Collapse()
+    {
+        if (owner.GetValue(Popover.TriggerExpandedProperty) == true) ((IInvokeProvider)this).Invoke();
+    }
 
     /// <inheritdoc />
     protected override string? GetItemStatusCore() => owner.IsLoading ? Provider.GetLang(owner).Loading : base.GetItemStatusCore();

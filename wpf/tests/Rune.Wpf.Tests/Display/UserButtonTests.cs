@@ -1,5 +1,7 @@
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Automation.Peers;
+using System.Windows.Automation.Provider;
 using System.Windows.Controls;
 
 namespace Rune.Wpf.Tests;
@@ -66,5 +68,25 @@ public class UserButtonTests
 
         Assert.Equal(Visibility.Collapsed, Part<Icon>(none, "PART_Indicator").Visibility);
         Assert.Equal(Lucide.Settings, Part<Icon>(custom, "PART_Indicator").Data);
+    });
+
+    [Fact]
+    [Upstream("UserButton", "当菜单的触发器")]
+    public Task As_a_menu_trigger_it_reports_its_state() => WpfUi.Run(() =>
+    {
+        var user = new UserButton { DisplayName = "林小满" };
+        var menu = new Menu { Trigger = user, Items = { new MenuItem { Content = "退出登录" } } };
+        var host = new System.Windows.Controls.StackPanel();
+        host.Resources.MergedDictionaries.Add(new RuneTheme());
+        host.Children.Add(menu);
+        WpfUi.Show(host);
+        IExpandCollapseProvider Expand(UserButton button) => (IExpandCollapseProvider)button.Peer().GetPattern(PatternInterface.ExpandCollapse);
+
+        Assert.Equal(ExpandCollapseState.Collapsed, Expand(user).ExpandCollapseState); // aria-expanded="false"
+        menu.IsOpen = true;
+        WpfUi.Flush();
+        Assert.Equal(ExpandCollapseState.Expanded, Expand(user).ExpandCollapseState);
+        menu.IsOpen = false;
+        Assert.Null(new UserButton().Peer().GetPattern(PatternInterface.ExpandCollapse)); // 不是触发器时没有展开模式
     });
 }

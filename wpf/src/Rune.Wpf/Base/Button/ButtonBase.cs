@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Automation.Peers;
+using System.Windows.Automation.Provider;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -226,10 +228,29 @@ public class ButtonBase : System.Windows.Controls.Button
 /// （TS 的 aria-busy：UIA 的按钮没有忙碌状态，读屏念 ItemStatus）。
 /// </summary>
 /// <param name="owner">按钮。</param>
-public class ButtonBaseAutomationPeer(ButtonBase owner) : ButtonAutomationPeer(owner)
+public class ButtonBaseAutomationPeer(ButtonBase owner) : ButtonAutomationPeer(owner), IExpandCollapseProvider
 {
     /// <inheritdoc />
     protected override bool IsEnabledCore() => !owner.IsDisabled;
+
+    bool? Expanded => (bool?)owner.GetValue(Popover.TriggerExpandedProperty);
+
+    /// <summary>弹出框、菜单的触发器（TS 的 aria-expanded、aria-haspopup）：能展开、收起；别的按钮没有这个模式。</summary>
+    /// <param name="patternInterface">模式。</param>
+    public override object? GetPattern(PatternInterface patternInterface) =>
+        patternInterface == PatternInterface.ExpandCollapse && Expanded is not null ? this : base.GetPattern(patternInterface);
+
+    ExpandCollapseState IExpandCollapseProvider.ExpandCollapseState => Expanded == true ? ExpandCollapseState.Expanded : ExpandCollapseState.Collapsed;
+
+    void IExpandCollapseProvider.Expand()
+    {
+        if (Expanded == false) ((System.Windows.Automation.Provider.IInvokeProvider)this).Invoke();
+    }
+
+    void IExpandCollapseProvider.Collapse()
+    {
+        if (Expanded == true) ((System.Windows.Automation.Provider.IInvokeProvider)this).Invoke();
+    }
 
     /// <inheritdoc />
     protected override string GetItemStatusCore() => owner.IsLoading ? Provider.GetLang(owner).Loading : base.GetItemStatusCore();

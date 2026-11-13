@@ -56,4 +56,18 @@ public class UserButtonTests
         Assert.Equal(Lucide.Settings, custom.Element.IndicatorPart.Data);
         Assert.Equal((TextTone.Accent, TextWeight.Medium), (custom.Element.NamePart.Tone, custom.Element.NamePart.Weight)); // 合并：字重仍是组件给的
     });
+
+    [Fact]
+    [Upstream("UserButton", "当菜单的触发器")]
+    public Task As_a_menu_trigger_it_reports_the_popup_and_its_state() => WinFormsUi.Run(() =>
+    {
+        var user = new UserButtonControl { DisplayName = "林小满" };
+        var menu = new MenuControl { Trigger = user };
+        menu.Items.Add(new MenuItemControl { Text = "退出登录" });
+        using var form = WinFormsUi.Show(menu);
+
+        Assert.True(user.AccessibilityObject.State.HasFlag(AccessibleStates.HasPopup)); // aria-haspopup
+        Assert.True(user.AccessibilityObject.State.HasFlag(AccessibleStates.Collapsed)); // aria-expanded="false"
+        Assert.False(new UserButtonControl().AccessibilityObject.State.HasFlag(AccessibleStates.HasPopup)); // 不是触发器时没有
+    });
 }

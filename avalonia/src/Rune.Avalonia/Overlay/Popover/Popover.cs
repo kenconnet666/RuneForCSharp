@@ -89,6 +89,11 @@ public class Popover : Control
     /// <summary>显示指向触发器的箭头。</summary>
     public static readonly StyledProperty<bool> ArrowProperty = AvaloniaProperty.Register<Popover, bool>(nameof(Arrow));
 
+    /// <summary>
+    /// 触发器上的展开状态（TS 交给触发器的 aria-expanded）：是弹出框、菜单的触发器时是开没开，不是时为 null。按钮的读屏按它报展开、收起。
+    /// </summary>
+    internal static readonly AttachedProperty<bool?> TriggerExpandedProperty = AvaloniaProperty.RegisterAttached<Popover, Control, bool?>("TriggerExpanded");
+
     readonly ContentPresenter trigger = new();
     readonly Popup popup = new() { IsLightDismissEnabled = true, WindowManagerAddShadowHint = false };
     readonly PopoverLayout layout;
@@ -153,6 +158,8 @@ public class Popover : Control
         base.OnPropertyChanged(change);
         if (change.Property == TriggerProperty)
         {
+            (change.OldValue as Control)?.ClearValue(TriggerExpandedProperty);
+            Trigger?.SetValue(TriggerExpandedProperty, IsOpen);
             trigger.Content = Trigger;
             if (Trigger is { } control) AutomationProperties.SetLabeledBy(panel, control);
             else panel.ClearValue(AutomationProperties.LabeledByProperty);
@@ -228,6 +235,7 @@ public class Popover : Control
     {
         var reason = pending;
         PseudoClasses.Set(":open", IsOpen);
+        Trigger?.SetValue(TriggerExpandedProperty, IsOpen);
         if (popup.IsOpen != IsOpen) popup.IsOpen = IsOpen;
         if (reason is { } known) OpenChanged?.Invoke(this, new OpenChangedEventArgs(IsOpen, known));
     }

@@ -57,4 +57,21 @@ public class UserButtonTests
         Assert.False(Part<Icon>(none, UserButtonParts.Indicator).IsVisible);
         Assert.Equal(Lucide.Settings, Part<Icon>(custom, UserButtonParts.Indicator).Data);
     });
+
+    [Fact]
+    [Upstream("UserButton", "当菜单的触发器")]
+    public Task As_a_menu_trigger_it_reports_the_popup_and_its_state() => HeadlessUi.Run(() =>
+    {
+        var user = new UserButton { DisplayName = "林小满" };
+        var menu = new Menu { Trigger = user, Items = { new MenuItem { Content = "退出登录" } } };
+        var window = HeadlessUi.Show(menu);
+        var expand = (global::Avalonia.Automation.Provider.IExpandCollapseProvider)user.Peer();
+
+        Assert.True(expand.ShowsMenu); // aria-haspopup="menu"
+        Assert.Equal(global::Avalonia.Automation.ExpandCollapseState.Collapsed, expand.ExpandCollapseState); // aria-expanded="false"
+        menu.IsOpen = true;
+        HeadlessUi.Flush(window);
+        Assert.Equal(global::Avalonia.Automation.ExpandCollapseState.Expanded, expand.ExpandCollapseState);
+        Assert.Equal(global::Avalonia.Automation.ExpandCollapseState.LeafNode, ((global::Avalonia.Automation.Provider.IExpandCollapseProvider)new UserButton().Peer()).ExpandCollapseState); // 不是触发器时不能展开
+    });
 }

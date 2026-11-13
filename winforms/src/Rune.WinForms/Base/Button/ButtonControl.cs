@@ -259,7 +259,15 @@ public abstract class ButtonControlBase<T> : ElementControl<T>, IButtonControl w
 
         public override string? KeyboardShortcut => owner.KeyboardShortcut ?? base.KeyboardShortcut;
 
-        public override AccessibleStates State => Owner is ButtonControlBase<T> { IsLoading: true } ? base.State | AccessibleStates.Busy : base.State;
+        public override AccessibleStates State => base.State | (owner.IsLoading ? AccessibleStates.Busy : 0) | TriggerStates();
+
+        /// <summary>弹出框、菜单的触发器（TS 的 aria-haspopup、aria-expanded）：有弹出、开着时展开、关着时收起。</summary>
+        AccessibleStates TriggerStates() => owner.Parent switch
+        {
+            MenuControl menu => AccessibleStates.HasPopup | (menu.IsOpen ? AccessibleStates.Expanded : AccessibleStates.Collapsed),
+            PopoverControl popover => AccessibleStates.HasPopup | (popover.IsOpen ? AccessibleStates.Expanded : AccessibleStates.Collapsed),
+            _ => 0,
+        };
 
         public override void DoDefaultAction() => (Owner as ButtonControlBase<T>)?.PerformClick();
     }

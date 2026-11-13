@@ -188,8 +188,15 @@ public class Popover : FrameworkElement
         return finalSize;
     }
 
+    /// <summary>
+    /// 触发器上的展开状态（TS 交给触发器的 aria-expanded）：是弹出框、菜单的触发器时是开没开，不是时为 null。按钮的读屏按它报展开、收起。
+    /// </summary>
+    internal static readonly DependencyProperty TriggerExpandedProperty = DependencyProperty.RegisterAttached("TriggerExpanded", typeof(bool?), typeof(Popover));
+
     void OnTriggerChanged(UIElement? old, UIElement? next)
     {
+        old?.ClearValue(TriggerExpandedProperty);
+        next?.SetValue(TriggerExpandedProperty, IsOpen);
         trigger.Content = next;
         if (next is not null) AutomationProperties.SetLabeledBy(panel, next);
         else panel.ClearValue(AutomationProperties.LabeledByProperty);
@@ -261,6 +268,7 @@ public class Popover : FrameworkElement
     void Toggle()
     {
         var reason = pending;
+        Trigger?.SetValue(TriggerExpandedProperty, IsOpen);
         if (popup.IsOpen != IsOpen) popup.IsOpen = IsOpen;
         if (reason is { } known) OpenChanged?.Invoke(this, new OpenChangedEventArgs(IsOpen, known));
     }
