@@ -39,7 +39,12 @@ public abstract class ChoiceGroup : ItemsControl, IFieldControl
 
     readonly HashSet<ChoiceBase> members = [];
 
-    static ChoiceGroup() => FocusableProperty.OverrideMetadata(typeof(ChoiceGroup), new FrameworkPropertyMetadata(false));
+    static ChoiceGroup()
+    {
+        FocusableProperty.OverrideMetadata(typeof(ChoiceGroup), new FrameworkPropertyMetadata(false));
+        // 横排时最小高度是控件高度（主题里打开 ControlHeight.MinHeight）
+        EmSize.Register(typeof(ChoiceGroup));
+    }
 
     /// <summary>整组只读：自己写了的优先，其次所在字段的。</summary>
     internal bool ReadOnly => Field.IsSet(this, IsReadOnlyProperty) ? IsReadOnly : Field.Of(this)?.IsReadOnly ?? false;

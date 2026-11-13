@@ -1,6 +1,6 @@
 <!--
   勾选类控件的主题（vue-tsx-pro 的 choiceRecipe 的 group 与 defaults）：Switch、Checkbox、RadioGroup 的色调默认 accent；
-  复选组、单选组竖排时 gap xs，横排时换行、列距 lg、行距 xs。外层与部件的外观在 ChoiceParts.axaml 与各组件的 *Parts.axaml
+  复选组、单选组竖排时 gap xs，横排时换行、列距 lg、行距 xs，至少与单行控件一样高、内容竖直居中（与输入框同排时文字在一条线上）。外层与部件的外观在 ChoiceParts.axaml 与各组件的 *Parts.axaml
 -->
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -17,9 +17,10 @@
       </ItemsPanelTemplate>
     </Setter>
     <Style Selector="^:horizontal">
+      <Setter Property="MinHeight" Value="{rune:ControlHeight}" />
       <Setter Property="ItemsPanel">
         <ItemsPanelTemplate>
-          <rune:Flex Wrap="True" ColumnGap="lg" RowGap="xs" />
+          <rune:Flex Wrap="True" ColumnGap="lg" RowGap="xs" Align="center" />
         </ItemsPanelTemplate>
       </Setter>
     </Style>

@@ -95,15 +95,19 @@ public abstract class ChoiceGroupControl : FlexControl, IFieldControl
         Wrap = horizontal ? FlexWrap.Wrap : FlexWrap.NoWrap;
         Gap = Card && !horizontal ? Space.Sm : Space.Xs;
         ColumnGap = horizontal ? Space.Lg : default;
-        Align = horizontal ? default : FlexAlign.Stretch;
+        // 横排：内容竖直居中（与输入框同排时文字在一条线上），卡片一样高；最小高度在 OnLayout 里按字号算
+        Align = !horizontal || Card ? FlexAlign.Stretch : FlexAlign.Center;
         if (!columnsApplied || (Card && horizontal)) return;
         columnsApplied = false;
         foreach (Control child in Controls) child.MinimumSize = child.MaximumSize = Size.Empty;
     }
 
-    /// <summary>卡片外观横排：按最小宽度算列数（auto-fill，同 Grid），每项定成列宽，换行的 Flex 就排成栅格。</summary>
+    /// <summary>横排的最小高度；卡片外观横排：按最小宽度算列数（auto-fill，同 Grid），每项定成列宽，换行的 Flex 就排成栅格。</summary>
     protected override void OnLayout(LayoutEventArgs levent)
     {
+        // 横排至少与单行控件一样高
+        var minHeight = Orientation == Orientation.Horizontal ? (int)MathF.Ceiling(ControlHeight.Of(ElementContext.Of(this), Font.SizeInPoints * DeviceDpi / 72f, ControlHeight.Factor(default))) : 0;
+        if (MinimumSize.Height != minHeight) MinimumSize = new Size(0, minHeight);
         if (Card && Orientation == Orientation.Horizontal && Controls.Count > 0)
         {
             var em = Font.SizeInPoints * DeviceDpi / 72f;

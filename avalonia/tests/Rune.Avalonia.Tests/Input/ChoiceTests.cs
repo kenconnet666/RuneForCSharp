@@ -214,6 +214,19 @@ public class ChoiceTests
         Assert.Equal(("pro", "专业版", "¥99 / 月"), (pro.Value, pro.Content as string, pro.Description as string));
     });
 
+    [Fact]
+    public Task Horizontal_groups_are_a_control_tall_and_center_their_items() => HeadlessUi.Run(() =>
+    {
+        var group = new RadioGroup { Orientation = global::Avalonia.Layout.Orientation.Horizontal, ItemsSource = new[] { "日", "周" } };
+        HeadlessUi.Show(new StackPanel { Children = { group } });
+        var radio = group.GetLogicalDescendants().OfType<Radio>().First();
+
+        Assert.Equal(28, group.Bounds.Height, 0.5); // 与单行控件一样高（单选组默认 sm 档：28）
+        Assert.True(radio.Bounds.Height < group.Bounds.Height);
+        var top = radio.TranslatePoint(default, group)!.Value.Y;
+        Assert.Equal(group.Bounds.Height - radio.Bounds.Height, 2 * top, 1); // 竖直居中
+    });
+
     /// <summary>TS 的 propsItem 是平台的 ItemContainerTheme：按项计算用绑定（容器的 DataContext 是这一项）；值由组管理，样式改不了。</summary>
     [Fact]
     public Task Item_container_theme_reaches_generated_items_and_the_group_keeps_values() => HeadlessUi.Run(() =>

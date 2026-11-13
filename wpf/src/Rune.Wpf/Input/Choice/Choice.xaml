@@ -80,11 +80,13 @@
       </Setter.Value>
     </Setter>
     <Style.Triggers>
+      <!-- 横排：至少与单行控件一样高、内容竖直居中，和输入框同排时文字在一条线上 -->
       <Trigger Property="Orientation" Value="Horizontal">
+        <Setter Property="rune:ControlHeight.MinHeight" Value="True" />
         <Setter Property="ItemsPanel">
           <Setter.Value>
             <ItemsPanelTemplate>
-              <rune:Flex Wrap="True" ColumnGap="lg" RowGap="xs" />
+              <rune:Flex Wrap="True" ColumnGap="lg" RowGap="xs" Align="center" />
             </ItemsPanelTemplate>
           </Setter.Value>
         </Setter>

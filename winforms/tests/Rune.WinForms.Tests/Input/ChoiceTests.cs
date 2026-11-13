@@ -214,6 +214,18 @@ public class ChoiceTests
         Assert.Equal(["email", "app"], group.Value);
     });
 
+    [Fact]
+    public Task Horizontal_groups_are_a_control_tall_and_center_their_items() => WinFormsUi.Run(() =>
+    {
+        var group = new RadioGroupControl { Orientation = Orientation.Horizontal, ItemsSource = new[] { "日", "周" } };
+        using var form = WinFormsUi.Show(group);
+        var radio = group.Controls.OfType<RadioControl>().First();
+        var em = group.Font.SizeInPoints * group.DeviceDpi / 72f;
+
+        Assert.True(group.Height >= (int)MathF.Ceiling(ControlHeight.Of(ElementContext.Of(group), em, ControlHeight.Factor(default)))); // 与单行控件一样高
+        Assert.InRange(2 * radio.Top - (group.ClientSize.Height - radio.Height), -2, 2); // 竖直居中
+    });
+
     /// <summary>TS 的 propsItem 是 ItemGenerated：按这一项的数据改生成的控件，值仍由组管理。</summary>
     [Fact]
     public Task Item_generated_customizes_items_and_the_group_keeps_values() => WinFormsUi.Run(() =>

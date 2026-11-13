@@ -215,6 +215,19 @@ public class ChoiceTests
         Assert.Equal(("pro", "专业版", "¥99 / 月"), (pro.Value, pro.Content as string, pro.Description as string));
     });
 
+    [Fact]
+    public Task Horizontal_groups_are_a_control_tall_and_center_their_items() => WpfUi.Run(() =>
+    {
+        var group = new RadioGroup { Orientation = Orientation.Horizontal, ItemsSource = new[] { "日", "周" } };
+        Show(group);
+        var radio = WpfUi.Descendants(group).OfType<Radio>().First();
+
+        Assert.Equal(28, group.ActualHeight, 0); // 与单行控件一样高（单选组默认 sm 档：28）
+        Assert.True(radio.ActualHeight < group.ActualHeight);
+        var top = radio.TranslatePoint(default, group).Y;
+        Assert.Equal(group.ActualHeight - radio.ActualHeight, 2 * top, 0); // 竖直居中
+    });
+
     /// <summary>TS 的 propsItem 是平台的 ItemContainerStyle（按项不同时用 ItemContainerStyleSelector 或绑定）；值由组管理，样式改不了。</summary>
     [Fact]
     public Task Item_container_style_reaches_generated_items_and_the_group_keeps_values() => WpfUi.Run(() =>
