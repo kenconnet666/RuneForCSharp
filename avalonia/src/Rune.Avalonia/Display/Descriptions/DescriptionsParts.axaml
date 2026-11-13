@@ -1,0 +1,23 @@
+<!--
+  Descriptions 部件的默认外观（vue-tsx-pro 的 descriptionsStyles）：标题中等字重；标签次要色，值正文色；边框时外框与分隔线 borderMuted、标签格 fill 底。
+  间距、内边距、线宽与圆角按字号在 Descriptions.cs 里。写成主题里的样式（DESIGN §7），使用方的部件样式排在后面，盖得过
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|Descriptions rune|Text#PART_Title">
+    <Setter Property="Weight" Value="medium" />
+  </Style>
+  <Style Selector="rune|Descriptions Border#PART_Label">
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+  </Style>
+  <Style Selector="rune|Descriptions Border#PART_Value">
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+  </Style>
+  <Style Selector="rune|Descriptions:bordered Border#PART_List, rune|Descriptions:bordered Border#PART_Item">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+  </Style>
+  <Style Selector="rune|Descriptions:bordered Border#PART_Label">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Fill}" />
+  </Style>
+</Styles>

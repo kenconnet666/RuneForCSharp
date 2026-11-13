@@ -1,0 +1,18 @@
+<!--
+  ValueChange 部件的默认外观（vue-tsx-pro 的 valueChangeStyles）：原值次要色（删除线在文字上，见 ValueChange.cs），箭头次要色，新值正文色、中等字重。
+  写成主题里的样式（DESIGN §7），使用方的部件样式排在后面，盖得过
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|ValueChange Border#PART_Before">
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+  </Style>
+  <Style Selector="rune|ValueChange rune|Icon#PART_Arrow">
+    <Setter Property="Tone" Value="muted" />
+  </Style>
+  <Style Selector="rune|ValueChange Border#PART_After">
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="TextElement.FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
+  </Style>
+</Styles>
