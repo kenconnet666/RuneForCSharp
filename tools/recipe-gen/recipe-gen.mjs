@@ -46,6 +46,14 @@ export const RECIPES = {
       outline: { Foreground: 'text', BorderBrush: 'border' },
     },
   },
+  Banner: {
+    // 横幅（vue-tsx-pro 的 statusToneSx 的 soft、solid）。WinForms 直接用 BadgeRecipe 的这两档
+    file: 'wpf/src/Rune.Wpf/Feedback/Banner/BannerRecipe.g.xaml',
+    variants: {
+      soft: { Background: 'soft', Foreground: 'text' },
+      solid: { Background: 'solid', Foreground: 'contrast' },
+    },
+  },
   Avatar: {
     // 头像的后备内容（首字母、图标）：vue-tsx-pro 的 statusToneStyles 的 soft、solid。WinForms 直接用 BadgeRecipe 的这两档
     file: 'wpf/src/Rune.Wpf/Display/Avatar/AvatarRecipe.g.xaml',

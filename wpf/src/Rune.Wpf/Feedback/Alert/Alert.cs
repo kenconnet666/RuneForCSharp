@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Automation.Peers;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Markup;
 using System.Windows.Media;
 
@@ -73,13 +74,13 @@ public class Alert : Control
 
     readonly Border root = new();
     readonly Flex row = new() { Align = FlexAlign.Start, Gap = Space.Sm };
-    readonly Icon icon = new();
-    readonly Spinner spinner = new() { Visibility = Visibility.Collapsed };
-    readonly Flex body = new() { Direction = FlexDirection.Column, Gap = Space.Xs };
-    readonly Text title = new();
-    readonly ContentPresenter description = new();
-    readonly ContentPresenter content = new();
-    readonly ContentPresenter action = new() { VerticalAlignment = VerticalAlignment.Center };
+    readonly Icon icon = new() { Name = "PART_Icon" };
+    readonly Spinner spinner = new() { Name = "PART_Spinner", Visibility = Visibility.Collapsed };
+    readonly Flex body = new() { Name = "PART_Body", Direction = FlexDirection.Column, Gap = Space.Xs };
+    readonly Text title = new() { Name = "PART_Title" };
+    readonly ContentPresenter description = new() { Name = "PART_Description" };
+    readonly ContentPresenter content = new() { Name = "PART_Content" };
+    readonly ContentPresenter action = new() { Name = "PART_Action", VerticalAlignment = VerticalAlignment.Center };
     readonly Dismissal dismissal;
     EventHandler? closeRequested;
     CloseButton? close;
@@ -87,7 +88,6 @@ public class Alert : Control
     static Alert()
     {
         DefaultStyleKeyProperty.OverrideMetadata(typeof(Alert), new FrameworkPropertyMetadata(typeof(Alert)));
-        EmSize.Register(typeof(Alert));
         FocusableProperty.OverrideMetadata(typeof(Alert), new FrameworkPropertyMetadata(false));
         IsTabStopProperty.OverrideMetadata(typeof(Alert), new FrameworkPropertyMetadata(false));
     }
@@ -110,6 +110,8 @@ public class Alert : Control
         root.SetBinding(Border.BorderBrushProperty, new System.Windows.Data.Binding(nameof(BorderBrush)) { Source = this });
         root.SetBinding(Border.BorderThicknessProperty, new System.Windows.Data.Binding(nameof(BorderThickness)) { Source = this });
         root.SetBinding(Border.PaddingProperty, new System.Windows.Data.Binding(nameof(Padding)) { Source = this });
+        // 字号显式绑过去：在 Gallery、inspect 的宿主里组件自己的子元素没有继承到它（测试的宿主里能继承，原因没查清）
+        root.SetBinding(TextElement.FontSizeProperty, new System.Windows.Data.Binding(nameof(FontSize)) { Source = this });
         AddVisualChild(root);
         AddLogicalChild(root);
         dismissal = new Dismissal(this, PresenceProperty, () => closeRequested?.Invoke(this, EventArgs.Empty));
@@ -249,12 +251,14 @@ public class Alert : Control
         (UIElementAutomationPeer.FromElement(this) ?? UIElementAutomationPeer.CreatePeerForElement(this))?.RaiseAutomationEvent(AutomationEvents.LiveRegionChanged);
     }
 
-    /// <summary>em 尺寸（内边距 space.md 是主题里的 EmSize.Padding）：行高 normal；图标 1em，与第一行文字对齐（上下各 0.25em）；关闭按钮小一档、上下各收 space.xs；圆角按档位。</summary>
+    /// <summary>em 尺寸：内边距 space.md、行高 normal；图标 1em，与第一行文字对齐（上下各 0.25em）；关闭按钮小一档、上下各收 space.xs；圆角按档位。</summary>
     void UpdateMetrics()
     {
         var em = FontSize;
         double Resource(string key, double fallback) => TryFindResource(key) as double? ?? fallback;
         root.CornerRadius = new CornerRadius((Radius.ResourceKey is { } key ? Resource(key, 0.375) : 0.375) * em);
+        // 内边距随字号，写当前值（使用方的本地值、样式盖得过）；EmSize 的登记会换掉字号的继承，不用它
+        SetCurrentValue(PaddingProperty, new Thickness(Resource("Rune.Space.Md", 0.75) * em));
         TextBlock.SetLineHeight(root, Resource("Rune.LineHeight.Normal", 1.5) * em);
         icon.Size = em;
         icon.Margin = spinner.Margin = new Thickness(0, 0.25 * em, 0, 0.25 * em);
@@ -275,7 +279,7 @@ public class Alert : Control
             return;
         }
         if (close is not null) return;
-        close = new CloseButton { VerticalAlignment = VerticalAlignment.Top };
+        close = new CloseButton { Name = "PART_Close", VerticalAlignment = VerticalAlignment.Top };
         close.SetResourceReference(StyleProperty, AlertParts.Close);
         close.SetBinding(ForegroundProperty, new System.Windows.Data.Binding(nameof(Foreground)) { Source = this });
         // 悬停的底色取提示条的文字色（状态层，14%）：彩色提示条上不是一块灰；用按钮自己的事件，不留静态的属性监听

@@ -10,7 +10,6 @@
     <ResourceDictionary Source="/Rune.Wpf;component/Base/Button/Button.xaml" />
   </ResourceDictionary.MergedDictionaries>
   <Style TargetType="rune:Alert" BasedOn="{StaticResource Rune.Recipe.Alert}">
-    <Setter Property="rune:EmSize.Padding" Value="0.75" />
     <!-- borderWidths.xs：每种样式都留出边框的位置（浅色底时透明），切换样式时尺寸不变 -->
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="BorderBrush" Value="Transparent" />

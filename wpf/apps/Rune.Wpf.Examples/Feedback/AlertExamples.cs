@@ -4,7 +4,7 @@ using System.Windows.Documents;
 
 namespace Rune.Wpf.Examples;
 
-/// <summary>Alert 的示例（vue-tsx-pro 文档站 feedback/Alert）。banner 在 Banner 做了以后加。</summary>
+/// <summary>Alert 的示例（vue-tsx-pro 文档站 feedback/Alert，Banner 的示例也在这一页）。</summary>
 static class AlertExamples
 {
     public static Example[] All =>
@@ -12,6 +12,7 @@ static class AlertExamples
         new("Alert", "tones", "色调", "Tone 决定颜色与默认图标：info、success、warning、danger、neutral、accent。说明写在内容上，标题可选。", Tones),
         new("Alert", "status", "进行中、播报与尺寸", "IsLoading 时图标换成加载指示；操作后才出现的提示写 Live=\"polite\"（错误用 assertive），读屏会念出来。Size 跟字号档位缩放。", Status),
         new("Alert", "variants", "样式、操作与关闭", "Variant：soft（默认）、surface（加描边）、outline（只有描边）。Action 放右侧的操作；订阅了 CloseRequested 才有关闭按钮，淡出后再请使用方移除。", Variants),
+        new("Alert", "banner", "页面顶部的横幅", "Banner 占满宽度、一行说完、内容居中，没有圆角，放在页面最上方；Variant=\"solid\" 最醒目，用于必须先看到的消息。订阅了 CloseRequested 才有关闭按钮：先淡出再请使用方移除（关掉的可以记下来，下次不再出现）。", Banner),
     ];
 
     static FrameworkElement Tones()
@@ -96,5 +97,45 @@ static class AlertExamples
         list.Children.Add(tip);
         list.Children.Add(again);
         return list;
+    }
+
+    static FrameworkElement Banner()
+    {
+        var page = new Flex { Direction = FlexDirection.Column };
+        // 实底上的链接跟随横幅的文字颜色，对比度才够
+        var maintenance = new Banner
+        {
+            Variant = BannerVariant.Solid, Tone = StatusTone.Warning, Icon = Lucide.Wrench, Title = "系统维护",
+            Action = new TextBlock { Inlines = { new Link { Href = new Uri("https://example.com/maintenance"), Tone = TextTone.Inherit, Underline = LinkUnderline.Always, Inlines = { new Run("查看公告") } } } },
+            Content = "今晚 22:00–23:00 暂停服务，请提前保存草稿",
+        };
+        var trial = new Banner { Tone = StatusTone.Accent, Action = new Button { Size = TextSize.Xs, Variant = ButtonVariant.Solid, Content = "升级到正式版" }, Content = "试用还剩 3 天，到期后项目将变为只读" };
+        var archived = new Banner { Tone = StatusTone.Neutral, Icon = Lucide.Lock, Size = TextSize.Sm, Content = "当前项目已归档，只能查看" };
+        var restore = new Button { Size = TextSize.Sm, Variant = ButtonVariant.Ghost, Content = "重新显示关掉的横幅", Visibility = Visibility.Collapsed, HorizontalAlignment = HorizontalAlignment.Left };
+        void Closed(Banner banner)
+        {
+            page.Children.Remove(banner);
+            restore.Visibility = Visibility.Visible;
+        }
+        maintenance.CloseRequested += (_, _) => Closed(maintenance);
+        trial.CloseRequested += (_, _) => Closed(trial);
+        restore.Click += (_, _) =>
+        {
+            foreach (var banner in new[] { trial, maintenance })
+                if (!page.Children.Contains(banner)) page.Children.Insert(0, banner);
+            restore.Visibility = Visibility.Collapsed;
+        };
+        foreach (var child in new UIElement[] { maintenance, trial, archived }) page.Children.Add(child);
+        page.Children.Add(new Flex
+        {
+            Direction = FlexDirection.Column, Gap = Space.Xs, Margin = new Thickness(17.5, 14, 17.5, 14),
+            Children =
+            {
+                new Text { Text = "项目台账", Weight = TextWeight.Semibold },
+                new Small { Tone = TextTone.Muted, Text = "横幅占满宽度、一行说完，放在页面最上方；关掉的写进本地存储，下次不再出现。" },
+                restore,
+            },
+        });
+        return new Card { Padding = Space.None, Content = page };
     }
 }

@@ -1,0 +1,33 @@
+<!--
+  Banner 的主题样式（vue-tsx-pro 的 bannerStyles）：样式 × 色调的颜色是生成的 BannerRecipe.g.xaml，字号档位是触发器；
+  内边距与 em 尺寸在 Banner.cs 里（结束端随关闭按钮变）。没有圆角，留 1 像素的透明边框（同上游的 statusToneSx）
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Rune.Wpf;component/Feedback/Banner/BannerRecipe.g.xaml" />
+    <ResourceDictionary Source="/Rune.Wpf;component/Base/Button/Button.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <Style TargetType="rune:Banner" BasedOn="{StaticResource Rune.Recipe.Banner}">
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="TextBlock.LineStackingStrategy" Value="BlockLineHeight" />
+    <Style.Triggers>
+      <Trigger Property="Size" Value="xs"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xs}" /></Trigger>
+      <Trigger Property="Size" Value="sm"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" /></Trigger>
+      <Trigger Property="Size" Value="md"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Md}" /></Trigger>
+      <Trigger Property="Size" Value="lg"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Lg}" /></Trigger>
+      <Trigger Property="Size" Value="xl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xl}" /></Trigger>
+      <Trigger Property="Size" Value="xxl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xxl}" /></Trigger>
+      <Trigger Property="Size" Value="xxxl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xxxl}" /></Trigger>
+    </Style.Triggers>
+  </Style>
+  <!-- 部件的默认外观写在部件样式里（DESIGN §7），使用方同键的样式叠在上面，盖得过 -->
+  <Style x:Key="{x:Static rune:BannerParts.Icon}" TargetType="rune:Icon" />
+  <Style x:Key="{x:Static rune:BannerParts.Content}" TargetType="TextBlock" />
+  <Style x:Key="{x:Static rune:BannerParts.Action}" TargetType="ContentPresenter">
+    <Setter Property="TextElement.FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
+  </Style>
+  <Style x:Key="{x:Static rune:BannerParts.Close}" TargetType="rune:CloseButton" BasedOn="{StaticResource {x:Type rune:CloseButton}}" />
+</ResourceDictionary>

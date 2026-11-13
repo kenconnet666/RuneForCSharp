@@ -34,6 +34,7 @@
     <ResourceDictionary Source="/Rune.Wpf;component/Display/UserButton/UserButton.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Display/ItemList/ItemList.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Feedback/Alert/Alert.xaml" />
+    <ResourceDictionary Source="/Rune.Wpf;component/Feedback/Banner/Banner.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Feedback/Empty/Empty.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Base/Code/Code.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Base/Blockquote/Blockquote.xaml" />
