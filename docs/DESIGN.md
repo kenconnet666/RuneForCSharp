@@ -633,7 +633,7 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 测试的等待：Avalonia `HeadlessUi.Until` / `Pump`，WPF `WpfUi.Until`（三处测试都要等异步结果，收进了测试的基础设施）。
 - 示例：上游的 CopyButton 在 icon-button 页的 states（还要 Tooltip、focusableWhenDisabled）与 presets（还要 TextField）里，这两个示例等这些组件做好再补。
 
-### Tabs（2026-11-07，核心部分）
+### Tabs（2026-11-07；2026-11-14 补齐可关闭、新建、排序与标签栏）
 
 - 照上游拆成四层：Tabs（状态：Value、Orientation、Activation、Variant、Size、Ripple）> TabList（一排标签）> Tab；TabPanel 与标签按 Value 对应。
   成员按"逻辑树上最近的那组 Tabs"认领（不进到里面另一组）；没有值时选第一个标签，只显示当前标签的面板（看不见的面板不排版、不绘制——上游的 lazy 不移植）。
@@ -642,14 +642,29 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   （跟着当前标签滑过去，durations.md、standard，第一次直接到位）；soft 时列表 fill 底、xs 内边距、md 圆角，宽度按标签，选中的标签 surface 底；不可用的标签半透明。
 - 键盘：漫游焦点（整组一个 Tab 停靠点，方向键跳过不可用项，到两端后从另一端继续）；automatic 时焦点到哪个切到哪个，manual 时 Enter / 空格才切换。
   点击先发 Click（Avalonia、WPF；WinForms 是 TabClick），处理里标记 Handled / Cancel 可以拦下切换（上游的 preventDefault）。
-- **Avalonia**：Tabs、TabList 从 Flex 派生。Avalonia 12 的 Panel.Render 是密封的：TabList 插一个只做绘制的子元素（不在 Children 里、不参加 Flex 排版，ZIndex -1）。
-  Flex 没有 Padding：soft 的内边距在 TabList 的量、排两步里收进去再挪过去。面板在横排时不能 Grow（不限高的容器里会往下撑满）。
+- **Avalonia**：Tabs 从 Flex 派生，TabList 是组合控件（见下面的标签栏）。面板在横排时不能 Grow（不限高的容器里会往下撑满）。
 - **WPF**：同样的结构，指示条用 DoubleAnimation；标签的外观在 Tabs.xaml 里按只读的 Variant、Orientation、IsSelected 触发。合成的按键事件不改
   InputManager 的"最近的输入设备"，自动切换改在 TabList 处理完方向键之后看焦点在哪个标签上。
 - **WinForms**：平台自带 TabControl、TabPage，组件库的叫 TabsControl、TabListControl、TabItemControl（标签，里面放文字或子控件）、TabPanelControl。
   FlexControl 只量自动大小的子控件（关掉 AutoSize 的按自己的大小）：示例里的固定宽度列关掉 AutoSize。没有波纹。
-- 没做：可关闭（Delete、中键、关闭按钮）、新建按钮、拖动与 Alt + 方向键排序、"全部标签页"菜单、propsIndicator / propsBar / propsAdd——等 Menu 一起做。
-  vertical 示例的面板要 TextField。
+- **可关闭、新建、排序、标签栏（2026-11-14）**：Tab 订阅了 CloseRequested（TS 的 onClose）才有关闭按钮——xs、圆形的 X，叠在结束端（标签结束端多留 1.25em），
+  不能聚焦、读屏看不到（键盘、读屏用标签上的 Delete，AcceleratorKey / KeyboardShortcut 报出来），鼠标中键也关。使用方移除标签；关掉的是当前标签时
+  TabList 选它后面（没有时前面）的一个，关掉的标签有焦点时焦点交给接着选中的标签（上游这件事在 Tabs 的注销里，我们在 TabList 看子元素的增减）。
+  横排时 TabList 是一个标签栏：[往前滚][列表][往后滚][全部标签页菜单][新建]，间距 space.xs、竖直居中，line 的分隔线画在整个栏上；列表按内容宽，
+  放不下时收缩、横向滚动（滚动条藏起来），出现滚动按钮（只给指针用，到头的那个不可用，一次滚 80%），还能滚的那头 1.5em 渐隐；当前标签变了滚进来（留 16 像素）。
+  ShowAllMenu 是按显示顺序列出标签的 Menu（MenuRadioGroup，选一项切过去）。AddRequested（onAdd）订阅了才有新建按钮。
+  Reordered（onReorder）订阅了才能排序：拖动越过别的标签的中线就换位（门槛 4 像素，拖动中半透明），Alt + ←→ 挪一位并让读屏念新位置（语言包的 TabMoved）。
+  和上游不同，TabList 自己挪好标签再报告新顺序（桌面上标签多是直接写的子元素，没有使用方的数组可以重排）。竖排时只有列表。
+  - Avalonia：TabList 改成组合控件（Children 转给里面的 Flex），列表在内部的 ScrollArea 子类里（inspect 不把它当组件）；指示条是列表层里的 Border（部件 Indicator），
+    渐隐是滚动区域的 OpacityMask；关闭按钮放在 Tab 模板的 PART_CloseHost 里。按下关闭按钮不挪焦点：焦点管理器在按下的源元素上挪焦点，按钮在隧道阶段先拦下、自己认点击。
+    读屏的实时区域 `LiveRegion`（Utils/Accessibility）是看不见的一段文字，改了就发 LiveRegionChanged。
+  - WPF：结构同 Avalonia（FrameworkElement 托管一个 Border）；集合没有挪动，排序是拿下再放回，列表在这期间不把它当关闭；拿下标签时可视子元素的槽位还空着，
+    关掉后的另选、交焦点延后一拍。Alt 的状态合成不了，测试经过 OnReorderKey。
+  - WinForms：TabListControl 横排时自己排（LayoutEngine 换成标签栏的排列），竖排仍是 Flex；栏里的按钮、标签里的关闭按钮不参加 Flex 的排列（FlexControl.SetOverlay）。
+    列表外面的标签部分用窗口区域裁掉；子控件各画在自己的窗口上，没有渐隐。排序用 SetChildIndex（不换窗口，焦点、指针都不丢）。
+    拿掉有焦点的标签时，焦点在 OnControlRemoved 之前就没了：子控件集合的 Remove 先记下。读屏的报告是 RaiseAutomationNotification。
+    顺带修了：只写 Text 的 TabItemControl 原来不显示文字（Flex 不画 Text），现在里面放一个 TextControl。
+- 示例：workspace（多页签，首页不能关）、line、soft、vertical（设置页）。
 
 ### Table（2026-11-07，静态表格）
 

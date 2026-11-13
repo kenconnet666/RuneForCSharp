@@ -248,6 +248,8 @@ NavBar（root、list、item）补了部件标记。这些组件都还没做，�
 复合组件转发里面的按钮、复选框、链接的部件属性（SchemaFields、SchemaForm、Upload、ConditionBuilder、Breadcrumbs、CommentThread、FilterBar、SlideCaptcha、
 QueryTable、ErrorBoundary、JsonViewer、ImageCropper、QuarterCalendar、Carousel、TabList 的 propsScrollButton、Transfer、XY 图表、MapChart）。
 这些里面只有 TabList 是已做的，但我们的 TabList 还没有滚动按钮（连同 onAdd、onReorder、showAllMenu 等，parity 缺 6/8）：做 TabList 的这些功能时一起加 PropsScrollButton。CI 还在跑，锁定停在 56e28b39。
+2026-11-14 补齐：Tab 的 CloseRequested（onClose）、TabList 的 AddRequested、Reordered、ShowAllMenu、滚动按钮与渐隐三个平台都做了，部件见 TabParts、TabListParts（WinForms 登记为没有部件属性），
+测试对上"可关闭""新建按钮与 Alt + →"两条用例。
 
 ### 第二十一批（2026-11-08 通知，master 7c019043：新组件 UserButton）
 
@@ -356,7 +358,7 @@ Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_
 | Link：下划线平时 50% 文字色、悬停实色；tone=muted 悬停换正文色（d8e0429f、f5e4c5a6） | Link 已做 | 已跟：三个平台（WinForms 的下划线改成自己画） |
 | Switch 轨道悬停混进正文色（关 15%、开 12%，oklab）；输入外壳 soft 悬停 fillHover（bbdf86c9） | 已做 | 已跟：Switch 的 TrackHover（sRGB 里混，差不到一个色阶），TextField、Select 的 soft 悬停 |
 | Checklist、KanbanBoard、Upload、色块、Image、Carousel、Splitter 的悬停（bbdf86c9），Splitter / ResizeHandle 的悬停聚焦拖动（1046ed37） | 还没做 | 做时照新的 |
-| TabList 横排可滚时可滚的一头渐隐（604d1334） | TabList 还不能横向滚动 | 做滚动（连同滚动按钮）时一起做 |
+| TabList 横排可滚时可滚的一头渐隐（604d1334） | TabList 已做滚动 | 2026-11-14 做了：Avalonia、WPF 是滚动区域的 OpacityMask；WinForms 的标签是各自的窗口，没有渐隐 |
 | Steps 横排连接线对齐圆圈中线（4a257b71） | 还没做 | 做时照新的 |
 | AppShell：收起按钮从侧栏底部挪到品牌格结束边，收起后品牌格只放居中的展开按钮，AppShellBrand 不再按收起隐藏产品名（cb28b280） | 已做 | 已跟：三个平台，去掉 CollapseBar 部件、WPF 的 AppShellBrand.IsCompact 附加属性、WinForms 的 IsCompact |
 | 横排单选、复选组至少控件高、竖直居中，卡片组 stretch（d7af9b3d）；choice 根按基线排（0255a355） | 组已做 | 已跟横排的高度与居中；基线对齐我们的 Field 本来按文字基线排 |
