@@ -3,6 +3,7 @@ using System.Windows.Automation;
 using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 
 namespace Rune.Wpf;
 
@@ -37,6 +38,17 @@ public class Icon : Control
     public static readonly DependencyProperty FlipInRtlProperty = DependencyProperty.Register(
         nameof(FlipInRtl), typeof(bool), typeof(Icon), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsRender));
 
+    /// <summary>
+    /// 描线动画（一笔画出）：加载时为 true 就在加载时播，之后每次由 false 变为 true 再播（时长 durations.xl、缓动 enter，
+    /// 系统关闭动画时直接画好）。不写（null）的图标不建动画、不订阅 Loaded。
+    /// </summary>
+    public static readonly DependencyProperty DrawProperty = DependencyProperty.Register(
+        nameof(Draw), typeof(bool?), typeof(Icon), new FrameworkPropertyMetadata(null, OnDrawChanged));
+
+    /// <summary>描线的进度：1 是画完（平常就是 1，只有描线时从 0 走到 1）。</summary>
+    static readonly DependencyProperty DrawnProperty = DependencyProperty.Register(
+        "Drawn", typeof(double), typeof(Icon), new FrameworkPropertyMetadata(1d, FrameworkPropertyMetadataOptions.AffectsRender));
+
     /// <summary>Size 是档位名时，从主题资源取到的字号（资源引用 Rune.FontSize.*，主题与作用域换了跟着变）。</summary>
     static readonly DependencyProperty ResolvedSizeProperty = DependencyProperty.Register(
         "ResolvedSize", typeof(double), typeof(Icon), new FrameworkPropertyMetadata(double.NaN, FrameworkPropertyMetadataOptions.AffectsMeasure));
@@ -70,6 +82,12 @@ public class Icon : Control
     /// <summary>从右到左排版时水平翻转。</summary>
     public bool FlipInRtl { get => (bool)GetValue(FlipInRtlProperty); set => SetValue(FlipInRtlProperty, value); }
 
+    /// <summary>描线动画；不写时不建动画。</summary>
+    public bool? Draw { get => (bool?)GetValue(DrawProperty); set => SetValue(DrawProperty, value); }
+
+    /// <summary>描线的进度（测试用）。</summary>
+    internal double Drawn => (double)GetValue(DrawnProperty);
+
     /// <summary>实际的边长：像素数 &gt; 档位的主题字号 &gt; 继承的字号。</summary>
     public double ActualSize => Size.Pixels ?? (Size.ResourceKey is not null && GetValue(ResolvedSizeProperty) is double resolved && !double.IsNaN(resolved) ? resolved : FontSize);
 
@@ -81,6 +99,37 @@ public class Icon : Control
         var icon = (Icon)d;
         if (((TextSize)e.NewValue).ResourceKey is { } key) icon.SetResourceReference(ResolvedSizeProperty, key);
         else icon.ClearValue(ResolvedSizeProperty);
+    }
+
+    static void OnDrawChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        var icon = (Icon)d;
+        if (e.OldValue is null) icon.Loaded += OnLoadedDraw;
+        else if (e.NewValue is null) icon.Loaded -= OnLoadedDraw;
+        if (e.NewValue is true && e.OldValue is not true && icon.IsLoaded) icon.PlayDraw();
+    }
+
+    static void OnLoadedDraw(object sender, RoutedEventArgs e)
+    {
+        var icon = (Icon)sender;
+        if (icon.Draw == true) icon.PlayDraw();
+    }
+
+    /// <summary>先擦掉再画：从 0 开始，FillBehavior.Stop 结束或被打断后留下的本地值 1 就是画完的图标。</summary>
+    void PlayDraw()
+    {
+        SetValue(DrawnProperty, 1d);
+        var duration = Motion.Duration(this, "Rune.Duration.Xl", TimeSpan.FromMilliseconds(500));
+        if (duration <= TimeSpan.Zero)
+        {
+            BeginAnimation(DrawnProperty, null);
+            return;
+        }
+        BeginAnimation(DrawnProperty, new DoubleAnimation(0, 1, duration)
+        {
+            EasingFunction = TryFindResource("Rune.Easing.Enter") as IEasingFunction,
+            FillBehavior = FillBehavior.Stop,
+        });
     }
 
     /// <inheritdoc />
@@ -101,8 +150,24 @@ public class Icon : Control
         var scale = size / IconData.Size;
         drawingContext.PushTransform(CancelsMirroring ? new MatrixTransform(-scale, 0, 0, scale, size, 0) : new ScaleTransform(scale, scale));
         if (data.FillGeometry is { } fill) drawingContext.DrawGeometry(brush, null, fill);
-        drawingContext.DrawGeometry(null, pen ??= CreatePen(brush), data.Geometry);
+        drawingContext.DrawGeometry(null, pen ??= CreatePen(brush), Drawn < 1 ? PartialGeometry(data, Drawn) : data.Geometry);
         drawingContext.Pop();
+    }
+
+    /// <summary>描线中：每一笔画出的部分连成折线。</summary>
+    static StreamGeometry PartialGeometry(IconData data, double progress)
+    {
+        var geometry = new StreamGeometry();
+        using (var context = geometry.Open())
+        {
+            foreach (var stroke in data.Strokes.Partial(progress))
+            {
+                context.BeginFigure(new Point(stroke[0].X, stroke[0].Y), false, false);
+                foreach (var (x, y) in stroke.Skip(1)) context.LineTo(new Point(x, y), true, true);
+            }
+        }
+        geometry.Freeze();
+        return geometry;
     }
 
     Pen CreatePen(Brush brush)

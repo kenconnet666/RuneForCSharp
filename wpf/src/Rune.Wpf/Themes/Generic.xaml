@@ -36,6 +36,7 @@
     <ResourceDictionary Source="/Rune.Wpf;component/Feedback/Alert/Alert.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Feedback/Banner/Banner.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Feedback/Empty/Empty.xaml" />
+    <ResourceDictionary Source="/Rune.Wpf;component/Feedback/Result/Result.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Base/Code/Code.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Base/Blockquote/Blockquote.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Base/Button/Button.xaml" />

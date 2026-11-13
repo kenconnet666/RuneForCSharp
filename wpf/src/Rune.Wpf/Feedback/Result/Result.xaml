@@ -1,0 +1,38 @@
+<!-- Result 的主题样式（vue-tsx-pro 的 resultRecipe）：正文色，字号档位是触发器；em 尺寸与图标的色调在 Result.cs 里 -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <Style TargetType="rune:Result">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Style.Triggers>
+      <Trigger Property="Size" Value="xs"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xs}" /></Trigger>
+      <Trigger Property="Size" Value="sm"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" /></Trigger>
+      <Trigger Property="Size" Value="md"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Md}" /></Trigger>
+      <Trigger Property="Size" Value="lg"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Lg}" /></Trigger>
+      <Trigger Property="Size" Value="xl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xl}" /></Trigger>
+      <Trigger Property="Size" Value="xxl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xxl}" /></Trigger>
+      <Trigger Property="Size" Value="xxxl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xxxl}" /></Trigger>
+    </Style.Triggers>
+  </Style>
+  <!-- 部件的默认外观写在部件样式里（DESIGN §7），使用方同键的样式叠在上面，盖得过；图标的颜色是色调，在 Result.cs 里 -->
+  <Style x:Key="{x:Static rune:ResultParts.Icon}" TargetType="rune:Icon">
+    <Setter Property="StrokeWidth" Value="{DynamicResource Rune.StrokeWidth.Sm}" />
+  </Style>
+  <Style x:Key="{x:Static rune:ResultParts.Code}" TargetType="rune:Text">
+    <Setter Property="Weight" Value="bold" />
+    <Setter Property="Tone" Value="muted" />
+    <Setter Property="Numeric" Value="True" />
+    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.None}" />
+    <Setter Property="Align" Value="center" />
+  </Style>
+  <Style x:Key="{x:Static rune:ResultParts.Title}" TargetType="rune:Text">
+    <Setter Property="Weight" Value="semibold" />
+    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Tight}" />
+    <Setter Property="Align" Value="center" />
+  </Style>
+  <Style x:Key="{x:Static rune:ResultParts.Description}" TargetType="rune:Paragraph">
+    <Setter Property="Tone" Value="muted" />
+    <Setter Property="Align" Value="center" />
+  </Style>
+  <Style x:Key="{x:Static rune:ResultParts.Action}" TargetType="ContentPresenter" />
+</ResourceDictionary>
