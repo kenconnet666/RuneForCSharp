@@ -472,7 +472,10 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   - 设计器：属性标 `[Category]`、`[Description]`，档位用 `ShouldSerializeXxx` / `ResetXxx`；`IconData` 带 `IconDataConverter`，属性窗口按名字列出 Lucide 的现名（旧名不列），生成 `Lucide.Search`，自定义图标生成 `new IconData(…)`。
   - 无障碍：`AccessibleRole` 默认 Graphic，名字只取 AccessibleName（不让系统借用前面 Label 的文字），状态去掉 Focusable；不能获得焦点（去掉 Selectable）。WinForms 的公开 API 改不了 UIA 的 IsControlElement，装饰性图标没法像另外两个平台那样从控件树里隐藏，只是没有名字。
   - 自定义图标的路径只认绝对坐标的 M、L、C、Z（GraphicsPath 没有解析 SVG 路径的现成方法）；Avalonia、WPF 用 `Geometry.Parse`，什么写法都认。三个平台的示例都用这种写法，要支持任意 SVG 路径时在 WinForms 里补一个归一化（同 icons-gen 的 svg.mjs）。
-- **暂缓**：`draw`（描线动画，一笔画出）三个平台都还没做，parity 里列为缺失。
+- 描线动画 `Draw`（2026-11-14，Result 要用）：`bool?`，不写（null）的图标不建动画（WPF 只在写了时才订阅 Loaded）；挂上（WinForms 是第一次绘制）时为 true 就播，
+  之后每次由 false 变为 true 再播，时长 durations.xl、缓动 enter，系统关闭动画时直接画好。TS 给每个 SVG 元素写 pathLength = 1 再按比例设虚线；
+  这里的孪生文件 `IconStrokes`（Base/Icon）把路径拆成一笔一笔（每个 M 开始的子路径）、曲线展开成折线（每段 16 份），按每一笔自己的长度截出画到的部分，
+  进度 0 时什么也不画（圆头的线长度为 0 时还会画出一个点）。描线中按折线画，画完换回原来的几何。
 
 ### Text 家族
 
@@ -982,6 +985,19 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   inspect 也按 Alert 自己报。不用 EmSize.Padding：它的登记会覆盖 FontSize 的元数据、换掉字号的继承。代码建的部件要有 `Name = "PART_X"`，inspect 才配得上部件。
   根 Border 的 TextElement.FontSize 绑到控件的 FontSize：Gallery 与 inspect 的宿主里，说明的 TextBlock 没从控件继承到字号（测试里继承正常，原因没查清），绑上就稳了。
 - 示例：tones、status、variants、banner（Banner 在同一页）。Avalonia、WPF 与文档站的取值对照没有差异。
+
+### Result（2026-11-14）
+
+- 结构同 TS：一列居中的 [图标（4em、strokeWidths.sm、色调的颜色，下面多空 space.sm）、状态码（2.5em 粗体、次要色、等宽数字、行高 1）、标题（半粗、xl / md、行高 tight）、
+  说明（最宽 36em、次要色）、内容、操作（上面多空 space.md）]，项之间 space.sm，上下 space.xl、左右 space.lg。示例在 Empty 页（result、status）。
+- 色调用 StatusTone（默认 success；上游只列了 success、danger、warning、info 四种，其余照样能用），图标按色调选时同 Alert 的 IconFor；
+  `ResultStatus`（403、404、500，孪生文件）给出图标（ShieldX、FileQuestionMark、ServerCrash）、色调与语言包的标题、说明（Lang.ResultStatus），显式写的优先。
+- 状态码对读屏是重复的：Avalonia 设 AccessibilityView.Raw，WPF 的 Result 自己的 peer 从子元素里去掉它，WinForms 的是画的、读屏里本来就没有（读屏的名称是标题、描述是说明）。
+- WPF 的 TextBlock 没有字距，状态码不收紧字距（tight）；内边距同 Alert 写成 Result 自己的 Padding（SetCurrentValue）。
+- WinForms：图标、状态码、标题、说明是画的元素（PropsIcon、PropsCode、PropsTitle、PropsDescription），直接加的子控件是内容，Action 是操作；GDI 的行高是字体自己的，
+  状态码只占 2.5em 高、字形在里面竖直居中。图标只在色调、状态、图标、PropsIcon 变了时重建，描线只在第一次画出来之前或 Draw 由 false 变为 true 时播，改文字不重画。
+  inspect 的截图先画一遍再等动画时钟停下（Animator.IsRunning），取动画播完的样子。
+- 取值对照：Avalonia、WPF 只差内容里的行内代码（桌面要放进一段文字里）带来的约 2 像素高度；按钮的差异是工具把切换项当按钮配对的错位。
 
 ### Banner（2026-11-14）
 

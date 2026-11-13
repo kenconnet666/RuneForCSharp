@@ -29,6 +29,9 @@ public sealed class IconData(string name, string path, string? fillPath = null)
 
     Outline StrokeOutline => field ??= Outline.Parse(Path);
 
+    /// <summary>描线用的一笔一笔的折线（Icon 的 Draw）：第一次描线时解析。</summary>
+    internal IconStrokes Strokes => field ??= IconStrokes.Parse(Path);
+
     Outline? FillOutline => FillPath is null ? null : field ??= Outline.Parse(FillPath);
 
     /// <summary>新建描边的 GraphicsPath；用完要 Dispose。解析结果缓存着，每次只是按点建一条新路径。</summary>

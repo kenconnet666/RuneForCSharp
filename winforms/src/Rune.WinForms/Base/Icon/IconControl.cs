@@ -43,6 +43,12 @@ public class IconControl : ElementControl<Icon>
     [DefaultValue(false)]
     public bool FlipInRtl { get => Element.FlipInRtl; set => Element.FlipInRtl = value; }
 
+    /// <summary>描线动画（一笔画出）：第一次画出来时为 true 就播，之后每次由 false 变为 true 再播；不写时不建动画。</summary>
+    [Category("Appearance")]
+    [Description("描线动画：一笔画出图标。")]
+    [DefaultValue(null)]
+    public bool? Draw { get => Element.Draw; set => Element.Draw = value; }
+
     bool ShouldSerializeIconSize() => IconSize != default;
 
     void ResetIconSize() => IconSize = default;

@@ -73,6 +73,29 @@ public class Icon : Element
         }
     }
 
+    /// <summary>
+    /// 描线动画（一笔画出）：第一次画出来时为 true 就在那时播，之后每次由 false 变为 true 再播（时长 durations.xl、缓动 enter，
+    /// 系统关闭动画时直接画好）。不写（null）的图标不建动画。元素不知道自己什么时候挂上，所以等第一次绘制才开始。
+    /// </summary>
+    public bool? Draw
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            if (value == true) drawPending = true;
+            field = value;
+            Invalidate();
+        }
+    }
+
+    /// <summary>描线的进度：1 是画完（平常就是 1，只有描线时从 0 走到 1）。</summary>
+    readonly Signal<double> drawn = new(1);
+    bool drawPending;
+
+    /// <summary>描线的进度（测试用）。</summary>
+    internal double Drawn => drawn.Peek();
+
     /// <inheritdoc />
     protected internal override Size Measure(ElementContext context, Size available)
     {
@@ -84,6 +107,14 @@ public class Icon : Element
     protected internal override void Paint(Graphics graphics, ElementContext context)
     {
         if (Data is not { } data) return;
+        if (drawPending)
+        {
+            // 先擦掉再画：这一帧就从 0 开始，不会先闪一下完整的图标
+            drawPending = false;
+            drawn.Value = 0;
+            Animator.Animate(drawn, 1, Tokens.Duration.Xl, Easing.Enter);
+        }
+        var progress = drawn.Value;
         var size = ActualSize(context);
         var color = Tone.ColorIn(context);
         var state = graphics.Save();
@@ -104,8 +135,15 @@ public class Icon : Element
                 using var brush = new SolidBrush(color);
                 using (fill) graphics.FillPath(brush, fill);
             }
-            using var path = data.CreatePath();
             using var pen = new Pen(color, StrokeWidth) { StartCap = LineCap.Round, EndCap = LineCap.Round, LineJoin = LineJoin.Round };
+            if (progress < 1)
+            {
+                // 描线中：每一笔画出的部分连成折线
+                foreach (var stroke in data.Strokes.Partial(progress).Where(stroke => stroke.Length > 1))
+                    graphics.DrawLines(pen, [.. stroke.Select(point => new PointF((float)point.X, (float)point.Y))]);
+                return;
+            }
+            using var path = data.CreatePath();
             graphics.DrawPath(pen, path);
         }
         finally

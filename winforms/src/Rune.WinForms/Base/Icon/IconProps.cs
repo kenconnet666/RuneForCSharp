@@ -24,6 +24,9 @@ public sealed record IconProps
     /// <summary>从右到左排版时水平翻转。</summary>
     public bool? FlipInRtl { get; init; }
 
+    /// <summary>描线动画。</summary>
+    public bool? Draw { get; init; }
+
     /// <summary>上面一层盖住这一层：上层写了的字段用上层的，没写的沿用这一层。</summary>
     /// <param name="over">上面一层；null 时原样返回。</param>
     public IconProps Merge(IconProps? over) => over is null ? this : new()
@@ -33,6 +36,7 @@ public sealed record IconProps
         Tone = over.Tone ?? Tone,
         StrokeWidth = over.StrokeWidth ?? StrokeWidth,
         FlipInRtl = over.FlipInRtl ?? FlipInRtl,
+        Draw = over.Draw ?? Draw,
     };
 
     /// <summary>把写了的字段设到图标上，没写的保持图标自己的默认值。</summary>
@@ -44,5 +48,6 @@ public sealed record IconProps
         if (Tone is { } tone) icon.Tone = tone;
         if (StrokeWidth is { } strokeWidth) icon.StrokeWidth = strokeWidth;
         if (FlipInRtl is { } flip) icon.FlipInRtl = flip;
+        if (Draw is { } draw) icon.Draw = draw;
     }
 }

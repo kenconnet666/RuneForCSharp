@@ -92,6 +92,7 @@ static class Inspector
         var path = Report.SnapshotPath("winforms", options);
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         using var bitmap = new Bitmap(form.ClientSize.Width, form.ClientSize.Height);
+        Settle(form, bitmap);
         using (var graphics = Graphics.FromImage(bitmap))
         using (var clip = new Region(new Rectangle(Point.Empty, form.ClientSize)))
             Render(form, graphics, Point.Empty, clip);
@@ -127,6 +128,23 @@ static class Inspector
         area.Intersect(new Rectangle(origin + (Size)client, control.ClientSize));
         foreach (var child in control.Controls.Cast<Control>().Where(child => child.Visible).Reverse())
             Render(child, graphics, origin + (Size)client + (Size)child.Location, area);
+    }
+
+    /// <summary>
+    /// 截图取动画播完的样子（同文档站的截图）：先画一遍（第一次绘制才开始的动画，如图标的描线，由它触发），
+    /// 再跑消息循环等共享的动画时钟停下，最多等 3 秒。
+    /// </summary>
+    static void Settle(Form form, Bitmap scratch)
+    {
+        using (var graphics = Graphics.FromImage(scratch))
+        using (var clip = new Region(new Rectangle(Point.Empty, form.ClientSize)))
+            Render(form, graphics, Point.Empty, clip);
+        var waited = System.Diagnostics.Stopwatch.StartNew();
+        while (Animator.IsRunning && waited.Elapsed < TimeSpan.FromSeconds(3))
+        {
+            Application.DoEvents();
+            Thread.Sleep(15);
+        }
     }
 
     /// <summary>
