@@ -229,6 +229,7 @@ public class ChoiceTests
                 {
                     new Setter(AutomationProperties.AutomationIdProperty, new Binding(".") { StringFormat = "radio-{0}" }),
                     new Setter(Radio.ValueProperty, "x"),
+                    new Setter(InputElement.IsEnabledProperty, false), // 不可用按选项是默认值，主题盖得过
                 },
             },
         };
@@ -237,6 +238,7 @@ public class ChoiceTests
 
         Assert.Equal(["radio-a", "radio-b"], radios.Select(AutomationProperties.GetAutomationId));
         Assert.Equal(["a", "b"], radios.Select(radio => radio.Value));
+        Assert.All(radios, radio => Assert.False(radio.IsEnabled));
         Assert.NotNull(radios[0].Part<global::Avalonia.Controls.Presenters.ContentPresenter>(ChoiceBaseParts.Label)); // 基于默认主题，模板还在
     });
 

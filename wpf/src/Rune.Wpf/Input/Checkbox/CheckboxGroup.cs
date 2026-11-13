@@ -36,9 +36,7 @@ public class CheckboxGroup : ChoiceGroup
     /// <inheritdoc />
     protected override void Prepare(ChoiceBase item, ListboxOption option)
     {
-        var checkbox = (Checkbox)item;
-        checkbox.Value = option.Value;
-        checkbox.Description = option.Description;
+        ((Checkbox)item).Value = option.Value;
     }
 
     /// <summary>各项按组的值勾选。</summary>

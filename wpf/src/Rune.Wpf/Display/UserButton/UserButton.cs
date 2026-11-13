@@ -98,7 +98,7 @@ public class UserButton : ButtonBase
         if (e.Property == TextElement.FontSizeProperty) UpdateFontSizes();
     }
 
-    /// <summary>头像、文字、箭头与读屏：名称是名字，说明是帮助文字。</summary>
+    /// <summary>头像、文字与箭头。</summary>
     void Update()
     {
         var (described, compact) = (!string.IsNullOrEmpty(Description), Compact);
@@ -113,8 +113,6 @@ public class UserButton : ButtonBase
         Flex.SetGrow(text, described && !compact);
         indicator.Data = Indicator ?? (described && !compact ? Lucide.ChevronsUpDown : Lucide.ChevronDown);
         indicator.Visibility = !compact && ShowIndicator ? Visibility.Visible : Visibility.Collapsed;
-        AutomationProperties.SetName(this, DisplayName ?? "");
-        AutomationProperties.SetHelpText(this, compact ? "" : Description ?? "");
         UpdateFontSizes();
     }
 
@@ -123,6 +121,18 @@ public class UserButton : ButtonBase
     {
         name.SetValue(TextElement.FontSizeProperty, 0.93 * FontSize);
         description.SetValue(TextElement.FontSizeProperty, 0.86 * FontSize);
+    }
+
+    /// <inheritdoc />
+    protected override System.Windows.Automation.Peers.AutomationPeer OnCreateAutomationPeer() => new UserButtonAutomationPeer(this);
+
+    /// <summary>读屏名称默认是名字、帮助文字默认是说明（compact 时没有）；使用方写的 AutomationProperties 优先。</summary>
+    sealed class UserButtonAutomationPeer(UserButton owner) : ButtonBaseAutomationPeer(owner)
+    {
+        protected override string GetNameCore() => AutomationProperties.GetName(owner) is { Length: > 0 } name ? name : owner.DisplayName ?? "";
+
+        protected override string GetHelpTextCore() =>
+            AutomationProperties.GetHelpText(owner) is { Length: > 0 } help ? help : owner.Compact ? "" : owner.Description ?? "";
     }
 }
 

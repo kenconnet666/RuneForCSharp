@@ -1,8 +1,10 @@
 using Avalonia;
 using Avalonia.Automation;
+using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Controls.Metadata;
+using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
 
@@ -46,6 +48,7 @@ public class UserButton : ButtonBase
     readonly Text description = new() { Name = UserButtonParts.Description, Tone = TextTone.Muted, Truncate = true };
     readonly Icon indicator = new() { Name = UserButtonParts.Indicator, Tone = TextTone.Muted, VerticalAlignment = VerticalAlignment.Center };
     readonly Flex row = new() { Align = FlexAlign.Center, Gap = Space.Sm };
+    readonly List<IDisposable> shape = [];
 
     /// <summary>新建：头像、名字与说明、箭头。</summary>
     public UserButton()
@@ -86,7 +89,7 @@ public class UserButton : ButtonBase
 
     /// <summary>
     /// 头像、文字、箭头与形态：有说明且不 compact 时整行（左右 space.sm、md 圆角），compact 只剩头像（四周 space.xs），否则胶囊
-    /// （上下与起始边 space.xs、结束边 space.sm、圆角 full）。读屏名称是名字，说明是帮助文字。
+    /// （上下与起始边 space.xs、结束边 space.sm、圆角 full）。
     /// </summary>
     void Update()
     {
@@ -103,17 +106,33 @@ public class UserButton : ButtonBase
         Flex.SetGrow(text, described && !compact);
         indicator.Data = Indicator ?? (described && !compact ? Lucide.ChevronsUpDown : Lucide.ChevronDown);
         indicator.IsVisible = !compact && ShowIndicator;
-        AutomationProperties.SetName(this, DisplayName);
-        AutomationProperties.SetHelpText(this, compact ? null : Description);
 
         var em = TextElement.GetFontSize(this);
         var (xs, sm) = (this.Resource("Rune.Space.Xs", 0.25) * em, this.Resource("Rune.Space.Sm", 0.5) * em);
         name.FontSize = 0.93 * em;
         description.FontSize = 0.86 * em;
         var row = described && !compact;
-        Padding = compact ? new Thickness(xs) : row ? new Thickness(sm, xs) : new Thickness(xs, xs, sm, xs);
-        CornerRadius = new CornerRadius(row ? this.Resource("Rune.Radius.Md", 0.375) * em : 9999);
-        HorizontalAlignment = row ? HorizontalAlignment.Stretch : HorizontalAlignment.Left;
+        // 形态按模板优先级写：使用方的样式与本地值盖得过
+        foreach (var value in shape) value.Dispose();
+        shape.Clear();
+        shape.AddRange(new[]
+        {
+            SetValue(PaddingProperty, compact ? new Thickness(xs) : row ? new Thickness(sm, xs) : new Thickness(xs, xs, sm, xs), BindingPriority.Template),
+            SetValue(CornerRadiusProperty, new CornerRadius(row ? this.Resource("Rune.Radius.Md", 0.375) * em : 9999), BindingPriority.Template),
+            SetValue(HorizontalAlignmentProperty, row ? HorizontalAlignment.Stretch : HorizontalAlignment.Left, BindingPriority.Template),
+        }.OfType<IDisposable>());
+    }
+
+    /// <inheritdoc />
+    protected override AutomationPeer OnCreateAutomationPeer() => new UserButtonAutomationPeer(this);
+
+    /// <summary>读屏名称默认是名字、帮助文字默认是说明（compact 时没有）；使用方写的 AutomationProperties 优先。</summary>
+    sealed class UserButtonAutomationPeer(UserButton owner) : ButtonBaseAutomationPeer(owner)
+    {
+        protected override string? GetNameCore() => AutomationProperties.GetName(owner) is { Length: > 0 } name ? name : owner.DisplayName;
+
+        protected override string? GetHelpTextCore() =>
+            AutomationProperties.GetHelpText(owner) is { Length: > 0 } help ? help : owner.Compact ? null : owner.Description;
     }
 }
 

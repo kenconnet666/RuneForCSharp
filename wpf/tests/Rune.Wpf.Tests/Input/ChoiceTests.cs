@@ -222,12 +222,14 @@ public class ChoiceTests
         var style = new Style(typeof(Radio));
         style.Setters.Add(new Setter(AutomationProperties.AutomationIdProperty, new System.Windows.Data.Binding(".") { StringFormat = "radio-{0}" }));
         style.Setters.Add(new Setter(Radio.ValueProperty, "x"));
+        style.Setters.Add(new Setter(UIElement.IsEnabledProperty, false)); // 不可用按选项是默认值，样式盖得过
         var group = new RadioGroup { ItemsSource = new[] { "a", "b" }, ItemContainerStyle = style };
         Show(group);
         var radios = WpfUi.Descendants(group).OfType<Radio>().ToList();
 
         Assert.Equal(["radio-a", "radio-b"], radios.Select(AutomationProperties.GetAutomationId));
         Assert.Equal(["a", "b"], radios.Select(radio => radio.Value));
+        Assert.All(radios, radio => Assert.False(radio.IsEnabled));
     });
 
     [Fact]

@@ -104,18 +104,27 @@ public abstract class ChoiceGroup : ItemsControl, IFieldControl
     /// <summary>直接写在里面的勾选项就是它自己的容器。</summary>
     protected override bool IsItemItsOwnContainerOverride(object item) => item is ChoiceBase;
 
-    /// <summary>数据生成的项：值、文字、说明、不可用取自选项。</summary>
+    /// <summary>
+    /// 数据生成的项：文字、说明、不可用取自选项。说明、不可用只在 ItemContainerStyle（TS 的 propsItem）没写时写；值由组管理，派生类按本地值写。
+    /// </summary>
     protected override void PrepareContainerForItemOverride(DependencyObject element, object item)
     {
         base.PrepareContainerForItemOverride(element, item);
         if (item is ChoiceBase || element is not ChoiceBase choice) return;
         var option = ListboxOption.From(item, ToOption);
-        choice.Content = option.Label;
-        choice.IsEnabled = !option.IsDisabled;
+        choice.Content = option.Label; // 生成容器时平台按本地值写了数据本身，这里换成选项的文字
+        SetDefault(choice, IsEnabledProperty, !option.IsDisabled);
+        SetDefault(choice, ChoiceBase.DescriptionCoreProperty, option.Description);
         Prepare(choice, option);
+
+        static void SetDefault(DependencyObject target, DependencyProperty property, object? value)
+        {
+            if (DependencyPropertyHelper.GetValueSource(target, property).BaseValueSource is BaseValueSource.Default or BaseValueSource.Inherited)
+                target.SetCurrentValue(property, value);
+        }
     }
 
-    /// <summary>派生类写入这一项的值与说明。</summary>
+    /// <summary>派生类写入这一项的值。</summary>
     /// <param name="item">生成的项。</param>
     /// <param name="option">选项。</param>
     protected abstract void Prepare(ChoiceBase item, ListboxOption option);

@@ -64,9 +64,7 @@ public class RadioGroup : ChoiceGroup
     /// <inheritdoc />
     protected override void Prepare(ChoiceBase item, ListboxOption option)
     {
-        var radio = (Radio)item;
-        radio.Value = option.Value;
-        radio.Description = option.Description;
+        ((Radio)item).Value = option.Value;
     }
 
     /// <summary>各项按组的值选中；Tab 停在选中项，没有选中（或选中项不可用）时停在第一个可用项。</summary>

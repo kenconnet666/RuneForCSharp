@@ -107,18 +107,21 @@ public abstract class ChoiceGroup : ItemsControl, IFieldControl
         return item is not ChoiceBase;
     }
 
-    /// <summary>数据生成的项：值、文字、说明、不可用取自选项。</summary>
+    /// <summary>
+    /// 数据生成的项：文字、说明、不可用取自选项。说明、不可用按当前值写、不占优先级（TS 的 propsItem 在 ItemContainerTheme 里盖得过）；值由组管理，派生类按本地值写。
+    /// </summary>
     protected override void PrepareContainerForItemOverride(Control container, object? item, int index)
     {
         base.PrepareContainerForItemOverride(container, item, index);
         if (item is ChoiceBase || container is not ChoiceBase choice) return;
         var option = ListboxOption.From(item, ToOption);
-        choice.Content = option.Label;
-        choice.IsEnabled = !option.IsDisabled;
+        choice.Content = option.Label; // 生成容器时平台按本地值写了数据本身，这里换成选项的文字
+        choice.SetCurrentValue(IsEnabledProperty, !option.IsDisabled);
+        choice.SetCurrentValue(ChoiceBase.DescriptionCoreProperty, option.Description);
         Prepare(choice, option);
     }
 
-    /// <summary>派生类写入这一项的值与说明。</summary>
+    /// <summary>派生类写入这一项的值。</summary>
     /// <param name="item">生成的项。</param>
     /// <param name="option">选项。</param>
     protected abstract void Prepare(ChoiceBase item, ListboxOption option);
