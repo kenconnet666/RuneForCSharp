@@ -68,6 +68,7 @@ public class Listbox : Control, IFieldControl
     readonly ContentPresenter empty = new() { Name = ListboxParts.Empty, IsVisible = false };
     readonly DelayedLoading loading;
     bool syncing;
+    bool loadingMore;
 
     /// <summary>新建：列表状态、虚拟滚动的行、骨架与空状态。</summary>
     public Listbox()
@@ -84,8 +85,10 @@ public class Listbox : Control, IFieldControl
         rows.DataTemplates.Add(new FuncDataTemplate<ListboxOptionRow>((_, _) => new ListboxItem(this), supportsRecycling: true));
         for (var index = 0; index < 4; index++)
             skeleton.Children.Add(new Skeleton { Delay = index * 100, Width = double.NaN, HorizontalAlignment = HorizontalAlignment.Left, Tag = 0.85 - index * 0.15 });
-        var body = new Panel { Children = { rows, skeleton, empty } };
+        // 一列：平时行、骨架、空状态三选一；取下一页时骨架接在行后面
+        var body = new StackPanel { Children = { rows, skeleton, empty } };
         scroll.Content = body;
+        scroll.ScrollChanged += (_, _) => CheckReached();
         LogicalChildren.Add(scroll);
         VisualChildren.Add(scroll);
         Focusable = true;
@@ -156,7 +159,7 @@ public class Listbox : Control, IFieldControl
         }
         else if (change.Property == ValueProperty || change.Property == ValuesProperty || change.Property == SelectionModeProperty) SyncSelection();
         else if (change.Property == IsRequiredProperty || change.Property == Field.OwnerProperty) State.Required = Required;
-        else if (change.Property == IsLoadingProperty) loading.Update(IsLoading);
+        else if (change.Property == IsLoadingProperty) loading.Update(IsLoading || loadingMore);
         else if (change.Property == EmptyProperty) UpdateBody();
         else if (change.Property == ItemTemplateProperty) Refresh();
         else if (change.Property == TextElement.FontSizeProperty || change.Property == HeightProperty) UpdateMetrics();
@@ -216,11 +219,34 @@ public class Listbox : Control, IFieldControl
         foreach (var item in RealizedItems) item.Sync();
     }
 
-    /// <summary>行、骨架、空状态三选一。</summary>
+    /// <summary>正在取下一页（远程选项分页）：骨架少两行、接在已有的行后面（TS 的 loading="more"）。</summary>
+    internal bool IsLoadingMore
+    {
+        get => loadingMore;
+        set
+        {
+            if (loadingMore == value) return;
+            loadingMore = value;
+            for (var index = 2; index < skeleton.Children.Count; index++) skeleton.Children[index].IsVisible = !value;
+            loading.Update(IsLoading || value);
+        }
+    }
+
+    /// <summary>滚到了离末尾不远的地方（5 行以内，含内容不满一屏）：参数是最后一项的序号。远程选项据此取下一页。</summary>
+    internal event Action<int>? Reached;
+
+    void CheckReached()
+    {
+        if (Reached is null || State.Options.Count == 0) return;
+        var remaining = scroll.Extent.Height - scroll.Offset.Y - scroll.Viewport.Height;
+        if (remaining <= 5 * this.Resource("Rune.Size.Control", 2.25) * TextElement.GetFontSize(this)) Reached(State.Options.Count - 1);
+    }
+
+    /// <summary>行、骨架、空状态三选一（取下一页时行与骨架都在）。</summary>
     void UpdateBody()
     {
         var hasRows = State.Options.Count > 0;
-        rows.IsVisible = !skeleton.IsVisible && hasRows;
+        rows.IsVisible = (!skeleton.IsVisible || loadingMore) && hasRows;
         empty.IsVisible = !skeleton.IsVisible && !hasRows && !IsLoading;
         empty.Content = Empty ?? new Empty { Size = TextSize.Sm, Description = Provider.GetLang(this).SelectEmpty };
     }

@@ -50,7 +50,7 @@ public class Listbox : FrameworkElement, IFieldControl
 
     /// <summary>加载中：选项换成骨架行（很快完成时不闪）。</summary>
     public static readonly DependencyProperty IsLoadingProperty = DependencyProperty.Register(nameof(IsLoading), typeof(bool), typeof(Listbox),
-        new FrameworkPropertyMetadata(false, (d, _) => ((Listbox)d).loading.Update(((Listbox)d).IsLoading)));
+        new FrameworkPropertyMetadata(false, (d, _) => ((Listbox)d).loading.Update(((Listbox)d).IsLoading || ((Listbox)d).loadingMore)));
 
     /// <summary>自定义选项内容：数据模板拿到 ItemsSource 里的原始数据。</summary>
     public static readonly DependencyProperty ItemTemplateProperty = DependencyProperty.Register(nameof(ItemTemplate), typeof(DataTemplate), typeof(Listbox),
@@ -70,6 +70,7 @@ public class Listbox : FrameworkElement, IFieldControl
     readonly Border focusRing = new() { Name = "PART_FocusRing", Visibility = Visibility.Collapsed, IsHitTestVisible = false, BorderThickness = new Thickness(2) };
     readonly DelayedLoading loading;
     bool syncing;
+    bool loadingMore;
 
     static Listbox()
     {
@@ -93,9 +94,11 @@ public class Listbox : FrameworkElement, IFieldControl
         });
         for (var index = 0; index < 4; index++)
             skeleton.Children.Add(new Skeleton { Delay = index * 100, HorizontalAlignment = HorizontalAlignment.Left, Tag = 0.85 - index * 0.15 });
-        root.Children.Add(rows);
-        root.Children.Add(skeleton);
+        // 平时行、骨架、空状态三选一（叠在同一格）；取下一页时骨架挪到行下面那一格（固定高度时行照样在第一格里滚动）
+        var body = new System.Windows.Controls.Grid { RowDefinitions = { new RowDefinition(), new RowDefinition { Height = GridLength.Auto } }, Children = { rows, skeleton } };
+        root.Children.Add(body);
         root.Children.Add(empty);
+        rows.AddHandler(ScrollViewer.ScrollChangedEvent, new ScrollChangedEventHandler((_, e) => CheckReached(e.ExtentHeight - e.VerticalOffset - e.ViewportHeight)));
         // 键盘聚焦时一圈 2 像素的焦点环画在里面：列表自己滚动，外面一圈会被滚动区域裁掉（上游 c6b0309d 同样画在里面）
         focusRing.SetResourceReference(Border.BorderBrushProperty, "Rune.Brush.FocusRing");
         root.Children.Add(focusRing);
@@ -242,12 +245,35 @@ public class Listbox : FrameworkElement, IFieldControl
         foreach (var item in RealizedItems) item.Sync();
     }
 
-    /// <summary>行、骨架、空状态三选一。</summary>
+    /// <summary>正在取下一页（远程选项分页）：骨架少两行、接在已有的行下面（TS 的 loading="more"）。</summary>
+    internal bool IsLoadingMore
+    {
+        get => loadingMore;
+        set
+        {
+            if (loadingMore == value) return;
+            loadingMore = value;
+            for (var index = 2; index < skeleton.Children.Count; index++) skeleton.Children[index].Visibility = value ? Visibility.Collapsed : Visibility.Visible;
+            System.Windows.Controls.Grid.SetRow(skeleton, value ? 1 : 0);
+            loading.Update(IsLoading || value);
+        }
+    }
+
+    /// <summary>滚到了离末尾不远的地方（5 行以内，含内容不满一屏）：参数是最后一项的序号。远程选项据此取下一页。</summary>
+    internal event Action<int>? Reached;
+
+    void CheckReached(double remaining)
+    {
+        if (Reached is null || State.Options.Count == 0) return;
+        if (remaining <= 5 * (TryFindResource("Rune.Size.Control") as double? ?? 2.25) * TextElement.GetFontSize(this)) Reached(State.Options.Count - 1);
+    }
+
+    /// <summary>行、骨架、空状态三选一（取下一页时行与骨架都在）。</summary>
     void UpdateBody()
     {
         var hasRows = State.Options.Count > 0;
         var skeletonShown = skeleton.Visibility == Visibility.Visible;
-        rows.Visibility = !skeletonShown && hasRows ? Visibility.Visible : Visibility.Collapsed;
+        rows.Visibility = (!skeletonShown || loadingMore) && hasRows ? Visibility.Visible : Visibility.Collapsed;
         empty.Visibility = !skeletonShown && !hasRows && !IsLoading ? Visibility.Visible : Visibility.Collapsed;
         empty.Content = Empty ?? new Empty { Size = TextSize.Sm, Description = Provider.GetLang(this).SelectEmpty };
     }

@@ -31,6 +31,9 @@ namespace Rune.Avalonia;
 /// （单选随后关闭），Esc、Tab 关闭；多选时 Backspace 移除最后一项。<see cref="Searchable"/> 时弹出层顶部有搜索框，打开后焦点在里面，输入就过滤
 /// （按显示文字，忽略大小写与重音，或 <see cref="Filter"/>）；<see cref="Creatable"/> 时自带搜索框，输入的文字没有对应的选项时末尾多一项"新建"，
 /// 选中后值就是这段文字，<see cref="OptionCreated"/> 报告它。单选的值是空字符串时算没有选中。部件名见 <see cref="SelectParts"/>。
+/// 远程选项：给了 <see cref="Load"/> 时打开就按搜索词请求，输入停下 300 毫秒再请求，只采用最后一次，结果代替 ItemsSource（ItemsSource 是第一次结果之前的选项，
+/// 编辑页放上已选的那一项）；搜索交给服务端，不在本地过滤。返回的一页带 Next 时分页：列表滚到离末尾不到 5 项取下一页，骨架接在后面。
+/// 加载失败时列表里提示"加载失败，请重试"。已选项的文字记着见过的选项：搜索换掉了结果，触发框照样显示文字。
 /// </summary>
 public class Select : TemplatedControl, IFieldControl
 {
@@ -101,6 +104,9 @@ public class Select : TemplatedControl, IFieldControl
     /// <summary>选项的内容模板（拿到原始数据）；触发框里仍显示文字。</summary>
     public static readonly StyledProperty<IDataTemplate?> ItemTemplateProperty = AvaloniaProperty.Register<Select, IDataTemplate?>(nameof(ItemTemplate));
 
+    /// <summary>远程选项的加载函数（TS 的 load）：搜索词、第几页 → 一页选项。</summary>
+    public static readonly StyledProperty<OptionsLoader?> LoadProperty = AvaloniaProperty.Register<Select, OptionsLoader?>(nameof(Load));
+
     /// <summary>与外壳的距离（像素）。</summary>
     const double Offset = 6;
 
@@ -110,6 +116,8 @@ public class Select : TemplatedControl, IFieldControl
     readonly Border header = new() { Name = SelectParts.Header, IsVisible = false };
     readonly TextField search = new() { Name = SelectParts.Search, Icon = Lucide.Search, Variant = ControlVariant.Soft };
     readonly Listbox listbox = new() { Name = SelectParts.Listbox, Focusable = false };
+    readonly RemoteOptions remote;
+    readonly Dictionary<string, string> seen = [];
     IReadOnlyList<object?> all = [];
     Dictionary<string, string>? labels;
     SelectedTags? tags;
@@ -122,6 +130,8 @@ public class Select : TemplatedControl, IFieldControl
     public Select()
     {
         resources = new TemplateResources(this);
+        remote = new RemoteOptions(item => ListboxOption.From(item, ToOption).Value, OnRemoteChanged);
+        listbox.Reached += last => remote.Reached(last);
         Resolved.Bind(this, Resolved.RadiusProperty, Radius.Md.ResourceKey);
         header.Child = search;
         var body = new DockPanel { Children = { header, listbox } };
@@ -214,6 +224,9 @@ public class Select : TemplatedControl, IFieldControl
     /// <summary>选项的内容模板。</summary>
     public IDataTemplate? ItemTemplate { get => GetValue(ItemTemplateProperty); set => SetValue(ItemTemplateProperty, value); }
 
+    /// <summary>远程选项的加载函数。</summary>
+    public OptionsLoader? Load { get => GetValue(LoadProperty); set => SetValue(LoadProperty, value); }
+
     /// <summary>用户开、关了（触发框、选中、点外面、Esc、Tab）；代码里改 IsOpen 时不发。</summary>
     public event EventHandler<OpenChangedEventArgs>? OpenChanged;
 
@@ -287,7 +300,12 @@ public class Select : TemplatedControl, IFieldControl
             Sync();
         else if (change.Property == SearchableProperty) header.IsVisible = WithSearch;
         else if (change.Property == IsOpenProperty) Toggle();
-        else if (change.Property == IsLoadingProperty) listbox.IsLoading = IsLoading;
+        else if (change.Property == IsLoadingProperty) listbox.IsLoading = IsLoading || remote.Loading;
+        else if (change.Property == LoadProperty)
+        {
+            remote.Load = Load;
+            OnRemoteChanged();
+        }
         else if (change.Property == EmptyProperty) UpdateEmpty();
         else if (change.Property == ItemTemplateProperty) listbox.ItemTemplate = ItemTemplate;
         else if (change.Property == TextElement.FontSizeProperty) UpdateMetrics();
@@ -298,18 +316,37 @@ public class Select : TemplatedControl, IFieldControl
         ? new ListboxOption(creation.Text, Provider.GetLang(this).SelectCreate(creation.Text)) { Icon = Lucide.Plus }
         : ListboxOption.From(item, ToOption);
 
-    /// <summary>列表里的数据：按搜索词过滤，creatable 时可能多一项"新建"。</summary>
+    /// <summary>当前的数据：远程请求到的，没有时是 ItemsSource。</summary>
+    IReadOnlyList<object?> Source => remote.ItemsOr(all);
+
+    /// <summary>列表里的数据：按搜索词过滤（远程选项交给服务端），creatable 时可能多一项"新建"。</summary>
     void UpdateItems()
     {
         listbox.ToOption = OptionOf;
         listbox.ItemsSource = WithSearch
-            ? SelectSearch.Shown(all, item => ListboxOption.From(item, ToOption), search.Text ?? "", localFilter: true, Filter, Creatable)
-            : all;
+            ? SelectSearch.Shown(Source, item => ListboxOption.From(item, ToOption), search.Text ?? "", localFilter: Load is null, Filter, Creatable)
+            : Source;
         UpdateEmpty();
     }
 
-    /// <summary>没有选项时：有搜索词是"没有匹配的选项"，否则是使用方的 Empty（不写时列表自己的）。</summary>
-    void UpdateEmpty() => listbox.Empty = string.IsNullOrEmpty(search.Text) ? Empty : new Empty { Size = TextSize.Sm, Description = Provider.GetLang(this).SelectNoMatch };
+    /// <summary>远程选项变了（请求到了、开始或停止加载、失败了）：列表、加载状态、已选项的文字跟着变。</summary>
+    void OnRemoteChanged()
+    {
+        labels = null;
+        listbox.IsLoading = IsLoading || remote.Loading;
+        listbox.IsLoadingMore = remote.LoadingMore;
+        UpdateItems();
+        Sync();
+    }
+
+    /// <summary>没有选项时：加载失败是"加载失败，请重试"；有搜索词是"没有匹配的选项"；否则是使用方的 Empty（不写时列表自己的）。</summary>
+    void UpdateEmpty()
+    {
+        var lang = Provider.GetLang(this);
+        listbox.Empty = remote.Failed ? new Empty { Size = TextSize.Sm, Description = lang.ListLoadFailed }
+            : string.IsNullOrEmpty(search.Text) ? Empty
+            : new Empty { Size = TextSize.Sm, Description = lang.SelectNoMatch };
+    }
 
     /// <summary>值 → 列表、触发框（文字或标签）、清空按钮、状态伪类。</summary>
     void Sync()
@@ -345,21 +382,22 @@ public class Select : TemplatedControl, IFieldControl
     }
 
     /// <summary>
-    /// 已选项的文字取自全部数据（被过滤掉的也在）；数据里没有时（新建了还没加进来）就是值本身。值 → 文字的表按数据建一次：
-    /// 已选项很多时逐个在数据里找是 O(n²)（上游的性能用例：三万个全选）。初始化器里 ToOption 可能还没设：认不出的数据先跳过。
+    /// 已选项的文字取自全部数据（被过滤掉的也在）；数据里没有时取见过的（远程搜索换掉了结果），再没有时（新建了还没加进来）就是值本身。
+    /// 值 → 文字的表按数据建一次：已选项很多时逐个在数据里找是 O(n²)（上游的性能用例：三万个全选）。初始化器里 ToOption 可能还没设：认不出的数据先跳过。
     /// </summary>
     string LabelOf(string value)
     {
         if (labels is null)
         {
             labels = [];
-            foreach (var item in all)
+            foreach (var item in Source)
             {
                 var option = ToOption?.Invoke(item) ?? item switch { ListboxOption known => known, string text => new ListboxOption(text, text), _ => null };
                 if (option is not null) labels.TryAdd(option.Value, option.Label);
             }
         }
-        return labels.TryGetValue(value, out var label) ? label : value;
+        if (labels.TryGetValue(value, out var label)) return seen[value] = label;
+        return seen.TryGetValue(value, out var remembered) ? remembered : value;
     }
 
     /// <summary>列表的选择 → 值；选中了"新建"项时报告新建，清空搜索词。</summary>
@@ -385,6 +423,7 @@ public class Select : TemplatedControl, IFieldControl
 
     void OnSearchChanged()
     {
+        remote.SetQuery(search.Text ?? "");
         UpdateItems();
         // 输入搜索词：高亮第一个匹配的（打开时清空搜索词不算：那时高亮的是已选项）
         if (!string.IsNullOrEmpty(search.Text)) listbox.State.MoveToEnd(last: false);
@@ -411,6 +450,7 @@ public class Select : TemplatedControl, IFieldControl
     {
         var reason = pending;
         PseudoClasses.Set(":open", IsOpen);
+        remote.SetOpen(IsOpen);
         if (IsOpen) panel.MinWidth = Bounds.Width;
         if (popup.IsOpen != IsOpen) popup.IsOpen = IsOpen;
         if (reason is { } known) OpenChanged?.Invoke(this, new OpenChangedEventArgs(IsOpen, known));
