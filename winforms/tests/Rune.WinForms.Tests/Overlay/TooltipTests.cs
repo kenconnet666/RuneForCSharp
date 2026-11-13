@@ -91,6 +91,7 @@ public class TooltipTests
     [Fact]
     public Task Hover_waits_for_the_delay_and_pressing_hides() => WinFormsUi.Run(() => WithButton((_, button, tips) =>
     {
+        WinFormsUi.Wait(TimeSpan.FromMilliseconds(350)); // 前一个测试刚关掉提示（300 毫秒内）时下一个直接显示
         tips.Delay = 150;
         Raise(button, "OnMouseEnter", EventArgs.Empty);
         WinFormsUi.Wait(TimeSpan.FromMilliseconds(60));

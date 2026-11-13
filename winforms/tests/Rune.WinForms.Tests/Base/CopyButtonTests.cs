@@ -48,7 +48,7 @@ public class CopyButtonTests
         Assert.Equal("secret", Clipboard.GetText());
         Assert.True(button.IsCopied);
         Assert.Same(Lucide.Check, button.Icon);
-        Assert.True(button.Element.PopProgress < 1); // 对勾正在弹出
+        Assert.Equal(Motion.Enabled, button.Element.PopProgress < 1); // 对勾正在弹出；系统关闭动画时直接弹完
 
         Until(() => !button.IsCopied);
         Assert.Same(Lucide.Copy, button.Icon);

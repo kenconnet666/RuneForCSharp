@@ -121,12 +121,13 @@ public class AppShellTests
     [Upstream("AppShell", "部件属性：header 内容格、主体、侧栏与右栏的滚动区域")]
     public Task Parts_take_part_styles() => WpfUi.Run(() =>
     {
-        var shell = new AppShell { Sidebar = Navigation("/"), Aside = new TextBlock { Text = "目录" }, Content = new TextBlock() };
+        var shell = new AppShell { Sidebar = Navigation("/"), Aside = new TextBlock { Text = "目录" }, Content = new TextBlock(), Width = 1400 };
         var styles = new ResourceDictionary();
         var header = new Style(typeof(Border), (Style)new RuneTheme()[AppShellParts.Header]);
         header.Setters.Add(new Setter(UIElement.OpacityProperty, 0.5));
         styles[AppShellParts.Header] = header;
         Provider.SetStyles(shell, styles);
+        // 宽度写在 shell 上：窗口不能比屏幕宽太多（CI 的屏幕 1280），正文到不了显示右侧栏的断点
         var window = Show(shell, 1400);
 
         Assert.Equal(0.5, shell.HeaderPart.Opacity);

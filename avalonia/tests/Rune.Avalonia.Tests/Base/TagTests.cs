@@ -41,9 +41,10 @@ public class TagTests
     public Task The_remove_button_appears_with_a_handler_and_asks_after_leaving() => HeadlessUi.Run(() =>
     {
         var requests = 0;
+        var opacityWhenAsked = double.NaN;
         var plain = new Tag { Content = "只读" };
         var shanghai = new Tag { Content = "上海" };
-        shanghai.RemoveRequested += (_, _) => requests++;
+        shanghai.RemoveRequested += (_, _) => (requests, opacityWhenAsked) = (requests + 1, shanghai.Opacity);
         var beijing = new Tag { Content = "北京", RemoveLabel = "删除筛选条件" };
         beijing.RemoveRequested += (_, _) => { };
         var window = HeadlessUi.Show(new StackPanel { Children = { plain, shanghai, beijing } });
@@ -54,8 +55,8 @@ public class TagTests
 
         ((IInvokeProvider)RemoveButton(shanghai)!.Peer()).Invoke();
         HeadlessUi.Flush(window);
-        Assert.True(shanghai.IsDismissing);
         HeadlessUi.Until(() => requests == 1);
+        Assert.Equal(0, opacityWhenAsked); // 离场结束才问（关了动画的机器上离场是同步的，不能看 IsDismissing 的中间态）
         // 使用方没移除：复原
         HeadlessUi.Until(() => shanghai.Opacity == 1 && !shanghai.IsDismissing);
     });

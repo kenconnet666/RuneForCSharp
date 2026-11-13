@@ -164,7 +164,7 @@ public class SwitchTests
         using var form = WinFormsUi.Show(toggle);
 
         toggle.IsChecked = true;
-        Assert.InRange(toggle.Element.Position, 0, 0.99); // 动画刚开始，没有跳到终点
+        Assert.Equal(Motion.Enabled, toggle.Element.Position < 1); // 动画刚开始，没有跳到终点；系统关闭动画时直接到终点
         WinFormsUi.Wait(TimeSpan.FromMilliseconds(300));
         Assert.Equal(1, toggle.Element.Position);
 
