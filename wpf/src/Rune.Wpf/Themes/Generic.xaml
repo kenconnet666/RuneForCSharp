@@ -32,6 +32,8 @@
     <ResourceDictionary Source="/Rune.Wpf;component/Display/Collapse/Collapse.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Display/Avatar/Avatar.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Display/Avatar/AvatarGroup.xaml" />
+    <ResourceDictionary Source="/Rune.Wpf;component/Display/Descriptions/Descriptions.xaml" />
+    <ResourceDictionary Source="/Rune.Wpf;component/Display/ValueChange/ValueChange.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Display/UserButton/UserButton.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Display/ItemList/ItemList.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Feedback/Alert/Alert.xaml" />

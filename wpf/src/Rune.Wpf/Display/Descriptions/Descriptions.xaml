@@ -1,0 +1,35 @@
+<!--
+  Descriptions 的主题样式（vue-tsx-pro 的 descriptionsStyles）：字号档位是触发器；标题中等字重，标签次要色，值正文色。
+  间距、内边距、线宽、圆角与边框样式的颜色在 Descriptions.cs 里
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Rune.Wpf;component/Base/Button/Button.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <Style TargetType="rune:Descriptions">
+    <Style.Triggers>
+      <Trigger Property="Size" Value="xs"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xs}" /></Trigger>
+      <Trigger Property="Size" Value="sm"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" /></Trigger>
+      <Trigger Property="Size" Value="md"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Md}" /></Trigger>
+      <Trigger Property="Size" Value="lg"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Lg}" /></Trigger>
+      <Trigger Property="Size" Value="xl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xl}" /></Trigger>
+      <Trigger Property="Size" Value="xxl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xxl}" /></Trigger>
+      <Trigger Property="Size" Value="xxxl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xxxl}" /></Trigger>
+    </Style.Triggers>
+  </Style>
+  <!-- 部件的默认外观写在部件样式里（DESIGN §7），使用方同键的样式叠在上面，盖得过 -->
+  <Style x:Key="{x:Static rune:DescriptionsParts.Title}" TargetType="rune:Text">
+    <Setter Property="Weight" Value="medium" />
+  </Style>
+  <Style x:Key="{x:Static rune:DescriptionsParts.List}" TargetType="Border" />
+  <Style x:Key="{x:Static rune:DescriptionsParts.Item}" TargetType="Border" />
+  <Style x:Key="{x:Static rune:DescriptionsParts.Label}" TargetType="Border">
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+  </Style>
+  <Style x:Key="{x:Static rune:DescriptionsParts.Value}" TargetType="Border">
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+  </Style>
+  <Style x:Key="{x:Static rune:DescriptionsParts.Copy}" TargetType="rune:CopyButton" BasedOn="{StaticResource {x:Type rune:CopyButton}}" />
+</ResourceDictionary>

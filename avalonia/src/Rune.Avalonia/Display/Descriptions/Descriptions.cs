@@ -133,7 +133,17 @@ public class Descriptions : Control
     /// <summary>按项重建：每一项是 [标签][值（与复制按钮）]，放进网格（行内时放进换行的一排）。</summary>
     void Rebuild()
     {
-        foreach (var (_, cell) in built) cell.Child = null;
+        // 拆开旧的格子：使用方给的标签、值（控件）要能挂到新的格子上
+        foreach (var (_, cell) in built)
+        {
+            var row = (Flex)((Border)cell.Child!).Child!;
+            foreach (var part in row.Children.OfType<Border>())
+            {
+                if (part.Child is CopyRow copyRow) copyRow.Children.Clear();
+                part.Child = null;
+            }
+            cell.Child = null;
+        }
         built.Clear();
         grid.Children.Clear();
         inline.Children.Clear();
@@ -170,7 +180,7 @@ public class Descriptions : Control
     {
         var copy = new CopyButton { Name = DescriptionsParts.Copy, Size = TextSize.Xs, Value = item.CopyText ?? (item.Value is string or IFormattable ? Convert.ToString(item.Value, System.Globalization.CultureInfo.CurrentCulture) : "") };
         AutomationProperties.SetName(copy, lang.DescriptionsCopy(PlainText(item.Label) is { Length: > 0 } label ? label : lang.Copy));
-        return new Flex { Align = FlexAlign.Baseline, Gap = Space.Xs, Children = { Content(item.Value), copy } };
+        return new CopyRow { Align = FlexAlign.Baseline, Gap = Space.Xs, Children = { Content(item.Value), copy } };
     }
 
     /// <summary>文字放进会换行的 Text（值很长时按字断开，TS 的 overflow-wrap: anywhere）；控件原样放。</summary>
@@ -212,7 +222,7 @@ public class Descriptions : Control
             label.Padding = value.Padding = padding;
             label.MinWidth = Bordered ? 8 * em : 0;
             // 复制按钮上下各收 0.25em：不把这一行撑高
-            if (value.Child is Flex { Children: [_, CopyButton copy] }) copy.Margin = new Thickness(0, -0.25 * em);
+            if (value.Child is CopyRow { Children: [_, CopyButton copy] }) copy.Margin = new Thickness(0, -0.25 * em);
             // 每格画上、起始边的线，往回挪一条线宽叠在前一格的线上；外框由列表画，盖住第一行、第一列的线
             cell.BorderThickness = Bordered ? new Thickness(line, line, 0, 0) : default;
             cell.Margin = Bordered ? new Thickness(-line, -line, 0, 0) : default;
@@ -240,6 +250,12 @@ public class Descriptions : Control
     {
         root.Arrange(new Rect(finalSize));
         return finalSize;
+    }
+
+    /// <summary>值与复制按钮的一行（重建时只拆它，使用方自己的 Flex 不动）。</summary>
+    sealed class CopyRow : Flex
+    {
+        protected override Type StyleKeyOverride => typeof(Flex);
     }
 
     /// <summary>一项：样式按 Border 匹配（部件选择器写 Border#PART_Item），读屏里是一组，名称是标签。</summary>
