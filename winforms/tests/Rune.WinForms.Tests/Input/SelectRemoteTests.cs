@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace Rune.WinForms.Tests;
 
 /// <summary>SelectControl 的远程选项（Load）：打开才请求、搜索词防抖、只采用最后一次、已选项的文字留着、失败提示、分页。</summary>
@@ -31,16 +29,6 @@ public class SelectRemoteTests
     }
 
     /// <summary>边处理消息边等，直到条件成立；超过 3 秒算失败。</summary>
-    static void Until(Func<bool> condition)
-    {
-        for (var clock = Stopwatch.StartNew(); !condition();)
-        {
-            if (clock.Elapsed > TimeSpan.FromSeconds(3)) throw new TimeoutException("等了 3 秒条件仍不成立");
-            Application.DoEvents();
-            Thread.Sleep(5);
-        }
-    }
-
     static void WithSelect(SelectControl select, Action body)
     {
         using var form = new Form
@@ -76,7 +64,7 @@ public class SelectRemoteTests
             Assert.Empty(api.Calls);
 
             select.IsOpen = true;
-            Until(() => Shown(select).Length == 3);
+            WinFormsUi.Until(() => Shown(select).Length == 3);
             Assert.Equal([""], api.Calls);
             Assert.Equal(["林小满", "周一航", "许知远"], Shown(select));
         });
@@ -91,13 +79,13 @@ public class SelectRemoteTests
         WithSelect(select, () =>
         {
             select.IsOpen = true;
-            Until(() => Shown(select).Length == 3);
+            WinFormsUi.Until(() => Shown(select).Length == 3);
             select.Value = "u1";
 
             // 连着输入两次：防抖期间的那次不请求（等待的时长交给 Avalonia 的同一用例）
             select.SearchBox.Text = "周";
             select.SearchBox.Text = "周一";
-            Until(() => api.Calls.Count == 2 && Shown(select).Length == 1);
+            WinFormsUi.Until(() => api.Calls.Count == 2 && Shown(select).Length == 1);
             WinFormsUi.Wait(TimeSpan.FromMilliseconds(350));
             Assert.Equal(["", "周一"], api.Calls);
             Assert.Equal(["周一航"], Shown(select));
@@ -114,7 +102,7 @@ public class SelectRemoteTests
         WithSelect(select, () =>
         {
             select.IsOpen = true;
-            Until(() => select.List.EmptyText is not null);
+            WinFormsUi.Until(() => select.List.EmptyText is not null);
             Assert.Equal("加载失败，请重试", select.List.EmptyText);
         });
     });
@@ -133,13 +121,13 @@ public class SelectRemoteTests
         WithSelect(select, () =>
         {
             select.IsOpen = true;
-            Until(() => select.List.State.Options.Count == 20);
+            WinFormsUi.Until(() => select.List.State.Options.Count == 20);
             WinFormsUi.Pump();
             Assert.Equal([1], pages);
 
             var scroll = select.List.Controls.OfType<ScrollAreaControl>().First();
             scroll.ScrollOffset = new Point(0, 100000);
-            Until(() => select.List.State.Options.Count >= 40);
+            WinFormsUi.Until(() => select.List.State.Options.Count >= 40);
             Assert.Equal([1, 2], pages.Take(2));
         });
     });

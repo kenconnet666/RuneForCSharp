@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace Rune.WinForms.Tests;
 
 /// <summary>
@@ -9,15 +7,6 @@ namespace Rune.WinForms.Tests;
 public class CodeBlockTests
 {
     const string Source = "const a = 1;\nconst b = 2;\nconst c = 3;\nconst d = 4;";
-
-    static void Until(Func<bool> condition)
-    {
-        for (var clock = Stopwatch.StartNew(); !condition();)
-        {
-            if (clock.Elapsed > TimeSpan.FromSeconds(3)) throw new TimeoutException("等了 3 秒条件仍不成立");
-            WinFormsUi.Wait(TimeSpan.FromMilliseconds(10));
-        }
-    }
 
     [Fact]
     [Upstream("CodeBlock", "没有高亮器时显示纯文本")]
@@ -36,7 +25,7 @@ public class CodeBlockTests
         block.Code = "const";
         WinFormsUi.Pump();
         second.SetResult([new CodeToken(0, 5, CodeTokenKind.Keyword)]);
-        Until(() => block.Tokens is not null);
+        WinFormsUi.Until(() => block.Tokens is not null);
         first.SetResult([new CodeToken(0, 1, CodeTokenKind.String)]);
         WinFormsUi.Pump();
         Assert.Equal(CodeTokenKind.Keyword, Assert.Single(block.Tokens!).Kind);
@@ -59,7 +48,7 @@ public class CodeBlockTests
         WinFormsUi.Pump();
         Assert.Equal(0, calls);
         block.Highlight = true;
-        Until(() => block.Tokens is not null);
+        WinFormsUi.Until(() => block.Tokens is not null);
         Assert.Equal(1, calls);
 
         block.Highlighter = (_, _) => Task.FromException<IReadOnlyList<CodeToken>?>(new InvalidOperationException("boom"));

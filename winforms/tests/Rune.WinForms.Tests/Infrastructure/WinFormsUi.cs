@@ -81,6 +81,16 @@ static class WinFormsUi
         }
     }
 
+    /// <summary>边处理消息边等条件成立，最多 3 秒。</summary>
+    public static void Until(Func<bool> condition)
+    {
+        for (var clock = Stopwatch.StartNew(); !condition();)
+        {
+            if (clock.Elapsed > TimeSpan.FromSeconds(3)) throw new TimeoutException("等了 3 秒条件仍不成立");
+            Wait(TimeSpan.FromMilliseconds(10));
+        }
+    }
+
     static Control Start()
     {
         Control? result = null;
