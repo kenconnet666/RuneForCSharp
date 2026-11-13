@@ -564,6 +564,12 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 
 - **Card**：Avalonia、WPF 都是代码组合的子元素（页头里的标题与 Extra 是换行的 Flex，页脚是靠结束边的 Flex，正文在骨架与内容之间换），不从 TemplatedControl / Control 派生——它们的 Padding 是 Thickness，和 TS 的 padding 档位撞名（同 Container）。WPF 的阴影单独一层（DropShadowEffect 套在正文上会连文字一起投影），正文按圆角裁剪。加载：挂上时已经在加载就立即显示骨架，之后的切换走 DelayedLoading 防闪烁；出现过骨架之后互换时淡入。读屏的项状态是"加载中"（WinForms 是 Busy 状态）。WinForms 的 CardControl 自己画表面与页头文字，子控件是正文；Header 是文字，Extra、Footer 各是一个控件；TS 的 padding 叫 CardPadding。
 - **Avatar**：TS 的 name、src 叫 DisplayName、Source（Name 是控件名）；Source 是平台的图片对象，WPF 等 BitmapSource 下载完、失败时退回后备内容。首字母算法 `AvatarInitials` 是孪生文件。WPF 的 soft / solid × 色调是 recipe-gen 生成的触发器，WinForms 直接用 BadgeRecipe 的这两档。
+- **AvatarGroup**（2026-11-14）：组里的头像往前叠 0.5em（按头像自己的字号），各带一圈页面底色的描边（TS 的 box-shadow，borderWidths.sm）把相邻的分开，后面的盖在前面的上面；
+  超过 Max 的折叠成"+N"（和头像一样大的圆，fill 底、正文色、xs / md 的字号），读屏念"还有 N 人"（Lang.AvatarMore），Total 给了时按它算 N。
+  Avalonia、WPF：Children 放头像，组里的排版层把显示的每一项包进一个画描边的外圈（Decorator，描边画在外面、不占位置）；读屏里组的子元素直接是头像与"+N"
+  （Avalonia 的 NoneAutomationPeer 仍会出现在原始树里，所以由组的 peer 直接列出）。"+N"是 Border 的子类：Avalonia 用 StyleKeyOverride 让部件选择器 `Border#PART_More` 照样匹配。
+  WinForms：叠放的头像要按顺序盖住前一个、描边要画到头像外面，子控件做不到，所以 AvatarGroupControl 的 `Avatars` 是画出来的 Avatar 元素；
+  描边是在每个头像下面先填一圈页面底色。读屏的子项是各个头像（名称是名字）与"+N"。
 - **Empty**：Avalonia、WPF 代码组合；WinForms 画图标、标题、说明，子控件与 Action 排在下面。图标默认 Inbox，设成 null 不显示（TS 的 icon={false}）。
 - **UserButton**（2026-11-08）：TS 的 name、src 同 Avatar 叫 DisplayName、Source；`indicator={false}` 是 ShowIndicator=False（Indicator 只放图标）。Avalonia、WPF 建在 ButtonBase 上，内容是代码组合的 Flex（头像、名字与说明、箭头）；
   胶囊、整行、compact 三种形态：Avalonia 在代码里按 em 设内边距与圆角，WPF 是主题样式的触发器（只读的 IsDescribed）。名字只在整行时 grow：Flex 量尺寸时 grow 的子元素会占满可用宽度，胶囊就不按内容的宽了。

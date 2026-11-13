@@ -2,13 +2,14 @@ using System.Drawing.Drawing2D;
 
 namespace Rune.WinForms.Examples;
 
-/// <summary>Avatar 的示例（vue-tsx-pro 文档站 display/Avatar）。group（头像组）要等 AvatarGroup；user-button 的账号菜单要等 Menu。</summary>
+/// <summary>Avatar 的示例（vue-tsx-pro 文档站 display/Avatar）。user-button 的账号菜单要等 Menu。</summary>
 static class AvatarExamples
 {
     public static Example[] All =>
     [
         new("Avatar", "basic", "基础用法", "DisplayName 是读屏念的名称，也用来生成首字母；没有图片时显示后备内容。Radius=md 用于团队、组织；后备内容的 Variant 与 Tone 同 Badge。", Basic),
         new("Avatar", "user-button", "用户按钮", "UserButtonControl 是头像 + 名字 + 箭头，做账号菜单的触发器（菜单还没有：在 Click 里打开自己的菜单）。写了 Description 时多一行说明、占满一行，适合侧栏底部；Compact 只剩头像，名字成为按钮的名称。", Account),
+        new("Avatar", "group", "头像组", "AvatarGroupControl 把头像（画出来的 Avatar 元素）叠放，超过 Max 的折叠成“+N”，读屏念“还有 N 人”；列表只拿到一部分时用 Total 算 N。组里头像的大小随组的 TextSize。", Group),
         new("Avatar", "indicator", "角标", "IndicatorControl 包住要标记的控件：计数超过 Max 显示\"99+\"，0 时不显示（ShowZero 时显示 0）；Dot 是小圆点。数字对读屏隐藏，另有一句完整的 Label。WinForms 的角标画不到控件外面，伸出去的一半占位置。", Indicators),
     ];
 
@@ -29,6 +30,21 @@ static class AvatarExamples
             .. Tones.Select(tone => new AvatarControl { DisplayName = tone.Value, Tone = tone }),
             .. Tones.Select(tone => new AvatarControl { DisplayName = tone.Value, Tone = tone, Variant = AvatarVariant.Solid }),
         ]));
+
+    static AvatarGroupControl Members(string name, IEnumerable<(string Name, Image? Photo)> members, int? max = null, int? total = null, TextSize size = default)
+    {
+        var group = new AvatarGroupControl { Max = max, Total = total, TextSize = size, AccessibleName = name };
+        foreach (var member in members) group.Avatars.Add(new Avatar { DisplayName = member.Name, Source = member.Photo });
+        return group;
+    }
+
+    static Control Group() => Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Md, Align = FlexAlign.Stretch },
+        Build.Card(new CardControl(), Build.Flex(new FlexControl { Align = FlexAlign.Center, Justify = FlexJustify.Between, Gap = Space.Md, Wrap = true },
+            Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Xs }, new StrongControl { Text = "官网改版" }, new SmallControl { Tone = TextTone.Muted, Text = "7 位协作者 · 2 小时前更新" }),
+            Members("协作者", Photos.Members, max: 4))),
+        Build.Flex(new FlexControl { Align = FlexAlign.Center, Gap = Space.Lg, Wrap = true },
+            Members("点赞的人", Photos.Members.Take(3), max: 3, total: 128, size: TextSize.Sm), new SmallControl { Tone = TextTone.Muted, Text = "只拿到了 3 位，Total 是 128：显示“+125”" }),
+        Build.Flex(new FlexControl(), Members("评审人", Photos.Members.Skip(1).Take(4), size: TextSize.Lg)));
 
     static Control Account()
     {

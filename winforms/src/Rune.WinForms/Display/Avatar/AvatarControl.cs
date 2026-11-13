@@ -66,6 +66,13 @@ public class Avatar : Element
         return new Size(side, side);
     }
 
+    /// <summary>圆角的半径（设备像素；头像组画描边也用它）。</summary>
+    internal float CornerRadius(ElementContext context, float side)
+    {
+        var corners = ResolvedSx?.Radius ?? Radius;
+        return corners.Value == "full" ? side / 2f : (corners.In(context.Theme.Radii) ?? 0) * context.Sized(Size).Em;
+    }
+
     /// <inheritdoc />
     protected internal override void Paint(Graphics graphics, ElementContext context)
     {
@@ -73,8 +80,7 @@ public class Avatar : Element
         var side = Math.Min(Bounds.Width, Bounds.Height);
         var box = new RectangleF(Bounds.X, Bounds.Y, side, side);
         var sx = ResolvedSx;
-        var corners = sx?.Radius ?? Radius;
-        var radius = corners.Value == "full" ? side / 2f : (corners.In(context.Theme.Radii) ?? 0) * inner.Em;
+        var radius = CornerRadius(context, side);
         var state = graphics.Save();
         try
         {

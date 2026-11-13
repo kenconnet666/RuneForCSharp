@@ -261,6 +261,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     Tag: { propsRemove: '移除按钮是 CloseButtonControl 子控件，颜色、字号跟着标签；没有部件属性记录' },
     Alert: Object.fromEntries(['propsSpinner', 'propsBody', 'propsContent', 'propsAction', 'propsClose']
       .map((prop) => [prop, '加载指示、操作、关闭按钮与额外内容是 AlertControl 的子控件，文字区是排版出来的一块区域：没有部件属性记录（图标、标题、说明是画的元素，有 PropsIcon、PropsTitle、PropsDescription）'])),
+    AvatarGroup: { propsMore: '"+N"的圆是 AvatarGroupControl 画的，没有部件属性记录（里面的文字有 PropsMoreText）' },
     Result: { propsAction: '操作是 ResultControl 的子控件（排在最下面、居中），没有部件属性记录（图标、状态码、标题、说明是画的元素，有 PropsIcon、PropsCode、PropsTitle、PropsDescription）' },
     Banner: Object.fromEntries(['propsAction', 'propsClose']
       .map((prop) => [prop, '操作与关闭按钮是 BannerControl 的子控件，没有部件属性记录（图标、标题、正文是画的元素，有 PropsIcon、PropsTitle、PropsContent）'])),
