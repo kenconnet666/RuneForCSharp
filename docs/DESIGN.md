@@ -992,6 +992,19 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   根 Border 的 TextElement.FontSize 绑到控件的 FontSize：Gallery 与 inspect 的宿主里，说明的 TextBlock 没从控件继承到字号（测试里继承正常，原因没查清），绑上就稳了。
 - 示例：tones、status、variants、banner（Banner 在同一页）。Avalonia、WPF 与文档站的取值对照没有差异。
 
+### AnimatedNumber、NumericFormat（2026-11-14）
+
+- `NumericFormat`（Utils/Data，孪生文件）是 TS 的 NumericFormat：Intl.NumberFormat 的 style（普通、百分比、金额）、最少 / 最多小数位、signDisplay、千位分隔，
+  加上 Scale（先除以它）与 Suffix（不换行的空格接单位）。值是 decimal：TS 的 number、bigint、Decimal 在 C# 里都放得进 decimal，十进制精确。
+  照 Intl 的规则：取舍四舍五入远离 0；小数位默认普通数字 0–3、百分比 0、金额按币种（大多 2，日元、韩元 0），只写一头时另一头收拢；
+  百分号紧跟数字，币种符号在前（本地区的币种用文化的符号，别的币种用 US$、CN¥ 这类写法，不认识的写代码），负号在最前面。语言按 Lang.Code 取 CultureInfo。
+- AnimatedNumber：值是 decimal，过渡的中间帧按 double 算、按终值的小数位（decimal.Scale）取整，停下时按原值格式化。时长默认 durations.lg、缓动 standard
+  （TS 的 duration 档位在这里是 TimeSpan?，不写取主题）；From 给了时挂上（WinForms 第一次画出来）就从它滚过去。Trend 按正负设色调（TS 的 data-trend 是 Direction）。
+  读屏的名称是前缀、终值与后缀（TS 是隐藏的终值文字与 aria-hidden 的滚动数字），propsLabel 不移植。
+  Avalonia 用 Animation 驱动私有的 Current 属性，WPF 用 DoubleAnimation（FillBehavior.Stop），WinForms 用 Animator 补间 Signal、在绘制里取当前值；
+  WinForms 的前后缀是画的文字（PropsPrefix、PropsValue、PropsSuffix），前面的图标写 PrefixIcon，宽度按终值的文字量（等宽数字，滚动时不跳）。
+- 示例在 Stat 页（animated-number）；Stat、StatGroup 接着做。
+
 ### Descriptions、ValueChange（2026-11-14）
 
 - Descriptions：项是 `DescriptionItem`（Label、Value、Span、Copyable、CopyText；TS 的 items 数组），Avalonia、WPF 的 Items 是内容属性，XAML 里直接写项。

@@ -181,6 +181,7 @@ export const PROPS_NOT_PORTED = {
   ClearButton: { type: BUTTON_TYPE },
   CopyButton: { type: BUTTON_TYPE },
   UserButton: { type: BUTTON_TYPE },
+  AnimatedNumber: { propsLabel: '给读屏的终值不是一段隐藏的文字：AnimatedNumber 的读屏名称就是前缀、终值与后缀（peer / AccessibleObject）' },
   Tooltip: { trigger: '提示挂在触发器上（Avalonia、WPF 的 ToolTip 附加属性，WinForms 的扩展属性），不用渲染函数' },
   ScrollArea: { propsContent: '内容就是 Content 本身，平台的滚动呈现器直接排它，中间没有包一层' },
   Table: { propsRoot: '外层的外框与滚动区域由 Table 管：滚动方向是 ScrollAxis（WinForms 外面套 ScrollAreaControl），外观按密度、样式、斑马纹与主题 token' },
