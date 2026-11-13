@@ -105,6 +105,9 @@ public class Avatar : Control
     /// <summary>后备内容的色调。</summary>
     public StatusTone Tone { get => (StatusTone)GetValue(ToneProperty); set => SetValue(ToneProperty, value); }
 
+    /// <summary>圆角的半径（头像组画描边用）。</summary>
+    internal double CornerRadius => root.CornerRadius.TopLeft;
+
     /// <summary>后备内容在显示吗。</summary>
     internal bool FallbackShown => fallback.Visibility == Visibility.Visible;
 

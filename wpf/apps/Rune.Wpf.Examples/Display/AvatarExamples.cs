@@ -4,15 +4,50 @@ using System.Windows.Media;
 
 namespace Rune.Wpf.Examples;
 
-/// <summary>Avatar 的示例（vue-tsx-pro 文档站 display/Avatar）。group（头像组）要等 AvatarGroup；user-button 的账号菜单要等 Menu。</summary>
+/// <summary>Avatar 的示例（vue-tsx-pro 文档站 display/Avatar）。user-button 的账号菜单要等 Menu。</summary>
 static class AvatarExamples
 {
     public static Example[] All =>
     [
         new("Avatar", "basic", "基础用法", "DisplayName 是读屏念的名称，也用来生成首字母；图片还在下载、下载失败时显示后备内容。Radius=\"md\" 用于团队、组织；后备内容的 Variant 与 Tone 同 Badge。", Basic),
         new("Avatar", "user-button", "用户按钮", "UserButton 是头像 + 名字 + 箭头，做账号菜单的触发器（菜单还没有：点它时打开自己的菜单）。写了 Description 时多一行说明、占满一行，适合侧栏底部；Compact 只剩头像，名字成为按钮的名称。", Account),
+        new("Avatar", "group", "头像组", "AvatarGroup 把头像叠放，超过 Max 的折叠成“+N”，读屏念“还有 N 人”；列表只拿到一部分时用 Total 算 N。组里头像的大小随组的 Size。", Group),
         new("Avatar", "indicator", "角标", "Indicator 包住要标记的元素：计数超过 Max 显示\"99+\"，0 时不显示（ShowZero 时显示 0）；Dot 是小圆点。数字对读屏隐藏，另有一句完整的 Label。", Indicators),
     ];
+
+    static AvatarGroup Members(string name, IEnumerable<(string Name, ImageSource? Photo)> members, int? max = null, int? total = null, TextSize size = default)
+    {
+        var group = new AvatarGroup { Max = max, Total = total, Size = size };
+        foreach (var member in members) group.Children.Add(new Avatar { DisplayName = member.Name, Source = member.Photo });
+        AutomationProperties.SetName(group, name);
+        return group;
+    }
+
+    static FrameworkElement Group() => new Flex
+    {
+        Direction = FlexDirection.Column, Gap = Space.Md,
+        Children =
+        {
+            new Card
+            {
+                Content = new Flex
+                {
+                    Align = FlexAlign.Center, Justify = FlexJustify.Between, Gap = Space.Md, Wrap = true,
+                    Children =
+                    {
+                        new Flex { Direction = FlexDirection.Column, Gap = Space.Xs, Children = { new Strong { Text = "官网改版" }, new Small { Tone = TextTone.Muted, Text = "7 位协作者 · 2 小时前更新" } } },
+                        Members("协作者", Photos.Members, max: 4),
+                    },
+                },
+            },
+            new Flex
+            {
+                Align = FlexAlign.Center, Gap = Space.Lg, Wrap = true,
+                Children = { Members("点赞的人", Photos.Members.Take(3), max: 3, total: 128, size: TextSize.Sm), new Small { Tone = TextTone.Muted, Text = "只拿到了 3 位，Total 是 128：显示“+125”" } },
+            },
+            new Flex { Children = { Members("评审人", Photos.Members.Skip(1).Take(4), size: TextSize.Lg) } },
+        },
+    };
 
     static FrameworkElement Account()
     {
