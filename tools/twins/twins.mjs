@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// 三个库各有一份、除命名空间外逐字相同的源文件（纯计算或纯数据，不用平台类型：FlexLayout、GridLayout、StatusMap、AvatarInitials、ListboxOption、ListState、FloatingPlacement、ScrollAreaVariants、CodeHighlighting、TabsVariants、TableVariants、ItemListVariants、Selection、ToggleGroupVariants、ControlVariants、TextFieldVariants、TextFormat、DesktopMessages、SelectSearch、Hotkey）。三个库不共享代码（ROADMAP 决定 2），
+// 三个库各有一份、除命名空间外逐字相同的源文件（纯计算或纯数据，不用平台类型：FlexLayout、GridLayout、StatusMap、AvatarInitials、ListboxOption、ListState、FloatingPlacement、ScrollAreaVariants、CodeHighlighting、TabsVariants、TableVariants、ItemListVariants、Workdays、Selection、ToggleGroupVariants、ControlVariants、TextFieldVariants、TextFormat、DesktopMessages、SelectSearch、Hotkey）。三个库不共享代码（ROADMAP 决定 2），
 // 一致性靠这里检查：改了一份，另外两份照抄。用法：node tools/twins/twins.mjs；有不同时退出码为 1
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -21,6 +21,7 @@ const TWINS = [
   ['avalonia/src/Rune.Avalonia/Navigation/Tabs/TabsVariants.cs', 'wpf/src/Rune.Wpf/Navigation/Tabs/TabsVariants.cs', 'winforms/src/Rune.WinForms/Navigation/Tabs/TabsVariants.cs'],
   ['avalonia/src/Rune.Avalonia/Table/TableVariants.cs', 'wpf/src/Rune.Wpf/Table/TableVariants.cs', 'winforms/src/Rune.WinForms/Table/TableVariants.cs'],
   ['avalonia/src/Rune.Avalonia/Display/ItemList/ItemListVariants.cs', 'wpf/src/Rune.Wpf/Display/ItemList/ItemListVariants.cs', 'winforms/src/Rune.WinForms/Display/ItemList/ItemListVariants.cs'],
+  ['avalonia/src/Rune.Avalonia/Utils/Data/Workdays.cs', 'wpf/src/Rune.Wpf/Utils/Data/Workdays.cs', 'winforms/src/Rune.WinForms/Utils/Data/Workdays.cs'],
   ['avalonia/src/Rune.Avalonia/Utils/Data/Selection.cs', 'wpf/src/Rune.Wpf/Utils/Data/Selection.cs', 'winforms/src/Rune.WinForms/Utils/Data/Selection.cs'],
   ['avalonia/src/Rune.Avalonia/Input/ToggleGroup/ToggleGroupVariants.cs', 'wpf/src/Rune.Wpf/Input/ToggleGroup/ToggleGroupVariants.cs', 'winforms/src/Rune.WinForms/Input/ToggleGroup/ToggleGroupVariants.cs'],
   ['avalonia/src/Rune.Avalonia/Input/Control/ControlVariants.cs', 'wpf/src/Rune.Wpf/Input/Control/ControlVariants.cs', 'winforms/src/Rune.WinForms/Input/Control/ControlVariants.cs'],

@@ -692,7 +692,19 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   Avalonia 在部件上按自己的字号设，WPF 的行高按像素继承，代码里重算。
 - **WinForms**：ItemListControl（竖排的 Flex）、ItemListItemControl（横排的 Flex：起始边一格、标题与说明一栏、结束边一格，格跟着里面的控件变大小）。
   点起始边、标题、说明同点这一条（转发子控件的点击），结束边不转发。子控件不能半透明：不可用时文字换成 textDisabled。WinForms 没有 Command，可点的是 Href 或 Invoked。
-- 取值对照（notifications、selectable）：Avalonia 只差列表总高 0.75（布局取整），WPF 一致。示例：notifications、selectable；todos 要等 DeadlineBadge。
+- 取值对照（todos、notifications、selectable）：Avalonia 只差列表总高 0.75（布局取整），WPF 一致（todos 的链接在 WPF 是 Text 里的行内 Hyperlink，结构上多一层 Text）。
+  Avalonia 的 Link 行高原来是 NaN（放进段落时不带段落的行高），改成按自己的字号算 normal：条目标题、卡片页头里的链接同上游 21。
+  示例：todos（WinForms 的标题是文字，链接写成整条的 Href）、notifications、selectable。
+
+### DeadlineBadge 与工作日历（2026-11-14）
+
+- 工作日算法是孪生文件 `Utils/Data/Workdays.cs`（上游 utils/data/workdays.ts）：`WorkCalendar`（周末、节假日区间、调休补班；`Weekdays` 只按周末）、
+  `WorkdaysBetween`（不含起点、含终点，反向为负）、`AddWorkdays`、`DeadlineOf`（截止日或开始日加工作日；是否过期按日期比）。日期用 DateOnly。
+- 工作日历在作用域上（上游 createUi / Provider 的 workCalendar）：Avalonia、WPF 是继承的附加属性 `Provider.WorkCalendar`，WinForms 是
+  `ProviderControl.WorkCalendar`（`WorkCalendarOf` 沿外层找），都没写时只按周末。
+- DeadlineBadge 从 Badge 派生（WinForms 从 BadgeControl），色调与文字按状态；截止日（TS 的 title）是悬停提示，也接在读屏名称后面
+  （TS 另放一段 VisuallyHidden）。WinForms 没有给单个控件的提示，徽标自带一个 TooltipProvider。截止日、开始日都没给时不显示。
+  Avalonia 按模板优先级设、WPF 设当前值：使用方写的盖得过。
 
 ### NavList（2026-11-07）
 

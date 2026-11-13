@@ -33,6 +33,11 @@ public class ProviderControl : Panel
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public Lang? Lang { get; set { field = value; Changed(); } }
 
+    /// <summary>这片区域的工作日历（上游 createUi / Provider 的 workCalendar）；null 时沿用外层，都没写时只按周末。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public WorkCalendar? WorkCalendar { get; set { field = value; Changed(); } }
+
     /// <summary>组件的默认值（上游的 defaults.Xxx）：每种组件一个记录，如 <see cref="ButtonDefaults"/>。</summary>
     [Browsable(false)]
     public ScopeRecords Defaults { get; }
@@ -50,6 +55,9 @@ public class ProviderControl : Panel
     /// <summary>这一层看到的语言包。</summary>
     public Lang EffectiveLang => Lang ?? Outer?.EffectiveLang ?? RuneLang.Current.Value;
 
+    /// <summary>这一层看到的工作日历。</summary>
+    public WorkCalendar EffectiveWorkCalendar => WorkCalendar ?? Outer?.EffectiveWorkCalendar ?? Rune.WinForms.WorkCalendar.Weekdays;
+
     /// <summary>控件所在的作用域：控件自己是作用域时就是它，否则沿 Parent 链往外找（浮层窗口里的接着从弹出它的控件找）；没有时为 null。</summary>
     /// <param name="control">控件。</param>
     public static ProviderControl? Of(Control? control)
@@ -66,6 +74,10 @@ public class ProviderControl : Panel
     /// <summary>控件看到的语言包。</summary>
     /// <param name="control">控件。</param>
     public static Lang LangOf(Control control) => Of(control)?.EffectiveLang ?? RuneLang.Current.Value;
+
+    /// <summary>控件所在作用域的工作日历；没有作用域时只按周末。</summary>
+    /// <param name="control">控件。</param>
+    public static WorkCalendar WorkCalendarOf(Control control) => Of(control)?.EffectiveWorkCalendar ?? Rune.WinForms.WorkCalendar.Weekdays;
 
     /// <summary>某种组件的默认值合并到这一层：外层的在下、这一层的在上，逐字段；哪层都没写时为 null。</summary>
     /// <typeparam name="T">默认值记录。</typeparam>

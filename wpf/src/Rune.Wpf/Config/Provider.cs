@@ -39,6 +39,10 @@ public class Provider : Decorator
     public static readonly DependencyProperty LangProperty = DependencyProperty.RegisterAttached(
         "Lang", typeof(Lang), typeof(Provider), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits));
 
+    /// <summary>工作日历（上游 createUi / Provider 的 workCalendar）：沿元素树继承；哪里都没写时只按周末（<see cref="Rune.Wpf.WorkCalendar.Weekdays"/>）。</summary>
+    public static readonly DependencyProperty WorkCalendarProperty = DependencyProperty.RegisterAttached(
+        "WorkCalendar", typeof(WorkCalendar), typeof(Provider), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits));
+
     /// <summary>
     /// 这一层的样式：类型键（隐式样式）用于组件的默认值与外观，<c>x:Key</c> 为部件键的用于部件。
     /// 只写要改的 setter 与触发器，不写 BasedOn。Provider 本身与任何 FrameworkElement 都能设。
@@ -54,6 +58,18 @@ public class Provider : Decorator
 
     /// <summary>这片区域的语言包。</summary>
     public Lang? Lang { get => (Lang?)GetValue(LangProperty); set => SetValue(LangProperty, value); }
+
+    /// <summary>这片区域的工作日历。</summary>
+    public WorkCalendar? WorkCalendar { get => (WorkCalendar?)GetValue(WorkCalendarProperty); set => SetValue(WorkCalendarProperty, value); }
+
+    /// <summary>某个元素所在作用域的工作日历；哪里都没写时只按周末。</summary>
+    /// <param name="target">元素。</param>
+    public static WorkCalendar GetWorkCalendar(DependencyObject target) => (WorkCalendar?)target.GetValue(WorkCalendarProperty) ?? Rune.Wpf.WorkCalendar.Weekdays;
+
+    /// <summary>给一个元素（及它里面的）设工作日历。</summary>
+    /// <param name="target">元素。</param>
+    /// <param name="value">工作日历；null 时沿用外面的。</param>
+    public static void SetWorkCalendar(DependencyObject target, WorkCalendar? value) => target.SetValue(WorkCalendarProperty, value);
 
     /// <summary>合成时实际生成了几个 Style（缓存命中不算）。测试与性能观察用。</summary>
     internal static int Compositions { get; set; }

@@ -252,6 +252,8 @@ sealed class StyleReport
         ["NavSection"] = "nav-list",
         // 上游 ItemList、ItemListItem 共用 item-list 的部件标记
         ["ItemListItem"] = "item-list",
+        // 时限标记就是一个 Badge
+        ["DeadlineBadge"] = "badge",
     };
 
     /// <summary>
