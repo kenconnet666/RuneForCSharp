@@ -373,7 +373,7 @@ public class Table : Control
             // 行的上下边吸附到设备像素（同浏览器画表格）：行高带小数时分隔线不发虚。网格自己可能不在整像素上，按到根的偏移算
             var scale = TopLevel.GetTopLevel(this)?.RenderScaling ?? 1;
             var offset = VisualRoot is Visual root ? this.TranslatePoint(default, root)?.Y ?? 0 : 0;
-            double Snap(double value) => Math.Round((value + offset) * scale) / scale - offset;
+            double Snap(double value) => Math.Floor((value + offset) * scale + 0.5) / scale - offset; // 不用 Math.Round：.5 时银行家舍入让一条线的两边差出 2 像素
             Rect Band(double top, double bottom) => new(area.X, Snap(top), area.Width, Snap(bottom) - Snap(top));
             using var shift = context.PushTransform(Matrix.CreateTranslation(-area.X, -area.Y));
             var y = 0d;
