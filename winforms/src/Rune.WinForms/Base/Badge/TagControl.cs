@@ -202,7 +202,7 @@ public class TagControl : BadgeControl
         remove = RemoveFocusable ? new CloseButtonControl() : new PassiveCloseButton();
         remove.Radius = Radius.Full;
         remove.AutoSize = false;
-        remove.Click += (_, _) => RequestRemove();
+        remove.Click += (_, _) => Dismissal.Request(this, () => removeRequested?.Invoke(this, EventArgs.Empty));
         remove.MouseEnter += (_, _) => SetRemoveHovered(true);
         remove.MouseLeave += (_, _) => SetRemoveHovered(false);
         Controls.Add(remove);
@@ -261,28 +261,6 @@ public class TagControl : BadgeControl
         var foreground = Element.ForegroundIn(context);
         var sx = new ButtonSx { Foreground = foreground, Background = removeHovered ? Color.FromArgb((int)MathF.Round(foreground.A * 0.14f), foreground) : null };
         if (remove.Sx != sx) remove.Sx = sx;
-    }
-
-    /// <summary>请使用方移除；焦点原来在移除按钮上、标签被移除了时，交给同一容器里下一个（没有就上一个）能聚焦的控件。</summary>
-    void RequestRemove()
-    {
-        var focused = remove?.Focused == true;
-        var group = Parent;
-        var index = group?.Controls.IndexOf(this) ?? -1;
-        removeRequested?.Invoke(this, EventArgs.Empty);
-        if (!focused || group is null || Parent == group) return;
-        var siblings = group.Controls.Cast<Control>().ToList();
-        var candidates = siblings.Skip(index).Concat(siblings.Take(index).Reverse());
-        foreach (var candidate in candidates)
-        {
-            if (!candidate.Visible || !candidate.Enabled) continue;
-            if (candidate.CanSelect)
-            {
-                candidate.Select();
-                return;
-            }
-            if (candidate.SelectNextControl(null, true, true, true, false)) return;
-        }
     }
 
     /// <summary>不能聚焦的移除按钮：点它不抢焦点、不进 Tab 顺序。</summary>
