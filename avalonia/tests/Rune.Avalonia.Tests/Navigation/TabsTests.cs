@@ -1,10 +1,12 @@
 using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Automation.Peers;
 using Avalonia.Automation.Provider;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 
 namespace Rune.Avalonia.Tests;
 
@@ -126,5 +128,136 @@ public class TabsTests
         Assert.Contains(":vertical", list.Classes);
         Assert.Equal(FlexDirection.Row, tabs.Direction);
         Assert.Equal(FlexDirection.Column, list.Direction);
+    });
+
+    [Fact]
+    [Upstream("Tabs", "可关闭：Delete 或关闭按钮关闭；关掉当前标签时选它后面的一个，焦点跟过去")]
+    public Task Closing_selects_the_next_tab_and_moves_focus_there() => HeadlessUi.Run(() =>
+    {
+        var list = new TabList { [AutomationProperties.NameProperty] = "页面" };
+        foreach (var value in new[] { "a", "b", "c" })
+        {
+            var tab = new Tab { Value = value, Content = value.ToUpperInvariant() };
+            tab.CloseRequested += (_, _) => list.Children.Remove(tab);
+            list.Children.Add(tab);
+        }
+        var tabs = new Tabs { Value = "b", Children = { list } };
+        var window = HeadlessUi.Show(tabs);
+        Tab Find(string text) => list.Children.OfType<Tab>().Single(tab => (string?)tab.Content == text);
+        IconButton CloseOf(Tab tab) => tab.GetVisualDescendants().OfType<IconButton>().Single(button => button.Name == TabParts.Close);
+
+        // 关闭按钮不在 Tab 顺序里，名称带上标签的文字
+        var close = CloseOf(Find("B"));
+        Assert.Equal("关闭 B", close.Peer().GetName());
+        Assert.False(close.Focusable);
+        Assert.Contains(":closable", Find("B").Classes);
+
+        Find("B").Focus(NavigationMethod.Tab);
+        window.KeyPressQwerty(PhysicalKey.Delete, RawInputModifiers.None);
+        HeadlessUi.Flush(window);
+        Assert.Equal(["A", "C"], list.Children.OfType<Tab>().Select(tab => (string?)tab.Content));
+        Assert.Equal("c", tabs.Value);
+        Assert.True(Find("C").IsFocused);
+
+        // 关掉最后一个：选前面的
+        Click(window, CloseOf(Find("C")));
+        HeadlessUi.Flush(window);
+        Assert.Equal("a", tabs.Value);
+    });
+
+    [Fact]
+    public Task Middle_click_closes_and_pressing_the_close_button_does_not_take_focus() => HeadlessUi.Run(() =>
+    {
+        var (tabs, items, _) = Build();
+        var closed = new List<string?>();
+        foreach (var item in items) item.CloseRequested += (_, _) => closed.Add(item.Value);
+        var window = HeadlessUi.Show(tabs);
+        items[0].Focus(NavigationMethod.Tab);
+
+        var at = items[2].TranslatePoint(new Point(4, items[2].Bounds.Height / 2), window)!.Value;
+        window.MouseDown(at, MouseButton.Middle);
+        window.MouseUp(at, MouseButton.Middle);
+        Assert.Equal(["done"], closed);
+
+        Click(window, items[1].GetVisualDescendants().OfType<IconButton>().Single());
+        Assert.Equal(["done", "paid"], closed);
+        Assert.True(items[0].IsFocused); // 按下关闭按钮不把焦点挪到那个标签上
+        Assert.Equal("all", tabs.SelectedValue);
+    });
+
+    [Fact]
+    [Upstream("Tabs", "新建按钮在标签栏里、tablist 外面；Alt + → 把标签往后挪一位并报告新顺序")]
+    public Task Add_button_sits_outside_the_tabs_and_alt_arrow_reorders() => HeadlessUi.Run(() =>
+    {
+        var list = new TabList { [AutomationProperties.NameProperty] = "页面" };
+        foreach (var value in new[] { "a", "b", "c" }) list.Children.Add(new Tab { Value = value, Content = value });
+        var added = 0;
+        IReadOnlyList<string>? order = null;
+        list.AddRequested += (_, _) => added++;
+        list.Reordered += (_, e) => order = e.Values;
+        var window = HeadlessUi.Show(new Tabs { Children = { list } });
+
+        var add = list.AddButton!;
+        Assert.Equal("新建标签页", add.Peer().GetName());
+        Assert.DoesNotContain(add, list.Children);
+        Click(window, add);
+        Assert.Equal(1, added);
+
+        var first = (Tab)list.Children[0];
+        first.Focus(NavigationMethod.Tab);
+        window.KeyPressQwerty(PhysicalKey.ArrowRight, RawInputModifiers.Alt);
+        Assert.Equal(["b", "a", "c"], order);
+        Assert.Equal(["b", "a", "c"], list.Children.OfType<Tab>().Select(tab => tab.Value));
+        Assert.True(first.IsFocused);
+        Assert.Equal("a移到第 2 个，共 3 个", list.Announcement);
+    });
+
+    [Fact]
+    public Task Dragging_a_tab_past_the_next_ones_center_swaps_them() => HeadlessUi.Run(() =>
+    {
+        var (tabs, items, _) = Build();
+        var list = (TabList)tabs.Children[0];
+        IReadOnlyList<string>? order = null;
+        list.Reordered += (_, e) => order = e.Values;
+        var window = HeadlessUi.Show(tabs);
+
+        Point At(Control control, double x) => control.TranslatePoint(new Point(x, control.Bounds.Height / 2), window)!.Value;
+        window.MouseDown(At(items[0], 4), MouseButton.Left);
+        window.MouseMove(At(items[1], 2)); // 还没过中线
+        Assert.Null(order);
+        Assert.Contains(":dragging", items[0].Classes);
+        window.MouseMove(At(items[1], items[1].Bounds.Width - 2));
+        Assert.Equal(["paid", "all", "done"], order);
+        window.MouseUp(At(items[0], 4), MouseButton.Left);
+        Assert.DoesNotContain(":dragging", items[0].Classes);
+    });
+
+    [Fact]
+    public Task Overflowing_tabs_scroll_with_buttons_and_the_all_tabs_menu_switches() => HeadlessUi.Run(() =>
+    {
+        var list = new TabList { ShowAllMenu = true };
+        foreach (var index in Enumerable.Range(1, 12)) list.Children.Add(new Tab { Value = $"t{index}", Content = $"标签页 {index}" });
+        var tabs = new Tabs { Width = 360, Children = { list } };
+        var window = HeadlessUi.Show(tabs);
+
+        var (previous, next) = list.ScrollButtons;
+        Assert.True(previous.IsVisible && next.IsVisible);
+        Assert.False(previous.IsEnabled); // 在起始端：往前滚不可用
+        Assert.NotNull(list.Scroller.OpacityMask); // 结束端渐隐
+        Click(window, next);
+        HeadlessUi.Flush(window);
+        Assert.True(list.Scroller.Offset.X > 0);
+        Assert.True(previous.IsEnabled);
+
+        // 菜单按显示的顺序列出标签，选一项切过去并滚进来
+        var items = list.AllMenu!.Items.OfType<MenuRadioGroup>().Single().Items.OfType<MenuRadioItem>().ToArray();
+        Assert.Equal(12, items.Length);
+        Assert.Equal("标签页 12", items[^1].Content);
+        Assert.Equal("全部标签页", list.AllMenu.Trigger!.Peer().GetName());
+        items[^1].Run();
+        HeadlessUi.Flush(window);
+        Assert.Equal("t12", tabs.Value);
+        Assert.Equal(list.Scroller.Extent.Width - list.Scroller.Viewport.Width, list.Scroller.Offset.X, 0.5);
+        Assert.False(next.IsEnabled);
     });
 }

@@ -46,6 +46,9 @@ export const COMPONENT_PROP_RENAMES = {
   UserButton: { name: 'DisplayName', src: 'Source' },
   // 移除由使用方做：事件是"请求移除"（离场结束才发）
   Tag: { onRemove: 'RemoveRequested' },
+  // 关闭、新建由使用方做：事件是"请求"；排序由 TabList 自己挪好标签，事件报告新顺序
+  Tab: { onClose: 'CloseRequested' },
+  TabList: { onAdd: 'AddRequested', onReorder: 'Reordered' },
   // 点了这一条是事件（订阅了才整条可点；Select 是动词，选中另有 IsSelected）；正在看的一条是 IsSelected（同平台的选中项）
   ItemListItem: { onSelect: 'Invoked', selected: 'IsSelected' },
   // 执行是按钮的 Click（还有 Command）；右键菜单的菜单项同 Menu 的 Items

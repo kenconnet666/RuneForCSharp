@@ -254,13 +254,16 @@ sealed class StyleReport
         ["ItemListItem"] = "item-list",
         // 时限标记就是一个 Badge
         ["DeadlineBadge"] = "badge",
+        // 上游标签的配方叫 Tabs（tabsRecipe）：每个标签是 tabs/root
+        ["Tab"] = "tabs",
+        ["TabItemControl"] = "tabs",
     };
 
     /// <summary>
     /// 上游没有部件标记的组件（样式直接写在元素上，不带 data-scope）：它们自己与部件都不按组件记，
     /// 里面的元素按标签配对（Field 的星号是 @svg）。
     /// </summary>
-    static readonly HashSet<string> Unscoped = ["Field", "FieldLabel"];
+    static readonly HashSet<string> Unscoped = ["Field", "FieldLabel", "Tabs", "TabList", "TabPanel"];
 
     /// <summary>组件在上游有部件标记（不在 <see cref="Unscoped"/> 里）。</summary>
     public static bool IsScoped(string componentType) => !Unscoped.Contains(componentType);

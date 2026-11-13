@@ -14,6 +14,34 @@
     <Setter Property="CornerRadius" Value="{rune:Em Resource=Rune.Radius.Sm}" />
     <Setter Property="HorizontalContentAlignment" Value="Center" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
+    <!-- 同 ButtonBase 的模板，多一格关闭按钮：叠在结束端（不用另一层容器，标签仍是列表的直接子元素，指示条按它的位置对齐） -->
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border Name="PART_Root" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" ClipToBounds="True">
+            <Panel>
+              <Canvas Name="PART_Ripples" IsHitTestVisible="False" />
+              <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
+                                Padding="{TemplateBinding Padding}"
+                                HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+            </Panel>
+          </Border>
+          <ContentPresenter Name="PART_CloseHost" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="{rune:Em 0, 0, 0.25, 0}" />
+          <Border Name="PART_FocusRing" IsVisible="False" IsHitTestVisible="False"
+                  BorderThickness="2" BorderBrush="{DynamicResource Rune.Brush.FocusRing}" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:focus-visible /template/ Border#PART_FocusRing"><Setter Property="IsVisible" Value="True" /></Style>
+    <!-- 可关闭：结束端给关闭按钮留出 1.25em -->
+    <Style Selector="^:closable">
+      <Setter Property="Padding" Value="{rune:Em 0.75, 0, 2, 0}" />
+    </Style>
+    <Style Selector="^:dragging">
+      <Setter Property="Opacity" Value="0.6" />
+    </Style>
     <Style Selector="^:pointerover">
       <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
     </Style>
