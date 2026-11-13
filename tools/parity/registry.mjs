@@ -47,7 +47,7 @@ export const COMPONENT_PROP_RENAMES = {
   // 移除由使用方做：事件是"请求移除"（离场结束才发）
   Tag: { onRemove: 'RemoveRequested' },
   // 关闭由使用方做：事件是"请求关闭"（Avalonia、WPF 离场结束才发）
-  Alert: { onClose: 'CloseRequested' },
+  ...Object.fromEntries(['Alert', 'Banner'].map((name) => [name, { onClose: 'CloseRequested' }])),
   // 关闭、新建由使用方做：事件是"请求"；排序由 TabList 自己挪好标签，事件报告新顺序
   Tab: { onClose: 'CloseRequested' },
   TabList: { onAdd: 'AddRequested', onReorder: 'Reordered' },
