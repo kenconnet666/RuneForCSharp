@@ -963,6 +963,24 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   我们的字体 token 从 "Segoe UI" 起，medium 落回常规，文字窄一点、横排的标签一路往后错开（DOCSITE"看过的原因"）。
 - 可选中（上游 0f69e5c5，2026-11-08）：`IsSelected`（bool?，Avalonia、WPF 默认双向绑定；WinForms 发 `IsSelectedChanged`）。不是 null 时整个标签是切换按钮（读屏是按钮、按下状态），点击、Enter 按下、空格松开切换，键盘聚焦画 2px 的焦点环；不带移除按钮。没写的色调、字号用 accent、sm，没选中时没写的样式用 surface，选中时一律 solid、前面一个对勾。Avalonia 回退值按模板优先级设，选中的 solid 与对勾按动画优先级（盖过写了的样式与图标，同上游）；WPF 是 Tag 样式里 IsSelected 的触发器（写了的照用）；WinForms 是 Badge 元素内部的 `Selected` 决定取值。示例：Badge 页的 tag-selectable（Avalonia 0.52%–0.79%、WPF 0.51%–0.78%、WinForms 1.37%–1.87%）。
 
+### Alert（2026-11-14）
+
+- 一行排开图标、文字区（标题中等字重、说明是正文色、额外内容）、操作、关闭按钮，间距 space.sm，内边距 space.md，行高 normal，每种样式都留 1 像素的边框位置。
+  颜色 = 样式（`AlertVariant`：soft、surface、outline；上游不提供实底）× 色调（默认 info），同 Badge 的色表：Avalonia 是调色板（Resolved.Palette）按模板优先级设到
+  Alert 自己的 Background、BorderBrush、Foreground 上；WPF 是 recipe-gen 生成的 AlertRecipe.g.xaml；WinForms 直接用 BadgeRecipe。档位类型 `AlertVariant`、`AlertLive`、
+  `BannerVariant` 是孪生文件（`Feedback/Alert/AlertVariants.cs`）。
+- 图标不写时按色调选（info / neutral / accent 是 Info，success 是 CircleCheck，warning、danger 是感叹号的三角与圆），写 null 不显示（"写没写"按本地值判断：
+  Avalonia 的 IsSet、WPF 的 ReadLocalValue、WinForms 记一个标记）。IsLoading 时图标换成加载指示，读屏的状态文字是"加载中"（WinForms 是 Busy 状态）。
+- 说明：Avalonia、WPF 有 Description 与内容（Content），没写 Description 时内容就是说明，两个都写时内容在说明下面（同上游 description / children）；
+  WinForms 的说明是画出来的文字，直接加的子控件是说明下面的额外内容（文字里放不了链接）。
+- Live（off / polite / assertive，上游的 role status / alert）：Avalonia 是实时区域（AutomationProperties.LiveSetting，内容变了平台发 LiveRegionChanged）；
+  WPF 设 LiveSetting 并在内容变了时自己发 LiveRegionChanged；WinForms 发自动化通知（assertive 是 ImportantMostRecent）。读屏的名称是标题。
+- 关闭：订阅了 CloseRequested 才有关闭按钮（小一档：sm / md 的字号，上下各收 space.xs），悬停底色是文字色的 14%（状态层）。离场同 Tag：
+  三个平台把 Tag 的"离场后请使用方移除、焦点交给相邻元素"挪进了共用的 `Dismissal`（Utils/Motion）；Avalonia、WPF 淡出（Alert 只改透明度），
+  WinForms 的子控件不能半透明，直接请使用方移除。
+- WPF 的 Control 自己有 Padding、BorderThickness：内边距与边框写在主题里（EmSize.Padding），里面的 Border 绑过去，样式能改；inspect 也按 Alert 自己报。
+- 示例：tones、status、variants（banner 等 Banner）。Avalonia、WPF 与文档站的取值对照没有差异。
+
 ### Select、SelectedTags（2026-11-07）
 
 - 下拉选择（select-only combobox）：外壳同输入框（Avalonia、WPF 照 Rune.TextInput 写了一份 Select 的主题；WinForms 抽出 `ControlShell`，TextInputControl 与 SelectControl 共用），
