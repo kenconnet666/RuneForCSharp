@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Media;
+using Avalonia.VisualTree;
 
 namespace Rune.Avalonia.Tests;
 
@@ -31,6 +32,47 @@ public class TableTests
     };
 
     static TableCell Cell(Table table, int row, int column) => (TableCell)table.Rows[row].Row.Cells[column];
+
+    /// <summary>限高、两个方向都能滚的明细表（同文档站 ScrollArea 页的 both 示例）：表头吸顶，行号那一列固定。</summary>
+    static Table Sheet()
+    {
+        static TableRow Row(TableCell first, IEnumerable<TableCell> rest)
+        {
+            var row = new TableRow();
+            row.Cells.Add(first);
+            foreach (var cell in rest) row.Cells.Add(cell);
+            return row;
+        }
+        var head = new TableHead();
+        head.Rows.Add(Row(new TableHeaderCell { Sticky = true, ColumnWidth = 48, Content = "行" }, Enumerable.Range(0, 14).Select(c => new TableHeaderCell { ColumnWidth = 88, Content = ((char)('A' + c)).ToString() })));
+        var body = new TableBody();
+        for (var r = 1; r <= 30; r++)
+            body.Rows.Add(Row(new TableHeaderCell { Scope = "row", Sticky = true, Content = r.ToString(System.Globalization.CultureInfo.InvariantCulture) }, Enumerable.Range(0, 14).Select(_ => new TableCell { Nowrap = true, Content = "12.34" })));
+        return new Table { StickyHeader = true, ScrollAxis = ScrollAreaAxis.Both, Height = 288, Width = 400, Sections = { head, body } };
+    }
+
+    [Fact]
+    [Upstream("Table", "stickyHeader 与 sticky：滚动后表头贴着顶边、第一列贴着起始边")]
+    public Task The_sticky_header_and_column_stay_put_while_scrolling() => HeadlessUi.Run(() =>
+    {
+        var table = Sheet();
+        var window = HeadlessUi.Show(new StackPanel { Children = { table } });
+        Point At(TableCell cell) => cell.TranslatePoint(default, table)!.Value;
+        var (corner, header, rowLabel, body) = (Cell(table, 0, 0), Cell(table, 0, 5), Cell(table, 10, 0), Cell(table, 10, 5));
+        var before = (corner: At(corner), header: At(header), rowLabel: At(rowLabel), body: At(body));
+
+        var scroll = table.GetVisualDescendants().OfType<ScrollArea>().First();
+        scroll.Offset = new Vector(200, 150);
+        HeadlessUi.Flush(window);
+
+        Assert.Equal(before.corner, At(corner)); // 角上的格两个方向都不动
+        Assert.Equal(before.header.Y, At(header).Y, 0.5); // 表头贴着顶边
+        Assert.Equal(before.header.X - 200, At(header).X, 0.5); // 横向照常滚
+        Assert.Equal(before.rowLabel.X, At(rowLabel).X, 0.5); // 第一列贴着起始边
+        Assert.Equal(before.rowLabel.Y - 150, At(rowLabel).Y, 0.5); // 竖向照常滚
+        Assert.Equal(before.body - new Point(200, 150), At(body)); // 别的格两个方向都滚
+        Assert.True(corner.ZIndex > header.ZIndex && header.ZIndex > rowLabel.ZIndex && rowLabel.ZIndex > body.ZIndex); // 叠放次序
+    });
 
     [Fact]
     [Upstream("Table", "渲染原生 table 结构")]

@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Automation.Peers;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace Rune.Wpf.Tests;
 
@@ -82,5 +83,53 @@ public class TableTests
         Assert.Equal(398, name.ActualWidth + value.ActualWidth + 1.5 * name.FontSize + 1.5 * value.FontSize, 1.0);
         Assert.Equal(HorizontalAlignment.Right, value.HorizontalContentAlignment);
         Assert.Equal([false, true], table.Rows.Where(row => row.Section is TableBody).Select(row => row.Row.IsStriped));
+    });
+
+    /// <summary>限高、两个方向都能滚的明细表（同文档站 ScrollArea 页的 both 示例）：表头吸顶，行号那一列固定。</summary>
+    static Table Sheet()
+    {
+        static TableRow Row(TableCell first, IEnumerable<TableCell> rest)
+        {
+            var row = new TableRow();
+            row.Cells.Add(first);
+            foreach (var cell in rest) row.Cells.Add(cell);
+            return row;
+        }
+        var head = new TableHead();
+        head.Rows.Add(Row(new TableHeaderCell { Sticky = true, ColumnWidth = 48, Content = "行" }, Enumerable.Range(0, 14).Select(c => new TableHeaderCell { ColumnWidth = 88, Content = ((char)('A' + c)).ToString() })));
+        var body = new TableBody();
+        for (var r = 1; r <= 30; r++)
+            body.Rows.Add(Row(new TableHeaderCell { Scope = "row", Sticky = true, Content = r.ToString(System.Globalization.CultureInfo.InvariantCulture) }, Enumerable.Range(0, 14).Select(_ => new TableCell { Nowrap = true, Content = "12.34" })));
+        return new Table { StickyHeader = true, ScrollAxis = ScrollAreaAxis.Both, Height = 288, Width = 400, Sections = { head, body } };
+    }
+
+    [Fact]
+    [Upstream("Table", "stickyHeader 与 sticky：滚动后表头贴着顶边、第一列贴着起始边")]
+    public Task The_sticky_header_and_column_stay_put_while_scrolling() => WpfUi.Run(() =>
+    {
+        var table = Sheet();
+        var host = new StackPanel();
+        host.Resources.MergedDictionaries.Add(new RuneTheme());
+        host.Children.Add(table);
+        WpfUi.Show(host);
+        Point At(TableCell cell) => cell.TranslatePoint(default, table);
+        var (corner, header, rowLabel, body) = (Cell(table, 0, 0), Cell(table, 0, 5), Cell(table, 10, 0), Cell(table, 10, 5));
+        var before = (corner: At(corner), header: At(header), rowLabel: At(rowLabel), body: At(body));
+
+        var scroll = WpfUi.Descendants(table).OfType<ScrollArea>().First();
+        scroll.ScrollToHorizontalOffset(200);
+        scroll.ScrollToVerticalOffset(150);
+        WpfUi.Flush();
+
+        Assert.Equal(before.corner, At(corner)); // 角上的格两个方向都不动
+        Assert.Equal(before.header.Y, At(header).Y, 0.5); // 表头贴着顶边
+        Assert.Equal(before.header.X - 200, At(header).X, 0.5); // 横向照常滚
+        Assert.Equal(before.rowLabel.X, At(rowLabel).X, 0.5); // 第一列贴着起始边
+        Assert.Equal(before.rowLabel.Y - 150, At(rowLabel).Y, 0.5); // 竖向照常滚
+        Assert.Equal(before.body - new Vector(200, 150), At(body)); // 别的格两个方向都滚
+        // 叠放次序：可视子元素越靠后越在上面
+        var grid = VisualTreeHelper.GetParent(corner);
+        int Layer(TableCell cell) => Enumerable.Range(0, VisualTreeHelper.GetChildrenCount(grid)).First(i => VisualTreeHelper.GetChild(grid, i) == cell);
+        Assert.True(Layer(corner) > Layer(header) && Layer(header) > Layer(rowLabel) && Layer(rowLabel) > Layer(body));
     });
 }

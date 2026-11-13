@@ -13,7 +13,10 @@ namespace Rune.WinForms;
 /// </code>
 /// 外观：<see cref="Density"/>、<see cref="Variant"/>（surface / ghost）、<see cref="Striped"/>。列宽按内容分配（同 CSS 的 table-layout: auto），
 /// 放不下时单元格换行；表头单元格不换行，<see cref="TableHeaderCellControl.ColumnWidth"/> 定宽。指针下的行 fillHover 底。
-/// 部分、行、单元格都是子控件，位置由表格统一排；行自己画底色与分隔线。没做：最小宽度也放不下时的横向滚动（外面套 ScrollAreaControl）。
+/// 部分、行、单元格都是子控件，位置由表格统一排；行自己画底色与分隔线。单元格占满整列，内边距是它的 Padding（同浏览器里 td 的盒子）。
+/// 滚动：最小宽度也放不下时表格比给的宽（首选宽度不小于各列最小宽度之和），外面套 ScrollAreaControl 滚动（上游表格自己是滚动区域，
+/// propsRoot 的 axis）。放在 ScrollAreaControl 里时 <see cref="StickyHeader"/> 让表头吸顶（Axis 写 Both 或 Y），单元格的
+/// <see cref="TableCellControl.Sticky"/> 把那一列固定在起始边，结束边一道 borderMuted 的竖线；固定的格透出行的底色，盖住滚到下面的格。
 /// </summary>
 [ToolboxItem(true)]
 [Description("静态表格：表头、表体、表尾里放行，行里放单元格。")]
@@ -65,6 +68,19 @@ public class TableControl : Control
         }
     }
 
+    /// <summary>表头吸顶：放在竖着滚的 ScrollAreaControl 里时，表头一直在滚动区域的顶上。</summary>
+    [Category("Behavior")]
+    [DefaultValue(false)]
+    public bool StickyHeader
+    {
+        get;
+        set
+        {
+            field = value;
+            ApplySticky();
+        }
+    }
+
     bool ShouldSerializeDensity() => Density != TableDensity.Standard;
 
     bool ShouldSerializeVariant() => Variant != TableVariant.Surface;
@@ -101,6 +117,19 @@ public class TableControl : Control
         base.OnControlRemoved(e);
         Sync();
     }
+
+    ScrollAreaControl? scroller;
+
+    /// <summary>放进（或移出）滚动区域：跟着它的滚动偏移挪固定的表头与列。</summary>
+    protected override void OnParentChanged(EventArgs e)
+    {
+        base.OnParentChanged(e);
+        if (scroller is not null) scroller.ScrollChanged -= OnScrolled;
+        scroller = Parent as ScrollAreaControl;
+        if (scroller is not null) scroller.ScrollChanged += OnScrolled;
+    }
+
+    void OnScrolled(object? sender, EventArgs e) => ApplySticky();
 
     /// <inheritdoc />
     protected override void OnFontChanged(EventArgs e)
@@ -140,6 +169,8 @@ public class TableControl : Control
     public override Size GetPreferredSize(Size proposedSize)
     {
         var width = proposedSize.Width is > 0 and < int.MaxValue ? proposedSize.Width : Width;
+        // 各列最小宽度也放不下：比给的宽，外面的滚动区域横着滚
+        width = Math.Max(width, (int)MathF.Ceiling(ColumnRanges(Rows).Min.Sum()) + 2 * Border);
         return new Size(width, Arrange(width, place: false));
     }
 
@@ -149,6 +180,11 @@ public class TableControl : Control
         base.OnLayout(levent);
         Arrange(Width, place: true);
     }
+
+    /// <summary>排好的列（起点、宽，表格内框的坐标）与固定的列；表头的上下边、各部分的底（吸顶的范围）。</summary>
+    (int X, int Width)[] placedColumns = [];
+    bool[] stickyColumns = [];
+    int headTop, headBottom, sectionsBottom;
 
     /// <summary>排版：标题在上，下面各部分、各行；列宽按内容比例分满宽度。返回总高度。</summary>
     int Arrange(int width, bool place)
@@ -163,7 +199,13 @@ public class TableControl : Control
             y += height;
         }
         var rows = Rows;
-        var columns = Columns(rows, inner);
+        var columns = Columns(ColumnRanges(rows), inner);
+        var sticky = new bool[columns.Length];
+        foreach (var (_, row) in rows)
+        {
+            var cells = row.Controls.OfType<TableCellControl>().ToArray();
+            for (var i = 0; i < cells.Length && i < sticky.Length; i++) sticky[i] |= cells[i].Sticky;
+        }
         var line = LogicalToDeviceUnits(1);
         foreach (var group in rows.GroupBy(item => item.Section))
         {
@@ -189,23 +231,53 @@ public class TableControl : Control
                             cells[i].Bounds = Rectangle.Empty;
                             continue;
                         }
-                        var padding = CellPadding(cells[i]);
-                        cells[i].Bounds = new Rectangle(columns[i].X + padding.Left, padding.Top + top,
-                            Math.Max(0, columns[i].Width - padding.Horizontal), Math.Max(0, height - padding.Vertical - line));
+                        cells[i].Padding = CellPadding(cells[i]);
+                        cells[i].IsStickyColumn = sticky[i];
+                        cells[i].Bounds = new Rectangle(columns[i].X, top, columns[i].Width, Math.Max(0, height - line));
                     }
                 }
                 y += height;
             }
-            if (place) group.Key.Bounds = new Rectangle(border, sectionTop, inner, y - sectionTop);
+            if (!place) continue;
+            group.Key.Bounds = new Rectangle(border, sectionTop, inner, y - sectionTop);
+            if (group.Key is TableHeadControl) (headTop, headBottom) = (sectionTop, y);
+        }
+        if (place)
+        {
+            (placedColumns, stickyColumns, sectionsBottom) = (columns, sticky, y);
+            ApplySticky();
         }
         return y + border;
     }
 
     /// <summary>
-    /// 列的起点与宽：CSS 的 table-layout: auto（表格宽 100%）。放得下时按各列内容的比例分多出来的宽度；放不下时按最小宽度插值；
-    /// 再放不下时最小宽度。表头单元格写了 ColumnWidth 的列定宽。边界按累计值取整，各列加起来正好是表格宽。
+    /// 跟着外面滚动区域的偏移挪：表头往下（不超出各部分的底）、固定的列往右（不超出表格）。滚动时只挪位置，不重新排版。
+    /// 叠放：表头吸顶时提到最上面；前面的列（子控件序号小）本来就叠在后面的列上面，固定在起始边的列不用调。
     /// </summary>
-    (int X, int Width)[] Columns(IReadOnlyList<(TableSectionControl Section, TableRowControl Row)> rows, int available)
+    void ApplySticky()
+    {
+        var offset = scroller?.ScrollOffset ?? Point.Empty;
+        if (Controls.OfType<TableHeadControl>().FirstOrDefault() is { } head && head.Height > 0)
+        {
+            var dy = StickyHeader ? Math.Clamp(offset.Y - headTop, 0, Math.Max(0, sectionsBottom - headBottom)) : 0;
+            head.Top = headTop + dy;
+            if (dy > 0) head.BringToFront();
+        }
+        var first = Array.IndexOf(stickyColumns, true);
+        if (first < 0) return;
+        var last = Array.LastIndexOf(stickyColumns, true);
+        var (start, end) = (placedColumns[first].X, placedColumns[last].X + placedColumns[last].Width);
+        var dx = Math.Clamp(offset.X - Border - start, 0, Math.Max(0, Width - 2 * Border - end));
+        foreach (var (_, row) in Rows)
+        {
+            var cells = row.Controls.OfType<TableCellControl>().ToArray();
+            for (var i = 0; i < cells.Length && i < stickyColumns.Length; i++)
+                if (stickyColumns[i]) cells[i].Left = placedColumns[i].X + dx;
+        }
+    }
+
+    /// <summary>各列的最小宽度（能换行时最长的一段）与最大宽度（不换行），都含左右内边距；表头单元格写了 ColumnWidth 的列两者都是它。</summary>
+    (float[] Min, float[] Max) ColumnRanges(IReadOnlyList<(TableSectionControl Section, TableRowControl Row)> rows)
     {
         var count = rows.Count == 0 ? 0 : rows.Max(item => item.Row.Controls.OfType<TableCellControl>().Count());
         var max = new float[count];
@@ -225,6 +297,17 @@ public class TableControl : Control
         }
         for (var i = 0; i < count; i++)
             if (fixedWidths[i] is { } width) max[i] = min[i] = width;
+        return (min, max);
+    }
+
+    /// <summary>
+    /// 列的起点与宽：CSS 的 table-layout: auto（表格宽 100%）。放得下时按各列内容的比例分多出来的宽度；放不下时按最小宽度插值；
+    /// 再放不下时最小宽度。边界按累计值取整，各列加起来正好是表格宽。
+    /// </summary>
+    static (int X, int Width)[] Columns((float[] Min, float[] Max) ranges, int available)
+    {
+        var (min, max) = ranges;
+        var count = min.Length;
         var (sumMax, sumMin) = (max.Sum(), min.Sum());
         var result = new (int X, int Width)[count];
         var x = 0f;
@@ -459,8 +542,8 @@ public class TableRowControl : Control
 }
 
 /// <summary>
-/// 单元格（td）：左右 space.md、上下按密度；对齐按 <see cref="Align"/>；默认可以换行，<see cref="Nowrap"/> 时一行（超出时省略号）。
-/// 里面是文字（<see cref="Control.Text"/>，行高 normal）或子控件（横排、竖直居中）。
+/// 单元格（td）：左右 space.md、上下按密度（表格设成它的 Padding）；对齐按 <see cref="Align"/>；默认可以换行，<see cref="Nowrap"/> 时一行（超出时省略号）。
+/// 里面是文字（<see cref="Control.Text"/>，行高 normal）或子控件（横排、竖直居中），都在内边距以内。
 /// </summary>
 [ToolboxItem(true)]
 [Description("单元格：里面放文字或子控件。")]
@@ -497,6 +580,32 @@ public class TableCellControl : Control
         {
             field = value;
             Table?.Sync();
+        }
+    }
+
+    /// <summary>固定在起始边（第一列，常是行标题）：表格在滚动区域里横向滚动时一直看得到；一列里有格写了就整列固定。</summary>
+    [Category("Behavior")]
+    [DefaultValue(false)]
+    public bool Sticky
+    {
+        get;
+        set
+        {
+            field = value;
+            Table?.Sync();
+        }
+    }
+
+    /// <summary>所在的列是固定的（表格排版时设）：结束边画一道 borderMuted 的竖线。</summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    internal bool IsStickyColumn
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            Invalidate();
         }
     }
 
@@ -583,16 +692,28 @@ public class TableCellControl : Control
 
     IEnumerable<Control> Children() => Controls.Cast<Control>().Where(child => child.Visible);
 
+    /// <summary>内边距以内（内容的位置）。</summary>
+    Rectangle Content => new(Padding.Left, Padding.Top, Math.Max(0, Width - Padding.Horizontal), Math.Max(0, Height - Padding.Vertical));
+
+    /// <inheritdoc />
+    protected override void OnPaddingChanged(EventArgs e)
+    {
+        base.OnPaddingChanged(e);
+        PerformLayout();
+        Invalidate();
+    }
+
     /// <summary>子控件横排、竖直居中，按 <see cref="Align"/> 靠边。</summary>
     protected override void OnLayout(LayoutEventArgs levent)
     {
         base.OnLayout(levent);
+        var content = Content;
         var children = Children().Select(child => (Child: child, Size: child.GetPreferredSize(Size.Empty))).ToArray();
         var total = children.Sum(item => item.Size.Width);
-        var x = Align == TableAlign.Center ? (Width - total) / 2 : Align == TableAlign.End ? Width - total : 0;
+        var x = content.X + (Align == TableAlign.Center ? (content.Width - total) / 2 : Align == TableAlign.End ? content.Width - total : 0);
         foreach (var (child, size) in children)
         {
-            child.Bounds = new Rectangle(x, (Height - size.Height) / 2, size.Width, size.Height);
+            child.Bounds = new Rectangle(x, content.Y + (content.Height - size.Height) / 2, size.Width, size.Height);
             x += size.Width;
         }
     }
@@ -601,10 +722,16 @@ public class TableCellControl : Control
     protected override void OnPaint(PaintEventArgs e)
     {
         base.OnPaint(e);
+        if (IsStickyColumn)
+        {
+            using var edge = new SolidBrush(ProviderControl.ThemeOf(this).Colors.BorderMuted);
+            e.Graphics.FillRectangle(edge, Width - LogicalToDeviceUnits(1), 0, LogicalToDeviceUnits(1), Height);
+        }
         if (Controls.Count > 0 || Text.Length == 0) return;
         var color = Enabled ? ForeColor : ProviderControl.ThemeOf(this).Colors.TextDisabled;
-        var height = TextHeight(Text, Font, Width, Flags, Em);
-        DrawText(e.Graphics, Text, Font, new Rectangle(0, (Height - height) / 2, Width, height), color, Flags, Em);
+        var content = Content;
+        var height = TextHeight(Text, Font, content.Width, Flags, Em);
+        DrawText(e.Graphics, Text, Font, new Rectangle(content.X, content.Y + (content.Height - height) / 2, content.Width, height), color, Flags, Em);
     }
 
     /// <summary>文字的高：行数 × 行高 normal（1.5em，GDI 的行距更小）。</summary>

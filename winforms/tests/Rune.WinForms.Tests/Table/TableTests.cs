@@ -67,12 +67,13 @@ public class TableTests
         var table = Build(striped: true);
         using var form = WinFormsUi.Show(table);
 
-        // 两列分满 400 减去外框；每格左右各 space.md（按格自己的字号）
+        // 两列分满 400 减去外框；每格左右各 space.md 的内边距（按格自己的字号）
         var name = Cell(table, 1, 0);
         var value = Cell(table, 1, 1);
         var line = table.LogicalToDeviceUnits(1);
         var padding = (int)MathF.Round(0.75f * name.Font.SizeInPoints * name.DeviceDpi / 72f);
-        Assert.Equal(400 - 2 * line, name.Width + value.Width + 4 * padding);
+        Assert.Equal(400 - 2 * line, name.Width + value.Width); // 格占满整列，内边距是 Padding
+        Assert.Equal(padding, name.Padding.Left);
         Assert.Equal(TableAlign.End, value.Align);
         Assert.Equal([false, true], table.Rows.Where(row => row.Section is TableBodyControl).Select(row => row.Row.IsStriped));
     });

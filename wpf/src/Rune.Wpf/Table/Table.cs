@@ -20,6 +20,8 @@ namespace Rune.Wpf;
 /// </code>
 /// 外观：<see cref="Density"/>、<see cref="Variant"/>（surface / ghost）、<see cref="Striped"/>。列宽按内容分配（同 CSS 的 table-layout: auto），
 /// 放不下时单元格换行，再放不下时横向滚动；表头单元格不换行，<see cref="TableHeaderCell.ColumnWidth"/> 定宽。指针下的行 fillHover 底。
+/// 外层限了高度时 <see cref="StickyHeader"/> 让表头吸顶（<see cref="ScrollAxis"/> 写 Both 或 Y 才能竖着滚），单元格的 <see cref="TableCell.Sticky"/>
+/// 把那一列固定在起始边（常是行标题），结束边一道 borderMuted 的竖线；固定的格用行的底色盖住滚到下面的内容。
 /// 行与单元格逻辑上属于各自的部分与行，可视上由表格里的网格排版、画行底色与分隔线。
 /// </summary>
 [ContentProperty(nameof(Sections))]
@@ -37,6 +39,14 @@ public class Table : FrameworkElement
     public static readonly DependencyProperty StripedProperty = DependencyProperty.Register(nameof(Striped), typeof(bool), typeof(Table),
         new FrameworkPropertyMetadata(false, (d, _) => ((Table)d).Sync()));
 
+    /// <summary>表头吸顶：表格自己竖着滚动时（限了高度、<see cref="ScrollAxis"/> 能竖着滚）表头一直在顶上。</summary>
+    public static readonly DependencyProperty StickyHeaderProperty = DependencyProperty.Register(nameof(StickyHeader), typeof(bool), typeof(Table),
+        new FrameworkPropertyMetadata(false, (d, _) => ((Table)d).grid.InvalidateArrange()));
+
+    /// <summary>表格自己的滚动方向（TS 的 propsRoot 的 axis），默认横向；限了高度的明细表写 Both。</summary>
+    public static readonly DependencyProperty ScrollAxisProperty = DependencyProperty.Register(nameof(ScrollAxis), typeof(ScrollAreaAxis), typeof(Table),
+        new FrameworkPropertyMetadata(ScrollAreaAxis.X, (d, e) => ((Table)d).scroll.Axis = (ScrollAreaAxis)e.NewValue));
+
     readonly Border root = new() { ClipToBounds = true };
     readonly VisualStack stack = new();
     readonly ScrollArea scroll = new() { Axis = ScrollAreaAxis.X };
@@ -48,6 +58,8 @@ public class Table : FrameworkElement
     {
         grid = new TableGrid(this);
         scroll.Content = grid;
+        // 固定的表头、列跟着滚动的位移走（网格就是滚动区域的内容，位移就是滚动的偏移）
+        scroll.ScrollChanged += (_, _) => grid.ApplyStickyOffsets();
         stack.Add(scroll);
         root.Child = stack;
         AddVisualChild(root);
@@ -72,6 +84,12 @@ public class Table : FrameworkElement
 
     /// <summary>斑马纹。</summary>
     public bool Striped { get => (bool)GetValue(StripedProperty); set => SetValue(StripedProperty, value); }
+
+    /// <summary>表头吸顶。</summary>
+    public bool StickyHeader { get => (bool)GetValue(StickyHeaderProperty); set => SetValue(StickyHeaderProperty, value); }
+
+    /// <summary>表格自己的滚动方向。</summary>
+    public ScrollAreaAxis ScrollAxis { get => (ScrollAreaAxis)GetValue(ScrollAxisProperty); set => SetValue(ScrollAxisProperty, value); }
 
     /// <summary>所有行，按表头、表体、表尾的顺序（测试用）。</summary>
     internal IReadOnlyList<(TableSection Section, TableRow Row)> Rows =>
@@ -153,7 +171,10 @@ public class Table : FrameworkElement
             : owner.Sections.OfType<TableCaption>().FirstOrDefault()?.Content?.ToString() ?? "";
     }
 
-    /// <summary>只挂可视子元素的竖排容器：子元素的逻辑父元素在别处（表格的标题、滚动区域）。</summary>
+    /// <summary>
+    /// 只挂可视子元素的竖排容器：子元素的逻辑父元素在别处（表格的标题、滚动区域）。
+    /// 前面的（标题）按内容高，最后一个（滚动区域）拿剩下的高度：表格限了高时竖着滚的是网格，标题不动。
+    /// </summary>
     sealed class VisualStack : FrameworkElement
     {
         readonly List<UIElement> children = [];
@@ -181,11 +202,12 @@ public class Table : FrameworkElement
         protected override Size MeasureOverride(Size availableSize)
         {
             var (width, height) = (0d, 0d);
-            foreach (var child in children)
+            for (var i = 0; i < children.Count; i++)
             {
-                child.Measure(new Size(availableSize.Width, double.PositiveInfinity));
-                width = Math.Max(width, child.DesiredSize.Width);
-                height += child.DesiredSize.Height;
+                var last = i == children.Count - 1;
+                children[i].Measure(new Size(availableSize.Width, last ? Math.Max(0, availableSize.Height - height) : double.PositiveInfinity));
+                width = Math.Max(width, children[i].DesiredSize.Width);
+                height += children[i].DesiredSize.Height;
             }
             return new Size(width, height);
         }
@@ -193,31 +215,68 @@ public class Table : FrameworkElement
         protected override Size ArrangeOverride(Size finalSize)
         {
             var y = 0d;
-            foreach (var child in children)
+            for (var i = 0; i < children.Count; i++)
             {
-                child.Arrange(new Rect(0, y, finalSize.Width, child.DesiredSize.Height));
-                y += child.DesiredSize.Height;
+                var height = i == children.Count - 1 ? Math.Max(0, finalSize.Height - y) : children[i].DesiredSize.Height;
+                children[i].Arrange(new Rect(0, y, finalSize.Width, height));
+                y += height;
             }
             return finalSize;
         }
     }
 
-    /// <summary>网格：所有单元格是它的可视子元素（逻辑上仍属于各自的行）。列宽按内容分配，行高按各格；行底色、分隔线、指针下的行在这里画。</summary>
-    sealed class TableGrid(Table owner) : FrameworkElement
+    /// <summary>
+    /// 网格：所有单元格是它的可视子元素（逻辑上仍属于各自的行）。列宽按内容分配，行高按各格；行底色、分隔线、指针下的行在这里画。
+    /// 固定的表头、列：各有一层底（画对应行的底色，盖住滚到下面的格），跟着滚动的偏移平移。
+    /// 叠放次序就是可视子元素的次序：表体、固定列的底、固定列、表头的底、表头、角的底、角上的格。
+    /// </summary>
+    sealed class TableGrid : FrameworkElement
     {
+        readonly Table owner;
         readonly List<(TableSection Section, TableRow Row, TableCell[] Cells)> rows = [];
-        readonly List<TableCell> cells = [];
+        readonly List<Visual> layers = [];
+        readonly Backdrop headBackdrop, sideBackdrop, cornerBackdrop;
         double[] columns = [];
         double[] heights = [];
+        bool[] stickyColumns = [];
         int hovered = -1;
+        double shiftX, shiftY;
+
+        public TableGrid(Table owner)
+        {
+            this.owner = owner;
+            headBackdrop = new Backdrop(this, head: true, edge: false);
+            sideBackdrop = new Backdrop(this, head: false, edge: true);
+            cornerBackdrop = new Backdrop(this, head: true, edge: true);
+        }
 
         /// <summary>表格的内容宽度（Table 量的时候交过来）。</summary>
         public double TableWidth { get; set; } = double.PositiveInfinity;
 
+        /// <summary>表头的高度（表头各行之和）。</summary>
+        double HeadHeight => rows.Select((row, index) => row.Section is TableHead && index < heights.Length ? heights[index] : 0).Sum();
+
+        /// <summary>固定的列：起始的 x 与总宽（有格写了 Sticky 的列）。</summary>
+        (double Left, double Width) StickySpan
+        {
+            get
+            {
+                var (left, width, x) = (double.NaN, 0d, 0d);
+                for (var i = 0; i < stickyColumns.Length && i < columns.Length; i++)
+                {
+                    if (stickyColumns[i])
+                    {
+                        if (double.IsNaN(left)) left = x;
+                        width += columns[i];
+                    }
+                    x += columns[i];
+                }
+                return (double.IsNaN(left) ? 0 : left, width);
+            }
+        }
+
         public void Rebuild()
         {
-            foreach (var cell in cells) RemoveVisualChild(cell);
-            cells.Clear();
             rows.Clear();
             var bodyIndex = 0;
             foreach (var (section, row) in owner.Rows)
@@ -225,20 +284,32 @@ public class Table : FrameworkElement
                 var items = row.Cells.OfType<TableCell>().ToArray();
                 rows.Add((section, row, items));
                 row.IsStriped = owner.Striped && section is TableBody && bodyIndex++ % 2 == 1;
-                foreach (var cell in items)
-                {
-                    cell.Apply(section);
-                    cells.Add(cell);
-                    AddVisualChild(cell);
-                }
+                foreach (var cell in items) cell.Apply(section);
             }
+            var count = rows.Count == 0 ? 0 : rows.Max(row => row.Cells.Length);
+            stickyColumns = [.. Enumerable.Range(0, count).Select(i => rows.Any(row => i < row.Cells.Length && row.Cells[i].Sticky))];
+            Restack();
             InvalidateMeasure();
-            InvalidateVisual();
+            InvalidateRows();
         }
 
-        protected override int VisualChildrenCount => cells.Count;
+        /// <summary>按层重新挂可视子元素（同 Avalonia 的 ZIndex：表体 0、固定列的底 1、固定列 2、表头的底 3、表头 4、角的底 5、角上的格 6）。</summary>
+        void Restack()
+        {
+            foreach (var visual in layers) RemoveVisualChild(visual);
+            layers.Clear();
+            var cells = rows.SelectMany(row => row.Cells.Select((cell, i) => (Layer: (row.Section is TableHead ? 4 : 0) + (stickyColumns[i] ? 2 : 0), Visual: (Visual)cell)));
+            (int Layer, Visual Visual)[] backdrops = [(1, sideBackdrop), (3, headBackdrop), (5, cornerBackdrop)];
+            foreach (var (_, visual) in cells.Concat(backdrops).OrderBy(item => item.Layer))
+            {
+                layers.Add(visual);
+                AddVisualChild(visual);
+            }
+        }
 
-        protected override Visual GetVisualChild(int index) => cells[index];
+        protected override int VisualChildrenCount => layers.Count;
+
+        protected override Visual GetVisualChild(int index) => layers[index];
 
         Thickness Padding(TableCell cell)
         {
@@ -249,7 +320,7 @@ public class Table : FrameworkElement
 
         protected override Size MeasureOverride(Size availableSize)
         {
-            var count = rows.Count == 0 ? 0 : rows.Max(row => row.Cells.Length);
+            var count = stickyColumns.Length;
             var max = new double[count];
             var min = new double[count];
             var fixedWidths = new double?[count];
@@ -309,18 +380,57 @@ public class Table : FrameworkElement
                 }
                 y += heights[r];
             }
+            var head = HeadHeight;
+            var (left, width) = StickySpan;
+            headBackdrop.Arrange(new Rect(0, 0, finalSize.Width, head));
+            sideBackdrop.Arrange(new Rect(left, head, width, Math.Max(0, finalSize.Height - head)));
+            cornerBackdrop.Arrange(new Rect(left, 0, width, head));
+            ApplyStickyOffsets();
             return finalSize;
         }
 
-        /// <summary>行底色（表头 fill；表体 surface 或页面底色，斑马纹 fill，指针下的行 fillHover）与分隔线（表头下 border，表体行下 borderMuted，表尾上 border）。</summary>
-        protected override void OnRender(DrawingContext context)
+        /// <summary>固定的表头往下移滚动的竖向偏移、固定的列往右移横向偏移（不超出表格）。用变换不重新排版：滚动时只改位移。</summary>
+        public void ApplyStickyOffsets()
         {
-            var width = ActualWidth;
-            var y = 0d;
+            var head = HeadHeight;
+            var (_, width) = StickySpan;
+            var (stickyHead, sticky) = (owner.StickyHeader && head > 0, width > 0);
+            shiftY = stickyHead ? Math.Clamp(owner.scroll.VerticalOffset, 0, Math.Max(0, ActualHeight - head)) : 0;
+            shiftX = sticky ? Math.Clamp(owner.scroll.HorizontalOffset, 0, Math.Max(0, ActualWidth - width)) : 0;
+            headBackdrop.Visibility = stickyHead ? Visibility.Visible : Visibility.Collapsed;
+            sideBackdrop.Visibility = sticky ? Visibility.Visible : Visibility.Collapsed;
+            cornerBackdrop.Visibility = sticky && head > 0 ? Visibility.Visible : Visibility.Collapsed;
+            Shift(headBackdrop, 0, shiftY);
+            Shift(sideBackdrop, shiftX, 0);
+            Shift(cornerBackdrop, shiftX, shiftY);
+            foreach (var (section, _, items) in rows)
+                for (var i = 0; i < items.Length; i++)
+                    Shift(items[i], stickyColumns[i] ? shiftX : 0, section is TableHead ? shiftY : 0);
+
+            static void Shift(UIElement element, double x, double y) =>
+                element.RenderTransform = x == 0 && y == 0 ? Transform.Identity : new TranslateTransform(x, y);
+        }
+
+        void InvalidateRows()
+        {
+            InvalidateVisual();
+            foreach (var backdrop in new[] { headBackdrop, sideBackdrop, cornerBackdrop }) backdrop.InvalidateVisual();
+        }
+
+        protected override void OnRender(DrawingContext context) => DrawRows(context, new Rect(RenderSize), _ => true, edge: false);
+
+        /// <summary>
+        /// 行底色（表头 fill；表体 surface 或页面底色，斑马纹 fill，指针下的行 fillHover）与分隔线（表头下 border，表体行下 borderMuted，表尾上 border），
+        /// 只画 <paramref name="area"/>（网格的坐标）里 <paramref name="include"/> 的行；<paramref name="edge"/> 时在结束边画固定列的竖线。
+        /// </summary>
+        void DrawRows(DrawingContext context, Rect area, Func<TableSection, bool> include, bool edge)
+        {
             Brush? Brush(string key) => owner.TryFindResource(key) as Brush;
             var rowBrush = Brush(owner.Variant == TableVariant.Ghost ? "Rune.Brush.Background" : "Rune.Brush.Surface");
+            context.PushTransform(new TranslateTransform(-area.X, -area.Y));
             // 行的上下边吸附到设备像素（同浏览器画表格）：行高带小数时分隔线不发虚
             var guidelines = new GuidelineSet();
+            var y = 0d;
             foreach (var height in heights)
             {
                 guidelines.GuidelinesY.Add(y);
@@ -334,44 +444,64 @@ public class Table : FrameworkElement
             {
                 var (section, row, _) = rows[r];
                 var height = heights[r];
-                var background = section is TableHead ? Brush("Rune.Brush.Fill")
-                    : r == hovered && section is TableBody ? Brush("Rune.Brush.FillHover")
-                    : row.IsStriped ? Brush("Rune.Brush.Fill") : rowBrush;
-                if (background is not null) context.DrawRectangle(background, null, new Rect(0, y, width, height));
-                if (section is TableFoot)
+                if (include(section))
                 {
-                    if (Brush("Rune.Brush.Border") is { } line) context.DrawRectangle(line, null, new Rect(0, y, width, 1));
+                    var background = section is TableHead ? Brush("Rune.Brush.Fill")
+                        : r == hovered && section is TableBody ? Brush("Rune.Brush.FillHover")
+                        : row.IsStriped ? Brush("Rune.Brush.Fill") : rowBrush;
+                    if (background is not null) context.DrawRectangle(background, null, new Rect(area.X, y, area.Width, height));
+                    if (section is TableFoot)
+                    {
+                        if (Brush("Rune.Brush.Border") is { } line) context.DrawRectangle(line, null, new Rect(area.X, y, area.Width, 1));
+                    }
+                    else if (Brush(section is TableHead ? "Rune.Brush.Border" : "Rune.Brush.BorderMuted") is { } line)
+                        context.DrawRectangle(line, null, new Rect(area.X, y + height - 1, area.Width, 1));
+                    if (edge && Brush("Rune.Brush.BorderMuted") is { } side) context.DrawRectangle(side, null, new Rect(area.Right - 1, y, 1, height));
                 }
-                else if (Brush(section is TableHead ? "Rune.Brush.Border" : "Rune.Brush.BorderMuted") is { } line)
-                    context.DrawRectangle(line, null, new Rect(0, y + height - 1, width, 1));
                 y += height;
             }
             context.Pop();
+            context.Pop();
+        }
+
+        /// <summary>指针所在的行；吸顶的表头盖着的地方算表头（不高亮下面的表体行）。</summary>
+        int RowAt(double y)
+        {
+            if (shiftY > 0 && y >= shiftY && y < shiftY + HeadHeight) return -1;
+            var top = 0d;
+            for (var r = 0; r < heights.Length; top += heights[r], r++)
+                if (y >= top && y < top + heights[r]) return r;
+            return -1;
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
-            var y = e.GetPosition(this).Y;
-            var index = -1;
-            var top = 0d;
-            for (var r = 0; r < heights.Length; top += heights[r], r++)
-                if (y >= top && y < top + heights[r]) index = r;
+            var index = RowAt(e.GetPosition(this).Y);
             if (index == hovered) return;
             hovered = index;
-            InvalidateVisual();
+            InvalidateRows();
         }
 
         protected override void OnMouseLeave(MouseEventArgs e)
         {
             base.OnMouseLeave(e);
             hovered = -1;
-            InvalidateVisual();
+            InvalidateRows();
         }
 
         // 只画背景：命中测试交给单元格，空白处也要能收到指针移动
         protected override HitTestResult? HitTestCore(PointHitTestParameters hitTestParameters) =>
             new Rect(RenderSize).Contains(hitTestParameters.HitPoint) ? new PointHitTestResult(this, hitTestParameters.HitPoint) : null;
+
+        /// <summary>固定的表头、列下面的一层：按自己在网格里的位置画对应的行；固定列的那几层在结束边画竖线。不参与命中测试。</summary>
+        sealed class Backdrop(TableGrid grid, bool head, bool edge) : FrameworkElement
+        {
+            protected override void OnRender(DrawingContext context) =>
+                grid.DrawRows(context, new Rect((Point)VisualTreeHelper.GetOffset(this), RenderSize), section => head == section is TableHead, edge);
+
+            protected override HitTestResult? HitTestCore(PointHitTestParameters hitTestParameters) => null;
+        }
     }
 }
 
@@ -457,6 +587,10 @@ public class TableCell : ContentControl
     /// <summary>不换行（超出时省略号）。</summary>
     public static readonly DependencyProperty NowrapProperty = DependencyProperty.Register(nameof(Nowrap), typeof(bool), typeof(TableCell));
 
+    /// <summary>固定在起始边（第一列，常是行标题）：表格横向滚动时一直看得到；一列里有格写了就整列固定。</summary>
+    public static readonly DependencyProperty StickyProperty = DependencyProperty.Register(nameof(Sticky), typeof(bool), typeof(TableCell),
+        new FrameworkPropertyMetadata(false, (d, _) => ((TableCell)d).OwnerTable?.Sync()));
+
     static readonly DependencyPropertyKey SectionKindKey = DependencyProperty.RegisterReadOnly(nameof(SectionKind), typeof(string), typeof(TableCell), new PropertyMetadata("body"));
 
     /// <summary>所在的部分：head、body、foot（主题的触发器按它切换外观）。</summary>
@@ -474,8 +608,14 @@ public class TableCell : ContentControl
     /// <summary>不换行。</summary>
     public bool Nowrap { get => (bool)GetValue(NowrapProperty); set => SetValue(NowrapProperty, value); }
 
+    /// <summary>固定在起始边。</summary>
+    public bool Sticky { get => (bool)GetValue(StickyProperty); set => SetValue(StickyProperty, value); }
+
     /// <summary>所在的部分。</summary>
     public string SectionKind => (string)GetValue(SectionKindProperty);
+
+    /// <summary>所在的表格（格、行、部分、表格逐级是逻辑父元素）。</summary>
+    Table? OwnerTable => ((Parent as TableRow)?.Parent as TableSection)?.Parent as Table;
 
     void ApplyAlign() => HorizontalContentAlignment = Align == TableAlign.Center ? HorizontalAlignment.Center : Align == TableAlign.End ? HorizontalAlignment.Right : HorizontalAlignment.Left;
 
