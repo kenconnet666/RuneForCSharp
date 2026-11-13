@@ -1,3 +1,4 @@
+using System.Globalization;
 using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Controls;
@@ -12,6 +13,7 @@ static class ScrollAreaExamples
     [
         new("ScrollArea", "vertical", "纵向滚动", "高度（或最大高度）由使用方给。区域可以用 Tab 聚焦、用方向键滚动，名称写在 AutomationProperties.Name 上；滚动条对读屏隐藏。", Inbox),
         new("ScrollArea", "horizontal", "横向滚动", "Axis=\"x\" 横向滚动，纵向超出的裁掉。滚动条浮在内容上，底部留出一点空，免得盖住卡片。", Playlists),
+        new("ScrollArea", "both", "两个方向", "宽表格、电子表格：Table 自己就有滚动区域，ScrollAxis=\"Both\" 并限高；表头吸顶（StickyHeader），行号固定在起始边（TableCell.Sticky）。", Sheet),
         new("ScrollArea", "types", "什么时候显示滚动条", "Type 三种显示时机；淡出前的停留时间是 HideDelay。", Types),
     ];
 
@@ -142,4 +144,27 @@ static class ScrollAreaExamples
             Encode(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s),
             Encode(-0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s));
     }
+
+    /// <summary>两个方向都能滚的明细表：表头吸顶，行号那一列固定。</summary>
+    static Control Sheet()
+    {
+        var head = new TableRow();
+        var corner = new TableHeaderCell { Sticky = true, ColumnWidth = 48 };
+        AutomationProperties.SetName(corner, "行号");
+        head.Cells.Add(corner);
+        for (var c = 0; c < 14; c++) head.Cells.Add(new TableHeaderCell { Align = TableAlign.Center, ColumnWidth = 88, Content = ((char)('A' + c)).ToString() });
+        var body = new TableBody();
+        for (var r = 1; r <= 30; r++)
+        {
+            var row = new TableRow { Cells = { new TableHeaderCell { Scope = "row", Sticky = true, Content = r.ToString(CultureInfo.InvariantCulture) } } };
+            for (var c = 0; c < 14; c++) row.Cells.Add(new TableCell { Align = TableAlign.End, Nowrap = true, Content = Value(r, c).ToString("F2", CultureInfo.InvariantCulture) });
+            body.Rows.Add(row);
+        }
+        var table = new Table { Density = TableDensity.Compact, StickyHeader = true, ScrollAxis = ScrollAreaAxis.Both, Height = 288, Sections = { new TableHead { Rows = { head } }, body } };
+        AutomationProperties.SetName(table, "销售明细表");
+        return table;
+    }
+
+    /// <summary>每格的数（同上游 demo 的算法：看起来随机、每次一样）。</summary>
+    static double Value(int row, int column) => (row * 7919 + column * 104_729) % 100_000 / 100d;
 }

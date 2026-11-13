@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Drawing.Drawing2D;
 
 namespace Rune.WinForms.Examples;
@@ -12,6 +13,7 @@ static class ScrollAreaExamples
     [
         new("ScrollArea", "vertical", "纵向滚动", "高度由使用方给，内容放进 Content。区域可以用 Tab 聚焦、用方向键滚动，名称写在 AccessibleName 上。", Inbox),
         new("ScrollArea", "horizontal", "横向滚动", "Axis = x 横向滚动，纵向超出的裁掉。滚动条浮在内容上，底部留出一点空，免得盖住卡片。", Playlists),
+        new("ScrollArea", "both", "两个方向", "宽表格、电子表格：TableControl 放进 Axis = Both、限高的滚动区域；表头吸顶（StickyHeader），行号固定在起始边（TableCellControl.Sticky）。", Sheet),
         new("ScrollArea", "types", "什么时候显示滚动条", "Type 三种显示时机；隐藏前的停留时间是 HideDelay。", Types),
     ];
 
@@ -136,4 +138,25 @@ static class ScrollAreaExamples
             Encode(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s),
             Encode(-0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s));
     }
+
+    /// <summary>两个方向都能滚的明细表：表格放进限高的滚动区域，表头吸顶，行号那一列固定。</summary>
+    static Control Sheet()
+    {
+        var head = new TableRowControl();
+        head.Controls.Add(new TableHeaderCellControl { Sticky = true, ColumnWidth = 48, AccessibleName = "行号" });
+        for (var c = 0; c < 14; c++) head.Controls.Add(new TableHeaderCellControl { Align = TableAlign.Center, ColumnWidth = 88, Text = ((char)('A' + c)).ToString() });
+        var body = new TableBodyControl();
+        for (var r = 1; r <= 30; r++)
+        {
+            var row = new TableRowControl();
+            row.Controls.Add(new TableHeaderCellControl { Scope = "row", Sticky = true, Text = r.ToString(CultureInfo.InvariantCulture) });
+            for (var c = 0; c < 14; c++) row.Controls.Add(new TableCellControl { Align = TableAlign.End, Nowrap = true, Text = Value(r, c).ToString("F2", CultureInfo.InvariantCulture) });
+            body.Controls.Add(row);
+        }
+        var table = new TableControl { Density = TableDensity.Compact, StickyHeader = true, AccessibleName = "销售明细表", Controls = { new TableHeadControl { Controls = { head } }, body } };
+        return new ScrollAreaControl { Axis = ScrollAreaAxis.Both, Height = 288, Width = 560, Content = table, AccessibleName = "销售明细表" };
+    }
+
+    /// <summary>每格的数（同上游 demo 的算法：看起来随机、每次一样）。</summary>
+    static double Value(int row, int column) => (row * 7919 + column * 104_729) % 100_000 / 100d;
 }

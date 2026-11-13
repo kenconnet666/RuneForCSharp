@@ -77,4 +77,50 @@ public class TableTests
         Assert.Equal(TableAlign.End, value.Align);
         Assert.Equal([false, true], table.Rows.Where(row => row.Section is TableBodyControl).Select(row => row.Row.IsStriped));
     });
+
+    /// <summary>两个方向都能滚的明细表放进限高的滚动区域（同文档站 ScrollArea 页的 both 示例）：表头吸顶，行号那一列固定。</summary>
+    static (ScrollAreaControl Area, TableControl Table) Sheet()
+    {
+        static TableRowControl Row(TableCellControl first, IEnumerable<TableCellControl> rest)
+        {
+            var row = new TableRowControl();
+            row.Controls.Add(first);
+            foreach (var cell in rest) row.Controls.Add(cell);
+            return row;
+        }
+        var head = new TableHeadControl();
+        head.Controls.Add(Row(new TableHeaderCellControl { Sticky = true, ColumnWidth = 48, Text = "行" }, Enumerable.Range(0, 14).Select(c => new TableHeaderCellControl { ColumnWidth = 88, Text = ((char)('A' + c)).ToString() })));
+        var body = new TableBodyControl();
+        for (var r = 1; r <= 30; r++)
+            body.Controls.Add(Row(new TableHeaderCellControl { Scope = "row", Sticky = true, Text = r.ToString(System.Globalization.CultureInfo.InvariantCulture) }, Enumerable.Range(0, 14).Select(_ => new TableCellControl { Nowrap = true, Text = "12.34" })));
+        var table = new TableControl { StickyHeader = true, Controls = { head, body } };
+        return (new ScrollAreaControl { Axis = ScrollAreaAxis.Both, Size = new Size(400, 288), Content = table }, table);
+    }
+
+    [Fact]
+    [Upstream("Table", "stickyHeader 与 sticky：滚动后表头贴着顶边、第一列贴着起始边")]
+    public Task The_sticky_header_and_column_stay_put_while_scrolling() => WinFormsUi.Run(() =>
+    {
+        var (area, table) = Sheet();
+        using var form = WinFormsUi.Show(area);
+        Point At(Control cell) => area.PointToClient(cell.PointToScreen(Point.Empty));
+        var (corner, header, rowLabel, body) = (Cell(table, 0, 0), Cell(table, 0, 5), Cell(table, 10, 0), Cell(table, 10, 5));
+        var before = (corner: At(corner), header: At(header), rowLabel: At(rowLabel), body: At(body));
+        Assert.True(table.Width > area.Width); // 各列最小宽度放不下：表格比滚动区域宽
+
+        area.ScrollOffset = new Point(200, 150);
+        WinFormsUi.Pump();
+
+        var border = table.LogicalToDeviceUnits(1);
+        Assert.Equal(before.corner - new Size(border, border), At(corner)); // 角上的格贴着左上（外框滚走了）
+        Assert.Equal(before.header.Y - border, At(header).Y); // 表头贴着顶边
+        Assert.Equal(before.header.X - 200, At(header).X); // 横向照常滚
+        Assert.Equal(before.rowLabel.X - border, At(rowLabel).X); // 第一列贴着起始边
+        Assert.Equal(before.rowLabel.Y - 150, At(rowLabel).Y); // 竖向照常滚
+        Assert.Equal(before.body - new Size(200, 150), At(body)); // 别的格两个方向都滚
+        Assert.True(rowLabel.IsStickyColumn);
+        // 叠放：表头的部分在表体上面，固定的格在同一行的别的格上面（子控件序号小的在上）
+        Assert.Equal(0, table.Controls.IndexOf(corner.Parent!.Parent));
+        Assert.Equal(0, rowLabel.Parent!.Controls.IndexOf(rowLabel));
+    });
 }

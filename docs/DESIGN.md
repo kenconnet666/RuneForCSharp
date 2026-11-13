@@ -665,7 +665,14 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - **WPF**：同样的结构（FrameworkElement，AddLogicalChild / AddVisualChild），单元格按只读的 SectionKind 触发外观（Table.xaml）。分隔线用 GuidelineSet 吸附。
 - **WinForms**：TableControl、TableCaptionControl、TableHead/Body/FootControl、TableRowControl、TableCellControl、TableHeaderCellControl，都是子控件，位置由 TableControl 排；
   单元格里是 Text（按行高 normal 竖直居中画）或子控件（横排、竖直居中）。行透明（先画出表格的圆角外框），底色按表格内框的圆角裁。
-  GDI+ 默认像素中心在整数坐标上，整数坐标的 2 像素边线会压在两行之间发虚：外框与行用 PixelOffsetMode.Half。没做最小宽度也放不下时的横向滚动。
+  GDI+ 默认像素中心在整数坐标上，整数坐标的 2 像素边线会压在两行之间发虚：外框与行用 PixelOffsetMode.Half。单元格占满整列、内边距是它的 Padding（同 td 的盒子）。
+  最小宽度也放不下时表格比给的宽，外面套 ScrollAreaControl 滚动（上游表格的外层自己就是滚动区域）。
+- 表头吸顶与固定列（上游 9a57a058 的 stickyHeader、sticky，CSS 的 position: sticky）：Avalonia、WPF 的 Table 加 ScrollAxis（propsRoot 的 axis），
+  竖排容器把标题以下的高度都给滚动区域，限了高就是网格竖着滚。滚动时不重新排版，只给固定的格平移滚动的偏移（不超出表格）；固定的表头、固定的列、两者相交的角
+  各有一层底，画对应行的底色盖住滚到下面的格（sticky 的格在 CSS 里继承行的底色），固定列那几层在结束边画 borderMuted 的竖线。叠放：Avalonia 用 ZIndex，
+  WPF 的自绘元素没有 ZIndex，按层的先后重新挂可视子元素。吸顶的表头盖着的地方不高亮下面的表体行。WinForms 跟着外面 ScrollAreaControl 的偏移挪表头这个部分
+  与固定的格：子控件序号小的叠在上面，前面的列本来就在后面的列上面，只有表头要提到最上；透明的格只透出父控件（行）的底色，不透出兄弟控件，正好盖住滚到下面的格。
+  Avalonia 的行线吸附不能用 Math.Round：它是银行家舍入，行高带 .5 时一条线的两边差出 2 像素。示例在 ScrollArea 页（both）。
 - 像素对照（plans）：Avalonia 0.08% / 0.12%、WPF 0.05% / 0.38%、WinForms 0.32% / 0.41%。剩下的主要是表头那一行：上游是文字加行内的徽标（vertical-align: middle），
   行盒撑到 21.99，我们的 Flex 是 21，下面的行线差半个像素。示例：plans；invoice 要等 ToggleGroup，column-table 要等 ColumnTable。
 

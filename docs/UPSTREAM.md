@@ -48,7 +48,7 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 | FilterBar 按钮区成为条件栅格的最后一格；QueryTable 查询栏与工具栏分开（a6ffbb54） | 还没做 | 做时照新的 |
 | Grid / GridList 的 balanced（b0baadf5） | 已做 | 跟到 ad4a77ac 时做了：孪生文件 GridLayout 加 BalancedColumns，三个平台的 Grid 加 Balanced |
 | Sparkline 的柱在 showLast 时最新一根实色，删 variant | 还没做 | 做时照新的 |
-| 静态 Table 的 stickyHeader、单元格的 sticky（9a57a058） | 已做 Table | 等它的 CI 绿了下次锁定时做 |
+| 静态 Table 的 stickyHeader、单元格的 sticky（9a57a058） | 已做 Table | 2026-11-14 做了（1873c1a），见第三批 |
 | ProportionBar 图例从起始边排、列间距 lg；CommentThread、NotificationCenter 用 RelativeTime | 还没做 | 做时照新的 |
 | Listbox 根元素补上部件标记，border-box 罩得到（ff185e89） | 修了我们报的高度问题 | 下次锁定时重截 listbox multiple |
 | FilterBar / QueryTable 重做（cad81082，作废 a6ffbb54 那版）：标题单独一列，第一排条件 auto-fit 加按钮区（展开、高级筛选、actions、重置、查询、竖线、end），其余条件从第二排 auto-fill；minFieldWidth 默认 14em，加 propsBody、propsRow | 还没做 | 做时照 cad81082 |
@@ -63,7 +63,7 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 | 单选、复选的卡片外观（554b7246）：card、横排按 minItemWidth（默认 14em）auto-fill；Radio、Checkbox 加 end、propsEnd | 已做 Checkbox、Radio | 这次做 |
 | ItemList 整条可点、selected、disabled（0950975c） | 还没做 | 做时照新的 |
 | 可选中的 Tag（0f69e5c5）：_selected 时是按钮（aria-pressed），没选中 surface、选中 solid 加对勾，默认 accent、sm | 已做 Tag | 这次做 |
-| 静态 Table 的 stickyHeader、sticky（9a57a058，这次锁定才进来） | 已做 Table | 这次做 |
+| 静态 Table 的 stickyHeader、sticky（9a57a058，这次锁定才进来） | 已做 Table | 2026-11-14 做了（1873c1a）：Avalonia、WPF 加 Table.StickyHeader、ScrollAxis（propsRoot 的 axis）与 TableCell.Sticky；WinForms 跟着外面的 ScrollAreaControl 挪；三个平台补了 ScrollArea 的 both 示例 |
 | ScrollArea 各部件带标记、border-box（6160d6d2） | 网页的部件标记与盒模型，桌面上本来就是 border-box | 不涉及 |
 | 链接下划线 LinkUnderlineScope（ff221742）：显式 > 容器给的 > defaults.Link > always；ItemList、Stat、Timeline 等整块 hover，Card 只给页头 | 已做 Link、Card | 这次做；ItemList、Stat、Timeline、Descriptions、Checklist 做时照做 |
 | Upload 接父级放进来的待上传文件（ff221742） | 还没做 | 做时照新的 |
