@@ -216,6 +216,24 @@ public sealed partial record Lang
     /// <summary>SchemaForm 列表字段删一行的按钮：`('联系人', 2)` → “删除第 2 个联系人”</summary>
     public required Func<string, double, string> FormRemoveRow { get; init; }
 
+    /// <summary>明细表里一行的说明（格子里控件的读屏标签：“单价（第 2 个明细）”）</summary>
+    public required Func<string, double, string> FormRowLabel { get; init; }
+
+    /// <summary>明细表操作列的表头（只给读屏）</summary>
+    public required string FormRowActions { get; init; }
+
+    /// <summary>表单页签那一排的读屏名</summary>
+    public required string FormTabs { get; init; }
+
+    /// <summary>只读视图（SchemaView）里开关、复选框打开时的值</summary>
+    public required string FormValueTrue { get; init; }
+
+    /// <summary>只读视图里开关、复选框关着时的值</summary>
+    public required string FormValueFalse { get; init; }
+
+    /// <summary>只读视图里没有值时显示的</summary>
+    public required string FormValueEmpty { get; init; }
+
     /// <summary>未保存离开时确认对话框的标题，默认“离开这个页面？”</summary>
     public required string LeaveTitle { get; init; }
 
@@ -1094,6 +1112,12 @@ public sealed partial record Lang
         FormReset = "重置",
         FormAddRow = label => $"添加{label}",
         FormRemoveRow = (label, index) => string.Create(CultureInfo.InvariantCulture, $"删除第 {index} 个{label}"),
+        FormRowLabel = (label, index) => string.Create(CultureInfo.InvariantCulture, $"第 {index} 个{label}"),
+        FormRowActions = "操作",
+        FormTabs = "表单分页",
+        FormValueTrue = "是",
+        FormValueFalse = "否",
+        FormValueEmpty = "—",
         LeaveTitle = "离开这个页面？",
         LeaveDescription = "有未保存的修改，离开后会丢失。",
         LeaveConfirm = "离开",
@@ -1510,6 +1534,12 @@ public sealed partial record Lang
         FormReset = "Reset",
         FormAddRow = label => $"Add {label}",
         FormRemoveRow = (label, index) => string.Create(CultureInfo.InvariantCulture, $"Remove {label} {index}"),
+        FormRowLabel = (label, index) => string.Create(CultureInfo.InvariantCulture, $"{label} {index}"),
+        FormRowActions = "Actions",
+        FormTabs = "Form sections",
+        FormValueTrue = "Yes",
+        FormValueFalse = "No",
+        FormValueEmpty = "—",
         LeaveTitle = "Leave this page?",
         LeaveDescription = "You have unsaved changes that will be lost.",
         LeaveConfirm = "Leave",

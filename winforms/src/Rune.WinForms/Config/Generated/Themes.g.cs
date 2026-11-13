@@ -50,7 +50,7 @@ public sealed class ThemeColors
     /// <summary>accent = #3e63dd：品牌色实色：主按钮、选中的复选框。indigo 9：两套主题都是 `#3e63dd`</summary>
     public required Color Accent { get; init; }
 
-    /// <summary>accentHover = #3358d4：品牌色实色悬停。亮色 indigo 10 `#3358d4`；暗色比实色更深一点 `#3758d4`（indigo 10 `#5472e4` 配白字只有 4.28:1）</summary>
+    /// <summary>accentHover = #3358d4：品牌色实色悬停。亮色 indigo 10 `#3358d4`；暗色调亮到白字仍有 4.6:1 的 `#4a6ddf`（indigo 10 `#5472e4` 配白字只有 4.28:1；暗色里调暗看不出悬停）</summary>
     public required Color AccentHover { get; init; }
 
     /// <summary>accentContrast = #ffffff：品牌色实色上的文字与图标。Radix 规定 indigo 9 上用白字：`#ffffff`</summary>
@@ -71,7 +71,7 @@ public sealed class ThemeColors
     /// <summary>danger = #ce2c31：危险实色：危险按钮的底色，上面放 dangerContrast（白色）文字，要满足 4.5:1。 red 9 配白字只有 3.91:1，所以亮色用 red 11 `#ce2c31`（5.21:1），暗色用 red 8 `#b54548`（5.37:1）</summary>
     public required Color Danger { get; init; }
 
-    /// <summary>dangerHover = #b8272c：危险实色悬停：比实色更深一点，白字才满足 4.5:1（red 10 只有 4.37:1）。亮色 `#b8272c`，暗色 `#a33b3e`</summary>
+    /// <summary>dangerHover = #b8272c：危险实色悬停：亮色比实色更深一点 `#b8272c`（red 10 配白字只有 4.37:1）；暗色调亮到白字仍有 4.6:1 的 `#bd5356`（暗色里调暗看不出悬停）</summary>
     public required Color DangerHover { get; init; }
 
     /// <summary>dangerContrast = #ffffff：危险实色上的文字与图标：`#ffffff`</summary>
@@ -469,14 +469,14 @@ public static class BuiltinThemes
             Border = Color.FromArgb(255, 67, 72, 78),
             BorderStrong = Color.FromArgb(255, 90, 97, 105),
             Accent = Color.FromArgb(255, 62, 99, 221),
-            AccentHover = Color.FromArgb(255, 55, 88, 212),
+            AccentHover = Color.FromArgb(255, 74, 109, 223),
             AccentContrast = Color.FromArgb(255, 255, 255, 255),
             AccentText = Color.FromArgb(255, 158, 177, 255),
             AccentSoft = Color.FromArgb(255, 24, 36, 73),
             AccentSoftHover = Color.FromArgb(255, 29, 46, 98),
             AccentBorder = Color.FromArgb(255, 58, 79, 151),
             Danger = Color.FromArgb(255, 181, 69, 72),
-            DangerHover = Color.FromArgb(255, 163, 59, 62),
+            DangerHover = Color.FromArgb(255, 189, 83, 86),
             DangerContrast = Color.FromArgb(255, 255, 255, 255),
             DangerText = Color.FromArgb(255, 255, 149, 146),
             DangerSoft = Color.FromArgb(255, 59, 18, 25),
@@ -706,7 +706,7 @@ public static class BuiltinThemes
             AccentSoftHover = Color.FromArgb(255, 0, 56, 72),
             AccentBorder = Color.FromArgb(255, 4, 84, 104),
             Danger = Color.FromArgb(255, 181, 69, 72),
-            DangerHover = Color.FromArgb(255, 163, 59, 62),
+            DangerHover = Color.FromArgb(255, 189, 83, 86),
             DangerContrast = Color.FromArgb(255, 255, 255, 255),
             DangerText = Color.FromArgb(255, 255, 149, 146),
             DangerSoft = Color.FromArgb(255, 59, 18, 25),
@@ -1856,7 +1856,7 @@ public static class BuiltinThemes
             AccentSoftHover = Color.FromArgb(255, 70, 33, 0),
             AccentBorder = Color.FromArgb(255, 126, 69, 29),
             Danger = Color.FromArgb(255, 181, 69, 72),
-            DangerHover = Color.FromArgb(255, 163, 59, 62),
+            DangerHover = Color.FromArgb(255, 189, 83, 86),
             DangerContrast = Color.FromArgb(255, 255, 255, 255),
             DangerText = Color.FromArgb(255, 255, 149, 146),
             DangerSoft = Color.FromArgb(255, 59, 18, 25),
