@@ -50,6 +50,7 @@
     <ResourceDictionary Source="/Rune.Wpf;component/Overlay/Dialog/Dialog.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Overlay/CommandPalette/CommandPalette.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Overlay/Popover/Popover.xaml" />
+    <ResourceDictionary Source="/Rune.Wpf;component/Overlay/Menu/Menu.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Patterns/AppShell/AppShell.xaml" />
   </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>

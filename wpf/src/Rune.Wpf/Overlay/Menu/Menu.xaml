@@ -1,0 +1,83 @@
+<!--
+  菜单项的主题样式（vue-tsx-pro 的 menuRecipe 与 itemStyles.row）：一行里勾选标记、图标、文字（有说明时文字与说明上下排）、快捷键、子菜单箭头横排，
+  隔 space.sm；高度不低于控件高度，上下 space.xs、左右 space.sm、sm 圆角，正文色、正文字重、行高 normal。
+  悬停 fillHover；破坏性操作 dangerText、悬停 dangerSoft；不可用时变淡。标记没勾时只占位；快捷键、箭头离文字 space.lg（代码里按字号设）；
+  说明、快捷键、分组标题 textMuted、sm（分组标题中等字重）。
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Rune.Wpf;component/Base/Button/Button.xaml" />
+    <ResourceDictionary Source="/Rune.Wpf;component/Base/Text/Text.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <Style TargetType="rune:MenuItemBase" BasedOn="{StaticResource {x:Type rune:ButtonBase}}">
+    <Setter Property="rune:ControlHeight.MinHeight" Value="True" />
+    <Setter Property="rune:EmSize.Padding" Value="0.5,0.25" />
+    <Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.Sm}" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Normal}" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="rune:EmSize.LineHeight" Value="{DynamicResource Rune.LineHeight.Normal}" />
+    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Normal}" />
+    <Setter Property="TextBlock.LineStackingStrategy" Value="BlockLineHeight" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="rune:MenuItemBase">
+          <Grid>
+            <Border x:Name="PART_Root" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}" rune:BrushTransition.Enabled="True">
+              <Grid>
+                <Canvas x:Name="PART_Ripples" IsHitTestVisible="False" />
+                <rune:Flex Align="center" Gap="sm" Margin="{TemplateBinding Padding}">
+                  <rune:Icon x:Name="PART_Indicator" Data="{TemplateBinding Mark}" Opacity="0" VerticalAlignment="Center" />
+                  <rune:Icon x:Name="PART_Icon" Data="{TemplateBinding Icon}" VerticalAlignment="Center" />
+                  <StackPanel rune:Flex.Grow="True" VerticalAlignment="Center">
+                    <ContentPresenter x:Name="PART_Label" />
+                    <ContentPresenter x:Name="PART_Description" Content="{TemplateBinding Description}"
+                                      Style="{DynamicResource {x:Static rune:MenuItemParts.DescriptionStyle}}" />
+                  </StackPanel>
+                  <rune:Text x:Name="PART_Shortcut" Text="{TemplateBinding ShortcutText}" Tone="muted" Size="sm" VerticalAlignment="Center" />
+                  <rune:Icon x:Name="PART_Chevron" Data="{x:Static rune:Lucide.ChevronRight}" Visibility="Collapsed" VerticalAlignment="Center" />
+                </rune:Flex>
+              </Grid>
+            </Border>
+            <Border x:Name="PART_FocusRing" Visibility="Collapsed" IsHitTestVisible="False" BorderThickness="2" BorderBrush="{DynamicResource Rune.Brush.FocusRing}" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsFocusVisible" Value="True"><Setter TargetName="PART_FocusRing" Property="Visibility" Value="Visible" /></Trigger>
+            <Trigger Property="Mark" Value="{x:Null}"><Setter TargetName="PART_Indicator" Property="Visibility" Value="Collapsed" /></Trigger>
+            <Trigger Property="IsMarked" Value="True"><Setter TargetName="PART_Indicator" Property="Opacity" Value="1" /></Trigger>
+            <Trigger Property="Icon" Value="{x:Null}"><Setter TargetName="PART_Icon" Property="Visibility" Value="Collapsed" /></Trigger>
+            <Trigger Property="Description" Value="{x:Null}"><Setter TargetName="PART_Description" Property="Visibility" Value="Collapsed" /></Trigger>
+            <Trigger Property="ShortcutText" Value="{x:Null}"><Setter TargetName="PART_Shortcut" Property="Visibility" Value="Collapsed" /></Trigger>
+            <Trigger Property="IsSubmenu" Value="True"><Setter TargetName="PART_Chevron" Property="Visibility" Value="Visible" /></Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <Style.Triggers>
+      <Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="{DynamicResource Rune.Brush.FillHover}" /></Trigger>
+      <Trigger Property="IsDanger" Value="True"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.DangerText}" /></Trigger>
+      <MultiTrigger>
+        <MultiTrigger.Conditions>
+          <Condition Property="IsDanger" Value="True" />
+          <Condition Property="IsMouseOver" Value="True" />
+        </MultiTrigger.Conditions>
+        <Setter Property="Background" Value="{DynamicResource Rune.Brush.DangerSoft}" />
+      </MultiTrigger>
+      <Trigger Property="IsEnabled" Value="False">
+        <Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" />
+        <Setter Property="Background" Value="Transparent" />
+      </Trigger>
+    </Style.Triggers>
+  </Style>
+
+  <!-- 部件的默认外观写在部件样式里（DESIGN §7） -->
+  <Style x:Key="{x:Static rune:MenuItemParts.DescriptionStyle}" TargetType="ContentPresenter">
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+    <Setter Property="TextElement.FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
+  </Style>
+  <Style x:Key="{x:Static rune:MenuItemParts.GroupLabel}" TargetType="rune:Text" BasedOn="{StaticResource {x:Type rune:Text}}" />
+</ResourceDictionary>

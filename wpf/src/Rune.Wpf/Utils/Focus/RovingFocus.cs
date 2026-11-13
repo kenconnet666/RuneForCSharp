@@ -6,7 +6,7 @@ namespace Rune.Wpf;
 
 /// <summary>
 /// 漫游焦点（vue-tsx-pro 的 rovingFocus，WAI-ARIA 的 roving tabindex）：一组项里只有一个是 Tab 停靠点，其余不停；
-/// 组内用方向键移动，Home / End 到两端。Toolbar 用它，以后的 Tabs、Menu、ToggleGroup 同样用。
+/// 组内用方向键移动，Home / End 到两端。Toolbar 用它，Tabs、Menu、ToggleGroup 同样用。
 /// 不可用、隐藏的项跳过；Tab 进入时落在上次聚焦的项，没有时是 <see cref="Preferred"/> 选出的项或第一项。从右到左排版时左右键反过来。
 /// </summary>
 sealed class RovingFocus
@@ -14,6 +14,7 @@ sealed class RovingFocus
     readonly FrameworkElement container;
     readonly Func<DependencyObject, bool> isItem;
     UIElement? current;
+    global::Rune.Wpf.Typeahead? search;
 
     /// <summary>开始管理容器里各项的焦点。</summary>
     /// <param name="container">容器。</param>
@@ -24,6 +25,8 @@ sealed class RovingFocus
         this.isItem = isItem;
         container.AddHandler(UIElement.KeyDownEvent, new KeyEventHandler(OnKeyDown));
         container.AddHandler(UIElement.GotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(OnGotFocus));
+        // 键盘事件里没有输入的字符：类型搜索接文字输入（焦点所在的项收到）
+        container.AddHandler(UIElement.TextInputEvent, new TextCompositionEventHandler(OnTextInput));
     }
 
     /// <summary>方向键的方向：horizontal 左右键，vertical 上下键，both 四个都行。</summary>
@@ -34,6 +37,12 @@ sealed class RovingFocus
 
     /// <summary>还没聚焦过时优先作 Tab 停靠点的项（分段控件的选中项）；没有时是第一项。</summary>
     public Func<UIElement, bool>? Preferred { get; set; }
+
+    /// <summary>按字母跳到以它开头的项（菜单）：匹配 <see cref="TextOf"/> 给的文字，规则同 Listbox（<see cref="global::Rune.Wpf.Typeahead"/>）。</summary>
+    public bool Typeahead { get => search is not null; set => search = value ? new global::Rune.Wpf.Typeahead() : null; }
+
+    /// <summary>项的文字（类型搜索用）；不写时取读屏名称。</summary>
+    public Func<UIElement, string>? TextOf { get; set; }
 
     IEnumerable<UIElement> All() => Descendants(container).OfType<UIElement>().Where(element => isItem(element));
 
@@ -68,6 +77,7 @@ sealed class RovingFocus
 
     void OnKeyDown(object sender, KeyEventArgs e)
     {
+        if (e.Handled) return;
         if (e.OriginalSource is not UIElement element || !isItem(element)) return;
         var items = Items();
         var index = items.IndexOf(element);
@@ -94,8 +104,23 @@ sealed class RovingFocus
             if (!Loop) return;
             next = (next + items.Count) % items.Count;
         }
-        current = items[next];
+        Move(items[next]);
+    }
+
+    void OnTextInput(object sender, TextCompositionEventArgs e)
+    {
+        if (search is null || e.Handled || e.Text.Length != 1 || e.OriginalSource is not UIElement element || !isItem(element)) return;
+        var items = Items();
+        var match = search.Next(e.Text, [.. items.Select(item => TextOf?.Invoke(item) ?? System.Windows.Automation.AutomationProperties.GetName(item))], items.IndexOf(element), Environment.TickCount64);
+        if (match < 0) return;
+        Move(items[match]);
+        e.Handled = true;
+    }
+
+    void Move(UIElement item)
+    {
+        current = item;
         Sync();
-        current.Focus();
+        item.Focus();
     }
 }

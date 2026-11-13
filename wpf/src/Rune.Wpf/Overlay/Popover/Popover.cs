@@ -105,6 +105,7 @@ public class Popover : FrameworkElement
     OpenChangeReason? pending;
     long closedAt = long.MinValue / 2;
     bool focusWasInside;
+    bool anchoredElsewhere;
 
     static Popover() => TextElement.FontSizeProperty.OverrideMetadata(typeof(Popover),
         new FrameworkPropertyMetadata(SystemFonts.MessageFontSize, FrameworkPropertyMetadataOptions.Inherits, (d, _) => ((Popover)d).UpdateMetrics()));
@@ -127,9 +128,10 @@ public class Popover : FrameworkElement
         AddVisualChild(trigger);
         AddLogicalChild(popup);
         trigger.AddHandler(ButtonBase.ClickEvent, new RoutedEventHandler((_, _) => OnTriggerClick()));
+        trigger.AddHandler(KeyDownEvent, new KeyEventHandler((_, e) => OnTriggerKeyDown(e)));
         popup.Opened += (_, _) => OnOpened();
         popup.Closed += (_, _) => OnClosed();
-        panel.PreviewKeyDown += OnPanelKeyDown;
+        panel.PreviewKeyDown += (_, e) => OnPanelKeyDown(e);
         panel.IsKeyboardFocusWithinChanged += (_, e) =>
         {
             if ((bool)e.NewValue) focusWasInside = true;
@@ -208,11 +210,48 @@ public class Popover : FrameworkElement
         var em = TextElement.GetFontSize(this);
         var radius = new CornerRadius((TryFindResource("Rune.Radius.Lg") as double? ?? 0.5) * em);
         panel.CornerRadius = shadow.CornerRadius = radius;
-        panel.Padding = new Thickness((TryFindResource("Rune.Space.Md") as double? ?? 0.75) * em);
+        panel.Padding = PanelPadding(em);
         arrow.Width = arrow.Height = ArrowSize;
     }
 
-    void SetOpen(bool open, OpenChangeReason reason)
+    /// <summary>面板的内边距：space.md。菜单的面板不留（内边距在里面的内容层上，滚动条贴着边缘）。</summary>
+    /// <param name="em">字号。</param>
+    private protected virtual Thickness PanelPadding(double em) => new((TryFindResource("Rune.Space.Md") as double? ?? 0.75) * em);
+
+    /// <summary>打开后聚焦哪个元素：里面第一个能聚焦的；没有时聚焦面板。</summary>
+    private protected virtual UIElement? FocusTarget() => FirstFocusable(panel);
+
+    /// <summary>触发器上按了键（菜单：↓ / ↑ 打开）。</summary>
+    /// <param name="e">按键。</param>
+    private protected virtual void OnTriggerKeyDown(KeyEventArgs e)
+    {
+    }
+
+    /// <summary>面板的读屏类型：弹出框是窗格（念"对话框"），菜单是菜单。</summary>
+    internal AutomationControlType PanelRole { get => panel.Role; set => panel.Role = value; }
+
+    /// <summary>关上，焦点不还给触发器（菜单里按 Tab：焦点照常往后走）。</summary>
+    /// <param name="reason">为什么。</param>
+    private protected void CloseKeepingFocus(OpenChangeReason reason)
+    {
+        focusWasInside = false;
+        SetOpen(false, reason);
+    }
+
+    /// <summary>以别的元素为锚点打开（右键菜单：指针所在处，或获得焦点的元素）；关上后恢复以触发器为锚点。</summary>
+    /// <param name="target">锚点。</param>
+    /// <param name="mode">平台弹出层的位置（MousePoint 是指针所在处）。</param>
+    /// <param name="reason">为什么。</param>
+    private protected void OpenAt(UIElement target, PlacementMode mode, OpenChangeReason reason)
+    {
+        anchoredElsewhere = true;
+        popup.PlacementTarget = target;
+        popup.Placement = mode;
+        SetOpen(true, reason);
+    }
+
+    /// <summary>改开关并记下原因（属性变化时报告）。</summary>
+    private protected void SetOpen(bool open, OpenChangeReason reason)
     {
         pending = reason;
         SetCurrentValue(IsOpenProperty, open);
@@ -261,7 +300,7 @@ public class Popover : FrameworkElement
         Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () =>
         {
             PlaceArrow();
-            (FirstFocusable(panel) ?? panel).Focus();
+            (FocusTarget() ?? panel).Focus();
         });
     }
 
@@ -282,12 +321,19 @@ public class Popover : FrameworkElement
     {
         closedAt = Environment.TickCount64;
         if (IsOpen) SetOpen(false, OpenChangeReason.Outside);
+        if (anchoredElsewhere)
+        {
+            anchoredElsewhere = false;
+            popup.PlacementTarget = trigger;
+            popup.Placement = PlacementMode.Custom;
+        }
         if (focusWasInside) Trigger?.Focus();
         focusWasInside = false;
     }
 
-    /// <summary>Esc：关上，焦点回到触发器；Esc 不再往外传。</summary>
-    void OnPanelKeyDown(object sender, KeyEventArgs e)
+    /// <summary>Esc：关上，焦点回到触发器；Esc 不再往外传（不关掉外面的对话框）。</summary>
+    /// <param name="e">按键。</param>
+    private protected virtual void OnPanelKeyDown(KeyEventArgs e)
     {
         if (e.Key != Key.Escape) return;
         focusWasInside = true;
@@ -324,15 +370,18 @@ public class Popover : FrameworkElement
     /// <summary>浮层的面板：读屏是一个对话框（TS 的 role="dialog"），名称取自触发器。</summary>
     sealed class PopoverPanel : Border
     {
+        /// <summary>读屏类型。</summary>
+        public AutomationControlType Role { get; set; } = AutomationControlType.Pane;
+
         protected override AutomationPeer OnCreateAutomationPeer() => new PanelAutomationPeer(this);
 
         sealed class PanelAutomationPeer(PopoverPanel owner) : FrameworkElementAutomationPeer(owner)
         {
-            protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Pane;
+            protected override AutomationControlType GetAutomationControlTypeCore() => owner.Role;
 
             protected override string GetClassNameCore() => nameof(Popover);
 
-            protected override string GetLocalizedControlTypeCore() => "对话框";
+            protected override string GetLocalizedControlTypeCore() => owner.Role == AutomationControlType.Pane ? "对话框" : base.GetLocalizedControlTypeCore();
         }
     }
 }
