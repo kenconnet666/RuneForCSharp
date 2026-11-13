@@ -1,12 +1,15 @@
 namespace Rune.WinForms.Examples;
 
-/// <summary>Dialog 的示例（vue-tsx-pro 文档站 overlay/Dialog）。alert-dialog 要等 AlertDialog，imperative 要等命令式打开，blocking 要等导入流程。</summary>
+/// <summary>Dialog 的示例（vue-tsx-pro 文档站 overlay/Dialog）。</summary>
 static class DialogExamples
 {
     public static Example[] All =>
     [
         new("Dialog", "dialog", "编辑表单", "写了 Confirm 时页脚是“取消 / 确认”：确认的任务进行中按钮加载、关不掉，结果为 false（姓名没填）时对话框留着。焦点进对话框里第一个能聚焦的控件，关上后回到打开它的按钮。", Profile),
+        new("Dialog", "alert-dialog", "确认操作", "AlertDialogControl 没有右上角的关闭按钮、点遮罩不关，打开时焦点在“取消”上（误按 Enter 不会执行）；Confirm 的任务进行中确认按钮加载。只想在一个操作前问一句时用 AlertDialogControl.ConfirmAsync(owner, 选项)，得到是否确认；给了 ConfirmReason 时多一个填理由的输入框，得到填的理由（取消时 null）。", Confirm),
         new("Dialog", "long-content", "宽度与长内容", "DialogSize 是宽度档位（默认 xs），不超出窗体；内容长时只滚正文，标题与页脚固定。Footer 是布局面板时占满一行。", Terms),
+        new("Dialog", "imperative", "命令式与关闭的原因", "不必在界面里放对话框、管 IsOpen：new DialogControl { … }.ShowAsync(owner) 从列表的一行、回调里直接弹出，沿用 owner 处的作用域与字体；开着时改属性（这里改标题），Close() 关上。ShowAsync 得到关上的原因（确认是 confirm）。所有浮层的 OpenChanged 都报告原因：关闭按钮 close、Esc escape、点遮罩 outside、确认 confirm、代码调用 imperative；直接改 IsOpen 时不报告。要在关闭前拦下用 BeforeClose，它也拿到原因。", Imperative),
+        new("Dialog", "blocking", "进行中的任务", "Closable = false 去掉右上角的关闭按钮，Dismissible = false 让点遮罩不关闭——任务进行中别被误关；Esc 仍然可以关，在 OpenChanged 里收尾。", Blocking),
         new("Dialog", "draggable", "可以拖动", "Draggable 时按住标题行能把对话框挪开（核对数据时看后面被挡住的内容），拖到哪都不超出窗体，下次打开回到正中；标题行上的关闭按钮照常点。（付款信息上游用 Descriptions，还没有：先排成标签、值两列）", Payable),
     ];
 
@@ -17,6 +20,178 @@ static class DialogExamples
         ("账号", "6214 8301 2233 4455"),
         ("金额", "¥128,000.00"),
     ];
+
+    static Control Confirm()
+    {
+        var result = new SmallControl { Tone = TextTone.Muted, Text = "还没有操作" };
+        // Confirm 的任务进行中确认按钮显示加载中，完成后才关闭
+        var alert = new AlertDialogControl
+        {
+            Tone = StatusTone.Danger, Title = "删除项目“官网改版”？", Description = "项目里的 48 个文件和全部评论会一起删除，无法恢复。", ConfirmText = "删除",
+        };
+        alert.Confirm = async () =>
+        {
+            await Task.Delay(1000);
+            result.Text = "项目“官网改版”已删除";
+            return true;
+        };
+        var remove = new ButtonControl { Variant = ButtonVariant.Soft, Tone = StatusTone.Danger, Icon = Lucide.Trash, Text = "删除项目" };
+        remove.Click += (_, _) => alert.IsOpen = true;
+        var signOut = new ButtonControl { Variant = ButtonVariant.Outline, Tone = StatusTone.Neutral, Icon = Lucide.LogOut, Text = "退出登录（ConfirmAsync）" };
+        signOut.Click += async (_, _) =>
+        {
+            var ok = await AlertDialogControl.ConfirmAsync(signOut, new ConfirmOptions { Title = "退出登录？", Description = "未保存的草稿会保留在这台设备上。", ConfirmText = "退出" });
+            result.Text = ok ? "已退出登录" : "取消了退出";
+        };
+        // 要填理由：得到填的理由，取消时是 null
+        var reject = new ButtonControl { Variant = ButtonVariant.Outline, Tone = StatusTone.Danger, Icon = Lucide.Undo2, Text = "驳回（填理由）" };
+        reject.Click += async (_, _) =>
+        {
+            var reason = await AlertDialogControl.ConfirmAsync(reject,
+                new ConfirmOptions { Title = "驳回“10 月差旅报销”？", Tone = StatusTone.Danger, ConfirmText = "驳回" },
+                new ConfirmReason { Label = "驳回理由", IsRequired = true, Description = "申请人会在通知里看到这段理由", Placeholder = "如：缺少 10 月 12 日的酒店发票", MaxLength = 200 });
+            result.Text = reason is null ? "取消了驳回" : $"已驳回：{reason}";
+        };
+        return Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Md, Align = FlexAlign.Start },
+            Build.Flex(new FlexControl { Gap = Space.Sm, Wrap = true }, remove, signOut, reject), result, alert);
+    }
+
+    static readonly (string No, string Vendor, string Amount, string Date)[] Invoices =
+    [
+        ("FP-20261021-031", "华辰精密", "¥48,210.00", "2026-10-21"),
+        ("FP-20261019-118", "启航塑胶", "¥12,860.00", "2026-10-19"),
+        ("FP-20261015-007", "远山钣金", "¥3,420.50", "2026-10-15"),
+    ];
+
+    static readonly Dictionary<OpenChangeReason, string> ReasonText = new()
+    {
+        [OpenChangeReason.Trigger] = "触发器", [OpenChangeReason.Outside] = "点遮罩", [OpenChangeReason.Escape] = "Esc", [OpenChangeReason.Close] = "关闭按钮",
+        [OpenChangeReason.Confirm] = "确认", [OpenChangeReason.Select] = "选中", [OpenChangeReason.Focus] = "焦点", [OpenChangeReason.Imperative] = "代码调用",
+    };
+
+    /// <summary>标签、值两列（上游用 Descriptions，还没有）。</summary>
+    static FlexControl Pairs(IEnumerable<(string Label, string Value)> pairs)
+    {
+        var rows = new FlexControl { Direction = FlexDirection.Column, Gap = Space.Sm };
+        foreach (var (label, value) in pairs)
+        {
+            var name = new SmallControl { Tone = TextTone.Muted, Text = label, AutoSize = false };
+            name.Size = new Size(name.LogicalToDeviceUnits(6 * 14), name.GetPreferredSize(Size.Empty).Height);
+            rows.Controls.Add(Build.Flex(new FlexControl { Gap = Space.Md }, name, new TextControl { TextSize = TextSize.Sm, Text = value }));
+        }
+        return rows;
+    }
+
+    static Control Imperative()
+    {
+        var log = new FlexControl { Direction = FlexDirection.Column, Gap = Space.Xs };
+        var lines = new List<string>();
+        void Render()
+        {
+            log.SuspendLayout();
+            foreach (var old in log.Controls.Cast<Control>().ToList()) old.Dispose();
+            log.Controls.Add(new SmallControl { Tone = TextTone.Muted, Text = "OpenChanged" });
+            if (lines.Count == 0) log.Controls.Add(new SmallControl { Tone = TextTone.Muted, Text = "（还没有）" });
+            foreach (var text in lines) log.Controls.Add(new SmallControl { Text = text });
+            log.ResumeLayout();
+        }
+        Render();
+        var list = new ItemListControl { Divided = true, Inset = Space.Md };
+        foreach (var (no, vendor, amount, date) in Invoices)
+        {
+            var check = new BadgeControl { Tone = StatusTone.Success, Text = "已核对", Visible = false };
+            var view = new ButtonControl { TextSize = TextSize.Sm, Variant = ButtonVariant.Ghost, Text = "查看" };
+            view.Click += (_, _) =>
+            {
+                var dialog = new DialogControl
+                {
+                    Title = $"发票 {no}", Description = vendor, DialogSize = DialogSize.Sm, ConfirmText = "去付款",
+                    Confirm = async () =>
+                    {
+                        await Task.Delay(600);
+                        return true;
+                    },
+                };
+                dialog.OpenChanged += (_, e) =>
+                {
+                    lines.Insert(0, $"{(e.IsOpen ? "打开" : "关上")} · {ReasonText[e.Reason]}");
+                    if (lines.Count > 6) lines.RemoveAt(6);
+                    Render();
+                };
+                var mark = new ButtonControl { TextSize = TextSize.Sm, Variant = ButtonVariant.Soft, Text = "标记已核对并关上" };
+                mark.Click += async (_, _) =>
+                {
+                    check.Visible = true;
+                    dialog.Title = $"发票 {no}（已核对）";
+                    await Task.Delay(800);
+                    dialog.Close();
+                };
+                dialog.Content = Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Md }, Pairs([("供应商", vendor), ("金额", amount), ("开票日期", date)]), mark);
+                // 关上后不再用：放掉两层窗口
+                _ = dialog.ShowAsync(view).ContinueWith(_ => dialog.Dispose(), TaskScheduler.FromCurrentSynchronizationContext());
+            };
+            list.Controls.Add(new ItemListItemControl { Text = vendor, Description = $"{no} · {amount}", End = Build.Flex(new FlexControl { Align = FlexAlign.Center, Gap = Space.Sm }, check, view) });
+        }
+        // 列表占满剩下的宽度、至少 18em（上游 flex: 1 1 18rem）
+        var card = Build.Card(new CardControl { CardPadding = Space.None }, list);
+        card.MinimumSize = new Size(card.LogicalToDeviceUnits(18 * 14), 0);
+        var row = Build.Flex(new FlexControl { Gap = Space.Lg, Align = FlexAlign.Start, Wrap = true }, card, log);
+        row.SetGrow(card, true);
+        return row;
+    }
+
+    const int Contacts = 1280;
+
+    static Control Blocking()
+    {
+        var result = new SmallControl { Tone = TextTone.Muted, Text = "导入期间点遮罩不会关闭，也没有右上角的关闭按钮" };
+        var progress = new ProgressControl { Max = Contacts, Label = "导入进度", ValueText = (value, max) => $"已导入 {value} / {max} 位" };
+        var cancel = new ButtonControl { Variant = ButtonVariant.Soft, Tone = StatusTone.Neutral, Text = "取消导入" };
+        var dialog = new DialogControl
+        {
+            Title = "正在导入通讯录", Description = "完成后自动关闭；可以随时取消，已导入的联系人会保留。",
+            Closable = false, Dismissible = false, Content = progress, Footer = cancel,
+        };
+        var timer = new System.Windows.Forms.Timer { Interval = 150 };
+        var done = 0;
+        void Show(int value)
+        {
+            done = value;
+            progress.Value = value;
+            progress.ValueLabel = $"{value} / {Contacts}";
+        }
+        void Stop(string text)
+        {
+            timer.Stop();
+            result.Text = text;
+        }
+        timer.Tick += async (_, _) =>
+        {
+            Show(Math.Min(Contacts, done + 96));
+            if (done < Contacts) return;
+            Stop($"导入了 {Contacts} 位联系人");
+            await Task.Delay(400);
+            dialog.IsOpen = false;
+        };
+        // Esc 仍然能关：在 OpenChanged 里收尾
+        dialog.OpenChanged += (_, e) =>
+        {
+            if (!e.IsOpen && timer.Enabled) Stop($"取消了，已导入 {done} 位");
+        };
+        cancel.Click += (_, _) =>
+        {
+            Stop($"取消了，已导入 {done} 位");
+            dialog.IsOpen = false;
+        };
+        var start = new ButtonControl { Icon = Lucide.Contact, Text = "导入通讯录" };
+        start.Click += (_, _) =>
+        {
+            Show(0);
+            dialog.IsOpen = true;
+            timer.Start();
+        };
+        return Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Md, Align = FlexAlign.Start }, start, result, dialog);
+    }
 
     static Control Payable()
     {

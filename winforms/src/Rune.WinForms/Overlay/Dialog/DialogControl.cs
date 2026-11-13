@@ -15,9 +15,11 @@ namespace Rune.WinForms;
 /// <see cref="BeforeClose"/>；确认的任务进行中按钮加载、关不掉，结果为 false 或失败时保持打开。<see cref="OpenChanged"/> 报告原因（代码里改 IsOpen 不报告）。
 /// <see cref="Draggable"/> 时按住标题（或标题行的空白）能把面板挪开：拖到哪都不超出宿主窗体，每次打开回到正中；关闭按钮照常点。
 /// 读屏：对话框，以标题为名称、说明为帮助文字。
+/// 命令式（TS 的 useDialog）：不放进界面，<c>await new DialogControl { … }.ShowAsync(owner)</c> 在 owner 所在的窗体打开，沿用 owner 处的作用域（主题、语言）与字体；
+/// 得到关上的原因（代码调用 <see cref="Close"/> 是 imperative）。开着时改属性就是上游句柄的 update；owner 从界面上拿掉、销毁时跟着关上。
 /// </summary>
 [DefaultEvent(nameof(OpenChanged))]
-public class DialogControl : Control
+public class DialogControl : Control, IAnchored
 {
     readonly FloatingSurface surface;
     readonly LayeredWindow scrim = new();
@@ -31,6 +33,9 @@ public class DialogControl : Control
     readonly ButtonControl cancel = new() { Variant = ButtonVariant.Soft, Tone = StatusTone.Neutral, Visible = false };
     readonly ButtonControl confirm = new() { Visible = false };
     Form? host;
+    Control? anchor;
+    bool borrowedFont;
+    TaskCompletionSource<OpenChangeReason>? closed;
     Control? returnFocus;
     bool open;
     bool confirming;
@@ -204,6 +209,72 @@ public class DialogControl : Control
         if (open) PresentPanel();
     }
 
+    /// <summary>
+    /// 命令式打开（TS 的 useDialog().open）：在 <paramref name="owner"/> 所在的窗体打开这个对话框（它不用放进界面，开着时借 owner 的作用域与字体）。
+    /// 得到关上的原因；owner 从界面上拿掉、销毁时跟着关上（imperative）。
+    /// </summary>
+    /// <param name="owner">在哪个窗体打开、沿用谁的设置（一般是点的那个按钮）。</param>
+    public Task<OpenChangeReason> ShowAsync(Control owner)
+    {
+        ArgumentNullException.ThrowIfNull(owner);
+        if (open) throw new InvalidOperationException("对话框已经开着。");
+        anchor = owner;
+        if (Parent is null)
+        {
+            // 字体是环境属性，不在界面里时拿不到：借 owner 的（面板按它算 em）
+            Font = owner.Font;
+            borrowedFont = true;
+            Sync();
+        }
+        owner.ParentChanged += OnAnchorMoved;
+        owner.HandleDestroyed += OnAnchorDestroyed;
+        var source = closed = new TaskCompletionSource<OpenChangeReason>();
+        LastShown = this;
+        SetOpen(true, OpenChangeReason.Imperative);
+        return source.Task;
+    }
+
+    /// <summary>代码关上（TS 句柄的 close）：不问 <see cref="BeforeClose"/>，原因是 imperative。</summary>
+    public void Close()
+    {
+        if (open) SetOpen(false, OpenChangeReason.Imperative);
+    }
+
+    /// <summary>借谁的上下文（命令式打开、不在界面里时是 owner）。</summary>
+    Control? IAnchored.Anchor => Parent is null ? anchor : null;
+
+    /// <summary>最近一个命令式打开的对话框（测试用：ConfirmAsync 建的对话框不在界面里，找不到）。</summary>
+    internal static DialogControl? LastShown { get; private set; }
+
+    /// <summary>打开时先聚焦哪个控件；null 时是第一个能聚焦的（AlertDialogControl 是取消按钮）。</summary>
+    private protected virtual Control? InitialFocus => null;
+
+    /// <summary>owner 从父控件上拿掉了：跟着关上。</summary>
+    void OnAnchorMoved(object? sender, EventArgs e)
+    {
+        if (anchor?.Parent is null) Close();
+    }
+
+    /// <summary>owner 销毁了（窗体关了；重建句柄不算）：跟着关上。</summary>
+    void OnAnchorDestroyed(object? sender, EventArgs e)
+    {
+        if (anchor is { RecreatingHandle: false }) Close();
+    }
+
+    /// <summary>命令式打开的关上了：还回借来的字体，等着的 ShowAsync 得到原因。</summary>
+    void Release(OpenChangeReason reason)
+    {
+        if (anchor is null) return;
+        anchor.ParentChanged -= OnAnchorMoved;
+        anchor.HandleDestroyed -= OnAnchorDestroyed;
+        anchor = null;
+        if (borrowedFont) ResetFont();
+        borrowedFont = false;
+        var source = closed;
+        closed = null;
+        source?.TrySetResult(reason);
+    }
+
     /// <summary>放面板内容的窗口（测试用）。</summary>
     internal FloatingSurface Surface => surface;
 
@@ -241,12 +312,13 @@ public class DialogControl : Control
         if (next) Open();
         else Dismiss();
         if (reason is { } known) OpenChanged?.Invoke(this, new OpenChangedEventArgs(next, known));
+        if (!next) Release(reason ?? OpenChangeReason.Imperative);
     }
 
     /// <summary>打开：记下焦点来源，禁用宿主窗体，盖上遮罩与面板。</summary>
     void Open()
     {
-        host = FindForm();
+        host = (Parent is null ? anchor : null)?.FindForm() ?? FindForm();
         if (host is null) return;
         returnFocus = host.ActiveControl;
         Offset = Point.Empty;
@@ -255,6 +327,7 @@ public class DialogControl : Control
         Present();
         // 同 ShowDialog：打开期间宿主窗体不接受输入（Win32 层禁用，不改 WinForms 的 Enabled：里面的控件不按不可用重画）
         EnableWindow(host.Handle, false);
+        InitialFocus?.Focus();
     }
 
     /// <summary>关上：恢复宿主窗体，焦点还给打开前的控件。</summary>

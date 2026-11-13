@@ -58,11 +58,14 @@ public class ProviderControl : Panel
     /// <summary>这一层看到的工作日历。</summary>
     public WorkCalendar EffectiveWorkCalendar => WorkCalendar ?? Outer?.EffectiveWorkCalendar ?? Rune.WinForms.WorkCalendar.Weekdays;
 
-    /// <summary>控件所在的作用域：控件自己是作用域时就是它，否则沿 Parent 链往外找（浮层窗口里的接着从弹出它的控件找）；没有时为 null。</summary>
+    /// <summary>
+    /// 控件所在的作用域：控件自己是作用域时就是它，否则沿 Parent 链往外找（浮层窗口里的接着从弹出它的控件找，不在界面里的命令式对话框接着从它的 owner 找）；
+    /// 没有时为 null。
+    /// </summary>
     /// <param name="control">控件。</param>
     public static ProviderControl? Of(Control? control)
     {
-        for (var node = control; node is not null; node = node is FloatingForm floating ? floating.Origin : node.Parent)
+        for (var node = control; node is not null; node = node is FloatingForm floating ? floating.Origin : node.Parent ?? (node as IAnchored)?.Anchor)
             if (node is ProviderControl scope) return scope;
         return null;
     }
@@ -148,4 +151,11 @@ interface IScopeAware
 {
     /// <summary>作用域里的主题、语言、默认值或外观变了。</summary>
     void ScopeChanged();
+}
+
+/// <summary>不在界面里、借别的控件的上下文（作用域、窗体）的控件：命令式打开的对话框借 owner 的。</summary>
+interface IAnchored
+{
+    /// <summary>借谁的上下文；没借时为 null。</summary>
+    Control? Anchor { get; }
 }
