@@ -10,8 +10,8 @@
     <Setter Property="Underline" Value="always" />
     <Setter Property="CornerRadius" Value="{rune:Em Resource=Rune.Radius.Xs}" />
     <Setter Property="VerticalAlignment" Value="Center" />
-    <!-- 放进一段文字时不带上段落的行高，按自己的字体排 -->
-    <Setter Property="TextBlock.LineHeight" Value="NaN" />
+    <!-- 行高按自己的字号算 normal：放进一段文字时不带上段落的行高（像素数），在条目标题、卡片页头里同上游的 1.5em -->
+    <Setter Property="TextBlock.LineHeight" Value="{rune:Em Resource=Rune.LineHeight.Normal}" />
     <Setter Property="Template">
       <ControlTemplate>
         <Panel>
