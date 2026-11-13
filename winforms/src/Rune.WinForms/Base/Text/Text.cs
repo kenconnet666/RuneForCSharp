@@ -127,6 +127,18 @@ public class Text : Element
         }
     }
 
+    /// <summary>删除线（ValueChange 的原值，TS 的 del）。</summary>
+    public bool Strikethrough
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            Invalidate();
+        }
+    }
+
     /// <summary>组件默认的字号（Small 是 xs）。</summary>
     protected internal virtual TextSize DefaultSize => default;
 
@@ -183,6 +195,7 @@ public class Text : Element
         var style = host.Style;
         if (Weight.Number is { } weight) style = weight >= Tokens.FontWeight.Semibold ? style | FontStyle.Bold : style & ~FontStyle.Bold;
         if (Italic) style |= FontStyle.Italic;
+        if (Strikethrough) style |= FontStyle.Strikeout;
         // 只有写了 Mono（或是标题）才读主题：没写的文字换主题时不重画
         var family = Mono ? Fonts.Installed(context.Theme.Fonts.Mono) : HeadingFont ? Fonts.Installed(context.Theme.Fonts.Heading) : host.FontFamily.Name;
         return family == host.FontFamily.Name && points == host.SizeInPoints && style == host.Style ? host : Fonts.Get(family, points, style);

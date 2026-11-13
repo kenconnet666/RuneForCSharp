@@ -81,4 +81,17 @@ public class DescriptionsTests
         Assert.Equal(["复制订单号", "复制收货地址"], buttons.Select(AutomationProperties.GetName));
         Assert.Equal(["A-1024", "上海市浦东新区"], buttons.Select(button => button.Value));
     });
+
+    [Fact]
+    [Upstream("Descriptions", "Descriptions 的 inline 排法：不按栏分（没有 grid-template-columns）")]
+    public Task Inline_layout_ignores_columns() => HeadlessUi.Run(() =>
+    {
+        var descriptions = Of(new Descriptions { Layout = DescriptionsLayout.Inline, Columns = 3 },
+            new DescriptionItem { Label = "主办", Value = "宋知行" }, new DescriptionItem { Label = "团队", Value = "研发" });
+        HeadlessUi.Show(new StackPanel { Width = 600, Children = { descriptions } });
+
+        Assert.Equal(1, descriptions.ColumnCount);
+        Assert.IsType<Flex>(descriptions.Cells[0].Parent); // 换行的一排，不是网格
+        Assert.Equal(descriptions.Cells[0].Bounds.Y, descriptions.Cells[1].Bounds.Y); // 同一行
+    });
 }

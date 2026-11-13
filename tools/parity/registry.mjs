@@ -113,6 +113,8 @@ export const PLATFORM_COMPONENT_PROP_RENAMES = {
     RadioGroup: { propsItem: 'ItemGenerated' },
     Container: { size: 'ContainerSize', padding: 'InlinePadding' },
     Card: { padding: 'CardPadding' },
+    // 控件自己有 Layout 事件
+    Descriptions: { layout: 'ItemLayout' },
     // 标题是控件的 Text（同按钮、导航项的文字）
     ItemListItem: { title: 'Text' },
     // 同 TextFieldControl
@@ -261,6 +263,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     Tag: { propsRemove: '移除按钮是 CloseButtonControl 子控件，颜色、字号跟着标签；没有部件属性记录' },
     Alert: Object.fromEntries(['propsSpinner', 'propsBody', 'propsContent', 'propsAction', 'propsClose']
       .map((prop) => [prop, '加载指示、操作、关闭按钮与额外内容是 AlertControl 的子控件，文字区是排版出来的一块区域：没有部件属性记录（图标、标题、说明是画的元素，有 PropsIcon、PropsTitle、PropsDescription）'])),
+    Descriptions: Object.fromEntries(['propsList', 'propsItem', 'propsValue', 'propsCopy']
+      .map((prop) => [prop, '列表、格子是 DescriptionsControl 画的面板，控件的值与复制按钮是子控件，没有部件属性记录（标题、标签是画的元素，有 PropsTitle、PropsLabel）'])),
     AvatarGroup: { propsMore: '"+N"的圆是 AvatarGroupControl 画的，没有部件属性记录（里面的文字有 PropsMoreText）' },
     Result: { propsAction: '操作是 ResultControl 的子控件（排在最下面、居中），没有部件属性记录（图标、状态码、标题、说明是画的元素，有 PropsIcon、PropsCode、PropsTitle、PropsDescription）' },
     Banner: Object.fromEntries(['propsAction', 'propsClose']

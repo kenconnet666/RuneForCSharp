@@ -992,6 +992,23 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   根 Border 的 TextElement.FontSize 绑到控件的 FontSize：Gallery 与 inspect 的宿主里，说明的 TextBlock 没从控件继承到字号（测试里继承正常，原因没查清），绑上就稳了。
 - 示例：tones、status、variants、banner（Banner 在同一页）。Avalonia、WPF 与文档站的取值对照没有差异。
 
+### Descriptions、ValueChange（2026-11-14）
+
+- Descriptions：项是 `DescriptionItem`（Label、Value、Span、Copyable、CopyText；TS 的 items 数组），Avalonia、WPF 的 Items 是内容属性，XAML 里直接写项。
+  栏数 `DescriptionsColumns`（数字或 auto，孪生文件 DescriptionsVariants，含排列 `DescriptionsLayout`）：固定栏数时列表窄于 32em 排成一列（TS 的容器查询），
+  auto 时 floor(宽度 / MinItemWidth)，在 1 到 MaxColumns 之间；跨列按算出的栏数封顶。行内排法不按栏分。
+- Avalonia、WPF：列表是 Grid（栏间距 xl、行间距 md；边框样式没有间距）或换行的 Flex（行内），每项是 [标签][值]：横排按基线对齐、值占满剩下的宽度，竖排上下 xs。
+  边框样式同 TS：每格画上、起始边的线并往回挪一条线宽，外框由列表画（Avalonia 按圆角裁，WPF 在 ArrangeOverride 里设圆角的 Clip）。
+  读屏里每项是一组，名称是标签（标签不再单独念）。值是文字时放进 Text（会换行），控件原样放；重建时先把使用方的控件从旧的格子里拆下来。
+  里面的链接悬停才有下划线（Link.SetUnderlineScope）。
+- WinForms：标题、标签、文字的值是画的元素（PropsTitle、PropsLabel），控件的值与复制按钮是子控件；TS 的 layout 叫 ItemLayout（Control 自己有 Layout 事件）。
+  横排时按基线对齐：值是控件时用 FieldControl.FirstBaseline 找控件里第一行文字的基线。边框样式里每格画上、起始边的分隔线（不在第一行、第一列时），
+  外框由列表画，碰到圆角的格子按圆角裁——裁剪从 CardControl 抽成了共用的 `CornerClip`（Elements）。格子不写 Font，跟着控件的字体。
+- ValueChange：原值次要色、删除线，箭头次要色、竖直居中，新值正文色、中等字重，间距 xs，放不下换行。读屏念"原值 改为 新值"（语言包的 FieldCompareTo；
+  TS 是 del、ins 与给读屏的隐藏文字），没有原值时只念新值。WinForms 是画的（PropsBefore、PropsArrow、PropsAfter；Text 元素加了 Strikethrough）。
+  示例在 FieldCompare 页（value-change，FieldCompare 本身还没做）。
+- 取值对照：Descriptions 的 basic、layouts 与文档站一致；auto 示例 TS 用可以拖宽的区域，桌面用窗口宽度，宽区域的高度不同。
+
 ### Result（2026-11-14）
 
 - 结构同 TS：一列居中的 [图标（4em、strokeWidths.sm、色调的颜色，下面多空 space.sm）、状态码（2.5em 粗体、次要色、等宽数字、行高 1）、标题（半粗、xl / md、行高 tight）、
