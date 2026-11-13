@@ -27,6 +27,31 @@ public class TabsTests
         return (tabs, items, panels, host);
     }
 
+    [Fact]
+    [Upstream("Tabs", "值里有中文、空格、下划线时 id 也各不相同，标签与面板照样关联")]
+    [Upstream("Tabs", "整组卸载时标签一个个注销，不另选、不写回（使用方据此改地址时不会把离开的导航拽回来）")]
+    public Task Any_values_pair_tabs_and_panels_and_unloading_writes_nothing_back() => WpfUi.Run(() =>
+    {
+        string[] values = ["行程", "费用", "a b", "a_b"];
+        var list = new TabList();
+        foreach (var value in values) list.Children.Add(new Tab { Value = value, Content = $"标签 {value}" });
+        var tabs = new Tabs { Value = "费用" };
+        tabs.Children.Add(list);
+        var panels = values.Select(value => new TabPanel { Value = value, Content = value }).ToArray();
+        foreach (var panel in panels) tabs.Children.Add(panel);
+        var host = new StackPanel();
+        host.Resources.MergedDictionaries.Add(new RuneTheme());
+        host.Children.Add(tabs);
+        WpfUi.Show(host);
+
+        Assert.Equal(values.Select(value => $"标签 {value}"), panels.Select(panel => panel.Peer().GetName()));
+        var writes = 0;
+        System.ComponentModel.DependencyPropertyDescriptor.FromProperty(Tabs.ValueProperty, typeof(Tabs)).AddValueChanged(tabs, (_, _) => writes++);
+        host.Children.Remove(tabs); // 整组卸载
+        WpfUi.Flush();
+        Assert.Equal(("费用", 0), (tabs.Value, writes));
+    });
+
     static void Click(Tab tab) => ((IInvokeProvider)tab.Peer().GetPattern(PatternInterface.Invoke)).Invoke();
 
     static void Press(UIElement owner, Key key)

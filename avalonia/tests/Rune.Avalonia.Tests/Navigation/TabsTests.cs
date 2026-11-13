@@ -33,6 +33,28 @@ public class TabsTests
     }
 
     [Fact]
+    [Upstream("Tabs", "值里有中文、空格、下划线时 id 也各不相同，标签与面板照样关联")]
+    [Upstream("Tabs", "整组卸载时标签一个个注销，不另选、不写回（使用方据此改地址时不会把离开的导航拽回来）")]
+    public Task Any_values_pair_tabs_and_panels_and_unloading_writes_nothing_back() => HeadlessUi.Run(() =>
+    {
+        string[] values = ["行程", "费用", "a b", "a_b"];
+        var list = new TabList();
+        foreach (var value in values) list.Children.Add(new Tab { Value = value, Content = $"标签 {value}" });
+        var tabs = new Tabs { Value = "费用", Children = { list } };
+        var panels = values.Select(value => new TabPanel { Value = value, Content = value }).ToArray();
+        foreach (var panel in panels) tabs.Children.Add(panel);
+        var host = new StackPanel { Children = { tabs } };
+        var window = HeadlessUi.Show(host);
+
+        Assert.Equal(values.Select(value => $"标签 {value}"), panels.Select(panel => panel.Peer().GetName()));
+        var writes = 0;
+        tabs.PropertyChanged += (_, e) => { if (e.Property == Tabs.ValueProperty) writes++; };
+        host.Children.Remove(tabs); // 整组卸载
+        HeadlessUi.Flush(window);
+        Assert.Equal(("费用", 0), (tabs.Value, writes));
+    });
+
+    [Fact]
     [Upstream("Tabs", "没有选中值时选第一个；标签与面板互相关联；只显示当前面板")]
     public Task The_first_tab_is_selected_and_only_its_panel_shows() => HeadlessUi.Run(() =>
     {
