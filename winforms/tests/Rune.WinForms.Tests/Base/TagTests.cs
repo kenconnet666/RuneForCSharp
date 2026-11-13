@@ -6,6 +6,39 @@ namespace Rune.WinForms.Tests;
 /// </summary>
 public class TagTests
 {
+    static void Raise(Control control, string method) =>
+        typeof(Control).GetMethod(method, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!.Invoke(control, [EventArgs.Empty]);
+
+    [Fact]
+    public Task Hover_tints_with_the_tag_text_color() => WinFormsUi.Run(() =>
+    {
+        var removable = new TagControl { Text = "品牌：小米", Tone = StatusTone.Danger };
+        removable.RemoveRequested += (_, _) => { };
+        var selectable = new TagControl { Text = "加急", IsSelected = false };
+        using var form = WinFormsUi.Show(removable, selectable);
+        var fore = removable.Element.ForegroundIn(ElementContext.Of(removable));
+
+        // 移除按钮悬停：底色是标签文字色的 14%，不是幽灵按钮的灰色；离开后没有
+        Raise(removable.RemoveButton!, "OnMouseEnter");
+        Assert.Equal(Color.FromArgb((int)MathF.Round(fore.A * 0.14f), fore), removable.RemoveButton!.Sx?.Background);
+        Raise(removable.RemoveButton!, "OnMouseLeave");
+        Assert.Null(removable.RemoveButton!.Sx?.Background);
+        Assert.Equal(fore, removable.RemoveButton!.Sx?.Foreground);
+
+        // 可选中的标签悬停叠一层 8% 的文字色：画出来比没悬停时深
+        Color Edge()
+        {
+            using var bitmap = new Bitmap(selectable.Width, selectable.Height);
+            selectable.DrawToBitmap(bitmap, new Rectangle(Point.Empty, selectable.Size));
+            return bitmap.GetPixel(selectable.Element.Bounds.Left + 3, selectable.Height / 2);
+        }
+        var plain = Edge();
+        Raise(selectable, "OnMouseEnter");
+        Assert.True(Edge().GetBrightness() < plain.GetBrightness());
+        Raise(selectable, "OnMouseLeave");
+        Assert.Equal(plain, Edge());
+    });
+
     [Fact]
     [Upstream("Tag", "给了 onRemove 才有移除按钮")]
     public Task The_remove_button_appears_with_a_handler_and_asks_for_removal() => WinFormsUi.Run(() =>

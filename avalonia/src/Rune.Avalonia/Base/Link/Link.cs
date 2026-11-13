@@ -2,6 +2,7 @@ using System.ComponentModel;
 using global::Avalonia;
 using global::Avalonia.Automation.Peers;
 using global::Avalonia.Controls;
+using global::Avalonia.Media;
 
 namespace Rune.Avalonia;
 
@@ -75,8 +76,7 @@ public class Link : ButtonBase
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
-        // 色调的文字色按模板优先级（同 Text），带类或伪类的样式盖得过
-        if (change.Property == ToneProperty) resources.Bind(ForegroundProperty, (Tone.Value is null ? TextTone.Accent : Tone).BrushKey);
+        if (change.Property == ToneProperty) BindTone();
         else if (change.Property == UnderlineProperty || change.Property == UnderlineScopeProperty)
         {
             var next = EffectiveUnderline;
@@ -84,7 +84,21 @@ public class Link : ButtonBase
             shownUnderline = next;
             UpdateUnderline();
         }
-        else if (change.Property == IsPointerOverProperty || change.Property == IsEnabledProperty || change.Property == IsEffectivelyEnabledProperty) UpdateUnderline();
+        else if (change.Property == ForegroundProperty) UpdateUnderline();
+        else if (change.Property == IsPointerOverProperty || change.Property == IsEnabledProperty || change.Property == IsEffectivelyEnabledProperty)
+        {
+            UpdateUnderline();
+            if (Tone == TextTone.Muted) BindTone();
+        }
+    }
+
+    /// <summary>
+    /// 色调的文字色按模板优先级（同 Text），带类或伪类的样式盖得过。次要链接（muted：导航、页脚）悬停时换成正文色：不画下划线时也有悬停反馈。
+    /// </summary>
+    void BindTone()
+    {
+        var tone = Tone.Value is null ? TextTone.Accent : Tone == TextTone.Muted && IsPointerOver && IsEffectivelyEnabled ? TextTone.Neutral : Tone;
+        resources.Bind(ForegroundProperty, tone.BrushKey);
     }
 
     global::Avalonia.Controls.Presenters.ContentPresenter? presenter;
@@ -109,7 +123,11 @@ public class Link : ButtonBase
         if (presenter is null) return;
         var effective = EffectiveUnderline;
         var shown = effective.Value is null or "always" || (effective.Value == "hover" && IsPointerOver && !IsDisabled);
-        if (shown) underline = presenter.SetValue(global::Avalonia.Controls.Documents.Inline.TextDecorationsProperty, global::Avalonia.Media.TextDecorations.Underline, global::Avalonia.Data.BindingPriority.Template);
+        if (!shown) return;
+        // 下划线平时是半透明的文字色，悬停时实色（同上游）：一直有下划线的链接也有悬停反馈，各色调都适用
+        var stroke = Foreground is ISolidColorBrush fore ? new SolidColorBrush(fore.Color, (IsPointerOver && !IsDisabled ? 1 : 0.5) * fore.Opacity) : null;
+        var decorations = new TextDecorationCollection { new TextDecoration { Location = TextDecorationLocation.Underline, Stroke = stroke } };
+        underline = presenter.SetValue(global::Avalonia.Controls.Documents.Inline.TextDecorationsProperty, decorations, global::Avalonia.Data.BindingPriority.Template);
     }
 
     static string? Pseudo(LinkUnderline underline) => underline.Value is null ? null : $"underline-{underline.Value}";

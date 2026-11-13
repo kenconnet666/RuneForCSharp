@@ -1,7 +1,10 @@
+using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Automation.Provider;
 using Avalonia.Controls;
+using Avalonia.Headless;
 using Avalonia.Input;
+using Avalonia.Media;
 using Avalonia.VisualTree;
 
 namespace Rune.Avalonia.Tests;
@@ -13,6 +16,25 @@ namespace Rune.Avalonia.Tests;
 public class TagTests
 {
     static CloseButton? RemoveButton(Tag tag) => tag.GetVisualChildren().OfType<CloseButton>().SingleOrDefault();
+
+    [Fact]
+    public Task The_remove_button_hovers_with_the_tag_text_color() => HeadlessUi.Run(() =>
+    {
+        var tag = new Tag { Content = "品牌：小米", Tone = StatusTone.Danger };
+        tag.RemoveRequested += (_, _) => { };
+        var window = HeadlessUi.Show(new StackPanel { Children = { tag } });
+        var remove = RemoveButton(tag)!;
+        var fore = Assert.IsAssignableFrom<ISolidColorBrush>(tag.Foreground).Color;
+
+        var center = remove.TranslatePoint(new global::Avalonia.Point(remove.Bounds.Width / 2, remove.Bounds.Height / 2), window)!.Value;
+        window.MouseMove(center);
+        HeadlessUi.Flush(window);
+        var hover = Assert.IsAssignableFrom<ISolidColorBrush>(remove.GetBaseValue(global::Avalonia.Controls.Primitives.TemplatedControl.BackgroundProperty).Value); // 基础值（不含颜色过渡的中间值）
+        Assert.Equal((fore, 0.14), (hover.Color, hover.Opacity)); // 标签文字色的 14%，不是幽灵按钮的灰色
+        window.MouseMove(tag.TranslatePoint(new global::Avalonia.Point(2, tag.Bounds.Height / 2), window)!.Value); // 移到标签的文字那边
+        HeadlessUi.Flush(window);
+        Assert.NotEqual(fore, (remove.GetBaseValue(global::Avalonia.Controls.Primitives.TemplatedControl.BackgroundProperty).Value as ISolidColorBrush)?.Color); // 离开后没有底色
+    });
 
     [Fact]
     [Upstream("Tag", "给了 onRemove 才有移除按钮")]

@@ -57,6 +57,9 @@ public class Badge : Element
     /// </summary>
     internal bool? Selected { get; set { if (field == value) return; field = value; Rebuild(); Invalidate(); } }
 
+    /// <summary>指针在可选中的标签上（宿主设）：叠一层 8% 的文字色。</summary>
+    internal bool Hovered { get; set { if (field == value) return; field = value; Invalidate(); } }
+
     /// <summary>圆角；不写时取作用域的默认值，再没有时 sm。表格、密集列表里的状态常用 none。</summary>
     public Radius Radius { get => radius.Or(ScopeDefaults?.Radius, Radius.Sm); set { radius = value; Invalidate(); } }
 
@@ -149,6 +152,12 @@ public class Badge : Element
             {
                 using var brush = new SolidBrush(background);
                 graphics.FillPath(brush, outline);
+            }
+            // 可选中时悬停叠一层 8% 的文字色（状态层：各色调、各样式都适用，亮色里变深、暗色里变亮）
+            if (Selected is not null && Hovered)
+            {
+                using var layer = new SolidBrush(Color.FromArgb((int)MathF.Round(colors.Foreground.A * 0.08f), colors.Foreground));
+                graphics.FillPath(layer, outline);
             }
             if (colors.Border is { } stroke)
             {

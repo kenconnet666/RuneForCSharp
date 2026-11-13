@@ -18,11 +18,12 @@ namespace Rune.Wpf;
 /// &lt;rune:Tag Tone="accent" Radius="full" RemoveRequested="OnRemoveFilter"&gt;品牌：小米&lt;/rune:Tag&gt;
 /// </code>
 /// 订阅了 <see cref="RemoveRequested"/> 才有移除按钮（上游给了 onRemove 才有）：文字后面一个圆形的 <see cref="CloseButton"/>，宽 1.5em、
-/// 字号与颜色同标签，读屏名称是"移除 + 标签文字"（<see cref="RemoveLabel"/> 能改）。点它时标签先淡出缩小到 0.8（durations.sm、exit），
+/// 字号与颜色同标签，悬停的底色是标签文字色的 14%、按下的波纹 22%（彩色标签上协调，不用幽灵按钮的灰色），读屏名称是"移除 + 标签文字"（<see cref="RemoveLabel"/> 能改）。点它时标签先淡出缩小到 0.8（durations.sm、exit），
 /// 离场结束才发 RemoveRequested。使用方移除了标签时，原来在移除按钮上的焦点交给同一容器里下一个（没有就上一个）能聚焦的元素；
 /// 没移除（如拒绝删除）时淡入复原。部件样式键：<see cref="TagParts"/>。
 /// 可选中（筛选条件的一排标签）：写了 <see cref="IsSelected"/> 时整个标签是切换按钮（读屏念"已按下 / 未按下"），点击、空格、Enter 切换；
 /// 没选中时是 surface（有描边），选中时 solid 实底并在前面加一个对勾（不只靠颜色）；没写的色调、字号用 accent、sm（主题样式的触发器，写了的照用）。
+/// 悬停时叠一层 8% 的文字色（状态层：各色调、各样式都适用，亮色里变深、暗色里变亮）。
 /// 可选中的标签不带移除按钮。一排放在有名称的容器里（AutomationProperties.Name）。
 /// <code>
 /// &lt;rune:Tag IsSelected="{Binding Urgent}"&gt;加急&lt;/rune:Tag&gt;
@@ -56,6 +57,8 @@ public class Tag : Badge
         DefaultStyleKeyProperty.OverrideMetadata(typeof(Tag), new FrameworkPropertyMetadata(typeof(Tag)));
         ContentProperty.OverrideMetadata(typeof(Tag), new FrameworkPropertyMetadata((d, _) => ((Tag)d).UpdateRemoveLabel()));
         FontSizeProperty.OverrideMetadata(typeof(Tag), new FrameworkPropertyMetadata((d, _) => ((Tag)d).UpdateRemoveSize()));
+        // 文字色变了（主题、色调），悬停中的移除按钮底色跟着换
+        ForegroundProperty.OverrideMetadata(typeof(Tag), new FrameworkPropertyMetadata((d, _) => ((Tag)d).UpdateRemoveBackground()));
     }
 
     /// <summary>新建：变形以中心为原点（缩小时向中间收）。</summary>
@@ -106,6 +109,7 @@ public class Tag : Badge
     {
         base.OnMouseLeave(e);
         pressed = false;
+        if (IsSelected is not null) InvalidateVisual();
     }
 
     /// <summary>Enter 按下时、空格松开时切换（同原生按钮）。</summary>
@@ -142,11 +146,25 @@ public class Tag : Badge
         InvalidateVisual();
     }
 
-    /// <summary>可选中时键盘聚焦画焦点环（2px focusRing，压在边上，同按钮）。</summary>
+    /// <inheritdoc />
+    protected override void OnMouseEnter(MouseEventArgs e)
+    {
+        base.OnMouseEnter(e);
+        if (IsSelected is not null) InvalidateVisual();
+    }
+
+    /// <summary>可选中时：悬停叠一层 8% 的文字色（画在底色上、文字下，同上游的 background-image）；键盘聚焦画焦点环（2px focusRing，压在边上，同按钮）。</summary>
     protected override void OnRender(DrawingContext drawingContext)
     {
         base.OnRender(drawingContext);
-        if (IsSelected is null || !focusVisible || GetValue(FocusRingProperty) is not Brush ring) return;
+        if (IsSelected is null) return;
+        if (IsMouseOver && Foreground is SolidColorBrush fore)
+        {
+            var box = new Rect(RenderSize);
+            var corner = CornerRadius(box.Height);
+            drawingContext.DrawRoundedRectangle(new SolidColorBrush(fore.Color) { Opacity = 0.08 * fore.Opacity }, null, box, corner, corner);
+        }
+        if (!focusVisible || GetValue(FocusRingProperty) is not Brush ring) return;
         var bounds = new Rect(RenderSize);
         bounds.Inflate(-1, -1);
         if (bounds.Width <= 0 || bounds.Height <= 0) return;
@@ -226,10 +244,21 @@ public class Tag : Badge
         remove.SetResourceReference(StyleProperty, TagParts.Remove);
         // 颜色同标签（上游 color: inherit）
         remove.SetBinding(ForegroundProperty, new Binding(nameof(Foreground)) { Source = this });
+        // 用按钮自己的事件：DependencyPropertyDescriptor.AddValueChanged 不退订会让按钮与标签一直留在静态表里
+        remove.MouseEnter += (_, _) => UpdateRemoveBackground();
+        remove.MouseLeave += (_, _) => UpdateRemoveBackground();
         remove.Click += (_, _) => Dismiss();
         Trailing = remove;
         UpdateRemoveSize();
         UpdateRemoveLabel();
+    }
+
+    /// <summary>移除按钮悬停的底色：标签文字色的 14%（本地值盖过幽灵按钮主题的灰色）；平时交还主题。按下的波纹本来就是文字色的 22%。</summary>
+    void UpdateRemoveBackground()
+    {
+        if (remove is null) return;
+        if (remove.IsMouseOver && Foreground is SolidColorBrush fore) remove.Background = new SolidColorBrush(fore.Color) { Opacity = 0.14 * fore.Opacity };
+        else remove.ClearValue(BackgroundProperty);
     }
 
     /// <summary>字号同标签（不按按钮自己的档位放大），宽、最小高 1.5em，上下各让出 0.25em（不把标签撑高）。</summary>

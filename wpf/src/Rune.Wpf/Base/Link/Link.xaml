@@ -1,5 +1,6 @@
 <!--
   Link 的主题样式（vue-tsx-pro 的 linkRecipe）：色调（默认 accent）与下划线（默认 always）是触发器；悬停下划线只在 hover 档；
+  次要链接（muted：导航、页脚）悬停时换成正文色，不画下划线时也有悬停反馈；
   外链图标的部件样式（LinkParts.Icon）：末尾 0.1em 的间距
 -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -22,6 +23,10 @@
       <MultiTrigger>
         <MultiTrigger.Conditions><Condition Property="Underline" Value="hover" /><Condition Property="IsMouseOver" Value="True" /></MultiTrigger.Conditions>
         <Setter Property="TextDecorations" Value="Underline" />
+      </MultiTrigger>
+      <MultiTrigger>
+        <MultiTrigger.Conditions><Condition Property="Tone" Value="muted" /><Condition Property="IsMouseOver" Value="True" /></MultiTrigger.Conditions>
+        <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
       </MultiTrigger>
       <Trigger Property="IsEnabled" Value="False"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" /></Trigger>
     </Style.Triggers>

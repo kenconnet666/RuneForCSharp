@@ -22,6 +22,25 @@ public class LinkTests
 
     static Point Center(Visual visual, Visual root) => visual.TranslatePoint(new Point(visual.Bounds.Width / 2, visual.Bounds.Height / 2), root)!.Value;
 
+    static Color Token(string key)
+    {
+        Application.Current!.TryGetResource(key, ThemeVariant.Light, out var value);
+        return Assert.IsAssignableFrom<ISolidColorBrush>(value).Color;
+    }
+
+    [Fact]
+    public Task Muted_links_turn_to_the_text_color_on_hover() => HeadlessUi.Run(() =>
+    {
+        var link = new Link { Content = "帮助中心", Tone = TextTone.Muted, Underline = LinkUnderline.None };
+        var window = HeadlessUi.Show(new StackPanel { Children = { link } });
+        Assert.Equal(Token("Rune.Brush.TextMuted"), Assert.IsAssignableFrom<ISolidColorBrush>(link.Foreground).Color);
+
+        window.MouseMove(Center(link, window));
+        HeadlessUi.Flush(window);
+        // 基础值（不含颜色过渡的中间值）；不画下划线时也有悬停反馈
+        Assert.Equal(Token("Rune.Brush.Text"), Assert.IsAssignableFrom<ISolidColorBrush>(link.GetBaseValue(global::Avalonia.Controls.Primitives.TemplatedControl.ForegroundProperty).Value).Color);
+    });
+
     [Upstream("Link", "普通链接")]
     [Upstream("Link", "外部链接")]
     [Fact]
@@ -59,9 +78,12 @@ public class LinkTests
         HeadlessUi.Show(new StackPanel { Children = { always, none, mixed } });
         static TextDecorationCollection? Decorations(Link link) => global::Avalonia.VisualTree.VisualExtensions.GetVisualDescendants(link).OfType<TextBlock>().First().TextDecorations;
 
-        Assert.Equal(TextDecorations.Underline, Decorations(always));
+        Assert.Equal(TextDecorationLocation.Underline, Assert.Single(Decorations(always)!).Location);
+        // 下划线平时是半透明的文字色（悬停时实色）
+        var stroke = Assert.IsAssignableFrom<ISolidColorBrush>(Assert.Single(Decorations(always)!).Stroke);
+        Assert.Equal((Assert.IsAssignableFrom<ISolidColorBrush>(always.Foreground).Color, 0.5), (stroke.Color, stroke.Opacity));
         Assert.Null(Decorations(none));
-        Assert.Equal(TextDecorations.Underline, Decorations(mixed));
+        Assert.Equal(TextDecorationLocation.Underline, Assert.Single(Decorations(mixed)!).Location);
     });
 
     [Fact]
@@ -78,11 +100,11 @@ public class LinkTests
         HeadlessUi.Show(new StackPanel { Children = { body, scope, new Card { Header = header, Content = cardBody } } });
 
         static TextDecorationCollection? Decorations(Link link) => global::Avalonia.VisualTree.VisualExtensions.GetVisualDescendants(link).OfType<TextBlock>().First().TextDecorations;
-        Assert.Equal(TextDecorations.Underline, Decorations(body));
+        Assert.Equal(TextDecorationLocation.Underline, Assert.Single(Decorations(body)!).Location);
         Assert.Null(Decorations(scoped)); // 容器给 hover：没指着时没有下划线
         Assert.Contains(":underline-hover", scoped.Classes);
-        Assert.Equal(TextDecorations.Underline, Decorations(explicitAlways)); // 显式写的优先
+        Assert.Equal(TextDecorationLocation.Underline, Assert.Single(Decorations(explicitAlways)!).Location); // 显式写的优先
         Assert.Null(Decorations(header)); // 卡片页头
-        Assert.Equal(TextDecorations.Underline, Decorations(cardBody)); // 卡片正文照旧
+        Assert.Equal(TextDecorationLocation.Underline, Assert.Single(Decorations(cardBody)!).Location); // 卡片正文照旧
     });
 }

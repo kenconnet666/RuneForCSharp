@@ -23,11 +23,12 @@ namespace Rune.Avalonia;
 /// &lt;rune:Tag Tone="accent" Radius="full" RemoveRequested="OnRemoveFilter"&gt;品牌：小米&lt;/rune:Tag&gt;
 /// </code>
 /// 订阅了 <see cref="RemoveRequested"/> 才有移除按钮（上游给了 onRemove 才有）：文字后面一个圆形的 <see cref="CloseButton"/>，宽 1.5em、
-/// 字号与颜色同标签，读屏名称是"移除 + 标签文字"（<see cref="RemoveLabel"/> 能改）。点它时标签先淡出缩小到 0.8（durations.sm、exit），
+/// 字号与颜色同标签，悬停的底色是标签文字色的 14%、按下的波纹 22%（彩色标签上协调，不用幽灵按钮的灰色），读屏名称是"移除 + 标签文字"（<see cref="RemoveLabel"/> 能改）。点它时标签先淡出缩小到 0.8（durations.sm、exit），
 /// 离场结束才发 RemoveRequested。使用方移除了标签时，原来在移除按钮上的焦点交给同一容器里下一个（没有就上一个）能聚焦的元素；
 /// 没移除（如拒绝删除）时淡入复原。部件名：<see cref="TagParts"/>。
 /// 可选中（筛选条件的一排标签）：写了 <see cref="IsSelected"/> 时整个标签是切换按钮（读屏念"已按下 / 未按下"），点击、空格、Enter 切换；
 /// 没选中时是 surface（有描边），选中时 solid 实底并在前面加一个对勾（不只靠颜色）；不写色调时 accent、不写字号时 sm（点击区域够大）。
+/// 悬停时叠一层 8% 的文字色（状态层：各色调、各样式都适用，亮色里变深、暗色里变亮）。
 /// 可选中的标签不带移除按钮。一排放在有名称的容器里（AutomationProperties.Name）。
 /// <code>
 /// &lt;rune:Tag IsSelected="{Binding Urgent}"&gt;加急&lt;/rune:Tag&gt;
@@ -52,7 +53,7 @@ public class Tag : Badge
     readonly List<IDisposable> selectable = [];
     bool dismissing;
 
-    static Tag() => AffectsRender<Tag>(FocusRingProperty, IsFocusedProperty);
+    static Tag() => AffectsRender<Tag>(FocusRingProperty, IsFocusedProperty, IsPointerOverProperty);
 
     /// <summary>新建：焦点环的颜色绑到主题。</summary>
     public Tag() => new TemplateResources(this).Bind(FocusRingProperty, "Rune.Brush.FocusRing");
@@ -171,11 +172,18 @@ public class Tag : Badge
         ToggleSelected();
     }
 
-    /// <summary>可选中时键盘聚焦画焦点环（2px focusRing，压在边上，同按钮）。</summary>
+    /// <summary>可选中时：悬停叠一层 8% 的文字色（画在底色上、文字下，同上游的 background-image）；键盘聚焦画焦点环（2px focusRing，压在边上，同按钮）。</summary>
     public override void Render(DrawingContext context)
     {
         base.Render(context);
-        if (IsSelected is null || !Classes.Contains(":focus-visible") || GetValue(FocusRingProperty) is not { } ring) return;
+        if (IsSelected is null) return;
+        if (IsPointerOver && Foreground is ISolidColorBrush fore)
+        {
+            var box = new Rect(Bounds.Size);
+            var corner = CornerRadius(box.Height);
+            context.DrawRectangle(new SolidColorBrush(fore.Color, 0.08 * fore.Opacity), null, box, corner, corner);
+        }
+        if (!Classes.Contains(":focus-visible") || GetValue(FocusRingProperty) is not { } ring) return;
         var bounds = new Rect(Bounds.Size).Deflate(1);
         var radius = CornerRadius(bounds.Height);
         context.DrawRectangle(null, new Pen(ring, 2), bounds, radius, radius);
@@ -211,10 +219,21 @@ public class Tag : Badge
         remove = new CloseButton { Name = TagParts.Remove, Radius = Radius.Full, VerticalAlignment = VerticalAlignment.Center, Focusable = RemoveFocusable };
         // 颜色、字号同标签（上游 color: inherit，按钮不按自己的字号档位放大）
         remove.Bind(ForegroundProperty, this.GetObservable(ForegroundProperty));
+        remove.PropertyChanged += (_, e) => { if (e.Property == ForegroundProperty) UpdateRemovePalette(); };
+        UpdateRemovePalette();
         remove.Click += (_, _) => Dismiss();
         Trailing = remove;
         UpdateRemoveSize();
         UpdateRemoveLabel();
+    }
+
+    /// <summary>
+    /// 移除按钮的调色板换成标签文字色的：幽灵按钮主题的悬停底色（SubtleHover）是它的 14%，不用灰色；按下的波纹本来就是文字色的 22%。
+    /// </summary>
+    void UpdateRemovePalette()
+    {
+        if (remove?.Foreground is not ISolidColorBrush fore) return;
+        remove.Palette = new TonePalette { Text = fore, SubtleHover = new SolidColorBrush(fore.Color, 0.14 * fore.Opacity) };
     }
 
     /// <summary>宽、最小高 1.5em，上下各让出 0.25em（不把标签撑高）。</summary>

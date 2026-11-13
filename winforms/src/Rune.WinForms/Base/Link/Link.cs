@@ -53,13 +53,15 @@ public class Link : Element
     public bool IsFocusVisible { get; set { field = value; Invalidate(); } }
 
 
-    /// <summary>里面的环境：要下划线时字体加上下划线。</summary>
-    ElementContext Inner(ElementContext context)
+    /// <summary>里面的环境：下划线自己画（颜色与文字不同），字体不带下划线。</summary>
+    static ElementContext Inner(ElementContext context)
     {
-        var shown = Underline == LinkUnderline.Always || (Underline == LinkUnderline.Hover && IsHovered);
-        var style = shown ? context.Font.Style | FontStyle.Underline : context.Font.Style & ~FontStyle.Underline;
+        var style = context.Font.Style & ~FontStyle.Underline;
         return style == context.Font.Style ? context : context with { Font = Fonts.Get(context.Font.FontFamily.Name, context.Font.SizeInPoints, style) };
     }
+
+    /// <summary>要画下划线：always，或 hover 时指针在上面。</summary>
+    internal bool UnderlineShown => Underline == LinkUnderline.Always || (Underline == LinkUnderline.Hover && IsHovered);
 
     /// <inheritdoc />
     protected internal override Size Measure(ElementContext context, Size available)
@@ -83,10 +85,20 @@ public class Link : Element
     /// <inheritdoc />
     protected internal override void Paint(Graphics graphics, ElementContext context)
     {
-        var inner = Inner(context) with { ForeColor = ResolvedSx?.Foreground ?? Tone.ColorIn(context) };
+        // 次要链接（muted：导航、页脚）悬停时换成正文色：不画下划线时也有悬停反馈
+        var tone = Tone == TextTone.Muted && IsHovered ? TextTone.Neutral : Tone;
+        var inner = Inner(context) with { ForeColor = ResolvedSx?.Foreground ?? tone.ColorIn(context) };
         var size = text.Measure(inner, new Size(int.MaxValue, int.MaxValue));
         text.Bounds = new Rectangle(Bounds.X, Bounds.Y + (Bounds.Height - size.Height) / 2, size.Width, size.Height);
         text.Paint(graphics, inner);
+        if (UnderlineShown)
+        {
+            // 下划线平时是半透明的文字色，悬停时实色（同上游）：一直有下划线的链接也有悬停反馈；位置在基线下 0.12em，粗细约 1/14em
+            var fore = inner.ForeColor;
+            using var pen = new Pen(IsHovered ? fore : Color.FromArgb(fore.A / 2, fore), MathF.Max(1, MathF.Round(inner.Em / 14)));
+            var y = text.Bounds.Y + (text.Baseline(inner) ?? text.Bounds.Height) + MathF.Round(0.12f * inner.Em);
+            graphics.DrawLine(pen, text.Bounds.Left, y, text.Bounds.Right, y);
+        }
         if (External)
         {
             var glyph = icon.Measure(inner, Bounds.Size);

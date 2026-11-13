@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Automation.Peers;
 using System.Windows.Documents;
+using System.Windows.Media;
 
 namespace Rune.Wpf;
 
@@ -51,7 +52,37 @@ public class Link : Hyperlink
 
     InlineUIContainer? icon;
 
-    static Link() => DefaultStyleKeyProperty.OverrideMetadata(typeof(Link), new FrameworkPropertyMetadata(typeof(Link)));
+    static Link()
+    {
+        DefaultStyleKeyProperty.OverrideMetadata(typeof(Link), new FrameworkPropertyMetadata(typeof(Link)));
+        TextDecorationsProperty.OverrideMetadata(typeof(Link), new FrameworkPropertyMetadata(null, null, CoerceDecorations));
+        ForegroundProperty.OverrideMetadata(typeof(Link), new FrameworkPropertyMetadata((d, _) => d.CoerceValue(TextDecorationsProperty)));
+    }
+
+    /// <summary>
+    /// 主题样式给的下划线换成文字色画的：平时半透明（50%），悬停时实色（同上游）——一直有下划线的链接也有悬停反馈，各色调都适用。
+    /// </summary>
+    static object? CoerceDecorations(DependencyObject d, object? baseValue)
+    {
+        if (baseValue is not TextDecorationCollection { Count: > 0 } || d is not Link { Foreground: SolidColorBrush fore } link) return baseValue;
+        var pen = new Pen(new SolidColorBrush(fore.Color) { Opacity = (link.IsMouseOver ? 1 : 0.5) * fore.Opacity }, 1);
+        pen.Freeze();
+        return new TextDecorationCollection { new TextDecoration(TextDecorationLocation.Underline, pen, 0, TextDecorationUnit.FontRecommended, TextDecorationUnit.FontRecommended) };
+    }
+
+    /// <inheritdoc />
+    protected override void OnMouseEnter(System.Windows.Input.MouseEventArgs e)
+    {
+        base.OnMouseEnter(e);
+        CoerceValue(TextDecorationsProperty);
+    }
+
+    /// <inheritdoc />
+    protected override void OnMouseLeave(System.Windows.Input.MouseEventArgs e)
+    {
+        base.OnMouseLeave(e);
+        CoerceValue(TextDecorationsProperty);
+    }
 
     /// <summary>新建链接：载入后把外链图标挪到最后（XAML 里 External 先于文字赋值，图标会排在前面）。</summary>
     public Link() => Loaded += (_, _) =>

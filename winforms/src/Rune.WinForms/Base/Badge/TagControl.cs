@@ -10,10 +10,10 @@ namespace Rune.WinForms;
 /// tag.RemoveRequested += (_, _) => filters.Controls.Remove(tag);
 /// </code>
 /// 订阅了 <see cref="RemoveRequested"/> 才有移除按钮（上游给了 onRemove 才有）：文字后面一个圆形的 <see cref="CloseButtonControl"/> 子控件，
-/// 1.5em、字号与颜色同标签，读屏名称是"移除 + 标签文字"（<see cref="RemoveLabel"/> 能改）。使用方移除了标签时，原来在移除按钮上的焦点交给
+/// 1.5em、字号与颜色同标签，悬停的底色是标签文字色的 14%、按下的波纹 22%（彩色标签上协调，不用幽灵按钮的灰色），读屏名称是"移除 + 标签文字"（<see cref="RemoveLabel"/> 能改）。使用方移除了标签时，原来在移除按钮上的焦点交给
 /// 同一容器里下一个（没有就上一个）能聚焦的控件。出入：没有离场的淡出缩小（子控件不能半透明），点了就请求移除。
 /// 可选中（筛选条件的一排标签）：写了 <see cref="IsSelected"/> 时整个标签是切换按钮（读屏是按钮、状态"已按下"），点击、空格、Enter 切换；
-/// 没选中时 surface（有描边），选中时 solid 实底并在前面加一个对勾；没写的色调、字号用 accent、sm。可选中的标签不带移除按钮。
+/// 没选中时 surface（有描边），选中时 solid 实底并在前面加一个对勾；没写的色调、字号用 accent、sm；悬停时叠一层 8% 的文字色。可选中的标签不带移除按钮。
 /// </summary>
 [ToolboxItem(true)]
 [DefaultEvent(nameof(RemoveRequested))]
@@ -94,6 +94,21 @@ public class TagControl : BadgeControl
     {
         base.OnMouseDown(e);
         if (IsSelected is not null && e.Button == MouseButtons.Left) Focus();
+    }
+
+    /// <inheritdoc />
+    protected override void OnMouseEnter(EventArgs e)
+    {
+        base.OnMouseEnter(e);
+        Element.Hovered = true;
+    }
+
+    /// <inheritdoc />
+    protected override void OnMouseLeave(EventArgs e)
+    {
+        base.OnMouseLeave(e);
+        // 指针移到移除按钮上也算离开标签：只有可选中的标签画悬停层，它不带移除按钮
+        Element.Hovered = false;
     }
 
     /// <inheritdoc />
@@ -188,6 +203,8 @@ public class TagControl : BadgeControl
         remove.Radius = Radius.Full;
         remove.AutoSize = false;
         remove.Click += (_, _) => RequestRemove();
+        remove.MouseEnter += (_, _) => SetRemoveHovered(true);
+        remove.MouseLeave += (_, _) => SetRemoveHovered(false);
         Controls.Add(remove);
         Element.TrailingEm = RemoveEm;
         UpdateRemoveLabel();
@@ -219,13 +236,31 @@ public class TagControl : BadgeControl
         var context = ElementContext.Of(this);
         var em = Element.EmIn(context);
         if (remove.TextSize != Element.Size) remove.TextSize = Element.Size;
-        var foreground = Element.ForegroundIn(context);
-        if (remove.Sx?.Foreground != foreground) remove.Sx = new ButtonSx { Foreground = foreground };
+        UpdateRemoveSx(context);
         var size = (int)MathF.Round(RemoveEm * em);
         var ring = remove.Padding;
         var right = Element.Bounds.Right - (int)MathF.Round(context.Scale(Tokens.BorderWidth.Xs) + 0.25f * em);
         var top = Element.Bounds.Top + (Element.Bounds.Height - size) / 2;
         remove.Bounds = new Rectangle(right - size - ring.Left, top - ring.Top, size + ring.Horizontal, size + ring.Vertical);
+    }
+
+    bool removeHovered;
+
+    void SetRemoveHovered(bool hovered)
+    {
+        removeHovered = hovered;
+        UpdateRemoveSx(ElementContext.Of(this));
+    }
+
+    /// <summary>
+    /// 移除按钮的颜色同标签的文字色；悬停的底色是它的 14%（外观覆盖写了底色时平时也用它，所以只在悬停时写）。按下的波纹本来就是文字色的 22%。
+    /// </summary>
+    void UpdateRemoveSx(ElementContext context)
+    {
+        if (remove is null) return;
+        var foreground = Element.ForegroundIn(context);
+        var sx = new ButtonSx { Foreground = foreground, Background = removeHovered ? Color.FromArgb((int)MathF.Round(foreground.A * 0.14f), foreground) : null };
+        if (remove.Sx != sx) remove.Sx = sx;
     }
 
     /// <summary>请使用方移除；焦点原来在移除按钮上、标签被移除了时，交给同一容器里下一个（没有就上一个）能聚焦的控件。</summary>

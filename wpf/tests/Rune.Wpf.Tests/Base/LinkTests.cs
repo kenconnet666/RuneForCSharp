@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Media;
 
 namespace Rune.Wpf.Tests;
 
@@ -34,7 +35,10 @@ public class LinkTests
         WpfUi.Show(host);
 
         Assert.Same(host.FindResource("Rune.Brush.AccentText"), link.Foreground);
-        Assert.Equal(TextDecorations.Underline, link.TextDecorations);
+        Assert.Equal(TextDecorationLocation.Underline, Assert.Single(link.TextDecorations).Location);
+        // 下划线平时是半透明的文字色（悬停时实色）
+        var stroke = (SolidColorBrush)Assert.Single(link.TextDecorations).Pen.Brush;
+        Assert.Equal((((SolidColorBrush)link.Foreground).Color, 0.5), (stroke.Color, stroke.Opacity));
         Assert.NotNull(external.IconPart);
         Assert.Same(external.IconPart, ((InlineUIContainer)external.Inlines.LastInline).Child); // 图标在文字后面
         typeof(Hyperlink).GetMethod("OnClick", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!.Invoke(link, null);
@@ -69,11 +73,11 @@ public class LinkTests
         host.Resources.MergedDictionaries.Add(new RuneTheme());
         WpfUi.Show(host);
 
-        Assert.Equal(TextDecorations.Underline, body.Link.TextDecorations);
+        Assert.Equal(TextDecorationLocation.Underline, Assert.Single(body.Link.TextDecorations).Location);
         Assert.Equal(LinkUnderline.Hover, scoped.Link.Underline); // 容器给 hover：没指着时没有下划线
         Assert.Null(scoped.Link.TextDecorations);
-        Assert.Equal(TextDecorations.Underline, explicitAlways.Link.TextDecorations); // 显式写的优先
+        Assert.Equal(TextDecorationLocation.Underline, Assert.Single(explicitAlways.Link.TextDecorations).Location); // 显式写的优先
         Assert.Null(header.Link.TextDecorations); // 卡片页头
-        Assert.Equal(TextDecorations.Underline, cardBody.Link.TextDecorations); // 卡片正文照旧
+        Assert.Equal(TextDecorationLocation.Underline, Assert.Single(cardBody.Link.TextDecorations).Location); // 卡片正文照旧
     });
 }

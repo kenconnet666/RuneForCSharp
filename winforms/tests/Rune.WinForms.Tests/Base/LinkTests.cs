@@ -10,6 +10,32 @@ public class LinkTests
         protected override void Navigate(Uri href) => Opened.Add(href);
     }
 
+    /// <summary>画出来的“墨量”：各像素（1 - 亮度）之和，颜色越深、画得越多越大。</summary>
+    static float Ink(LinkControl link)
+    {
+        using var bitmap = new Bitmap(link.Width, link.Height);
+        link.DrawToBitmap(bitmap, new Rectangle(Point.Empty, link.Size));
+        var ink = 0f;
+        for (var x = 0; x < bitmap.Width; x++)
+            for (var y = 0; y < bitmap.Height; y++)
+                ink += 1 - bitmap.GetPixel(x, y).GetBrightness();
+        return ink;
+    }
+
+    [Fact]
+    public Task Underline_turns_solid_and_muted_links_turn_to_text_on_hover() => WinFormsUi.Run(() =>
+    {
+        var link = new LinkControl { Text = "文档" };
+        var muted = new LinkControl { Text = "帮助中心", Tone = TextTone.Muted, Underline = LinkUnderline.None };
+        using var form = WinFormsUi.Show(link, muted);
+
+        Assert.True(link.Element.UnderlineShown);
+        var (plainLink, plainMuted) = (Ink(link), Ink(muted));
+        link.Element.IsHovered = muted.Element.IsHovered = true;
+        Assert.True(Ink(link) > plainLink); // 下划线平时半透明，悬停时实色
+        Assert.True(Ink(muted) > plainMuted); // 次要链接悬停换成正文色
+    });
+
     [Upstream("Link", "普通链接")]
     [Upstream("Link", "外部链接")]
     [Fact]
