@@ -28,6 +28,8 @@ namespace Rune.Avalonia;
 /// 都先问 <see cref="BeforeClose"/>；确认返回的任务进行中按钮加载、关不掉，结果为 false 或失败时保持打开。<see cref="OpenChanged"/> 报告原因
 /// （close、confirm、escape、outside；代码里改 IsOpen 不报告）。读屏：对话框，以标题为名称、说明为帮助文字。部件名见 <see cref="DialogParts"/>。
 /// <see cref="Draggable"/> 时按住标题行能把对话框挪开（核对数据时看后面被挡住的内容）：从标题行上的按钮、输入框按下不拖，拖到哪都不超出窗口，每次打开回到正中。
+/// 命令式（TS 的 useDialog）：不放进界面，<c>await new Dialog { … }.ShowAsync(owner)</c> 在 owner 所在的窗口打开，沿用 owner 处的主题、语言；
+/// 得到关上的原因（代码调用 <see cref="Close"/> 是 imperative）。开着时改属性就是上游句柄的 update；owner 离开界面时跟着关上。
 /// </summary>
 public class Dialog : Control
 {
@@ -89,6 +91,9 @@ public class Dialog : Control
     readonly Button cancel = new() { Name = DialogParts.Cancel, Variant = ButtonVariant.Soft, Tone = StatusTone.Neutral };
     readonly Button confirm = new() { Name = DialogParts.Confirm };
     OpenChangeReason? pending;
+    Control? anchor;
+    bool detached;
+    TaskCompletionSource<OpenChangeReason>? closed;
     IInputElement? returnFocus;
     TopLevel? host;
     bool confirming;
@@ -188,6 +193,39 @@ public class Dialog : Control
     /// <summary>用户开、关了（关闭按钮、取消、确认、Esc、点遮罩）；代码里改 IsOpen 时不发。</summary>
     public event EventHandler<OpenChangedEventArgs>? OpenChanged;
 
+    /// <summary>
+    /// 命令式打开（TS 的 useDialog().open）：在 <paramref name="owner"/> 所在的窗口打开这个对话框（它不用放进界面，开着时挂在 owner 的逻辑树下，沿用那里的主题、语言）。
+    /// 得到关上的原因；owner 离开界面时跟着关上（imperative）。
+    /// </summary>
+    /// <param name="owner">在哪个窗口打开、沿用谁的设置（一般是点的那个按钮）。</param>
+    public Task<OpenChangeReason> ShowAsync(Control owner)
+    {
+        ArgumentNullException.ThrowIfNull(owner);
+        if (IsOpen) throw new InvalidOperationException("对话框已经开着。");
+        anchor = owner;
+        detached = Parent is null;
+        if (detached) ((ISetLogicalParent)this).SetParent(owner);
+        owner.DetachedFromVisualTree += OnAnchorDetached;
+        var source = closed = new TaskCompletionSource<OpenChangeReason>();
+        LastShown = this;
+        SetOpen(true, OpenChangeReason.Imperative);
+        return source.Task;
+    }
+
+    /// <summary>代码关上（TS 句柄的 close）：不问 <see cref="BeforeClose"/>，原因是 imperative。</summary>
+    public void Close()
+    {
+        if (IsOpen) SetOpen(false, OpenChangeReason.Imperative);
+    }
+
+    /// <summary>最近一个命令式打开的对话框（测试用：ConfirmAsync 建的对话框不在界面里，找不到）。</summary>
+    internal static Dialog? LastShown { get; private set; }
+
+    void OnAnchorDetached(object? sender, VisualTreeAttachmentEventArgs e) => Close();
+
+    /// <summary>打开时先聚焦哪个元素；null 时是第一个能聚焦的（AlertDialog 是取消按钮）。</summary>
+    private protected virtual InputElement? InitialFocus => null;
+
     /// <summary>标题行只给读屏（命令面板：标题是面板的名称，不显示）。</summary>
     internal bool HeaderHidden { get; set { field = value; Sync(); } }
 
@@ -282,7 +320,7 @@ public class Dialog : Control
         if (IsOpen)
         {
             Offset = default;
-            var top = TopLevel.GetTopLevel(this);
+            var top = TopLevel.GetTopLevel(anchor ?? this);
             returnFocus = top?.FocusManager?.GetFocusedElement();
             popup.PlacementTarget = top;
             host = top;
@@ -291,7 +329,7 @@ public class Dialog : Control
             popup.IsOpen = true;
             Dispatcher.UIThread.Post(() =>
             {
-                var first = panel.GetVisualDescendants().OfType<InputElement>()
+                var first = InitialFocus ?? panel.GetVisualDescendants().OfType<InputElement>()
                     .FirstOrDefault(element => element.Focusable && element.IsEffectivelyEnabled && element.IsEffectivelyVisible);
                 (first ?? panel).Focus(NavigationMethod.Tab);
             }, DispatcherPriority.Loaded);
@@ -305,6 +343,20 @@ public class Dialog : Control
             returnFocus = null;
         }
         if (reason is { } known) OpenChanged?.Invoke(this, new OpenChangedEventArgs(IsOpen, known));
+        if (!IsOpen) Release(reason ?? OpenChangeReason.Imperative);
+    }
+
+    /// <summary>命令式打开的关上了：放开 owner，等着的 ShowAsync 得到原因。</summary>
+    void Release(OpenChangeReason reason)
+    {
+        if (anchor is null) return;
+        anchor.DetachedFromVisualTree -= OnAnchorDetached;
+        if (detached) ((ISetLogicalParent)this).SetParent(null);
+        anchor = null;
+        detached = false;
+        var source = closed;
+        closed = null;
+        source?.TrySetResult(reason);
     }
 
     /// <summary>窗口变了大小：遮罩跟着铺满，面板重新居中。</summary>
