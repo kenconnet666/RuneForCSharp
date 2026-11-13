@@ -21,6 +21,7 @@ public class CardControl : Panel, IScopeAware
     readonly Effect paint;
     readonly Text title = new() { Weight = TextWeight.Semibold };
     readonly SkeletonTextControl skeleton = new() { Visible = false };
+    readonly HashSet<Control> clipped = [];
     DelayedLoading loading;
     bool skeletonShown;
 
@@ -51,12 +52,12 @@ public class CardControl : Panel, IScopeAware
     /// <summary>圆角；不写时 lg。</summary>
     [Category("Appearance")]
     [Description("圆角，默认 lg。")]
-    public Radius Radius { get => radius.Or(ScopeDefaults?.Radius, Radius.Lg); set { radius = value; Invalidate(); } }
+    public Radius Radius { get => radius.Or(ScopeDefaults?.Radius, Radius.Lg); set { radius = value; PerformLayout(); Invalidate(); } }
 
     /// <summary>外观覆盖（代码里设，上游的 sx）：盖过作用域的 <see cref="CardSx"/> 与配方。</summary>
     [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public CardSx? Sx { get; set { field = value; Invalidate(); } }
+    public CardSx? Sx { get; set { field = value; PerformLayout(); Invalidate(); } }
 
     /// <summary>合并好的外观覆盖：作用域的在下，实例的在上。</summary>
     CardSx? ResolvedSx => ProviderControl.Of(this)?.ResolveStyles(Sx) ?? Sx;
@@ -239,10 +240,9 @@ public class CardControl : Panel, IScopeAware
         };
         var sx = ResolvedSx;
         (fill, border) = (sx?.Background ?? fill, sx?.BorderColor ?? border);
-        var corners = sx?.Radius ?? Radius;
         var graphics = e.Graphics;
         var line = Line;
-        var radius = corners.Value == "full" ? Height / 2f : (corners.In(ProviderControl.ThemeOf(this).Radii) ?? 0) * Em;
+        var radius = CornerRadius(sx);
         var state = graphics.Save();
         graphics.SmoothingMode = SmoothingMode.AntiAlias;
         using (var shape = Drawing.RoundedRectangle(new RectangleF(line / 2f, line / 2f, Width - line, Height - line), radius))
@@ -258,6 +258,53 @@ public class CardControl : Panel, IScopeAware
         if (engine.HeaderBottom is { } headerBottom) graphics.FillRectangle(divider, line, headerBottom, Width - 2 * line, line);
         if (engine.FooterTop is { } footerTop) graphics.FillRectangle(divider, line, footerTop, Width - 2 * line, line);
         if (Header.Length > 0) title.Paint(graphics, Context with { ForeColor = colors.Text });
+    }
+
+    float CornerRadius(CardSx? sx)
+    {
+        var corners = sx?.Radius ?? Radius;
+        return corners.Value == "full" ? Height / 2f : (corners.In(ProviderControl.ThemeOf(this).Radii) ?? 0) * Em;
+    }
+
+    /// <summary>
+    /// 碰到圆角的子控件按边框里面的圆角裁（TS 的 overflow: hidden）：内边距 none 时贴边的横幅、代码块不会盖住卡片的圆角。
+    /// 子控件画在自己的窗口上，卡片盖不住它们，只能给它们设窗口区域；只动自己裁过的，使用方自己设的区域不碰。
+    /// </summary>
+    void ClipCorners()
+    {
+        var line = Line;
+        var radius = Math.Max(0, CornerRadius(ResolvedSx) - line);
+        var inner = new RectangleF(line, line, Width - 2 * line, Height - 2 * line);
+        var corner = (int)MathF.Ceiling(radius);
+        foreach (Control child in Controls)
+        {
+            var bounds = child.Bounds;
+            var touches = radius > 0 && (bounds.Left < inner.Left + corner || bounds.Right > inner.Right - corner)
+                && (bounds.Top < inner.Top + corner || bounds.Bottom > inner.Bottom - corner);
+            if (!touches)
+            {
+                if (clipped.Remove(child)) SwapRegion(child, null);
+                continue;
+            }
+            if (child.Region is not null && !clipped.Contains(child)) continue;
+            using var path = Drawing.RoundedRectangle(inner with { X = inner.X - bounds.X, Y = inner.Y - bounds.Y }, radius);
+            clipped.Add(child);
+            SwapRegion(child, new Region(path));
+        }
+    }
+
+    static void SwapRegion(Control child, Region? region)
+    {
+        var old = child.Region;
+        child.Region = region;
+        old?.Dispose();
+    }
+
+    /// <inheritdoc />
+    protected override void OnControlRemoved(ControlEventArgs e)
+    {
+        base.OnControlRemoved(e);
+        if (e.Control is { } child && clipped.Remove(child)) SwapRegion(child, null);
     }
 
     /// <inheritdoc />
@@ -361,6 +408,7 @@ public class CardControl : Panel, IScopeAware
         public override bool Layout(object container, LayoutEventArgs layoutEventArgs)
         {
             Run(owner.ClientSize.Width, arrange: true);
+            owner.ClipCorners();
             return owner.AutoSize;
         }
     }

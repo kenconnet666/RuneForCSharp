@@ -93,27 +93,29 @@ static class Inspector
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         using var bitmap = new Bitmap(form.ClientSize.Width, form.ClientSize.Height);
         using (var graphics = Graphics.FromImage(bitmap))
-            Render(form, graphics, Point.Empty, new Rectangle(Point.Empty, form.ClientSize));
+        using (var clip = new Region(new Rectangle(Point.Empty, form.ClientSize)))
+            Render(form, graphics, Point.Empty, clip);
         bitmap.Save(path, ImageFormat.Png);
         return $"{path}（{bitmap.Width}×{bitmap.Height}，DPI {form.DeviceDpi}）{Environment.NewLine}";
     }
 
     /// <summary>
-    /// 画一个控件，再从下往上把子控件逐个盖上去（按自己的 Region 裁剪）。DrawToBitmap 让 Windows 画子控件，
+    /// 画一个控件，再从下往上把子控件逐个盖上去。DrawToBitmap 让 Windows 画子控件，
     /// 它从最上面的画起，叠在上面的控件（角标）反而被盖住；这里每层都用正确的 z 序重画一遍。
+    /// 裁剪同窗口系统：自己的 Region 也裁到所有子控件（卡片的圆角裁掉贴边的横幅）。
     /// PrintWindow 取 DWM 合成的画面，屏幕外的窗体常取到没画完的黑块，所以不用它。
     /// </summary>
-    static void Render(Control control, Graphics graphics, Point origin, Rectangle clip)
+    static void Render(Control control, Graphics graphics, Point origin, Region clip)
     {
-        clip.Intersect(new Rectangle(origin, control.Size));
-        // Rectangle.IsEmpty 要四个值都是 0：宽或高为 0、位置不在原点的控件（还没排版的子控件）也要跳过
-        if (clip.Width <= 0 || clip.Height <= 0) return;
+        // 宽或高为 0 的控件（还没排版的子控件）跳过
+        if (control.Width <= 0 || control.Height <= 0) return;
+        using var shape = control.Region?.Clone() ?? new Region(new Rectangle(Point.Empty, control.Size));
+        shape.Translate(origin.X, origin.Y);
+        shape.Intersect(clip);
+        if (shape.IsEmpty(graphics)) return;
         using (var image = new Bitmap(control.Width, control.Height))
-        using (var shape = control.Region?.Clone() ?? new Region(new Rectangle(Point.Empty, control.Size)))
         {
-            control.DrawToBitmap(image, new Rectangle(Point.Empty, control.Size));
-            shape.Translate(origin.X, origin.Y);
-            shape.Intersect(clip);
+            PaintSelf(control, image);
             graphics.Clip = shape;
             graphics.DrawImageUnscaled(image, origin);
             graphics.ResetClip();
@@ -121,11 +123,27 @@ static class Inspector
         // 客户区相对控件左上角的偏移（边框、标题栏）
         var window = control.Parent is { } parent ? parent.PointToScreen(control.Location) : control.Location;
         var client = control.Parent is null ? Point.Empty : control.PointToScreen(Point.Empty) - (Size)window;
-        var area = new Rectangle(origin + (Size)client, control.ClientSize);
-        area.Intersect(clip);
+        using var area = shape.Clone();
+        area.Intersect(new Rectangle(origin + (Size)client, control.ClientSize));
         foreach (var child in control.Controls.Cast<Control>().Where(child => child.Visible).Reverse())
             Render(child, graphics, origin + (Size)client + (Size)child.Location, area);
     }
+
+    /// <summary>
+    /// 只画控件自己（WM_PRINT 不带 PRF_CHILDREN）：DrawToBitmap 会把子控件一起画进来、不按它们的 Region 裁，
+    /// 卡片圆角裁掉的部分又从父控件的图里露出来。子控件由 Render 逐层盖上去。
+    /// </summary>
+    static void PaintSelf(Control control, Bitmap image)
+    {
+        const int print = 0x0317, nonClient = 0x2, clientArea = 0x4, eraseBackground = 0x8;
+        using var graphics = Graphics.FromImage(image);
+        var dc = graphics.GetHdc();
+        try { SendMessage(control.Handle, print, dc, nonClient | clientArea | eraseBackground); }
+        finally { graphics.ReleaseHdc(dc); }
+    }
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    static extern nint SendMessage(nint window, int message, nint wParam, nint lParam);
 
     static ReportTable Tree(Control root, Dictionary<object, string> labels)
     {

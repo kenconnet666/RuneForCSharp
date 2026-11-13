@@ -66,6 +66,25 @@ public class CardTests
         Assert.Equal(card.ClientSize.Height - line - (int)MathF.Round(0.5f * em), action.Bottom); // 上下 sm
     });
 
+    [Fact]
+    public Task Children_touching_a_corner_are_clipped_to_the_rounding() => WinFormsUi.Run(() =>
+    {
+        var flush = new ParagraphControl { Text = "贴边" };
+        var card = new CardControl { CardPadding = Space.None };
+        card.Controls.Add(flush);
+        Show(card, out var form);
+        using var _ = form;
+
+        Assert.NotNull(flush.Region); // 正文贴边：按圆角裁
+        using (var graphics = flush.CreateGraphics())
+        {
+            Assert.False(flush.Region!.IsVisible(0, 0, graphics)); // 角上露出卡片的圆角
+            Assert.True(flush.Region.IsVisible(flush.Width / 2, 0, graphics));
+        }
+        card.CardPadding = Space.Lg;
+        Assert.Null(flush.Region); // 离开圆角：去掉自己设的区域
+    });
+
     [Upstream("Card", "loading：正文换成对读屏隐藏的骨架")]
     [Fact]
     public Task Loading_swaps_the_body_for_a_skeleton() => WinFormsUi.Run(() =>
