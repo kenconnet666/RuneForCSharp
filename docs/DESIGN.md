@@ -978,8 +978,24 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 关闭：订阅了 CloseRequested 才有关闭按钮（小一档：sm / md 的字号，上下各收 space.xs），悬停底色是文字色的 14%（状态层）。离场同 Tag：
   三个平台把 Tag 的"离场后请使用方移除、焦点交给相邻元素"挪进了共用的 `Dismissal`（Utils/Motion）；Avalonia、WPF 淡出（Alert 只改透明度），
   WinForms 的子控件不能半透明，直接请使用方移除。
-- WPF 的 Control 自己有 Padding、BorderThickness：内边距与边框写在主题里（EmSize.Padding），里面的 Border 绑过去，样式能改；inspect 也按 Alert 自己报。
-- 示例：tones、status、variants（banner 等 Banner）。Avalonia、WPF 与文档站的取值对照没有差异。
+- WPF 的 Control 自己有 Padding、BorderThickness：边框写在主题里，内边距随字号用 SetCurrentValue 写当前值（使用方的本地值、样式盖得过），里面的 Border 绑过去；
+  inspect 也按 Alert 自己报。不用 EmSize.Padding：它的登记会覆盖 FontSize 的元数据、换掉字号的继承。代码建的部件要有 `Name = "PART_X"`，inspect 才配得上部件。
+  根 Border 的 TextElement.FontSize 绑到控件的 FontSize：Gallery 与 inspect 的宿主里，说明的 TextBlock 没从控件继承到字号（测试里继承正常，原因没查清），绑上就稳了。
+- 示例：tones、status、variants、banner（Banner 在同一页）。Avalonia、WPF 与文档站的取值对照没有差异。
+
+### Banner（2026-11-14）
+
+- 结构同 TS：一行居中的 Flex（换行，间距 space.sm、行距 space.xs，上下 space.sm、左右 space.lg）里排图标、文字、操作（中等字重）；文字是一段：
+  标题（中等字重）后跟 0.5em 的空隙再接正文，放不下时在文字里换行。关闭按钮不参与居中，叠在结束边（space.sm）竖直居中，有它时结束端多留 2em。
+  没有圆角，留 1 像素的透明边框（同上游的 statusToneSx）。颜色 = 样式（`BannerVariant`：soft 默认、solid 实底）× 色调（默认 info），同 Badge 的色表；
+  图标的默认值、Live、关闭与离场同 Alert（共用 Alert 的 IconFor 与 `Dismissal`）。
+- Avalonia、WPF：TextBlock 的 Inlines 是 Run（标题，PART_Title）+ InlineUIContainer 空隙 + Run（字符串内容）或 InlineUIContainer（控件内容），文字整段居中、跟着换行；
+  WPF 的关闭按钮用负的外边距伸到边框外的内边距里（Banner 自己的 Padding 结束端多了 2em）。
+- WinForms：图标、标题、正文是画的元素，操作与关闭按钮是子控件；标题与正文一行放得下时并排，放不下时标题在上、正文在下各自居中
+  （GDI 画不了一段里混排两种字重的折行）。实底上的操作要跟着横幅的文字色：BannerControl 的 ForeColor 设成文字色，色调写 inherit 的链接随之变色。
+- 卡片里贴边放横幅（内边距 none）时，WinForms 的子控件会盖住卡片的圆角：CardControl 给碰到圆角的子控件按边框里面的圆角设窗口区域（TS 的 overflow: hidden），
+  只动自己裁过的；inspect 的截图改用 WM_PRINT（不带 PRF_CHILDREN）逐层画，按每层的区域裁，和窗口系统的裁剪一致。
+- 示例：Alert 页的 banner（实底维护通知带链接、试用提醒带按钮、只读提示，关掉的可以重新显示）。三个平台各有两条上游用例。
 
 ### Select、SelectedTags（2026-11-07）
 
