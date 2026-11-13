@@ -202,6 +202,21 @@ public class SwitchTests
     });
 
     [Fact]
+    public Task Hover_mixes_text_color_into_the_track() => WinFormsUi.Run(() =>
+    {
+        var toggle = new SwitchControl();
+        using var form = WinFormsUi.Show(toggle);
+        var track = Track(toggle);
+        var (x, y) = ((int)track.Right - 3, (int)(track.Y + track.Height / 2));
+        var colors = RuneTheme.Current.Value.Colors;
+
+        toggle.Element.IsHovered = true;
+        Assert.Equal(Drawing.Mix(colors.BorderStrong, colors.Text, 0.15).ToArgb(), Pixel(toggle, x, y).ToArgb()); // 关：borderStrong 混进 15% 的正文色
+        toggle.Element.IsHovered = false;
+        Assert.Equal(colors.BorderStrong.ToArgb(), Pixel(toggle, x, y).ToArgb());
+    });
+
+    [Fact]
     public Task Disabled_cannot_toggle_and_fades_to_opacities_disabled() => WinFormsUi.Run(() =>
     {
         var toggle = new SwitchControl();

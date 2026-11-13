@@ -126,6 +126,9 @@ public class Switch : ChoiceBase
     }
 
     /// <inheritdoc />
+    private protected override bool HoverRepaints => true;
+
+    /// <inheritdoc />
     private protected override void PaintControl(Graphics graphics, ElementContext context, ElementContext inner, RectangleF track, Func<Color, Color> dim)
     {
         var theme = context.Theme;
@@ -136,9 +139,12 @@ public class Switch : ChoiceBase
         var progress = position.Value;
         var thumb = Thumb(context, inner, track, progress);
 
-        // 轨道色随滑块的位置从 borderStrong 过渡到色调的实底（TS 的 background-color 过渡，同一时长与缓动）
+        // 轨道色随滑块的位置从 borderStrong 过渡到色调的实底（TS 的 background-color 过渡，同一时长与缓动）；
+        // 悬停时混进一点正文色（关 15%、开 12%）：亮色里变深、暗色里变亮
+        var trackColor = Drawing.Mix(sx?.TrackOffColor ?? colors.BorderStrong, sx?.TrackColor ?? fill, progress);
+        if (IsHovered && IsEnabled) trackColor = Drawing.Mix(trackColor, colors.Text, IsChecked ? 0.12 : 0.15);
         using (var path = Drawing.RoundedRectangle(track, track.Height / 2))
-        using (var brush = new SolidBrush(dim(Drawing.Mix(sx?.TrackOffColor ?? colors.BorderStrong, sx?.TrackColor ?? fill, progress)))) graphics.FillPath(brush, path);
+        using (var brush = new SolidBrush(dim(trackColor))) graphics.FillPath(brush, path);
         if (Invalid)
         {
             var width = context.Scale(Tokens.BorderWidth.Sm);

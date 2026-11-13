@@ -17,6 +17,30 @@ public class SwitchTests
     /// <summary>主题资源的颜色（按控件的主题变体查）。</summary>
     static IToggleProvider Toggle(Switch owner) => (IToggleProvider)ControlAutomationPeer.CreatePeerForElement(owner);
 
+    static Color Mix(Color a, Color b, double amount)
+    {
+        byte Channel(byte x, byte y) => (byte)Math.Round(x * amount + y * (1 - amount));
+        return Color.FromArgb(Channel(a.A, b.A), Channel(a.R, b.R), Channel(a.G, b.G), Channel(a.B, b.B));
+    }
+
+    [Fact]
+    public Task Hover_mixes_text_color_into_the_track() => HeadlessUi.Run(() =>
+    {
+        var off = new Switch { Content = "通知" };
+        var on = new Switch { Content = "同步", IsChecked = true };
+        var window = HeadlessUi.Show(new StackPanel { Children = { off, on } });
+        Color Track(Switch owner) => Lookup.ColorOf(owner.Part<Border>("PART_Track").GetBaseValue(Border.BackgroundProperty).Value as IBrush);
+        var text = off.ThemeColor("Rune.Brush.Text");
+
+        Assert.Equal(off.ThemeColor("Rune.Brush.BorderStrong"), Track(off));
+        window.MouseMove(off.Part<Border>("PART_Track").TranslatePoint(new Point(2, 2), window)!.Value);
+        HeadlessUi.Flush(window);
+        Assert.Equal(Mix(off.ThemeColor("Rune.Brush.BorderStrong"), text, 0.85), Track(off)); // 关：borderStrong 混进 15% 的正文色
+        window.MouseMove(on.Part<Border>("PART_Track").TranslatePoint(new Point(2, 2), window)!.Value);
+        HeadlessUi.Flush(window);
+        Assert.Equal(Mix(Lookup.ColorOf(on.ToneFill), text, 0.88), Track(on)); // 开：色调实底混进 12%
+    });
+
     [Fact]
     [Upstream("Switch", "role=")]
     public Task Click_space_and_screen_readers_toggle_it() => HeadlessUi.Run(() =>
@@ -33,6 +57,8 @@ public class SwitchTests
         window.MouseUp(new Point(10, 10), MouseButton.Left);
         Assert.True(toggle.IsChecked);
         Assert.Contains(":checked", toggle.Classes);
+        window.MouseMove(new Point(toggle.Bounds.Right + 50, 10)); // 指针移开：悬停时轨道另有颜色
+        HeadlessUi.Flush(window);
         Assert.Same(toggle.ToneFill, toggle.Part<Border>("PART_Track").Background); // 开：色调实底
 
         toggle.Focus();

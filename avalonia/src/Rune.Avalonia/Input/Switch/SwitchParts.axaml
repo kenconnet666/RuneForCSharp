@@ -1,6 +1,6 @@
 <!--
   Switch 部件的默认外观（vue-tsx-pro 的 switchStyles 与 choiceInputStyles）：关时轨道是 borderStrong、滑块是页面底色加小阴影；
-  开时轨道是色调实底（ToneFill）、滑块是其上的颜色（ToneOnFill）；出错时轨道描边是危险色。轨道里的文字 fontSizes.xs、半粗，
+  开时轨道是色调实底（ToneFill）、滑块是其上的颜色（ToneOnFill）；悬停时轨道是 TrackHover（混进一点正文色，Switch.cs 里算）；出错时轨道描边是危险色。轨道里的文字 fontSizes.xs、半粗，
   开时是实底上的颜色，关时是正文色。写成主题里的样式（DESIGN §7 代码组合的控件），使用方的部件样式盖得过
 -->
 <Styles xmlns="https://github.com/avaloniaui"
@@ -11,6 +11,9 @@
   </Style>
   <Style Selector="rune|Switch:checked > #PART_Control > Border#PART_Track">
     <Setter Property="Background" Value="{Binding $parent[rune:Switch].ToneFill}" />
+  </Style>
+  <Style Selector="rune|Switch:pointerover:not(:disabled) > #PART_Control > Border#PART_Track">
+    <Setter Property="Background" Value="{Binding $parent[rune:Switch].TrackHover}" />
   </Style>
   <!-- 只在出错时画描边：Border 的底色只铺在描边里面，透明描边会让关着的轨道小一圈（CSS 的底色铺到描边下面） -->
   <Style Selector="rune|Switch:invalid > #PART_Control > Border#PART_Track">

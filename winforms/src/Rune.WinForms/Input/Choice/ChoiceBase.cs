@@ -75,7 +75,10 @@ public abstract class ChoiceBase : Element
     private protected TextProps? EndProps { get => field; set { field = value; RebuildEnd(); } }
 
     /// <summary>指针在上面（宿主设）：卡片的描边换成 borderStrong。</summary>
-    internal bool IsHovered { get; set { if (field == value) return; field = value; if (AsCard) Invalidate(); } }
+    internal bool IsHovered { get; set { if (field == value) return; field = value; if (HoverRepaints) Invalidate(); } }
+
+    /// <summary>悬停时外观会变（卡片外观的描边、开关的轨道）：要重画。</summary>
+    private protected virtual bool HoverRepaints => AsCard;
 
     /// <summary>卡片外观、所在组变了：重新量。</summary>
     internal void Relayout() => InvalidateMeasure();

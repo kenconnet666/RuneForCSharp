@@ -50,6 +50,18 @@ public class Switch : ChoiceBase
     public static readonly DependencyProperty UncheckedContentProperty = DependencyProperty.Register(
         nameof(UncheckedContent), typeof(object), typeof(Switch), new FrameworkPropertyMetadata(null, (d, _) => ((Switch)d).Update()));
 
+    /// <summary>
+    /// 悬停时的轨道色（上游 switchStyles 的 _hover）：关时 borderStrong 混进 15% 的正文色，开时色调实底混进 12%——亮色里变深、暗色里变亮。
+    /// 按主题与开关状态算好，部件样式绑定它。
+    /// </summary>
+    public static readonly DependencyProperty TrackHoverProperty = DependencyProperty.Register(nameof(TrackHover), typeof(Brush), typeof(Switch));
+
+    static readonly DependencyProperty TrackOffProperty = DependencyProperty.Register(
+        "TrackOff", typeof(Brush), typeof(Switch), new FrameworkPropertyMetadata(null, (d, _) => ((Switch)d).UpdateTrackHover()));
+
+    static readonly DependencyProperty TextBrushProperty = DependencyProperty.Register(
+        "TextBrush", typeof(Brush), typeof(Switch), new FrameworkPropertyMetadata(null, (d, _) => ((Switch)d).UpdateTrackHover()));
+
     /// <summary>滑块的位置：0 在起始边，1 在结束边（过渡驱动）。</summary>
     static readonly DependencyProperty PositionProperty = DependencyProperty.Register(
         "Position", typeof(double), typeof(Switch), new FrameworkPropertyMetadata(0d, (d, _) => ((Switch)d).control.InvalidateArrange()));
@@ -65,12 +77,19 @@ public class Switch : ChoiceBase
     readonly Spinner spinner = new() { Visibility = Visibility.Collapsed };
     readonly DelayedLoading loading;
 
-    static Switch() => DefaultStyleKeyProperty.OverrideMetadata(typeof(Switch), new FrameworkPropertyMetadata(typeof(Switch)));
+    static Switch()
+    {
+        DefaultStyleKeyProperty.OverrideMetadata(typeof(Switch), new FrameworkPropertyMetadata(typeof(Switch)));
+        IsCheckedProperty.OverrideMetadata(typeof(Switch), new FrameworkPropertyMetadata((d, _) => ((Switch)d).UpdateTrackHover()));
+        ToneFillProperty.OverrideMetadata(typeof(Switch), new FrameworkPropertyMetadata((d, _) => ((Switch)d).UpdateTrackHover()));
+    }
 
     /// <summary>新建：关闭；部件的外观引用主题的部件样式。</summary>
     public Switch()
     {
         control = new SwitchStack(this) { Name = "PART_Control" };
+        SetResourceReference(TrackOffProperty, "Rune.Brush.BorderStrong");
+        SetResourceReference(TextBrushProperty, "Rune.Brush.Text");
         control.SetResourceReference(StyleProperty, SwitchParts.Control);
         track.SetResourceReference(StyleProperty, SwitchParts.Track);
         focusRing.SetResourceReference(StyleProperty, SwitchParts.FocusRing);
@@ -111,7 +130,19 @@ public class Switch : ChoiceBase
     /// <summary>关闭时轨道里的内容。</summary>
     public object? UncheckedContent { get => GetValue(UncheckedContentProperty); set => SetValue(UncheckedContentProperty, value); }
 
+    /// <summary>悬停时的轨道色。</summary>
+    public Brush? TrackHover { get => (Brush?)GetValue(TrackHoverProperty); set => SetValue(TrackHoverProperty, value); }
+
     bool Wide => CheckedContent is not null || UncheckedContent is not null;
+
+    /// <summary>按当前的轨道色混进正文色（当前值：使用方写的 TrackHover 照用）。</summary>
+    void UpdateTrackHover()
+    {
+        var (track, amount) = IsChecked == true ? (ToneFill, 0.88) : ((Brush?)GetValue(TrackOffProperty), 0.85);
+        var hover = track is SolidColorBrush fill && GetValue(TextBrushProperty) is SolidColorBrush text ? new SolidColorBrush(ChoiceBase.Mix(fill.Color, text.Color, amount)) : track;
+        hover?.Freeze();
+        SetCurrentValue(TrackHoverProperty, hover);
+    }
 
     /// <inheritdoc />
     protected override bool CanToggle => !IsLoading;

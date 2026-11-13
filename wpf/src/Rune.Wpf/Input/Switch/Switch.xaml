@@ -18,6 +18,14 @@
       <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource AncestorType=rune:Switch}}" Value="True">
         <Setter Property="Background" Value="{Binding ToneFill, RelativeSource={RelativeSource AncestorType=rune:Switch}}" />
       </DataTrigger>
+      <!-- 悬停：轨道混进一点正文色（Switch.cs 里按开关状态算好的 TrackHover） -->
+      <MultiDataTrigger>
+        <MultiDataTrigger.Conditions>
+          <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=rune:Switch}}" Value="True" />
+          <Condition Binding="{Binding IsEnabled, RelativeSource={RelativeSource AncestorType=rune:Switch}}" Value="True" />
+        </MultiDataTrigger.Conditions>
+        <Setter Property="Background" Value="{Binding TrackHover, RelativeSource={RelativeSource AncestorType=rune:Switch}}" />
+      </MultiDataTrigger>
       <DataTrigger Binding="{Binding IsEffectivelyInvalid, RelativeSource={RelativeSource AncestorType=rune:Switch}}" Value="True">
         <Setter Property="BorderThickness" Value="2" />
         <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Danger}" />

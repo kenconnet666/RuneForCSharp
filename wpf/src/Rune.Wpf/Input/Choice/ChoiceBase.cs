@@ -404,7 +404,7 @@ public abstract class ChoiceBase : Control, IFieldControl
     }
 
     /// <summary>两种颜色按比例混合（CSS 的 color-mix，前一种占 <paramref name="amount"/>；在 sRGB 里插值，8% 时与 oklab 差不到一个色阶）。</summary>
-    static Color Mix(Color a, Color b, double amount)
+    internal static Color Mix(Color a, Color b, double amount)
     {
         byte Channel(byte x, byte y) => (byte)Math.Round(x * amount + y * (1 - amount));
         return Color.FromArgb(Channel(a.A, b.A), Channel(a.R, b.R), Channel(a.G, b.G), Channel(a.B, b.B));

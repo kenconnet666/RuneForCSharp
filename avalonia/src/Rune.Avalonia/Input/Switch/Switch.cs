@@ -7,6 +7,7 @@ using Avalonia.Automation.Provider;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Presenters;
+using Avalonia.Media;
 using Avalonia.Styling;
 using LayoutSize = Avalonia.Size;
 
@@ -50,8 +51,17 @@ public class Switch : ChoiceBase
     /// <summary>关闭时轨道里的文字或图标。</summary>
     public static readonly StyledProperty<object?> UncheckedContentProperty = AvaloniaProperty.Register<Switch, object?>(nameof(UncheckedContent));
 
+    /// <summary>
+    /// 悬停时的轨道色（上游 switchStyles 的 _hover）：关时 borderStrong 混进 15% 的正文色，开时色调实底混进 12%——亮色里变深、暗色里变亮。
+    /// 按主题与开关状态算好，主题样式绑定它。
+    /// </summary>
+    public static readonly StyledProperty<IBrush?> TrackHoverProperty = AvaloniaProperty.Register<Switch, IBrush?>(nameof(TrackHover));
+
     /// <summary>滑块的位置：0 在起始边，1 在结束边（过渡驱动）。</summary>
     static readonly StyledProperty<double> PositionProperty = AvaloniaProperty.Register<Switch, double>("Position");
+
+    static readonly StyledProperty<IBrush?> TrackOffProperty = AvaloniaProperty.Register<Switch, IBrush?>("TrackOff");
+    static readonly StyledProperty<IBrush?> TextBrushProperty = AvaloniaProperty.Register<Switch, IBrush?>("TextBrush");
 
     readonly SwitchStack control;
     readonly Border track = new() { Name = SwitchParts.Track };
@@ -74,6 +84,9 @@ public class Switch : ChoiceBase
     /// <summary>新建：关闭。</summary>
     public Switch()
     {
+        var themed = new TemplateResources(this);
+        themed.Bind(TrackOffProperty, "Rune.Brush.BorderStrong");
+        themed.Bind(TextBrushProperty, "Rune.Brush.Text");
         loading = new DelayedLoading(shown => spinner.IsVisible = shown);
         onContent.Child = onText;
         offContent.Child = offText;
@@ -109,7 +122,19 @@ public class Switch : ChoiceBase
     /// <summary>关闭时轨道里的内容。</summary>
     public object? UncheckedContent { get => GetValue(UncheckedContentProperty); set => SetValue(UncheckedContentProperty, value); }
 
+    /// <summary>悬停时的轨道色。</summary>
+    public IBrush? TrackHover { get => GetValue(TrackHoverProperty); set => SetValue(TrackHoverProperty, value); }
+
     bool Wide => CheckedContent is not null || UncheckedContent is not null;
+
+    /// <summary>按当前的轨道色混进正文色（当前值，不占优先级：使用方写的 TrackHover 照用）。</summary>
+    void UpdateTrackHover()
+    {
+        var (track, amount) = IsChecked ? (ToneFill, 0.88) : (GetValue(TrackOffProperty), 0.85);
+        SetCurrentValue(TrackHoverProperty, track is ISolidColorBrush fill && GetValue(TextBrushProperty) is ISolidColorBrush text
+            ? new SolidColorBrush(ChoiceBase.Mix(fill.Color, text.Color, amount))
+            : track);
+    }
 
     /// <inheritdoc />
     protected override bool CanToggle => !IsLoading;
@@ -118,6 +143,7 @@ public class Switch : ChoiceBase
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
+        if (change.Property == IsCheckedProperty || change.Property == ToneFillProperty || change.Property == TrackOffProperty || change.Property == TextBrushProperty) UpdateTrackHover();
         // 轨道、滑块由叠放层排：尺寸与位置变了让它重排
         if (change.Property == PositionProperty) control.InvalidateArrange();
         else if (change.Property == CheckedContentProperty || change.Property == UncheckedContentProperty)

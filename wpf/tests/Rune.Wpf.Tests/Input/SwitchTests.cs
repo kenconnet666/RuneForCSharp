@@ -22,6 +22,24 @@ public class SwitchTests
         return host;
     }
 
+    static Color Mix(Color a, Color b, double amount)
+    {
+        byte Channel(byte x, byte y) => (byte)Math.Round(x * amount + y * (1 - amount));
+        return Color.FromArgb(Channel(a.A, b.A), Channel(a.R, b.R), Channel(a.G, b.G), Channel(a.B, b.B));
+    }
+
+    [Fact]
+    public Task Hover_track_mixes_in_the_text_color() => WpfUi.Run(() =>
+    {
+        var toggle = new Switch { Content = "通知" };
+        var host = Show(toggle);
+        Color Token(string key) => ((SolidColorBrush)host.FindResource(key)).Color;
+
+        Assert.Equal(Mix(Token("Rune.Brush.BorderStrong"), Token("Rune.Brush.Text"), 0.85), ((SolidColorBrush)toggle.TrackHover!).Color); // 关：混进 15%
+        toggle.IsChecked = true;
+        Assert.Equal(Mix(((SolidColorBrush)toggle.ToneFill!).Color, Token("Rune.Brush.Text"), 0.88), ((SolidColorBrush)toggle.TrackHover!).Color); // 开：混进 12%
+    });
+
     /// <summary>用这个部件样式键的元素（样式是同一个引用）。</summary>
     static List<T> Parts<T>(Switch owner, PartKey key) where T : FrameworkElement
     {
