@@ -31,8 +31,8 @@ namespace Rune.Avalonia;
 /// 按外壳自己的宽度排版（TS 按视口，断点同 sizes.lg / sizes.xl）：1024 以上显示左侧栏，更窄时收进从起始边滑出的抽屉，顶栏最前面出现打开它的按钮；
 /// 抽屉里点了导航项、或变宽时自动关上。1280 以上显示右侧栏，更窄时不显示。两侧栏与正文各自滚动（ScrollArea），页脚在正文下面、内容少时贴着底部。
 /// 写了 <see cref="Brand"/> 且有侧栏时，宽屏下品牌这一格与侧栏同宽，侧栏的竖线一直延伸到顶栏顶端，顶栏的内容与正文的起始边对齐。
-/// <see cref="Nav"/> 是顶栏里品牌后面的导航（只有它时是顶部导航布局，和侧栏一起时是混合布局）；<see cref="SidebarCollapsible"/> 在侧栏底部加"收起侧栏"，
-/// 收起后只剩图标栏（宽屏时；侧栏里的 NavList 变紧凑，品牌格只剩标志）。
+/// <see cref="Nav"/> 是顶栏里品牌后面的导航（只有它时是顶部导航布局，和侧栏一起时是混合布局）；<see cref="SidebarCollapsible"/> 在品牌格的结束边加"收起侧栏"（宽屏时），
+/// 收起后只剩图标栏（侧栏里的 NavList 变紧凑），品牌格变窄、只放居中的展开按钮（不放品牌）；没写 Brand 时也有这一格放按钮。
 /// 全屏（<see cref="Fullscreenable"/>，默认开，窄于 768 时不显示按钮）：不显示顶栏和左侧栏，正文占满，外壳是窗口内容时窗口同时全屏；右上角留一个退出按钮，Esc 也退出。
 /// 桌面特有（上游没有）：外壳是窗口的内容时，顶栏兼作窗口的标题栏（<see cref="ExtendsContentIntoTitleBar"/>，默认开）：去掉系统的标题栏，
 /// 顶栏的空白处拖动窗口、双击最大化，结束边是自绘的最小化、最大化（还原）、关闭（悬停 danger 底）；系统的缩放边框、贴边与 Windows 11 的贴靠布局都保留。
@@ -70,7 +70,7 @@ public class AppShell : Control
     /// <summary>正文。</summary>
     public static readonly StyledProperty<object?> ContentProperty = AvaloniaProperty.Register<AppShell, object?>(nameof(Content));
 
-    /// <summary>侧栏底部有"收起侧栏"按钮。</summary>
+    /// <summary>品牌格的结束边有"收起侧栏"按钮（宽屏时）。</summary>
     public static readonly StyledProperty<bool> SidebarCollapsibleProperty = AvaloniaProperty.Register<AppShell, bool>(nameof(SidebarCollapsible));
 
     /// <summary>侧栏收起了（宽屏时成图标栏）。默认双向绑定。</summary>
@@ -101,6 +101,7 @@ public class AppShell : Control
     readonly Flex headerRow = new() { Align = FlexAlign.Center };
     readonly IconButton menuButton = new() { Name = AppShellParts.MenuButton, Icon = Lucide.Menu };
     readonly Border brand = new() { Name = AppShellParts.Brand };
+    readonly Flex brandRow = new() { Align = FlexAlign.Center, Gap = Space.Sm };
     readonly ContentPresenter brandContent = new() { VerticalAlignment = VerticalAlignment.Center };
     readonly ContentPresenter nav = new() { Name = AppShellParts.Nav, VerticalAlignment = VerticalAlignment.Stretch, VerticalContentAlignment = VerticalAlignment.Center };
     readonly Flex headerContent = new() { Name = AppShellParts.HeaderContent, Align = FlexAlign.Center, Gap = Space.Md };
@@ -115,7 +116,6 @@ public class AppShell : Control
     readonly DockPanel sidebarLayout = new();
     readonly ScrollArea sidebarScroll = new() { Name = AppShellParts.SidebarScroll };
     readonly ContentPresenter sidebarContent = new() { Name = AppShellParts.SidebarContent };
-    readonly Border collapseBar = new() { Name = AppShellParts.CollapseBar };
     readonly IconButton collapseButton = new() { Name = AppShellParts.Collapse, Size = TextSize.Sm };
     readonly ScrollArea mainScroll = new() { Name = AppShellParts.MainScroll };
     readonly LayoutGrid column = new() { RowDefinitions = new RowDefinitions("*,Auto") };
@@ -147,7 +147,8 @@ public class AppShell : Control
     /// <summary>新建：顶栏、主体（侧栏、正文、右侧栏）、全屏的退出按钮、窄时的抽屉。</summary>
     public AppShell()
     {
-        brand.Child = brandContent;
+        brandRow.Children.AddRange([brandContent, collapseButton]);
+        brand.Child = brandRow;
         Flex.SetGrow(headerMain, true);
         headerContent.Children.AddRange([headerMain, fullscreenButton]);
         headerRow.Children.AddRange([menuButton, brand, nav, headerContent]);
@@ -158,9 +159,7 @@ public class AppShell : Control
         AutomationProperties.SetLandmarkType(header, AutomationLandmarkType.Banner);
 
         sidebarScroll.Content = sidebarContent;
-        collapseBar.Child = collapseButton;
-        DockPanel.SetDock(collapseBar, Dock.Bottom);
-        sidebarLayout.Children.AddRange([collapseBar, sidebarScroll]);
+        sidebarLayout.Children.Add(sidebarScroll);
         sidebar.Child = sidebarLayout;
         LayoutGrid.SetRow(footer, 1);
         column.Children.AddRange([main, footer]);
@@ -360,6 +359,9 @@ public class AppShell : Control
         var hasSidebar = Sidebar is not null;
         var hasBrand = Brand is not null;
         var rail = Rail;
+        // 侧栏能收起：品牌格里有收起、展开按钮（宽屏时；窄屏时侧栏在抽屉里），没写 Brand 时也给出这一格放它
+        var collapsible = hasSidebar && SidebarCollapsible && wide;
+        var brandCell = hasBrand || collapsible;
         var em = TextElement.GetFontSize(this);
         var lg = this.Resource("Rune.Space.Lg", 1.0) * em;
         PseudoClasses.Set(":wide", wide);
@@ -369,30 +371,31 @@ public class AppShell : Control
 
         header.IsVisible = !IsFullscreen;
         menuButton.IsVisible = hasSidebar && !wide;
-        brand.IsVisible = hasBrand;
+        brand.IsVisible = brandCell;
         nav.IsVisible = Nav is not null;
         // 有导航时右边的工具按内容宽、靠结束边
         Flex.SetGrow(headerContent, Nav is null);
         Flex.SetGrow(nav, Nav is not null);
         fullscreenButton.IsVisible = Fullscreenable && fullscreenFits;
         // 品牌格与侧栏同宽（宽时）：贴着起始边，与内容之间隔开正文的内边距（space.xl），内容与正文的起始边对齐
-        var brandRail = hasBrand && hasSidebar && wide;
+        var brandRail = brandCell && hasSidebar && wide;
         headerRow.Gap = brandRail ? Space.Xl : Space.Md;
         headerRow.Margin = new Thickness(brandRail ? 0 : lg, 0, lg, 0);
         brand.Width = brandRail ? rail ? RailWidth : SidebarWidth : double.NaN;
         Flex.SetAlignSelf(brand, brandRail ? FlexAlign.Stretch : FlexAlign.Center);
         brand.Padding = brandRail ? new Thickness(rail ? this.Resource("Rune.Space.Xs", 0.25) * em : lg, 0) : default;
         brand.BorderThickness = brandRail ? new Thickness(0, 0, 1, 0) : default;
-        brandContent.HorizontalAlignment = rail ? HorizontalAlignment.Center : HorizontalAlignment.Left;
+        // 收起后品牌格只放展开按钮（居中）；展开时按钮贴着结束边
+        brandContent.IsVisible = hasBrand && !rail;
+        Flex.SetGrow(brandContent, collapsible);
+        brandRow.Justify = rail ? FlexJustify.Center : FlexJustify.Start;
 
         var showSidebar = hasSidebar && wide && !IsFullscreen;
         sidebar.IsVisible = showSidebar;
         body.ColumnDefinitions[0].Width = new GridLength(showSidebar ? rail ? RailWidth : SidebarWidth : 0);
         aside.IsVisible = Aside is not null && asideWide;
         body.ColumnDefinitions[2].Width = new GridLength(aside.IsVisible ? AsideWidth : 0);
-        collapseBar.IsVisible = SidebarCollapsible;
-        collapseBar.HorizontalAlignment = HorizontalAlignment.Stretch;
-        collapseButton.HorizontalAlignment = rail ? HorizontalAlignment.Center : HorizontalAlignment.Right;
+        collapseButton.IsVisible = collapsible;
         collapseButton.Icon = IsSidebarCollapsed ? Lucide.PanelLeftOpen : Lucide.PanelLeftClose;
         NavList.SetCompactScope(sidebarContent, rail);
         footer.IsVisible = Footer is not null;
@@ -551,10 +554,7 @@ public static class AppShellParts
     /// <summary>左侧栏的内容层（内边距）。</summary>
     public const string SidebarContent = "PART_SidebarContent";
 
-    /// <summary>侧栏底部放"收起侧栏"的一条。</summary>
-    public const string CollapseBar = "PART_CollapseBar";
-
-    /// <summary>"收起侧栏"按钮（TS 的 propsCollapse）。</summary>
+    /// <summary>品牌格里"收起侧栏"、"展开侧栏"的按钮（TS 的 propsCollapse，部件 collapseButton）。</summary>
     public const string Collapse = "PART_Collapse";
 
     /// <summary>正文那一列的滚动区域（TS 是整页滚动）。</summary>

@@ -22,10 +22,6 @@
   <Style Selector="rune|AppShell Border#PART_Brand">
     <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
   </Style>
-  <!-- 侧栏收起成图标栏：产品名不显示，仍是品牌按钮的名称 -->
-  <Style Selector="rune|AppShell:rail rune|AppShellBrand /template/ ContentPresenter#PART_ContentPresenter">
-    <Setter Property="IsVisible" Value="False" />
-  </Style>
   <Style Selector="rune|AppShell Border#PART_Sidebar">
     <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
     <Setter Property="BorderThickness" Value="0,0,1,0" />
@@ -35,11 +31,6 @@
   </Style>
   <Style Selector="rune|AppShell:rail ContentPresenter#PART_SidebarContent">
     <Setter Property="Padding" Value="{rune:Em 0.25, 1.5}" />
-  </Style>
-  <Style Selector="rune|AppShell Border#PART_CollapseBar">
-    <Setter Property="Padding" Value="{rune:Em 0.5}" />
-    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
-    <Setter Property="BorderThickness" Value="0,1,0,0" />
   </Style>
   <Style Selector="rune|AppShell rune|IconButton#PART_Collapse">
     <Setter Property="Variant" Value="ghost" />

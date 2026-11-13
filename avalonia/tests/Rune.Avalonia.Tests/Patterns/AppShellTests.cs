@@ -165,7 +165,7 @@ public class AppShellTests
     });
 
     [Fact]
-    [Upstream("AppShell", "sidebarCollapsible：宽屏时“收起侧栏”把侧栏收成图标栏，品牌只剩标志，写回 sidebarCollapsed")]
+    [Upstream("AppShell", "sidebarCollapsible：品牌格里的“收起侧栏”把侧栏收成图标栏，品牌格只剩展开按钮，写回 sidebarCollapsed")]
     public Task Collapsing_turns_the_sidebar_into_an_icon_rail() => HeadlessUi.Run(() =>
     {
         var list = Navigation("/", "/orders");
@@ -173,15 +173,19 @@ public class AppShellTests
         var shell = new AppShell { Brand = brand, Sidebar = list, SidebarCollapsible = true, Content = new TextBlock() };
         var window = Show(shell, 1100);
         var collapse = Part<IconButton>(shell, AppShellParts.Collapse);
-        var name = Part<ContentPresenter>(brand, AppShellBrandParts.Name);
+        var cell = Part<Border>(shell, AppShellParts.Brand);
 
         Assert.Equal(PatternsMessages.ZhCn.SidebarCollapse, collapse.Peer().GetName());
+        Assert.Contains(cell, collapse.GetVisualAncestors()); // 按钮在品牌格里、贴着结束边
+        Assert.True(collapse.TranslatePoint(default, cell)!.Value.X > brand.TranslatePoint(default, cell)!.Value.X + brand.Bounds.Width);
         Invoke(collapse);
         HeadlessUi.Flush(window);
         Assert.True(shell.IsSidebarCollapsed);
         Assert.Equal(56, Part<Border>(shell, AppShellParts.Sidebar).Bounds.Width);
         Assert.True(list.GetVisualDescendants().OfType<NavRow>().All(row => row.IsIconOnly));
-        Assert.False(name.IsVisible);
+        Assert.False(brand.IsEffectivelyVisible); // 收起后品牌格不放品牌，只放居中的展开按钮
+        var center = collapse.TranslatePoint(new Point(collapse.Bounds.Width / 2, 0), cell)!.Value.X;
+        Assert.Equal(cell.Bounds.Width / 2, center, 1.5);
         Assert.Equal(PatternsMessages.ZhCn.SidebarExpand, collapse.Peer().GetName());
 
         // 窄时侧栏在抽屉里，抽屉总是完整的

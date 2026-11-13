@@ -144,7 +144,7 @@ public class AppShellTests
     });
 
     [Fact]
-    [Upstream("AppShell", "sidebarCollapsible：宽屏时“收起侧栏”把侧栏收成图标栏，品牌只剩标志，写回 sidebarCollapsed")]
+    [Upstream("AppShell", "sidebarCollapsible：品牌格里的“收起侧栏”把侧栏收成图标栏，品牌格只剩展开按钮，写回 sidebarCollapsed")]
     public Task Collapsing_turns_the_sidebar_into_an_icon_rail() => WinFormsUi.Run(() =>
     {
         var list = Navigation("/", "/orders");
@@ -154,12 +154,14 @@ public class AppShellTests
         var collapse = shell.CollapsePart;
 
         Assert.Equal(PatternsMessages.ZhCn.SidebarCollapse, collapse.AccessibilityObject.Name);
+        var cell = shell.BrandPart;
+        Assert.True(collapse.Left > cell.Left + brand.Right && collapse.Right <= cell.Right); // 按钮在品牌格里、贴着结束边
         Invoke(collapse);
         Assert.True(shell.IsSidebarCollapsed);
         Assert.Equal(shell.LogicalToDeviceUnits(56), shell.SidebarPart.Width);
         Assert.All(list.Controls.OfType<NavItemControl>(), item => Assert.True(item.IsIconOnly));
-        Assert.True(brand.IsCompact);
-        Assert.Equal("采购", brand.AccessibilityObject.Name);
+        Assert.False(brand.Visible); // 收起后品牌格不放品牌，只放居中的展开按钮
+        Assert.InRange(collapse.Left + collapse.Width / 2 - (cell.Left + cell.Width / 2), -2, 2);
         Assert.Equal(PatternsMessages.ZhCn.SidebarExpand, collapse.AccessibilityObject.Name);
 
         // 窄时侧栏在抽屉里，抽屉总是完整的

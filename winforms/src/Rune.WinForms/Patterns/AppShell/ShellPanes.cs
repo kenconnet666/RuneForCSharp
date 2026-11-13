@@ -16,7 +16,7 @@ enum PaneAlign
 
 /// <summary>
 /// 外壳的一格：底色、某几边的细线、内边距，里面放一个子控件（插槽的内容）。颜色取主题，换主题时重画。
-/// 子控件横向占满内容区（<see cref="CenterChild"/> 时按想要的宽度居中），竖向按 <see cref="Align"/>。
+/// 子控件横向占满内容区（<see cref="FitChild"/> 时按想要的宽度），竖向按 <see cref="Align"/>。
 /// </summary>
 sealed class ShellPane : Control
 {
@@ -50,10 +50,6 @@ sealed class ShellPane : Control
     /// <summary>子控件按想要的宽度、靠起始边（品牌），不占满一行。</summary>
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool FitChild { get; init; }
-
-    /// <summary>子控件按想要的宽度、水平居中（图标栏里的品牌标志）。</summary>
-    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public bool CenterChild { get; set { field = value; PerformLayout(); } }
 
     /// <summary>页脚：里面的文字 sm、textMuted。</summary>
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -98,8 +94,8 @@ sealed class ShellPane : Control
         var insets = Padding + EdgeInsets;
         area = new Rectangle(area.X + insets.Left, area.Y + insets.Top, Math.Max(0, area.Width - insets.Horizontal), Math.Max(0, area.Height - insets.Vertical));
         var wanted = child.GetPreferredSize(new Size(area.Width, 0));
-        var width = CenterChild || FitChild ? Math.Min(wanted.Width, area.Width) : area.Width;
-        var x = CenterChild ? area.X + (area.Width - width) / 2 : area.X;
+        var width = FitChild ? Math.Min(wanted.Width, area.Width) : area.Width;
+        var x = area.X;
         var height = Align == PaneAlign.Stretch ? area.Height : Align == PaneAlign.Center ? Math.Min(wanted.Height, area.Height) : wanted.Height;
         var y = Align == PaneAlign.Center ? area.Y + (area.Height - height) / 2 : area.Y;
         child.Bounds = new Rectangle(x, y, width, height);

@@ -12,7 +12,6 @@ namespace Rune.Avalonia;
 /// &lt;rune:AppShellBrand Icon="{x:Static rune:Lucide.Box}" Command="{Binding GoHome}"&gt;采购协同&lt;/rune:AppShellBrand&gt;
 /// </code>
 /// 产品名就是按钮的名称；点了回首页（桌面上没有路由：TS 的 href 换成 Click / Command）。自己的标志图写在 <see cref="Logo"/>，写了时不画 <see cref="Icon"/>。
-/// 侧栏收起成图标栏时品牌格只放得下标志：产品名不显示，仍是读屏的名称（<c>rune|AppShell:rail</c> 的样式）。
 /// 部件（模板里的名字，见 <see cref="AppShellBrandParts"/>）：标志图标、标志图、产品名。
 /// </summary>
 [TemplatePart(AppShellBrandParts.Icon, typeof(Icon))]

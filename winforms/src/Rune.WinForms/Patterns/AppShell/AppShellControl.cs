@@ -11,7 +11,7 @@ namespace Rune.WinForms;
 /// 按外壳自己的宽度排版（TS 按视口，断点同 sizes.lg / sizes.xl）：1024 以上显示左侧栏，更窄时收进从起始边滑出的抽屉，顶栏最前面出现打开它的按钮；
 /// 抽屉里点了导航项、或变宽时自动关上。1280 以上显示右侧栏，更窄时不显示。两侧栏与正文各自滚动（ScrollAreaControl），页脚在正文下面、内容少时贴着底部。
 /// 写了 <see cref="Brand"/> 且有侧栏时，宽屏下品牌这一格与侧栏同宽，侧栏的竖线一直延伸到顶栏顶端，顶栏的内容与正文的起始边对齐。
-/// <see cref="Nav"/> 是顶栏里品牌后面的导航；<see cref="SidebarCollapsible"/> 在侧栏底部加"收起侧栏"，收起后只剩图标栏（宽屏时；侧栏里的 NavList 变紧凑，品牌格只剩标志）。
+/// <see cref="Nav"/> 是顶栏里品牌后面的导航；<see cref="SidebarCollapsible"/> 在品牌格的结束边加"收起侧栏"（宽屏时），收起后只剩图标栏（侧栏里的 NavList 变紧凑），品牌格只放居中的展开按钮；没写 Brand 时也有这一格。
 /// 全屏（<see cref="Fullscreenable"/>，默认开，窄于 768 时不显示按钮）：不显示顶栏和左侧栏，正文占满，外壳铺满窗体时窗体同时全屏；右上角留一个退出按钮，Esc 也退出。
 /// 桌面特有（上游没有）：外壳铺满窗体（Dock = Fill）时，顶栏兼作窗体的标题栏（<see cref="ExtendsContentIntoTitleBar"/>，默认开）：去掉系统的标题栏，
 /// 顶栏的空白处拖动窗体、双击最大化，结束边是自绘的最小化、最大化（还原）、关闭（悬停 danger 底）；系统的缩放边框、贴边与 Windows 11 的贴靠布局都保留。
@@ -40,7 +40,6 @@ public partial class AppShellControl : Control
     readonly ShellPane sidebar = new() { BorderColor = colors => colors.Border, Edges = AnchorStyles.Right };
     readonly ScrollAreaControl sidebarScroll = new();
     readonly ShellPane sidebarContent = new();
-    readonly ShellPane collapseBar = new() { BorderColor = colors => colors.BorderMuted, Edges = AnchorStyles.Top };
     readonly IconButtonControl collapseButton = new() { TextSize = TextSize.Sm, Variant = ButtonVariant.Ghost };
     readonly ScrollAreaControl mainScroll = new();
     readonly ShellColumn column;
@@ -62,9 +61,11 @@ public partial class AppShellControl : Control
         column = new ShellColumn(main, footer);
         drawer = new ShellDrawer(this);
         header.Controls.AddRange([menuButton, brand, nav, headerMain, fullscreenButton, minimizeButton, maximizeButton, closeButton]);
-        collapseBar.Controls.Add(collapseButton);
+        // 收起、展开侧栏的按钮在顶栏的品牌格里（LayoutHeader 摆到品牌格的结束边，收起时居中）
+        header.Controls.Add(collapseButton);
+        collapseButton.BringToFront();
         sidebarScroll.Content = sidebarContent;
-        sidebar.Controls.AddRange([sidebarScroll, collapseBar]);
+        sidebar.Controls.Add(sidebarScroll);
         mainScroll.Content = column;
         asideScroll.Content = asideContent;
         Controls.AddRange([drawer, fullscreenExit, header, sidebar, mainScroll, asideScroll]);
@@ -226,12 +227,7 @@ public partial class AppShellControl : Control
         var asideWidth = asideScroll.Visible ? Dip(AsideWidth) : 0;
         var bodyHeight = Math.Max(0, ClientSize.Height - headerHeight);
         sidebar.Bounds = new Rectangle(0, headerHeight, sidebarWidth, bodyHeight);
-        var barHeight = collapseBar.Visible ? collapseButton.GetPreferredSize(Size.Empty).Height + 2 * Space(Tokens.Space.Sm) + 1 : 0;
-        collapseBar.Bounds = new Rectangle(0, bodyHeight - barHeight, Math.Max(0, sidebarWidth - 1), barHeight);
-        var buttonSize = collapseButton.GetPreferredSize(Size.Empty);
-        collapseButton.Bounds = new Rectangle(rail ? (collapseBar.Width - buttonSize.Width) / 2 : collapseBar.Width - Space(Tokens.Space.Sm) - buttonSize.Width,
-            1 + Space(Tokens.Space.Sm), buttonSize.Width, buttonSize.Height);
-        sidebarScroll.Bounds = new Rectangle(0, 0, Math.Max(0, sidebarWidth - 1), bodyHeight - barHeight);
+        sidebarScroll.Bounds = new Rectangle(0, 0, Math.Max(0, sidebarWidth - 1), bodyHeight);
         mainScroll.Bounds = new Rectangle(sidebarWidth, headerHeight, Math.Max(0, width - sidebarWidth - asideWidth), bodyHeight);
         asideScroll.Bounds = new Rectangle(width - asideWidth, headerHeight, asideWidth, bodyHeight);
 
@@ -255,7 +251,7 @@ public partial class AppShellControl : Control
             x += button.Width;
         }
 
-        var brandRail = Brand is not null && Sidebar is not null && wide;
+        var brandRail = brand.Visible && Sidebar is not null && wide;
         var lg = Space(Tokens.Space.Lg);
         var start = brandRail ? 0 : lg;
         var end = header.Width - captionWidth - lg;
@@ -288,10 +284,14 @@ public partial class AppShellControl : Control
         }
         Place(headerMain, remaining);
         if (fullscreenButton.Visible) Place(fullscreenButton, fullscreenWidth);
-        // 品牌格：内容竖直居中，左右 space.lg（图标栏时 space.xs，标志居中）
+        // 品牌格：内容竖直居中，左右 space.lg（图标栏时 space.xs）
         brand.Padding = brandRail ? new Padding(IsRail ? Space(Tokens.Space.Xs) : lg, 0, IsRail ? Space(Tokens.Space.Xs) : lg, 0) : Padding.Empty;
         brand.Edges = brandRail ? AnchorStyles.Right : AnchorStyles.None;
-        brand.CenterChild = IsRail;
+        if (!collapseButton.Visible) return;
+        // 收起、展开按钮：贴着品牌格的结束边；收起后品牌格只放它，居中
+        var toggle = collapseButton.GetPreferredSize(Size.Empty);
+        var toggleLeft = IsRail ? brand.Left + (brand.Width - header.Line - toggle.Width) / 2 : brand.Right - header.Line - lg - toggle.Width;
+        collapseButton.Bounds = new Rectangle(toggleLeft, (height - toggle.Height) / 2, toggle.Width, toggle.Height);
     }
 
     /// <summary>断点按外壳自己的宽度（TS 的媒体查询）：侧栏常驻、右侧栏显示、全屏按钮显示。</summary>
@@ -332,18 +332,21 @@ public partial class AppShellControl : Control
         var rail = IsRail;
         var lg = Space(Tokens.Space.Lg);
         var xl = Space(Tokens.Space.Xl);
+        // 侧栏能收起：品牌格里有收起、展开按钮（宽屏时；窄屏时侧栏在抽屉里），没写 Brand 时也给出这一格放它
+        var collapsible = hasSidebar && SidebarCollapsible && wide;
         header.Visible = !IsFullscreen;
         menuButton.Visible = hasSidebar && !wide;
-        brand.Visible = Brand is not null;
+        brand.Visible = Brand is not null || collapsible;
+        // 收起后品牌格不放品牌，只放展开按钮
+        Brand?.Visible = !rail;
+        collapseButton.Visible = collapsible;
         nav.Visible = Nav is not null;
         fullscreenButton.Visible = Fullscreenable && fullscreenFits;
         sidebar.Visible = hasSidebar && wide && !IsFullscreen;
         asideScroll.Visible = Aside is not null && asideWide;
-        collapseBar.Visible = SidebarCollapsible;
         collapseButton.Icon = IsSidebarCollapsed ? Lucide.PanelLeftOpen : Lucide.PanelLeftClose;
         sidebarContent.Padding = new Padding(rail ? Space(Tokens.Space.Xs) : Space(Tokens.Space.Md), xl, rail ? Space(Tokens.Space.Xs) : Space(Tokens.Space.Md), xl);
         if (Sidebar is not null) foreach (var list in Descendants(Sidebar).OfType<NavListControl>()) list.ScopeCompact = rail;
-        if (Brand is AppShellBrandControl shellBrand) shellBrand.IsCompact = rail;
         main.Padding = new Padding(xl);
         // 页脚是 sm 字号：内边距按它自己的字号算
         var footerEm = Tokens.FontSize.Sm * DeviceDpi / 96f;

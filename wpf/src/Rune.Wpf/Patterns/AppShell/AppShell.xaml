@@ -43,7 +43,6 @@
                     BorderBrush="{DynamicResource Rune.Brush.FocusRing}" CornerRadius="{TemplateBinding CornerRadius}" />
           </Grid>
           <ControlTemplate.Triggers>
-            <Trigger Property="rune:AppShellBrand.IsCompact" Value="True"><Setter TargetName="PART_Name" Property="Visibility" Value="Collapsed" /></Trigger>
             <Trigger Property="IsFocusVisible" Value="True"><Setter TargetName="PART_FocusRing" Property="Visibility" Value="Visible" /></Trigger>
           </ControlTemplate.Triggers>
         </ControlTemplate>
@@ -99,10 +98,6 @@
   <Style x:Key="{x:Static rune:AppShellParts.Sidebar}" TargetType="Border">
     <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
     <Setter Property="BorderThickness" Value="0,0,1,0" />
-  </Style>
-  <Style x:Key="{x:Static rune:AppShellParts.CollapseBar}" TargetType="Border">
-    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
-    <Setter Property="BorderThickness" Value="0,1,0,0" />
   </Style>
   <Style x:Key="{x:Static rune:AppShellParts.Collapse}" TargetType="rune:IconButton" BasedOn="{StaticResource {x:Type rune:IconButton}}" />
   <Style x:Key="{x:Static rune:AppShellParts.Main}" TargetType="Border" />

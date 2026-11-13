@@ -25,7 +25,6 @@ public class AppShellBrand : Button
 
 /// <summary>
 /// 放进 <see cref="AppShellControl.Brand"/> 的品牌：产品名就是控件的 <see cref="Control.Text"/>，也是读屏的名称；点了回首页（Click，桌面上没有路由）。
-/// 侧栏收起成图标栏时只显示标志，产品名仍是读屏的名称（外壳设 <see cref="IsCompact"/>）。
 /// </summary>
 [ToolboxItem(true)]
 [DefaultEvent(nameof(Click))]
@@ -33,25 +32,4 @@ public class AppShellBrand : Button
 [Description("外壳顶栏的品牌：品牌色的标志与产品名。")]
 public class AppShellBrandControl : ButtonControl<AppShellBrand>
 {
-    /// <summary>只显示标志（侧栏收成了图标栏）。</summary>
-    [Browsable(false)]
-    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public bool IsCompact
-    {
-        get;
-        set
-        {
-            if (field == value) return;
-            field = value;
-            Element.Content = value ? "" : Text;
-            AccessibleName = value ? Text : null;
-        }
-    }
-
-    /// <inheritdoc />
-    protected override void OnTextChanged(EventArgs e)
-    {
-        base.OnTextChanged(e);
-        if (IsCompact) Element.Content = "";
-    }
 }
