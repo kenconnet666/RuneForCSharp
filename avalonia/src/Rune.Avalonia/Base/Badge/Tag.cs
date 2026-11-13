@@ -49,14 +49,17 @@ public class Tag : Badge
 
     EventHandler? removeRequested;
     CloseButton? remove;
-    CancellationTokenSource? transition;
     readonly List<IDisposable> selectable = [];
-    bool dismissing;
+    readonly Dismissal dismissal;
 
     static Tag() => AffectsRender<Tag>(FocusRingProperty, IsFocusedProperty, IsPointerOverProperty);
 
-    /// <summary>新建：焦点环的颜色绑到主题。</summary>
-    public Tag() => new TemplateResources(this).Bind(FocusRingProperty, "Rune.Brush.FocusRing");
+    /// <summary>新建：焦点环的颜色绑到主题；移除时先离场（Dismissal）。</summary>
+    public Tag()
+    {
+        new TemplateResources(this).Bind(FocusRingProperty, "Rune.Brush.FocusRing");
+        dismissal = new Dismissal(this, PresenceProperty, () => removeRequested?.Invoke(this, EventArgs.Empty));
+    }
 
     /// <summary>可选中。</summary>
     public bool? IsSelected { get => GetValue(IsSelectedProperty); set => SetValue(IsSelectedProperty, value); }
@@ -90,7 +93,7 @@ public class Tag : Badge
     } = true;
 
     /// <summary>正在离场（测试、样式用；上游的 data-state="closed"）。</summary>
-    public bool IsDismissing => dismissing;
+    public bool IsDismissing => dismissal.IsDismissing;
 
     /// <inheritdoc />
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -221,7 +224,7 @@ public class Tag : Badge
         remove.Bind(ForegroundProperty, this.GetObservable(ForegroundProperty));
         remove.PropertyChanged += (_, e) => { if (e.Property == ForegroundProperty) UpdateRemovePalette(); };
         UpdateRemovePalette();
-        remove.Click += (_, _) => Dismiss();
+        remove.Click += (_, _) => dismissal.Dismiss();
         Trailing = remove;
         UpdateRemoveSize();
         UpdateRemoveLabel();
@@ -252,81 +255,6 @@ public class Tag : Badge
         var lang = Provider.GetLang(this);
         var label = RemoveLabel ?? (Content is string { Length: > 0 } text ? $"{lang.Remove} {text}" : lang.Remove);
         AutomationProperties.SetName(remove, label);
-    }
-
-    /// <summary>
-    /// 离场：记下焦点在不在移除按钮上与同一容器里的候选，淡出缩小，结束后请使用方移除；等布局之后还在界面上就淡入复原，
-    /// 被移除了且焦点丢了就交给候选里第一个还在界面上的。
-    /// </summary>
-    async void Dismiss()
-    {
-        if (dismissing) return;
-        dismissing = true;
-        var candidates = IsKeyboardFocusWithin ? FocusCandidates() : [];
-        await Animate(0, "Rune.Easing.Exit", new CubicEaseIn());
-        dismissing = false;
-        removeRequested?.Invoke(this, EventArgs.Empty);
-        Dispatcher.UIThread.Post(() =>
-        {
-            if (TopLevel.GetTopLevel(this) is not null)
-            {
-                _ = Animate(1, "Rune.Easing.Enter", new CubicEaseOut());
-                return;
-            }
-            if (candidates.Count == 0 || TopLevel.GetTopLevel(candidates[0]) is not { } top) return;
-            if (top.FocusManager?.GetFocusedElement() is Visual focused && TopLevel.GetTopLevel(focused) is not null && focused is not TopLevel) return;
-            candidates.FirstOrDefault(candidate => TopLevel.GetTopLevel(candidate) is not null)?.Focus(NavigationMethod.Tab);
-        }, DispatcherPriority.Loaded);
-    }
-
-    /// <summary>同一容器（最近的面板：Flex、ItemsControl 的项面板）里别的能 Tab 聚焦的元素：后面的在前，前面的倒序接在后面。</summary>
-    List<InputElement> FocusCandidates()
-    {
-        if (this.FindAncestorOfType<Panel>() is not { } group) return [];
-        var following = new List<InputElement>();
-        var preceding = new List<InputElement>();
-        var after = false;
-        foreach (var visual in group.GetVisualDescendants())
-        {
-            if (visual == this)
-            {
-                after = true;
-                continue;
-            }
-            if (visual is not InputElement element || this.IsVisualAncestorOf(visual)) continue;
-            if (!element.Focusable || !element.IsEffectivelyEnabled || !element.IsEffectivelyVisible || !KeyboardNavigation.GetIsTabStop(element)) continue;
-            (after ? following : preceding).Add(element);
-        }
-        preceding.Reverse();
-        return [.. following, .. preceding];
-    }
-
-    async Task Animate(double to, string easingKey, Easing fallback)
-    {
-        transition?.Cancel();
-        var from = GetValue(PresenceProperty);
-        var duration = VisualRoot is null ? TimeSpan.Zero : Motion.Duration(this, "Rune.Duration.Sm", TimeSpan.FromMilliseconds(120));
-        if (duration <= TimeSpan.Zero || from == to)
-        {
-            SetValue(PresenceProperty, to);
-            return;
-        }
-        var cancel = transition = new CancellationTokenSource();
-        // 先写终值：动画在动画优先级上盖住它，结束或被打断后留下的就是终值
-        SetValue(PresenceProperty, to);
-        _ = new Animation
-        {
-            Duration = duration,
-            Easing = this.Resource(easingKey, fallback),
-            Children =
-            {
-                new KeyFrame { Cue = new Cue(0), Setters = { new Setter(PresenceProperty, from) } },
-                new KeyFrame { Cue = new Cue(1), Setters = { new Setter(PresenceProperty, to) } },
-            },
-        }.RunAsync(this, cancel.Token);
-        // 结束按真实时间算（同库里别的延时；headless 的动画时钟不走），到点停掉动画，留下的就是终值
-        await Task.Delay(duration);
-        cancel.Cancel();
     }
 }
 
