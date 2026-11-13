@@ -100,6 +100,9 @@ public class Avatar : Control
     /// <summary>字号。</summary>
     public double FontSize { get => GetValue(FontSizeProperty); set => SetValue(FontSizeProperty, value); }
 
+    /// <summary>圆角的半径（头像组画描边用）。</summary>
+    internal double CornerRadius => root.CornerRadius.TopLeft;
+
     /// <summary>后备内容在显示吗。</summary>
     internal bool FallbackShown => fallback.IsVisible;
 

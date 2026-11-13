@@ -1,0 +1,18 @@
+<!--
+  AvatarGroup 部件的默认外观（vue-tsx-pro 的 avatarGroupStyles）："+N"是 fill 底、正文色的圆，文字中等字重、居中；边长与字号在 AvatarGroup.cs 里。
+  写成主题里的样式（DESIGN §7 代码组合的控件），使用方的部件样式排在后面，盖得过
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|AvatarGroup Border#PART_More">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Fill}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+  </Style>
+  <Style Selector="rune|AvatarGroup rune|Text#PART_MoreText">
+    <Setter Property="Weight" Value="medium" />
+    <Setter Property="Wrap" Value="NoWrap" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+</Styles>
