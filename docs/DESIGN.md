@@ -1008,10 +1008,19 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 可以拖动（上游 237f97d2，2026-11-08）：`Draggable` 时标题行是把手（移动指针），从标题行上的按钮、输入框按下不拖；位移在排版时加到面板上、限制在窗口里，
   每次打开回到正中。Avalonia 用指针捕获，WPF 用鼠标捕获（测试里鼠标位置造不出来，直接调内部的 `DragTo`）；WinForms 的面板是单独的窗口，按住标题或标题行的空白，
   按屏幕上的光标位移重新摆面板。示例：draggable（付款信息上游用 Descriptions，还没有，先排成标签、值两列）。
-- 没做：进出场动画、命令式打开（useDialog）、AlertDialog。
+- **命令式打开与 AlertDialog（2026-11-14）**：上游的 useDialog 是在 setup 里拿到 open(options) → 句柄；桌面上就是对话框实例自己：`await new Dialog { … }.ShowAsync(owner)`
+  在 owner 所在的窗口打开，得到关上的原因；开着时改属性就是句柄的 update，`Close()` 是 close（原因 imperative，不问 BeforeClose）。owner 离开界面时跟着关上。
+  不在界面里的对话框要借 owner 的上下文：Avalonia 把 owner 设成逻辑父元素（ISetLogicalParent，owner 的 LogicalChildren 里没有它，同平台 Popup 挂 PopupRoot 的做法），
+  主题、Provider、继承的字号都沿逻辑树来；WPF 挂到 owner 所在窗口的装饰层（AdornerLayer，在可视树里），owner 一路上的资源字典按由远到近合并进来、继承的语言包与工作日历照抄
+  （装饰层是窗口内容的兄弟，不是 owner 的祖先）；WinForms 的作用域查找经内部接口 `IAnchored` 接着从 owner 找，字体借 owner 的。关上后都还回去。
+  AlertDialog（WinForms 的 AlertDialogControl）是 Dialog 的子类：没有关闭按钮、点遮罩不关、宽度默认 xs、没写 Confirm 也有确认按钮，打开时焦点在取消上（Dialog 开放了
+  一个内部钩子：先聚焦哪个元素）。`AlertDialog.ConfirmAsync(owner, ConfirmOptions)` 是 useConfirm，得到是否确认；带 `ConfirmReason` 的重载多一个填理由的 Textarea
+  （焦点先进输入框，必填没填时字段报语言包的"必填"、不关），得到去掉首尾空白的理由，取消时 null。ConfirmOptions.Confirm 拿到理由，结果为 false 或失败时保持打开。
+  读屏：上游是 role="alertdialog"，桌面的读屏没有这一类型，仍是对话框。
+- 没做：进出场动画。
 - behavior.mjs：describe 不是纯组件名（'Dialog 的 onOpenChange'）时，用例名不以组件名开头的归到 describe 开头的组件名（原来退回文件名）。这样多归出 19 条已做组件的上游用例
   （Badge、Button、Card、Icon 等的属性落点、Provider 默认值），原来被算成"组件还没做"，待逐条对应或登记不适用。
-- 示例：dialog（编辑资料，确认时校验与等待）、long-content（宽度档位、长正文、占满一行的页脚）。
+- 示例：dialog（编辑资料，确认时校验与等待）、alert-dialog（删除确认、ConfirmAsync、填理由）、long-content（宽度档位、长正文、占满一行的页脚）、imperative（发票列表里命令式打开，记下关闭的原因）、blocking（导入进度，不能误关）、draggable。
 
 ### CommandPalette（2026-11-07）
 
