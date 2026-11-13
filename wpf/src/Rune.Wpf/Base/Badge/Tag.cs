@@ -48,7 +48,7 @@ public class Tag : Badge
 
     EventHandler? removeRequested;
     CloseButton? remove;
-    bool dismissing;
+    readonly Dismissal dismissal;
     bool focusVisible;
     bool pressed;
 
@@ -66,6 +66,7 @@ public class Tag : Badge
     {
         RenderTransformOrigin = new Point(0.5, 0.5);
         SetResourceReference(FocusRingProperty, "Rune.Brush.FocusRing");
+        dismissal = new Dismissal(this, PresenceProperty, () => removeRequested?.Invoke(this, EventArgs.Empty));
     }
 
     /// <summary>可选中。</summary>
@@ -223,7 +224,7 @@ public class Tag : Badge
     } = true;
 
     /// <summary>正在离场（测试、样式用；上游的 data-state="closed"）。</summary>
-    public bool IsDismissing => dismissing;
+    public bool IsDismissing => dismissal.IsDismissing;
 
     void ApplyPresence(double presence)
     {
@@ -247,7 +248,7 @@ public class Tag : Badge
         // 用按钮自己的事件：DependencyPropertyDescriptor.AddValueChanged 不退订会让按钮与标签一直留在静态表里
         remove.MouseEnter += (_, _) => UpdateRemoveBackground();
         remove.MouseLeave += (_, _) => UpdateRemoveBackground();
-        remove.Click += (_, _) => Dismiss();
+        remove.Click += (_, _) => dismissal.Dismiss();
         Trailing = remove;
         UpdateRemoveSize();
         UpdateRemoveLabel();
@@ -276,79 +277,6 @@ public class Tag : Badge
         if (remove is null) return;
         var lang = Provider.GetLang(this);
         AutomationProperties.SetName(remove, RemoveLabel ?? (Content is string { Length: > 0 } text ? $"{lang.Remove} {text}" : lang.Remove));
-    }
-
-    /// <summary>
-    /// 离场：记下焦点在不在移除按钮上与同一容器里的候选，淡出缩小，结束后请使用方移除；布局之后还在界面上就淡入复原，
-    /// 被移除了且焦点丢了就交给候选里第一个还在界面上的。
-    /// </summary>
-    void Dismiss()
-    {
-        if (dismissing) return;
-        dismissing = true;
-        var candidates = IsKeyboardFocusWithin ? FocusCandidates() : [];
-        Animate(0, "Rune.Easing.Exit", () =>
-        {
-            dismissing = false;
-            removeRequested?.Invoke(this, EventArgs.Empty);
-            Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () =>
-            {
-                if (PresentationSource.FromVisual(this) is not null)
-                {
-                    Animate(1, "Rune.Easing.Enter", null);
-                    return;
-                }
-                if (Keyboard.FocusedElement is UIElement { IsVisible: true }) return;
-                candidates.FirstOrDefault(candidate => PresentationSource.FromVisual(candidate) is not null)?.Focus();
-            });
-        });
-    }
-
-    /// <summary>同一容器（最近的面板：Flex、ItemsControl 的项面板）里别的能 Tab 聚焦的元素：后面的在前，前面的倒序接在后面。</summary>
-    List<UIElement> FocusCandidates()
-    {
-        DependencyObject? group = VisualTreeHelper.GetParent(this);
-        while (group is not null and not Panel) group = VisualTreeHelper.GetParent(group);
-        if (group is null) return [];
-        var following = new List<UIElement>();
-        var preceding = new List<UIElement>();
-        var after = false;
-        void Walk(DependencyObject parent)
-        {
-            for (var index = 0; index < VisualTreeHelper.GetChildrenCount(parent); index++)
-            {
-                var child = VisualTreeHelper.GetChild(parent, index);
-                if (child == this)
-                {
-                    after = true;
-                    continue;
-                }
-                if (child is UIElement { Focusable: true, IsEnabled: true, IsVisible: true } element && KeyboardNavigation.GetIsTabStop(element))
-                    (after ? following : preceding).Add(element);
-                Walk(child);
-            }
-        }
-        Walk(group);
-        preceding.Reverse();
-        return [.. following, .. preceding];
-    }
-
-    /// <summary>出现程度过渡到 <paramref name="to"/>（durations.sm）；系统关闭动画、还没加载时立即到位。</summary>
-    void Animate(double to, string easingKey, Action? completed)
-    {
-        var from = (double)GetValue(PresenceProperty);
-        // 先写终值：过渡结束（FillBehavior.Stop）或被打断后留下的就是它
-        SetValue(PresenceProperty, to);
-        var duration = IsLoaded ? Motion.Duration(this, "Rune.Duration.Sm", TimeSpan.FromMilliseconds(120)) : TimeSpan.Zero;
-        if (duration <= TimeSpan.Zero || from == to)
-        {
-            BeginAnimation(PresenceProperty, null);
-            completed?.Invoke();
-            return;
-        }
-        var animation = new DoubleAnimation(from, to, duration) { EasingFunction = TryFindResource(easingKey) as IEasingFunction, FillBehavior = FillBehavior.Stop };
-        if (completed is not null) animation.Completed += (_, _) => completed();
-        BeginAnimation(PresenceProperty, animation);
     }
 }
 
