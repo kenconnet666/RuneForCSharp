@@ -98,6 +98,7 @@ public class Popover : Control
     readonly Border arrow = new() { Name = PopoverParts.Arrow, IsVisible = false };
     OpenChangeReason? pending;
     bool focusWasInside;
+    bool anchoredElsewhere;
 
     /// <summary>新建：触发器、弹出层（面板与箭头）。</summary>
     public Popover()
@@ -111,9 +112,10 @@ public class Popover : Control
         LogicalChildren.AddRange([trigger, popup]);
         VisualChildren.AddRange([trigger, popup]);
         trigger.AddHandler(Button.ClickEvent, (_, _) => SetOpen(!IsOpen, OpenChangeReason.Trigger));
+        trigger.AddHandler(KeyDownEvent, (_, e) => OnTriggerKeyDown(e));
         popup.Opened += (_, _) => OnOpened();
         popup.Closed += (_, _) => OnClosed();
-        panel.AddHandler(KeyDownEvent, OnPanelKeyDown);
+        panel.AddHandler(KeyDownEvent, (_, e) => OnPanelKeyDown(e));
         panel.GotFocus += (_, _) => focusWasInside = true;
     }
 
@@ -176,12 +178,46 @@ public class Popover : Control
     {
         var em = TextElement.GetFontSize(this);
         panel.CornerRadius = new CornerRadius(this.Resource("Rune.Radius.Lg", 0.5) * em);
-        panel.Padding = new Thickness(this.Resource("Rune.Space.Md", 0.75) * em);
+        panel.Padding = PanelPadding(em);
         arrow.Width = arrow.Height = ArrowSize;
     }
 
+    /// <summary>面板的内边距：space.md。菜单的面板不留（内边距在里面的内容层上，滚动条贴着边缘）。</summary>
+    /// <param name="em">字号。</param>
+    private protected virtual Thickness PanelPadding(double em) => new(this.Resource("Rune.Space.Md", 0.75) * em);
+
+    /// <summary>打开后聚焦哪个元素：里面第一个能聚焦的；没有时聚焦面板。</summary>
+    private protected virtual InputElement? FocusTarget() =>
+        panel.GetVisualDescendants().OfType<InputElement>().FirstOrDefault(element => element.Focusable && element.IsEffectivelyEnabled && element.IsEffectivelyVisible);
+
+    /// <summary>触发器上按了键（菜单：↓ / ↑ 打开）。</summary>
+    /// <param name="e">按键。</param>
+    private protected virtual void OnTriggerKeyDown(KeyEventArgs e)
+    {
+    }
+
+    /// <summary>关上，焦点不还给触发器（菜单里按 Tab：焦点照常往后走）。</summary>
+    /// <param name="reason">为什么。</param>
+    private protected void CloseKeepingFocus(OpenChangeReason reason)
+    {
+        focusWasInside = false;
+        SetOpen(false, reason);
+    }
+
+    /// <summary>以别的元素为锚点打开（右键菜单：指针所在处，或获得焦点的元素）；关上后恢复以触发器为锚点。</summary>
+    /// <param name="target">锚点。</param>
+    /// <param name="mode">平台弹出层的位置（Pointer 是指针所在处）。</param>
+    /// <param name="reason">为什么。</param>
+    private protected void OpenAt(Control target, PlacementMode mode, OpenChangeReason reason)
+    {
+        anchoredElsewhere = true;
+        popup.PlacementTarget = target;
+        popup.Placement = mode;
+        SetOpen(true, reason);
+    }
+
     /// <summary>改开关并记下原因（属性变化时报告）。</summary>
-    void SetOpen(bool open, OpenChangeReason reason)
+    private protected void SetOpen(bool open, OpenChangeReason reason)
     {
         pending = reason;
         SetCurrentValue(IsOpenProperty, open);
@@ -204,9 +240,7 @@ public class Popover : Control
         {
             arrow.IsVisible = Arrow;
             if (Arrow) FloatingPopup.PlaceArrow(arrow, arrowLayer, trigger);
-            var first = panel.GetVisualDescendants().OfType<InputElement>()
-                .FirstOrDefault(element => element.Focusable && element.IsEffectivelyEnabled && element.IsEffectivelyVisible);
-            (first ?? panel).Focus(NavigationMethod.Tab);
+            (FocusTarget() ?? panel).Focus(NavigationMethod.Tab);
         }, DispatcherPriority.Loaded);
     }
 
@@ -214,12 +248,19 @@ public class Popover : Control
     void OnClosed()
     {
         if (IsOpen) SetOpen(false, OpenChangeReason.Outside);
+        if (anchoredElsewhere)
+        {
+            anchoredElsewhere = false;
+            popup.PlacementTarget = trigger;
+            popup.Placement = FloatingPopup.ToPlacementMode(Placement, FlowDirection == global::Avalonia.Media.FlowDirection.RightToLeft);
+        }
         if (focusWasInside && Trigger is { } control) control.Focus(NavigationMethod.Tab);
         focusWasInside = false;
     }
 
     /// <summary>Esc：关上，焦点回到触发器；Esc 不再往外传（不关掉外面的对话框）。</summary>
-    void OnPanelKeyDown(object? sender, KeyEventArgs e)
+    /// <param name="e">按键。</param>
+    private protected virtual void OnPanelKeyDown(KeyEventArgs e)
     {
         if (e.Key != Key.Escape || e.Handled) return;
         focusWasInside = true;

@@ -1,0 +1,63 @@
+<!--
+  菜单项的主题（vue-tsx-pro 的 menuRecipe 与 itemStyles.row）：一行里勾选标记、图标、文字（有说明时文字与说明上下排）、快捷键、子菜单箭头横排，
+  隔 space.sm；高度不低于控件高度（且不低于 24px），上下 space.xs、左右 space.sm、sm 圆角，正文色、行高 normal。
+  悬停 fillHover；破坏性操作 dangerText、悬停 dangerSoft；不可用时变淡、禁止光标。标记占 1em 宽，没勾时只占位；
+  快捷键、箭头离文字至少 space.lg；说明、快捷键 textMuted、sm。
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:MenuItemBase}" TargetType="rune:MenuItemBase" BasedOn="{StaticResource {x:Type rune:ButtonBase}}">
+    <Setter Property="MinHeight" Value="{rune:ControlHeight}" />
+    <Setter Property="Padding" Value="{rune:Em 0.5, 0.25}" />
+    <Setter Property="CornerRadius" Value="{rune:Em Resource=Rune.Radius.Sm}" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="TextBlock.LineHeight" Value="{rune:Em Resource=Rune.LineHeight.Normal}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border Name="PART_Root" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}" ClipToBounds="True">
+            <Panel>
+              <Canvas Name="PART_Ripples" IsHitTestVisible="False" />
+              <rune:Flex Align="Center" Gap="sm" Margin="{TemplateBinding Padding}">
+                <rune:Icon Name="PART_Indicator" IsVisible="False" Opacity="0" VerticalAlignment="Center" />
+                <rune:Icon Name="PART_Icon" Data="{TemplateBinding Icon}" IsVisible="False" VerticalAlignment="Center" />
+                <StackPanel rune:Flex.Grow="True" VerticalAlignment="Center">
+                  <ContentPresenter Name="PART_Label" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" />
+                  <ContentPresenter Name="PART_Description" Content="{TemplateBinding Description}" IsVisible="False"
+                                    Foreground="{DynamicResource Rune.Brush.TextMuted}" FontSize="{DynamicResource Rune.FontSize.Sm}"
+                                    TextBlock.LineHeight="{rune:Em Resource=Rune.LineHeight.Normal}" />
+                </StackPanel>
+                <!-- 快捷键、箭头离文字至少 space.lg（1em，按菜单项的字号） -->
+                <rune:Text Name="PART_Shortcut" Tone="muted" Size="sm" IsVisible="False" VerticalAlignment="Center" Margin="{rune:Em 1, 0, 0, 0, Of=TemplatedParent}" />
+                <rune:Icon Name="PART_Chevron" Data="{x:Static rune:Lucide.ChevronRight}" IsVisible="False" VerticalAlignment="Center" Margin="{rune:Em 1, 0, 0, 0, Of=TemplatedParent}" />
+              </rune:Flex>
+            </Panel>
+          </Border>
+          <Border Name="PART_FocusRing" IsVisible="False" IsHitTestVisible="False"
+                  BorderThickness="2" BorderBrush="{DynamicResource Rune.Brush.FocusRing}" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:focus-visible /template/ Border#PART_FocusRing"><Setter Property="IsVisible" Value="True" /></Style>
+    <Style Selector="^:has-indicator /template/ rune|Icon#PART_Indicator"><Setter Property="IsVisible" Value="True" /></Style>
+    <Style Selector="^:checked /template/ rune|Icon#PART_Indicator"><Setter Property="Opacity" Value="1" /></Style>
+    <Style Selector="^:has-icon /template/ rune|Icon#PART_Icon"><Setter Property="IsVisible" Value="True" /></Style>
+    <Style Selector="^:described /template/ ContentPresenter#PART_Description"><Setter Property="IsVisible" Value="True" /></Style>
+    <Style Selector="^:has-shortcut /template/ rune|Text#PART_Shortcut"><Setter Property="IsVisible" Value="True" /></Style>
+    <Style Selector="^:submenu /template/ rune|Icon#PART_Chevron"><Setter Property="IsVisible" Value="True" /></Style>
+    <Style Selector="^:pointerover"><Setter Property="Background" Value="{DynamicResource Rune.Brush.FillHover}" /></Style>
+    <Style Selector="^:danger">
+      <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.DangerText}" />
+    </Style>
+    <Style Selector="^:danger:pointerover"><Setter Property="Background" Value="{DynamicResource Rune.Brush.DangerSoft}" /></Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Cursor" Value="No" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

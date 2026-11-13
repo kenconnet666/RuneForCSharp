@@ -8,7 +8,7 @@ namespace Rune.Avalonia;
 
 /// <summary>
 /// 漫游焦点（vue-tsx-pro 的 rovingFocus，WAI-ARIA 的 roving tabindex）：一组项里只有一个是 Tab 停靠点，其余不停；
-/// 组内用方向键移动，Home / End 到两端。Toolbar 用它，以后的 Tabs、Menu、ToggleGroup 同样用。
+/// 组内用方向键移动，Home / End 到两端。Toolbar 用它，Tabs、Menu、ToggleGroup 同样用。
 /// 不可用、隐藏的项跳过；Tab 进入时落在上次聚焦的项，没有时是 <see cref="Preferred"/> 选出的项或第一项。从右到左排版时左右键反过来。
 /// </summary>
 sealed class RovingFocus
@@ -16,6 +16,7 @@ sealed class RovingFocus
     readonly Control container;
     readonly Func<Control, bool> isItem;
     Control? current;
+    global::Rune.Avalonia.Typeahead? search;
 
     /// <summary>开始管理容器里各项的焦点。</summary>
     /// <param name="container">容器。</param>
@@ -36,6 +37,12 @@ sealed class RovingFocus
 
     /// <summary>还没聚焦过时优先作 Tab 停靠点的项（分段控件的选中项）；没有时是第一项。</summary>
     public Func<Control, bool>? Preferred { get; set; }
+
+    /// <summary>按字母跳到以它开头的项（菜单）：匹配 <see cref="TextOf"/> 给的文字，规则同 Listbox（<see cref="global::Rune.Avalonia.Typeahead"/>）。</summary>
+    public bool Typeahead { get => search is not null; set => search = value ? new global::Rune.Avalonia.Typeahead() : null; }
+
+    /// <summary>项的文字（类型搜索用）；不写时取读屏名称。</summary>
+    public Func<Control, string>? TextOf { get; set; }
 
     /// <summary>项：可见、可用（可聚焦的不可用也跳过），不在里面另一个漫游焦点的组里。</summary>
     List<Control> Items() =>
@@ -63,10 +70,19 @@ sealed class RovingFocus
 
     void OnKeyDown(object? sender, KeyEventArgs e)
     {
+        if (e.Handled) return;
         if (e.Source is not Control control || !isItem(control)) return;
         var items = Items();
         var index = items.IndexOf(control);
         if (index < 0) return;
+        if (search is not null && e.KeySymbol is { Length: 1 } symbol && (e.KeyModifiers & (KeyModifiers.Control | KeyModifiers.Alt | KeyModifiers.Meta)) == 0)
+        {
+            var match = search.Next(symbol, [.. items.Select(item => TextOf?.Invoke(item) ?? global::Avalonia.Automation.AutomationProperties.GetName(item) ?? "")], index, Environment.TickCount64);
+            if (match < 0) return;
+            Move(items[match]);
+            e.Handled = true;
+            return;
+        }
         var rtl = container.FlowDirection == global::Avalonia.Media.FlowDirection.RightToLeft;
         var horizontal = Orientation is "horizontal" or "both";
         var vertical = Orientation is "vertical" or "both";
@@ -92,9 +108,14 @@ sealed class RovingFocus
             }
             next = (next + items.Count) % items.Count;
         }
-        current = items[next];
-        Sync();
-        current.Focus(NavigationMethod.Directional);
+        Move(items[next]);
         e.Handled = true;
+    }
+
+    void Move(Control item)
+    {
+        current = item;
+        Sync();
+        item.Focus(NavigationMethod.Directional);
     }
 }
