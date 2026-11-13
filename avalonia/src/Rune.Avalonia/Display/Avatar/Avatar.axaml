@@ -7,6 +7,8 @@
                     xmlns:rune="clr-namespace:Rune.Avalonia">
   <ControlTheme x:Key="{x:Type rune:Avatar}" TargetType="rune:Avatar">
     <Setter Property="Radius" Value="full" />
+    <!-- 行高按自己的字号算 normal（继承的是像素数：放进行高 21 的条目里也是 19.5，同上游头像根继承 lineHeights.normal） -->
+    <Setter Property="TextBlock.LineHeight" Value="{rune:Em Resource=Rune.LineHeight.Normal}" />
     <Setter Property="Variant" Value="soft" />
     <Setter Property="Tone" Value="accent" />
     <Setter Property="Palette" Value="{rune:Resolved Palette}" />

@@ -63,7 +63,10 @@ public class Avatar : Control
         DefaultStyleKeyProperty.OverrideMetadata(typeof(Avatar), new FrameworkPropertyMetadata(typeof(Avatar)));
         FocusableProperty.OverrideMetadata(typeof(Avatar), new FrameworkPropertyMetadata(false));
         IsTabStopProperty.OverrideMetadata(typeof(Avatar), new FrameworkPropertyMetadata(false));
-        FontSizeProperty.OverrideMetadata(typeof(Avatar), new FrameworkPropertyMetadata(SystemFonts.MessageFontSize, FrameworkPropertyMetadataOptions.Inherits | FrameworkPropertyMetadataOptions.AffectsMeasure));
+        FontSizeProperty.OverrideMetadata(typeof(Avatar), new FrameworkPropertyMetadata(SystemFonts.MessageFontSize, FrameworkPropertyMetadataOptions.Inherits | FrameworkPropertyMetadataOptions.AffectsMeasure, (d, _) => d.CoerceValue(TextBlock.LineHeightProperty)));
+        // 行高按像素继承：放在行高 21 的条目里也按自己的字号算 normal（上游头像根继承 lineHeights.normal，后备文字层另设 1）
+        TextBlock.LineHeightProperty.OverrideMetadata(typeof(Avatar), new FrameworkPropertyMetadata(double.NaN, FrameworkPropertyMetadataOptions.Inherits, null,
+            (d, _) => Leading.Normal * ((Avatar)d).FontSize));
     }
 
     /// <summary>新建：后备内容垫在图片下面。</summary>

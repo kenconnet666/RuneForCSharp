@@ -8,5 +8,8 @@
   <Style Selector="rune|Avatar > Border > Panel > ContentPresenter#PART_Fallback">
     <Setter Property="HorizontalAlignment" Value="Center" />
     <Setter Property="VerticalAlignment" Value="Center" />
+    <!-- 后备文字层自己定字重与行高（上游 fallback：medium、line-height 1）：放进设了行高的容器（条目列表）里也不跟着变 -->
+    <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
+    <Setter Property="TextBlock.LineHeight" Value="{rune:Em 1}" />
   </Style>
 </Styles>
