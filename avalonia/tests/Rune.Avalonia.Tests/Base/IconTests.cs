@@ -72,4 +72,20 @@ public class IconTests
         Assert.Equal(AutomationControlType.Image, namedPeer.GetAutomationControlType());
         Assert.Equal("删除", namedPeer.GetName());
     });
+
+    [Fact]
+    public void Drawing_cuts_each_stroke_by_its_own_length()
+    {
+        // 两笔：长 10 的横线、长 4 的竖线（Z 回到起点）；描到一半时各画一半
+        var strokes = new IconData("test", "M0 0L10 0M2 2L2 4Z").Strokes;
+
+        Assert.Empty(strokes.Partial(0)); // 进度 0 什么也不画（圆头的线会剩一个点）
+        var half = strokes.Partial(0.5).ToList();
+        Assert.Equal([(0.0, 0.0), (5.0, 0.0)], half[0]);
+        Assert.Equal([(2.0, 2.0), (2.0, 4.0)], half[1]);
+        Assert.Equal(3, strokes.Partial(1).ToList()[1].Length); // 画完是完整的折线（含闭合回起点的一段）
+        var middle = Assert.Single(new IconData("curve", "M0 0C0 0 2 2 2 2").Strokes.Partial(0.5))[^1]; // 曲线展开成折线
+        Assert.Equal(1, middle.X, 6);
+        Assert.Equal(1, middle.Y, 6);
+    }
 }

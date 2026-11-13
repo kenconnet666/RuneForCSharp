@@ -1,0 +1,28 @@
+<!--
+  Result 部件的默认外观（vue-tsx-pro 的 resultRecipe）：图标细线（strokeWidths.sm，颜色是色调，在 Result.cs 里），状态码粗体、次要色、等宽数字、行高 1，
+  标题半粗、行高 tight，说明次要色，都居中。写成主题里的样式（DESIGN §7 代码组合的控件），使用方的部件样式排在后面，盖得过；
+  选择器沿逻辑树写全，不碰 Content、Action 里的同名部件
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|Result > Border > rune|Flex > rune|Icon#PART_Icon">
+    <Setter Property="StrokeWidth" Value="{DynamicResource Rune.StrokeWidth.Sm}" />
+  </Style>
+  <Style Selector="rune|Result > Border > rune|Flex > rune|Text#PART_Code">
+    <Setter Property="Weight" Value="bold" />
+    <Setter Property="Tone" Value="muted" />
+    <Setter Property="Numeric" Value="True" />
+    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.None}" />
+    <Setter Property="Align" Value="{x:Static rune:TextAlign.Center}" />
+  </Style>
+  <Style Selector="rune|Result > Border > rune|Flex > rune|Text#PART_Title">
+    <Setter Property="Weight" Value="semibold" />
+    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Tight}" />
+    <Setter Property="Align" Value="{x:Static rune:TextAlign.Center}" />
+  </Style>
+  <Style Selector="rune|Result > Border > rune|Flex > rune|Paragraph#PART_Description">
+    <Setter Property="Tone" Value="muted" />
+    <Setter Property="Align" Value="{x:Static rune:TextAlign.Center}" />
+  </Style>
+</Styles>

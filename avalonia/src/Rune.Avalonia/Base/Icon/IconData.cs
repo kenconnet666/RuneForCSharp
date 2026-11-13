@@ -26,6 +26,9 @@ public sealed class IconData(string name, string path, string? fillPath = null)
     /// <summary>描边的几何：第一次用到时解析，之后各处共用同一个（不要修改它）。</summary>
     public Geometry Geometry => field ??= Geometry.Parse(Path);
 
+    /// <summary>描线用的一笔一笔的折线（Icon 的 Draw）：第一次描线时解析。</summary>
+    internal IconStrokes Strokes => field ??= IconStrokes.Parse(Path);
+
     /// <summary>填充的几何；没有填充的部分时为 null。</summary>
     public Geometry? FillGeometry => FillPath is null ? null : field ??= Geometry.Parse(FillPath);
 }

@@ -1,9 +1,12 @@
 using global::Avalonia;
+using global::Avalonia.Animation;
+using global::Avalonia.Animation.Easings;
 using global::Avalonia.Automation;
 using global::Avalonia.Automation.Peers;
 using global::Avalonia.Controls;
 using global::Avalonia.Controls.Documents;
 using global::Avalonia.Media;
+using global::Avalonia.Styling;
 using LayoutSize = global::Avalonia.Size;
 
 namespace Rune.Avalonia;
@@ -34,8 +37,17 @@ public class Icon : Control
     /// <summary>从右到左排版时水平翻转：箭头、chevron 这类有方向的图标。</summary>
     public static readonly StyledProperty<bool> FlipInRtlProperty = AvaloniaProperty.Register<Icon, bool>(nameof(FlipInRtl));
 
+    /// <summary>
+    /// 描线动画（一笔画出）：挂上时为 true 就在挂上时播，之后每次由 false 变为 true 再播（时长 durations.xl、缓动 enter，
+    /// 系统关闭动画时直接画好）。不写（null）的图标不建动画。
+    /// </summary>
+    public static readonly StyledProperty<bool?> DrawProperty = AvaloniaProperty.Register<Icon, bool?>(nameof(Draw));
+
     /// <summary>颜色（继承自外面的文字颜色）。</summary>
     public static readonly StyledProperty<IBrush?> ForegroundProperty = TextElement.ForegroundProperty.AddOwner<Icon>();
+
+    /// <summary>描线的进度：1 是画完（平常就是 1，只有描线时从 0 走到 1）。</summary>
+    static readonly StyledProperty<double> DrawnProperty = AvaloniaProperty.Register<Icon, double>("Drawn", 1);
 
     /// <summary>字号（继承）：不写 Size 时图标就是这么大。</summary>
     public static readonly StyledProperty<double> FontSizeProperty = TextElement.FontSizeProperty.AddOwner<Icon>();
@@ -46,10 +58,11 @@ public class Icon : Control
     static readonly StyledProperty<double> ResolvedSizeProperty = AvaloniaProperty.Register<Icon, double>("ResolvedSize", double.NaN);
 
     IPen? pen;
+    CancellationTokenSource? drawing;
 
     static Icon()
     {
-        AffectsRender<Icon>(DataProperty, ForegroundProperty, StrokeWidthProperty);
+        AffectsRender<Icon>(DataProperty, ForegroundProperty, StrokeWidthProperty, DrawnProperty);
         AffectsMeasure<Icon>(SizeProperty, FontSizeProperty, ResolvedSizeProperty);
     }
 
@@ -68,8 +81,14 @@ public class Icon : Control
     /// <summary>从右到左排版时水平翻转。</summary>
     public bool FlipInRtl { get => GetValue(FlipInRtlProperty); set => SetValue(FlipInRtlProperty, value); }
 
+    /// <summary>描线动画；不写时不建动画。</summary>
+    public bool? Draw { get => GetValue(DrawProperty); set => SetValue(DrawProperty, value); }
+
     /// <summary>颜色。</summary>
     public IBrush? Foreground { get => GetValue(ForegroundProperty); set => SetValue(ForegroundProperty, value); }
+
+    /// <summary>描线的进度（测试用）。</summary>
+    internal double Drawn => GetValue(DrawnProperty);
 
     /// <summary>字号。</summary>
     public double FontSize { get => GetValue(FontSizeProperty); set => SetValue(FontSizeProperty, value); }
@@ -102,6 +121,45 @@ public class Icon : Control
         {
             pen = null;
         }
+        else if (change.Property == DrawProperty && change.GetNewValue<bool?>() == true && change.GetOldValue<bool?>() != true && VisualRoot is not null)
+        {
+            PlayDraw();
+        }
+    }
+
+    /// <inheritdoc />
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        if (Draw == true) PlayDraw();
+    }
+
+    /// <summary>先擦掉再画：挂上时在第一次绘制前就把进度置 0，不会先闪一下完整的图标。</summary>
+    async void PlayDraw()
+    {
+        drawing?.Cancel();
+        var duration = Motion.Duration(this, "Rune.Duration.Xl", TimeSpan.FromMilliseconds(500));
+        if (duration <= TimeSpan.Zero)
+        {
+            SetValue(DrawnProperty, 1);
+            return;
+        }
+        var cancel = drawing = new CancellationTokenSource();
+        // 先写终值：动画在动画优先级上盖住它，结束或被打断后留下的就是画完的图标
+        SetValue(DrawnProperty, 1);
+        _ = new Animation
+        {
+            Duration = duration,
+            Easing = this.Resource<Easing>("Rune.Easing.Enter", new CubicEaseOut()),
+            Children =
+            {
+                new KeyFrame { Cue = new Cue(0), Setters = { new Setter(DrawnProperty, 0d) } },
+                new KeyFrame { Cue = new Cue(1), Setters = { new Setter(DrawnProperty, 1d) } },
+            },
+        }.RunAsync(this, cancel.Token);
+        // 结束按真实时间算（同 Dismissal；headless 的动画时钟不走），到点停掉动画
+        await Task.Delay(duration);
+        cancel.Cancel();
     }
 
     /// <inheritdoc />
@@ -116,8 +174,22 @@ public class Icon : Control
         {
             if (data.FillGeometry is { } fill) context.DrawGeometry(brush, null, fill);
             pen ??= new Pen(brush, StrokeWidth, lineCap: PenLineCap.Round, lineJoin: PenLineJoin.Round);
-            context.DrawGeometry(null, pen, data.Geometry);
+            context.DrawGeometry(null, pen, Drawn < 1 ? PartialGeometry(data, Drawn) : data.Geometry);
         }
+    }
+
+    /// <summary>描线中：每一笔画出的部分连成折线。</summary>
+    static StreamGeometry PartialGeometry(IconData data, double progress)
+    {
+        var geometry = new StreamGeometry();
+        using var context = geometry.Open();
+        foreach (var stroke in data.Strokes.Partial(progress))
+        {
+            context.BeginFigure(new Point(stroke[0].X, stroke[0].Y), false);
+            foreach (var (x, y) in stroke.Skip(1)) context.LineTo(new Point(x, y));
+            context.EndFigure(false);
+        }
+        return geometry;
     }
 
     /// <inheritdoc />

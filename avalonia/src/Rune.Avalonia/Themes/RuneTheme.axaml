@@ -52,6 +52,7 @@
   <StyleInclude Source="avares://Rune.Avalonia/Base/CodeBlock/CodeBlockParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Display/Avatar/AvatarParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Feedback/Empty/EmptyParts.axaml" />
+  <StyleInclude Source="avares://Rune.Avalonia/Feedback/Result/ResultParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Feedback/Progress/ProgressParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Input/Choice/ChoiceParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Input/Switch/SwitchParts.axaml" />
