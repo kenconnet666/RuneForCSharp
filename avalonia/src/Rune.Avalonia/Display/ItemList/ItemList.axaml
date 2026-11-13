@@ -1,0 +1,70 @@
+<!--
+  ItemList 的主题（vue-tsx-pro 的 itemListStyles）：条目是三列（起始边、标题与说明、结束边），列间 space.sm；没有起始边时不留第一列。
+  结束边那一列总在（TS 没有 end 时也放一个空的 span），标题与说明后面总有 space.sm。标题与说明之间 space.xxs，说明 textMuted、xs；放不下时换行。
+  对齐 start 时起始边、结束边贴着第一行，起始边的内容在第一行（行高 normal）里居中。
+  divided：下边一道 borderMuted（最后一条没有）；hoverable、整条可点：悬停 fillHover、sm 圆角；已选 accentSoft（悬停 accentSoftHover）；
+  整条可点又不可用：半透明、禁止光标。指针是箭头（TS 的整条链接、按钮是 cursor: inherit）。上下内边距、两侧内边距在代码里按列表的设置算。
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:ItemListItem}" TargetType="rune:ItemListItem" BasedOn="{StaticResource {x:Type rune:ButtonBase}}">
+    <Setter Property="Cursor" Value="Arrow" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="TextBlock.LineHeight" Value="{rune:Em Resource=Rune.LineHeight.Normal}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border Name="PART_Root" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" ClipToBounds="True">
+            <Panel>
+              <Canvas Name="PART_Ripples" IsHitTestVisible="False" />
+              <Grid ColumnDefinitions="Auto,*,Auto" Margin="{TemplateBinding Padding}">
+                <ContentPresenter Name="PART_Start" Content="{TemplateBinding Start}" VerticalAlignment="Center" VerticalContentAlignment="Center"
+                                  Margin="{rune:Em 0, 0, 0.5, 0, Of=TemplatedParent}" />
+                <StackPanel Name="PART_Body" Grid.Column="1" VerticalAlignment="Center" Spacing="{rune:Em 0.125, Of=TemplatedParent}"
+                            Margin="{rune:Em 0, 0, 0.5, 0, Of=TemplatedParent}">
+                  <ContentPresenter Name="PART_Title" Content="{TemplateBinding Title}" IsVisible="{TemplateBinding Title, Converter={x:Static ObjectConverters.IsNotNull}}" TextWrapping="Wrap" />
+                  <ContentPresenter Name="PART_Description" Content="{TemplateBinding Description}" IsVisible="{TemplateBinding Description, Converter={x:Static ObjectConverters.IsNotNull}}" TextWrapping="Wrap"
+                                    Foreground="{DynamicResource Rune.Brush.TextMuted}" FontSize="{DynamicResource Rune.FontSize.Xs}"
+                                    TextBlock.LineHeight="{rune:Em Resource=Rune.LineHeight.Normal}" />
+                  <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}" IsVisible="{TemplateBinding Content, Converter={x:Static ObjectConverters.IsNotNull}}" ContentTemplate="{TemplateBinding ContentTemplate}" />
+                </StackPanel>
+                <ContentPresenter Name="PART_End" Grid.Column="2" Content="{TemplateBinding End}" VerticalAlignment="Center" HorizontalAlignment="Right" />
+              </Grid>
+            </Panel>
+          </Border>
+          <Border Name="PART_FocusRing" IsVisible="False" IsHitTestVisible="False"
+                  BorderThickness="2" BorderBrush="{DynamicResource Rune.Brush.FocusRing}" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:focus-visible /template/ Border#PART_FocusRing"><Setter Property="IsVisible" Value="True" /></Style>
+    <Style Selector="^:not(:has-start) /template/ ContentPresenter#PART_Start"><Setter Property="IsVisible" Value="False" /></Style>
+
+    <Style Selector="^:align-start">
+      <Style Selector="^ /template/ ContentPresenter#PART_Start">
+        <Setter Property="VerticalAlignment" Value="Top" />
+        <Setter Property="MinHeight" Value="{rune:Em Resource=Rune.LineHeight.Normal, Of=TemplatedParent}" />
+      </Style>
+      <Style Selector="^ /template/ StackPanel#PART_Body"><Setter Property="VerticalAlignment" Value="Top" /></Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_End"><Setter Property="VerticalAlignment" Value="Top" /></Style>
+    </Style>
+
+    <Style Selector="^:divided">
+      <Setter Property="BorderThickness" Value="0,0,0,1" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+    </Style>
+    <Style Selector="^:divided:nth-last-child(1)"><Setter Property="BorderThickness" Value="0" /></Style>
+
+    <Style Selector="^:hoverable, ^:interactive"><Setter Property="CornerRadius" Value="{rune:Em Resource=Rune.Radius.Sm}" /></Style>
+    <Style Selector="^:hoverable:pointerover, ^:interactive:pointerover"><Setter Property="Background" Value="{DynamicResource Rune.Brush.FillHover}" /></Style>
+    <Style Selector="^:selected"><Setter Property="Background" Value="{DynamicResource Rune.Brush.AccentSoft}" /></Style>
+    <Style Selector="^:selected:pointerover"><Setter Property="Background" Value="{DynamicResource Rune.Brush.AccentSoftHover}" /></Style>
+    <Style Selector="^:interactive:disabled">
+      <Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Cursor" Value="No" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

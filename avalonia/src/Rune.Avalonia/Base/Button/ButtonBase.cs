@@ -33,7 +33,7 @@ public class ButtonBase : global::Avalonia.Controls.Button
     public static readonly StyledProperty<bool?> RippleProperty = AvaloniaProperty.Register<ButtonBase, bool?>(nameof(Ripple));
 
     /// <summary>焦点环比外框大出的距离：outline 宽 2、偏移 2（borderWidths.sm）。</summary>
-    const double FocusRingOutset = 4;
+    private protected virtual double FocusRingOutset => 4;
 
     static readonly Easing Linear = new LinearEasing();
 

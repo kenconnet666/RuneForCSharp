@@ -46,6 +46,8 @@ export const COMPONENT_PROP_RENAMES = {
   UserButton: { name: 'DisplayName', src: 'Source' },
   // 移除由使用方做：事件是"请求移除"（离场结束才发）
   Tag: { onRemove: 'RemoveRequested' },
+  // 点了这一条是事件（订阅了才整条可点；Select 是动词，选中另有 IsSelected）；正在看的一条是 IsSelected（同平台的选中项）
+  ItemListItem: { onSelect: 'Invoked', selected: 'IsSelected' },
   SelectedTags: { onRemove: 'RemoveRequested' },
   // 数据是平台的 ItemsSource；自定义选项内容是数据模板；新建是事件（Control 自己有 Created）
   Select: { items: 'ItemsSource', children: 'ItemTemplate', onCreate: 'OptionCreated' },
@@ -103,6 +105,8 @@ export const PLATFORM_COMPONENT_PROP_RENAMES = {
     RadioGroup: { propsItem: 'ItemGenerated' },
     Container: { size: 'ContainerSize', padding: 'InlinePadding' },
     Card: { padding: 'CardPadding' },
+    // 标题是控件的 Text（同按钮、导航项的文字）
+    ItemListItem: { title: 'Text' },
     // 同 TextFieldControl
     Select: { placeholder: 'PlaceholderText' },
     // 控件自己有 Size
@@ -148,6 +152,7 @@ export const PROPS_NOT_PORTED = {
   },
   NavList: { propsList: 'nav > ul 是 HTML 的结构：NavList 本身就是那一列' },
   NavItem: { propsItem: '外层的 li 是 HTML 列表的结构：桌面上导航项本身就是列表里的一行' },
+  ItemListItem: Object.fromEntries(['propsLink', 'propsButton'].map((prop) => [prop, '标题里伸展的链接、按钮是网页让整条可点的写法：桌面上整条就是一个可点的控件（Href、Invoked），没有里面那一层'])),
   ToggleGroup: { propsIndicator: '滑块是组自己画的（跟着选中项滑动），没有可改样式的部件' },
   CharacterCount: {
     propsValue: '看得见的字数就是控件自己的文字，读屏读的是控件的名称（完整的句子），不另分部件',
@@ -209,6 +214,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     SelectedTags: { propsMore: '“+N”同其余标签是 SelectedTagsControl 建的 sm、soft 的 TagControl（同 propsTag），WinForms 没有部件样式' },
     Tabs: { ripple: '标签是组件库画的容器控件（里面放文字与计数），没有按下的波纹' },
     NavItem: { ripple: '导航行是组件库画的容器控件（里面放图标、文字与计数），没有按下的波纹' },
+    ItemListItem: Object.fromEntries(['propsTitle', 'propsDescription'].map((prop) => [prop, '标题、说明是 ItemListItemControl 里的 TextControl 子控件，WinForms 没有部件样式；说明固定 textMuted、xs'])),
     CodeBlock: Object.fromEntries(
       ['propsCode', 'propsRoot', 'propsHeader', 'propsTitle', 'propsBody', 'propsLine', 'propsLineNumber', 'propsCopy', 'propsScroll', 'propsExpand', 'propsExpandIcon']
         .map((prop) => [prop, '外层、标题栏、代码与行号、展开按钮都是 CodeBlockControl 自己画的，没有可改的部件']),
@@ -295,6 +301,7 @@ export const EXCLUDED = {
 /** 只在某个平台上不适用的上游测试用例：库 → { 组件: { 用例名的开头: 原因 } } */
 export const PLATFORM_BEHAVIOR_NOT_APPLICABLE = {
   WinForms: {
+    ItemList: { 'ItemList：列表是 root，条目是 item': '标题、说明是 ItemListItemControl 里的子控件，没有部件标记（PLATFORM_PROPS_NOT_PORTED）' },
     ScrollArea: { '内容层、滚动条、滑块都能加属性': '滚动条是组件库画的滑块子控件，没有部件属性可加（PLATFORM_PROPS_NOT_PORTED）' },
     CodeBlock: {
       '部件属性': '代码块是 CodeBlockControl 自己画的，没有部件属性可加（PLATFORM_PROPS_NOT_PORTED）',

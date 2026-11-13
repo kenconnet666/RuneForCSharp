@@ -23,7 +23,7 @@ vue-tsx-pro 那边的会话改了设计时会发通知过来（每完成一个�
 |---|---|---|
 | 还没有使用方：旧 API 直接删、不留 deprecated；每批 CI 绿了从 master 发版 | 我们同样没有使用方 | 跟到新版本时直接改名、删旧写法 |
 | 样式引擎最低层统一 `box-sizing: border-box` | 修我们报的 Listbox 高度问题 | 等提交号，重截 listbox multiple |
-| 组件里的导航链接部件（ItemList 标题、Card 页头操作、StatGroup 操作、Timeline 附件）默认悬停才有下划线 | 正文 Link 不变 | 做这些组件时照做 |
+| 组件里的导航链接部件（ItemList 标题、Card 页头操作、StatGroup 操作、Timeline 附件）默认悬停才有下划线 | 正文 Link 不变 | 做这些组件时照做；ItemList 2026-11-14 做了 |
 | P3 新组件：ChoiceCard、ItemList 可选中的行、ColorPicker、ImageCropper、Carousel、Dialog 拖动、Tag 加 selected、QRCode、FloatButton 组、JsonViewer、SignaturePad、DataTable 横向虚拟化 | Tag 刚做完 | selected 发版后补 |
 | P10 把组件规格（属性、默认值、部件、档位、键盘）导成 JSON | 可以在 CI 里比对 | 已出（0.13.0，见第十一批），上线后让 parity 工具改读它 |
 
@@ -61,11 +61,11 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
 | 单选、复选的卡片外观（554b7246）：card、横排按 minItemWidth（默认 14em）auto-fill；Radio、Checkbox 加 end、propsEnd | 已做 Checkbox、Radio | 这次做 |
-| ItemList 整条可点、selected、disabled（0950975c） | 还没做 | 做时照新的 |
+| ItemList 整条可点、selected、disabled（0950975c） | 已做 ItemList | 2026-11-14 做了：Href、Invoked（onSelect）、IsSelected、不可用只对可点的条目有外观 |
 | 可选中的 Tag（0f69e5c5）：_selected 时是按钮（aria-pressed），没选中 surface、选中 solid 加对勾，默认 accent、sm | 已做 Tag | 这次做 |
 | 静态 Table 的 stickyHeader、sticky（9a57a058，这次锁定才进来） | 已做 Table | 2026-11-14 做了（1873c1a）：Avalonia、WPF 加 Table.StickyHeader、ScrollAxis（propsRoot 的 axis）与 TableCell.Sticky；WinForms 跟着外面的 ScrollAreaControl 挪；三个平台补了 ScrollArea 的 both 示例 |
 | ScrollArea 各部件带标记、border-box（6160d6d2） | 网页的部件标记与盒模型，桌面上本来就是 border-box | 不涉及 |
-| 链接下划线 LinkUnderlineScope（ff221742）：显式 > 容器给的 > defaults.Link > always；ItemList、Stat、Timeline 等整块 hover，Card 只给页头 | 已做 Link、Card | 这次做；ItemList、Stat、Timeline、Descriptions、Checklist 做时照做 |
+| 链接下划线 LinkUnderlineScope（ff221742）：显式 > 容器给的 > defaults.Link > always；ItemList、Stat、Timeline 等整块 hover，Card 只给页头 | 已做 Link、Card、ItemList | 这次做；ItemList 2026-11-14 做了；Stat、Timeline、Descriptions、Checklist 做时照做 |
 | Upload 接父级放进来的待上传文件（ff221742） | 还没做 | 做时照新的 |
 | 文档：ButtonBase 页换成"长得不像按钮的按钮"；Upload、Timeline、Code 合并示例 | Code 页的示例变了 | 跟着像素差异改示例 |
 
@@ -186,7 +186,7 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 | NavList 的行与分组触发器、Accordion 标题、Tree、VirtualList、NotificationCenter 的整行焦点环画在里面 | NavList 的行焦点环本来就在里面；Accordion、Tree 等还没做 | 做时照新的 |
 | CodeBlock 复制按钮（标题栏里也是）、SlideCaptcha 刷新、Upload 图片墙缩略图画在里面 | 复制按钮同 IconButton，本来就在里面 | 不涉及 |
 | DataTable 单元格、StatGroup 根 overflow: hidden → overflowX: clip | 还没做 | 做时照新的 |
-| Upload 的文件名链接自己省略；ItemList、PeoplePickerPanel 的内边距调整 | 还没做 | 做时照新的 |
+| Upload 的文件名链接自己省略；ItemList、PeoplePickerPanel 的内边距调整 | ItemList 已做 | ItemList 照新的（inset，悬停着底色、整条可点时默认 sm）；Upload、PeoplePickerPanel 做时照新的 |
 
 ### 第十四批（2026-11-08 通知，master 0e7f08a3：间距多一档 space.xxs = 0.125em）
 
@@ -195,7 +195,7 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
 | 主题加 space.xxs（0.125em，vtp-space 组，在 none 与 xs 之间） | token 由 token-gen 从上游生成；`Space` 档位类型是手写的 | 已做：token 重新生成，三个平台的 `Space` 加 Xxs（WinForms 的 Factor 对上 Tokens.Space.Xxs） |
-| 写死的 2px 间距换成 xxs（ItemList、Checklist、NotificationCenter 标题与说明之间、CalendarBoard、DiagramNode、Upload 图片墙等）；Diagram 连线标签、ProportionBar、DiagramNode、ColorPicker、ImageCropper 的宽度换成 token | 这些组件都还没做 | 做时照新的 |
+| 写死的 2px 间距换成 xxs（ItemList、Checklist、NotificationCenter 标题与说明之间、CalendarBoard、DiagramNode、Upload 图片墙等）；Diagram 连线标签、ProportionBar、DiagramNode、ColorPicker、ImageCropper 的宽度换成 token | ItemList 已做 | ItemList 照新的（xxs）；其余做时照新的 |
 | 组件规格 JSON 不含 token，token 照 tokens.ts 核对 | token-gen 本来就读 tokens.ts | 不涉及 |
 
 ### 第十五批（2026-11-08 通知，master cb4d5941、bcd44fd1：部件补齐第七批，TreemapChart 数据表）
@@ -304,7 +304,7 @@ Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
 | 样式合并时后写的简写重设前面片段的长属性（84e6cde2，修 #5）：UserButton 的 compact 四边 xs、整行左右 sm 生效 | 我们本来就按本意做 | 066ad66e 的 CI 绿后锁定，重截 avatar user-button 核对 |
-| ItemList 的已选、不可用按 data-selected / data-disabled，NavBar 的当前页按 aria-current（066ad66e） | ItemList、NavBar 还没做；外观不变 | 做时照新的 |
+| ItemList 的已选、不可用按 data-selected / data-disabled，NavBar 的当前页按 aria-current（066ad66e） | ItemList 已做；NavBar 还没做 | ItemList 照新的（已选对所有条目，不可用只对可点的条目）；NavBar 做时照新的 |
 
 ### 第二十六批（2026-11-08 通知，master 2bdf378e：24.2 收尾）
 

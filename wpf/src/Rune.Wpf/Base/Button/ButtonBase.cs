@@ -50,7 +50,7 @@ public class ButtonBase : System.Windows.Controls.Button
     public static readonly DependencyProperty IsFocusVisibleProperty = IsFocusVisibleKey.DependencyProperty;
 
     /// <summary>焦点环比外框大出的距离：outline 宽 2、偏移 2（borderWidths.sm）。</summary>
-    const double FocusRingOutset = 4;
+    private protected virtual double FocusRingOutset => 4;
 
     Canvas? ripples;
     Border? focusRing;

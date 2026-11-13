@@ -36,6 +36,7 @@
         <ResourceInclude Source="avares://Rune.Avalonia/Display/Card/Card.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Display/Avatar/Avatar.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Display/UserButton/UserButton.axaml" />
+        <ResourceInclude Source="avares://Rune.Avalonia/Display/ItemList/ItemList.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Input/Choice/Choice.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Overlay/Tooltip/Tooltip.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Patterns/AppShell/AppShell.axaml" />

@@ -250,6 +250,8 @@ sealed class StyleReport
         ["NavGroupHeader"] = "nav-list",
         ["NavGroup"] = "nav-list",
         ["NavSection"] = "nav-list",
+        // 上游 ItemList、ItemListItem 共用 item-list 的部件标记
+        ["ItemListItem"] = "item-list",
     };
 
     /// <summary>
@@ -270,6 +272,7 @@ sealed class StyleReport
         ["NavItem"] = "nav-list/link",
         ["NavGroup"] = "nav-list/group",
         ["NavSection"] = "nav-list/section",
+        ["ItemListItem"] = "item-list/item",
     };
 
     /// <summary>部件在上游叫别的名字：API 名（propsThumb）与部件标记（data-part="indicator"）不同的。</summary>

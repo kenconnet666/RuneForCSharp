@@ -1,0 +1,114 @@
+<!--
+  ItemList 的主题样式（vue-tsx-pro 的 itemListStyles）：条目是三列（起始边、标题与说明、结束边），列间 space.sm；没有起始边时不留第一列。
+  结束边那一格总在（TS 没有 end 时也放一个空的 span），标题与说明后面总有 space.sm。标题与说明之间 space.xxs，说明 textMuted、xs；放不下时换行。
+  对齐 start 时起始边、结束边贴着第一行，起始边至少一行高、内容在里面居中（代码里设）。
+  分隔线：下边一道 borderMuted（最后一条没有）；hoverable、整条可点：悬停 fillHover、sm 圆角；已选 accentSoft（悬停 accentSoftHover）；
+  整条可点又不可用：半透明。指针是箭头（TS 的整条链接、按钮是 cursor: inherit）。上下、两侧内边距在代码里按列表的设置算（em 系数）。
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Rune.Wpf;component/Base/Button/Button.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <Style TargetType="rune:ItemListItem" BasedOn="{StaticResource {x:Type rune:ButtonBase}}">
+    <Setter Property="Cursor" Value="Arrow" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Normal}" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="rune:EmSize.LineHeight" Value="{DynamicResource Rune.LineHeight.Normal}" />
+    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Normal}" />
+    <Setter Property="TextBlock.LineStackingStrategy" Value="BlockLineHeight" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="rune:ItemListItem">
+          <Grid>
+            <Border x:Name="PART_Root" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" rune:BrushTransition.Enabled="True">
+              <Grid>
+                <Canvas x:Name="PART_Ripples" IsHitTestVisible="False" />
+                <rune:Flex x:Name="PART_Row" Align="center" Gap="sm" Margin="{TemplateBinding Padding}">
+                  <ContentPresenter x:Name="PART_Start" Content="{TemplateBinding Start}" VerticalAlignment="Center" />
+                  <rune:Flex x:Name="PART_Body" rune:Flex.Grow="True" Direction="column" Gap="xxs" VerticalAlignment="Center">
+                    <ContentPresenter x:Name="PART_Title" Content="{TemplateBinding Title}" Style="{DynamicResource {x:Static rune:ItemListItemParts.Title}}">
+                      <ContentPresenter.Resources>
+                        <Style TargetType="TextBlock"><Setter Property="TextWrapping" Value="Wrap" /></Style>
+                      </ContentPresenter.Resources>
+                    </ContentPresenter>
+                    <ContentPresenter x:Name="PART_Description" Content="{TemplateBinding Description}" Style="{DynamicResource {x:Static rune:ItemListItemParts.Description}}">
+                      <ContentPresenter.Resources>
+                        <Style TargetType="TextBlock"><Setter Property="TextWrapping" Value="Wrap" /></Style>
+                      </ContentPresenter.Resources>
+                    </ContentPresenter>
+                    <ContentPresenter x:Name="PART_Content" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" />
+                  </rune:Flex>
+                  <ContentPresenter x:Name="PART_End" Content="{TemplateBinding End}" VerticalAlignment="Center" />
+                </rune:Flex>
+              </Grid>
+            </Border>
+            <Border x:Name="PART_FocusRing" Visibility="Collapsed" IsHitTestVisible="False" BorderThickness="2" BorderBrush="{DynamicResource Rune.Brush.FocusRing}" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsFocusVisible" Value="True"><Setter TargetName="PART_FocusRing" Property="Visibility" Value="Visible" /></Trigger>
+            <Trigger Property="Start" Value="{x:Null}"><Setter TargetName="PART_Start" Property="Visibility" Value="Collapsed" /></Trigger>
+            <Trigger Property="Title" Value="{x:Null}"><Setter TargetName="PART_Title" Property="Visibility" Value="Collapsed" /></Trigger>
+            <Trigger Property="Description" Value="{x:Null}"><Setter TargetName="PART_Description" Property="Visibility" Value="Collapsed" /></Trigger>
+            <Trigger Property="Content" Value="{x:Null}"><Setter TargetName="PART_Content" Property="Visibility" Value="Collapsed" /></Trigger>
+            <Trigger Property="Align" Value="{x:Static rune:ItemListAlign.Start}">
+              <Setter TargetName="PART_Row" Property="Align" Value="start" />
+              <Setter TargetName="PART_Start" Property="VerticalAlignment" Value="Top" />
+              <Setter TargetName="PART_Body" Property="VerticalAlignment" Value="Top" />
+              <Setter TargetName="PART_End" Property="VerticalAlignment" Value="Top" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <Style.Triggers>
+      <Trigger Property="HasDivider" Value="True">
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+      </Trigger>
+      <Trigger Property="IsHoverable" Value="True"><Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.Sm}" /></Trigger>
+      <Trigger Property="IsInteractive" Value="True"><Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.Sm}" /></Trigger>
+      <MultiTrigger>
+        <MultiTrigger.Conditions>
+          <Condition Property="IsHoverable" Value="True" />
+          <Condition Property="IsMouseOver" Value="True" />
+        </MultiTrigger.Conditions>
+        <Setter Property="Background" Value="{DynamicResource Rune.Brush.FillHover}" />
+      </MultiTrigger>
+      <MultiTrigger>
+        <MultiTrigger.Conditions>
+          <Condition Property="IsInteractive" Value="True" />
+          <Condition Property="IsMouseOver" Value="True" />
+        </MultiTrigger.Conditions>
+        <Setter Property="Background" Value="{DynamicResource Rune.Brush.FillHover}" />
+      </MultiTrigger>
+      <Trigger Property="IsSelected" Value="True"><Setter Property="Background" Value="{DynamicResource Rune.Brush.AccentSoft}" /></Trigger>
+      <MultiTrigger>
+        <MultiTrigger.Conditions>
+          <Condition Property="IsSelected" Value="True" />
+          <Condition Property="IsMouseOver" Value="True" />
+        </MultiTrigger.Conditions>
+        <Setter Property="Background" Value="{DynamicResource Rune.Brush.AccentSoftHover}" />
+      </MultiTrigger>
+      <MultiTrigger>
+        <MultiTrigger.Conditions>
+          <Condition Property="IsInteractive" Value="True" />
+          <Condition Property="IsEnabled" Value="False" />
+        </MultiTrigger.Conditions>
+        <Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" />
+        <Setter Property="Background" Value="Transparent" />
+      </MultiTrigger>
+    </Style.Triggers>
+  </Style>
+
+  <!-- 部件的默认外观写在部件样式里（DESIGN §7）：说明 textMuted、xs -->
+  <Style x:Key="{x:Static rune:ItemListItemParts.Title}" TargetType="ContentPresenter" />
+  <Style x:Key="{x:Static rune:ItemListItemParts.Description}" TargetType="ContentPresenter">
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+    <Setter Property="TextElement.FontSize" Value="{DynamicResource Rune.FontSize.Xs}" />
+  </Style>
+</ResourceDictionary>

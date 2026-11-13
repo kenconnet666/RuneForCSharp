@@ -676,6 +676,24 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 像素对照（plans）：Avalonia 0.08% / 0.12%、WPF 0.05% / 0.38%、WinForms 0.32% / 0.41%。剩下的主要是表头那一行：上游是文字加行内的徽标（vertical-align: middle），
   行盒撑到 21.99，我们的 Flex 是 21，下面的行线差半个像素。示例：plans；invoice 要等 ToggleGroup，column-table 要等 ColumnTable。
 
+### ItemList（2026-11-14）
+
+- 照上游两个组件：ItemList（列表的设置：Divided、Hoverable、Density、Inset）与 ItemListItem（Start、Title、Description、End、Content、Align）。
+  档位类型 `ItemListDensity`、`ItemListAlign` 是孪生文件（`Display/ItemList/ItemListVariants.cs`）。列表给里面的链接悬停才有下划线（Link 的下划线作用域）。
+- 整条可点：网页是标题里一个伸展盖住整条的链接或按钮；桌面上整条就是一个控件。Avalonia、WPF 的 ItemListItem 从 ButtonBase 派生（键盘、读屏的 Invoke、
+  加载中现成），写了 Href（绝对地址，系统打开）、Command 或订阅了 Invoked（TS 的 onSelect，订阅时记下，同 Tag 的 RemoveRequested）才可点、能聚焦；
+  不可点时读屏里是列表项，可点时是链接或按钮。结束边的按钮自己处理按下，点它不触发这一条。选中（IsSelected）的项状态是 DesktopMessages 的"当前"
+  （网页的 aria-current 由读屏自己念，桌面要组件给）。不可用只对可点的条目有外观（同上游 data-disabled 只在可点时有）。不出波纹（上游 ripple: false）。
+- 焦点环叠在条目的边上：上游 outline 宽 2、偏移 -1px，不像按钮外扩 4。Avalonia、WPF 的 ButtonBase 把外扩距离做成可覆盖的 FocusRingOutset。
+- 内边距：上下按疏密（compact xs、standard sm），两侧按 Inset，不写时悬停着底色、整条可点的条目留 sm；都随字号，在代码里按列表的设置算
+  （Avalonia 按模板优先级设 Padding，WPF 设 EmSize.Padding 的系数，WinForms 按像素设 Padding）。最后一条没有分隔线：Avalonia 用 `:nth-last-child(1)`，
+  WPF 由列表算出 HasDivider 给触发器，WinForms 由列表算出、在下内边距里留出线宽自己画。
+- 结束边那一格总在（TS 没有 end 时也放一个空的 span）：标题与说明后面总有 space.sm。说明的行高按它自己的 xs 字号算（18 而不是 21）：
+  Avalonia 在部件上按自己的字号设，WPF 的行高按像素继承，代码里重算。
+- **WinForms**：ItemListControl（竖排的 Flex）、ItemListItemControl（横排的 Flex：起始边一格、标题与说明一栏、结束边一格，格跟着里面的控件变大小）。
+  点起始边、标题、说明同点这一条（转发子控件的点击），结束边不转发。子控件不能半透明：不可用时文字换成 textDisabled。WinForms 没有 Command，可点的是 Href 或 Invoked。
+- 取值对照（notifications、selectable）：Avalonia 只差列表总高 0.75（布局取整），WPF 一致。示例：notifications、selectable；todos 要等 DeadlineBadge。
+
 ### NavList（2026-11-07）
 
 - 照上游：NavList > NavItem / NavGroup（可展开）/ NavSection（带小标题、一直展开）。桌面上没有路由：NavList 的 `CurrentHref` 是当前地址（TS 路由适配的 isActive
