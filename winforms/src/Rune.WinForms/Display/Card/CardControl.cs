@@ -21,7 +21,7 @@ public class CardControl : Panel, IScopeAware
     readonly Effect paint;
     readonly Text title = new() { Weight = TextWeight.Semibold };
     readonly SkeletonTextControl skeleton = new() { Visible = false };
-    readonly HashSet<Control> clipped = [];
+    readonly CornerClip cornerClip = new();
     DelayedLoading loading;
     bool skeletonShown;
 
@@ -266,45 +266,18 @@ public class CardControl : Panel, IScopeAware
         return corners.Value == "full" ? Height / 2f : (corners.In(ProviderControl.ThemeOf(this).Radii) ?? 0) * Em;
     }
 
-    /// <summary>
-    /// 碰到圆角的子控件按边框里面的圆角裁（TS 的 overflow: hidden）：内边距 none 时贴边的横幅、代码块不会盖住卡片的圆角。
-    /// 子控件画在自己的窗口上，卡片盖不住它们，只能给它们设窗口区域；只动自己裁过的，使用方自己设的区域不碰。
-    /// </summary>
+    /// <summary>碰到圆角的子控件按边框里面的圆角裁：内边距 none 时贴边的横幅、代码块不会盖住卡片的圆角。</summary>
     void ClipCorners()
     {
         var line = Line;
-        var radius = Math.Max(0, CornerRadius(ResolvedSx) - line);
-        var inner = new RectangleF(line, line, Width - 2 * line, Height - 2 * line);
-        var corner = (int)MathF.Ceiling(radius);
-        foreach (Control child in Controls)
-        {
-            var bounds = child.Bounds;
-            var touches = radius > 0 && (bounds.Left < inner.Left + corner || bounds.Right > inner.Right - corner)
-                && (bounds.Top < inner.Top + corner || bounds.Bottom > inner.Bottom - corner);
-            if (!touches)
-            {
-                if (clipped.Remove(child)) SwapRegion(child, null);
-                continue;
-            }
-            if (child.Region is not null && !clipped.Contains(child)) continue;
-            using var path = Drawing.RoundedRectangle(inner with { X = inner.X - bounds.X, Y = inner.Y - bounds.Y }, radius);
-            clipped.Add(child);
-            SwapRegion(child, new Region(path));
-        }
-    }
-
-    static void SwapRegion(Control child, Region? region)
-    {
-        var old = child.Region;
-        child.Region = region;
-        old?.Dispose();
+        cornerClip.Apply(Controls.Cast<Control>(), new RectangleF(line, line, Width - 2 * line, Height - 2 * line), Math.Max(0, CornerRadius(ResolvedSx) - line));
     }
 
     /// <inheritdoc />
     protected override void OnControlRemoved(ControlEventArgs e)
     {
         base.OnControlRemoved(e);
-        if (e.Control is { } child && clipped.Remove(child)) SwapRegion(child, null);
+        if (e.Control is { } child) cornerClip.Release(child);
     }
 
     /// <inheritdoc />
