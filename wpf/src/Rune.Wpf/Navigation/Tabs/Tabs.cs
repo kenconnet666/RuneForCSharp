@@ -22,7 +22,7 @@ namespace Rune.Wpf;
 /// 没有选中值时选第一个标签；只显示当前标签的面板。键盘：标签之间用方向键移动（整组一个 Tab 停靠点），Home / End 到两端；
 /// <see cref="Activation"/> 为 automatic（默认）时焦点到哪个就切到哪个，manual 时按 Enter / 空格才切换。
 /// 样式 <see cref="Variant"/>：line（默认，当前标签下方一条品牌色的线，切换时滑过去）、soft（浅色底）。<see cref="Orientation"/>：horizontal、vertical。
-/// 没做：可关闭、新建、拖动排序、"全部标签页"菜单（等 Menu）。
+/// 可关闭（<see cref="Tab.CloseRequested"/>）、新建（<see cref="TabList.AddRequested"/>）、排序（<see cref="TabList.Reordered"/>）、"全部标签页"菜单（<see cref="TabList.ShowAllMenu"/>）见各自的说明。
 /// </summary>
 public class Tabs : Flex
 {
