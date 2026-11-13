@@ -311,7 +311,7 @@ public class NavItem : NavRow
 
         protected override string GetClassNameCore() => nameof(NavItem);
 
-        protected override string? GetItemStatusCore() => owner.IsCurrent ? "当前页" : base.GetItemStatusCore();
+        protected override string? GetItemStatusCore() => owner.IsCurrent ? DesktopMessages.For(Provider.GetLang(owner)).CurrentPage : base.GetItemStatusCore();
     }
 }
 
