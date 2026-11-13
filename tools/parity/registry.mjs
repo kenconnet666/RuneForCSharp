@@ -46,6 +46,8 @@ export const COMPONENT_PROP_RENAMES = {
   UserButton: { name: 'DisplayName', src: 'Source' },
   // 移除由使用方做：事件是"请求移除"（离场结束才发）
   Tag: { onRemove: 'RemoveRequested' },
+  // 关闭由使用方做：事件是"请求关闭"（Avalonia、WPF 离场结束才发）
+  Alert: { onClose: 'CloseRequested' },
   // 关闭、新建由使用方做：事件是"请求"；排序由 TabList 自己挪好标签，事件报告新顺序
   Tab: { onClose: 'CloseRequested' },
   TabList: { onAdd: 'AddRequested', onReorder: 'Reordered' },
@@ -257,6 +259,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
       ...Object.fromEntries(['propsTrigger', 'propsInput', 'propsListbox'].map((prop) => [prop, '默认触发按钮、搜索框、列表是 CommandPaletteControl 组合的子控件，没有部件属性记录'])),
     },
     Tag: { propsRemove: '移除按钮是 CloseButtonControl 子控件，颜色、字号跟着标签；没有部件属性记录' },
+    Alert: Object.fromEntries(['propsSpinner', 'propsBody', 'propsContent', 'propsAction', 'propsClose']
+      .map((prop) => [prop, '加载指示、操作、关闭按钮与额外内容是 AlertControl 的子控件，文字区是排版出来的一块区域：没有部件属性记录（图标、标题、说明是画的元素，有 PropsIcon、PropsTitle、PropsDescription）'])),
     Tab: { propsClose: '关闭按钮是 TabItemControl 里的 CloseButtonControl 子控件（xs、圆形），没有部件属性记录' },
     TabList: {
       propsIndicator: '分隔线与指示条是 TabListControl 自己画的，没有可改的部件',
