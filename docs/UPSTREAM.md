@@ -376,9 +376,11 @@ Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_
 
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
-| 部件属性合并：undefined 不表态、null 才清掉；aria-describedby 拼接去重；嵌套 propsXxx 递归合并；同名事件合成 | WinForms 的部件属性记录本来就是 null = 不改、逐字段合并；Avalonia、WPF 用样式 | 锁定时核对 |
-| Listbox disabled 时点选项不改值、不触发 onPick；Link external 的 target、rel 是默认层；Popconfirm、TagsInput、日期、Pagination、Rating、Splitter 等一批行为修正；输入法组合中 DataTable、Cascader 等不处理按键 | Listbox 已做，其余还没做 | CI 绿后锁定，核对 Listbox；其余做时照新的 |
+| 部件属性合并：undefined 不表态、null 才清掉；aria-describedby 拼接去重；嵌套 propsXxx 递归合并；同名事件合成 | WinForms 的部件属性记录本来就是 null = 不改、逐字段合并；Avalonia、WPF 用样式 | 已跟：读屏的帮助文字（aria-describedby）三个平台都改成字段的说明、错误与控件自己的拼在一起去重——原来 TextField、Select、Listbox、ToggleGroup 根本没念字段的说明，勾选项只在自己没写时才念 |
+| Listbox disabled 时点选项不改值、不触发 onPick；Link external 的 target、rel 是默认层；Popconfirm、TagsInput、日期、Pagination、Rating、Splitter 等一批行为修正；输入法组合中 DataTable、Cascader 等不处理按键 | Listbox 已做，其余还没做 | Listbox 本来就拦下（补了测试）；其余做时照新的 |
 | 新部件属性：NavBar、QuarterCalendar、DataTable 表头按钮、ImageCropper、QueryTable | 还没做 | 做时照新的 |
+
+锁定跟到 0.22.0（6e6f831d）：生成文件没变；行为对照新增的 Field 两条、Listbox 一条都对上了。
 
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 
