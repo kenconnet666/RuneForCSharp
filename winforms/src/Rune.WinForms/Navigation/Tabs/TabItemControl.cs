@@ -7,6 +7,8 @@ namespace Rune.WinForms;
 /// 标签：里面放文字（<see cref="Control.Text"/>）或子控件（文字加计数），中等字重（GDI 只有常规与粗体，按常规画）；平时 textMuted、悬停与选中时 text；
 /// 控件高度、左右 space.md、sm 圆角；soft 时选中的标签 surface 底；键盘聚焦时里侧焦点环。点击、Enter、空格切换（<see cref="TabClick"/> 先执行，
 /// <see cref="TabClickEventArgs.Cancel"/> 拦下）。读屏里是选项卡。
+/// 订阅了 <see cref="CloseRequested"/> 才能关闭（上游给了 onClose 才有）：末尾一个圆形的关闭按钮（不能聚焦，只给指针用），
+/// 标签上按 Delete、鼠标中键点也关闭。使用方移除这个标签；关掉的是当前标签时选它后面（没有时前面）的一个，焦点也跟过去。
 /// </summary>
 [ToolboxItem(true)]
 [DefaultEvent(nameof(TabClick))]
@@ -15,6 +17,9 @@ public class TabItemControl : FlexControl
 {
     TabsControl? owner;
     bool hovered;
+    EventHandler? closeRequested;
+    TabCloseButtonControl? close;
+    TextControl? label;
 
     /// <summary>新建：内容居中、间距 space.xs。</summary>
     public TabItemControl()
@@ -43,6 +48,47 @@ public class TabItemControl : FlexControl
     [Browsable(false)]
     public bool IsSelected { get; private set; }
 
+    /// <summary>请求关闭（关闭按钮、Delete、鼠标中键；TS 的 onClose）：使用方移除这个标签。订阅了才有关闭按钮。</summary>
+    [Category("Action")]
+    public event EventHandler? CloseRequested
+    {
+        add
+        {
+            closeRequested += value;
+            SyncClose();
+        }
+        remove
+        {
+            closeRequested -= value;
+            SyncClose();
+        }
+    }
+
+    /// <summary>能关闭（订阅了 <see cref="CloseRequested"/>）。</summary>
+    internal bool IsClosable => closeRequested is not null;
+
+    /// <summary>关闭按钮（测试用）；没有订阅时为 null。</summary>
+    internal CloseButtonControl? CloseButton => close;
+
+    /// <summary>拖动排序中：文字淡一些（同上游的 0.6 不透明度）。</summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    internal bool IsDragging
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            OnForeColorChanged(EventArgs.Empty);
+            Invalidate(true);
+        }
+    }
+
+    /// <summary>读屏、菜单里的文字：Text，没有时子控件的文字，再没有时是值。</summary>
+    internal string Label => Text is { Length: > 0 } text ? text
+        : string.Join(" ", Controls.Cast<Control>().Where(child => child != close && child != label).Select(child => child.Text).Where(text => text.Length > 0)) is { Length: > 0 } inner ? inner
+        : Value ?? "";
+
     /// <summary>跟着 TabsControl 的选中值与样式。</summary>
     internal void Apply(TabsControl tabs, bool selected)
     {
@@ -54,7 +100,9 @@ public class TabItemControl : FlexControl
         var vertical = tabs.Orientation == TabsOrientation.Vertical;
         // line：底边（竖排时结束边）留 2 像素给指示条
         var bar = line ? LogicalToDeviceUnits(2) : 0;
-        Padding = vertical ? new Padding(inline, 0, inline + bar, 0) : new Padding(inline, 0, inline, bar);
+        // 可关闭：结束端给关闭按钮留出 1.25em
+        var end = inline + (IsClosable ? (int)MathF.Round(1.25f * em) : 0);
+        Padding = vertical ? new Padding(inline, 0, end + bar, 0) : new Padding(inline, 0, end, bar);
         MinimumSize = new Size(0, (int)MathF.Ceiling(ControlHeight.Of(ElementContext.Of(this), em, Tokens.Size.Control)));
         Justify = vertical ? FlexJustify.Start : FlexJustify.Center;
         ForeColor = Color.Empty;
@@ -67,7 +115,8 @@ public class TabItemControl : FlexControl
         get
         {
             var colors = ProviderControl.ThemeOf(this).Colors;
-            return IsSelected || hovered ? colors.Text : colors.TextMuted;
+            var color = IsSelected || hovered ? colors.Text : colors.TextMuted;
+            return IsDragging ? Color.FromArgb((int)(0.6f * color.A), color) : color;
         }
         set => base.ForeColor = value;
     }
@@ -76,10 +125,16 @@ public class TabItemControl : FlexControl
     protected override void OnControlAdded(ControlEventArgs e)
     {
         base.OnControlAdded(e);
-        // 里面的文字、计数也算标签的一部分：点它们同点标签
-        e.Control!.MouseClick += (_, args) => OnMouseClick(args);
-        e.Control.MouseEnter += (_, _) => SetHovered(true);
-        e.Control.MouseLeave += (_, _) => SetHovered(ClientRectangle.Contains(PointToClient(Cursor.Position)));
+        if (e.Control == close) return;
+        // 里面的文字、计数也算标签的一部分：点它们同点标签，按下、拖动同在标签上（拖动排序）
+        var child = e.Control!;
+        MouseEventArgs Translate(MouseEventArgs args) => new(args.Button, args.Clicks, args.X + child.Left, args.Y + child.Top, args.Delta);
+        child.MouseClick += (_, args) => OnMouseClick(Translate(args));
+        child.MouseDown += (_, args) => OnMouseDown(Translate(args));
+        child.MouseMove += (_, args) => OnMouseMove(Translate(args));
+        child.MouseUp += (_, args) => OnMouseUp(Translate(args));
+        child.MouseEnter += (_, _) => SetHovered(true);
+        child.MouseLeave += (_, _) => SetHovered(ClientRectangle.Contains(PointToClient(Cursor.Position)));
     }
 
     void SetHovered(bool value)
@@ -109,6 +164,87 @@ public class TabItemControl : FlexControl
     {
         base.OnMouseClick(e);
         if (e.Button == MouseButtons.Left) Activate();
+        // 鼠标中键关闭（同浏览器的标签页）
+        else if (e.Button == MouseButtons.Middle) RequestClose();
+    }
+
+    /// <summary>订阅了关闭就放上关闭按钮，退订了就拿掉。</summary>
+    void SyncClose()
+    {
+        if (closeRequested is null)
+        {
+            if (close is null) return;
+            Controls.Remove(close);
+            close.Dispose();
+            close = null;
+            if (owner is not null) Apply(owner, IsSelected);
+            return;
+        }
+        if (close is not null) return;
+        close = new TabCloseButtonControl { Radius = Radius.Full, TextSize = TextSize.Xs };
+        close.Click += (_, _) => RequestClose();
+        Controls.Add(close);
+        SetOverlay(close, true);
+        UpdateCloseLabel();
+        if (owner is not null) Apply(owner, IsSelected);
+        PerformLayout();
+    }
+
+    /// <summary>Text 由里面的一个文字控件显示（排在子控件的最前面）；没有文字时拿掉。</summary>
+    void SyncLabel()
+    {
+        if (Text.Length == 0)
+        {
+            if (label is null) return;
+            Controls.Remove(label);
+            label.Dispose();
+            label = null;
+            return;
+        }
+        if (label is null)
+        {
+            label = new TextControl();
+            Controls.Add(label);
+            Controls.SetChildIndex(label, 0);
+        }
+        label.Text = Text;
+    }
+
+    void UpdateCloseLabel()
+    {
+        if (close is not null) close.AccessibleName = ProviderControl.LangOf(this).TabClose(Label);
+    }
+
+    /// <inheritdoc />
+    protected override void OnTextChanged(EventArgs e)
+    {
+        base.OnTextChanged(e);
+        SyncLabel();
+        UpdateCloseLabel();
+        (Parent as TabListControl)?.SyncMenuItems();
+    }
+
+    /// <summary>
+    /// 关闭按钮叠在结束端，看得见的按钮离边 space.xs（按钮自己的字号），竖直居中。按钮四周留着画焦点环的 Padding（同 TagControl 的移除按钮），
+    /// 控件比看得见的按钮大一圈。
+    /// </summary>
+    protected override void OnLayout(LayoutEventArgs levent)
+    {
+        base.OnLayout(levent);
+        if (close is null) return;
+        var ring = close.Padding;
+        var size = close.GetPreferredSize(Size.Empty) - ring.Size;
+        var margin = (int)MathF.Round(0.25f * close.Font.SizeInPoints * DeviceDpi / 72f);
+        var bar = owner?.Variant != TabsVariant.Soft && owner?.Orientation == TabsOrientation.Vertical ? LogicalToDeviceUnits(2) : 0;
+        var left = Width - bar - margin - size.Width;
+        var top = (Height - size.Height) / 2;
+        close.SetBounds(left - ring.Left, top - ring.Top, size.Width + ring.Horizontal, size.Height + ring.Vertical);
+    }
+
+    /// <summary>请求关闭（不可用时不关）。</summary>
+    internal void RequestClose()
+    {
+        if (closeRequested is not null && Enabled) closeRequested.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>切到这个标签：先发 <see cref="TabClick"/>（设 Cancel 拦下），不可用时不切。</summary>
@@ -128,6 +264,13 @@ public class TabItemControl : FlexControl
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
+        // Delete 关闭（TS 的 aria-keyshortcuts="Delete"）
+        if (e.KeyData == Keys.Delete && IsClosable)
+        {
+            RequestClose();
+            e.Handled = true;
+            return;
+        }
         if (e.KeyCode is not (Keys.Enter or Keys.Space)) return;
         Activate();
         e.Handled = true;
@@ -182,6 +325,8 @@ public class TabItemControl : FlexControl
 
         public override string DefaultAction => "切换";
 
+        public override string? KeyboardShortcut => owner.IsClosable ? "Delete" : base.KeyboardShortcut;
+
         public override void DoDefaultAction() => owner.Activate();
     }
 }
@@ -191,4 +336,14 @@ public sealed class TabClickEventArgs : EventArgs
 {
     /// <summary>拦下这次切换。</summary>
     public bool Cancel { get; set; }
+}
+
+/// <summary>标签的关闭按钮：不能聚焦（按下时焦点留在原处，不进 Tab 顺序）。</summary>
+sealed class TabCloseButtonControl : CloseButtonControl
+{
+    public TabCloseButtonControl()
+    {
+        SetStyle(ControlStyles.Selectable, false);
+        TabStop = false;
+    }
 }

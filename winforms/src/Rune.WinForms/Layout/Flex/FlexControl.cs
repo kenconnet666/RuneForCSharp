@@ -21,6 +21,7 @@ public class FlexControl : Panel, IExtenderProvider
 {
     readonly FlexEngine engine;
     readonly HashSet<Control> growing = [];
+    readonly HashSet<Control> overlays = [];
     readonly Dictionary<Control, FlexAlign> selfAligns = [];
 
     /// <summary>新建：自动大小。</summary>
@@ -136,6 +137,14 @@ public class FlexControl : Panel, IExtenderProvider
         if (value ? growing.Add(control) : growing.Remove(control)) PerformLayout();
     }
 
+    /// <summary>子控件不参加排列（CSS 的绝对定位）：叠在上面，由主人自己摆（标签的关闭按钮、标签栏的按钮）。</summary>
+    /// <param name="control">子控件。</param>
+    /// <param name="value">不参加排列。</param>
+    internal void SetOverlay(Control control, bool value)
+    {
+        if (value ? overlays.Add(control) : overlays.Remove(control)) PerformLayout();
+    }
+
     /// <summary>子控件自己的交叉轴对齐（CSS 的 align-self），盖过 Align；没写时是控件自己带的（<see cref="IFlexItem"/>）。</summary>
     /// <param name="control">子控件。</param>
     [DisplayName("AlignSelf")]
@@ -161,6 +170,7 @@ public class FlexControl : Panel, IExtenderProvider
     {
         base.OnControlRemoved(e);
         growing.Remove(e.Control!);
+        overlays.Remove(e.Control!);
         selfAligns.Remove(e.Control!);
     }
 
@@ -198,7 +208,7 @@ public class FlexControl : Panel, IExtenderProvider
             }
         }
 
-        List<Control> Shown() => [.. owner.Controls.Cast<Control>().Where(child => child.Visible || !owner.Visible)];
+        List<Control> Shown() => [.. owner.Controls.Cast<Control>().Where(child => (child.Visible || !owner.Visible) && !owner.overlays.Contains(child))];
 
         /// <summary>
         /// 子控件在主轴上给了 main 时的大小（自动大小的按宽度取高度；main 为无穷时是自然大小），夹在它的最小、最大尺寸之间

@@ -257,6 +257,12 @@ export const PLATFORM_PROPS_NOT_PORTED = {
       ...Object.fromEntries(['propsTrigger', 'propsInput', 'propsListbox'].map((prop) => [prop, '默认触发按钮、搜索框、列表是 CommandPaletteControl 组合的子控件，没有部件属性记录'])),
     },
     Tag: { propsRemove: '移除按钮是 CloseButtonControl 子控件，颜色、字号跟着标签；没有部件属性记录' },
+    Tab: { propsClose: '关闭按钮是 TabItemControl 里的 CloseButtonControl 子控件（xs、圆形），没有部件属性记录' },
+    TabList: {
+      propsIndicator: '分隔线与指示条是 TabListControl 自己画的，没有可改的部件',
+      propsBar: '标签栏就是 TabListControl 自己（横排时自己排滚动按钮、列表、菜单与新建按钮），没有另一层',
+      ...Object.fromEntries(['propsAdd', 'propsScrollButton'].map((prop) => [prop, '新建、滚动按钮是 TabListControl 建的 IconButtonControl 子控件，外观走 ProviderControl 的组件定制，没有部件属性记录'])),
+    },
     Popover: { propsArrow: '面板、阴影与箭头是组件库画在分层窗口上的位图，箭头没有可改样式的部件' },
     Listbox: Object.fromEntries(
       ['empty', 'propsOption', 'propsGroupLabel', 'propsCheck', 'propsEmpty', 'propsSkeleton']
