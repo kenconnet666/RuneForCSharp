@@ -23,6 +23,21 @@ public class FieldTests
     static Point Offset(Control control, Control ancestor) => ancestor.PointToClient(control.PointToScreen(Point.Empty));
 
     [Fact]
+    [Upstream("Field", "控件自己写了 id：标签的 for 跟着指向它；控件自己的 aria-describedby 与 Field 的说明拼在一起")]
+    [Upstream("Field", "不在 Field 里：控件上写的 aria-describedby 照常落到 input")]
+    public Task Text_fields_in_a_field_are_described_by_it() => WinFormsUi.Run(() =>
+    {
+        var inside = new TextFieldControl { Name = "phone" };
+        var field = new FieldControl { Label = "联系电话", Description = "只用于送货", Content = inside, Dock = DockStyle.Top };
+        var outside = new TextFieldControl { Dock = DockStyle.Top };
+        using var form = WinFormsUi.Show(field, outside);
+
+        Assert.Equal("联系电话", inside.AccessibilityObject.Name); // 控件自己有名字时标签照样指向它
+        Assert.Equal("只用于送货", inside.AccessibilityObject.Help);
+        Assert.Null(outside.AccessibilityObject.Help);
+    });
+
+    [Fact]
     [Upstream("Field", "标签的 for 指向控件")]
     public Task Label_description_and_error_are_tied_to_the_control() => WinFormsUi.Run(() =>
     {

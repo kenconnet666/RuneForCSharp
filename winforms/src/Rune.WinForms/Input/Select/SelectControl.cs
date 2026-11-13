@@ -618,6 +618,8 @@ public class SelectControl : FlexControl, IFieldControl
     /// <summary>读屏：组合框（展开、收起），值是全部已选的文字；没写名称时取所在字段的标签。</summary>
     sealed class SelectAccessibleObject(SelectControl owner) : ControlAccessibleObject(owner)
     {
+        public override string? Help => FieldControl.DescribedBy(owner, base.Help);
+
         public override string? Name => owner.AccessibleName is { Length: > 0 } name ? name : FieldControl.Of(owner) is { } scope && scope.Owns(owner) ? scope.Label : null;
 
         public override AccessibleRole Role => AccessibleRole.ComboBox;

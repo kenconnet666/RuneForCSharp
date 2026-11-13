@@ -335,6 +335,8 @@ public class ToggleGroupControl : FlexControl, IFieldControl
 
     sealed class GroupAccessibleObject(ToggleGroupControl owner) : ControlAccessibleObject(owner)
     {
+        public override string? Help => FieldControl.DescribedBy(owner, base.Help);
+
         public override string? Name => base.Name is { Length: > 0 } name ? name : FieldControl.Of(owner) is { } scope && scope.Owns(owner) ? scope.Label : null;
     }
 }

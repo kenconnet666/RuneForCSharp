@@ -210,7 +210,7 @@ public abstract class ChoiceGroupControl : FlexControl, IFieldControl
             set => base.Name = value;
         }
 
-        public override string? Help => base.Help ?? FieldControl.Of(owner)?.HelpText;
+        public override string? Help => FieldControl.DescribedBy(owner, base.Help);
     }
 }
 

@@ -294,6 +294,8 @@ public abstract class TextInputControl : FlexControl, IFieldControl
 
     sealed class FieldAccessibleObject(TextInputControl owner) : ControlAccessibleObject(owner)
     {
+        public override string? Help => FieldControl.DescribedBy(owner, base.Help);
+
         // 平台默认的名称取 Text，这里的 Text 是输入的值：只认 AccessibleName，没有时是字段的标签
         public override string? Name => owner.AccessibleName is { Length: > 0 } name ? name : FieldControl.Of(owner) is { } scope && scope.Owns(owner) ? scope.Label : null;
 

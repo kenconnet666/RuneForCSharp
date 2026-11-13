@@ -312,6 +312,8 @@ public class Listbox : Control, IFieldControl
     /// <summary>读屏：列表（能多选、必选）；没写名称时取所在字段的标签。</summary>
     sealed class ListboxPeer(Listbox owner) : ControlAutomationPeer(owner), ISelectionProvider
     {
+        protected override string? GetHelpTextCore() => Field.DescribedBy(owner, base.GetHelpTextCore());
+
         protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.List;
 
         protected override string GetClassNameCore() => nameof(Listbox);

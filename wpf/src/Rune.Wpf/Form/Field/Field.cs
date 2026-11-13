@@ -203,6 +203,18 @@ public class Field : Control
     /// <summary>控件是不是认领了标签的那个（第一个接入的）。</summary>
     internal bool Owns(IFieldControl control) => Controls().FirstOrDefault() == control;
 
+    /// <summary>
+    /// 控件读屏的帮助文字（上游的 aria-describedby，各层拼在一起、重复的只留一份）：所在字段的说明与错误（认领标签的控件才有），
+    /// 再接控件自己的（勾选项的说明、使用方写的 HelpText）。不在字段里时只有自己的；什么都没有时是空字符串（UIA 的约定）。
+    /// </summary>
+    /// <param name="control">接入字段的控件。</param>
+    /// <param name="own">控件自己的帮助文字。</param>
+    internal static string DescribedBy(IFieldControl control, params string?[] own)
+    {
+        var field = control is DependencyObject element && Of(element) is { } owner && owner.Owns(control) ? owner.HelpText : null;
+        return string.Join(" ", own.Prepend(field).Where(HasText).Distinct());
+    }
+
     /// <summary>元素所在的字段；不在字段里时为 null。</summary>
     internal static Field? Of(DependencyObject element) => element.GetValue(OwnerProperty) is Field field && field != element ? field : null;
 

@@ -64,6 +64,19 @@ public class ListboxTests
     }
 
     [Fact]
+    [Upstream("Listbox", "不可用：点选项不改值，也不触发 onPick")]
+    public Task Disabled_listboxes_ignore_picks() => HeadlessUi.Run(() =>
+    {
+        var picks = 0;
+        var listbox = new Listbox { ItemsSource = Fruits, Value = "cherry", IsEnabled = false };
+        listbox.Picked += (_, _) => picks++;
+        HeadlessUi.Show(listbox);
+
+        listbox.Pick("apple");
+        Assert.Equal(("cherry", 0), (listbox.Value, picks));
+    });
+
+    [Fact]
     [Upstream("Listbox", "role=")]
     public Task Focus_highlights_the_selection_and_keys_move_and_select() => HeadlessUi.Run(() =>
     {

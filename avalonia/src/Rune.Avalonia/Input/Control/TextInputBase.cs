@@ -157,10 +157,12 @@ public abstract class TextInputBase : TextBox, IFieldControl
     /// <inheritdoc />
     protected override AutomationPeer OnCreateAutomationPeer() => new TextInputPeer(this);
 
-    /// <summary>读屏：类名是组件名；没写名称时取所在字段的标签。</summary>
+    /// <summary>读屏：类名是组件名；没写名称时取所在字段的标签；帮助文字拼上字段的说明与错误。</summary>
     sealed class TextInputPeer(TextInputBase owner) : TextBoxAutomationPeer(owner)
     {
         protected override string GetClassNameCore() => owner.GetType().Name;
+
+        protected override string? GetHelpTextCore() => Field.DescribedBy(owner, base.GetHelpTextCore());
 
         protected override string? GetNameCore() =>
             base.GetNameCore() is { Length: > 0 } name ? name : Field.Of(owner) is { } field && field.Owns(owner) ? field.LabelText : null;

@@ -211,6 +211,8 @@ public abstract class TextInputBase : TextBox, IFieldControl
     /// <summary>读屏：类名是组件名；没写名称时取所在字段的标签。</summary>
     sealed class TextInputPeer(TextInputBase owner) : TextBoxAutomationPeer(owner)
     {
+        protected override string GetHelpTextCore() => Field.DescribedBy(owner, base.GetHelpTextCore());
+
         protected override string GetClassNameCore() => owner.GetType().Name;
 
         protected override string GetNameCore() =>

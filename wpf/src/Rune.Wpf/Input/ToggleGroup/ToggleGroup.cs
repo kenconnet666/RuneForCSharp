@@ -229,6 +229,8 @@ public class ToggleGroup : Flex, IFieldControl
 
     sealed class ToggleGroupPeer(ToggleGroup owner) : FrameworkElementAutomationPeer(owner)
     {
+        protected override string GetHelpTextCore() => Field.DescribedBy(owner, base.GetHelpTextCore());
+
         protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Group;
 
         protected override string GetClassNameCore() => nameof(ToggleGroup);

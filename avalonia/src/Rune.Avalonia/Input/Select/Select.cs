@@ -545,6 +545,8 @@ public class Select : TemplatedControl, IFieldControl
     /// <summary>读屏：组合框（展开、收起），值是全部已选的文字；没写名称时取所在字段的标签。</summary>
     sealed class SelectPeer(Select owner) : ControlAutomationPeer(owner), IExpandCollapseProvider, IValueProvider
     {
+        protected override string? GetHelpTextCore() => Field.DescribedBy(owner, base.GetHelpTextCore());
+
         protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.ComboBox;
 
         protected override string GetClassNameCore() => nameof(Select);

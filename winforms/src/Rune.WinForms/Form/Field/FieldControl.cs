@@ -166,6 +166,19 @@ public class FieldControl : Panel
     /// <summary>控件是不是认领了标签的那个（第一个接入的）。</summary>
     internal bool Owns(IFieldControl control) => FieldControls().FirstOrDefault() == control;
 
+    /// <summary>
+    /// 控件读屏的帮助文字（上游的 aria-describedby，各层拼在一起、重复的只留一份）：所在字段的说明与错误（认领标签的控件才有），
+    /// 再接控件自己的（勾选项的说明、平台给的 Help）。不在字段里时只有自己的。
+    /// </summary>
+    /// <param name="control">接入字段的控件。</param>
+    /// <param name="own">控件自己的帮助文字。</param>
+    internal static string? DescribedBy(Control control, params string?[] own)
+    {
+        var field = control is IFieldControl fieldControl && Of(control) is { } owner && owner.Owns(fieldControl) ? owner.HelpText : null;
+        var parts = own.Prepend(field).Where(HasText).Distinct().ToArray();
+        return parts.Length > 0 ? string.Join(" ", parts) : null;
+    }
+
     /// <summary>控件所在的字段：沿 Parent 链往外找；不在字段里时为 null。</summary>
     internal static FieldControl? Of(Control control)
     {

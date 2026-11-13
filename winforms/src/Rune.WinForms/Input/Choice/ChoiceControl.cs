@@ -184,7 +184,7 @@ public abstract class ChoiceControl<T> : ElementControl<T>, IFieldControl where 
         }
 
         /// <inheritdoc />
-        public override string? Help => base.Help ?? (owner.Element.DescriptionPart.Content is { Length: > 0 } own ? own : owner.Element.Field?.HelpText);
+        public override string? Help => FieldControl.DescribedBy(owner, owner.Element.DescriptionPart.Content, base.Help);
 
         /// <inheritdoc />
         public override AccessibleStates State

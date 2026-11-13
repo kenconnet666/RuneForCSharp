@@ -350,6 +350,8 @@ public class ListboxControl : Control, IFieldControl
     /// <summary>读屏：列表（名称没写时取字段的标签），子节点是每个选项（选中、不可用、高亮时有焦点）。</summary>
     sealed class ListboxAccessibleObject(ListboxControl owner) : ControlAccessibleObject(owner)
     {
+        public override string? Help => FieldControl.DescribedBy(owner, base.Help);
+
         public override string? Name => owner.AccessibleName is { Length: > 0 } name ? name : FieldControl.Of(owner) is { } scope && scope.Owns(owner) ? scope.Label : null;
 
         public override AccessibleRole Role => AccessibleRole.List;

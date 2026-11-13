@@ -472,8 +472,7 @@ public abstract class ChoiceBase : Control, IFieldControl
             : owner.Content as string ?? (owner.FieldOwner is { } field && field.Owns(owner) ? field.LabelText : null) ?? "";
 
         /// <inheritdoc />
-        protected override string GetHelpTextCore() =>
-            base.GetHelpTextCore() is { Length: > 0 } help ? help : owner.GetValue(DescriptionCoreProperty) as string ?? owner.FieldOwner?.HelpText ?? "";
+        protected override string GetHelpTextCore() => Field.DescribedBy(owner, owner.GetValue(DescriptionCoreProperty) as string, base.GetHelpTextCore());
 
         /// <inheritdoc />
         protected override bool IsRequiredForFormCore() => owner.Required;

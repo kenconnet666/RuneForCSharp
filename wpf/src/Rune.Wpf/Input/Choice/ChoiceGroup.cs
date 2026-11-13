@@ -194,7 +194,7 @@ public abstract class ChoiceGroup : ItemsControl, IFieldControl
         protected override string GetNameCore() =>
             base.GetNameCore() is { Length: > 0 } name ? name : (Field.Of(owner) is { } field && field.Owns(owner) ? field.LabelText : null) ?? "";
 
-        protected override string GetHelpTextCore() => base.GetHelpTextCore() is { Length: > 0 } help ? help : Field.Of(owner)?.HelpText ?? "";
+        protected override string GetHelpTextCore() => Field.DescribedBy(owner, base.GetHelpTextCore());
 
         protected override string GetClassNameCore() => owner.GetType().Name;
     }

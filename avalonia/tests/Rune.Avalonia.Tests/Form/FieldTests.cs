@@ -15,6 +15,23 @@ namespace Rune.Avalonia.Tests;
 public class FieldTests
 {
     [Fact]
+    [Upstream("Field", "控件自己写了 id：标签的 for 跟着指向它；控件自己的 aria-describedby 与 Field 的说明拼在一起")]
+    [Upstream("Field", "不在 Field 里：控件上写的 aria-describedby 照常落到 input")]
+    public Task The_control_s_own_help_joins_the_field_description() => HeadlessUi.Run(() =>
+    {
+        var inside = new TextField { Name = "phone" };
+        AutomationProperties.SetHelpText(inside, "填手机号");
+        var field = new Field { Label = "联系电话", Description = "只用于送货", Content = inside };
+        var outside = new TextField();
+        AutomationProperties.SetHelpText(outside, "填手机号");
+        HeadlessUi.Show(new StackPanel { Children = { field, outside } });
+
+        Assert.Equal("联系电话", inside.Peer().GetName()); // 控件自己有名字（id）时标签照样指向它
+        Assert.Equal("只用于送货 填手机号", inside.Peer().GetHelpText());
+        Assert.Equal("填手机号", outside.Peer().GetHelpText());
+    });
+
+    [Fact]
     [Upstream("Field", "标签的 for 指向控件")]
     public Task Label_description_and_error_are_tied_to_the_control() => HeadlessUi.Run(() =>
     {
