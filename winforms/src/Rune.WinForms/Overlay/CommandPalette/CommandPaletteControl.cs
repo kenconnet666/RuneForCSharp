@@ -281,15 +281,7 @@ public class CommandPaletteControl : Control
     /// <returns>是快捷键。</returns>
     internal bool OnHotkey(Keys keyData, bool win = false)
     {
-        if (Hotkey is not { } combo) return false;
-        var code = keyData & Keys.KeyCode;
-        var name = code switch
-        {
-            >= Keys.A and <= Keys.Z => code.ToString(),
-            >= Keys.D0 and <= Keys.D9 => ((char)('0' + (code - Keys.D0))).ToString(),
-            _ => code.ToString(),
-        };
-        if (!global::Rune.WinForms.Hotkey.Parse(combo).Matches(keyData.HasFlag(Keys.Control), keyData.HasFlag(Keys.Shift), keyData.HasFlag(Keys.Alt), win, name)) return false;
+        if (Hotkey is not { } combo || !global::Rune.WinForms.Hotkey.Parse(combo).Matches(keyData, win)) return false;
         SetOpen(!open, OpenChangeReason.Imperative);
         return true;
     }

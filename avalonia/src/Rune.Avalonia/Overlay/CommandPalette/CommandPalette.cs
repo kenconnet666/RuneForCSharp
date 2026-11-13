@@ -311,16 +311,7 @@ public class CommandPalette : Control
     /// <summary>窗口里按了快捷键：开关面板。</summary>
     void OnHostKeyDown(object? sender, KeyEventArgs e)
     {
-        if (Hotkey is not { } combo || e.Handled) return;
-        var name = e.Key switch
-        {
-            >= Key.A and <= Key.Z => e.Key.ToString(),
-            >= Key.D0 and <= Key.D9 => ((char)('0' + (e.Key - Key.D0))).ToString(),
-            _ => e.Key.ToString(),
-        };
-        var modifiers = e.KeyModifiers;
-        if (!global::Rune.Avalonia.Hotkey.Parse(combo).Matches(modifiers.HasFlag(KeyModifiers.Control), modifiers.HasFlag(KeyModifiers.Shift),
-                modifiers.HasFlag(KeyModifiers.Alt), modifiers.HasFlag(KeyModifiers.Meta), name)) return;
+        if (Hotkey is not { } combo || e.Handled || !global::Rune.Avalonia.Hotkey.Parse(combo).Matches(e.Key, e.KeyModifiers)) return;
         e.Handled = true;
         SetOpen(!IsOpen, OpenChangeReason.Imperative);
     }

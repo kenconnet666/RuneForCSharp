@@ -326,15 +326,7 @@ public class CommandPalette : FrameworkElement
     /// <returns>是快捷键。</returns>
     internal bool OnHotkey(Key key, ModifierKeys modifiers)
     {
-        if (Hotkey is not { } combo) return false;
-        var name = key switch
-        {
-            >= Key.A and <= Key.Z => key.ToString(),
-            >= Key.D0 and <= Key.D9 => ((char)('0' + (key - Key.D0))).ToString(),
-            _ => key.ToString(),
-        };
-        if (!global::Rune.Wpf.Hotkey.Parse(combo).Matches(modifiers.HasFlag(ModifierKeys.Control), modifiers.HasFlag(ModifierKeys.Shift),
-                modifiers.HasFlag(ModifierKeys.Alt), modifiers.HasFlag(ModifierKeys.Windows), name)) return false;
+        if (Hotkey is not { } combo || !global::Rune.Wpf.Hotkey.Parse(combo).Matches(key, modifiers)) return false;
         SetOpen(!IsOpen, OpenChangeReason.Imperative);
         return true;
     }
