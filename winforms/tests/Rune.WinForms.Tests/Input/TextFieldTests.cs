@@ -7,6 +7,16 @@ namespace Rune.WinForms.Tests;
 public class TextFieldTests
 {
     [Fact]
+    public void Soft_shells_darken_on_hover_and_read_only_stays_fill()
+    {
+        var colors = RuneTheme.Current.Value.Colors;
+        Assert.Equal(colors.FillHover, ControlShell.Fill(colors, ControlVariant.Soft, readOnly: false, hovered: true));
+        Assert.Equal(colors.Fill, ControlShell.Fill(colors, ControlVariant.Soft, readOnly: false, hovered: false));
+        Assert.Equal(colors.Fill, ControlShell.Fill(colors, ControlVariant.Soft, readOnly: true, hovered: true));
+        Assert.Equal(colors.Surface, ControlShell.Fill(colors, ControlVariant.Surface, readOnly: false, hovered: true));
+    }
+
+    [Fact]
     [Upstream("TextField", "未声明的属性落到 input；外壳用 propsRoot；清空后写回并聚焦 input")]
     public Task Clearing_writes_back_an_empty_string_and_focuses_the_input() => WinFormsUi.Run(() =>
     {

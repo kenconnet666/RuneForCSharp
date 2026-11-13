@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Automation.Peers;
 using Avalonia.Automation.Provider;
 using Avalonia.Controls;
@@ -11,6 +12,18 @@ namespace Rune.Avalonia.Tests;
 /// </summary>
 public class TextFieldTests
 {
+    [Fact]
+    public Task Soft_fields_darken_on_hover() => HeadlessUi.Run(() =>
+    {
+        var soft = new TextField { Variant = ControlVariant.Soft, Width = 200 };
+        var window = HeadlessUi.Show(new StackPanel { Children = { soft } });
+        Assert.Equal(soft.ThemeColor("Rune.Brush.Fill"), Lookup.ColorOf(soft.Background));
+
+        global::Avalonia.Headless.HeadlessWindowExtensions.MouseMove(window, soft.TranslatePoint(new global::Avalonia.Point(5, 5), window)!.Value);
+        HeadlessUi.Flush(window);
+        Assert.Equal(soft.ThemeColor("Rune.Brush.FillHover"), Lookup.ColorOf(soft.Background)); // 没有描边可变：底色加深一档
+    });
+
     static T Part<T>(Control owner, string name) where T : Control => owner.GetVisualDescendants().OfType<T>().First(part => part.Name == name);
 
     static void Invoke(Control control) => ((IInvokeProvider)control.Peer()).Invoke();

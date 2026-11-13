@@ -36,6 +36,8 @@
       <Setter Property="BorderBrush" Value="Transparent" />
       <Setter Property="Background" Value="{DynamicResource Rune.Brush.Fill}" />
     </Style>
+    <!-- soft 没有描边可变：悬停时底色加深一档（只读的底色在下面，盖过它） -->
+    <Style Selector="^:soft:pointerover"><Setter Property="Background" Value="{DynamicResource Rune.Brush.FillHover}" /></Style>
     <Style Selector="^:readonly">
       <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
       <Setter Property="Background" Value="{DynamicResource Rune.Brush.Fill}" />

@@ -13,7 +13,9 @@ static class ControlShell
     /// <param name="colors">主题的颜色。</param>
     /// <param name="variant">样式。</param>
     /// <param name="readOnly">只读。</param>
-    public static Color Fill(ThemeColors colors, ControlVariant variant, bool readOnly) => variant == ControlVariant.Soft || readOnly ? colors.Fill : colors.Surface;
+    /// <param name="hovered">指针在上面：soft 没有描边可变，底色加深一档（只读不变）。</param>
+    public static Color Fill(ThemeColors colors, ControlVariant variant, bool readOnly, bool hovered = false) =>
+        readOnly ? colors.Fill : variant == ControlVariant.Soft ? hovered ? colors.FillHover : colors.Fill : colors.Surface;
 
     /// <summary>左右 space.md 的内边距、控件高度的最小尺寸。</summary>
     /// <param name="host">外壳。</param>
@@ -52,7 +54,7 @@ static class ControlShell
         graphics.PixelOffsetMode = PixelOffsetMode.Half;
         var corner = Math.Min((radius.In(theme.Radii) ?? 0) * em, height / 2f);
         using (var path = Drawing.RoundedRectangle(new RectangleF(0, 0, width, height), corner))
-        using (var fill = new SolidBrush(Fill(colors, variant, state.ReadOnly)))
+        using (var fill = new SolidBrush(Fill(colors, variant, state.ReadOnly, state.Hovered)))
             graphics.FillPath(fill, path);
         var line = host.LogicalToDeviceUnits(1);
         Color? border = state.Invalid ? colors.Danger : state.ReadOnly ? colors.BorderMuted : variant == ControlVariant.Soft ? null : state.Hovered ? colors.BorderStrong : colors.Border;
