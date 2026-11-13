@@ -595,10 +595,25 @@ sealed class ListboxView : Control, IElementHost
     /// <summary>指针所在的选项（组名、空白处为空）。</summary>
     ListboxOption? OptionAt(Point point) => rows.FirstOrDefault(row => point.Y >= row.Top && point.Y < row.Top + row.Height).Option?.Option;
 
+    /// <summary>
+    /// 上一次指针移动时的屏幕位置。列表出现在不动的指针下面时系统也补发一次移动：那次不抢键盘的高亮（同 Radix Select），
+    /// 否则一打开下拉、命令面板，高亮就跳到指针碰巧停着的那项。
+    /// </summary>
+    Point lastPointer;
+
+    /// <inheritdoc />
+    protected override void OnVisibleChanged(EventArgs e)
+    {
+        base.OnVisibleChanged(e);
+        if (Visible) lastPointer = MousePosition;
+    }
+
     /// <summary>指针移过：高亮（不可用的不高亮）。</summary>
     protected override void OnMouseMove(MouseEventArgs e)
     {
         base.OnMouseMove(e);
+        if (MousePosition == lastPointer) return;
+        lastPointer = MousePosition;
         if (OptionAt(e.Location) is { IsDisabled: false } option && owner.State.Active != option.Value) owner.State.SetActive(option.Value);
     }
 
