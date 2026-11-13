@@ -262,7 +262,7 @@ QueryTable、ErrorBoundary、JsonViewer、ImageCropper、QuarterCalendar、Carou
 锁定跟到 e18a29a6（含 P12 第二批，7c019043 还在跑）：生成文件没变；parity 的 TabList 多缺一个 propsScrollButton（同上，等滚动按钮），行为对照 204 条、66 条没对上（并进整理）。
 
 跟进（2026-11-08，锁定 d99ab483）：三个平台做了 UserButton（TS 的 name、src 叫 DisplayName、Source，`indicator={false}` 是 ShowIndicator=False）与 Avatar 页的 user-button 示例（账号菜单等 Menu），
-测试对上前三条用例，第四条（菜单的触发器）等 Menu。Avalonia、WPF 建在 ButtonBase 上、内容在代码里组合（WPF 的部件是 PartKey 样式键）；WinForms 建在按钮内核上（ghost、neutral），
+测试对上前三条用例，第四条（菜单的触发器）2026-11-14 随 Menu 补上（触发器的读屏报有弹出、展开 / 收起）。Avalonia、WPF 建在 ButtonBase 上、内容在代码里组合（WPF 的部件是 PartKey 样式键）；WinForms 建在按钮内核上（ghost、neutral），
 内核加了 DefaultRadius 与两边可以不同的内边距。取值对照里只差上游 compact、整行的内边距（见上游问题 #5）；inspect 的部件归属改成往上找声明了这个部件名的组件，越过组件内部组合用的 Flex。
 
 ### 第二十二批（2026-11-08 通知，master d99ab483：Countdown 的数字块外观；f98eb920 是文档）
@@ -277,11 +277,11 @@ QueryTable、ErrorBoundary、JsonViewer、ImageCropper、QuarterCalendar、Carou
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
 | NavList、NavItem、NavGroup、NavSection 共用配方 navListRecipe，部件 root、list、item、link、icon、label、badge、group、trigger、chevron、groupList、flyout、section、sectionLabel、sectionIcon、sectionText（f4065afc） | 外观不变；inspect 的部件名对不上了 | 已跟：inspect 把 NavRow、NavItem、NavGroupHeader、NavGroup、NavSection 归到 nav-list（NavItem 是 link、NavGroup 是 group、NavSection 是 section，分组的列表是 groupList，小节的标题行、图标、文字是 sectionLabel、sectionIcon、sectionText）；WPF 的 NavRowParts 补上 Chevron 的名字 |
-| Menu 配方（档位 size，部件 panel、content、item……）、Toaster 配方（档位 placement、max、stack、progress） | 还没做 | 做时照新的 |
+| Menu 配方（档位 size，部件 panel、content、item……）、Toaster 配方（档位 placement、max、stack、progress） | Menu 已做；Toaster 还没做 | Menu 2026-11-14 照新的（Size 档位，部件见 MenuParts、MenuItemBaseParts）；Toaster 做时照新的 |
 | AppShell 配方：档位 sidebarCollapsible、fullscreenable、skipLink、pageScrollbar 可在 components.AppShell 给默认，22 个部件（5785adb4） | 档位已有；部件名还没逐个对 | 跟 AppShell 的 admin、mixed 示例时对部件 |
 | Transfer 配方（68ef26a9） | 还没做 | 做时照新的 |
 | Text 截断与换行补一张 wrap="pretty" 的卡片，四张两行两列（aecc847d） | 三个平台的示例 | 已跟：加了第四张（桌面上 Pretty 同普通换行） |
-| Select、Upload 两列示例挪齐（f3ea7cda）；Menu 右键菜单示例改用 RadioGroup 卡片（26187227） | Select 的示例已对过；Menu 还没做 | 不涉及 / 做 Menu 时照新的 |
+| Select、Upload 两列示例挪齐（f3ea7cda）；Menu 右键菜单示例改用 RadioGroup 卡片（26187227） | Select 的示例已对过；Menu 已做 | 不涉及 / 右键菜单示例照新的用 RadioGroup 卡片 |
 
 锁定跟到 68ef26a9：生成文件没变，parity、行为对照都没变。对照中发现并修了：
 ts-styles 记了 display: none 的元素（NavList 紧凑时没打开的弹出卡片），按序号配对全错了位——现在跳过没渲染的元素（同 inspect 不记看不见的）；
@@ -474,7 +474,7 @@ Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_
 | 阶段 3：焦点环新增 inset（画在里面）、virtual（aria-activedescendant 的当前项常亮） | 我们的焦点环在 ButtonBase 里，只有外扩一种 | 做 Listbox、Menu 时照做（桌面上"当前项"对应 UIA 的选中项 / 焦点项，不是真焦点）；ButtonBase 加 inset 变体 |
 | 阶段 3：展开箭头 flip（朝上）、turn（朝行尾，RTL 下反向转），修了 RTL 下箭头朝上 | Icon 有 FlipInRtl | 做 Accordion、Select、Tree 时照做 |
 | 阶段 3：`statusToneCompound` 让 Badge、Alert 的组合档位直接引用共用色表 | 我们也是两张表：Button 用调色板表（`palette.mjs` 生成），Badge 用手写的 `StatusColors` | 合成一张：Badge（以后的 Alert）的颜色也从调色板表生成 |
-| 阶段 3：OtpField 用输入框配方；Popover、HoverCard、Menu 面板统一 `anchoredPanelSx` | 还没做 | 做的时候照做（浮层表面一个共用件） |
+| 阶段 3：OtpField 用输入框配方；Popover、HoverCard、Menu 面板统一 `anchoredPanelSx` | Popover、Menu 已做 | Menu 的面板就是 Popover 的面板（Avalonia、WPF 组合 Popover，WinForms 共用 FloatingSurface）；HoverCard 做时照做 |
 
 **跟进的工作包**（按先后；都要先跑 `inspect bench` 与 `inspect props` 的前后对比，外观与开销不能变差）：
 

@@ -706,6 +706,28 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   （TS 另放一段 VisuallyHidden）。WinForms 没有给单个控件的提示，徽标自带一个 TooltipProvider。截止日、开始日都没给时不显示。
   Avalonia 按模板优先级设、WPF 设当前值：使用方写的盖得过。
 
+### Menu 与 ContextMenu（2026-11-14）
+
+- 照上游的复合组件：Menu（Trigger、Items、IsOpen、Placement、Size、Ripple）里放 MenuItem（Tone、Click / Command：TS 的 onAction）、MenuLinkItem（Href 绝对地址，系统打开）、
+  MenuCheckboxItem（IsChecked）、MenuRadioGroup（Value）/ MenuRadioItem、MenuGroup（Label）、MenuSub（Label，子菜单）、Separator；ContextMenu 是区域加从指针或焦点弹出的菜单。
+  档位类型 `MenuItemTone` 是孪生文件（`Overlay/Menu/MenuVariants.cs`）。WinForms 的类名带 Control 后缀，文字是 Text，项加进 Items / Controls。
+- 弹出层不另写：Avalonia、WPF 的 Menu 里组合一个 Popover 的子类，Popover 开放几处内部钩子（面板内边距、打开时聚焦哪个元素、触发器的按键、面板的按键、
+  关上但不还焦点、以别的元素为锚点打开、面板的读屏类型）；WinForms 同 PopoverControl 用 FloatingSurface。面板外观就是弹出框的面板，不留内边距（内容层 space.xs），至少 12em。
+- 键盘：触发器上 ↓ / ↑ 打开并聚焦第一项 / 最后一项；菜单里 ↑↓ 循环、Home / End、按字母跳（漫游焦点 RovingFocus 加了类型搜索，规则同 Listbox 的 Typeahead；
+  WinForms 没有漫游焦点，由一列菜单项 MenuList 处理），Esc 关上回到触发器，Tab 关上、焦点从触发器往后走。WPF 的按键里没有字符，类型搜索接 TextInput。
+- 菜单项的快捷键（Shortcut，HotkeyInput 把平台按键换成快捷键的键名）在窗口里随时有效：Avalonia 在窗口上隧道接，WPF 预览，WinForms 用消息过滤器（同 CommandPalette）。
+  读屏从 AcceleratorKey / KeyboardShortcut 念。复选、单选项是能切换的菜单项（Avalonia 另一个带 Toggle 的对等体：对等体只能按实现的接口提供模式）。
+- 子菜单：→ / Enter / 空格打开并聚焦第一项，← / Esc 只关这一层；指针停 100 毫秒打开，离开后 400 毫秒内移进子菜单不关（上游的安全三角简化成宽限时间）；
+  子菜单里执行一项整串关闭；外面的菜单关了子菜单跟着关（Avalonia 离开可视树、WPF Unloaded、WinForms 跟着藏起来）。WinForms 的浮层窗口激活即拿焦点：
+  父菜单失去激活时先看激活的是不是自己的子菜单（沿 FloatingForm.Origin 找回来），子菜单因点了外面关时再问父菜单要不要一起关。
+- 触发器的读屏（TS 交给触发器的 aria-haspopup、aria-expanded）：Popover 在触发器上记展开状态，按钮家族的对等体据此报展开 / 收起（Avalonia 的对等体总带这个模式，
+  不是触发器时是 LeafNode；WPF 只在触发器上有；WinForms 是 HasPopup 与 Expanded / Collapsed 状态）。弹出框的触发器同样受益。
+- 右键菜单：Avalonia 接 ContextRequested，WPF 接 ContextMenuOpening，WinForms 接 WM_CONTEXTMENU；指针时在指针处（平台弹出层的 Pointer / MousePoint），
+  键盘时在获得焦点的元素下方；关上后焦点还给打开前的元素。名称默认取语言包的 ContextMenuLabel。
+- WPF 的坑：`new FrameworkPropertyMetadata(null, (d, _) => x = y)` 选中 (PropertyChangedCallback, CoerceValueCallback) 重载，有返回值的 lambda 成了强制回调，属性设不上；
+  回调写成语句体。WPF 的内容呈现器不给内容逻辑父元素：菜单把滚动区域挂成自己的逻辑子元素，菜单项沿逻辑树找所在的菜单。
+- 示例：actions、description、checkable、account、zoom、context-menu（WinForms 的文件卡片只有文字）。WPF、WinForms 的弹出层是单独的窗口，静态截图拍不到。
+
 ### NavList（2026-11-07）
 
 - 照上游：NavList > NavItem / NavGroup（可展开）/ NavSection（带小标题、一直展开）。桌面上没有路由：NavList 的 `CurrentHref` 是当前地址（TS 路由适配的 isActive

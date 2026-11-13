@@ -36,7 +36,7 @@
                   <StackPanel rune:Flex.Grow="True" VerticalAlignment="Center">
                     <ContentPresenter x:Name="PART_Label" />
                     <ContentPresenter x:Name="PART_Description" Content="{TemplateBinding Description}"
-                                      Style="{DynamicResource {x:Static rune:MenuItemParts.DescriptionStyle}}" />
+                                      Style="{DynamicResource {x:Static rune:MenuItemBaseParts.Description}}" />
                   </StackPanel>
                   <rune:Text x:Name="PART_Shortcut" Text="{TemplateBinding ShortcutText}" Tone="muted" Size="sm" VerticalAlignment="Center" />
                   <rune:Icon x:Name="PART_Chevron" Data="{x:Static rune:Lucide.ChevronRight}" Visibility="Collapsed" VerticalAlignment="Center" />
@@ -75,9 +75,9 @@
   </Style>
 
   <!-- 部件的默认外观写在部件样式里（DESIGN §7） -->
-  <Style x:Key="{x:Static rune:MenuItemParts.DescriptionStyle}" TargetType="ContentPresenter">
+  <Style x:Key="{x:Static rune:MenuItemBaseParts.Description}" TargetType="ContentPresenter">
     <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
     <Setter Property="TextElement.FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
   </Style>
-  <Style x:Key="{x:Static rune:MenuItemParts.GroupLabel}" TargetType="rune:Text" BasedOn="{StaticResource {x:Type rune:Text}}" />
+  <Style x:Key="{x:Static rune:MenuGroupParts.Label}" TargetType="rune:Text" BasedOn="{StaticResource {x:Type rune:Text}}" />
 </ResourceDictionary>

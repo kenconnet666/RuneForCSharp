@@ -48,6 +48,9 @@ export const COMPONENT_PROP_RENAMES = {
   Tag: { onRemove: 'RemoveRequested' },
   // 点了这一条是事件（订阅了才整条可点；Select 是动词，选中另有 IsSelected）；正在看的一条是 IsSelected（同平台的选中项）
   ItemListItem: { onSelect: 'Invoked', selected: 'IsSelected' },
+  // 执行是按钮的 Click（还有 Command）；右键菜单的菜单项同 Menu 的 Items
+  MenuItem: { onAction: 'Click' },
+  ContextMenu: { menu: 'Items' },
   SelectedTags: { onRemove: 'RemoveRequested' },
   // 数据是平台的 ItemsSource；自定义选项内容是数据模板；新建是事件（Control 自己有 Created）
   Select: { items: 'ItemsSource', children: 'ItemTemplate', onCreate: 'OptionCreated' },
@@ -153,6 +156,12 @@ export const PROPS_NOT_PORTED = {
   NavList: { propsList: 'nav > ul 是 HTML 的结构：NavList 本身就是那一列' },
   NavItem: { propsItem: '外层的 li 是 HTML 列表的结构：桌面上导航项本身就是列表里的一行' },
   ItemListItem: Object.fromEntries(['propsLink', 'propsButton'].map((prop) => [prop, '标题里伸展的链接、按钮是网页让整条可点的写法：桌面上整条就是一个可点的控件（Href、Invoked），没有里面那一层'])),
+  Menu: {
+    point: '从某一点弹出只给右键菜单用：ContextMenu 在指针所在处或获得焦点的元素旁打开（内部的 OpenAt），桌面上没有用触发器之外的坐标打开菜单的场景',
+    offset: '与触发器的距离同 Popover（6）：菜单不另设',
+    lazy: '菜单项是控件，平台按需应用模板；快捷键要求菜单项一直在（上游有快捷键时也不延迟）',
+  },
+  ContextMenu: { propsMenu: '里面的菜单是 ContextMenu 建的：名称用 Label，其余同 Menu 的默认（位置跟着指针或焦点）' },
   ToggleGroup: { propsIndicator: '滑块是组自己画的（跟着选中项滑动），没有可改样式的部件' },
   CharacterCount: {
     propsValue: '看得见的字数就是控件自己的文字，读屏读的是控件的名称（完整的句子），不另分部件',
@@ -215,6 +224,12 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     Tabs: { ripple: '标签是组件库画的容器控件（里面放文字与计数），没有按下的波纹' },
     NavItem: { ripple: '导航行是组件库画的容器控件（里面放图标、文字与计数），没有按下的波纹' },
     ItemListItem: Object.fromEntries(['propsTitle', 'propsDescription'].map((prop) => [prop, '标题、说明是 ItemListItemControl 里的 TextControl 子控件，WinForms 没有部件样式；说明固定 textMuted、xs'])),
+    Menu: { ripple: '菜单项是组件库画的容器控件（里面放图标、文字、快捷键），没有按下的波纹' },
+    ...Object.fromEntries(['MenuItem', 'MenuLinkItem', 'MenuCheckboxItem', 'MenuRadioItem', 'MenuSub'].map((name) => [name, Object.fromEntries(
+      ['propsIndicator', 'propsIcon', 'propsLabel', 'propsShortcut', 'propsDescription', 'propsChevron', 'propsPanel']
+        .map((prop) => [prop, '标记、图标、文字、说明、快捷键、箭头是菜单项里的 IconControl、TextControl 子控件，子菜单的面板是浮层窗口：WinForms 没有部件样式'])),
+    ])),
+    ...Object.fromEntries(['MenuGroup', 'MenuRadioGroup'].map((name) => [name, { propsLabel: '分组标题是 MenuGroupControl 里的 SmallControl（textMuted、sm），WinForms 没有部件样式' }])),
     CodeBlock: Object.fromEntries(
       ['propsCode', 'propsRoot', 'propsHeader', 'propsTitle', 'propsBody', 'propsLine', 'propsLineNumber', 'propsCopy', 'propsScroll', 'propsExpand', 'propsExpandIcon']
         .map((prop) => [prop, '外层、标题栏、代码与行号、展开按钮都是 CodeBlockControl 自己画的，没有可改的部件']),
@@ -281,6 +296,8 @@ export const PLATFORM_PROPS = new Set([
   'ToolTipService.InitialShowDelay',
   'ToolTipService.IsEnabled',
   'ToolTipOpening',
+  // 按钮类（菜单项）的点击是平台按钮、控件的 Click
+  'Click',
   // 文本框从平台的 TextBox 派生：值、只读、长度上限是平台的
   'Text',
   'IsReadOnly',

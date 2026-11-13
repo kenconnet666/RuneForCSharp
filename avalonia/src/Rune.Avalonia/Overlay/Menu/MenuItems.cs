@@ -14,7 +14,7 @@ namespace Rune.Avalonia;
 /// 按钮类菜单项共有的（vue-tsx-pro 的 useButtonItem、menuItemContent）：起始边的勾选标记（复选、单选项）、图标、文字（Content）、
 /// 文字下方的说明（<see cref="Description"/>，弱化；读屏当作描述，不算进名称）、结束边的快捷键提示。
 /// 列表行的外观：控件高度、上下 space.xs、左右 space.sm、sm 圆角，悬停 fillHover；不可用时变淡、方向键跳过。
-/// 执行（点击、Enter、空格、快捷键）时先触发 Click、Command，点击后按 <see cref="CloseOnSelect"/> 关闭菜单。部件名在 <see cref="MenuItemParts"/>。
+/// 执行（点击、Enter、空格、快捷键）时先触发 Click、Command，点击后按 <see cref="CloseOnSelect"/> 关闭菜单。部件名在 <see cref="MenuItemBaseParts"/>。
 /// </summary>
 [PseudoClasses(":has-icon", ":has-indicator", ":checked", ":described", ":has-shortcut", ":danger", ":submenu")]
 public abstract class MenuItemBase : ButtonBase
@@ -84,8 +84,8 @@ public abstract class MenuItemBase : ButtonBase
     protected override void OnApplyTemplate(global::Avalonia.Controls.Primitives.TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
-        indicatorPart = e.NameScope.Find<Icon>(MenuItemParts.Indicator);
-        shortcutPart = e.NameScope.Find<Text>(MenuItemParts.Shortcut);
+        indicatorPart = e.NameScope.Find<Icon>(MenuItemBaseParts.Indicator);
+        shortcutPart = e.NameScope.Find<Text>(MenuItemBaseParts.Shortcut);
         UpdateParts();
     }
 
@@ -255,7 +255,7 @@ public class MenuGroup : Control
     public static readonly StyledProperty<string?> LabelProperty = AvaloniaProperty.Register<MenuGroup, string?>(nameof(Label));
 
     readonly StackPanel root = new();
-    readonly Text label = new() { Name = MenuItemParts.GroupLabel, Tone = TextTone.Muted, Size = TextSize.Sm, Weight = TextWeight.Medium, IsVisible = false };
+    readonly Text label = new() { Name = MenuGroupParts.Label, Tone = TextTone.Muted, Size = TextSize.Sm, Weight = TextWeight.Medium, IsVisible = false };
     readonly StackPanel items = new();
 
     /// <summary>新建：标题与组里的项竖着排。</summary>
@@ -330,8 +330,8 @@ public class MenuRadioGroup : MenuGroup
     }
 }
 
-/// <summary>菜单项、分组的部件名（模板里的元素名；分组标题是 MenuGroup 里的 Text）。</summary>
-public static class MenuItemParts
+/// <summary>菜单项的部件名（模板里的元素名，各种菜单项共用，TS 的 menuRecipe）。</summary>
+public static class MenuItemBaseParts
 {
     /// <summary>复选、单选的标记（TS 的 indicator）：占一列，没勾时只占位。</summary>
     public const string Indicator = "PART_Indicator";
@@ -350,7 +350,30 @@ public static class MenuItemParts
 
     /// <summary>子菜单的箭头（TS 的 chevron）。</summary>
     public const string Chevron = "PART_Chevron";
+}
 
-    /// <summary>分组的标题（TS 的 groupLabel）。</summary>
-    public const string GroupLabel = "PART_GroupLabel";
+/// <summary>分组的部件名。</summary>
+public static class MenuGroupParts
+{
+    /// <summary>分组的标题（TS 的 groupLabel、propsLabel）：MenuGroup 里的 Text。</summary>
+    public const string Label = "PART_GroupLabel";
+}
+
+/// <summary>子菜单的部件名：那一项的部件同菜单项（<see cref="MenuItemBaseParts"/>），面板同菜单（<see cref="MenuParts.Panel"/>）。</summary>
+public static class MenuSubParts
+{
+    /// <summary>子菜单的面板（TS 的 propsPanel）。</summary>
+    public const string Panel = MenuParts.Panel;
+
+    /// <summary>文字前的图标。</summary>
+    public const string Icon = MenuItemBaseParts.Icon;
+
+    /// <summary>文字。</summary>
+    public const string Label = MenuItemBaseParts.Label;
+
+    /// <summary>说明。</summary>
+    public const string Description = MenuItemBaseParts.Description;
+
+    /// <summary>右侧的箭头。</summary>
+    public const string Chevron = MenuItemBaseParts.Chevron;
 }

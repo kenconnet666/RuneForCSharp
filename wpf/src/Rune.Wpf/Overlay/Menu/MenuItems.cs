@@ -16,8 +16,8 @@ namespace Rune.Wpf;
 /// 列表行的外观：控件高度、上下 space.xs、左右 space.sm、sm 圆角，悬停 fillHover；不可用时变淡、方向键跳过。
 /// 执行（点击、Enter、空格、快捷键）时先触发 Click、Command，点击后按 <see cref="CloseOnSelect"/> 关闭菜单。
 /// </summary>
-[TemplatePart(Name = MenuItemParts.Description, Type = typeof(ContentPresenter))]
-[TemplatePart(Name = MenuItemParts.Shortcut, Type = typeof(FrameworkElement))]
+[TemplatePart(Name = MenuItemBaseParts.DescriptionName, Type = typeof(ContentPresenter))]
+[TemplatePart(Name = MenuItemBaseParts.Shortcut, Type = typeof(FrameworkElement))]
 public abstract class MenuItemBase : ButtonBase
 {
     /// <summary>文字前的图标。</summary>
@@ -152,8 +152,8 @@ public abstract class MenuItemBase : ButtonBase
     public override void OnApplyTemplate()
     {
         base.OnApplyTemplate();
-        shortcutPart = GetTemplateChild(MenuItemParts.Shortcut) as FrameworkElement;
-        descriptionPart = GetTemplateChild(MenuItemParts.Description) as ContentPresenter;
+        shortcutPart = GetTemplateChild(MenuItemBaseParts.Shortcut) as FrameworkElement;
+        descriptionPart = GetTemplateChild(MenuItemBaseParts.DescriptionName) as ContentPresenter;
         UpdateMark();
         UpdateMetrics();
     }
@@ -303,7 +303,7 @@ public class MenuGroup : FrameworkElement
     /// <summary>新建：标题与组里的项竖着排。</summary>
     public MenuGroup()
     {
-        label.SetResourceReference(StyleProperty, MenuItemParts.GroupLabel);
+        label.SetResourceReference(StyleProperty, MenuGroupParts.Label);
         root.Children.Add(label);
         root.Children.Add(items);
         AddLogicalChild(root);
@@ -383,18 +383,53 @@ public class MenuRadioGroup : MenuGroup
     }
 }
 
-/// <summary>菜单项、分组的部件：说明、分组标题有部件样式（DESIGN §7），其余是模板里的元素名。</summary>
-public static class MenuItemParts
+/// <summary>菜单项的部件（各种菜单项共用，TS 的 menuRecipe）：说明有部件样式（DESIGN §7），其余是模板里的元素名。</summary>
+public static class MenuItemBaseParts
 {
-    /// <summary>说明（模板里的元素名，TS 的 description）。</summary>
-    public const string Description = "PART_Description";
+    /// <summary>复选、单选的标记（TS 的 indicator）。</summary>
+    public const string Indicator = "PART_Indicator";
 
-    /// <summary>快捷键提示（模板里的元素名，TS 的 shortcut）。</summary>
+    /// <summary>文字前的图标（TS 的 icon）。</summary>
+    public const string Icon = "PART_Icon";
+
+    /// <summary>文字（TS 的 label）。</summary>
+    public const string Label = "PART_Label";
+
+    /// <summary>说明的部件样式（TS 的 description：textMuted、sm）。</summary>
+    public static readonly PartKey Description = new(typeof(MenuItemBase), nameof(Description), typeof(ContentPresenter));
+
+    /// <summary>说明在模板里的元素名。</summary>
+    public const string DescriptionName = "PART_Description";
+
+    /// <summary>快捷键提示（TS 的 shortcut）。</summary>
     public const string Shortcut = "PART_Shortcut";
 
-    /// <summary>说明的部件样式（textMuted、sm）。</summary>
-    public static readonly PartKey DescriptionStyle = new(typeof(MenuItemBase), "Description", typeof(ContentPresenter));
+    /// <summary>子菜单的箭头（TS 的 chevron）。</summary>
+    public const string Chevron = "PART_Chevron";
+}
 
-    /// <summary>分组标题的部件样式（TS 的 groupLabel）。</summary>
-    public static readonly PartKey GroupLabel = new(typeof(MenuGroup), nameof(GroupLabel), typeof(Text));
+/// <summary>分组的部件。</summary>
+public static class MenuGroupParts
+{
+    /// <summary>分组标题的部件样式（TS 的 groupLabel、propsLabel）。</summary>
+    public static readonly PartKey Label = new(typeof(MenuGroup), nameof(Label), typeof(Text));
+}
+
+/// <summary>子菜单的部件：那一项的部件同菜单项（<see cref="MenuItemBaseParts"/>），面板的样式同弹出框的面板（<see cref="PopoverParts.Panel"/>）。</summary>
+public static class MenuSubParts
+{
+    /// <summary>子菜单的面板（TS 的 propsPanel）。</summary>
+    public static readonly PartKey Panel = PopoverParts.Panel;
+
+    /// <summary>文字前的图标。</summary>
+    public const string Icon = MenuItemBaseParts.Icon;
+
+    /// <summary>文字。</summary>
+    public const string Label = MenuItemBaseParts.Label;
+
+    /// <summary>说明。</summary>
+    public static readonly PartKey Description = MenuItemBaseParts.Description;
+
+    /// <summary>右侧的箭头。</summary>
+    public const string Chevron = MenuItemBaseParts.Chevron;
 }

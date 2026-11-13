@@ -45,7 +45,7 @@ public class MenuTests
     }
 
     [Fact]
-    [Upstream("Menu 的说明", "有说明时名称指向文字、描述指向说明；没有说明时两者都不加")]
+    [Upstream("Menu", "有说明时名称指向文字、描述指向说明；没有说明时两者都不加")]
     public Task Descriptions_are_help_text_not_names() => WpfUi.Run(() =>
     {
         var document = new MenuItem { Content = "文档", Description = "空白的文字文档" };
@@ -65,7 +65,7 @@ public class MenuTests
     });
 
     [Fact]
-    [Upstream("弹层的名称", "默认以触发器的文字为名称；写了 aria-label 时不再加 aria-labelledby（它会盖过 aria-label）")]
+    [Upstream("Menu", "默认以触发器的文字为名称；写了 aria-label 时不再加 aria-labelledby（它会盖过 aria-label）")]
     public Task The_panel_is_named_by_the_trigger_unless_named() => WpfUi.Run(() =>
     {
         var byTrigger = new Menu { Trigger = new Button { Content = "更多" }, Items = { new MenuItem { Content = "复制" } } };
@@ -80,7 +80,7 @@ public class MenuTests
     });
 
     [Fact]
-    [Upstream("MenuGroup、MenuRadioGroup", "分组以标题为名称；单选项跟着 _value 勾选，点另一项写回")]
+    [Upstream("MenuGroup", "分组以标题为名称；单选项跟着 _value 勾选，点另一项写回")]
     public Task Groups_are_named_and_radio_items_follow_the_value() => WpfUi.Run(() =>
     {
         var refresh = new MenuGroup { Label = "操作", Items = { new MenuItem { Content = "刷新" } } };
@@ -102,7 +102,7 @@ public class MenuTests
     });
 
     [Fact]
-    [Upstream("Popover 与 Menu 的 onOpenChange", "Menu：执行一项是 select")]
+    [Upstream("Menu", "Menu：执行一项是 select")]
     public Task Running_an_item_closes_with_select_but_checkboxes_stay() => WpfUi.Run(() =>
     {
         var ran = 0;
@@ -177,7 +177,7 @@ public class MenuTests
     });
 
     [Fact]
-    [Upstream("MenuSub", "是带子菜单的项：aria-haspopup=\"menu\"，点了展开")]
+    [Upstream("MenuSub", "是带子菜单的项")]
     public Task Submenus_expand_and_keys_go_in_and_out() => WpfUi.Run(() =>
     {
         var pdf = new MenuItem { Content = "PDF" };
