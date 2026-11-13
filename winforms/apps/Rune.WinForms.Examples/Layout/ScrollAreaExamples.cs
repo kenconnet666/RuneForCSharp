@@ -27,20 +27,19 @@ static class ScrollAreaExamples
 
     static Control Inbox()
     {
-        var list = new FlexListControl { Direction = FlexDirection.Column, AutoSize = true };
+        var list = new ItemListControl { Divided = true, Inset = Space.Md };
         for (var index = 0; index < 24; index++)
         {
             var sender = Senders[index % Senders.Length];
-            var time = $"{18 - index / 3:00}:{index * 17 % 60:00}";
-            var body = Build.Flex(new FlexControl { Direction = FlexDirection.Column },
-                Build.Flex(new FlexControl { Justify = FlexJustify.Between, Gap = Space.Sm },
-                    new StrongControl { Text = sender }, new SmallControl { Text = time, Tone = TextTone.Muted }),
-                new TextControl { Text = Subjects[index % Subjects.Length], TextSize = TextSize.Sm, Tone = TextTone.Muted, Truncate = true });
-            // 每一项上下 space.sm、左右 space.md（画布字号 14px）
-            var item = Build.Flex(new FlexControl { Gap = Space.Md, Align = FlexAlign.Center },
-                new AvatarControl { TextSize = TextSize.Sm, DisplayName = sender }, body);
-            item.SetGrow(body, true);
-            item.Padding = new Padding(item.LogicalToDeviceUnits(10), item.LogicalToDeviceUnits(7), item.LogicalToDeviceUnits(10), item.LogicalToDeviceUnits(7));
+            var item = new ItemListItemControl
+            {
+                Start = new AvatarControl { TextSize = TextSize.Sm, DisplayName = sender }, Text = sender, Description = Subjects[index % Subjects.Length],
+                End = new SmallControl { Text = $"{18 - index / 3:00}:{index * 17 % 60:00}", Tone = TextTone.Muted }, IsSelected = index == 0,
+            };
+            item.Invoked += (_, _) =>
+            {
+                foreach (var other in list.Controls.OfType<ItemListItemControl>()) other.IsSelected = other == item;
+            };
             list.Controls.Add(item);
         }
         var area = new ScrollAreaControl { Content = list, AccessibleName = "收件箱", Dock = DockStyle.Top };

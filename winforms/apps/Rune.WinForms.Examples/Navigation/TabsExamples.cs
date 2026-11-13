@@ -20,25 +20,6 @@ static class TabsExamples
 
     static readonly (string Value, string Label)[] Statuses = [("all", "全部"), ("unpaid", "待付款"), ("shipped", "已发货"), ("done", "已完成"), ("refund", "退款")];
 
-    /// <summary>一行订单：上下 space.sm，底边一道 borderMuted。</summary>
-    sealed class OrderRow : FlexControl
-    {
-        public OrderRow()
-        {
-            Gap = Space.Md;
-            Align = FlexAlign.Center;
-            AutoSize = true;
-            SetStyle(ControlStyles.UserPaint | ControlStyles.ResizeRedraw, true);
-        }
-
-        protected override void OnPaint(PaintEventArgs e)
-        {
-            base.OnPaint(e);
-            using var line = new SolidBrush(ProviderControl.ThemeOf(this).Colors.BorderMuted);
-            e.Graphics.FillRectangle(line, 0, Height - LogicalToDeviceUnits(1), Width, LogicalToDeviceUnits(1));
-        }
-    }
-
     static Control Orders()
     {
         var tabs = new TabsControl { Value = "all" };
@@ -55,19 +36,10 @@ static class TabsExamples
             list.Controls.Add(tab);
             var panel = new TabPanelControl { Value = value };
             if (orders.Length == 0) panel.Controls.Add(new EmptyControl { Title = $"没有{label}的订单" });
+            var rows = new ItemListControl { Divided = true, Dock = DockStyle.Top };
             foreach (var order in orders)
-            {
-                var row = new OrderRow();
-                // 订单号一列宽 6rem：固定大小
-                var id = new StrongControl { Text = order.Id };
-                id.Size = new Size(id.LogicalToDeviceUnits(96), id.GetPreferredSize(Size.Empty).Height);
-                id.AutoSize = false;
-                var customer = new TextControl { Text = order.Customer, Tone = TextTone.Muted };
-                row.Controls.AddRange([id, customer, new TextControl { Text = order.Amount }]);
-                row.SetGrow(customer, true);
-                row.Padding = new Padding(0, row.LogicalToDeviceUnits(7), 0, row.LogicalToDeviceUnits(7));
-                panel.Controls.Add(row);
-            }
+                rows.Controls.Add(new ItemListItemControl { Text = order.Customer, Description = order.Id, End = new StrongControl { Text = order.Amount }, Href = new Uri($"https://example.com/orders/{order.Id[1..]}") });
+            if (orders.Length > 0) panel.Controls.Add(rows);
             tabs.Controls.Add(panel);
         }
         tabs.Controls.Add(new SmallControl { Text = "方向键在标签之间移动，焦点到哪个就切到哪个", Tone = TextTone.Muted });

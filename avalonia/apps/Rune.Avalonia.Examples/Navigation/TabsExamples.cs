@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Controls;
-using PlatformGrid = Avalonia.Controls.Grid;
 
 namespace Rune.Avalonia.Examples;
 
@@ -38,22 +37,9 @@ static class TabsExamples
             if (orders.Length == 0) body = new Empty { Title = $"没有{label}的订单" };
             else
             {
-                var rows = new FlexList { Direction = FlexDirection.Column };
-                // 订单号、客户、金额三列对齐；每行上下 space.sm，底边一道 borderMuted
+                var rows = new ItemList { Divided = true };
                 foreach (var order in orders)
-                {
-                    var row = new PlatformGrid { ColumnDefinitions = new ColumnDefinitions("96,*,Auto"), ColumnSpacing = 10.5 };
-                    row.Children.Add(new Strong { Text = order.Id });
-                    var customer = new Text { Text = order.Customer, Tone = TextTone.Muted };
-                    PlatformGrid.SetColumn(customer, 1);
-                    row.Children.Add(customer);
-                    var amount = new Text { Text = order.Amount };
-                    PlatformGrid.SetColumn(amount, 2);
-                    row.Children.Add(amount);
-                    var line = new Border { Padding = new Thickness(0, 7), BorderThickness = new Thickness(0, 0, 0, 1), Child = row };
-                    line[!Border.BorderBrushProperty] = line.GetResourceObservable("Rune.Brush.BorderMuted").ToBinding();
-                    rows.Children.Add(line);
-                }
+                    rows.Children.Add(new ItemListItem { Title = order.Customer, Description = order.Id, End = new Strong { Text = order.Amount }, Href = new Uri($"https://example.com/orders/{order.Id[1..]}") });
                 body = rows;
             }
             tabs.Children.Add(new TabPanel { Value = value, Content = body });

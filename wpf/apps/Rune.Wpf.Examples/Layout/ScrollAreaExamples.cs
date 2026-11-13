@@ -28,27 +28,20 @@ static class ScrollAreaExamples
 
     static FrameworkElement Inbox()
     {
-        var list = new FlexList { Direction = FlexDirection.Column };
+        var list = new ItemList { Divided = true, Inset = Space.Md };
         for (var index = 0; index < 24; index++)
         {
             var sender = Senders[index % Senders.Length];
-            var time = $"{18 - index / 3:00}:{index * 17 % 60:00}";
-            var body = new Flex
+            var item = new ItemListItem
             {
-                Direction = FlexDirection.Column,
-                Children =
-                {
-                    new Flex { Justify = FlexJustify.Between, Gap = Space.Sm, Children = { new Strong { Text = sender }, new Small { Text = time, Tone = TextTone.Muted } } },
-                    new Text { Text = Subjects[index % Subjects.Length], Size = TextSize.Sm, Tone = TextTone.Muted, Truncate = true },
-                },
+                Start = new Avatar { Size = TextSize.Sm, DisplayName = sender }, Title = sender, Description = Subjects[index % Subjects.Length],
+                End = new Small { Text = $"{18 - index / 3:00}:{index * 17 % 60:00}", Tone = TextTone.Muted }, IsSelected = index == 0,
             };
-            Flex.SetGrow(body, true);
-            // 每一项上下 space.sm、左右 space.md（画布字号 14px）
-            list.Children.Add(new Border
+            item.Invoked += (_, _) =>
             {
-                Padding = new Thickness(10.5, 7, 10.5, 7),
-                Child = new Flex { Gap = Space.Md, Align = FlexAlign.Center, Children = { new Avatar { Size = TextSize.Sm, DisplayName = sender }, body } },
-            });
+                foreach (var other in list.Children.OfType<ItemListItem>()) other.IsSelected = other == item;
+            };
+            list.Children.Add(item);
         }
         var area = new ScrollArea { Height = 320, Content = list };
         AutomationProperties.SetName(area, "收件箱");

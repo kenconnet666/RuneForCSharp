@@ -2,7 +2,6 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
-using PlatformGrid = System.Windows.Controls.Grid;
 
 namespace Rune.Wpf.Examples;
 
@@ -39,23 +38,9 @@ static class TabsExamples
             if (orders.Length == 0) body = new Empty { Title = $"没有{label}的订单" };
             else
             {
-                var rows = new FlexList { Direction = FlexDirection.Column };
-                // 订单号、客户、金额三列对齐；每行上下 space.sm，底边一道 borderMuted
+                var rows = new ItemList { Divided = true };
                 foreach (var order in orders)
-                {
-                    // WPF 的 Grid 没有列间距：前两列右边各留 space.md
-                    var row = new PlatformGrid { ColumnDefinitions = { new ColumnDefinition { Width = new GridLength(96 + 10.5) }, new ColumnDefinition(), new ColumnDefinition { Width = GridLength.Auto } } };
-                    row.Children.Add(new Strong { Text = order.Id });
-                    var customer = new Text { Text = order.Customer, Tone = TextTone.Muted, Margin = new Thickness(0, 0, 10.5, 0) };
-                    PlatformGrid.SetColumn(customer, 1);
-                    row.Children.Add(customer);
-                    var amount = new Text { Text = order.Amount };
-                    PlatformGrid.SetColumn(amount, 2);
-                    row.Children.Add(amount);
-                    var line = new Border { Padding = new Thickness(0, 7, 0, 7), BorderThickness = new Thickness(0, 0, 0, 1), Child = row };
-                    line.SetResourceReference(Border.BorderBrushProperty, "Rune.Brush.BorderMuted");
-                    rows.Children.Add(line);
-                }
+                    rows.Children.Add(new ItemListItem { Title = order.Customer, Description = order.Id, End = new Strong { Text = order.Amount }, Href = new Uri($"https://example.com/orders/{order.Id[1..]}") });
                 body = rows;
             }
             tabs.Children.Add(new TabPanel { Value = value, Content = body });
