@@ -261,6 +261,11 @@ public class MenuSub : FrameworkElement, IMenuHost
             protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Menu;
 
             protected override string GetClassNameCore() => nameof(MenuSub);
+
+            // 名称取自那一项（LabeledBy）：平台只找已经建好的对等体，这里替它建（同 Popover 的面板）
+            protected override string GetNameCore() =>
+                base.GetNameCore() is { Length: > 0 } name ? name
+                : AutomationProperties.GetLabeledBy(owner) is UIElement label ? CreatePeerForElement(label)?.GetName() ?? "" : "";
         }
     }
 

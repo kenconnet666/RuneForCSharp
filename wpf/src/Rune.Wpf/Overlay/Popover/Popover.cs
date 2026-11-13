@@ -389,6 +389,11 @@ public class Popover : FrameworkElement
 
             protected override string GetClassNameCore() => nameof(Popover);
 
+            // 名称取自触发器（LabeledBy）：平台只找已经建好的对等体，触发器还没被读屏问过时名称是空的，这里替它建
+            protected override string GetNameCore() =>
+                base.GetNameCore() is { Length: > 0 } name ? name
+                : AutomationProperties.GetLabeledBy(owner) is UIElement label ? CreatePeerForElement(label)?.GetName() ?? "" : "";
+
             protected override string GetLocalizedControlTypeCore() => owner.Role == AutomationControlType.Pane ? "对话框" : base.GetLocalizedControlTypeCore();
         }
     }
