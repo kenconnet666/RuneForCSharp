@@ -26,6 +26,8 @@ namespace Rune.Wpf;
 /// （<see cref="Dismissible"/>）都先问 <see cref="BeforeClose"/>；确认返回的任务进行中按钮加载、关不掉，结果为 false 或失败时保持打开。<see cref="OpenChanged"/> 报告原因
 /// （close、confirm、escape、outside；代码里改 IsOpen 不报告）。<see cref="Draggable"/> 时按住标题行能把对话框挪开：从标题行上的按钮、输入框按下不拖，
 /// 拖到哪都不超出窗口，每次打开回到正中。读屏：对话框，以标题为名称、说明为帮助文字。部件样式键见 <see cref="DialogParts"/>。
+/// 命令式（TS 的 useDialog）：不放进界面，<c>await new Dialog { … }.ShowAsync(owner)</c> 在 owner 所在的窗口打开，沿用 owner 处的主题、语言；
+/// 得到关上的原因（代码调用 <see cref="Close"/> 是 imperative）。开着时改属性就是上游句柄的 update；owner 离开界面时跟着关上。
 /// </summary>
 [ContentProperty(nameof(Content))]
 public class Dialog : FrameworkElement
@@ -91,6 +93,10 @@ public class Dialog : FrameworkElement
     readonly Button cancel = new() { Variant = ButtonVariant.Soft, Tone = StatusTone.Neutral };
     readonly Button confirm = new();
     OpenChangeReason? pending;
+    FrameworkElement? anchor;
+    Adorner? adorner;
+    readonly List<ResourceDictionary> borrowed = [];
+    TaskCompletionSource<OpenChangeReason>? closed;
     IInputElement? returnFocus;
     Window? host;
     bool confirming;
@@ -193,6 +199,105 @@ public class Dialog : FrameworkElement
     /// <summary>标题行（测试用）。</summary>
     internal Flex Header => header;
 
+    /// <summary>
+    /// 命令式打开（TS 的 useDialog().open）：在 <paramref name="owner"/> 所在的窗口打开这个对话框。不在界面里的对话框开着时挂在窗口的装饰层上，
+    /// 借用 owner 一路上的资源（主题、Provider 的样式层）与继承的语言包、工作日历。得到关上的原因；owner 离开界面时跟着关上（imperative）。
+    /// </summary>
+    /// <param name="owner">在哪个窗口打开、沿用谁的设置（一般是点的那个按钮）。</param>
+    public Task<OpenChangeReason> ShowAsync(FrameworkElement owner)
+    {
+        ArgumentNullException.ThrowIfNull(owner);
+        if (IsOpen) throw new InvalidOperationException("对话框已经开着。");
+        anchor = owner;
+        if (Parent is null && VisualTreeHelper.GetParent(this) is null) Borrow(owner);
+        owner.Unloaded += OnAnchorUnloaded;
+        var source = closed = new TaskCompletionSource<OpenChangeReason>();
+        LastShown = this;
+        SetOpen(true, OpenChangeReason.Imperative);
+        return source.Task;
+    }
+
+    /// <summary>代码关上（TS 句柄的 close）：不问 <see cref="BeforeClose"/>，原因是 imperative。</summary>
+    public void Close()
+    {
+        if (IsOpen) SetOpen(false, OpenChangeReason.Imperative);
+    }
+
+    /// <summary>最近一个命令式打开的对话框（测试用：ConfirmAsync 建的对话框不在界面里，找不到）。</summary>
+    internal static Dialog? LastShown { get; private set; }
+
+    /// <summary>打开时先聚焦哪个元素；null 时是第一个能聚焦的（AlertDialog 是取消按钮）。</summary>
+    private protected virtual UIElement? InitialFocus => null;
+
+    void OnAnchorUnloaded(object sender, RoutedEventArgs e) => Close();
+
+    /// <summary>
+    /// 借 owner 的上下文：挂到装饰层上（在窗口的可视树里），owner 一路上的资源按由远到近合并进来（近的盖过远的），继承的语言包、工作日历照抄。
+    /// 装饰层在窗口内容的旁边，不是 owner 的祖先，光挂上去拿不到 owner 那一支上的资源。
+    /// </summary>
+    void Borrow(FrameworkElement owner)
+    {
+        if (AdornerLayer.GetAdornerLayer(owner) is { } layer)
+        {
+            adorner = new DialogAdorner(owner, this);
+            layer.Add(adorner);
+        }
+        var chain = new List<ResourceDictionary>();
+        for (DependencyObject? node = owner; node is not null; node = VisualTreeHelper.GetParent(node) ?? LogicalTreeHelper.GetParent(node))
+            if (node is FrameworkElement { Resources: { } resources } && (resources.Count > 0 || resources.MergedDictionaries.Count > 0)) chain.Add(resources);
+        chain.Reverse();
+        foreach (var resources in chain)
+        {
+            Resources.MergedDictionaries.Add(resources);
+            borrowed.Add(resources);
+        }
+        foreach (var property in new[] { Provider.LangProperty, Provider.WorkCalendarProperty })
+            if (owner.GetValue(property) is { } value) SetValue(property, value);
+    }
+
+    /// <summary>命令式打开的关上了：还回借来的东西，等着的 ShowAsync 得到原因。</summary>
+    void Release(OpenChangeReason reason)
+    {
+        if (anchor is null) return;
+        anchor.Unloaded -= OnAnchorUnloaded;
+        if (adorner is not null) AdornerLayer.GetAdornerLayer(anchor)?.Remove(adorner);
+        adorner = null;
+        foreach (var resources in borrowed) Resources.MergedDictionaries.Remove(resources);
+        if (borrowed.Count > 0)
+        {
+            ClearValue(Provider.LangProperty);
+            ClearValue(Provider.WorkCalendarProperty);
+        }
+        borrowed.Clear();
+        anchor = null;
+        var source = closed;
+        closed = null;
+        source?.TrySetResult(reason);
+    }
+
+    /// <summary>装饰层上的一格：只装着命令式打开的对话框（对话框自己不占位置，画在弹出层里）。</summary>
+    sealed class DialogAdorner : Adorner
+    {
+        readonly Dialog dialog;
+
+        public DialogAdorner(UIElement owner, Dialog dialog) : base(owner)
+        {
+            this.dialog = dialog;
+            IsHitTestVisible = false;
+            AddVisualChild(dialog);
+        }
+
+        protected override int VisualChildrenCount => 1;
+
+        protected override Visual GetVisualChild(int index) => dialog;
+
+        protected override Size ArrangeOverride(Size finalSize)
+        {
+            dialog.Arrange(new Rect(finalSize));
+            return finalSize;
+        }
+    }
+
     Point? dragFrom;
     Vector dragOrigin;
 
@@ -284,14 +389,14 @@ public class Dialog : FrameworkElement
         if (IsOpen)
         {
             Offset = default;
-            host = Window.GetWindow(this);
+            host = Window.GetWindow(anchor ?? this);
             returnFocus = Keyboard.FocusedElement;
             popup.PlacementTarget = host?.Content as UIElement;
             if (host is not null) host.SizeChanged += OnHostResized;
             UpdateMetrics();
             layer.InvalidateMeasure();
             popup.IsOpen = true;
-            Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () => (FirstFocusable(panel) ?? panel).Focus());
+            Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () => (InitialFocus ?? FirstFocusable(panel) ?? panel).Focus());
         }
         else
         {
@@ -302,6 +407,7 @@ public class Dialog : FrameworkElement
             returnFocus = null;
         }
         if (reason is { } known) OpenChanged?.Invoke(this, new OpenChangedEventArgs(IsOpen, known));
+        if (!IsOpen) Release(reason ?? OpenChangeReason.Imperative);
     }
 
     /// <summary>窗口变了大小：遮罩跟着铺满，面板重新居中。</summary>
