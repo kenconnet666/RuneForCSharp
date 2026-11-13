@@ -78,7 +78,7 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 | Dialog 的 draggable（237f97d2）：按住标题栏拖，不超出窗口，每次打开回到正中 | 已做 Dialog | 这次做 |
 | FileDrop、Upload 选文件夹（directory，f5d31cdd） | 还没做 | 做时照新的（桌面上是选文件夹的对话框、拖进来的文件夹递归读出文件） |
 | FloatButton、FloatButtonGroup（速拨），BackTop 基于它（77cffad3） | 还没做 | CI 绿了锁定，做时照新的 |
-| useInfiniteList、InfiniteListStatus，语言包 listNoMore；Select、Combobox、Mentions 的 load 分页（page、{ items, next }），ListboxView 的 onRangeChange 与 loading: 'more'（cffe9ad9） | Select 的远程选项还没做 | 语言包已重新生成（ListNoMore）；做 Select 的 load 时连分页、Listbox 的 RangeChange 一起做 |
+| useInfiniteList、InfiniteListStatus，语言包 listNoMore；Select、Combobox、Mentions 的 load 分页（page、{ items, next }），ListboxView 的 onRangeChange 与 loading: 'more'（cffe9ad9） | Select 的远程选项已做 | 2026-11-14 做了：Select.Load（OptionsLoader，分页返回 OptionsPage 的 Next），状态是孪生文件 RemoteOptions；Listbox 内部的 Reached、IsLoadingMore 代替 onRangeChange 与 loading: 'more'。测试对上 remote-items 的三条 Select 用例；Combobox、Mentions、TreeSelect 还没做 |
 
 ### 第五批（2026-11-08 通知，master 到 fd628293）
 

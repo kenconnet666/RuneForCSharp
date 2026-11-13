@@ -983,8 +983,14 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   宿主失去激活、移动时也关；可搜索时切到激活模式（搜索框要键盘）。内容窗口没有内边距：按面板的圆角裁成圆角（Region）。列表 `Embedded`（不能聚焦）。
   踩过：ListboxView 画的时候给元素换内容会回调失效，无限重画（屏幕外的测试窗口收不到 WM_PAINT，一直没发现）——绘制期间不再响应元素的失效通知；
   Values 先于 MaxTagCount 设时一下子建了三万个标签控件、句柄耗尽。框内小按钮同样收成 1.5em（`ControlShell.FitInnerButton`）。没有自定义选项内容。
-- 没做：远程选项 load（searchable、custom 示例）、renderValue、表单的 name、placement。
-- 示例：basic、tags、appearance（Avalonia 0.12%–1.55%，WPF 0.10%–1.53%，WinForms 4%–5.8%）。
+- **远程选项（2026-11-14）**：`Load`（TS 的 load）是 `OptionsLoader(搜索词, 第几页, CancellationToken) → Task<OptionsPage>`，`OptionsPage(Items, Next)`，不分页时 `OptionsPage.All(数据)`。
+  状态在孪生文件 `RemoteOptions`（Input/Select）：弹出层打开时立即按当前搜索词请求，搜索词停下 300 毫秒再请求，新的请求取消旧的、只采用最后一次；关上时取消；
+  第一次结果之前用 ItemsSource（编辑页放上已选的那一项）。有 Load 时搜索交给服务端，不在本地过滤。分页：列表离末尾不到 5 行（按行高折算滚动余量）时带着 Next 取下一页，
+  接在后面、按值去重，骨架少两行、接在行下面（Listbox 的 IsLoadingMore、Reached，内部的）。每次换一个新的列表：列表按引用判断数据变没变。
+  失败时列表的空状态是语言包的"加载失败，请重试"（上游有错误码文案时用它，我们不内置请求客户端，没有错误码）。已选项的文字记着见过的选项，搜索换掉了结果触发框照样有字。
+  继续执行回到界面的同步上下文（三个平台都有），所以状态机本身不碰平台类型。
+- 没做：renderValue（触发框是控件自己）、表单的 name、placement。
+- 示例：basic、tags、custom、searchable、paged、appearance（Avalonia 0.12%–1.55%，WPF 0.10%–1.53%，WinForms 4%–5.8%）。
 
 ### Dialog（2026-11-07）
 

@@ -156,7 +156,7 @@ CodeBlock 的语法高亮先做一个够用的版本（C#、XAML 两种语言）
 ## 三、先后顺序（用户 2026-11-07 定：对照基础之后先做文档站要用的组件）
 
 1. [x] **对照基础**：画布与缩放对齐、`ts-shots`、`pixels.mjs` 与报告、登记表；已做的页面跑出差异总表（见下面"差异基线"）。
-2. [ ] **文档站要用的组件**：~~Tooltip~~、~~CopyButton~~、~~ScrollArea~~、~~CodeBlock~~（2026-11-07 做了，内置简单高亮）、~~Tabs~~（2026-11-14 补齐可关闭、新建、排序、滚动、全部标签页）、~~Table~~（静态表格）、~~NavList~~（紧凑时分组弹出子项等 HoverCard）、~~TableOfContents~~、~~ToggleGroup~~（分段控件）、~~TextField~~（含 Textarea、format；form 示例等 Form）、~~AppShell~~（顶栏兼作窗口标题栏；抽屉等 Drawer，admin、mixed 示例等 Stat、NavBar）、Select、CommandPalette。
+2. [ ] **文档站要用的组件**：~~Tooltip~~、~~CopyButton~~、~~ScrollArea~~、~~CodeBlock~~（2026-11-07 做了，内置简单高亮）、~~Tabs~~（2026-11-14 补齐可关闭、新建、排序、滚动、全部标签页）、~~Table~~（静态表格）、~~NavList~~（紧凑时分组弹出子项等 HoverCard）、~~TableOfContents~~、~~ToggleGroup~~（分段控件）、~~TextField~~（含 Textarea、format；form 示例等 Form）、~~AppShell~~（顶栏兼作窗口标题栏；抽屉等 Drawer，admin、mixed 示例等 Stat、NavBar）、~~Select~~（2026-11-14 补齐远程选项）、~~CommandPalette~~。
    每个组件照常过取值、行为、像素三道核对。
 3. [ ] **文档应用**：每个平台一个，替换 Gallery；同时做内容抽取（`docs-gen` 产出页面与示例清单、示例注册改两级、覆盖率），API 表从 XML 文档注释生成。
 4. [ ] **补齐组件与示例**：按上游的层级把 136 页做齐，每页过三道核对。
