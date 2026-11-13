@@ -66,7 +66,16 @@ static class IconExamples
         Build.Flex(new FlexControl { Align = FlexAlign.Center, Gap = Space.Sm, Wrap = true },
             new ButtonControl { Icon = CustomIcons.Logo, Text = "回到首页" },
             new IconButtonControl { Icon = CustomIcons.Wave, Variant = ButtonVariant.Outline, AccessibleName = "网络状态" },
-            new TagControl { Icon = CustomIcons.Verified, Tone = StatusTone.Success, Text = "已认证供应商" }));
+            new TagControl { Icon = CustomIcons.Verified, Tone = StatusTone.Success, Text = "已认证供应商" },
+            More()));
+
+    /// <summary>菜单项里的自定义图标：同按钮里的。</summary>
+    static MenuControl More()
+    {
+        var menu = new MenuControl { Trigger = new ButtonControl { Variant = ButtonVariant.Outline, Text = "更多" } };
+        menu.Items.AddRange([new MenuItemControl { Icon = CustomIcons.Verified, Text = "申请认证" }, new MenuItemControl { Icon = CustomIcons.Wave, Text = "查看连接" }]);
+        return menu;
+    }
 
     static Control WithText() => Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Md },
         Build.Flex(new FlexControl { Gap = Space.Lg, Wrap = true },

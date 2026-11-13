@@ -13,6 +13,11 @@
       <rune:Button Icon="{x:Static local:IconCustom.Logo}">回到首页</rune:Button>
       <rune:IconButton Icon="{x:Static local:IconCustom.Wave}" Variant="outline" AutomationProperties.Name="网络状态" />
       <rune:Tag Icon="{x:Static local:IconCustom.Verified}" Tone="success">已认证供应商</rune:Tag>
+      <rune:Menu>
+        <rune:Menu.Trigger><rune:Button Variant="outline">更多</rune:Button></rune:Menu.Trigger>
+        <rune:MenuItem Icon="{x:Static local:IconCustom.Verified}">申请认证</rune:MenuItem>
+        <rune:MenuItem Icon="{x:Static local:IconCustom.Wave}">查看连接</rune:MenuItem>
+      </rune:Menu>
     </rune:Flex>
   </rune:Flex>
 </UserControl>
