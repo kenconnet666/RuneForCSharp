@@ -2,11 +2,11 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:rune="clr-namespace:Rune.Avalonia">
-  <Style Selector="rune|Card > Border > StackPanel > Border#PART_Header">
+  <Style Selector="rune|Card > Border > Grid > Border#PART_Header">
     <Setter Property="BorderThickness" Value="0,0,0,1" />
     <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
   </Style>
-  <Style Selector="rune|Card > Border > StackPanel > Border#PART_Footer">
+  <Style Selector="rune|Card > Border > Grid > Border#PART_Footer">
     <Setter Property="BorderThickness" Value="0,1,0,0" />
     <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
   </Style>

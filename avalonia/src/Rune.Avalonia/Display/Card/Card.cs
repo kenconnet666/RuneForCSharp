@@ -67,7 +67,8 @@ public class Card : Control
     static readonly StyledProperty<double> RadiusFactorProperty = AvaloniaProperty.Register<Card, double>("RadiusFactor");
 
     readonly Border surface = new() { BorderThickness = new Thickness(1), ClipToBounds = true };
-    readonly StackPanel layout = new();
+    // 页头、正文、页脚三行，正文撑开：被拉高的卡片（网格里拉齐的一排）页脚贴着底边（上游 body 的 flex-grow）
+    readonly global::Avalonia.Controls.Grid layout = new() { RowDefinitions = new RowDefinitions("Auto,*,Auto") };
     readonly Border header = new() { Name = CardParts.Header };
     readonly Flex headerRow = new() { Wrap = true, Align = FlexAlign.Center, Justify = FlexJustify.Between, Gap = Space.Sm };
     readonly ContentPresenter headerContent = new();
@@ -100,6 +101,8 @@ public class Card : Control
         footerRow.Children.Add(footerContent);
         footer.Child = footerRow;
         layout.Children.AddRange([header, body, footer]);
+        global::Avalonia.Controls.Grid.SetRow(body, 1);
+        global::Avalonia.Controls.Grid.SetRow(footer, 2);
         surface.Child = layout;
         LogicalChildren.Add(surface);
         VisualChildren.Add(surface);

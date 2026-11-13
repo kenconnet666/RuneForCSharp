@@ -35,6 +35,20 @@ public class CardTests
     });
 
     [Fact]
+    public Task A_taller_card_keeps_the_footer_at_the_bottom() => WinFormsUi.Run(() =>
+    {
+        var action = new ButtonControl { Text = "查看" };
+        var card = new CardControl { Header = "订单 #1024", Footer = action, AutoSize = false, Size = new Size(300, 400) };
+        card.Controls.Add(new ParagraphControl { Text = "内容" });
+        Show(card, out var form);
+        using var _ = form;
+        var inset = (int)MathF.Round(card.Font.SizeInPoints * card.DeviceDpi / 72f); // space.lg = 1em
+        var line = Math.Max(1, (int)MathF.Round(card.DeviceDpi / 96f));
+
+        Assert.Equal(card.ClientSize.Height - line - inset, action.Bottom); // 页脚贴着底边
+    });
+
+    [Fact]
     public Task Padding_none_keeps_the_body_flush_but_pads_header_and_footer() => WinFormsUi.Run(() =>
     {
         var action = new ButtonControl { Text = "查看" };

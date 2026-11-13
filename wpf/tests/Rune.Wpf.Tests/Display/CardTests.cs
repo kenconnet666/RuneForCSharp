@@ -21,6 +21,17 @@ public class CardTests
     static Border Part(Card card, PartKey key) => WpfUi.Descendants(card).OfType<Border>().Single(border => border.Style == card.FindResource(key));
 
     [Fact]
+    public Task A_taller_card_grows_its_body_and_keeps_the_footer_at_the_bottom() => WpfUi.Run(() =>
+    {
+        var card = new Card { Header = "标题", Footer = "操作", Content = "内容", Height = 300 };
+        WpfUi.Show(Themed(card));
+
+        var footer = Part(card, CardParts.Footer);
+        Assert.Equal(299, footer.TranslatePoint(new Point(0, footer.ActualHeight), card).Y, 0); // 页脚贴着底边（里面一像素的描边）
+        Assert.True(Part(card, CardParts.Body).ActualHeight > 100); // 正文撑开
+    });
+
+    [Fact]
     public Task Padding_none_keeps_the_body_flush_but_pads_header_and_footer() => WpfUi.Run(() =>
     {
         var card = new Card { Header = "标题", Footer = "操作", Content = "内容", Padding = Space.None };

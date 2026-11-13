@@ -296,6 +296,8 @@ public class CardControl : Panel, IScopeAware
         /// <summary>按宽度排一遍；arrange 为 false 时只算高度。</summary>
         int Run(int width, bool arrange)
         {
+            // 卡片被拉得比内容高（网格里拉齐的一排）：多出来的给正文，页脚贴着底边（上游 body 的 flex-grow）
+            var slack = arrange ? Math.Max(0, owner.ClientSize.Height - Run(width, arrange: false)) : 0;
             var (inset, edge, line) = (owner.Inset, owner.EdgeInset, owner.Line);
             var inner = Math.Max(0, width - 2 * line - 2 * inset);
             var edgeInner = Math.Max(0, width - 2 * line - 2 * edge.Inline);
@@ -336,7 +338,7 @@ public class CardControl : Panel, IScopeAware
                 if (arrange) child.SetBounds(X(line + inset, inner), bodyTop + bodyHeight, inner, size.Height);
                 bodyHeight += size.Height;
             }
-            y = bodyTop + bodyHeight + inset;
+            y = bodyTop + bodyHeight + inset + slack;
             if (owner.Footer is { } footer)
             {
                 FooterTop = y;
