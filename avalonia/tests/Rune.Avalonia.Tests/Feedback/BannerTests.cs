@@ -1,7 +1,9 @@
+using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Automation.Provider;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
+using Avalonia.VisualTree;
 
 namespace Rune.Avalonia.Tests;
 
@@ -32,16 +34,14 @@ public class BannerTests
     public Task Closing_leaves_first_and_comes_back_when_not_removed() => HeadlessUi.Run(() =>
     {
         var banner = new Banner { Tone = StatusTone.Warning, Content = "试用还剩 3 天" };
-        var closed = 0;
-        banner.CloseRequested += (_, _) => closed++;
-        var window = HeadlessUi.Show(new StackPanel { Children = { banner } });
+        var root = (Visual)banner.GetVisualChildren().Single();
+        var (closed, opacityWhenAsked) = (0, -1.0);
+        banner.CloseRequested += (_, _) => (closed, opacityWhenAsked) = (closed + 1, root.Opacity);
+        HeadlessUi.Show(new StackPanel { Children = { banner } });
 
         ((IInvokeProvider)banner.CloseButton!.Peer()).Invoke();
-        Assert.True(banner.IsDismissing);
         HeadlessUi.Until(() => closed == 1);
-        Assert.False(banner.IsDismissing);
-        HeadlessUi.Pump(TimeSpan.FromMilliseconds(400));
-        HeadlessUi.Flush(window);
-        Assert.True(banner.IsVisible); // 使用方没移除：重新出现
+        Assert.Equal(0, opacityWhenAsked); // 离场结束才问（关了动画的机器上离场是同步的，不能看 IsDismissing 的中间态）
+        HeadlessUi.Until(() => root.Opacity == 1 && !banner.IsDismissing); // 使用方没移除：重新出现
     });
 }
