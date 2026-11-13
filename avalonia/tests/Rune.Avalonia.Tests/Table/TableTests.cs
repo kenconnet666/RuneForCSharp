@@ -52,7 +52,7 @@ public class TableTests
     }
 
     [Fact]
-    [Upstream("Table", "stickyHeader 与 sticky：滚动后表头贴着顶边、第一列贴着起始边")]
+    // 上游是浏览器测试（Table.browser.test.tsx）：stickyHeader 与 sticky，滚动后表头贴着顶边、第一列贴着起始边
     public Task The_sticky_header_and_column_stay_put_while_scrolling() => HeadlessUi.Run(() =>
     {
         var table = Sheet();
