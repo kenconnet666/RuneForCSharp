@@ -1,6 +1,6 @@
 namespace Rune.WinForms.Examples;
 
-/// <summary>Stat 页的示例（vue-tsx-pro 文档站 display/Stat）。live 要等 Sparkline。</summary>
+/// <summary>Stat 页的示例（vue-tsx-pro 文档站 display/Stat）。</summary>
 static class StatExamples
 {
     public static Example[] All =>
@@ -9,6 +9,7 @@ static class StatExamples
         new("Stat", "change", "变化量", "Change 默认按百分比显示，上升为成功色、下降为危险色；成本、耗时这类越低越好的指标写 InvertChange。变化量是绝对数时用 ChangeFormat 换格式。", Changes),
         new("Stat", "group", "一排指标", "StatGroupControl 把几个 StatControl 排成一排，按宽度换行（MinItemWidth，默认 9rem），同一行里之间一条竖线。超时、缺漏这类要引起注意的数写 Tone = danger，数值换成危险色。", Group),
         new("Stat", "loading", "加载中", "IsLoading 时数值与变化量换成骨架，指标名照常显示；CardControl 的 IsLoading 把正文换成几行骨架。读屏带 Busy 状态；很快完成的加载不出现骨架。", Loading),
+        new("Stat", "live", "数值变化", "数值变化时从旧值滚动到新值（AnimatedNumberControl），读屏只读终值；系统关闭动画时直接跳到新值。下方的迷你趋势是示例自己拼的最近 12 次取值（SparklineControl 的柱）。", Live),
         new("Stat", "animated-number", "AnimatedNumber 单独使用", "值变化时从旧值滚到新值，等宽数字不抖动。Format 是 Intl.NumberFormat 的选项加上缩放 Scale（NumericFormat），金额不写币种时用语言包的币种；值是 decimal，中间帧按浮点数算，停下时按原值格式化，不丢精度。Trend 按正负着色；Prefix、Suffix 是数字前后的文字，图标写 PrefixIcon。", Numbers),
     ];
 
@@ -66,6 +67,55 @@ static class StatExamples
         var note = Build.Card(new CardControl { Header = "本月说明", IsLoading = true }, new TextControl { Text = "实际销售额按财务口径统计，每月 5 日更新上月数据。" });
         toggle.IsCheckedChanged += (_, _) => count.IsLoading = sales.IsLoading = note.IsLoading = toggle.IsChecked;
         return Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Md, Align = FlexAlign.Stretch }, Build.Flex(new FlexControl(), toggle), Cards("12em", count, sales, note));
+    }
+
+    // 实时指标：每 2 秒推一个新值，数值滚动到新值，变化量与上一次比较；下面是最近 12 次的柱，最新的一根实色
+    static Control Live()
+    {
+        var random = new Random(3);
+        (string Label, IconData Icon, string Unit, int Spread, int Base)[] metrics =
+        [
+            ("在线人数", Lucide.Users, "人", 180, 3260), ("每分钟订单", Lucide.ShoppingCart, "单", 12, 86),
+            ("接口 QPS", Lucide.Activity, "次/秒", 90, 1420), ("平均延迟", Lucide.Gauge, "ms", 14, 118),
+        ];
+        var running = new SwitchControl { Text = "每 2 秒刷新", IsChecked = true };
+        var updates = new List<Action>();
+        var cards = new List<Control>();
+        foreach (var (label, icon, unit, spread, start) in metrics)
+        {
+            var history = Enumerable.Range(0, 12).Select(index => (decimal)Math.Round(start + Math.Sin(index) * spread)).ToList();
+            var trend = new SparklineControl { Type = SparklineType.Bar, Label = $"最近 12 次{label}" };
+            var stat = new StatControl { Label = label, Icon = icon, Unit = unit, ChangeLabel = "较上次", InvertChange = label == "平均延迟", Content = trend };
+            void Show()
+            {
+                var (value, previous) = (history[^1], history[^2]);
+                stat.Value = value;
+                stat.Change = previous == 0 ? 0 : Math.Round((value - previous) / previous, 4);
+                // 柱默认从 0 起；值都在几千上下时从略低于最小值的地方起，起伏才看得出
+                var (min, max) = ((double)history.Min(), (double)history.Max());
+                trend.Domain = (min - (max - min) / 3, null);
+                trend.Data = [.. history.Select(point => (decimal?)point)];
+            }
+            Show();
+            updates.Add(() =>
+            {
+                history.RemoveAt(0);
+                history.Add(Math.Max(0, Math.Round(history[^1] + (decimal)((random.NextDouble() - 0.5) * spread))));
+                Show();
+            });
+            cards.Add(Build.Card(new CardControl(), stat));
+        }
+        var grid = Build.Grid(new GridControl { MinItemWidth = "15em", Balanced = true, Gap = Space.Md }, [.. cards]);
+        var timer = new System.Windows.Forms.Timer { Interval = 2000 };
+        timer.Tick += (_, _) =>
+        {
+            if (running.IsChecked) updates.ForEach(update => update());
+        };
+        grid.HandleCreated += (_, _) => timer.Start();
+        grid.Disposed += (_, _) => timer.Dispose();
+        return Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Md, Align = FlexAlign.Stretch },
+            Build.Flex(new FlexControl { Gap = Space.Md, Align = FlexAlign.Center, Wrap = true }, running, new SmallControl { Tone = TextTone.Muted, Text = "数值滚动到新值，变化量与上一次比较" }),
+            grid);
     }
 
     static Control Numbers()

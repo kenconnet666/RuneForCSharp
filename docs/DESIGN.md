@@ -992,6 +992,16 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   根 Border 的 TextElement.FontSize 绑到控件的 FontSize：Gallery 与 inspect 的宿主里，说明的 TextBlock 没从控件继承到字号（测试里继承正常，原因没查清），绑上就稳了。
 - 示例：tones、status、variants、banner（Banner 在同一页）。Avalonia、WPF 与文档站的取值对照没有差异。
 
+### Sparkline（2026-11-14）
+
+- 几何是孪生文件 `SparklineGeometry`（Display/Sparkline）：横坐标按位置（折线 0 到 n-1、柱每个占一格），纵坐标 0（上）到 100（下），空值处断开，柱从 0 起、0.7 格宽，
+  最后一个值的位置；读屏的一句话也在这里（Lang.SparklineSummary，值按 NumericFormat 格式化，Label 在前，没有值时是 Lang.EmptyValue）。
+  各平台按控件的宽高把这套坐标拉伸着画（TS 的 preserveAspectRatio="none"），线宽不随拉伸变（vector-effect: non-scaling-stroke）。
+- 颜色是色调的实底（ToneFill，默认 accent）：折线 1.5 像素、圆头；面积 15%；柱 85%，标出最后一个值时前面 40%、最后一根实色；最后一个点 6 像素，外面一圈表面色。
+  高度默认 2em（控件自己的 Height 盖过它；TS 的 height 是 CSS 长度）；数据是 `IReadOnlyList<decimal?>`，纵向范围 Domain 是 (double? Min, double? Max)。
+- WinForms：Sparkline 是元素、SparklineControl 是单元素宿主；控件画不到自己外面，标出最后一个点时结束边与上下各让出点的半径加一圈（TS 的点有一半伸到图外）。
+- 示例：Sparkline 页的 cards（in-table 等 ColumnTable）与 Stat 页的 live（每 2 秒推一个新值）。
+
 ### Stat、StatGroup（2026-11-14）
 
 - 结构同 TS：第一行是图标框（1.75em、accentSoft 底，按 sm 的字号）与指标名（sm、次要色）、结束边是变化量（xs：箭头、空格宽、带符号的百分比、说明），放不下时变化量换到下一行；
@@ -1003,7 +1013,7 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - StatGroup 是 Grid（MinItemWidth 9rem、行间距 md、没有栏间距）：组里的 Stat 左右各空 md、起始边一条竖线；Avalonia、WPF 照 TS 往起始方向挪一条线宽、组裁掉每行第一个的线，
   WPF 的竖线与内边距写在 Stat 自己的 BorderThickness、Padding 上（同 Result），WinForms 不在一行开头时才画线。
 - WinForms：指标名、图标、单位、说明、字符串值是画的元素，数字与变化量是 AnimatedNumberControl 子控件（它实现了 IBaseline，单位按它的基线对齐），内容、底栏是使用方的控件。
-- 示例：basic、change、group、loading（live 要等 Sparkline）。取值对照：数值一行比文档站高约 4 像素（数字与单位按基线对齐时，桌面的行高分配与 CSS 不同）。
+- 示例：basic、change、group、loading、live。取值对照：数值一行比文档站高约 4 像素（数字与单位按基线对齐时，桌面的行高分配与 CSS 不同）。
 
 ### AnimatedNumber、NumericFormat（2026-11-14）
 

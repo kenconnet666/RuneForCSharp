@@ -326,6 +326,8 @@ export const PLATFORM_PROPS = new Set([
   'Text',
   'IsReadOnly',
   'MaxLength',
+  // 写成 CSS 长度的高度（Sparkline 的 height）：平台控件自己的 Height（像素），不写时组件给默认值（2em）
+  'Height',
 ]);
 
 /** 桌面上不做的组件与原因（ROADMAP 阶段 3） */
