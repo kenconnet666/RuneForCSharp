@@ -86,14 +86,32 @@ public static class EmSize
                 d.CoerceValue(Control.FontSizeProperty);
                 Refresh(d);
             }, (d, baseValue) => ScaleFontSize(d, baseValue, fontScale)));
-        if (cornerRadiusProperty is not null) cornerRadiusByType[controlType] = cornerRadiusProperty;
+        if (cornerRadiusProperty is null) return;
+        cornerRadiusByType[controlType] = cornerRadiusProperty;
+        // 圆角按大小收回（见 FitCorners）：大小变了重新算
+        EventManager.RegisterClassHandler(controlType, FrameworkElement.SizeChangedEvent,
+            new SizeChangedEventHandler((sender, _) => ((DependencyObject)sender).CoerceValue(cornerRadiusProperty)));
     }
 
-    /// <summary>圆角属性的 coerce 回调。</summary>
+    /// <summary>圆角属性的 coerce 回调：em 系数换成实际值，再按控件的大小收回过大的圆角。</summary>
     public static object CoerceCornerRadius(DependencyObject d, object baseValue)
     {
-        if (GetCornerRadius(d) is not { } f || CornerRadiusFor(d.GetType()) is not { } property) return baseValue;
-        return FromLibrary(d, property, baseValue) ? new CornerRadius(f * FontSize(d)) : baseValue;
+        var radius = (CornerRadius)baseValue;
+        if (GetCornerRadius(d) is { } f && CornerRadiusFor(d.GetType()) is { } property && FromLibrary(d, property, baseValue)) radius = new CornerRadius(f * FontSize(d));
+        return d is FrameworkElement { ActualWidth: > 0, ActualHeight: > 0 } element ? FitCorners(radius, element.ActualWidth, element.ActualHeight) : radius;
+    }
+
+    /// <summary>
+    /// 同 CSS：相邻两角的半径加起来超过边长时，四个角按同一个比例缩小。WPF 的 Border 横竖两个方向各缩各的，
+    /// radii.full（9999）在长方形上会画成椭圆而不是胶囊。
+    /// </summary>
+    internal static CornerRadius FitCorners(CornerRadius radius, double width, double height)
+    {
+        static double Ratio(double side, double sum) => sum > side ? side / sum : 1;
+        var scale = Math.Min(
+            Math.Min(Ratio(width, radius.TopLeft + radius.TopRight), Ratio(width, radius.BottomLeft + radius.BottomRight)),
+            Math.Min(Ratio(height, radius.TopLeft + radius.BottomLeft), Ratio(height, radius.TopRight + radius.BottomRight)));
+        return scale < 1 ? new CornerRadius(radius.TopLeft * scale, radius.TopRight * scale, radius.BottomRight * scale, radius.BottomLeft * scale) : radius;
     }
 
     static object CoercePadding(DependencyObject d, object baseValue)

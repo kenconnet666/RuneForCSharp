@@ -148,6 +148,7 @@ public abstract class TextInputBase : TextBox, IFieldControl
         count = GetTemplateChild(TextInputParts.Count) as CharacterCount;
         if (clear is not null) clear.Click += OnClear;
         OnTemplateParts();
+        ClearContentHostPadding();
         HideFocusRing();
         FitInnerButtons();
         Sync();
@@ -158,6 +159,16 @@ public abstract class TextInputBase : TextBox, IFieldControl
     {
         base.OnPropertyChanged(e);
         if (e.Property == FontSizeProperty) FitInnerButtons();
+        else if (e.Property == PaddingProperty) ClearContentHostPadding();
+    }
+
+    /// <summary>
+    /// TextBoxBase 把自己的 Padding 抄到 PART_ContentHost（滚动区）上，模板的外框又按 Padding 留了边（图标、前后缀也在边里）：
+    /// 文字会缩进两遍。抄过去之后清掉，边只留外框那一层。
+    /// </summary>
+    void ClearContentHostPadding()
+    {
+        if (GetTemplateChild("PART_ContentHost") is ScrollViewer host) host.Padding = default;
     }
 
     /// <summary>框里的小按钮按字号收紧（派生类加上自己的，如显示密码按钮）。</summary>

@@ -41,10 +41,10 @@ public class ButtonBase : System.Windows.Controls.Button
     /// <summary>按下时的波纹；不写时沿用 <see cref="Wpf.Ripple.Enabled"/>（默认开启）。</summary>
     public static readonly DependencyProperty RippleProperty = DependencyProperty.Register(nameof(Ripple), typeof(bool?), typeof(ButtonBase));
 
-    /// <summary>圆角（按钮家族的主题按 Radius 设 em 系数，EmSize 算出实际值）；不超过高度的一半。</summary>
+    /// <summary>圆角（按钮家族的主题按 Radius 设 em 系数，EmSize 算出实际值、按大小收回过大的圆角）。</summary>
     public static readonly DependencyProperty CornerRadiusProperty = DependencyProperty.Register(
         nameof(CornerRadius), typeof(CornerRadius), typeof(ButtonBase),
-        new FrameworkPropertyMetadata(default(CornerRadius), (d, _) => ((ButtonBase)d).UpdateClip(), CoerceCornerRadius));
+        new FrameworkPropertyMetadata(default(CornerRadius), (d, _) => ((ButtonBase)d).UpdateClip(), EmSize.CoerceCornerRadius));
 
     static readonly DependencyPropertyKey IsFocusVisibleKey = DependencyProperty.RegisterReadOnly(nameof(IsFocusVisible), typeof(bool), typeof(ButtonBase), new PropertyMetadata(false));
 
@@ -67,11 +67,7 @@ public class ButtonBase : System.Windows.Controls.Button
     }
 
     /// <summary>新建按钮。</summary>
-    public ButtonBase() => SizeChanged += (_, _) =>
-    {
-        CoerceValue(CornerRadiusProperty);
-        UpdateClip();
-    };
+    public ButtonBase() => SizeChanged += (_, _) => UpdateClip();
 
     /// <summary>加载中。</summary>
     public bool IsLoading { get => (bool)GetValue(IsLoadingProperty); set => SetValue(IsLoadingProperty, value); }
@@ -114,14 +110,6 @@ public class ButtonBase : System.Windows.Controls.Button
         ripples = GetTemplateChild("PART_Ripples") as Canvas;
         focusRing = GetTemplateChild("PART_FocusRing") as Border;
         UpdateClip();
-    }
-
-    /// <summary>em 算出的圆角不超过高度的一半：WPF 的 Border 不像 CSS 那样把过大的圆角缩回来，radii.full 会画成椭圆而不是胶囊。</summary>
-    static object CoerceCornerRadius(DependencyObject d, object baseValue)
-    {
-        var radius = (CornerRadius)EmSize.CoerceCornerRadius(d, baseValue);
-        var max = ((ButtonBase)d).ActualHeight / 2;
-        return max > 0 && radius.TopLeft > max ? new CornerRadius(max) : radius;
     }
 
     /// <summary>加载中点击无效（焦点保留）；Command 也不执行。</summary>
