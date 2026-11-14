@@ -169,4 +169,20 @@ public class FlexTests
         Assert.Equal(new Rectangle(100, 0, 50, 10), narrow.Bounds);
         Assert.Equal(150, next.Left);
     });
+
+    [Fact]
+    public Task Shrink_false_keeps_the_natural_size() => WinFormsUi.Run(() =>
+    {
+        var name = new TextControl { Text = "杭州远山精密机械有限公司（萧山二厂）", Truncate = true };
+        var city = new SmallControl { Text = "杭州" };
+        var row = new FlexControl { AutoSize = false, Size = new Size(120, 40) };
+        row.Controls.AddRange([name, city]);
+        row.SetShrink(city, false);
+        using var form = WinFormsUi.Show(row);
+        row.PerformLayout();
+
+        Assert.False(row.GetShrink(city));
+        Assert.Equal(city.GetPreferredSize(Size.Empty).Width, city.Width);
+        Assert.True(name.Width <= 120 - city.Width);
+    });
 }

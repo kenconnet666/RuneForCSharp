@@ -164,4 +164,22 @@ public class FlexTests
         Assert.Equal(40, flex.ActualHeight);
         Assert.Equal(30, box.ActualHeight);
     });
+
+    [Fact]
+    public Task Shrink_false_keeps_the_natural_size() => WpfUi.Run(() =>
+    {
+        var name = new Text { Text = "杭州远山精密机械有限公司（萧山二厂）", Truncate = true };
+        var city = new Small { Text = "杭州" };
+        Flex.SetShrink(city, false);
+        var row = new Flex { Width = 120, Children = { name, city } };
+        var host = new StackPanel { HorizontalAlignment = HorizontalAlignment.Left };
+        host.Resources.MergedDictionaries.Add(new RuneTheme());
+        host.Children.Add(row);
+        WpfUi.Show(host);
+        WpfUi.Flush();
+
+        city.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+        Assert.Equal(city.DesiredSize.Width, city.ActualWidth, 0.5);
+        Assert.True(name.ActualWidth < 120 - city.ActualWidth + 0.5);
+    });
 }

@@ -156,4 +156,19 @@ public class FlexTests
         Assert.Equal(40, flex.Bounds.Height);
         Assert.Equal(30, box.Bounds.Height);
     });
+
+    [Fact]
+    public Task Shrink_false_keeps_the_natural_size() => HeadlessUi.Run(() =>
+    {
+        var name = new Text { Text = "杭州远山精密机械有限公司（萧山二厂）", Truncate = true };
+        var city = new Small { Text = "杭州" };
+        Flex.SetShrink(city, false);
+        var row = new Flex { Width = 120, Children = { name, city } };
+        var window = HeadlessUi.Show(row);
+        HeadlessUi.Flush(window);
+
+        city.Measure(global::Avalonia.Size.Infinity);
+        Assert.Equal(city.DesiredSize.Width, city.Bounds.Width, 0.5);
+        Assert.True(name.Bounds.Width < 120 - city.Bounds.Width + 0.5);
+    });
 }

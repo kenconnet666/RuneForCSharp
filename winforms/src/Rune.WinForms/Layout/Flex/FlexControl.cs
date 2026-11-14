@@ -16,6 +16,7 @@ namespace Rune.WinForms;
 /// 自己的大小同 Label：自然宽度，不超过布局给的宽度与 MaximumSize（停靠、锚定时由父容器给）。
 /// </summary>
 [ProvideProperty("Grow", typeof(Control))]
+[ProvideProperty("Shrink", typeof(Control))]
 [ProvideProperty("AlignSelf", typeof(Control))]
 public class FlexControl : Panel, IExtenderProvider
 {
@@ -23,6 +24,7 @@ public class FlexControl : Panel, IExtenderProvider
     readonly PreferredSizeCache preferred;
     readonly HashSet<Control> growing = [];
     readonly HashSet<Control> overlays = [];
+    readonly HashSet<Control> rigid = [];
     readonly Dictionary<Control, FlexAlign> selfAligns = [];
 
     /// <summary>新建：自动大小。</summary>
@@ -139,6 +141,22 @@ public class FlexControl : Panel, IExtenderProvider
         if (value ? growing.Add(control) : growing.Remove(control)) PerformLayout();
     }
 
+    /// <summary>子控件空间不够时能不能缩小：默认能（缩到内容最窄的宽度）；不能时不比内容窄（CSS 的 flex-shrink: 0：截断的名称旁边的城市）。</summary>
+    /// <param name="control">子控件。</param>
+    [DisplayName("Shrink")]
+    [Category("Layout")]
+    [Description("空间不够时能缩小；关掉时不比内容窄。")]
+    [DefaultValue(true)]
+    public bool GetShrink(Control control) => !rigid.Contains(control);
+
+    /// <summary>设子控件能不能缩小。</summary>
+    /// <param name="control">子控件。</param>
+    /// <param name="value">能不能。</param>
+    public void SetShrink(Control control, bool value)
+    {
+        if (value ? rigid.Remove(control) : rigid.Add(control)) PerformLayout();
+    }
+
     /// <summary>子控件不参加排列（CSS 的绝对定位）：叠在上面，由主人自己摆（标签的关闭按钮、标签栏的按钮）。</summary>
     /// <param name="control">子控件。</param>
     /// <param name="value">不参加排列。</param>
@@ -173,6 +191,7 @@ public class FlexControl : Panel, IExtenderProvider
         base.OnControlRemoved(e);
         growing.Remove(e.Control!);
         overlays.Remove(e.Control!);
+        rigid.Remove(e.Control!);
         selfAligns.Remove(e.Control!);
     }
 
@@ -249,7 +268,8 @@ public class FlexControl : Panel, IExtenderProvider
         /// 按几乎为 0 的宽度取想要的大小（WinForms 的想要大小不受给的宽度限制：文字给出最长的词，不换行的给出自然宽度），
         /// 竖排时是内容的高度。
         /// </summary>
-        double MinMain(Control child, double cross) => !child.AutoSize ? Main(child.Size)
+        // 不缩小的项最小就是自己的尺寸（FlexLayout 取它与基础尺寸中小的那个）
+        double MinMain(Control child, double cross) => !owner.GetShrink(child) ? double.PositiveInfinity : !child.AutoSize ? Main(child.Size)
             : IsRow ? Preferred(child, new Size(2, 0)).Width
             : SizeOf(child, double.PositiveInfinity, cross).Height;
 

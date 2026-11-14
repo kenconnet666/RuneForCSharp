@@ -57,6 +57,10 @@ public class Flex : Panel
     public static readonly DependencyProperty GrowProperty = DependencyProperty.RegisterAttached(
         "Grow", typeof(bool), typeof(Flex), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsParentMeasure));
 
+    /// <summary>空间不够时能缩小，默认 true；false 时不比内容窄（CSS 的 flex-shrink: 0：截断的名称旁边的城市、展开按钮）。</summary>
+    public static readonly DependencyProperty ShrinkProperty = DependencyProperty.RegisterAttached(
+        "Shrink", typeof(bool), typeof(Flex), new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.AffectsParentMeasure));
+
     /// <summary>这一项自己的交叉轴对齐（CSS 的 align-self），盖过 Flex 的 Align（附加属性：竖向的 Separator 用它随行高拉伸）。</summary>
     public static readonly DependencyProperty AlignSelfProperty = DependencyProperty.RegisterAttached(
         "AlignSelf", typeof(FlexAlign), typeof(Flex), new FrameworkPropertyMetadata(default(FlexAlign), FrameworkPropertyMetadataOptions.AffectsParentMeasure));
@@ -111,6 +115,12 @@ public class Flex : Panel
 
     /// <summary>写子元素的 Grow。</summary>
     public static void SetGrow(UIElement element, bool value) => element.SetValue(GrowProperty, value);
+
+    /// <summary>读子元素的 Shrink。</summary>
+    public static bool GetShrink(UIElement element) => (bool)element.GetValue(ShrinkProperty);
+
+    /// <summary>写子元素的 Shrink。</summary>
+    public static void SetShrink(UIElement element, bool value) => element.SetValue(ShrinkProperty, value);
 
     /// <summary>读子元素的 AlignSelf。</summary>
     public static FlexAlign GetAlignSelf(UIElement element) => (FlexAlign)element.GetValue(AlignSelfProperty);
@@ -193,7 +203,8 @@ public class Flex : Panel
     /// 收缩时最多缩到多小：写了宽（高）就是它，否则是 MinWidth（MinHeight）。CSS 还会停在内容的最小宽度（最长的词），
     /// 平台的测量结果不会超过给的尺寸、量不出这个值，所以同 <c>min-width: 0</c>：文字换行或截断。
     /// </summary>
-    static double MinMain(UIElement child, bool row) => child is not FrameworkElement element ? 0 : row
+    // 不缩小的项最小就是自己的尺寸（FlexLayout 取它与基础尺寸中小的那个）
+    static double MinMain(UIElement child, bool row) => !GetShrink(child) ? double.PositiveInfinity : child is not FrameworkElement element ? 0 : row
         ? double.IsNaN(element.Width) ? element.MinWidth : element.Width
         : double.IsNaN(element.Height) ? element.MinHeight : element.Height;
 

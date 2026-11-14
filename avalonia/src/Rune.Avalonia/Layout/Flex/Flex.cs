@@ -50,6 +50,9 @@ public class Flex : Panel
     /// <summary>在外层 Flex 里分剩下的空间，并能缩到比内容窄（附加属性：任何子元素都能写，Flex 自己也有）。</summary>
     public static readonly AttachedProperty<bool> GrowProperty = AvaloniaProperty.RegisterAttached<Flex, Control, bool>("Grow");
 
+    /// <summary>空间不够时能缩小，默认 true；false 时不比内容窄（CSS 的 flex-shrink: 0：截断的名称旁边的城市、展开按钮）。</summary>
+    public static readonly AttachedProperty<bool> ShrinkProperty = AvaloniaProperty.RegisterAttached<Flex, Control, bool>("Shrink", true);
+
     /// <summary>这一项自己的交叉轴对齐（CSS 的 align-self），盖过 Flex 的 Align（附加属性：竖向的 Separator 用它随行高拉伸）。</summary>
     public static readonly AttachedProperty<FlexAlign> AlignSelfProperty = AvaloniaProperty.RegisterAttached<Flex, Control, FlexAlign>("AlignSelf");
 
@@ -67,7 +70,7 @@ public class Flex : Panel
     {
         AffectsMeasure<Flex>(DirectionProperty, AlignProperty, WrapProperty, RowGapFactorProperty, ColumnGapFactorProperty, TextElement.FontSizeProperty);
         AffectsArrange<Flex>(JustifyProperty);
-        AffectsParentMeasure<Flex>(GrowProperty);
+        AffectsParentMeasure<Flex>(GrowProperty, ShrinkProperty);
         AlignSelfProperty.Changed.AddClassHandler<Control>((control, _) => (control.Parent as Flex)?.InvalidateMeasure());
     }
 
@@ -106,6 +109,12 @@ public class Flex : Panel
 
     /// <summary>写子元素的 Grow。</summary>
     public static void SetGrow(Control element, bool value) => element.SetValue(GrowProperty, value);
+
+    /// <summary>读子元素的 Shrink。</summary>
+    public static bool GetShrink(Control element) => element.GetValue(ShrinkProperty);
+
+    /// <summary>写子元素的 Shrink。</summary>
+    public static void SetShrink(Control element, bool value) => element.SetValue(ShrinkProperty, value);
 
     /// <summary>读子元素的 AlignSelf。</summary>
     public static FlexAlign GetAlignSelf(Control element) => element.GetValue(AlignSelfProperty);
@@ -193,7 +202,8 @@ public class Flex : Panel
     /// 收缩时最多缩到多小：写了宽（高）就是它，否则是 MinWidth（MinHeight）。CSS 还会停在内容的最小宽度（最长的词），
     /// 平台的测量结果不会超过给的尺寸、量不出这个值，所以同 <c>min-width: 0</c>：文字换行或截断。
     /// </summary>
-    static double MinMain(Control child, bool row) => row
+    // 不缩小的项最小就是自己的尺寸（FlexLayout 取它与基础尺寸中小的那个）
+    static double MinMain(Control child, bool row) => !GetShrink(child) ? double.PositiveInfinity : row
         ? double.IsNaN(child.Width) ? child.MinWidth : child.Width
         : double.IsNaN(child.Height) ? child.MinHeight : child.Height;
 
