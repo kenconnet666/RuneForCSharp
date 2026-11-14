@@ -83,7 +83,11 @@ public class ResizeHandleControl : Control
 
     /// <summary>父控件当前的长度。</summary>
     [Browsable(false)]
-    public int Length => target is null ? MinLength : Horizontal ? target.Height : target.Width;
+    public int Length => Override is { } custom ? custom.Read() : target is null ? MinLength : Horizontal ? target.Height : target.Width;
+
+    /// <summary>调整的不是父控件时（DrawerControl 的面板宽度）：读当前长度、写新长度；位置由使用方摆。</summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    internal (Func<int> Read, Action<int> Write)? Override { get; set; }
 
     bool Horizontal => Orientation == Orientation.Horizontal;
 
@@ -111,7 +115,7 @@ public class ResizeHandleControl : Control
     /// <summary>贴边并叠在最上面：竖线在结束（起始）边、上下铺满；横线在下（上）边、左右铺满。</summary>
     void Place()
     {
-        if (target is null) return;
+        if (target is null || Override is not null) return;
         var thickness = (int)Math.Round(Tokens.Space.Sm * this.EmPixels());
         var client = target.ClientSize;
         // 竖线：结束边在右（从右到左排版时在左）
@@ -125,9 +129,10 @@ public class ResizeHandleControl : Control
     /// <summary>改父控件的长度（夹在范围里、取整），通知使用方。</summary>
     internal void SetLength(double length)
     {
-        if (target is null) return;
         var next = (int)SplitterScale.FitLength(length, MinLength, MaxLength);
-        if (Horizontal) target.Height = next;
+        if (Override is { } custom) custom.Write(next);
+        else if (target is null) return;
+        else if (Horizontal) target.Height = next;
         else target.Width = next;
         LengthChanged?.Invoke(this, next);
     }

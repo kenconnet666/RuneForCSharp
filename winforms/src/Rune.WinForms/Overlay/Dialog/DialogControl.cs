@@ -383,6 +383,9 @@ public class DialogControl : Control, IAnchored
     /// <summary>面板的内容窗口（Drawer 往里放宽度调整手柄）。</summary>
     private protected Form PanelForm => surface.Form;
 
+    /// <summary>面板里排标题行、正文、页脚的那一层（Drawer 给它最小宽度：拖窄以后内容被裁掉，不挤成一列）。</summary>
+    private protected Control ContentLayout => layout;
+
     /// <summary>直角面板（Drawer）。</summary>
     private protected virtual bool SquarePanel => false;
 
