@@ -147,6 +147,8 @@ export const PLATFORM_COMPONENT_PROP_RENAMES = {
   WinForms: {
     // 控件自己有 Size（边长）与 Refresh 方法
     QRCode: { size: 'Size', onRefresh: 'RefreshRequested' },
+    // 控件自己有 Size：起始一栏的百分比叫 Ratio，范围跟着叫 MinRatio、MaxRatio
+    Splitter: { _size: 'Ratio', minSize: 'MinRatio', maxSize: 'MaxRatio' },
     // 组自己生成控件：生成一项时的事件，处理完之后值由组写回
     CheckboxGroup: { propsItem: 'ItemGenerated' },
     RadioGroup: { propsItem: 'ItemGenerated' },
@@ -394,6 +396,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     Popover: { propsArrow: '面板、阴影与箭头是组件库画在分层窗口上的位图，箭头没有可改样式的部件' },
     HoverCard: { propsArrow: '同 PopoverControl：面板、阴影与箭头是组件库画在分层窗口上的位图，箭头没有可改样式的部件' },
     QRCode: Object.fromEntries(['propsLogo', 'propsOverlay', 'propsRefresh'].map((prop) => [prop, 'logo 与状态层是 QRCodeControl 画的（刷新按钮是子控件 ButtonControl），没有部件属性记录'])),
+    Splitter: Object.fromEntries(['propsStart', 'propsEnd', 'propsHandle', 'propsToggle'].map((prop) => [prop, '两栏是 ScrollAreaControl、分隔条是 Divider（SplitterHandleControl）、收起按钮是 IconButtonControl，都是真实的子控件，外观跟着各自的控件；没有部件属性记录'])),
     Checklist: Object.fromEntries(['propsItem', 'propsSummary', 'propsProgress', 'propsList', 'propsStatus', 'propsLabel', 'propsDescription', 'propsMeta', 'propsAction']
       .map((prop) => [prop, '每一项是 ChecklistRowControl 组合的子控件（状态、名称、说明、负责人 · 日期 · 证据、操作），没有部件属性记录'])),
     LoadingOverlay: {
