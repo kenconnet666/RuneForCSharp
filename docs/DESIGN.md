@@ -1378,6 +1378,12 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### OtpField（2026-11-15）
+
+- 同上游（input-otp 的做法）：只有一个真正的输入框，格子只是显示。Avalonia、WPF 的 OtpField 从 TextInputBase（平台 TextBox）派生，模板是自绘的 OtpSlots 加一个透明的文字层（Avalonia 的 TextPresenter、WPF 的 PART_ContentHost，前景、光标、选中都透明）；粘贴、退格、输入法、撤销、读屏的编辑框、字段的标签与出错都是现成的。WinForms 的 OtpFieldControl 自己画格子，真正的输入框是放在控件外面（看不见）的 TextBox，焦点转给它，读屏名称跟着字段的标签。
+- 值是 Text（同 Textarea）；上游的 type 叫 Charset（Numeric、Alphanumeric）；onComplete 是 Completed 事件（只在变成填满时触发一次：过滤造成的二次改写不重复触发）。过滤在值变了时做（输入法组合中的字不在 Text 里，组合结束才过滤），先过滤再截到 Length 位，不用 MaxLength（会先按原文截断，粘贴"123-456"丢一位）。
+- 格子的外壳颜色同 TextField（surface / soft 的 fill、border / borderStrong 悬停 / borderMuted 只读 / danger 出错），当前格画 2 像素焦点环，空的当前格里光标每半秒闪一次（系统关闭动画时常亮）。Mask：Avalonia 的 PasswordChar、WinForms 的 UseSystemPasswordChar；WPF 的 TextBox 没有密码字符，只是格子显示圆点。
+
 ### QRCode（2026-11-15）
 
 - 编码器照上游 utils/qr/encode 移植成孪生文件 QrEncoder（ISO/IEC 18004，字节模式、四档纠错、最小版本、罚分最低的掩码），另加 SvgPath / Svg 导出（桌面示例的"复制 SVG"）；测试照上游另写一个解码器把矩阵读回原文。QRCode 的模块是一条路径：Avalonia、WPF 直接解析 SvgPath，WinForms 拼 GraphicsPath。
