@@ -79,6 +79,8 @@ export const COMPONENT_PROP_RENAMES = {
   Countdown: { onEnd: 'Ended' },
   // 一次操作结束是事件
   Slider: { onValueCommit: 'ValueCommitted' },
+  // 边长是平台的宽度；Margin 是平台的外边距，静区叫 QuietZone；颜色是平台的前景、背景画刷
+  QRCode: { size: 'Width', margin: 'QuietZone', color: 'Foreground', bgColor: 'Background' },
   // Intl 的逐项选项是 .NET 的格式字符串（按语言包的文化）
   DateTime: { options: 'Format' },
   // 数据是平台的 ItemsSource；执行了一项是事件；输入框的文字同 TextBox 叫 Text；自定义选项内容是数据模板
@@ -137,6 +139,8 @@ export const PLATFORM_COMPONENT_PROP_RENAMES = {
     },
   },
   WinForms: {
+    // 控件自己有 Size（边长）、ForeColor、BackColor
+    QRCode: { size: 'Size', color: 'ForeColor', bgColor: 'BackColor' },
     // 组自己生成控件：生成一项时的事件，处理完之后值由组写回
     CheckboxGroup: { propsItem: 'ItemGenerated' },
     RadioGroup: { propsItem: 'ItemGenerated' },
@@ -184,6 +188,9 @@ const BUTTON_TYPE = '表单提交是浏览器的概念；对话框的默认、�
 
 /** 某个组件不移植的 prop 与原因（平台上没有对应的概念）：parity 不报缺 */
 export const PROPS_NOT_PORTED = {
+  QRCode: {
+    propsCode: '模块是 QRCode 自己画的一条路径（同 TS 的单条 path），没有元素可加属性；要自己处理时用 QrEncoder.Encode 的矩阵或 QrEncoder.Svg',
+  },
   Slider: {
     name: FORM_NAME,
     propsRoot: '外层就是 Slider 自己：样式直接写在它上面',
@@ -458,6 +465,8 @@ export const PLATFORM_PROPS = new Set([
   'MaxLength',
   // 写成 CSS 长度的高度（Sparkline 的 height）：平台控件自己的 Height（像素），不写时组件给默认值（2em）
   'Height',
+  // 同上，边长（QRCode 的 size）：平台控件自己的 Width（像素），不写时组件给默认值（10em）
+  'Width',
 ]);
 
 /** 桌面上不做的组件与原因（ROADMAP 阶段 3） */
