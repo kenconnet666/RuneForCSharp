@@ -210,7 +210,10 @@ public abstract class TextInputBase : TextBox, IFieldControl
         }
     }
 
-    void OnClear(object sender, RoutedEventArgs e)
+    void OnClear(object sender, RoutedEventArgs e) => ClearText();
+
+    /// <summary>清空按钮：清空文字，焦点回到输入框。派生类先清自己的值（NumberField 的值置空）再调它。</summary>
+    protected virtual void ClearText()
     {
         SetCurrentValue(TextProperty, "");
         Focus();
@@ -219,13 +222,17 @@ public abstract class TextInputBase : TextBox, IFieldControl
     /// <inheritdoc />
     protected override AutomationPeer OnCreateAutomationPeer() => new TextInputPeer(this);
 
-    /// <summary>读屏：类名是组件名；没写名称时取所在字段的标签。</summary>
-    sealed class TextInputPeer(TextInputBase owner) : TextBoxAutomationPeer(owner)
+    /// <summary>读屏：类名是组件名；没写名称时取所在字段的标签。派生类在它上面加自己的读屏接口（NumberField 的数值范围）。</summary>
+    /// <param name="owner">输入框。</param>
+    protected class TextInputPeer(TextInputBase owner) : TextBoxAutomationPeer(owner)
     {
+        /// <inheritdoc />
         protected override string GetHelpTextCore() => Field.DescribedBy(owner, base.GetHelpTextCore());
 
+        /// <inheritdoc />
         protected override string GetClassNameCore() => owner.GetType().Name;
 
+        /// <inheritdoc />
         protected override string GetNameCore() =>
             base.GetNameCore() is { Length: > 0 } name ? name : Field.Of(owner) is { } field && field.Owns(owner) ? field.LabelText ?? "" : "";
     }

@@ -1,0 +1,91 @@
+using Avalonia.Controls;
+
+namespace Rune.Avalonia.Examples;
+
+/// <summary>
+/// NumberField 的示例（vue-tsx-pro 文档站 input/NumberField）。值是 decimal：上游 number、bigint、Decimal 三种的示例在这里都是它；
+/// submit（原生表单提交）是网页的，range 要等 NumberRangeField。各框的值各自独立（上游几个框共用一个值）。
+/// </summary>
+static class NumberFieldExamples
+{
+    public static Example[] All =>
+    [
+        new("NumberField", "basic", "基础用法", "输入时是普通文字，失焦或回车时解析、夹到 Min–Max、对齐到 Step；解析不了时恢复原值，清空写回 null。Format 是数字格式（NumericFormat），认当前语言的小数点与千分位，也认中文输入法打出的全角数字。", Basic),
+        new("NumberField", "precise", "精确数值", "值是 decimal：十进制精确，加减与对齐步长都不经过浮点数，金额、超过 2⁵³ 的整数、长小数都不丢位。一开始为空时就是 null。", Precise),
+        new("NumberField", "units", "单位与缩放", "Suffix、Prefix 把单位放进输入框。值以元保存、按万元输入时写 Format 的 Scale = 10000：显示与编辑都是万元，写回时换回元；Min、Max、Step 仍按值本身的单位。只读时不显示加减按钮。", Units),
+        new("NumberField", "appearance", "外观与状态", "外观同 TextField：Variant、Size、Radius；减少、增加按钮不在 Tab 顺序里，按住时连续加减。", Appearance),
+    ];
+
+    static Grid Fields(string minItemWidth, params Control[] fields)
+    {
+        var grid = new Grid { MinItemWidth = minItemWidth, Gap = Space.Lg };
+        grid.Children.AddRange(fields);
+        return grid;
+    }
+
+    static Control Basic() => Fields("14em",
+        new Field { Label = "数量", Description = "1–99，↑ ↓ 加减 1，Page Up / Down 加减 10", Content = new NumberField { Value = 2, Min = 1, Max = 99 } },
+        new Field { Label = "重量", Description = "步长 0.1，提交时对齐，没有浮点误差", Content = new NumberField { Value = 1.5m, Min = 0, Step = 0.1m, Format = new NumericFormat { Style = NumericStyle.Unit, Unit = "kilogram" } } },
+        new Field { Label = "折扣", Description = "存 0–1 的小数，显示成百分比", Content = new NumberField { Value = 0.85m, Min = 0, Max = 1, Step = 0.05m, Format = new NumericFormat { Style = NumericStyle.Percent } } },
+        new Field { Label = "室外温度", Description = "可以是负数，Home / End 到两端", Content = new NumberField { Value = -4, Min = -40, Max = 60, Format = new NumericFormat { Style = NumericStyle.Unit, Unit = "celsius" } } },
+        new Field { Label = "评分", Description = "空着时为 null，按 ↑ 从 Min 开始", Content = new NumberField { Min = 1, Max = 5, PlaceholderText = "1–5" } });
+
+    static Control Precise()
+    {
+        Control Case(string label, string description, NumberField field)
+        {
+            var value = new Small { Tone = TextTone.Muted };
+            void Show() => value.Text = $"值：{field.Value?.ToString() ?? "null"}";
+            field.PropertyChanged += (_, e) =>
+            {
+                if (e.Property == NumberField.ValueProperty) Show();
+            };
+            Show();
+            return new Flex { Direction = FlexDirection.Column, Gap = Space.Sm, Children = { new Field { Label = label, Description = description, Content = field }, value } };
+        }
+        return Fields("16em",
+            Case("单价", "按两次 ↑：0.1 → 0.3，精确", new NumberField { Value = 0.1m, Step = 0.1m, Format = new NumericFormat { Style = NumericStyle.Currency, Currency = "CNY" } }),
+            Case("合计", "一开始为空，步长 0.01", new NumberField { Step = 0.01m, Min = 0, PlaceholderText = "0.00" }),
+            Case("播放量", "超过 2⁵³ 的整数，加减不丢位", new NumberField { Value = 9_007_199_254_740_993 }));
+    }
+
+    static Control Units()
+    {
+        var budget = new NumberField { Value = 155353.2m, Format = new NumericFormat { Scale = 10_000, MaximumFractionDigits = 2 }, Step = 100, Min = 0, Prefix = "¥", Suffix = "万元" };
+        var saved = new Small { Tone = TextTone.Muted };
+        void Show() => saved.Text = $"保存的值：{budget.Value?.ToString() ?? "null"} 元";
+        budget.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == NumberField.ValueProperty) Show();
+        };
+        Show();
+        var stores = new NumberField { Value = 40, Suffix = "家", IsReadOnly = true };
+        global::Avalonia.Automation.AutomationProperties.SetName(stores, "门店数量（只读）");
+        return Fields("16em",
+            new Flex { Direction = FlexDirection.Column, Gap = Space.Sm, Children = { new Field { Label = "年度预算", Description = "值是元，按万元输入；步长 100 元", Content = budget }, saved } },
+            new Field { Label = "运费目标", Content = new NumberField { Value = 12.5m, Step = 0.01m, Min = 0, Format = new NumericFormat { MinimumFractionDigits = 2 }, Suffix = "元/单", Stepper = false } },
+            new Flex
+            {
+                Direction = FlexDirection.Column, Gap = Space.Sm,
+                Children = { new Field { Label = "门店数量", Content = new NumberField { Value = 40, Min = 0, Suffix = "家" } }, new Small { Tone = TextTone.Muted, Text = "只读时不显示加减按钮：" }, stores },
+            });
+    }
+
+    static Control Appearance()
+    {
+        var fields = new List<Control>();
+        foreach (var variant in new[] { ControlVariant.Surface, ControlVariant.Soft })
+            foreach (var size in new[] { TextSize.Sm, TextSize.Md, TextSize.Lg })
+                fields.Add(new Field { Label = $"{variant} · {size}", Content = new NumberField { Value = 12, Variant = variant, Size = size } });
+        fields.AddRange(
+        [
+            new Field { Label = "胶囊形", Content = new NumberField { Value = 12, Radius = Radius.Full } },
+            new Field { Label = "可清空", Description = "Clearable：选填的数量，清空后值是 null", Content = new NumberField { Value = 12, Clearable = true } },
+            new Field { Label = "不要加减按钮", Description = "Stepper=false，方向键照常可用", Content = new NumberField { Value = 12, Stepper = false } },
+            new Field { Label = "只读", Content = new NumberField { Value = 12, IsReadOnly = true } },
+            new Field { Label = "不可用", Content = new NumberField { Value = 12, IsEnabled = false } },
+            new Field { Label = "出错", Error = "库存只剩 10 件", Content = new NumberField { Value = 12, Max = 10 } },
+        ]);
+        return Fields("13em", [.. fields]);
+    }
+}

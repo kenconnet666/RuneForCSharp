@@ -829,7 +829,31 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   默认样式（主题）里的值，部件样式 BasedOn 了 ButtonBase 的样式时 Padding 来源成了"样式"，系数就不生效。
 - WinForms 的可点一块（Steps 可点回的步骤、Pager 的卡片）共用内部的 `PressableFlex`（Utils/Layout）：能聚焦，点击、Enter、空格发 Click，
   子控件的点击、悬停转给它，默认悬停 fillHover 底、sm 圆角、键盘聚焦画焦点环，子类换圆角与底色、边框的画法。
-- 同页的分页栏（PaginationBar）、跳页（PageJump）、每页条数（PageSizeSelect）还没做。
+- PageSizeSelect 是 Select 的子类（外观同 Select，默认 sm）：`PageSize` 与 Select 的字符串 Value 互相同步，用户换了条数发 `PageSizeChanged`
+  （TS 的 onSizeChange），选项文字取语言包（"20 条/页"）。值那一格按最长的选项定宽（TS 把所有选项叠在同一格），换条数时宽窄不变。
+- PageJump："跳至 [ ] 页"，输入框是没有加减按钮、4.5em 宽的 NumberField，回车或失焦后跳过去（四舍五入、夹在 1–PageCount）并清空；
+  读屏念输入框的名称（"跳到第几页"），前后两段文字只是视觉提示。
+- PaginationBar：总数在起始边，页码、每页条数、跳页一组在结束边，换到下一行时也靠右（TS 的 margin-inline-start: auto）；换条数回第 1 页。
+  `TotalText`（Func&lt;PageRange, string&gt;，TS 的 showTotal 给函数）自己写总数；ShowTotal、ShowSizeSelect、ShowJump 关掉不要的部分。
+  按自己的宽度取舍（TS 的容器查询）：窄于 36em 不显示跳页，窄于 24em 总数单独一行（em 按字号档位与 DPI 算）。WinForms 在 OnSizeChanged 里
+  判断，变了时把改子控件挪到这一轮排版之后（BeginInvoke），排版中途改子控件会再触发排版。
+- 踩过：WinForms 的容器重写 GetPreferredSize 后丢了基类"先把给的大小夹到 MaximumSize 再量"的一步，限了最大宽度的卡片按不限宽量出一行的高度，
+  宽度被夹窄后内容换行、被裁掉（20rem 卡片里的分页栏）；改在三个容器共用的 PreferredSizeCache 里夹。
+
+### NumberField（2026-11-14）
+
+- 值是 `decimal?`（TS 的 valueType 在 number 与 bigint 之间选，C# 的 decimal 十进制精确，金额、大整数都不经过浮点数），空着时 null；
+  Avalonia、WPF 默认双向绑定，WinForms 发 `ValueChanged`。Min、Max、Step（默认 1）、BigStep（默认 Step × 10）、Format（NumericFormat）、
+  Icon、Prefix、Suffix、Stepper（默认 true，只读时不显示）、Clearable（清空写回 null）。外壳同 TextField（共用 TextInputBase / TextInputControl）。
+- 规则是孪生文件 `Input/NumberField/NumberRules.cs`：TryParse 认当前语言的小数点与千分位、全角数字与全角句点；Snap 从 Min（或 0）按步长
+  四舍五入（远离零）再夹到范围；有 Scale（或百分比）时显示与编辑都按缩放后的单位，写回时换回值本身的单位。
+- 输入时是草稿：失焦或回车时解析、对齐、夹住后写回，解析不了时恢复原值；文字没改过时不写（只是聚焦再离开，不该把值取整）。
+  没在编辑时按格式显示，编辑时去掉千分位。↑ / ↓、Page Up / Page Down、Home / End 是加减（spinbutton 的约定），不挪光标。
+- 加减按钮（ghost、中性、圆形，不在 Tab 顺序里，名称取语言包）到头时不可用；按住连续加减：先走一步，停 400ms 后每 60ms 一步（同 React Aria）；
+  指针按下已走过一步，随后的 Click 不再走，读屏、键盘触发的 Click 照常走。读屏里是 SpinButton（Avalonia 的 Spinner、WPF 的 RangeValue 模式）。
+- NumericFormat 加了 `Unit` 样式（TS 的 Intl 单位格式）：常用单位按语言取符号或文字（°C、kg、米 / m、天 / day），桌面没有 Intl 的完整单位表。
+- 文字输入的外壳给子类留了口子：`ClearText()` 可重写（NumberField 清空时写回 null）、读屏对象可继承（TextInputPeer / FieldAccessibleObject）。
+- TS 的 name（表单字段名）是浏览器的概念，没做。
 
 ### ToggleGroup（2026-11-07）
 

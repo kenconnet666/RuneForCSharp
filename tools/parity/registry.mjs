@@ -41,6 +41,8 @@ export const COMPONENT_PROP_RENAMES = {
   CodeText: { text: 'Source' },
   // Measure 是布局的方法
   Prose: { measure: 'LimitLineLength' },
+  // 每页条数本身叫 PageSize，换了条数的事件跟着叫 PageSizeChanged
+  PageSizeSelect: { onSizeChange: 'PageSizeChanged' },
   // Name 是控件名；图片给平台的图片对象
   Avatar: { name: 'DisplayName', src: 'Source' },
   UserButton: { name: 'DisplayName', src: 'Source' },
@@ -170,6 +172,10 @@ export const PROPS_NOT_PORTED = {
   },
   NavList: { propsList: 'nav > ul 是 HTML 的结构：NavList 本身就是那一列' },
   Pagination: { propsItem: '外层的 li 是 HTML 列表的结构：桌面上页码按钮、省略号直接排在列表里' },
+  NumberField: {
+    valueType: '值固定是 decimal?：十进制精确，金额、大整数不经过浮点数，不必按场景选 number 或 bigint；要别的类型时调用方转换',
+    name: FORM_NAME,
+  },
   Steps: { propsConnector: '连接线由 Steps 按圆圈的位置自己画（横竖两种画法统一；WinForms 的子控件是各自的窗口，会盖住父级画的东西），不是一个元素' },
   NavItem: { propsItem: '外层的 li 是 HTML 列表的结构：桌面上导航项本身就是列表里的一行' },
   ItemListItem: Object.fromEntries(['propsLink', 'propsButton'].map((prop) => [prop, '标题里伸展的链接、按钮是网页让整条可点的写法：桌面上整条就是一个可点的控件（Href、Invoked），没有里面那一层'])),
@@ -231,6 +237,10 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     ScrollArea: { propsScrollbar: '两条滚动条是平台 ScrollViewer 认的固定部件名：样式里用 ScrollAreaParts.VerticalScrollbar、HorizontalScrollbar 选中' },
   },
   WPF: {
+    PaginationBar: Object.fromEntries(
+      ['propsControls', 'propsPagination', 'propsSizeSelect', 'propsJump']
+        .map((prop) => [prop, '页码、每页条数、跳页是公开的 PaginationPart、SizeSelectPart、JumpPart（各自有主题样式），直接改它们；结束边那一组是 PaginationBar 代码建的面板']),
+    ),
     ScrollArea: { propsViewport: '视口就是 ScrollArea 自己：读屏名称、焦点都在它身上；滚动呈现器没有部件样式' },
     ...Object.fromEntries(['Dialog', 'AlertDialog'].map((name) => [name, Object.fromEntries(['propsHeader', 'propsTitle', 'propsClose', 'propsDescription', 'propsBody', 'propsFooter', 'propsCancel', 'propsConfirm']
       .map((prop) => [prop, '标题行、标题、关闭按钮、说明、正文、页脚、按钮是 Dialog 代码组合的子元素，部件样式键只有面板、遮罩与阴影；外观跟着各自组件的主题样式']))])),
@@ -297,6 +307,17 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     TextField: Object.fromEntries(
       ['propsRoot', 'propsIcon', 'propsIconEnd', 'propsPrefix', 'propsSuffix', 'propsCount', 'propsClear', 'propsReveal']
         .map((prop) => [prop, '外壳是 TextInputControl 自己画的，里面的图标、前后缀、按钮、字数是子控件，没有部件属性：外观跟主题，按钮走 ProviderControl 的组件定制']),
+    ),
+    NumberField: Object.fromEntries(
+      ['propsRoot', 'propsIcon', 'propsPrefix', 'propsSuffix', 'propsDecrement', 'propsIncrement', 'propsClear']
+        .map((prop) => [prop, '外壳是 TextInputControl 自己画的，里面的图标、前后缀、加减与清空按钮是子控件，没有部件属性：外观跟主题，按钮走 ProviderControl 的组件定制']),
+    ),
+    PageJump: Object.fromEntries(
+      ['propsBefore', 'propsInput', 'propsAfter'].map((prop) => [prop, '"跳至""页"与输入框是 PageJumpControl 的子控件，没有部件属性：外观跟主题，宽度与字号按 TextSize']),
+    ),
+    PaginationBar: Object.fromEntries(
+      ['propsTotal', 'propsControls', 'propsPagination', 'propsSizeSelect', 'propsJump']
+        .map((prop) => [prop, '页码、每页条数、跳页是公开的 PaginationPart、SizeSelectPart、JumpPart，直接改它们的属性；总数与结束边那一组是 PaginationBarControl 排的子控件']),
     ),
     Textarea: Object.fromEntries(
       ['propsRoot', 'propsCount', 'propsClear']

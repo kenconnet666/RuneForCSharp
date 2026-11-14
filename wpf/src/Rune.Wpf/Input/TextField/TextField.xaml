@@ -94,6 +94,45 @@
     </Setter>
   </Style>
 
+  <!-- NumberField：外壳同 TextField，右侧是减少、增加按钮（同清空按钮的紧凑尺寸，不在 Tab 顺序里） -->
+  <Style TargetType="rune:NumberField" BasedOn="{StaticResource Rune.TextInput}">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="rune:NumberField">
+          <Grid>
+            <Border x:Name="PART_Root" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
+              <rune:Flex Align="center" Gap="sm">
+                <rune:Icon x:Name="PART_Icon" Data="{TemplateBinding Icon}" Foreground="{DynamicResource Rune.Brush.TextMuted}" />
+                <TextBlock x:Name="PART_Prefix" Text="{TemplateBinding Prefix}" Foreground="{DynamicResource Rune.Brush.TextMuted}" VerticalAlignment="Center" />
+                <Grid rune:Flex.Grow="True" VerticalAlignment="Center">
+                  <TextBlock x:Name="PART_Placeholder" Text="{TemplateBinding PlaceholderText}" Foreground="{DynamicResource Rune.Brush.TextPlaceholder}"
+                             Visibility="Collapsed" IsHitTestVisible="False" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                  <ScrollViewer x:Name="PART_ContentHost" Focusable="False" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"
+                                VerticalAlignment="Center" />
+                </Grid>
+                <TextBlock x:Name="PART_Suffix" Text="{TemplateBinding Suffix}" Foreground="{DynamicResource Rune.Brush.TextMuted}" VerticalAlignment="Center" />
+                <rune:ClearButton x:Name="PART_Clear" Radius="full" Visibility="Collapsed" Cursor="Hand" />
+                <rune:IconButton x:Name="PART_Decrement" Icon="{x:Static rune:Lucide.Minus}" Radius="full" Variant="ghost" Tone="neutral" Focusable="False" Cursor="Hand" />
+                <rune:IconButton x:Name="PART_Increment" Icon="{x:Static rune:Lucide.Plus}" Radius="full" Variant="ghost" Tone="neutral" Focusable="False" Cursor="Hand" />
+              </rune:Flex>
+            </Border>
+            <Border x:Name="PART_FocusRing" Visibility="Collapsed" IsHitTestVisible="False" Margin="-1" BorderThickness="2"
+                    BorderBrush="{DynamicResource Rune.Brush.FocusRing}" CornerRadius="{TemplateBinding CornerRadius}" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="Icon" Value="{x:Null}"><Setter TargetName="PART_Icon" Property="Visibility" Value="Collapsed" /></Trigger>
+            <Trigger Property="Prefix" Value="{x:Null}"><Setter TargetName="PART_Prefix" Property="Visibility" Value="Collapsed" /></Trigger>
+            <Trigger Property="Suffix" Value="{x:Null}"><Setter TargetName="PART_Suffix" Property="Visibility" Value="Collapsed" /></Trigger>
+            <Trigger Property="Text" Value=""><Setter TargetName="PART_Placeholder" Property="Visibility" Value="Visible" /></Trigger>
+            <Trigger Property="IsKeyboardFocusWithin" Value="True"><Setter TargetName="PART_FocusRing" Property="Visibility" Value="Visible" /></Trigger>
+            <Trigger Property="ShowsInvalid" Value="True"><Setter TargetName="PART_FocusRing" Property="BorderBrush" Value="{DynamicResource Rune.Brush.Danger}" /></Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
   <!-- Textarea：外壳上下多留 space.xs（多行时内容从顶部开始），文字区上下各 space.xs、行数的高度在 Textarea.cs 里按行高算；清空按钮贴第一行，字数贴右下角 -->
   <Style TargetType="rune:Textarea" BasedOn="{StaticResource Rune.TextInput}">
     <Setter Property="rune:EmSize.Padding" Value="0.75,0.25" />

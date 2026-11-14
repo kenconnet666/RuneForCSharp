@@ -36,11 +36,7 @@ public abstract class TextInputControl : FlexControl, IFieldControl
         };
         input.GotFocus += (_, _) => Invalidate();
         input.LostFocus += (_, _) => Invalidate();
-        clear.Click += (_, _) =>
-        {
-            Text = "";
-            input.Focus();
-        };
+        clear.Click += (_, _) => ClearText();
         ControlAdded += (_, e) =>
         {
             e.Control!.MouseEnter += (_, _) => SetHovered(true);
@@ -200,6 +196,13 @@ public abstract class TextInputControl : FlexControl, IFieldControl
 
     void IFieldControl.FieldChanged() => Sync();
 
+    /// <summary>清空按钮：清空文字，焦点回到输入框。派生类先清自己的值（NumberField 的值置空）再调它。</summary>
+    protected virtual void ClearText()
+    {
+        Text = "";
+        input.Focus();
+    }
+
     /// <inheritdoc />
     protected override void OnParentChanged(EventArgs e)
     {
@@ -292,15 +295,21 @@ public abstract class TextInputControl : FlexControl, IFieldControl
     /// <inheritdoc />
     protected override AccessibleObject CreateAccessibilityInstance() => new FieldAccessibleObject(this);
 
-    sealed class FieldAccessibleObject(TextInputControl owner) : ControlAccessibleObject(owner)
+    /// <summary>读屏：名称是字段的标签，帮助文字拼上字段的说明与错误，值是输入的文字。派生类改角色（NumberField 是 SpinButton）。</summary>
+    /// <param name="owner">输入框。</param>
+    protected class FieldAccessibleObject(TextInputControl owner) : ControlAccessibleObject(owner)
     {
+        /// <inheritdoc />
         public override string? Help => FieldControl.DescribedBy(owner, base.Help);
 
+        /// <inheritdoc />
         // 平台默认的名称取 Text，这里的 Text 是输入的值：只认 AccessibleName，没有时是字段的标签
         public override string? Name => owner.AccessibleName is { Length: > 0 } name ? name : FieldControl.Of(owner) is { } scope && scope.Owns(owner) ? scope.Label : null;
 
+        /// <inheritdoc />
         public override AccessibleRole Role => AccessibleRole.Text;
 
+        /// <inheritdoc />
         public override string? Value { get => owner.Text; set => owner.Text = value ?? ""; }
     }
 }

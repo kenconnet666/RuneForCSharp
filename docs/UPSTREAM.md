@@ -360,7 +360,7 @@ Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_
 | Switch 轨道悬停混进正文色（关 15%、开 12%，oklab）；输入外壳 soft 悬停 fillHover（bbdf86c9） | 已做 | 已跟：Switch 的 TrackHover（sRGB 里混，差不到一个色阶），TextField、Select 的 soft 悬停 |
 | Checklist、KanbanBoard、Upload、色块、Image、Carousel、Splitter 的悬停（bbdf86c9），Splitter / ResizeHandle 的悬停聚焦拖动（1046ed37） | 还没做 | 做时照新的 |
 | TabList 横排可滚时可滚的一头渐隐（604d1334） | TabList 已做滚动 | 2026-11-14 做了：Avalonia、WPF 是滚动区域的 OpacityMask；WinForms 的标签是各自的窗口，没有渐隐 |
-| Steps 横排连接线对齐圆圈中线（4a257b71） | 还没做 | 做时照新的 |
+| Steps 横排连接线对齐圆圈中线（4a257b71） | 已做（2026-11-14 移植时照新的） | 连接线按圆圈的中线画 |
 | AppShell：收起按钮从侧栏底部挪到品牌格结束边，收起后品牌格只放居中的展开按钮，AppShellBrand 不再按收起隐藏产品名（cb28b280） | 已做 | 已跟：三个平台，去掉 CollapseBar 部件、WPF 的 AppShellBrand.IsCompact 附加属性、WinForms 的 IsCompact |
 | 横排单选、复选组至少控件高、竖直居中，卡片组 stretch（d7af9b3d）；choice 根按基线排（0255a355） | 组已做 | 已跟横排的高度与居中；基线对齐我们的 Field 本来按文字基线排 |
 | Card 正文 flex-grow:1（e066fd2a）；padding=none 页头页脚留内边距（b70cbd69） | Card 已做 | 已跟：三个平台 |

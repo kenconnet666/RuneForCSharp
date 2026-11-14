@@ -14,6 +14,9 @@ public enum NumericStyle
 
     /// <summary>金额：币种不写时取语言包的（Lang.Currency）。</summary>
     Currency,
+
+    /// <summary>带单位（Intl 的 unit 样式）：单位名写在 NumericFormat.Unit 上，如 kilogram、celsius、kilobyte。</summary>
+    Unit,
 }
 
 /// <summary>正负号怎样显示（Intl.NumberFormat 的 signDisplay）。</summary>
@@ -53,6 +56,9 @@ public sealed record NumericFormat
 
     /// <summary>币种（ISO 4217，如 CNY、USD）；不写时取语言包的。</summary>
     public string? Currency { get; init; }
+
+    /// <summary>单位（Style 为 Unit 时）：Intl 的单位名，如 kilogram、celsius、meter、day、kilobyte。</summary>
+    public string? Unit { get; init; }
 
     /// <summary>最少几位小数（不够补 0）。</summary>
     public int? MinimumFractionDigits { get; init; }
@@ -101,6 +107,7 @@ public sealed record NumericFormat
         {
             NumericStyle.Percent => digits + "%",
             NumericStyle.Currency => CurrencySymbol(currency!, culture) + digits,
+            NumericStyle.Unit when Unit is { } unit => digits + UnitText(unit, rounded, culture),
             _ => digits,
         };
         var sign = SignDisplay switch
@@ -113,6 +120,37 @@ public sealed record NumericFormat
         };
         var text = sign + body;
         return string.IsNullOrEmpty(Suffix) ? text : $"{text} {Suffix}";
+    }
+
+    /// <summary>
+    /// 单位的写法（同 Intl 的 short）：中文的长度、容量、时间是汉字、紧跟数字，其余（含英文）是缩写、隔一个空格；温度、百分号紧跟数字。
+    /// 表里没有的单位原样写在后面。
+    /// </summary>
+    static string UnitText(string unit, decimal value, CultureInfo culture)
+    {
+        var chinese = culture.TwoLetterISOLanguageName == "zh";
+        return unit switch
+        {
+            "celsius" => "°C",
+            "fahrenheit" => "°F",
+            "percent" => "%",
+            "kilogram" => " kg",
+            "gram" => " g",
+            "kilobyte" => " kB",
+            "megabyte" => " MB",
+            "gigabyte" => " GB",
+            "terabyte" => " TB",
+            "byte" => chinese ? " B" : " byte",
+            "meter" => chinese ? "米" : " m",
+            "kilometer" => chinese ? "公里" : " km",
+            "centimeter" => chinese ? "厘米" : " cm",
+            "liter" => chinese ? "升" : " L",
+            "second" => chinese ? "秒" : " sec",
+            "minute" => chinese ? "分钟" : " min",
+            "hour" => chinese ? "小时" : " hr",
+            "day" => chinese ? "天" : Math.Abs(value) == 1 ? " day" : " days",
+            _ => " " + unit,
+        };
     }
 
     /// <summary>小数位数：写了的为准；只写了一头时另一头按 Intl 的默认值收拢。</summary>

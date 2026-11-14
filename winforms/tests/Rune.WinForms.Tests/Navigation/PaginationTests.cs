@@ -58,3 +58,73 @@ public class PaginationTests
         Assert.Equal(AccessibleRole.Link, pager.Cards.First().AccessibilityObject.Role);
     });
 }
+
+/// <summary>PageSizeSelectControl、PageJumpControl、PaginationBarControl：条数与 Select 的值同步；跳页夹到范围、输入框清空；分页栏的总数、换条数回第 1 页、窄时收起跳页、总数单独一行。</summary>
+public class PaginationBarTests
+{
+    [Fact]
+    public Task Page_size_select_keeps_the_number_and_the_value_in_sync() => WinFormsUi.Run(() =>
+    {
+        var select = new PageSizeSelectControl { PageSize = 20 };
+        using var form = WinFormsUi.Show(select);
+        int? changed = null;
+        select.PageSizeChanged += (_, size) => changed = size;
+
+        Assert.Equal("20", select.Value);
+        select.Value = "50"; // 用户选了 50 条/页
+        Assert.Equal(50, select.PageSize);
+        Assert.Equal(50, changed);
+        Assert.Equal(ProviderControl.LangOf(select).PageSizeLabel, select.AccessibleName);
+    });
+
+    [Fact]
+    public Task Page_jump_clamps_and_clears() => WinFormsUi.Run(() =>
+    {
+        var jump = new PageJumpControl { PageCount = 12 };
+        using var form = WinFormsUi.Show(jump);
+
+        jump.Input.Value = 40;
+        Assert.Equal(12, jump.Page);
+        Assert.Null(jump.Input.Value);
+    });
+
+    [Fact]
+    public Task Bar_shows_the_range_and_resets_the_page_on_size_change() => WinFormsUi.Run(() =>
+    {
+        var bar = new PaginationBarControl { Page = 3, PageSize = 10, Total = 95, AutoSize = false, Width = 760 };
+        using var form = WinFormsUi.Show(bar);
+        var changed = 0;
+        bar.PageChanged += (_, _) => changed++;
+
+        Assert.Equal(new PageRange(21, 30, 95), bar.Range);
+        Assert.Equal(ProviderControl.LangOf(bar).PaginationRange(21, 30, 95), bar.TotalPart.Text);
+        Assert.True(bar.JumpPart.Visible);
+
+        bar.SizeSelectPart.Value = "20";
+        Assert.Equal(20, bar.PageSize);
+        Assert.Equal(1, bar.Page);
+        Assert.Equal(1, changed);
+
+        bar.PaginationPart.Page = 2; // 点了页码：写回分页栏
+        Assert.Equal(2, bar.Page);
+
+        bar.Width = 300; // 窄于 36em：不显示跳页
+        WinFormsUi.Pump();
+        Assert.False(bar.JumpPart.Visible);
+    });
+
+    [Fact]
+    public Task Narrow_bar_puts_the_total_on_its_own_line_and_the_card_grows() => WinFormsUi.Run(() =>
+    {
+        var bar = new PaginationBarControl { Page = 4, Total = 86, ShowSizeSelect = false };
+        var card = new CardControl { Controls = { bar } };
+        card.MinimumSize = card.MaximumSize = new Size(320, 0);
+        using var form = WinFormsUi.Show(card);
+        WinFormsUi.Pump();
+
+        Assert.False(bar.JumpPart.Visible);
+        var row = bar.PaginationPart.Parent!;
+        Assert.True(row.Top >= bar.TotalPart.Bottom, $"total {bar.TotalPart.Bounds} row {row.Bounds} bar {bar.Bounds}"); // 页码换到总数下面一行
+        Assert.True(bar.Bottom <= card.ClientSize.Height - card.Padding.Bottom, $"bar {bar.Bounds} card {card.ClientSize}"); // 卡片随之长高，没有裁掉
+    });
+}

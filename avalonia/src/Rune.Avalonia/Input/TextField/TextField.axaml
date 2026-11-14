@@ -153,6 +153,58 @@
     <Style Selector="^ /template/ rune|CharacterCount#PART_Count"><Setter Property="Margin" Value="{rune:Em 0, 0, 0, 0.25}" /></Style>
   </ControlTheme>
 
+  <!-- NumberField：外壳同 TextField，右侧是减少、增加按钮（同清空按钮的紧凑尺寸，不在 Tab 顺序里） -->
+  <ControlTheme x:Key="{x:Type rune:NumberField}" TargetType="rune:NumberField" BasedOn="{StaticResource Rune.TextInput}">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border Name="PART_Root" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
+            <rune:Flex Align="center" Gap="sm">
+              <rune:Icon Name="PART_Icon" Data="{TemplateBinding Icon}" IsVisible="{TemplateBinding Icon, Converter={x:Static ObjectConverters.IsNotNull}}" />
+              <TextBlock Name="PART_Prefix" Text="{TemplateBinding Prefix}" IsVisible="{TemplateBinding Prefix, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                         VerticalAlignment="Center" />
+              <Panel rune:Flex.Grow="True" ClipToBounds="True" VerticalAlignment="Center">
+                <TextBlock Name="PART_Placeholder" Text="{TemplateBinding PlaceholderText}" Foreground="{TemplateBinding PlaceholderForeground}"
+                           IsVisible="False" IsHitTestVisible="False" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                <TextPresenter Name="PART_TextPresenter"
+                               Text="{TemplateBinding Text, Mode=TwoWay}"
+                               CaretBlinkInterval="{TemplateBinding CaretBlinkInterval}"
+                               CaretIndex="{TemplateBinding CaretIndex}"
+                               SelectionStart="{TemplateBinding SelectionStart}"
+                               SelectionEnd="{TemplateBinding SelectionEnd}"
+                               TextAlignment="{TemplateBinding TextAlignment}"
+                               TextWrapping="NoWrap"
+                               LineHeight="{TemplateBinding LineHeight}"
+                               SelectionBrush="{TemplateBinding SelectionBrush}"
+                               SelectionForegroundBrush="{TemplateBinding SelectionForegroundBrush}"
+                               CaretBrush="{TemplateBinding CaretBrush}"
+                               VerticalAlignment="Center" />
+              </Panel>
+              <TextBlock Name="PART_Suffix" Text="{TemplateBinding Suffix}" IsVisible="{TemplateBinding Suffix, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                         VerticalAlignment="Center" />
+              <rune:ClearButton Name="PART_Clear" Radius="full" IsVisible="False" Cursor="Hand" />
+              <rune:IconButton Name="PART_Decrement" Icon="{x:Static rune:Lucide.Minus}" Radius="full" Focusable="False" Cursor="Hand" />
+              <rune:IconButton Name="PART_Increment" Icon="{x:Static rune:Lucide.Plus}" Radius="full" Focusable="False" Cursor="Hand" />
+            </rune:Flex>
+          </Border>
+          <Border Name="PART_FocusRing" IsVisible="False" IsHitTestVisible="False" Margin="-1" BorderThickness="2"
+                  BorderBrush="{DynamicResource Rune.Brush.FocusRing}" CornerRadius="{TemplateBinding CornerRadius}" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^ /template/ rune|IconButton#PART_Decrement, ^ /template/ rune|IconButton#PART_Increment">
+      <Setter Property="Width" Value="{rune:Em 1.5, Min=24}" />
+      <Setter Property="MinHeight" Value="{rune:Em 1.5, Min=24}" />
+      <Setter Property="Margin" Value="{rune:Em -0.25, 0}" />
+      <Setter Property="Variant" Value="ghost" />
+      <Setter Property="Tone" Value="neutral" />
+    </Style>
+    <Style Selector="^ /template/ rune|Icon#PART_Icon"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" /></Style>
+    <Style Selector="^ /template/ TextBlock#PART_Prefix"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" /></Style>
+    <Style Selector="^ /template/ TextBlock#PART_Suffix"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" /></Style>
+  </ControlTheme>
+
   <ControlTheme x:Key="{x:Type rune:CharacterCount}" TargetType="rune:CharacterCount">
     <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
     <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />

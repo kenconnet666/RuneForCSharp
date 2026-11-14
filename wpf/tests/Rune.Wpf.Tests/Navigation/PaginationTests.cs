@@ -67,3 +67,60 @@ public class PaginationTests
         Assert.Equal(AutomationControlType.Hyperlink, pager.Cards.First().Peer().GetAutomationControlType());
     });
 }
+
+/// <summary>PageSizeSelect、PageJump、PaginationBar：条数与 Select 的值同步；跳页夹到范围、输入框清空；分页栏的总数、换条数回第 1 页。</summary>
+public class PaginationBarTests
+{
+    static T Show<T>(T element) where T : UIElement
+    {
+        var host = new StackPanel();
+        host.Resources.MergedDictionaries.Add(new RuneTheme());
+        host.Children.Add(element);
+        WpfUi.Show(host);
+        return element;
+    }
+
+    [Fact]
+    public Task Page_size_select_keeps_the_number_and_the_value_in_sync() => WpfUi.Run(() =>
+    {
+        var select = Show(new PageSizeSelect { PageSize = 20 });
+        int? changed = null;
+        select.PageSizeChanged += (_, size) => changed = size;
+
+        Assert.Equal("20", select.Value);
+        select.Value = "50";
+        Assert.Equal(50, select.PageSize);
+        Assert.Equal(50, changed);
+        Assert.Equal(Provider.GetLang(select).PageSizeLabel, AutomationProperties.GetName(select));
+    });
+
+    [Fact]
+    public Task Page_jump_clamps_and_clears() => WpfUi.Run(() =>
+    {
+        var jump = Show(new PageJump { PageCount = 12 });
+        jump.Input.Value = 40;
+        Assert.Equal(12, jump.Page);
+        Assert.Null(jump.Input.Value);
+    });
+
+    [Fact]
+    public Task Bar_shows_the_range_and_resets_the_page_on_size_change() => WpfUi.Run(() =>
+    {
+        var bar = Show(new PaginationBar { Page = 3, PageSize = 10, Total = 95, Width = 900 });
+
+        Assert.Equal(new PageRange(21, 30, 95), bar.Range);
+        Assert.Equal(Provider.GetLang(bar).PaginationRange(21, 30, 95), bar.TotalPart.Text);
+        Assert.Equal(Visibility.Visible, bar.JumpPart.Visibility);
+
+        bar.SizeSelectPart.Value = "20";
+        Assert.Equal(20, bar.PageSize);
+        Assert.Equal(1, bar.Page);
+
+        bar.PaginationPart.Page = 2;
+        Assert.Equal(2, bar.Page);
+
+        bar.Width = 300; // 窄于 36em：不显示跳页
+        WpfUi.Flush();
+        Assert.Equal(Visibility.Collapsed, bar.JumpPart.Visibility);
+    });
+}

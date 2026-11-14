@@ -1,6 +1,7 @@
 <!--
   Pagination 部件的默认外观（vue-tsx-pro 的 paginationStyles）：页码按钮至少一个控件高度宽（翻页时位置不晃）、左右内边距 space.xs；
   省略号次要色（宽度在 Pagination.cs 里按字号算）；总条数次要色。
+  PageJump 前后的文字次要色、不换行，输入框 4.5em 宽；PaginationBar 的总数次要色。
   Pager 的链接卡片（vue-tsx-pro 的 pagerStyles）：xs 的 border 边框、md 圆角、内边距 space.md，悬停时边框换品牌色；提示一行次要色 sm，标题 accentText、中等字重。
 -->
 <Styles xmlns="https://github.com/avaloniaui"
@@ -34,5 +35,15 @@
   <Style Selector="rune|Pager TextBlock#PART_Label">
     <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.AccentText}" />
     <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
+  </Style>
+  <Style Selector="rune|PageJump TextBlock#PART_Before, rune|PageJump TextBlock#PART_After">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+    <Setter Property="TextWrapping" Value="NoWrap" />
+  </Style>
+  <Style Selector="rune|PageJump rune|NumberField#PART_Input">
+    <Setter Property="Width" Value="{rune:Em 4.5}" />
+  </Style>
+  <Style Selector="rune|PaginationBar TextBlock#PART_Total">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
   </Style>
 </Styles>
