@@ -86,7 +86,6 @@ public class Combobox : TextInputBase
     string query = "";
     // 组件自己写 Text（选中后写入选项文字）时，不当作用户输入
     bool writing;
-    bool syncing;
 
     /// <summary>新建：没有选项、没有选中。</summary>
     public Combobox()
@@ -187,9 +186,7 @@ public class Combobox : TextInputBase
         }
         else if (change.Property == ValueProperty)
         {
-            syncing = true;
             listbox.Value = Value;
-            syncing = false;
             ShowSelectedLabel();
         }
         else if (change.Property == LoadProperty)
@@ -253,9 +250,7 @@ public class Combobox : TextInputBase
         listbox.ItemsSource = Load is not null || !LocalFilter || query.Length == 0
             ? Source
             : [.. Source.Where(item => Filter?.Invoke(item, query) ?? SelectSearch.Matches(ListboxOption.From(item, ToOption).Label, query))];
-        syncing = true;
         listbox.Value = Value;
-        syncing = false;
         UpdateEmpty();
         popover.Show(Shown);
     }
@@ -288,7 +283,6 @@ public class Combobox : TextInputBase
     /// <summary>选中一项：值是它，输入框显示它的文字，关上。</summary>
     internal void Pick(string choice)
     {
-        if (syncing) return;
         SetCurrentValue(ValueProperty, choice);
         query = "";
         remote.SetQuery("");
