@@ -75,6 +75,10 @@ export const COMPONENT_PROP_RENAMES = {
   NativeSelect: { items: 'Options', placeholder: 'PlaceholderText' },
   // C# 的事件用过去式（同 Canceled、Closed），不和取消按钮的部件名 Cancel 重名
   Popconfirm: { onCancel: 'Canceled' },
+  // 到点是事件
+  Countdown: { onEnd: 'Ended' },
+  // Intl 的逐项选项是 .NET 的格式字符串（按语言包的文化）
+  DateTime: { options: 'Format' },
   // 数据是平台的 ItemsSource；执行了一项是事件；输入框的文字同 TextBox 叫 Text；自定义选项内容是数据模板
   CommandPalette: { items: 'ItemsSource', onAction: 'ItemInvoked', _inputValue: 'InputText', renderOption: 'ItemTemplate' },
   // 平台的 ItemsControl 自己有 Items（直接写的项）；数据给 ItemsSource
@@ -164,11 +168,12 @@ export const PLATFORM_COMPONENT_PROP_RENAMES = {
 /** 某个平台上改了名的组件（平台自带同名类型时）：库 → { 组件: 类型名 } */
 export const TYPE_RENAMES = {
   // 三个平台都自带 Label：表单标签叫 FieldLabel
-  Avalonia: { Label: 'FieldLabel' },
-  WPF: { Label: 'FieldLabel' },
+  // 三个平台都有 System.DateTime：日期时间的文字叫 DateTimeText
+  Avalonia: { Label: 'FieldLabel', DateTime: 'DateTimeText' },
+  WPF: { Label: 'FieldLabel', DateTime: 'DateTimeText' },
   // WinForms 自己有 ListControl（ListBox、ComboBox 的基类）
   // WinForms 的提示是扩展组件（同平台的 ToolTip 组件），不是控件；平台自带 TabControl、TabPage：标签叫 TabItemControl
-  WinForms: { List: 'UnorderedList', Container: 'ContainerPanel', Label: 'FieldLabel', Tooltip: 'TooltipProvider', Tab: 'TabItem' },
+  WinForms: { List: 'UnorderedList', Container: 'ContainerPanel', Label: 'FieldLabel', Tooltip: 'TooltipProvider', Tab: 'TabItem', DateTime: 'DateTimeText' },
 };
 
 const FORM_NAME = '表单提交的字段名是浏览器的概念；值经 Value 绑定，单选组的互斥由组自己管';
@@ -502,6 +507,7 @@ export const BEHAVIOR_NOT_APPLICABLE = {
   Embed: { 'iframe 带 title、src': 'loading="lazy"、referrerpolicy 是 iframe 的属性：桌面的网页内核放进界面就加载，没有懒加载；title 是读屏名称（测试覆盖）' },
   Video: { '自绘控制条跟着 video 的事件走': '控制条的脚本在网页内核的页面里跑，测试里没有内核：页面的元素与文案由 Custom_bar 的测试核对，事件与键盘在真实窗口里核对' },
   Collapse: { '页内搜索命中': '页内搜索命中收起的内容时展开（hidden="until-found"、beforematch）是浏览器的能力，桌面没有页内搜索' },
+  RelativeTime: { '服务端渲染记下': '桌面没有服务端渲染与水合：控件在界面线程上直接按此刻渲染；要固定"现在"（截图、测试）写 Now' },
 };
 
 /** 像素对照（pixels.mjs）默认允许的差异比例：未盖掉文字的像素里，不同的占多少以内算一致 */

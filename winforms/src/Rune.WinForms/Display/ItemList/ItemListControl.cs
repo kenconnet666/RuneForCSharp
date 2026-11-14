@@ -108,6 +108,7 @@ public class ItemListItemControl : FlexControl
     readonly FlexControl endHolder = new() { AutoSize = true, Align = FlexAlign.Center };
     Control? start;
     Control? end;
+    Control? descriptionContent;
     EventHandler? invoked;
     bool hovered;
 
@@ -174,7 +175,22 @@ public class ItemListItemControl : FlexControl
         set
         {
             description.Text = value ?? "";
-            description.Visible = description.Text.Length > 0;
+            description.Visible = descriptionContent is null && description.Text.Length > 0;
+        }
+    }
+
+    /// <summary>说明换成控件（相对时间、标记……；TS 的 description 是任意内容）：写了时代替 <see cref="Description"/> 的文字。</summary>
+    [Browsable(false)]
+    [DefaultValue(null)]
+    public Control? DescriptionContent
+    {
+        get => descriptionContent;
+        set
+        {
+            if (descriptionContent is not null) body.Controls.Remove(descriptionContent);
+            descriptionContent = value;
+            if (value is not null) body.Controls.Add(value);
+            description.Visible = value is null && description.Text.Length > 0;
         }
     }
 

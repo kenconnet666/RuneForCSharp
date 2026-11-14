@@ -95,15 +95,16 @@ public abstract class ElementControl<T> : Control, IElementHost, IBaseline, ISco
         RefreshLayout();
     }
 
-    /// <summary>所在作用域的主题、默认值变了：重新量大小、重画。</summary>
-    void IScopeAware.ScopeChanged() => RefreshLayout();
+    void IScopeAware.ScopeChanged() => OnScopeChanged();
+
+    /// <summary>所在作用域的主题、语言包、默认值变了（或换了位置，可能换了作用域）：默认重新量大小、重画；按语言包写文字的派生类在这里重写文字。</summary>
+    protected virtual void OnScopeChanged() => RefreshLayout();
 
     /// <inheritdoc />
     protected override void OnParentChanged(EventArgs e)
     {
         base.OnParentChanged(e);
-        // 换了位置可能换了作用域（默认值、主题跟着变）
-        RefreshLayout();
+        OnScopeChanged();
     }
 
     /// <inheritdoc />

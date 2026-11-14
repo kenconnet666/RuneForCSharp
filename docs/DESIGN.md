@@ -1378,6 +1378,16 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### DateTimeText、RelativeTime、Countdown（2026-11-15）
+
+- 三个平台都有 System.DateTime，上游的 DateTime 叫 DateTimeText（WinForms 是 DateTimeTextControl，parity 的 TYPE_RENAMES）。值是 object：DateTimeOffset、UTC 与本地的 DateTime、带 Z 或偏移的 ISO 字符串是时刻，按语言包的 TimeZone（IANA 或 Windows 的 id，没写时本机时区）换算；未指定时区的 DateTime、不带偏移的字符串是墙上时间，DateOnly 只有日期（同 TS 的 Date / CalendarDateTime / CalendarDate）。MachineValue 是 time 元素的 datetime。
+- 文字照 Intl 在 zh-CN、en-US 下的输出写（.NET 的文化格式与 Intl 不同："2026年10月20日 14:30"、"Oct 20, 2026, 2:30 PM"、"昨天"、"in 3 hr."），其他语言按英文的写法；TS 的 options（逐项指定）换成 .NET 的格式字符串 Format，按语言包的文化写。时间的 Long / Full 写 GMT 偏移，英文 Full 写时区的名字（中文没有可靠的本地化名字，同 Long）。这些都在孪生文件 TimeText。
+- RelativeTime、Countdown 共用孪生的 NowClock（TS 的 useNow）：每次刷新后组件给出下一跳的间隔，对齐到间隔的整数倍再跳（同一窗口里的计时器一起跳），回调经 SynchronizationContext 回到界面线程；不在界面上时停下（Avalonia 离开可视树、WPF Unloaded、WinForms 句柄销毁），对应 TS 的"页面隐藏时停下"。时钟是 TimeProvider，测试换成 FakeTimeProvider。上游的服务端渲染记下"现在"不适用；要固定"现在"写 Now。
+- 倒计时的剩余按精度向上取整（还剩 0.4 秒显示 1 秒），整秒对齐的一跳在目标带小数秒时显示不变，下一跳才少一秒（同 TS）。上游的 CountdownParts 在这里叫 CountdownRemaining（XxxParts 是部件名的类）；渲染函数是 Formatter（Func<CountdownRemaining, string>），onEnd 是 Ended 事件（从没到点变成到点时触发一次）。
+- Countdown 的数字块：accent 底、accentContrast 字、semibold，最小宽度 2em，内边距 xxs / xs、圆角 sm 都按字号算。Avalonia、WPF 是 Flex 里的 Border 与 Text（每秒只换文字，格数变了才重建；Avalonia 的部件名在 CountdownParts），WinForms 是自绘元素 CountdownFace。字号随上下文：Avalonia 是继承的 TextElement.FontSize（放进 InlineUIContainer 会被行高裁掉，直接给字号），WPF 是 Control 的 FontSize，WinForms 是控件的 Font。Avalonia 量完写上基线（文字的第一行基线、数字块按格子里的文字）。
+- 读屏：DateTimeText、RelativeTime 是文字（RelativeTime 的完整日期时间是提示，也是帮助文字 / 描述）；Countdown 是文字，Avalonia、WPF 的条目类型是 timer（TS 的 role="timer"），名称是显示的文字，写了名称时用它，里面的格子不另占节点。
+- WPF 的 TextBlock.OnPropertyChanged 是密封的：DateTimeText、RelativeTime 换语言包时的重写挂在 Provider.LangProperty 的元数据上（OverrideMetadata）。WinForms 的 ElementControl 加了可重写的 OnScopeChanged（作用域的主题、语言包变了或换了位置），按语言包写文字的控件在里面重写；ItemListItemControl 加了 DescriptionContent（说明放控件，TS 的 description 是任意内容），示例里放相对时间。
+
 ### Checklist（2026-11-15）
 
 - 状态、排法是枚举（ChecklistStatus、ChecklistLayout），项是普通的 ChecklistItem；图标、语言包的键、汇总（不适用的不算）在孪生文件 ChecklistModel。三种排法按 TS 每次重建；重建前放开旧行里使用方给的控件（证据、操作）。
