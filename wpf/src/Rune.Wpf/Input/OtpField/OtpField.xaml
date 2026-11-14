@@ -1,0 +1,48 @@
+<!--
+  OtpField 的主题样式（vue-tsx-pro 的 OtpField）：格子是 OtpSlots 画的（外壳的颜色同 TextField），真正的输入框（PART_ContentHost）透明地盖在格子上，
+  文字、光标、选中都看不见。不可用时半透明。圆角取 CornerRadius（按字号算），出错、只读由 OtpSlots 读 ShowsInvalid、ShowsReadOnly 来画。
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <Style TargetType="rune:OtpField">
+    <Setter Property="Foreground" Value="Transparent" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CaretBrush" Value="Transparent" />
+    <Setter Property="SelectionOpacity" Value="0" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="Cursor" Value="IBeam" />
+    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+    <Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.Md}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="rune:OtpField">
+          <Grid>
+            <rune:OtpSlots x:Name="PART_Slots" />
+            <ScrollViewer x:Name="PART_ContentHost" Focusable="False" Opacity="0" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <!-- 字号、圆角的档位同 TextField（格子按字号与圆角画） -->
+    <Style.Triggers>
+      <Trigger Property="Size" Value="xs"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xs}" /></Trigger>
+      <Trigger Property="Size" Value="sm"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" /></Trigger>
+      <Trigger Property="Size" Value="md"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Md}" /></Trigger>
+      <Trigger Property="Size" Value="lg"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Lg}" /></Trigger>
+      <Trigger Property="Size" Value="xl"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xl}" /></Trigger>
+      <Trigger Property="Radius" Value="none"><Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.None}" /></Trigger>
+      <Trigger Property="Radius" Value="xs"><Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.Xs}" /></Trigger>
+      <Trigger Property="Radius" Value="sm"><Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.Sm}" /></Trigger>
+      <Trigger Property="Radius" Value="lg"><Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.Lg}" /></Trigger>
+      <Trigger Property="Radius" Value="xl"><Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.Xl}" /></Trigger>
+      <Trigger Property="Radius" Value="full"><Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.Full}" /></Trigger>
+    </Style.Triggers>
+  </Style>
+</ResourceDictionary>
