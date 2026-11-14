@@ -149,7 +149,8 @@ public class StepsControl : Control
             if (StepRules.Reachable(item, state) && (item.Href is not null || Navigable))
             {
                 var (href, at) = (item.Href, index);
-                var trigger = new StepTrigger { AccessibleName = item.Title };
+                // 可点回的步骤：整块是按钮，悬停 fillHover 底、sm 圆角，键盘聚焦时画焦点环
+                var trigger = new PressableFlex { Align = FlexAlign.Start, Gap = Space.Sm, AccessibleName = item.Title };
                 trigger.Controls.AddRange([indicator, text]);
                 trigger.Click += (_, _) =>
                 {
@@ -247,120 +248,6 @@ public class StepsControl : Control
             var end = cell + column;
             var y = content.Top + diameter / 2 - line / 2;
             e.Graphics.FillRectangle(brush, rtl ? ClientSize.Width - end : start, y, Math.Max(0, end - start), line);
-        }
-    }
-
-    /// <summary>
-    /// 可点回的步骤：整块是按钮（Enter、空格、点击），悬停 fillHover 底、sm 圆角，键盘聚焦时画焦点环；点圆圈、文字同点这一块。
-    /// </summary>
-    sealed class StepTrigger : FlexControl
-    {
-        bool hovered;
-
-        public StepTrigger()
-        {
-            Align = FlexAlign.Start;
-            Gap = Space.Sm;
-            AutoSize = true;
-            Cursor = Cursors.Hand;
-            TabStop = true;
-            AccessibleRole = AccessibleRole.PushButton;
-            SetStyle(ControlStyles.Selectable | ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.SupportsTransparentBackColor, true);
-            BackColor = Color.Transparent;
-        }
-
-        protected override void OnControlAdded(ControlEventArgs e)
-        {
-            base.OnControlAdded(e);
-            Forward(e.Control!);
-        }
-
-        void Forward(Control child)
-        {
-            child.MouseClick += (_, args) => OnMouseClick(args);
-            child.MouseEnter += (_, _) => SetHovered(true);
-            child.MouseLeave += (_, _) => SetHovered(ClientRectangle.Contains(PointToClient(Cursor.Position)));
-            child.ControlAdded += (_, args) => Forward(args.Control!);
-            foreach (Control grandchild in child.Controls) Forward(grandchild);
-        }
-
-        void SetHovered(bool value)
-        {
-            if (hovered == value) return;
-            hovered = value;
-            Invalidate();
-        }
-
-        protected override void OnMouseEnter(EventArgs e)
-        {
-            base.OnMouseEnter(e);
-            SetHovered(true);
-        }
-
-        protected override void OnMouseLeave(EventArgs e)
-        {
-            base.OnMouseLeave(e);
-            SetHovered(ClientRectangle.Contains(PointToClient(Cursor.Position)));
-        }
-
-        protected override void OnMouseClick(MouseEventArgs e)
-        {
-            base.OnMouseClick(e);
-            if (e.Button == MouseButtons.Left) OnClick(EventArgs.Empty);
-        }
-
-        protected override bool IsInputKey(Keys keyData) => keyData is Keys.Enter or Keys.Space || base.IsInputKey(keyData);
-
-        protected override void OnKeyDown(KeyEventArgs e)
-        {
-            base.OnKeyDown(e);
-            if (e.KeyCode is not (Keys.Enter or Keys.Space)) return;
-            e.Handled = true;
-            OnClick(EventArgs.Empty);
-        }
-
-        protected override void OnGotFocus(EventArgs e)
-        {
-            base.OnGotFocus(e);
-            Invalidate();
-        }
-
-        protected override void OnLostFocus(EventArgs e)
-        {
-            base.OnLostFocus(e);
-            Invalidate();
-        }
-
-        protected override void OnPaint(PaintEventArgs e)
-        {
-            base.OnPaint(e);
-            var theme = ProviderControl.ThemeOf(this);
-            var graphics = e.Graphics;
-            graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            graphics.PixelOffsetMode = PixelOffsetMode.Half;
-            var radius = theme.Radii.Sm * this.EmPixels();
-            if (hovered)
-            {
-                using var path = Drawing.RoundedRectangle(new RectangleF(0, 0, Width, Height), radius);
-                using var brush = new SolidBrush(theme.Colors.FillHover);
-                graphics.FillPath(brush, path);
-            }
-            if (Focused && ShowFocusCues)
-            {
-                var width = LogicalToDeviceUnits(2);
-                using var path = Drawing.RoundedRectangle(new RectangleF(width / 2f, width / 2f, Width - width, Height - width), radius);
-                using var pen = new Pen(theme.Colors.FocusRing, width);
-                graphics.DrawPath(pen, path);
-            }
-        }
-
-        protected override AccessibleObject CreateAccessibilityInstance() => new TriggerAccessibleObject(this);
-
-        sealed class TriggerAccessibleObject(StepTrigger owner) : ControlAccessibleObject(owner)
-        {
-            public override string DefaultAction => "Press";
-
-            public override void DoDefaultAction() => owner.OnClick(EventArgs.Empty);
         }
     }
 }
