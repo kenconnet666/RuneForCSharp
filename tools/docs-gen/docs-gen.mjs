@@ -20,8 +20,9 @@ const { values: options } = parseArgs({
 
 const vue = await openVue(options.vue);
 try {
+  // 不写上游的提交号：锁定的提交记在 tools/vue-tsx-pro.ref；git 缩写的位数随机器不同，写进来 CI 的核对会对不上
   const site = buildSite(vue);
-  const content = `${JSON.stringify({ commit: vue.commit, ...site }, null, 2)}\n`;
+  const content = `${JSON.stringify(site, null, 2)}\n`;
   process.exitCode = writeOutputs([{ path: OUT, content }], {
     check: options.check,
     commit: vue.commit,
@@ -50,7 +51,7 @@ function buildSite(vue) {
           .filter((name) => existsSync(join(dir, name, 'docs.tsx')))
           .map((name) => page(vue, id, name))
           // 同上游 nav.ts：按 order，没写的按名字排在后面
-          .sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity) || a.name.localeCompare(b.name));
+          .sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity) || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
         return { id, label, pages };
       })
       .filter((category) => category.pages.length),
