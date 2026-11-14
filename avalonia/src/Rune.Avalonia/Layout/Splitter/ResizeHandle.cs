@@ -98,17 +98,21 @@ public class ResizeHandle : Control, global::Avalonia.Rendering.ICustomHitTest
 
     Layoutable? Target => Parent as Layoutable;
 
+    /// <summary>调整的不是父元素时（Drawer 的面板宽度）：读当前长度、写新长度；拖动按手柄自己的父元素（弹出层的根，不动）量。</summary>
+    internal (Func<double> Read, Action<double> Write)? Override { get; set; }
+
     /// <summary>
     /// 量拖动的坐标系：父元素的容器。父元素在拖动中变大变小（贴着起始边时它自己的原点也在动），容器不动；
     /// 容器从右到左排版时坐标本身就是镜像的，往结束方向拖总是正的。
     /// </summary>
-    Visual? Container => Target?.GetVisualParent() ?? Target;
+    Visual? Container => Override is null ? Target?.GetVisualParent() ?? Target : Parent as Visual;
 
     /// <summary>父元素当前的长度：写了 Width（Height）时取它，否则量实际的大小。</summary>
     public double Length
     {
         get
         {
+            if (Override is { } custom) return custom.Read();
             if (Target is not { } target) return MinLength;
             var set = Horizontal ? target.Height : target.Width;
             return double.IsNaN(set) ? Horizontal ? target.Bounds.Height : target.Bounds.Width : set;
@@ -134,9 +138,10 @@ public class ResizeHandle : Control, global::Avalonia.Rendering.ICustomHitTest
     /// <summary>改父元素的长度（夹在范围里、取整），通知使用方。</summary>
     internal void Resize(double length)
     {
-        if (Target is not { } target) return;
         var next = SplitterScale.FitLength(length, MinLength, MaxLength);
-        target.SetCurrentValue(Horizontal ? HeightProperty : WidthProperty, next);
+        if (Override is { } custom) custom.Write(next);
+        else if (Target is { } target) target.SetCurrentValue(Horizontal ? HeightProperty : WidthProperty, next);
+        else return;
         LengthChanged?.Invoke(this, next);
     }
 

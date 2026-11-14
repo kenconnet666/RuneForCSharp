@@ -300,7 +300,7 @@ export const PROPS_NOT_PORTED = {
   CommandPalette: Object.fromEntries(['closable', 'dismissible', 'beforeClose', 'onConfirm', 'confirmText', 'cancelText', 'tone', 'lazy', 'size',
     'propsConfirm', 'propsCancel', 'propsHeader', 'propsTitle', 'propsDescription', 'propsClose', 'propsBody', 'propsFooter']
     .map((prop) => [prop, '面板里的对话框是 CommandPalette 建的固定一种（sm 宽、停在上部、没有标题行与页脚，Esc 与点遮罩关闭），不转交对话框的属性'])),
-  ...Object.fromEntries(['Dialog', 'AlertDialog'].map((name) => [name, { lazy: '正文是传进来的控件实例，对话框关着时不在可视树里（不排版、不绘制），本来就是打开时才有代价' }])),
+  ...Object.fromEntries(['Dialog', 'AlertDialog', 'Drawer'].map((name) => [name, { lazy: '正文是传进来的控件实例，对话框关着时不在可视树里（不排版、不绘制），本来就是打开时才有代价' }])),
   Popover: {
     lazy: '内容是传进来的控件实例，浮层关着时不在可视树里（不排版、不绘制），本来就是打开时才有代价',
     role: '浮层固定是对话框（Avalonia、WPF 的读屏节点、WinForms 的 AccessibleRole.Dialog）；需要打断操作的确认用对话框组件',
@@ -497,6 +497,8 @@ export const PLATFORM_PROPS = new Set([
   'Height',
   // 同上，边长（QRCode 的 size）：平台控件自己的 Width（像素），不写时组件给默认值（10em）
   'Width',
+  // 抽屉面板的宽度、拖动时的最小宽度（Drawer 的 width、minWidth）：平台控件自己的 Width、MinWidth（抽屉自己不参与排版）
+  'MinWidth',
 ]);
 
 /** 桌面上不做的组件与原因（ROADMAP 阶段 3） */
