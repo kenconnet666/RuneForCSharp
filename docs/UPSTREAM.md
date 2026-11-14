@@ -66,7 +66,7 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 | 可选中的 Tag（0f69e5c5）：_selected 时是按钮（aria-pressed），没选中 surface、选中 solid 加对勾，默认 accent、sm | 已做 Tag | 这次做 |
 | 静态 Table 的 stickyHeader、sticky（9a57a058，这次锁定才进来） | 已做 Table | 2026-11-14 做了（1873c1a）：Avalonia、WPF 加 Table.StickyHeader、ScrollAxis（propsRoot 的 axis）与 TableCell.Sticky；WinForms 跟着外面的 ScrollAreaControl 挪；三个平台补了 ScrollArea 的 both 示例 |
 | ScrollArea 各部件带标记、border-box（6160d6d2） | 网页的部件标记与盒模型，桌面上本来就是 border-box | 不涉及 |
-| 链接下划线 LinkUnderlineScope（ff221742）：显式 > 容器给的 > defaults.Link > always；ItemList、Stat、Timeline 等整块 hover，Card 只给页头 | 已做 Link、Card、ItemList | 这次做；ItemList 2026-11-14 做了，Timeline 2026-11-15 做了；Stat、Descriptions、Checklist 做时照做 |
+| 链接下划线 LinkUnderlineScope（ff221742）：显式 > 容器给的 > defaults.Link > always；ItemList、Stat、Timeline 等整块 hover，Card 只给页头 | 已做 Link、Card、ItemList | 这次做；ItemList 2026-11-14 做了，Timeline、Checklist 2026-11-15 做了；Stat、Descriptions 做时照做 |
 | Upload 接父级放进来的待上传文件（ff221742） | 还没做 | 做时照新的 |
 | 文档：ButtonBase 页换成"长得不像按钮的按钮"；Upload、Timeline、Code 合并示例 | Code 页的示例变了 | 跟着像素差异改示例 |
 

@@ -138,6 +138,7 @@ export const PLATFORM_COMPONENT_PROP_RENAMES = {
     Card: { padding: 'CardPadding' },
     // 控件自己有 Layout 事件
     Descriptions: { layout: 'ItemLayout' },
+    Checklist: { layout: 'ItemLayout' },
     // 横条的粗细不是字号档位（同名的 TextSize 会误导）
     ProportionBar: { size: 'BarSize' },
     // 标题是控件的 Text（同按钮、导航项的文字）
@@ -289,6 +290,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     Select: Object.fromEntries(['propsListbox', 'propsSearch'].map((prop) => [prop, '弹出层里的列表、搜索框是 Select 建的，外观跟着 Listbox、TextField 的主题样式'])),
     Popconfirm: Object.fromEntries(['propsIcon', 'propsTitle', 'propsDescription', 'propsFooter', 'propsConfirm', 'propsCancel']
       .map((prop) => [prop, '图标、问题、说明、按钮行与按钮是 Popconfirm 代码组合的子元素（同 Dialog），外观跟着各自组件的主题样式；面板、阴影、箭头的部件样式键同 Popover'])),
+    Checklist: Object.fromEntries(['propsItem', 'propsSummary', 'propsProgress', 'propsList', 'propsStatus', 'propsLabel', 'propsDescription', 'propsMeta', 'propsAction']
+      .map((prop) => [prop, '每一项是 ChecklistRow 代码组合的（状态、名称、说明、负责人 · 日期 · 证据、操作），汇总是 Text 与 Progress，外观跟着各自组件的主题样式；没有部件样式键'])),
     LoadingOverlay: Object.fromEntries(['propsOverlay', 'propsSpinner'].map((prop) => [prop, '遮罩与加载指示是 LoadingOverlay 代码组合的 Grid 与 Spinner，外观跟着 token 与 Spinner 的主题样式；没有部件样式键'])),
     Ellipsis: Object.fromEntries(['propsText', 'propsToggle'].map((prop) => [prop, '文字与展开按钮是 Ellipsis 代码组合的 Text 与 ButtonBase，外观跟着它们的主题样式；没有部件样式键'])),
     Timeline: Object.fromEntries(['propsItem', 'propsRail', 'propsMarker', 'propsLine', 'propsContent', 'propsTitle', 'propsMeta', 'propsTime', 'propsDescription', 'propsDetails', 'propsToggle', 'propsAvatar', 'propsPending']
@@ -356,6 +359,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     },
     Popover: { propsArrow: '面板、阴影与箭头是组件库画在分层窗口上的位图，箭头没有可改样式的部件' },
     HoverCard: { propsArrow: '同 PopoverControl：面板、阴影与箭头是组件库画在分层窗口上的位图，箭头没有可改样式的部件' },
+    Checklist: Object.fromEntries(['propsItem', 'propsSummary', 'propsProgress', 'propsList', 'propsStatus', 'propsLabel', 'propsDescription', 'propsMeta', 'propsAction']
+      .map((prop) => [prop, '每一项是 ChecklistRowControl 组合的子控件（状态、名称、说明、负责人 · 日期 · 证据、操作），没有部件属性记录'])),
     LoadingOverlay: {
       blur: '遮罩画在属于窗体的分层窗口里，子控件各有窗口，画不到也模糊不了它们的内容',
       ...Object.fromEntries(['propsOverlay', 'propsSpinner'].map((prop) => [prop, '遮罩与加载指示整张画在分层窗口的位图上，没有部件属性记录'])),
@@ -456,12 +461,14 @@ export const EXCLUDED = {
 /** 只在某个平台上不适用的上游测试用例：库 → { 组件: { 用例名的开头: 原因 } } */
 export const PLATFORM_BEHAVIOR_NOT_APPLICABLE = {
   WPF: {
+    Checklist: { '部件：各层带 data-part': '每一项是代码组合的元素，没有部件样式键（PLATFORM_PROPS_NOT_PORTED）；结构由 Rows 的测试核对' },
     Timeline: {
       'Timeline：根、每项': '每一行是代码组合的元素，没有部件样式键（PLATFORM_PROPS_NOT_PORTED）；结构由 Rows 的测试核对',
       '操作人头像、进行中的加载指示也转发部件属性': '同上：头像、加载指示是 TimelineRow 组合的元素，没有部件样式键',
     },
   },
   WinForms: {
+    Checklist: { '部件：各层带 data-part': '每一项是组合的子控件，没有部件属性记录（PLATFORM_PROPS_NOT_PORTED）；结构由 Rows 的测试核对' },
     Timeline: {
       'Timeline：根、每项': '节点与连接线是画的，其余是组合的子控件，没有部件属性记录（PLATFORM_PROPS_NOT_PORTED）；结构由 Rows 的测试核对',
       '操作人头像、进行中的加载指示也转发部件属性': '同上：头像、加载指示是 TimelineRowControl 组合的子控件，没有部件属性记录',

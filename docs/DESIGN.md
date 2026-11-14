@@ -1378,6 +1378,13 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### Checklist（2026-11-15）
+
+- 状态、排法是枚举（ChecklistStatus、ChecklistLayout），项是普通的 ChecklistItem；图标、语言包的键、汇总（不适用的不算）在孪生文件 ChecklistModel。三种排法按 TS 每次重建；重建前放开旧行里使用方给的控件（证据、操作）。
+- 上游"给了 onCheckedChange 才能勾选"：C# 是 CheckedChange 事件，订阅了就把状态图标换成复选按钮（事件的 add / remove 里重建）；读屏是复选框，名称是这一项的名称、帮助文字 / 描述是状态，不适用、受阻的不可用。按钮可点的区域不小于 sizes.minTarget（24），悬停时一层 fillHover 的圆。
+- 说明、负责人、日期、证据是 fontSizes.sm（固定字号），使用方给的控件（证据的链接）也换成它；状态图标比文字大一档（1.14em）。图标排法整组是一张图，名称与提示是每一项的名称与状态。
+- WinForms：控件自己有 Layout 事件，TS 的 layout 叫 ItemLayout（同 DescriptionsControl）；可勾选的状态是自绘的小控件（复选框角色、空格与 Enter 切换、键盘聚焦时焦点环）。部件名只有 Avalonia 有（ChecklistParts，操作那一格包一层 Border）。
+
 ### LoadingOverlay（2026-11-15）
 
 - 防闪烁用已有的 DelayedLoading（200 毫秒内完成的不出现，出现后至少 500 毫秒）；读屏的"忙"（Avalonia、WPF 的 ItemStatus，WinForms 的 Busy 状态）与挡指针按 IsLoading 立即生效：遮罩出现前先盖一层看不见的。
