@@ -1378,6 +1378,14 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### Timeline（2026-11-15）
+
+- 项是普通的 TimelineItem（标题、说明、操作人、详情可以是文字或控件；时间是显示的文字，DateTime 是机器可读的时间，做成时间的读屏帮助文字 / 描述）。Timeline 按项、Pending、Reverse、MaxVisible、IsExpanded 重建各行（同 TS 每次渲染重算）：收起的按钮在旧的那一端，倒序时在最后。重建前先放开旧行里使用方给的元素（一个元素只能有一个父元素）。
+- 行：节点列 + 内容（交替排布时三列，时间在对侧，偶数项内容靠结束边对齐）；宽度不到 32em 时排回一侧（TS 的容器查询），宽度跨过阈值时重建。Avalonia、WPF 节点与连接线是 Border，WinForms 是画的；进行中的一项节点是 Spinner，读屏是忙（Avalonia、WPF 的 ItemStatus，WinForms 的 Busy 状态）。
+- 操作人是文字时带首字母头像（1.75em：Avatar 按字号的 2.5 倍定边长，字号给 0.7 倍）；详情是 Collapsible，触发器是像链接的按钮，打开时才建内容。容器给链接的下划线是 hover。
+- 上游的 components.Timeline（默认值 alternate、size）：Avalonia、WPF 是平台样式的 Setter，WinForms 是 ProviderControl 的 TimelineDefaults。部件名只有 Avalonia 有（TimelineParts）；WPF、WinForms 的行是代码组合的，没有部件样式键 / 部件属性记录。
+- WinForms 的坑：flex 容器只量 AutoSize 的子控件（不是自动大小的按当前大小），自绘的行要开 AutoSize，不限宽时报内容的自然宽度。
+
 ### Rating（2026-11-15）
 
 - 上游是单选组：每个分数一个视觉上隐藏的原生 radio。桌面上星由 Rating 自己画（孪生文件 RatingScale 算每颗填多少、能选的分数、方向键换到哪、点了以后的值）：空心的 borderStrong 描线打底，选中的那层按比例裁出、填上色调的实色；指针下的那颗放大 1.12 倍（没做过渡）。

@@ -289,6 +289,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     Select: Object.fromEntries(['propsListbox', 'propsSearch'].map((prop) => [prop, '弹出层里的列表、搜索框是 Select 建的，外观跟着 Listbox、TextField 的主题样式'])),
     Popconfirm: Object.fromEntries(['propsIcon', 'propsTitle', 'propsDescription', 'propsFooter', 'propsConfirm', 'propsCancel']
       .map((prop) => [prop, '图标、问题、说明、按钮行与按钮是 Popconfirm 代码组合的子元素（同 Dialog），外观跟着各自组件的主题样式；面板、阴影、箭头的部件样式键同 Popover'])),
+    Timeline: Object.fromEntries(['propsItem', 'propsRail', 'propsMarker', 'propsLine', 'propsContent', 'propsTitle', 'propsMeta', 'propsTime', 'propsDescription', 'propsDetails', 'propsToggle', 'propsAvatar', 'propsPending']
+      .map((prop) => [prop, '每一行是 TimelineRow 代码组合的（节点、连接线、标题、操作人、时间、说明、详情、展开按钮），外观跟着各自组件的主题样式与 token；没有部件样式键'])),
     CommandPalette: Object.fromEntries(['propsInput', 'propsListbox'].map((prop) => [prop, '面板里的搜索框、列表是 CommandPalette 建的，外观跟着 TextField、Listbox 的主题样式；部件样式键只有搜索行'])),
   },
   WinForms: {
@@ -352,6 +354,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     },
     Popover: { propsArrow: '面板、阴影与箭头是组件库画在分层窗口上的位图，箭头没有可改样式的部件' },
     HoverCard: { propsArrow: '同 PopoverControl：面板、阴影与箭头是组件库画在分层窗口上的位图，箭头没有可改样式的部件' },
+    Timeline: Object.fromEntries(['propsItem', 'propsRail', 'propsMarker', 'propsLine', 'propsContent', 'propsTitle', 'propsMeta', 'propsTime', 'propsDescription', 'propsDetails', 'propsToggle', 'propsAvatar', 'propsPending']
+      .map((prop) => [prop, '节点与连接线是 TimelineRowControl 画的，标题、操作人、时间、说明、详情、展开按钮是它组合的子控件，没有部件属性记录'])),
     Popconfirm: {
       propsArrow: '同 PopoverControl：面板、阴影与箭头是组件库画在分层窗口上的位图，箭头没有可改样式的部件',
       ...Object.fromEntries(['propsIcon', 'propsTitle', 'propsDescription', 'propsFooter', 'propsConfirm', 'propsCancel']
@@ -444,7 +448,17 @@ export const EXCLUDED = {
  */
 /** 只在某个平台上不适用的上游测试用例：库 → { 组件: { 用例名的开头: 原因 } } */
 export const PLATFORM_BEHAVIOR_NOT_APPLICABLE = {
+  WPF: {
+    Timeline: {
+      'Timeline：根、每项': '每一行是代码组合的元素，没有部件样式键（PLATFORM_PROPS_NOT_PORTED）；结构由 Rows 的测试核对',
+      '操作人头像、进行中的加载指示也转发部件属性': '同上：头像、加载指示是 TimelineRow 组合的元素，没有部件样式键',
+    },
+  },
   WinForms: {
+    Timeline: {
+      'Timeline：根、每项': '节点与连接线是画的，其余是组合的子控件，没有部件属性记录（PLATFORM_PROPS_NOT_PORTED）；结构由 Rows 的测试核对',
+      '操作人头像、进行中的加载指示也转发部件属性': '同上：头像、加载指示是 TimelineRowControl 组合的子控件，没有部件属性记录',
+    },
     ItemList: { 'ItemList：列表是 root，条目是 item': '标题、说明是 ItemListItemControl 里的子控件，没有部件标记（PLATFORM_PROPS_NOT_PORTED）' },
     ScrollArea: { '内容层、滚动条、滑块都能加属性': '滚动条是组件库画的滑块子控件，没有部件属性可加（PLATFORM_PROPS_NOT_PORTED）' },
     CodeBlock: {

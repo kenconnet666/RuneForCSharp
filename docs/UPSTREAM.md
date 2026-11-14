@@ -24,7 +24,7 @@ vue-tsx-pro 那边的会话改了设计时会发通知过来（每完成一个�
 |---|---|---|
 | 还没有使用方：旧 API 直接删、不留 deprecated；每批 CI 绿了从 master 发版 | 我们同样没有使用方 | 跟到新版本时直接改名、删旧写法 |
 | 样式引擎最低层统一 `box-sizing: border-box` | 修我们报的 Listbox 高度问题 | 等提交号，重截 listbox multiple |
-| 组件里的导航链接部件（ItemList 标题、Card 页头操作、StatGroup 操作、Timeline 附件）默认悬停才有下划线 | 正文 Link 不变 | 做这些组件时照做；ItemList 2026-11-14 做了 |
+| 组件里的导航链接部件（ItemList 标题、Card 页头操作、StatGroup 操作、Timeline 附件）默认悬停才有下划线 | 正文 Link 不变 | 做这些组件时照做；ItemList 2026-11-14 做了，Timeline 2026-11-15 做了 |
 | P3 新组件：ChoiceCard、ItemList 可选中的行、ColorPicker、ImageCropper、Carousel、Dialog 拖动、Tag 加 selected、QRCode、FloatButton 组、JsonViewer、SignaturePad、DataTable 横向虚拟化 | Tag 刚做完 | selected 发版后补 |
 | P10 把组件规格（属性、默认值、部件、档位、键盘）导成 JSON | 可以在 CI 里比对 | 已出（0.13.0，见第十一批），上线后让 parity 工具改读它 |
 
@@ -66,7 +66,7 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 | 可选中的 Tag（0f69e5c5）：_selected 时是按钮（aria-pressed），没选中 surface、选中 solid 加对勾，默认 accent、sm | 已做 Tag | 这次做 |
 | 静态 Table 的 stickyHeader、sticky（9a57a058，这次锁定才进来） | 已做 Table | 2026-11-14 做了（1873c1a）：Avalonia、WPF 加 Table.StickyHeader、ScrollAxis（propsRoot 的 axis）与 TableCell.Sticky；WinForms 跟着外面的 ScrollAreaControl 挪；三个平台补了 ScrollArea 的 both 示例 |
 | ScrollArea 各部件带标记、border-box（6160d6d2） | 网页的部件标记与盒模型，桌面上本来就是 border-box | 不涉及 |
-| 链接下划线 LinkUnderlineScope（ff221742）：显式 > 容器给的 > defaults.Link > always；ItemList、Stat、Timeline 等整块 hover，Card 只给页头 | 已做 Link、Card、ItemList | 这次做；ItemList 2026-11-14 做了；Stat、Timeline、Descriptions、Checklist 做时照做 |
+| 链接下划线 LinkUnderlineScope（ff221742）：显式 > 容器给的 > defaults.Link > always；ItemList、Stat、Timeline 等整块 hover，Card 只给页头 | 已做 Link、Card、ItemList | 这次做；ItemList 2026-11-14 做了，Timeline 2026-11-15 做了；Stat、Descriptions、Checklist 做时照做 |
 | Upload 接父级放进来的待上传文件（ff221742） | 还没做 | 做时照新的 |
 | 文档：ButtonBase 页换成"长得不像按钮的按钮"；Upload、Timeline、Code 合并示例 | Code 页的示例变了 | 跟着像素差异改示例 |
 
@@ -205,7 +205,7 @@ CI 还在排队，锁定停在 a189e71b。
 
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
-| NotificationList、Upload、ConditionBuilder、ColorPicker、JsonViewer、Lightbox、Timeline、ProportionBar 的内部节点补部件标记（部件名见通知） | 这些组件都还没做 | 做时部件名照上游 |
+| NotificationList、Upload、ConditionBuilder、ColorPicker、JsonViewer、Lightbox、Timeline、ProportionBar 的内部节点补部件标记（部件名见通知） | Timeline 已做（2026-11-15，Avalonia 的部件名照上游），其余还没做 | 做时部件名照上游 |
 | TreemapChart 读屏数据表的单元格只写数字（表头已有单位），三个图表共用 useChartValueText | 还没做图表 | 做时照新的 |
 
 ### 第十六批（2026-11-08 通知，master 7437db27：部件名统一成 camelCase）
@@ -233,7 +233,7 @@ NavBar（root、list、item）补了部件标记。这些组件都还没做，�
 | 0.14.0：焦点环不被裁、space.xxs、部件名 camelCase、图表数据表等 | 已在前几批跟进 | 不涉及 |
 | 新的单元测试（ac894f2c 等）：ButtonBase 的 type、不可用、加载中；Label 的星号与 data-disabled、for 指向一组时聚焦第一个控件；SelectedTags 单独用时对读屏隐藏、移除按钮不进 Tab、数字的 maxTagCount；Tooltip 的描述、延时、Esc、触屏不显示 | 行为对照多了 10 条没对上（203 条、65 条），多数是我们已有的行为没标记，Label 的“一组”与 SelectedTags 单独使用要先核对 | 并进行为对照的整理：逐条对上已有测试、补测试或登记不适用 |
 | Timeline、Stat、CodeBlock、Tour 成为配方组件（components.Xxx 设默认值、按部件追加样式）；CodeBlock 部件标记 header、title、body、pre、code、line、lineNumber；CodeBlockOptions：wrap、copyable、lineNumbers、maxLines、flush | 我们 CodeBlock 的部件名本来就是这些；Avalonia、WPF 的默认值用平台样式就能设 | 已做（锁定跟到 56e28b39）：WinForms 加 CodeBlockDefaults（Wrap、Copyable、LineNumbers、MaxLines、Flush），CodeBlockControl 跟着作用域变 |
-| Stat 的部件标记、TimelineOptions、StatOptions、TourOptions | 还没做 | 做时照新的 |
+| Stat 的部件标记、TimelineOptions、StatOptions、TourOptions | Timeline 已做，其余还没做 | TimelineOptions 在 Avalonia、WPF 是平台样式的 Setter，WinForms 是 TimelineDefaults；其余做时照新的 |
 
 ### 第十九批（2026-11-08 通知，master 5cbdd9cd..ffc6d190，0.14.0 之后）
 
