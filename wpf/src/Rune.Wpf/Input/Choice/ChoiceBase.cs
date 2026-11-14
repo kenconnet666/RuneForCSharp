@@ -145,7 +145,14 @@ public abstract class ChoiceBase : Control, IFieldControl
     /// <summary>
     /// 要切换时（点击、空格、读屏）先发：设 Cancel 不改值——切换要等接口、要先确认时拦下，之后再写 IsChecked（TS 的受控 onUpdate:_checked）。
     /// </summary>
-    public event EventHandler<ChoiceTogglingEventArgs>? Toggling;
+    public event EventHandler<ChoiceTogglingEventArgs>? Toggling
+    {
+        add => AddHandler(TogglingEvent, value);
+        remove => RemoveHandler(TogglingEvent, value);
+    }
+
+    /// <summary><see cref="Toggling"/> 的路由事件（冒泡：容器上可以统一处理）。</summary>
+    public static readonly RoutedEvent TogglingEvent = EventManager.RegisterRoutedEvent(nameof(Toggling), RoutingStrategy.Bubble, typeof(EventHandler<ChoiceTogglingEventArgs>), typeof(ChoiceBase));
 
     /// <summary>是否勾选。</summary>
     public bool IsChecked { get => (bool)GetValue(IsCheckedProperty); set => SetValue(IsCheckedProperty, value); }
@@ -308,8 +315,8 @@ public abstract class ChoiceBase : Control, IFieldControl
         if (ReadOnly || !CanToggle || !IsEnabled) return;
         var next = NextChecked;
         if (next == IsChecked) return;
-        var args = new ChoiceTogglingEventArgs(next);
-        Toggling?.Invoke(this, args);
+        var args = new ChoiceTogglingEventArgs(TogglingEvent, next);
+        RaiseEvent(args);
         if (!args.Cancel) ApplyChecked(next);
     }
 
@@ -483,9 +490,13 @@ public abstract class ChoiceBase : Control, IFieldControl
 }
 
 /// <summary>勾选类控件要切换时的参数：<see cref="IsChecked"/> 是要切到的值，设 Cancel 不改。</summary>
+/// <param name="routedEvent">事件。</param>
 /// <param name="isChecked">要切到的值。</param>
-public sealed class ChoiceTogglingEventArgs(bool isChecked) : CancelEventArgs
+public sealed class ChoiceTogglingEventArgs(RoutedEvent routedEvent, bool isChecked) : RoutedEventArgs(routedEvent)
 {
+    /// <summary>设为 true 取消这次切换。</summary>
+    public bool Cancel { get; set; }
+
     /// <summary>要切到的值。</summary>
     public bool IsChecked { get; } = isChecked;
 }

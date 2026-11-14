@@ -43,8 +43,9 @@ public enum OpenChangeReason
 
 /// <summary>浮层开关变了的事件参数。</summary>
 /// <param name="isOpen">现在开着。</param>
+/// <param name="routedEvent">事件。</param>
 /// <param name="reason">为什么。</param>
-public sealed class OpenChangedEventArgs(bool isOpen, OpenChangeReason reason) : EventArgs
+public sealed class OpenChangedEventArgs(RoutedEvent routedEvent, bool isOpen, OpenChangeReason reason) : RoutedEventArgs(routedEvent)
 {
     /// <summary>现在开着。</summary>
     public bool IsOpen { get; } = isOpen;
@@ -158,7 +159,14 @@ public class Popover : FrameworkElement
     public bool Arrow { get => (bool)GetValue(ArrowProperty); set => SetValue(ArrowProperty, value); }
 
     /// <summary>用户开、关了（触发器、点外面、Esc）；代码里改 IsOpen 时不发。</summary>
-    public event EventHandler<OpenChangedEventArgs>? OpenChanged;
+    public event EventHandler<OpenChangedEventArgs>? OpenChanged
+    {
+        add => AddHandler(OpenChangedEvent, value);
+        remove => RemoveHandler(OpenChangedEvent, value);
+    }
+
+    /// <summary><see cref="OpenChanged"/> 的路由事件（直接：不往上传，嵌套的浮层发的同名事件不会串到外层）。</summary>
+    public static readonly RoutedEvent OpenChangedEvent = EventManager.RegisterRoutedEvent(nameof(OpenChanged), RoutingStrategy.Direct, typeof(EventHandler<OpenChangedEventArgs>), typeof(Popover));
 
     /// <summary>浮层的面板（测试用）。</summary>
     internal Border Panel => panel;
@@ -270,7 +278,7 @@ public class Popover : FrameworkElement
         var reason = pending;
         Trigger?.SetValue(TriggerExpandedProperty, IsOpen);
         if (popup.IsOpen != IsOpen) popup.IsOpen = IsOpen;
-        if (reason is { } known) OpenChanged?.Invoke(this, new OpenChangedEventArgs(IsOpen, known));
+        if (reason is { } known) RaiseEvent(new OpenChangedEventArgs(OpenChangedEvent, IsOpen, known));
     }
 
     /// <summary>

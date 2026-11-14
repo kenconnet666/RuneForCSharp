@@ -302,7 +302,14 @@ public class Dialog : FrameworkElement
     Vector dragOrigin;
 
     /// <summary>用户开、关了（关闭按钮、取消、确认、Esc、点遮罩）；代码里改 IsOpen 时不发。</summary>
-    public event EventHandler<OpenChangedEventArgs>? OpenChanged;
+    public event EventHandler<OpenChangedEventArgs>? OpenChanged
+    {
+        add => AddHandler(OpenChangedEvent, value);
+        remove => RemoveHandler(OpenChangedEvent, value);
+    }
+
+    /// <summary><see cref="OpenChanged"/> 的路由事件（直接：不往上传，嵌套的浮层发的同名事件不会串到外层）。</summary>
+    public static readonly RoutedEvent OpenChangedEvent = EventManager.RegisterRoutedEvent(nameof(OpenChanged), RoutingStrategy.Direct, typeof(EventHandler<OpenChangedEventArgs>), typeof(Dialog));
 
     /// <summary>标题行只给读屏（命令面板：标题是面板的名称，不显示）。</summary>
     internal bool HeaderHidden { get; set { field = value; Sync(); } }
@@ -406,7 +413,7 @@ public class Dialog : FrameworkElement
             returnFocus?.Focus();
             returnFocus = null;
         }
-        if (reason is { } known) OpenChanged?.Invoke(this, new OpenChangedEventArgs(IsOpen, known));
+        if (reason is { } known) RaiseEvent(new OpenChangedEventArgs(OpenChangedEvent, IsOpen, known));
         if (!IsOpen) Release(reason ?? OpenChangeReason.Imperative);
     }
 

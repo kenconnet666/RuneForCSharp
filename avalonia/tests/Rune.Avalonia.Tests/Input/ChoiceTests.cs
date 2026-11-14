@@ -5,6 +5,7 @@ using Avalonia.Automation.Provider;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.Media;
 using Avalonia.Media.Transformation;
@@ -169,6 +170,21 @@ public class ChoiceTests
         Click(window, b);
         Assert.True(checkbox.IsChecked);
         Assert.Equal(("a", true, false), (group.Value, a.IsChecked, b.IsChecked));
+    });
+
+    [Fact]
+    public Task Toggling_bubbles_so_a_container_can_cancel() => HeadlessUi.Run(() =>
+    {
+        var checkbox = new Checkbox();
+        var panel = new StackPanel { Children = { checkbox } };
+        object? source = null;
+        panel.AddHandler(ChoiceBase.TogglingEvent, (_, e) => (source, e.Cancel) = (e.Source, true));
+        var window = HeadlessUi.Show(panel);
+
+        Click(window, checkbox);
+        Assert.Same(checkbox, source);
+        Assert.False(checkbox.IsChecked);
+        Assert.Equal(RoutingStrategies.Direct, Popover.OpenChangedEvent.RoutingStrategies); // 浮层的开合不往上传：嵌套浮层的事件不串到外层
     });
 
     [Fact]

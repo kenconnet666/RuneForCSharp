@@ -36,7 +36,14 @@ public class CopyButton : IconButton
     static CopyButton() => DefaultStyleKeyProperty.OverrideMetadata(typeof(CopyButton), new FrameworkPropertyMetadata(typeof(CopyButton)));
 
     /// <summary>复制完成（成功或失败）。</summary>
-    public event EventHandler<CopiedEventArgs>? Copied;
+    public event EventHandler<CopiedEventArgs>? Copied
+    {
+        add => AddHandler(CopiedEvent, value);
+        remove => RemoveHandler(CopiedEvent, value);
+    }
+
+    /// <summary><see cref="Copied"/> 的路由事件（冒泡：容器上可以统一处理）。</summary>
+    public static readonly RoutedEvent CopiedEvent = EventManager.RegisterRoutedEvent(nameof(Copied), RoutingStrategy.Bubble, typeof(EventHandler<CopiedEventArgs>), typeof(CopyButton));
 
     /// <summary>要复制的文字。</summary>
     public string? Value { get => (string?)GetValue(ValueProperty); set => SetValue(ValueProperty, value); }
@@ -81,7 +88,7 @@ public class CopyButton : IconButton
             if (factory is not null) IsLoading = false;
         }
         if (success) ShowCopied();
-        Copied?.Invoke(this, new CopiedEventArgs(success, error));
+        RaiseEvent(new CopiedEventArgs(CopiedEvent, success, error));
     }
 
     /// <summary>换成对勾（缩放弹出：durations.md、enter 缓动），读屏念"已复制"，<see cref="Timeout"/> 后复原；再次复制作废上一次的复原。</summary>
@@ -125,8 +132,9 @@ public class CopyButton : IconButton
 
 /// <summary>复制完成的参数。</summary>
 /// <param name="success">写进剪贴板了。</param>
+/// <param name="routedEvent">事件。</param>
 /// <param name="error">失败的原因（取值出错、剪贴板被占用等）；成功时为 null。</param>
-public sealed class CopiedEventArgs(bool success, Exception? error) : EventArgs
+public sealed class CopiedEventArgs(RoutedEvent routedEvent, bool success, Exception? error) : RoutedEventArgs(routedEvent)
 {
     /// <summary>写进剪贴板了。</summary>
     public bool Success { get; } = success;

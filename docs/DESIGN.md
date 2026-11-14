@@ -313,6 +313,10 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - **事件"使用方先处理、可接管"**：
   - Avalonia 和 WPF 都用隧道阶段：使用方在 Preview/Tunnel 里设 `Handled = true`，组件的内部处理就跳过（已实测）。冒泡阶段的普通订阅在组件处理之后才收到，组件标记 Handled 后就收不到了。
   - WinForms 没有路由事件，由组件提供可取消的前置事件（做组件时定）。
+- **组件自己的事件**（Avalonia、WPF；2026-11-14 定）：
+  - 用户动作的语义事件是**路由事件**，CLR 包装仍是 `EventHandler<T>`，参数从 RoutedEventArgs 派生。容器上能统一处理的用冒泡（`CopyButton.Copied`、勾选类的 `Toggling`、`Listbox.Picked`、`NavList.Navigate`）；浮层的开合与浮层里的动作用直接路由（`OpenChanged`、`Select.OptionCreated`、`CommandPalette.ItemInvoked`），不往上传，免得嵌套浮层（菜单里的子菜单、对话框里的下拉）的同名事件串到外层的处理里。
+  - **订阅了才启用功能的事件保持普通事件**：Tag 与已选标签的 `RemoveRequested`、Alert / Banner / Tab 的 `CloseRequested`、TabList 的 `AddRequested` 与 `Reordered`、ItemList 的 `Invoked`（上游给了 onRemove、onClose 才有按钮）。路由事件在容器上订阅也算处理，组件没法知道自己这一个有没有人管。
+  - **MVVM 命令**：值、开合、勾选类属性默认双向绑定；执行类的部件从 ButtonBase 派生，自带 Command（菜单项、ItemList 的项、导航项）。没有按钮可挂的执行动作补命令属性，事件之后调用、事件标记 Handled 时不调：`CommandPalette.ItemCommand`（参数是那一项）、`NavList.NavigateCommand`（参数是 Href，不能执行时不切换）。
 
 ## 8. 动效
 

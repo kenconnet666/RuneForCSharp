@@ -191,7 +191,14 @@ public class Dialog : Control
     Vector dragOrigin;
 
     /// <summary>用户开、关了（关闭按钮、取消、确认、Esc、点遮罩）；代码里改 IsOpen 时不发。</summary>
-    public event EventHandler<OpenChangedEventArgs>? OpenChanged;
+    public event EventHandler<OpenChangedEventArgs>? OpenChanged
+    {
+        add => AddHandler(OpenChangedEvent, value);
+        remove => RemoveHandler(OpenChangedEvent, value);
+    }
+
+    /// <summary><see cref="OpenChanged"/> 的路由事件（直接：不往上传，嵌套的浮层发的同名事件不会串到外层）。</summary>
+    public static readonly RoutedEvent<OpenChangedEventArgs> OpenChangedEvent = RoutedEvent.Register<Dialog, OpenChangedEventArgs>(nameof(OpenChanged), RoutingStrategies.Direct);
 
     /// <summary>
     /// 命令式打开（TS 的 useDialog().open）：在 <paramref name="owner"/> 所在的窗口打开这个对话框（它不用放进界面，开着时挂在 owner 的逻辑树下，沿用那里的主题、语言）。
@@ -342,7 +349,7 @@ public class Dialog : Control
             returnFocus?.Focus(NavigationMethod.Tab);
             returnFocus = null;
         }
-        if (reason is { } known) OpenChanged?.Invoke(this, new OpenChangedEventArgs(IsOpen, known));
+        if (reason is { } known) RaiseEvent(new OpenChangedEventArgs(OpenChangedEvent, IsOpen, known));
         if (!IsOpen) Release(reason ?? OpenChangeReason.Imperative);
     }
 

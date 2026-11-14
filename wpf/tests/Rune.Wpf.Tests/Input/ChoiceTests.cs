@@ -174,6 +174,20 @@ public class ChoiceTests
     });
 
     [Fact]
+    public Task Toggling_bubbles_so_a_container_can_cancel() => WpfUi.Run(() =>
+    {
+        var checkbox = new Checkbox();
+        var panel = Show(checkbox);
+        object? source = null;
+        panel.AddHandler(ChoiceBase.TogglingEvent, new EventHandler<ChoiceTogglingEventArgs>((_, e) => (source, e.Cancel) = (e.Source, true)));
+
+        Click(checkbox);
+        Assert.Same(checkbox, source);
+        Assert.False(checkbox.IsChecked);
+        Assert.Equal(RoutingStrategy.Direct, Popover.OpenChangedEvent.RoutingStrategy); // 浮层的开合不往上传：嵌套浮层的事件不串到外层
+    });
+
+    [Fact]
     [Upstream("CheckboxGroup", "CheckboxGroup 的 items")]
     public Task Checkbox_group_items_come_from_options() => WpfUi.Run(() =>
     {

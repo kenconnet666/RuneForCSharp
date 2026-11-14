@@ -114,4 +114,22 @@ public class NavListTests
         Assert.Null(item.ToolTip);
         Assert.Equal("3", item.Part<Badge>("PART_Badge").Content);
     });
+
+    [Fact]
+    public Task Navigate_command_gets_the_href_and_can_block_the_switch() => WpfUi.Run(() =>
+    {
+        var (list, items, _, _) = Build("/");
+        var allowed = true;
+        var command = new TestCommand(_ => allowed);
+        list.NavigateCommand = command;
+
+        Invoke(items[1]);
+        Assert.Equal(["/orders"], command.Executed);
+        Assert.Equal("/orders", list.CurrentHref);
+
+        allowed = false; // 命令不能执行：不切换
+        Invoke(items[2]);
+        Assert.Equal(["/orders"], command.Executed);
+        Assert.Equal("/orders", list.CurrentHref);
+    });
 }

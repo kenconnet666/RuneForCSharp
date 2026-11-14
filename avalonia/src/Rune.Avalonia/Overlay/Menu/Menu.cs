@@ -74,7 +74,7 @@ public class Menu : Control, IMenuHost
         resources = new TemplateResources(scroll);
         LogicalChildren.Add(popover);
         VisualChildren.Add(popover);
-        popover.OpenChanged += (_, e) => OpenChanged?.Invoke(this, e);
+        popover.OpenChanged += (_, e) => RaiseEvent(new OpenChangedEventArgs(OpenChangedEvent, e.IsOpen, e.Reason));
         popover.PropertyChanged += (_, e) =>
         {
             if (e.Property == Popover.IsOpenProperty) SetCurrentValue(IsOpenProperty, popover.IsOpen);
@@ -103,7 +103,14 @@ public class Menu : Control, IMenuHost
     public bool? Ripple { get => GetValue(RippleProperty); set => SetValue(RippleProperty, value); }
 
     /// <summary>用户开、关了（触发器、点外面、Esc、执行了一项、Tab 移走）；代码里改 IsOpen 时不发。</summary>
-    public event EventHandler<OpenChangedEventArgs>? OpenChanged;
+    public event EventHandler<OpenChangedEventArgs>? OpenChanged
+    {
+        add => AddHandler(OpenChangedEvent, value);
+        remove => RemoveHandler(OpenChangedEvent, value);
+    }
+
+    /// <summary><see cref="OpenChanged"/> 的路由事件（直接：不往上传，嵌套的浮层发的同名事件不会串到外层）。</summary>
+    public static readonly RoutedEvent<OpenChangedEventArgs> OpenChangedEvent = RoutedEvent.Register<Menu, OpenChangedEventArgs>(nameof(OpenChanged), RoutingStrategies.Direct);
 
     /// <summary>弹出层的面板（测试用）。</summary>
     internal Border Panel => popover.Panel;

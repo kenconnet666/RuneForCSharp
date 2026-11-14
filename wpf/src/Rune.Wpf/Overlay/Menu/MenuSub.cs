@@ -130,7 +130,14 @@ public class MenuSub : FrameworkElement, IMenuHost
     public UIElementCollection Items => items.Children;
 
     /// <summary>用户开、关了子菜单；代码里改 IsOpen 时不发。</summary>
-    public event EventHandler<OpenChangedEventArgs>? OpenChanged;
+    public event EventHandler<OpenChangedEventArgs>? OpenChanged
+    {
+        add => AddHandler(OpenChangedEvent, value);
+        remove => RemoveHandler(OpenChangedEvent, value);
+    }
+
+    /// <summary><see cref="OpenChanged"/> 的路由事件（直接：不往上传，嵌套的浮层发的同名事件不会串到外层）。</summary>
+    public static readonly RoutedEvent OpenChangedEvent = EventManager.RegisterRoutedEvent(nameof(OpenChanged), RoutingStrategy.Direct, typeof(EventHandler<OpenChangedEventArgs>), typeof(MenuSub));
 
     /// <summary>打开子菜单的那一项（测试用）。</summary>
     internal MenuItemBase Trigger => trigger;
@@ -194,7 +201,7 @@ public class MenuSub : FrameworkElement, IMenuHost
         var reason = pending;
         trigger.Expanded = IsOpen;
         if (popup.IsOpen != IsOpen) popup.IsOpen = IsOpen;
-        if (reason is { } known) OpenChanged?.Invoke(this, new OpenChangedEventArgs(IsOpen, known));
+        if (reason is { } known) RaiseEvent(new OpenChangedEventArgs(OpenChangedEvent, IsOpen, known));
     }
 
     /// <summary>键盘打开的：等排好版后聚焦第一项。</summary>

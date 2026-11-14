@@ -6,6 +6,7 @@ using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Metadata;
 using Avalonia.Input.Platform;
+using Avalonia.Interactivity;
 using Avalonia.Media.Transformation;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
@@ -43,7 +44,14 @@ public class CopyButton : IconButton
     public CopyButton() => AutomationProperties.SetLiveSetting(this, AutomationLiveSetting.Polite);
 
     /// <summary>复制完成（成功或失败）。</summary>
-    public event EventHandler<CopiedEventArgs>? Copied;
+    public event EventHandler<CopiedEventArgs>? Copied
+    {
+        add => AddHandler(CopiedEvent, value);
+        remove => RemoveHandler(CopiedEvent, value);
+    }
+
+    /// <summary><see cref="Copied"/> 的路由事件（冒泡：容器上可以统一处理）。</summary>
+    public static readonly RoutedEvent<CopiedEventArgs> CopiedEvent = RoutedEvent.Register<CopyButton, CopiedEventArgs>(nameof(Copied), RoutingStrategies.Bubble);
 
     /// <summary>要复制的文字。</summary>
     public string? Value { get => GetValue(ValueProperty); set => SetValue(ValueProperty, value); }
@@ -88,7 +96,7 @@ public class CopyButton : IconButton
             if (factory is not null) IsLoading = false;
         }
         if (success) ShowCopied();
-        Copied?.Invoke(this, new CopiedEventArgs(success, error));
+        RaiseEvent(new CopiedEventArgs(CopiedEvent, success, error));
     }
 
     /// <summary>
@@ -149,8 +157,9 @@ public class CopyButton : IconButton
 
 /// <summary>复制完成的参数。</summary>
 /// <param name="success">写进剪贴板了。</param>
+/// <param name="routedEvent">事件。</param>
 /// <param name="error">失败的原因（取值出错、剪贴板被占用等）；成功时为 null。</param>
-public sealed class CopiedEventArgs(bool success, Exception? error) : EventArgs
+public sealed class CopiedEventArgs(RoutedEvent routedEvent, bool success, Exception? error) : RoutedEventArgs(routedEvent)
 {
     /// <summary>写进剪贴板了。</summary>
     public bool Success { get; } = success;

@@ -50,7 +50,7 @@ public class ContextMenu : FrameworkElement
         };
         menu.OpenChanged += (_, e) =>
         {
-            OpenChanged?.Invoke(this, e);
+            RaiseEvent(new OpenChangedEventArgs(OpenChangedEvent, e.IsOpen, e.Reason));
             if (!e.IsOpen) RestoreFocus();
         };
         Loaded += (_, _) => UpdateLabel();
@@ -69,7 +69,14 @@ public class ContextMenu : FrameworkElement
     public bool IsOpen { get => menu.IsOpen; set => menu.IsOpen = value; }
 
     /// <summary>用户开、关了菜单。</summary>
-    public event EventHandler<OpenChangedEventArgs>? OpenChanged;
+    public event EventHandler<OpenChangedEventArgs>? OpenChanged
+    {
+        add => AddHandler(OpenChangedEvent, value);
+        remove => RemoveHandler(OpenChangedEvent, value);
+    }
+
+    /// <summary><see cref="OpenChanged"/> 的路由事件（直接：不往上传，嵌套的浮层发的同名事件不会串到外层）。</summary>
+    public static readonly RoutedEvent OpenChangedEvent = EventManager.RegisterRoutedEvent(nameof(OpenChanged), RoutingStrategy.Direct, typeof(EventHandler<OpenChangedEventArgs>), typeof(ContextMenu));
 
     /// <summary>里面的菜单（测试用）。</summary>
     internal Menu Menu => menu;

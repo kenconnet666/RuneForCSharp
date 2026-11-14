@@ -6,6 +6,7 @@ using System.Windows.Automation.Peers;
 using System.Windows.Automation.Provider;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -30,6 +31,9 @@ namespace Rune.Wpf;
 /// </summary>
 public class NavList : Flex
 {
+    /// <summary>点了导航项时调用的命令（MVVM）：参数是导航项的 Href；<see cref="Navigate"/> 标记 Handled 时不调用，命令不能执行时不切换。</summary>
+    public static readonly DependencyProperty NavigateCommandProperty = DependencyProperty.Register(nameof(NavigateCommand), typeof(ICommand), typeof(NavList));
+
     /// <summary>当前地址：Href 与它相同的导航项是当前页。默认双向绑定。</summary>
     public static readonly DependencyProperty CurrentHrefProperty = DependencyProperty.Register(nameof(CurrentHref), typeof(string), typeof(NavList),
         new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (d, _) => ((NavList)d).Sync()));
@@ -55,6 +59,9 @@ public class NavList : Flex
 
     /// <summary>当前地址。</summary>
     public string? CurrentHref { get => (string?)GetValue(CurrentHrefProperty); set => SetValue(CurrentHrefProperty, value); }
+
+    /// <summary>点了导航项时调用的命令。</summary>
+    public ICommand? NavigateCommand { get => (ICommand?)GetValue(NavigateCommandProperty); set => SetValue(NavigateCommandProperty, value); }
 
     /// <summary>紧凑。</summary>
     public bool Compact { get => (bool)GetValue(CompactProperty); set => SetValue(CompactProperty, value); }
@@ -116,7 +123,13 @@ public class NavList : Flex
     {
         var args = new NavigateEventArgs(NavigateEvent, this, item.Href);
         RaiseEvent(args);
-        if (!args.Handled && item.Href is { } href) SetCurrentValue(CurrentHrefProperty, href);
+        if (args.Handled || item.Href is not { } href) return;
+        if (NavigateCommand is { } command)
+        {
+            if (!command.CanExecute(href)) return;
+            command.Execute(href);
+        }
+        SetCurrentValue(CurrentHrefProperty, href);
     }
 
     /// <inheritdoc />

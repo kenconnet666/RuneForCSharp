@@ -104,4 +104,23 @@ public class CommandPaletteTests
         Assert.Equal("搜索", palette.Dialog.Title);
         palette.IsOpen = false;
     });
+
+    [Fact]
+    public Task Item_command_runs_with_the_item_unless_the_event_handles_it() => HeadlessUi.Run(() =>
+    {
+        var command = new TestCommand();
+        var palette = new CommandPalette { ItemsSource = Pages, ItemCommand = command };
+        var window = HeadlessUi.Show(palette);
+        palette.IsOpen = true;
+        HeadlessUi.Flush(window);
+
+        palette.List.RaiseEvent(new ListboxPickedEventArgs(Listbox.PickedEvent, "/dialog"));
+        Assert.Same(Pages[1], Assert.Single(command.Executed));
+
+        palette.ItemInvoked += (_, e) => e.Handled = true; // 事件处理了：不再调命令
+        palette.IsOpen = true;
+        HeadlessUi.Flush(window);
+        palette.List.RaiseEvent(new ListboxPickedEventArgs(Listbox.PickedEvent, "/button"));
+        Assert.Single(command.Executed);
+    });
 }

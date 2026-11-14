@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
 using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Metadata;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
@@ -43,7 +44,7 @@ public class ContextMenu : Control
         LogicalChildren.AddRange([content, menu]);
         VisualChildren.AddRange([content, menu]);
         AddHandler(ContextRequestedEvent, OnContextRequested);
-        menu.OpenChanged += (_, e) => OpenChanged?.Invoke(this, e);
+        menu.OpenChanged += (_, e) => RaiseEvent(new OpenChangedEventArgs(OpenChangedEvent, e.IsOpen, e.Reason));
         menu.PropertyChanged += (_, e) =>
         {
             if (e.Property != Menu.IsOpenProperty) return;
@@ -67,7 +68,14 @@ public class ContextMenu : Control
     public bool IsOpen { get => GetValue(IsOpenProperty); set => SetValue(IsOpenProperty, value); }
 
     /// <summary>用户开、关了菜单。</summary>
-    public event EventHandler<OpenChangedEventArgs>? OpenChanged;
+    public event EventHandler<OpenChangedEventArgs>? OpenChanged
+    {
+        add => AddHandler(OpenChangedEvent, value);
+        remove => RemoveHandler(OpenChangedEvent, value);
+    }
+
+    /// <summary><see cref="OpenChanged"/> 的路由事件（直接：不往上传，嵌套的浮层发的同名事件不会串到外层）。</summary>
+    public static readonly RoutedEvent<OpenChangedEventArgs> OpenChangedEvent = RoutedEvent.Register<ContextMenu, OpenChangedEventArgs>(nameof(OpenChanged), RoutingStrategies.Direct);
 
     /// <summary>里面的菜单（测试用）。</summary>
     internal Menu Menu => menu;

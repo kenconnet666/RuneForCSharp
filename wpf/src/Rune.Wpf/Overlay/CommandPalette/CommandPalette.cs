@@ -11,8 +11,9 @@ using System.Windows.Threading;
 namespace Rune.Wpf;
 
 /// <summary>执行了命令面板里一项的事件参数。</summary>
+/// <param name="routedEvent">事件。</param>
 /// <param name="item">ItemsSource 里的那一项。</param>
-public sealed class CommandPaletteItemEventArgs(object? item) : EventArgs
+public sealed class CommandPaletteItemEventArgs(RoutedEvent routedEvent, object? item) : RoutedEventArgs(routedEvent)
 {
     /// <summary>执行的那一项。</summary>
     public object? Item { get; } = item;
@@ -35,6 +36,9 @@ public class CommandPalette : FrameworkElement
     /// <summary>开着（默认双向绑定）；快捷键、触发按钮、执行、Esc 都会改它。</summary>
     public static readonly DependencyProperty IsOpenProperty = DependencyProperty.Register(nameof(IsOpen), typeof(bool), typeof(CommandPalette),
         new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (d, _) => ((CommandPalette)d).Toggle()));
+
+    /// <summary>执行了一项时调用的命令（MVVM）：参数是 ItemsSource 里的那一项；<see cref="ItemInvoked"/> 标记 Handled 时不调用。</summary>
+    public static readonly DependencyProperty ItemCommandProperty = DependencyProperty.Register(nameof(ItemCommand), typeof(ICommand), typeof(CommandPalette));
 
     /// <summary>数据：ListboxOption、字符串，或任意数据加 <see cref="ToOption"/>。</summary>
     public static readonly DependencyProperty ItemsSourceProperty = DependencyProperty.Register(nameof(ItemsSource), typeof(IEnumerable), typeof(CommandPalette),
@@ -131,6 +135,9 @@ public class CommandPalette : FrameworkElement
     /// <summary>数据。</summary>
     public IEnumerable? ItemsSource { get => (IEnumerable?)GetValue(ItemsSourceProperty); set => SetValue(ItemsSourceProperty, value); }
 
+    /// <summary>执行了一项时调用的命令。</summary>
+    public ICommand? ItemCommand { get => (ICommand?)GetValue(ItemCommandProperty); set => SetValue(ItemCommandProperty, value); }
+
     /// <summary>数据 → 选项。</summary>
     public Func<object?, ListboxOption>? ToOption { get => (Func<object?, ListboxOption>?)GetValue(ToOptionProperty); set => SetValue(ToOptionProperty, value); }
 
@@ -162,10 +169,24 @@ public class CommandPalette : FrameworkElement
     public object? Empty { get => GetValue(EmptyProperty); set => SetValue(EmptyProperty, value); }
 
     /// <summary>执行了一项（Enter 或点击）：面板随即关闭。</summary>
-    public event EventHandler<CommandPaletteItemEventArgs>? ItemInvoked;
+    public event EventHandler<CommandPaletteItemEventArgs>? ItemInvoked
+    {
+        add => AddHandler(ItemInvokedEvent, value);
+        remove => RemoveHandler(ItemInvokedEvent, value);
+    }
+
+    /// <summary><see cref="ItemInvoked"/> 的路由事件（直接：不往上传，嵌套的浮层发的同名事件不会串到外层）。</summary>
+    public static readonly RoutedEvent ItemInvokedEvent = EventManager.RegisterRoutedEvent(nameof(ItemInvoked), RoutingStrategy.Direct, typeof(EventHandler<CommandPaletteItemEventArgs>), typeof(CommandPalette));
 
     /// <summary>用户开、关了（快捷键、触发按钮、执行、Esc、点遮罩）；代码里改 IsOpen 时不发。</summary>
-    public event EventHandler<OpenChangedEventArgs>? OpenChanged;
+    public event EventHandler<OpenChangedEventArgs>? OpenChanged
+    {
+        add => AddHandler(OpenChangedEvent, value);
+        remove => RemoveHandler(OpenChangedEvent, value);
+    }
+
+    /// <summary><see cref="OpenChanged"/> 的路由事件（直接：不往上传，嵌套的浮层发的同名事件不会串到外层）。</summary>
+    public static readonly RoutedEvent OpenChangedEvent = EventManager.RegisterRoutedEvent(nameof(OpenChanged), RoutingStrategy.Direct, typeof(EventHandler<OpenChangedEventArgs>), typeof(CommandPalette));
 
     /// <summary>对话框（测试用）。</summary>
     internal Dialog Dialog => dialog;
@@ -269,7 +290,7 @@ public class CommandPalette : FrameworkElement
         if (dialog.IsOpen != IsOpen) dialog.IsOpen = IsOpen;
         // 对话框把焦点给第一个能聚焦的元素（这里就是搜索框）；保险起见打开后再给一次
         if (IsOpen) Dispatcher.BeginInvoke(DispatcherPriority.Input, () => input.Focus());
-        if (reason is { } known) OpenChanged?.Invoke(this, new OpenChangedEventArgs(IsOpen, known));
+        if (reason is { } known) RaiseEvent(new OpenChangedEventArgs(OpenChangedEvent, IsOpen, known));
     }
 
     /// <summary>对话框自己关了（Esc、点遮罩）：报告它的原因。</summary>
@@ -278,7 +299,7 @@ public class CommandPalette : FrameworkElement
         if (e.IsOpen || !IsOpen) return;
         pending = null;
         SetCurrentValue(IsOpenProperty, false);
-        OpenChanged?.Invoke(this, e);
+        RaiseEvent(new OpenChangedEventArgs(OpenChangedEvent, e.IsOpen, e.Reason));
     }
 
     /// <summary>执行一项：不可用的不执行；关上面板，报告那一项。</summary>
@@ -290,7 +311,9 @@ public class CommandPalette : FrameworkElement
         listbox.Value = null;
         if (entry.Option.IsDisabled) return;
         SetOpen(false, OpenChangeReason.Select);
-        ItemInvoked?.Invoke(this, new CommandPaletteItemEventArgs(entry.Item));
+        var args = new CommandPaletteItemEventArgs(ItemInvokedEvent, entry.Item);
+        RaiseEvent(args);
+        if (!args.Handled && ItemCommand is { } command && command.CanExecute(entry.Item)) command.Execute(entry.Item);
     }
 
     /// <summary>搜索框里：↑↓、Page Up / Down 移动高亮，Enter 执行（Home / End、空格留给输入）。</summary>

@@ -71,7 +71,7 @@ public class Menu : FrameworkElement, IMenuHost
         scroll.Content = items;
         popover.Content = scroll;
         popover.SetBinding(Popover.IsOpenProperty, new Binding(nameof(IsOpen)) { Source = this, Mode = BindingMode.TwoWay });
-        popover.OpenChanged += (_, e) => OpenChanged?.Invoke(this, e);
+        popover.OpenChanged += (_, e) => RaiseEvent(new OpenChangedEventArgs(OpenChangedEvent, e.IsOpen, e.Reason));
         AddLogicalChild(popover);
         AddVisualChild(popover);
         // 弹出框的内容呈现器不给内容逻辑父元素：菜单项沿逻辑树找所在的菜单，滚动区域挂在菜单下
@@ -110,7 +110,14 @@ public class Menu : FrameworkElement, IMenuHost
     public bool? Ripple { get => (bool?)GetValue(RippleProperty); set => SetValue(RippleProperty, value); }
 
     /// <summary>用户开、关了（触发器、点外面、Esc、执行了一项、Tab 移走）；代码里改 IsOpen 时不发。</summary>
-    public event EventHandler<OpenChangedEventArgs>? OpenChanged;
+    public event EventHandler<OpenChangedEventArgs>? OpenChanged
+    {
+        add => AddHandler(OpenChangedEvent, value);
+        remove => RemoveHandler(OpenChangedEvent, value);
+    }
+
+    /// <summary><see cref="OpenChanged"/> 的路由事件（直接：不往上传，嵌套的浮层发的同名事件不会串到外层）。</summary>
+    public static readonly RoutedEvent OpenChangedEvent = EventManager.RegisterRoutedEvent(nameof(OpenChanged), RoutingStrategy.Direct, typeof(EventHandler<OpenChangedEventArgs>), typeof(Menu));
 
     /// <summary>弹出层的面板（测试用）。</summary>
     internal Border Panel => popover.Panel;

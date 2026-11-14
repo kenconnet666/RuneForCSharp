@@ -228,10 +228,24 @@ public class Select : TemplatedControl, IFieldControl
     public OptionsLoader? Load { get => GetValue(LoadProperty); set => SetValue(LoadProperty, value); }
 
     /// <summary>用户开、关了（触发框、选中、点外面、Esc、Tab）；代码里改 IsOpen 时不发。</summary>
-    public event EventHandler<OpenChangedEventArgs>? OpenChanged;
+    public event EventHandler<OpenChangedEventArgs>? OpenChanged
+    {
+        add => AddHandler(OpenChangedEvent, value);
+        remove => RemoveHandler(OpenChangedEvent, value);
+    }
+
+    /// <summary><see cref="OpenChanged"/> 的路由事件（直接：不往上传，嵌套的浮层发的同名事件不会串到外层）。</summary>
+    public static readonly RoutedEvent<OpenChangedEventArgs> OpenChangedEvent = RoutedEvent.Register<Select, OpenChangedEventArgs>(nameof(OpenChanged), RoutingStrategies.Direct);
 
     /// <summary>新建了一项（<see cref="Creatable"/> 时）：参数是输入的文字，也就是选中的值。</summary>
-    public event EventHandler<SelectCreatedEventArgs>? OptionCreated;
+    public event EventHandler<SelectCreatedEventArgs>? OptionCreated
+    {
+        add => AddHandler(OptionCreatedEvent, value);
+        remove => RemoveHandler(OptionCreatedEvent, value);
+    }
+
+    /// <summary><see cref="OptionCreated"/> 的路由事件（直接：不往上传，嵌套的浮层发的同名事件不会串到外层）。</summary>
+    public static readonly RoutedEvent<SelectCreatedEventArgs> OptionCreatedEvent = RoutedEvent.Register<Select, SelectCreatedEventArgs>(nameof(OptionCreated), RoutingStrategies.Direct);
 
     /// <summary>弹出层里的列表（测试用）。</summary>
     internal Listbox List => listbox;
@@ -409,7 +423,7 @@ public class Select : TemplatedControl, IFieldControl
         if (Multiple) SetCurrentValue(ValuesProperty, next);
         else SetCurrentValue(ValueProperty, next.FirstOrDefault());
         if (created is null) return;
-        OptionCreated?.Invoke(this, new SelectCreatedEventArgs(created.Text));
+        RaiseEvent(new SelectCreatedEventArgs(OptionCreatedEvent, created.Text));
         search.Text = "";
     }
 
@@ -453,7 +467,7 @@ public class Select : TemplatedControl, IFieldControl
         remote.SetOpen(IsOpen);
         if (IsOpen) panel.MinWidth = Bounds.Width;
         if (popup.IsOpen != IsOpen) popup.IsOpen = IsOpen;
-        if (reason is { } known) OpenChanged?.Invoke(this, new OpenChangedEventArgs(IsOpen, known));
+        if (reason is { } known) RaiseEvent(new OpenChangedEventArgs(OpenChangedEvent, IsOpen, known));
     }
 
     /// <summary>打开后：可搜索时焦点进搜索框（关上后回到触发框）。</summary>
@@ -617,8 +631,9 @@ public class Select : TemplatedControl, IFieldControl
 }
 
 /// <summary>新建了一项的事件参数。</summary>
+/// <param name="routedEvent">事件。</param>
 /// <param name="text">输入的文字，也就是选中的值。</param>
-public sealed class SelectCreatedEventArgs(string text) : EventArgs
+public sealed class SelectCreatedEventArgs(RoutedEvent routedEvent, string text) : RoutedEventArgs(routedEvent)
 {
     /// <summary>输入的文字。</summary>
     public string Text { get; } = text;

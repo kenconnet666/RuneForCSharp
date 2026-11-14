@@ -12,6 +12,7 @@ using Avalonia.Layout;
 using Avalonia.LogicalTree;
 using Avalonia.Media.Transformation;
 using Avalonia.Metadata;
+using System.Windows.Input;
 
 namespace Rune.Avalonia;
 
@@ -33,6 +34,9 @@ namespace Rune.Avalonia;
 /// </summary>
 public class NavList : Flex
 {
+    /// <summary>点了导航项时调用的命令（MVVM）：参数是导航项的 Href；<see cref="Navigate"/> 标记 Handled 时不调用，命令不能执行时不切换。</summary>
+    public static readonly StyledProperty<ICommand?> NavigateCommandProperty = AvaloniaProperty.Register<NavList, ICommand?>(nameof(NavigateCommand));
+
     /// <summary>当前地址：Href 与它相同的导航项是当前页。默认双向绑定。</summary>
     public static readonly StyledProperty<string?> CurrentHrefProperty =
         AvaloniaProperty.Register<NavList, string?>(nameof(CurrentHref), defaultBindingMode: BindingMode.TwoWay);
@@ -56,6 +60,9 @@ public class NavList : Flex
 
     /// <summary>当前地址。</summary>
     public string? CurrentHref { get => GetValue(CurrentHrefProperty); set => SetValue(CurrentHrefProperty, value); }
+
+    /// <summary>点了导航项时调用的命令。</summary>
+    public ICommand? NavigateCommand { get => GetValue(NavigateCommandProperty); set => SetValue(NavigateCommandProperty, value); }
 
     /// <summary>紧凑。</summary>
     public bool Compact { get => GetValue(CompactProperty); set => SetValue(CompactProperty, value); }
@@ -109,7 +116,13 @@ public class NavList : Flex
     {
         var args = new NavigateEventArgs(NavigateEvent, item.Href);
         RaiseEvent(args);
-        if (!args.Handled && item.Href is { } href) CurrentHref = href;
+        if (args.Handled || item.Href is not { } href) return;
+        if (NavigateCommand is { } command)
+        {
+            if (!command.CanExecute(href)) return;
+            command.Execute(href);
+        }
+        CurrentHref = href;
     }
 }
 
