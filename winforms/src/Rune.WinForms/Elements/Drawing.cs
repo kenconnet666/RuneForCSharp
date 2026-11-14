@@ -163,6 +163,31 @@ static class Drawing
         }
     }
 
+    /// <summary>圆角矩形，其中几个角是直角（相连的一组里相邻的一侧）。</summary>
+    public static GraphicsPath RoundedRectangle(RectangleF bounds, float radius, AttachedCorners squared)
+    {
+        if (squared == AttachedCorners.None) return RoundedRectangle(bounds, radius);
+        radius = Math.Min(radius, Math.Min(bounds.Width, bounds.Height) / 2);
+        var path = new GraphicsPath();
+        void Corner(AttachedCorners corner, float x, float y, float start)
+        {
+            if (radius <= 0 || squared.HasFlag(corner))
+            {
+                // 直角：从这个角的顶点经过（AddLine 连到下一段）
+                var px = start is 180 or 90 ? x : x + 2 * radius;
+                var py = start is 180 or 270 ? y : y + 2 * radius;
+                path.AddLine(px, py, px, py);
+            }
+            else path.AddArc(x, y, 2 * radius, 2 * radius, start, 90);
+        }
+        Corner(AttachedCorners.TopLeft, bounds.X, bounds.Y, 180);
+        Corner(AttachedCorners.TopRight, bounds.Right - 2 * radius, bounds.Y, 270);
+        Corner(AttachedCorners.BottomRight, bounds.Right - 2 * radius, bounds.Bottom - 2 * radius, 0);
+        Corner(AttachedCorners.BottomLeft, bounds.X, bounds.Bottom - 2 * radius, 90);
+        path.CloseFigure();
+        return path;
+    }
+
     /// <summary>圆角矩形的路径；圆角不超过短边的一半（同 CSS 把过大的 border-radius 缩回来），0 时是直角矩形。</summary>
     public static GraphicsPath RoundedRectangle(RectangleF bounds, float radius)
     {

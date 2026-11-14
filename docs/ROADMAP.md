@@ -217,7 +217,7 @@
 - [x] `ts-styles`（文档站每个示例、每个部件的计算样式，亮暗、悬停 / 聚焦 / 按下）与 `inspect styles`（Avalonia、WPF，同一种格式），`tools/parity/styles.mjs` 逐项比对。Button 的 variants、tones、sizes、radius 两个平台在亮暗主题下都一致（顺手修了按钮文字的行高与竖直对齐）。
 - [ ] WinForms 的 `inspect styles`：元素在绘制时才解析外观，要给元素加一个报出解析结果（各部件的边界、颜色、内边距、圆角、字号）的内部接口。
 - [ ] 行为对照（上游测试用例逐条对应）、截图对比；拿已做的 16 个组件过一遍三道核对，补齐差异（Button 页还缺 basic、types、full-width、group、disabled 示例，icons、loading 的内容与文档站不同）。
-- [~] 按钮家族的缺口：focusableWhenDisabled（Avalonia、WPF 做了，WinForms 待定）、WinForms 的 propsContent 与 ButtonBase；ButtonGroup、CopyButton。行为对照（`tools/parity/behavior.mjs`）列出的其余缺口：加载中的读屏忙碌状态（Avalonia、WPF）、WPF / WinForms 的 Provider 默认值与 sx 测试。
+- [~] 按钮家族的缺口：focusableWhenDisabled（Avalonia、WPF 做了，WinForms 待定）、WinForms 的 propsContent 与 ButtonBase（ButtonGroup、CopyButton 三个平台都做了）。行为对照（`tools/parity/behavior.mjs`）列出的其余缺口：加载中的读屏忙碌状态（Avalonia、WPF）、WPF / WinForms 的 Provider 默认值与 sx 测试。
 
 ## 阶段
 
@@ -296,7 +296,7 @@
 - [x] Text 家族（Text、Paragraph、Strong、Em、Small）：三个平台都做了（DESIGN §14）；WPF 从 TextBlock 派生（决定 19）。示例做了 scale、tones、numeric、overflow，inline、links、headings 等 Kbd、Link、Heading。
 - [x] Spinner（第一个带部件的组件，`propsIcon`）：三个平台都做了，部件转发按 DESIGN §7 的三种写法落地（DESIGN §14）；parity 认部件名常量与 `PropsXxx`。
 - [x] Badge（第一个自绘、带配方与组合档位的组件）：三个平台都做了，部件按决定 20（代码里组合真的子组件）；示例做了 matrix、shapes，in-context、statuses、tag 等 Table、StatusBadge、Tag。
-- [~] Button 家族：Button、IconButton 三个平台都做了，ButtonBase 做了 Avalonia、WPF（DESIGN §14，分层照 TS 的 ButtonBase 与 button-core），效果照 TS（波纹、颜色过渡、焦点环、加载指示防闪烁）；缺 focusableWhenDisabled、WinForms 的 propsContent。CloseButton、ClearButton、LinkButton、IconLinkButton 三个平台都做了（读屏名称取语言包，语言包的作用域见 DESIGN §6；链接的 Href 是绝对地址，用系统打开）。CopyButton 三个平台都做了（DESIGN §14）；ButtonGroup 接着做。
+- [~] Button 家族：Button、IconButton 三个平台都做了，ButtonBase 做了 Avalonia、WPF（DESIGN §14，分层照 TS 的 ButtonBase 与 button-core），效果照 TS（波纹、颜色过渡、焦点环、加载指示防闪烁）；缺 focusableWhenDisabled、WinForms 的 propsContent。CloseButton、ClearButton、LinkButton、IconLinkButton 三个平台都做了（读屏名称取语言包，语言包的作用域见 DESIGN §6；链接的 Href 是绝对地址，用系统打开）。CopyButton、ButtonGroup 三个平台都做了（DESIGN §14）。
 
 ### 3. 按依赖分层移植组件
 

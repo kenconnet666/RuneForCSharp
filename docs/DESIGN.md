@@ -840,6 +840,24 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 踩过：WinForms 的容器重写 GetPreferredSize 后丢了基类"先把给的大小夹到 MaximumSize 再量"的一步，限了最大宽度的卡片按不限宽量出一行的高度，
   宽度被夹窄后内容换行、被裁掉（20rem 卡片里的分页栏）；改在三个容器共用的 PreferredSizeCache 里夹。
 
+### ButtonGroup（2026-11-14）
+
+- 相连的一组照上游拆成两半：组只说方向（`Attached`，孪生文件 `Utils/Style/AttachedVariants.cs`：AttachedOrientation、AttachedCorners、
+  `AttachedRules.Squared` 第几个去掉哪几个角、`Overlap` 叠一条边框），控件自己收圆角。以后的 ControlGroup（输入框与按钮连成一条）共用这一套。
+- 组的外观（Variant、Tone、Size / WinForms 的 TextSize、Radius，都可空）是按钮的默认值，按钮自己写的优先；没写 Tone 时组里的按钮都是 accent
+  （上游 useButtonAppearance 的 fallbackTone：图标按钮在组里也是，拆分按钮的两半同色）。交叉轴拉齐（align-items: stretch），悬停的浮到上面、聚焦的再高一层。
+- **Avalonia**：`ButtonGroup : Panel`，外观写在模板优先级上（主题之上、本地值之下），记下返回的 IDisposable，换外观、移出组时只撤自己写的；
+  `Attached.Corners` 在 ButtonBase 的 CornerRadius 强制回调里收角。焦点环的直角仍是直角（之前按"圆角 + 外扩"会给 0 圆角也加上弧）。
+- **WPF**：没有模板优先级，ButtonCore 的四个属性加强制回调：值来自默认值、默认样式（主题）时换成组的。WPF 先调强制、后记新来源，
+  刚写的本地值在强制里看不到：要盖的时候排一次 Send 优先级的重新强制（用集合防止反复排）。收角放在 EmSize.CoerceCornerRadius（文字输入、Select 也走它）；
+  波纹的裁剪改成四个角各自的圆角（`Attached.RoundedRect`）。拉伸用 SetCurrentValue，不占本地值。
+- **WinForms**：`ButtonGroupControl`，ButtonCore 的档位按"自己写的 → 所在组 → Provider 默认 → 组件默认"取（组给的不算 Explicit，设计器不序列化）。
+  按钮四周给焦点环留的边距在相邻一侧去掉、邻居紧贴着，那一侧的焦点环收进按钮里面；子控件是窗口，浮到上面要调 z 序，排列顺序另外记。
+  从右到左时 WinForms 不镜像绘制，左右两侧的角与边距对调。
+- 做的时候查出两个平台的按钮底色没铺到边框下面（CSS 是 background-clip: border-box）：WPF 的 Border 只在边框里面填底色，透明边框的实底、浅色底按钮
+  四边各窄 1 像素，组里两个实底之间露出一条缝——按钮家族、ItemList、NavList、Tabs 的模板把底色拆成单独一层（`PART_Fill`）；WinForms 的 ButtonCore
+  按描边的路径填底色，窄半个边宽，改成底色铺满、描边居中画在里面，并按 ControlShell 的做法用 PixelOffsetMode.Half（2 像素的边框之前糊成 3 像素）。
+
 ### NumberField（2026-11-14）
 
 - 值是 `decimal?`（TS 的 valueType 在 number 与 bigint 之间选，C# 的 decimal 十进制精确，金额、大整数都不经过浮点数），空着时 null；

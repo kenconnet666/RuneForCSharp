@@ -98,7 +98,14 @@ public static class EmSize
     {
         var radius = (CornerRadius)baseValue;
         if (GetCornerRadius(d) is { } f && CornerRadiusFor(d.GetType()) is { } property && FromLibrary(d, property, baseValue)) radius = new CornerRadius(f * FontSize(d));
-        return d is FrameworkElement { ActualWidth: > 0, ActualHeight: > 0 } element ? FitCorners(radius, element.ActualWidth, element.ActualHeight) : radius;
+        if (d is FrameworkElement { ActualWidth: > 0, ActualHeight: > 0 } element) radius = FitCorners(radius, element.ActualWidth, element.ActualHeight);
+        return Attached.Square(radius, Attached.GetCorners(d));
+    }
+
+    /// <summary>重算控件的圆角（放进、移出相连的一组时）。</summary>
+    internal static void RefreshCornerRadius(DependencyObject d)
+    {
+        if (CornerRadiusFor(d.GetType()) is { } property) d.CoerceValue(property);
     }
 
     /// <summary>

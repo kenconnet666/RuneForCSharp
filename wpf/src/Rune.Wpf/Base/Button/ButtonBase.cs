@@ -198,14 +198,17 @@ public class ButtonBase : System.Windows.Controls.Button
         releaseKeyRipple = null;
     }
 
-    /// <summary>波纹层裁成按钮的圆角；焦点环的圆角 = 外框的圆角 + 外扩的距离（同 CSS outline 跟着 border-radius 外扩）。</summary>
+    /// <summary>
+    /// 波纹层裁成按钮的圆角；焦点环的圆角 = 外框的圆角 + 外扩的距离（同 CSS outline 跟着 border-radius 外扩；直角仍是直角，如组里相邻的一侧）。
+    /// </summary>
     void UpdateClip()
     {
-        var r = CornerRadius.TopLeft;
-        if (ripples is not null) ripples.Clip = new RectangleGeometry(new Rect(0, 0, ActualWidth, ActualHeight), r, r);
+        var r = CornerRadius;
+        if (ripples is not null) ripples.Clip = Attached.RoundedRect(new Rect(0, 0, ActualWidth, ActualHeight), r);
         if (focusRing is not null)
         {
-            focusRing.CornerRadius = new CornerRadius(r + FocusRingOutset);
+            double Grow(double radius) => radius > 0 ? radius + FocusRingOutset : 0;
+            focusRing.CornerRadius = new CornerRadius(Grow(r.TopLeft), Grow(r.TopRight), Grow(r.BottomRight), Grow(r.BottomLeft));
             focusRing.Margin = new Thickness(-FocusRingOutset);
         }
     }

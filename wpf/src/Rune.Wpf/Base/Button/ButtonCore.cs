@@ -17,18 +17,19 @@ public abstract class ButtonCore : ButtonBase
 {
     /// <summary>样式（Button 默认 solid，IconButton 默认 ghost，写在各自的主题样式里）。</summary>
     public static readonly DependencyProperty VariantProperty = DependencyProperty.Register(
-        nameof(Variant), typeof(ButtonVariant), typeof(ButtonCore), new FrameworkPropertyMetadata(default(ButtonVariant), (d, _) => ((ButtonCore)d).UpdateUnderline()));
+        nameof(Variant), typeof(ButtonVariant), typeof(ButtonCore), new FrameworkPropertyMetadata(default(ButtonVariant), (d, _) => ((ButtonCore)d).UpdateUnderline(), ButtonGroup.CoerceVariant));
 
     /// <summary>色调（Button 默认 accent，IconButton 默认 neutral）。</summary>
-    public static readonly DependencyProperty ToneProperty = DependencyProperty.Register(nameof(Tone), typeof(StatusTone), typeof(ButtonCore));
+    public static readonly DependencyProperty ToneProperty = DependencyProperty.Register(
+        nameof(Tone), typeof(StatusTone), typeof(ButtonCore), new FrameworkPropertyMetadata(default(StatusTone), null, ButtonGroup.CoerceTone));
 
     /// <summary>字号档位，内部尺寸随之缩放；不写时继承外面的字号。</summary>
     public static readonly DependencyProperty SizeProperty = DependencyProperty.Register(
-        nameof(Size), typeof(TextSize), typeof(ButtonCore), new FrameworkPropertyMetadata(default(TextSize), OnSizeChanged));
+        nameof(Size), typeof(TextSize), typeof(ButtonCore), new FrameworkPropertyMetadata(default(TextSize), OnSizeChanged, ButtonGroup.CoerceSize));
 
     /// <summary>圆角，主题里默认 md。</summary>
     public static readonly DependencyProperty RadiusProperty = DependencyProperty.Register(
-        nameof(Radius), typeof(Radius), typeof(ButtonCore), new FrameworkPropertyMetadata(default(Radius)));
+        nameof(Radius), typeof(Radius), typeof(ButtonCore), new FrameworkPropertyMetadata(default(Radius), null, ButtonGroup.CoerceRadius));
 
     /// <summary>图标（Button 里在文字前）。</summary>
     public static readonly DependencyProperty IconProperty = DependencyProperty.Register(nameof(Icon), typeof(IconData), typeof(ButtonCore));

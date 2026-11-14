@@ -26,17 +26,40 @@ public abstract class ButtonCore : Element
     /// <summary>新建按钮。</summary>
     protected ButtonCore() => delayed = new DelayedLoading(_ => InvalidateMeasure());
 
-    /// <summary>样式；不写时取作用域的默认值（<see cref="ButtonDefaults"/>），再没有时取组件的默认（<see cref="DefaultVariant"/>）。</summary>
-    public ButtonVariant Variant { get => variant.Or(ScopeDefaults?.Variant, DefaultVariant); set { variant = value; InvalidateMeasure(); } }
+    /// <summary>
+    /// 样式；不写时取所在 <see cref="ButtonGroupControl"/> 的，再没有时取作用域的默认值（<see cref="ButtonDefaults"/>），最后是组件的默认（<see cref="DefaultVariant"/>）。
+    /// </summary>
+    public ButtonVariant Variant { get => variant.Or(Group?.Variant ?? ScopeDefaults?.Variant, DefaultVariant); set { variant = value; InvalidateMeasure(); } }
 
-    /// <summary>色调；不写时取作用域的默认值，再没有时取组件的默认（<see cref="DefaultTone"/>）。</summary>
-    public StatusTone Tone { get => tone.Or(ScopeDefaults?.Tone, DefaultTone); set { tone = value; Invalidate(); } }
+    /// <summary>色调；不写时取所在组的、作用域的默认值，最后是组件的默认（<see cref="DefaultTone"/>；在组里时是 accent，拆分按钮的两半同色）。</summary>
+    public StatusTone Tone { get => tone.Or(Group?.Tone ?? ScopeDefaults?.Tone, Group is null ? DefaultTone : StatusTone.Accent); set { tone = value; Invalidate(); } }
 
-    /// <summary>字号档位，内部尺寸随之缩放；不写时取作用域的默认值，再没有时跟随宿主的字体。</summary>
-    public TextSize Size { get => size.Or(ScopeDefaults?.Size, default); set { size = value; InvalidateMeasure(); } }
+    /// <summary>字号档位，内部尺寸随之缩放；不写时取所在组的、作用域的默认值，再没有时跟随宿主的字体。</summary>
+    public TextSize Size { get => size.Or(Group?.TextSize ?? ScopeDefaults?.Size, default); set { size = value; InvalidateMeasure(); } }
 
-    /// <summary>圆角；不写时取作用域的默认值，再没有时取组件的默认（<see cref="DefaultRadius"/>）。</summary>
-    public Radius Radius { get => radius.Or(ScopeDefaults?.Radius, DefaultRadius); set { radius = value; Invalidate(); } }
+    /// <summary>圆角；不写时取所在组的、作用域的默认值，最后是组件的默认（<see cref="DefaultRadius"/>）。</summary>
+    public Radius Radius { get => radius.Or(Group?.Radius ?? ScopeDefaults?.Radius, DefaultRadius); set { radius = value; Invalidate(); } }
+
+    /// <summary>放在 ButtonGroupControl 里时去掉圆角的角（组排版时写）。</summary>
+    internal AttachedCorners Attached
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            Invalidate();
+        }
+    }
+
+    ButtonGroupControl? Group => (Host as Control)?.Parent as ButtonGroupControl;
+
+    /// <summary>所在组的外观变了：重新量、重画。</summary>
+    internal void Restyle()
+    {
+        InvalidateMeasure();
+        Invalidate();
+    }
 
     /// <summary>外观覆盖（上游的 sx）：盖过作用域的 <see cref="ButtonSx"/> 与配方。</summary>
     public ButtonSx? Sx { get; set { field = value; InvalidateMeasure(); Invalidate(); } }
@@ -207,14 +230,18 @@ public abstract class ButtonCore : Element
         try
         {
             graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            using var outline = Drawing.RoundedRectangle(bounds, radius);
-            using (var fill = new SolidBrush(Fade(background.Value, dim))) graphics.FillPath(fill, outline);
+            // 整数坐标落在像素边上（同 ControlShell）：外框贴着像素，2 像素的边框不糊成 3 像素
+            graphics.PixelOffsetMode = PixelOffsetMode.Half;
+            // 底色铺满整个盒子（CSS 的 background-clip: border-box），描边居中画在里面半个边宽：透明边框的实底按钮不窄一圈，组里相邻的实底之间没有缝
+            using var box = Drawing.RoundedRectangle(Bounds, radius + border / 2, Attached);
+            using var outline = Drawing.RoundedRectangle(bounds, radius, Attached);
+            using (var fill = new SolidBrush(Fade(background.Value, dim))) graphics.FillPath(fill, box);
             if (colors.Border is { } stroke)
             {
                 using var pen = new Pen(Fade(stroke, dim), border);
                 graphics.DrawPath(pen, outline);
             }
-            PaintRipples(graphics, outline, colors.Foreground);
+            PaintRipples(graphics, box, colors.Foreground);
             if (delayed.Shown)
             {
                 var size = spinner.Measure(inner, Bounds.Size);
@@ -232,8 +259,7 @@ public abstract class ButtonCore : Element
             {
                 // outline 宽 2、偏移 2（borderWidths.sm）：画在宿主留出的 Padding 里
                 var gap = context.Scale(Tokens.BorderWidth.Sm);
-                var ring = RectangleF.Inflate(bounds, gap + gap / 2, gap + gap / 2);
-                using var ringPath = Drawing.RoundedRectangle(ring, radius + 1.5f * gap);
+                using var ringPath = Drawing.RoundedRectangle(FocusRing(bounds, gap), radius + 1.5f * gap, Attached);
                 using var pen = new Pen(context.Theme.Colors.FocusRing, gap);
                 graphics.DrawPath(pen, ringPath);
             }
@@ -266,6 +292,22 @@ public abstract class ButtonCore : Element
     static float Border(ElementContext context) => context.Scale(Tokens.BorderWidth.Xs);
 
     /// <summary>一个波纹：圆心、最终半径、扩散进度与不透明度（Animator 驱动的信号，绘制时读，变了只重画这个按钮）。</summary>
+    /// <summary>
+    /// 焦点环的矩形：四周外扩 1.5 个环宽（画笔居中，outline 宽 2、偏移 2）。组里相邻的一侧没有给环留的边距（邻居紧贴着），
+    /// 那一侧的环收进按钮里面、压在边框上。
+    /// </summary>
+    RectangleF FocusRing(RectangleF bounds, float gap)
+    {
+        var outset = 1.5f * gap;
+        var inset = -gap / 2;
+        bool Inner(AttachedCorners side) => (Attached & side) == side;
+        var left = Inner(AttachedCorners.TopLeft | AttachedCorners.BottomLeft) ? inset : outset;
+        var right = Inner(AttachedCorners.TopRight | AttachedCorners.BottomRight) ? inset : outset;
+        var top = Inner(AttachedCorners.TopLeft | AttachedCorners.TopRight) ? inset : outset;
+        var bottom = Inner(AttachedCorners.BottomLeft | AttachedCorners.BottomRight) ? inset : outset;
+        return RectangleF.FromLTRB(bounds.Left - left, bounds.Top - top, bounds.Right + right, bounds.Bottom + bottom);
+    }
+
     sealed record RippleState(PointF Origin, float Radius, Signal<double> Scale, Signal<double> Alpha)
     {
         public bool Released { get; set; }

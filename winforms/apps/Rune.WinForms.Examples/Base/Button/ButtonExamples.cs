@@ -25,6 +25,7 @@ static class ButtonExamples
         new("Button", "loading", "加载中", "IsLoading 显示旋转指示，宽度不变、点击无效、焦点保留；很快完成的加载不出现指示，出现了至少显示 0.5 秒。", Loading),
         new("Button", "full-width", "占满宽度", "FullWidth 占满一行：登录页、移动端的主要操作。放进 FlexControl 时竖排由它拉到整行宽，横排的两个各 SetGrow 平分一行。", FullWidthExample),
         new("Button", "links", "链接按钮", "点了去别处用 LinkButtonControl 而不是按钮加点击：读屏念“链接”；只有图标的链接用 IconLinkButtonControl（页脚的文档、订阅、联系）。外观同按钮；桌面上 Href 用系统打开，External 显示外链图标并告诉读屏在新窗口打开。", Links),
+        new("Button", "group", "按钮组", "ButtonGroupControl 把相关的按钮连成一条：拆分按钮、翻页、缩放、对齐方式。组上写的 Variant、Tone、TextSize 是组里按钮的默认值，按钮自己写的优先；Orientation=vertical 竖排。", Group),
         new("Button", "disabled", "不可用", "Enabled=false 时整体变淡、不响应点击。", Disabled),
     ];
 
@@ -135,6 +136,51 @@ static class ButtonExamples
 
     static IconButtonControl IconOnly(IconData icon, string name, ButtonVariant variant = default, StatusTone tone = default) =>
         new() { Icon = icon, AccessibleName = name, Variant = variant, Tone = tone };
+
+    static ButtonGroupControl Group(string name, ButtonGroupControl group, params Control[] buttons)
+    {
+        group.AccessibleName = name;
+        group.Controls.AddRange(buttons);
+        return group;
+    }
+
+    static Control Group()
+    {
+        ButtonGroupControl Neutral(string name, params Control[] buttons) => Group(name, new ButtonGroupControl { Variant = ButtonVariant.Surface, Tone = StatusTone.Neutral }, buttons);
+        var toolbar = Build.Flex(new ToolbarControl { Gap = Space.Sm, AccessibleName = "编辑器工具栏" },
+            Neutral("撤销", IconOnly(Lucide.Undo2, "撤销"), IconOnly(Lucide.Redo2, "重做")),
+            Neutral("字形", IconOnly(Lucide.LetterB, "加粗"), IconOnly(Lucide.Italic, "斜体"), IconOnly(Lucide.Underline, "下划线")),
+            Neutral("列表", IconOnly(Lucide.List, "无序列表"), IconOnly(Lucide.ListOrdered, "有序列表")),
+            Neutral("对齐", IconOnly(Lucide.TextAlignStart, "左对齐"), IconOnly(Lucide.TextAlignCenter, "居中"), IconOnly(Lucide.TextAlignEnd, "右对齐")));
+
+        var merge = Group("合并", new ButtonGroupControl(), new ButtonControl { Icon = Lucide.GitMerge, Text = "合并请求" }, IconOnly(Lucide.ChevronDown, "更多合并方式", ButtonVariant.Solid));
+
+        var page = 3;
+        var current = new ButtonControl { Text = $"第 {page} 页" };
+        var previous = IconOnly(Lucide.ChevronLeft, "上一页");
+        var next = IconOnly(Lucide.ChevronRight, "下一页");
+        previous.Click += (_, _) => current.Text = $"第 {page = Math.Max(1, page - 1)} 页";
+        next.Click += (_, _) => current.Text = $"第 {++page} 页";
+        var paging = Group("翻页", new ButtonGroupControl { Variant = ButtonVariant.Outline, Tone = StatusTone.Neutral }, previous, current, next);
+
+        var zoom = 100;
+        var reset = new ButtonControl { Text = "100%" };
+        var zoomOut = IconOnly(Lucide.Minus, "缩小");
+        var zoomIn = IconOnly(Lucide.Plus, "放大");
+        zoomOut.Click += (_, _) => reset.Text = $"{zoom = Math.Max(25, zoom - 25)}%";
+        zoomIn.Click += (_, _) => reset.Text = $"{zoom = Math.Min(400, zoom + 25)}%";
+        reset.Click += (_, _) => reset.Text = $"{zoom = 100}%";
+        var zooming = Group("缩放", new ButtonGroupControl { Variant = ButtonVariant.Surface, Tone = StatusTone.Neutral, TextSize = TextSize.Sm }, zoomOut, reset, zoomIn);
+
+        var export = Group("导出", new ButtonGroupControl { Orientation = AttachedOrientation.Vertical, Variant = ButtonVariant.Outline, Tone = StatusTone.Neutral },
+            new ButtonControl { Text = "导出 PDF" }, new ButtonControl { Text = "导出 Word" }, new ButtonControl { Text = "导出 Markdown" });
+
+        return Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Lg },
+            toolbar,
+            Build.Flex(new FlexControl { Gap = Space.Lg, Wrap = true, Align = FlexAlign.Start },
+                Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Md, Align = FlexAlign.Start }, merge, paging, zooming),
+                export));
+    }
 
     static Control Presets()
     {

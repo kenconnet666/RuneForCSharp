@@ -48,6 +48,14 @@ public class ButtonBase : global::Avalonia.Controls.Button
     Action? releasePointerRipple;
     Action? releaseKeyRipple;
 
+    static ButtonBase()
+    {
+        // 放进 ButtonGroup 时相邻一侧不要圆角：主题按 Radius 算出的圆角在这里收掉
+        CornerRadiusProperty.OverrideMetadata<ButtonBase>(new StyledPropertyMetadata<CornerRadius>(
+            coerce: (button, radius) => Attached.Square(radius, Attached.GetCorners((ButtonBase)button))));
+        Attached.CornersProperty.Changed.AddClassHandler<ButtonBase>((button, _) => button.CoerceValue(CornerRadiusProperty));
+    }
+
     /// <summary>新建按钮：颜色在 durations.sm 内过渡。</summary>
     public ButtonBase() => AttachedToVisualTree += (_, _) => Transitions = ColorTransitions();
 
@@ -163,12 +171,13 @@ public class ButtonBase : global::Avalonia.Controls.Button
         releaseKeyRipple = null;
     }
 
-    /// <summary>焦点环的圆角 = 外框的圆角 + 外扩的距离（同 CSS outline 跟着 border-radius 外扩）。</summary>
+    /// <summary>焦点环的圆角 = 外框的圆角 + 外扩的距离（同 CSS outline 跟着 border-radius 外扩；直角仍是直角，如组里相邻的一侧）。</summary>
     void UpdateFocusRing()
     {
         if (focusRing is null) return;
         var r = CornerRadius;
-        focusRing.CornerRadius = new CornerRadius(r.TopLeft + FocusRingOutset, r.TopRight + FocusRingOutset, r.BottomRight + FocusRingOutset, r.BottomLeft + FocusRingOutset);
+        double Grow(double radius) => radius > 0 ? radius + FocusRingOutset : 0;
+        focusRing.CornerRadius = new CornerRadius(Grow(r.TopLeft), Grow(r.TopRight), Grow(r.BottomRight), Grow(r.BottomLeft));
         focusRing.Margin = new Thickness(-FocusRingOutset);
     }
 

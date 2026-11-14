@@ -21,8 +21,82 @@ static class ButtonExamples
         new("Button", "loading", "加载中", "IsLoading 显示旋转指示，宽度不变、点击无效、焦点保留；很快完成的加载不出现指示，出现了至少显示 0.5 秒。", () => new ButtonLoading()),
         new("Button", "full-width", "占满宽度", "FullWidth 占满一行：登录页、移动端的主要操作。", () => new ButtonFullWidth()),
         new("Button", "links", "链接按钮", "点了去别处用 LinkButton 而不是 Button 加点击：读屏念“链接”；只有图标的链接用 IconLinkButton（页脚的文档、订阅、联系）。桌面没有站内地址，Href 写绝对地址、用系统打开，External 显示在新窗口打开并告诉读屏。", () => new ButtonLinks()),
+        new("Button", "group", "按钮组", "ButtonGroup 把相关的按钮连成一条：拆分按钮、翻页、缩放、对齐方式。组上写的 Variant、Tone、Size 是组里按钮的默认值，按钮自己写的优先；Orientation=vertical 竖排。", Group),
         new("Button", "disabled", "不可用", "IsEnabled=False 时整体变淡、不响应点击。", () => new ButtonDisabled()),
     ];
+
+    static IconButton Icon(IconData icon, string name)
+    {
+        var button = new IconButton { Icon = icon };
+        AutomationProperties.SetName(button, name);
+        return button;
+    }
+
+    static ButtonGroup Group(string name, ButtonGroup group, params UIElement[] buttons)
+    {
+        AutomationProperties.SetName(group, name);
+        foreach (var button in buttons) group.Children.Add(button);
+        return group;
+    }
+
+    static FrameworkElement Group()
+    {
+        ButtonGroup Neutral(string name, params UIElement[] buttons) => Group(name, new ButtonGroup { Variant = ButtonVariant.Surface, Tone = StatusTone.Neutral }, buttons);
+        var toolbar = new Toolbar
+        {
+            Gap = Space.Sm,
+            Children =
+            {
+                Neutral("撤销", Icon(Lucide.Undo2, "撤销"), Icon(Lucide.Redo2, "重做")),
+                Neutral("字形", Icon(Lucide.LetterB, "加粗"), Icon(Lucide.Italic, "斜体"), Icon(Lucide.Underline, "下划线")),
+                Neutral("列表", Icon(Lucide.List, "无序列表"), Icon(Lucide.ListOrdered, "有序列表")),
+                Neutral("对齐", Icon(Lucide.TextAlignStart, "左对齐"), Icon(Lucide.TextAlignCenter, "居中"), Icon(Lucide.TextAlignEnd, "右对齐")),
+            },
+        };
+        AutomationProperties.SetName(toolbar, "编辑器工具栏");
+
+        var more = Icon(Lucide.ChevronDown, "更多合并方式");
+        more.Variant = ButtonVariant.Solid;
+        var merge = Group("合并", new ButtonGroup(), new Button { Icon = Lucide.GitMerge, Content = "合并请求" }, more);
+
+        var page = 3;
+        var current = new Button { Content = $"第 {page} 页" };
+        var previous = Icon(Lucide.ChevronLeft, "上一页");
+        var next = Icon(Lucide.ChevronRight, "下一页");
+        previous.Click += (_, _) => current.Content = $"第 {page = Math.Max(1, page - 1)} 页";
+        next.Click += (_, _) => current.Content = $"第 {++page} 页";
+        var paging = Group("翻页", new ButtonGroup { Variant = ButtonVariant.Outline, Tone = StatusTone.Neutral }, previous, current, next);
+
+        var zoom = 100;
+        var reset = new Button { Content = "100%" };
+        var zoomOut = Icon(Lucide.Minus, "缩小");
+        var zoomIn = Icon(Lucide.Plus, "放大");
+        zoomOut.Click += (_, _) => reset.Content = $"{zoom = Math.Max(25, zoom - 25)}%";
+        zoomIn.Click += (_, _) => reset.Content = $"{zoom = Math.Min(400, zoom + 25)}%";
+        reset.Click += (_, _) => reset.Content = $"{zoom = 100}%";
+        var zooming = Group("缩放", new ButtonGroup { Variant = ButtonVariant.Surface, Tone = StatusTone.Neutral, Size = TextSize.Sm }, zoomOut, reset, zoomIn);
+
+        var export = Group("导出", new ButtonGroup { Orientation = AttachedOrientation.Vertical, Variant = ButtonVariant.Outline, Tone = StatusTone.Neutral },
+            new Button { Content = "导出 PDF" }, new Button { Content = "导出 Word" }, new Button { Content = "导出 Markdown" });
+
+        return new Flex
+        {
+            Direction = FlexDirection.Column, Gap = Space.Lg, VerticalAlignment = VerticalAlignment.Top,
+            Children =
+            {
+                toolbar,
+                new Flex
+                {
+                    Gap = Space.Lg, Wrap = true, Align = FlexAlign.Start,
+                    Children =
+                    {
+                        new Flex { Direction = FlexDirection.Column, Gap = Space.Md, Align = FlexAlign.Start, Children = { merge, paging, zooming } },
+                        export,
+                    },
+                },
+            },
+        };
+    }
 
     static FrameworkElement Presets()
     {

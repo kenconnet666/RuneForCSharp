@@ -10,7 +10,7 @@ namespace Rune.WinForms;
 /// 默认留 4 像素的 Padding：焦点环画在按钮外面一圈（CSS 的 outline 不占位，WinForms 的控件画不出自己的边界）。
 /// </summary>
 /// <typeparam name="T">按钮元素。</typeparam>
-public abstract class ButtonControlBase<T> : ElementControl<T>, IButtonControl where T : ButtonCore, new()
+public abstract class ButtonControlBase<T> : ElementControl<T>, IButtonControl, IGroupButton where T : ButtonCore, new()
 {
     /// <summary>元素的默认值：设计器只序列化与它不同的属性。</summary>
     static readonly T Defaults = new();
@@ -117,6 +117,8 @@ public abstract class ButtonControlBase<T> : ElementControl<T>, IButtonControl w
 
     /// <summary>窗体把它设成或取消默认按钮时调用（同 WinForms 的 Button）。</summary>
     public void NotifyDefault(bool value) => Invalidate();
+
+    ButtonCore IGroupButton.Core => Element;
 
     /// <summary>代码里点击（加载中、不可用时无效，由 OnClick 拦下）。</summary>
     public void PerformClick() => OnClick(EventArgs.Empty);
