@@ -18,6 +18,7 @@ namespace Rune.WinForms;
 public class CardControl : Panel, IScopeAware
 {
     readonly CardEngine engine;
+    readonly PreferredSizeCache preferred;
     readonly Effect paint;
     readonly Text title = new() { Weight = TextWeight.Semibold };
     readonly SkeletonTextControl skeleton = new() { Visible = false };
@@ -34,6 +35,7 @@ public class CardControl : Panel, IScopeAware
         AutoSizeMode = AutoSizeMode.GrowAndShrink;
         AccessibleRole = AccessibleRole.Grouping;
         engine = new CardEngine(this);
+        preferred = new PreferredSizeCache(this);
         paint = new Effect(Invalidate);
         loading = new DelayedLoading(ShowSkeleton);
         Controls.Add(skeleton);
@@ -223,7 +225,7 @@ public class CardControl : Panel, IScopeAware
     }
 
     /// <inheritdoc />
-    public override Size GetPreferredSize(Size proposedSize) => engine.Measure(proposedSize);
+    public override Size GetPreferredSize(Size proposedSize) => preferred.Get(proposedSize, engine.Measure);
 
     /// <inheritdoc />
     protected override void OnPaint(PaintEventArgs e)
@@ -313,6 +315,8 @@ public class CardControl : Panel, IScopeAware
 
         static Size SizeOf(Control control, int width) => control.AutoSize ? control.GetPreferredSize(new Size(width, 0)) : control.Size;
 
+        static int NaturalWidth(Control control) => control.AutoSize ? control.GetPreferredSize(Size.Empty).Width : control.Width;
+
         /// <summary>按宽度排一遍；arrange 为 false 时只算高度。</summary>
         int Run(int width, bool arrange)
         {
@@ -350,7 +354,7 @@ public class CardControl : Panel, IScopeAware
                 y += line;
             }
             var bodyTop = y + inset;
-            var bodyChildren = owner.skeletonShown ? [owner.skeleton] : owner.BodyControls().Where(control => control.Visible || !owner.Visible).ToList();
+            var bodyChildren = BodyChildren();
             var bodyHeight = 0;
             foreach (var child in bodyChildren)
             {
@@ -372,10 +376,32 @@ public class CardControl : Panel, IScopeAware
             return y + line;
         }
 
+        List<Control> BodyChildren() => owner.skeletonShown ? [owner.skeleton] : owner.BodyControls().Where(control => control.Visible || !owner.Visible).ToList();
+
         public Size Measure(Size proposed)
         {
-            var width = proposed.Width is > 1 and < int.MaxValue ? proposed.Width : owner.Width;
+            var width = proposed.Width is > 1 and < int.MaxValue ? proposed.Width : MaxContentWidth();
             return new Size(width, Run(width, arrange: false));
+        }
+
+        /// <summary>
+        /// 不限宽时的宽度（CSS 的 max-content）：页头、正文、页脚里最宽的一块加上边框与内边距。
+        /// 不能取卡片当前的宽度：外层按它排完又拿它当想要的宽度，只增不减（文档页的示例卡片会撑出两倍宽）。
+        /// </summary>
+        int MaxContentWidth()
+        {
+            var (inset, edge, line) = (owner.Inset, owner.EdgeInset, owner.Line);
+            var gap = (int)MathF.Round(Tokens.Space.Sm * owner.Em);
+            var header = 0;
+            if (owner.HasHeader)
+            {
+                var text = owner.Header.Length == 0 ? 0 : owner.title.Measure(owner.Context, new Size(int.MaxValue, int.MaxValue)).Width;
+                var extra = owner.Extra is { } e ? NaturalWidth(e) : 0;
+                header = text + (text > 0 && extra > 0 ? gap : 0) + extra + 2 * edge.Inline;
+            }
+            var body = BodyChildren().Select(child => child == owner.skeleton ? child.Width : NaturalWidth(child)).DefaultIfEmpty().Max() + 2 * inset;
+            var footer = owner.Footer is { } f ? NaturalWidth(f) + 2 * edge.Inline : 0;
+            return Math.Max(header, Math.Max(body, footer)) + 2 * line;
         }
 
         public override bool Layout(object container, LayoutEventArgs layoutEventArgs)

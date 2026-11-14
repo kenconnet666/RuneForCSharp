@@ -155,11 +155,14 @@ public class TableOfContentsControl : FlexControl
             paint = new Effect(Invalidate);
         }
 
+        /// <summary>换一组链接：加完再排一次（每加一个都整列重排的话，一页二十节要排两百多遍）。</summary>
         public void Rebuild(IReadOnlyList<HeadingEntry> items)
         {
+            SuspendLayout();
             Controls.Cast<Control>().DisposeAll();
             foreach (var item in items) Controls.Add(new TableOfContentsLink(owner, item));
             Padding = new Padding(LogicalToDeviceUnits(1), 0, 0, 0);
+            ResumeLayout();
         }
 
         protected override void OnLayout(LayoutEventArgs levent)
@@ -235,6 +238,7 @@ public sealed class TableOfContentsLink : Control
         Text = entry.Label;
         AccessibleRole = AccessibleRole.Link;
         Cursor = Cursors.Hand;
+        AutoSize = true;
         SetStyle(ControlStyles.Selectable | ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw | ControlStyles.SupportsTransparentBackColor, true);
         BackColor = Color.Transparent;
     }
@@ -261,7 +265,7 @@ public sealed class TableOfContentsLink : Control
     public override Size GetPreferredSize(Size proposedSize)
     {
         var (left, block) = Insets;
-        return new Size(left + TextRenderer.MeasureText(Text, LinkFont, Size.Empty, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix).Width + block,
+        return new Size(left + Fonts.Measure(Text, LinkFont, Size.Empty, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix).Width + block,
             (int)MathF.Round(1.375f * Em) + 2 * block);
     }
 

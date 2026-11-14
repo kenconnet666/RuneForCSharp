@@ -677,8 +677,8 @@ public class TableCellControl : Control
             return (width, width);
         }
         if (Text.Length == 0) return (0, 0);
-        var max = TextRenderer.MeasureText(Text, Font, Size.Empty, TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding | TextFormatFlags.SingleLine).Width;
-        var min = singleLine ? max : TextRenderer.MeasureText(Text, Font, new Size(1, int.MaxValue), TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding | TextFormatFlags.WordBreak).Width;
+        var max = Fonts.Measure(Text, Font, Size.Empty, TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding | TextFormatFlags.SingleLine).Width;
+        var min = singleLine ? max : Fonts.Measure(Text, Font, new Size(1, int.MaxValue), TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding | TextFormatFlags.WordBreak).Width;
         return (min, max);
     }
 
@@ -737,14 +737,14 @@ public class TableCellControl : Control
     /// <summary>文字的高：行数 × 行高 normal（1.5em，GDI 的行距更小）。</summary>
     internal static int TextHeight(string text, Font font, int width, TextFormatFlags flags, float em)
     {
-        var lines = text.Length == 0 ? 1 : Math.Max(1, (int)MathF.Round((float)TextRenderer.MeasureText(text, font, new Size(width, int.MaxValue), flags).Height / Fonts.LineHeight(font)));
+        var lines = text.Length == 0 ? 1 : Math.Max(1, (int)MathF.Round((float)Fonts.Measure(text, font, new Size(width, int.MaxValue), flags).Height / Fonts.LineHeight(font)));
         return lines * (int)MathF.Round(1.5f * em);
     }
 
     /// <summary>按行高 normal 画：GDI 按自己的行距排多行，这里把它放在行高的盒子里竖直居中（一行时与浏览器一致）。</summary>
     internal static void DrawText(Graphics graphics, string text, Font font, Rectangle bounds, Color color, TextFormatFlags flags, float em)
     {
-        var measured = TextRenderer.MeasureText(text, font, new Size(Math.Max(1, bounds.Width), int.MaxValue), flags).Height;
+        var measured = Fonts.Measure(text, font, new Size(Math.Max(1, bounds.Width), int.MaxValue), flags).Height;
         var box = TextHeight(text, font, bounds.Width, flags, em);
         var top = bounds.Y + (box - measured) / 2;
         TextRenderer.DrawText(graphics, text, font, new Rectangle(bounds.X, top, bounds.Width, Math.Max(measured, bounds.Bottom - top)), color, flags);

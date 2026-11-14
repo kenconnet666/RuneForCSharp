@@ -91,8 +91,24 @@ public class SelectedTagsControl : Control
         PerformLayout();
     }
 
-    /// <summary>按宽度时数出放得下几个（其余收起），再排成行。</summary>
+    /// <summary>
+    /// 按宽度时数出放得下几个（其余收起），再排成行。量"+N"的宽度要改它的文字，改了它会按新大小重设边界、让这里重排（重排又来量），
+    /// 外层每量一次都整条父链排一遍；算的时候挂起这里的布局，切断这条回路。
+    /// </summary>
     List<List<Control>> Arrange(int width, bool apply)
+    {
+        SuspendLayout();
+        try
+        {
+            return Compute(width, apply);
+        }
+        finally
+        {
+            ResumeLayout(false);
+        }
+    }
+
+    List<List<Control>> Compute(int width, bool apply)
     {
         var gap = (int)MathF.Round(0.25f * Em);
         HiddenCount = Tags.Count - tags.Count;

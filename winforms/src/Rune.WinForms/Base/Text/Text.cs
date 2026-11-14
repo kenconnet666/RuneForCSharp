@@ -13,9 +13,6 @@ namespace Rune.WinForms;
 /// </summary>
 public class Text : Element
 {
-    /// <summary>上一次量的输入与结果（字体是共用的实例，按引用比）。</summary>
-    (string Content, Font Font, int Width, TextFormatFlags Flags, Size Size)? measured;
-
     /// <summary>文字内容（TS 的 children）。</summary>
     public string Content
     {
@@ -161,11 +158,7 @@ public class Text : Element
         var lineHeight = Fonts.LineHeight(font);
         if (Content.Length == 0) return new Size(0, lineHeight);
         var flags = Flags(context);
-        // 同样的输入不重量：按钮这类在测量与绘制时各量一次，换主题重画时又量一次
-        if (measured is { } last && last.Content == Content && last.Font == font && last.Width == available.Width && last.Flags == flags) return Clamp(last.Size);
-        var size = TextRenderer.MeasureText(Content, font, new Size(available.Width, int.MaxValue), flags);
-        measured = (Content, font, available.Width, flags, size);
-        return Clamp(size);
+        return Clamp(Fonts.Measure(Content, font, new Size(available.Width, int.MaxValue), flags));
 
         Size Clamp(Size size)
         {

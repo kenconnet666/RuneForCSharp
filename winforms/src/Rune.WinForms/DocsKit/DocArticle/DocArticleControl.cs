@@ -26,6 +26,8 @@ public class DocArticleControl : Panel
         layout = new VerticalStack(() => LogicalToDeviceUnits(3 * 16));
         AutoSize = true;
         AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        // 挂上之前先按全局主题的字体族定好字号：一页文章一般先拼好再挂上，挂上时字体不变，拼的时候量过的文字就不用全部重量
+        Font = ArticleFont(Fonts.Installed(RuneTheme.Current.Peek().Fonts.Sans));
         header.Controls.AddRange([title, description]);
         Controls.Add(header);
     }
@@ -86,9 +88,11 @@ public class DocArticleControl : Panel
     void UpdateFont()
     {
         if (Parent is not { } parent) return;
-        Font = Fonts.Get(parent.Font.FontFamily.Name, 15 * 72 / 96f, FontStyle.Regular);
+        Font = ArticleFont(parent.Font.FontFamily.Name);
         description.MaximumSize = new Size(LogicalToDeviceUnits(48 * 16), 0);
     }
+
+    static Font ArticleFont(string family) => Fonts.Get(family, 15 * 72 / 96f, FontStyle.Regular);
 }
 
 /// <summary>

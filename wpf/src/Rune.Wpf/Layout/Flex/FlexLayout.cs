@@ -129,7 +129,7 @@ static class FlexLayout
     }
 
     /// <summary>
-    /// 各行的交叉轴尺寸铺到容器上：单行时这一行就是容器的交叉轴尺寸（CSS 的单行 flex 容器）；
+    /// 各行的交叉轴尺寸铺到容器上：单行时这一行就是容器的交叉轴尺寸（CSS 的单行 flex 容器，内容更宽也不跟着撑开，拉伸的项随容器）；
     /// 多行时多出来的空间平分给各行（align-content 的默认值 normal，同 stretch）。
     /// </summary>
     public static void Stretch(List<Line> lines, double size, double gap, bool wrap)
@@ -137,7 +137,7 @@ static class FlexLayout
         if (lines.Count == 0) return;
         if (!wrap)
         {
-            lines[0].Cross = Math.Max(lines[0].Cross, size);
+            lines[0].Cross = size;
             return;
         }
         var extra = size - lines.Sum(line => line.Cross) - gap * (lines.Count - 1);

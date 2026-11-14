@@ -20,6 +20,7 @@ namespace Rune.WinForms;
 public class GridControl : Panel, IExtenderProvider
 {
     readonly GridEngine engine;
+    readonly PreferredSizeCache preferred;
     readonly Dictionary<Control, GridSpan> spans = [];
     readonly Dictionary<Control, int> rowSpans = [];
 
@@ -27,6 +28,7 @@ public class GridControl : Panel, IExtenderProvider
     public GridControl()
     {
         engine = new GridEngine(this);
+        preferred = new PreferredSizeCache(this);
         AutoSize = true;
         AutoSizeMode = AutoSizeMode.GrowAndShrink;
     }
@@ -169,7 +171,7 @@ public class GridControl : Panel, IExtenderProvider
     }
 
     /// <inheritdoc />
-    public override Size GetPreferredSize(Size proposedSize) => engine.Measure(proposedSize);
+    public override Size GetPreferredSize(Size proposedSize) => preferred.Get(proposedSize, engine.Measure);
 
     /// <summary>grid 排版：交给 <see cref="GridLayout"/> 放、算行高，再摆（从右到左时镜像）。</summary>
     sealed class GridEngine(GridControl owner) : LayoutEngine

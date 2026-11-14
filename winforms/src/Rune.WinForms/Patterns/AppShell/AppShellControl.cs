@@ -111,10 +111,20 @@ public partial class AppShellControl : Control
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public Control? Footer { get => footer.Child; set { footer.Child = value; Sync(); } }
 
-    /// <summary>正文。</summary>
+    /// <summary>正文。换的时候正文区停画到排好再一次画出来（换一整页时不一块块地闪）。</summary>
     [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public Control? Content { get => main.Child; set { main.Child = value; Sync(); } }
+    public Control? Content
+    {
+        get => main.Child;
+        set
+        {
+            using var _ = mainScroll.SuspendRedraw();
+            main.Child = value;
+            // 只有正文那一列的高度变了：重排滚动区域就够，不用整个外壳（侧栏可能一百多项）重排
+            mainScroll.PerformLayout();
+        }
+    }
 
     /// <summary>侧栏底部有"收起侧栏"按钮。</summary>
     [Category("Behavior")]

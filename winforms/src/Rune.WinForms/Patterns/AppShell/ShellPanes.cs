@@ -1,4 +1,6 @@
 using System.ComponentModel;
+using System.Windows.Forms.Layout;
+
 namespace Rune.WinForms;
 
 /// <summary>子控件在格子里怎么竖着放。</summary>
@@ -20,6 +22,9 @@ enum PaneAlign
 /// </summary>
 sealed class ShellPane : Control
 {
+    /// <inheritdoc />
+    public override LayoutEngine LayoutEngine => ManualLayout.Instance;
+
     readonly Effect paint;
 
     public ShellPane()
@@ -65,7 +70,13 @@ sealed class ShellPane : Control
             if (field == value) return;
             if (field is not null) Controls.Remove(field);
             field = value;
-            if (value is not null) Controls.Add(value);
+            if (value is not null)
+            {
+                // 挂上之前先按最终的大小排好：还没有窗口句柄时设边界不发窗口消息，挂上后各个子窗口直接建在最终位置，
+                // 不会再一层层地挪位置、触发重排（换一整页时这是大头）
+                value.Bounds = ChildBounds(value);
+                Controls.Add(value);
+            }
             PerformLayout();
         }
     }
@@ -89,16 +100,18 @@ sealed class ShellPane : Control
     protected override void OnLayout(LayoutEventArgs levent)
     {
         base.OnLayout(levent);
-        if (Child is not { } child) return;
-        var area = new Rectangle(Point.Empty, ClientSize);
+        if (Child is { } child) child.Bounds = ChildBounds(child);
+    }
+
+    Rectangle ChildBounds(Control child)
+    {
         var insets = Padding + EdgeInsets;
-        area = new Rectangle(area.X + insets.Left, area.Y + insets.Top, Math.Max(0, area.Width - insets.Horizontal), Math.Max(0, area.Height - insets.Vertical));
+        var area = new Rectangle(insets.Left, insets.Top, Math.Max(0, ClientSize.Width - insets.Horizontal), Math.Max(0, ClientSize.Height - insets.Vertical));
         var wanted = child.GetPreferredSize(new Size(area.Width, 0));
         var width = FitChild ? Math.Min(wanted.Width, area.Width) : area.Width;
-        var x = area.X;
         var height = Align == PaneAlign.Stretch ? area.Height : Align == PaneAlign.Center ? Math.Min(wanted.Height, area.Height) : wanted.Height;
         var y = Align == PaneAlign.Center ? area.Y + (area.Height - height) / 2 : area.Y;
-        child.Bounds = new Rectangle(x, y, width, height);
+        return new Rectangle(area.X, y, width, height);
     }
 
     protected override void OnPaintBackground(PaintEventArgs e)
@@ -132,6 +145,9 @@ sealed class ShellPane : Control
 /// <summary>正文那一列：正文在上，页脚在下；内容少时页脚贴着底部（滚动区域把这一列至少撑到视口高）。</summary>
 sealed class ShellColumn : Control
 {
+    /// <inheritdoc />
+    public override LayoutEngine LayoutEngine => ManualLayout.Instance;
+
     readonly ShellPane main;
     readonly ShellPane footer;
 

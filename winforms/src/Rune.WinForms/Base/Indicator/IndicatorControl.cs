@@ -127,7 +127,7 @@ public class IndicatorControl : Panel
             return new Size(dot, dot);
         }
         var size = 0.75f * Em;
-        var text = TextRenderer.MeasureText(BadgeText, CountFont, Size.Empty, TextFormatFlags.NoPadding | TextFormatFlags.SingleLine | TextFormatFlags.NoPrefix);
+        var text = Fonts.Measure(BadgeText, CountFont, Size.Empty, TextFormatFlags.NoPadding | TextFormatFlags.SingleLine | TextFormatFlags.NoPrefix);
         var height = (int)MathF.Round(1.6f * size);
         var width = Math.Max(height, text.Width + (int)MathF.Round(0.8f * size));
         return new Size(width + 2 * Ring, height + 2 * Ring);

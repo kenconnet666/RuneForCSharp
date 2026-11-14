@@ -43,4 +43,16 @@ public static class Fonts
     /// </summary>
     internal static int LineHeight(Font font) => lineHeights.GetValue(font, key =>
         new StrongBox<int>(TextRenderer.MeasureText("Ag", key, default(System.Drawing.Size), TextFormatFlags.NoPadding | TextFormatFlags.SingleLine).Height)).Value;
+
+    static readonly ConcurrentDictionary<(string Text, Font Font, Size Proposed, TextFormatFlags Flags), Size> measured = new();
+
+    /// <summary>
+    /// 量文字（同 TextRenderer.MeasureText），结果全局共用：一次 GDI 测量比整个排版还贵，父布局会按几种宽度反复量同一段字，
+    /// 换一页时同样的标签、按钮文字又是新控件。攒多了整个清掉（拖窗口时宽度一直在变）。字体按值比。
+    /// </summary>
+    internal static Size Measure(string text, Font font, Size proposed, TextFormatFlags flags)
+    {
+        if (measured.Count > 16384) measured.Clear();
+        return measured.GetOrAdd((text, font, proposed, flags), key => TextRenderer.MeasureText(key.Text, key.Font, key.Proposed, key.Flags));
+    }
 }

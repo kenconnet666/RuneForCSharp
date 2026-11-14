@@ -13,7 +13,7 @@ namespace Rune.WinForms;
 /// </summary>
 public class CodePreviewControl : CardControl
 {
-    readonly PreviewScroll scroll = new() { Axis = ScrollAreaAxis.X };
+    readonly PreviewScroll scroll = new() { Axis = ScrollAreaAxis.X, AutoSize = true };
     readonly FlexControl layout = new() { Direction = FlexDirection.Column, Gap = Space.Md, AutoSize = true };
     readonly FlexControl toolbar = new() { Justify = FlexJustify.End, Gap = Space.Xs, AutoSize = true };
     readonly ButtonControl toggle = new() { Variant = ButtonVariant.Ghost, Tone = StatusTone.Neutral, TextSize = TextSize.Sm, Icon = Lucide.Code, Expanded = false };
@@ -152,11 +152,11 @@ public class CodePreviewControl : CardControl
         UpdateTexts();
     }
 
-    /// <summary>效果的排布外边距 xl（上游的内边距）；工具栏内边距 xs。随字号。</summary>
+    /// <summary>效果区内边距 1.5em、工具栏内边距 xs，随字号。</summary>
     void UpdateMetrics()
     {
         var em = this.EmPixels();
-        layout.Margin = new Padding((int)MathF.Round(1.5f * em));
+        layout.Padding = new Padding((int)MathF.Round(1.5f * em));
         toolbar.Padding = new Padding((int)MathF.Round(0.25f * em));
     }
 
@@ -223,8 +223,12 @@ public class CodePreviewControl : CardControl
     /// <summary>效果区：横向滚动，高度跟着内容（ScrollAreaControl 本身的高度由外面给）。</summary>
     sealed class PreviewScroll : ScrollAreaControl
     {
-        public override Size GetPreferredSize(Size proposedSize) =>
-            Content is { } content ? new Size(proposedSize.Width, content.GetPreferredSize(Size.Empty).Height + content.Margin.Vertical) : Size.Empty;
+        public override Size GetPreferredSize(Size proposedSize)
+        {
+            if (Content is not { } content) return Size.Empty;
+            var natural = content.GetPreferredSize(Size.Empty);
+            return new Size(proposedSize.Width is > 1 and < int.MaxValue ? proposedSize.Width : natural.Width, natural.Height);
+        }
     }
 }
 

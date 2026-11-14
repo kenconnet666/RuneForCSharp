@@ -239,9 +239,21 @@ public class CodeBlockControl : Control, IScopeAware
         copy.Visible = Copyable;
         expand.Visible = Collapsible;
         view.Reset();
+        // 看不见时（收起的源码区）先不排，显示出来再排：一页十几张示例卡片的源码都收着，每张都按行量一遍文字很慢
+        relayoutPending = !Visible;
+        if (relayoutPending) return;
         PerformLayout();
         Parent?.PerformLayout();
         Invalidate();
+    }
+
+    bool relayoutPending;
+
+    /// <inheritdoc />
+    protected override void OnVisibleChanged(EventArgs e)
+    {
+        base.OnVisibleChanged(e);
+        if (Visible && relayoutPending) Relayout();
     }
 
     /// <inheritdoc />
@@ -348,7 +360,7 @@ public class CodeBlockControl : Control, IScopeAware
 
         int NumberWidth => owner.LineNumbers ? (int)MathF.Ceiling(MathF.Max(1.2f * Em, Measure(Lines.Length.ToString())) + Em) : 0;
 
-        int Measure(string text) => text.Length == 0 ? 0 : TextRenderer.MeasureText(text, CodeFont, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix).Width;
+        int Measure(string text) => text.Length == 0 ? 0 : Fonts.Measure(text, CodeFont, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix).Width;
 
         /// <summary>代码区要的高度（折叠时最多 MaxLines 行）。</summary>
         public int BodyHeight(int width)
@@ -508,7 +520,7 @@ public class CodeBlockControl : Control, IScopeAware
             var font = Fonts.Get(owner.Font.FontFamily.Name, TextSize.Sm.Pixels!.Value * 72 / 96, FontStyle.Regular);
             var text = owner.ExpandText;
             AccessibleName = text;
-            var size = TextRenderer.MeasureText(text, font, Size.Empty, TextFormatFlags.NoPadding);
+            var size = Fonts.Measure(text, font, Size.Empty, TextFormatFlags.NoPadding);
             var icon = (int)MathF.Round(font.EmPixels(DeviceDpi));
             var gap = (int)MathF.Round(0.25f * icon);
             var x = (Width - size.Width - gap - icon) / 2;

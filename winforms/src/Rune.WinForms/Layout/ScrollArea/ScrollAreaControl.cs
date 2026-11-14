@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Drawing.Drawing2D;
+using System.Windows.Forms.Layout;
 
 namespace Rune.WinForms;
 
@@ -20,6 +21,9 @@ namespace Rune.WinForms;
 [Description("滚动区域：浮层滚动条，出现、消失都不占位。")]
 public class ScrollAreaControl : Control
 {
+    /// <inheritdoc />
+    public override LayoutEngine LayoutEngine => ManualLayout.Instance;
+
     readonly OverlayThumb vertical;
     readonly OverlayThumb horizontal;
     readonly Control[] focusRing;

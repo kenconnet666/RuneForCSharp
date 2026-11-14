@@ -20,6 +20,7 @@ namespace Rune.WinForms;
 public class FlexControl : Panel, IExtenderProvider
 {
     readonly FlexEngine engine;
+    readonly PreferredSizeCache preferred;
     readonly HashSet<Control> growing = [];
     readonly HashSet<Control> overlays = [];
     readonly Dictionary<Control, FlexAlign> selfAligns = [];
@@ -28,6 +29,7 @@ public class FlexControl : Panel, IExtenderProvider
     public FlexControl()
     {
         engine = new FlexEngine(this);
+        preferred = new PreferredSizeCache(this);
         AutoSize = true;
         AutoSizeMode = AutoSizeMode.GrowAndShrink;
     }
@@ -189,13 +191,13 @@ public class FlexControl : Panel, IExtenderProvider
     }
 
     /// <inheritdoc />
-    public override Size GetPreferredSize(Size proposedSize) => engine.Measure(proposedSize);
+    public override Size GetPreferredSize(Size proposedSize) => preferred.Get(proposedSize, engine.Measure);
 
     /// <summary>flex 排版：量子控件、交给 <see cref="FlexLayout"/> 分，再摆（从右到左时横排镜像）。</summary>
     sealed class FlexEngine(FlexControl owner) : LayoutEngine
     {
-        // 子控件想要的大小：同一次排版里会按同样的宽度量好几遍（自然大小、分行后的大小，外层先 Measure 再 Layout），
-        // 嵌套几层就是指数级的测量（文档应用的一页要几十秒）。记到这个容器下一次排版为止：子控件的大小变了，WinForms 会让父级重新排版
+        // 子控件想要的大小：一趟计算里会按同样的宽度量好几遍（自然大小、最小大小、分行后的大小），嵌套几层就是指数级的测量
+        // （文档应用的一页要几十秒）。只在一趟 Measure 或 Layout 里复用：跨趟留着的话，里层的内容变了外层还拿旧的大小排
         readonly Dictionary<(Control, Size), Size> measured = [];
 
         Size Preferred(Control child, Size proposed)
@@ -277,6 +279,7 @@ public class FlexControl : Panel, IExtenderProvider
         {
             var limit = proposed.Width is > 1 and < int.MaxValue ? proposed.Width : int.MaxValue;
             if (owner.MaximumSize.Width > 0) limit = Math.Min(limit, owner.MaximumSize.Width);
+            measured.Clear();
             var padding = owner.Padding;
             var width = limit == int.MaxValue ? double.PositiveInfinity : limit - padding.Horizontal;
             var (main, cross) = IsRow ? (width, double.PositiveInfinity) : (double.PositiveInfinity, width);
