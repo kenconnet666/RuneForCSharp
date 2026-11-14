@@ -57,6 +57,7 @@
   <StyleInclude Source="avares://Rune.Avalonia/Display/Descriptions/DescriptionsParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Display/ValueChange/ValueChangeParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Display/Stat/StatParts.axaml" />
+  <StyleInclude Source="avares://Rune.Avalonia/DocsKit/CodePreview/CodePreviewParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Feedback/Progress/ProgressParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Input/Choice/ChoiceParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Input/Switch/SwitchParts.axaml" />

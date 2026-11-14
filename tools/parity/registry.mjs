@@ -68,6 +68,8 @@ export const COMPONENT_PROP_RENAMES = {
   ScrollArea: { focusable: 'IsViewportFocusable' },
   // 代码的语言：lang 是缩写，C# 写全
   CodeBlock: { lang: 'Language' },
+  // 同 CodeBlock；显示源码是布尔的状态，按 Is 前缀
+  CodePreview: { lang: 'Language', _showCode: 'IsCodeShown' },
   // 控件自己有 Width
   TableHeaderCell: { width: 'ColumnWidth' },
   // Avalonia、WPF 沿用平台的提示（ToolTip.Tip、ToolTipService），组件库只补位置、距离、箭头
@@ -98,6 +100,7 @@ export const PLATFORM_COMPONENT_PROP_RENAMES = {
     RadioGroup: { propsItem: 'ItemContainerStyle' },
     // FrameworkElement 自己有 Language（界面文字的语言）
     CodeBlock: { lang: 'CodeLanguage' },
+    CodePreview: { lang: 'CodeLanguage' },
     // 平台的提示：FrameworkElement.ToolTip 与 ToolTipService
     Tooltip: {
       children: 'ToolTip',
