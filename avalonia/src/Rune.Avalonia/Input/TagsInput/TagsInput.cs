@@ -6,7 +6,6 @@ using Avalonia.Automation.Provider;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Controls.Primitives;
-using Avalonia.Controls.Primitives.PopupPositioning;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Input;
@@ -75,12 +74,8 @@ public class TagsInput : TextInputBase
     /// <summary><see cref="OpenChanged"/> 的路由事件（直接：不往上传）。</summary>
     public static readonly RoutedEvent<OpenChangedEventArgs> OpenChangedEvent = RoutedEvent.Register<TagsInput, OpenChangedEventArgs>(nameof(OpenChanged), RoutingStrategies.Direct);
 
-    /// <summary>与外壳的距离（像素）。</summary>
-    const double Offset = 6;
-
-    readonly Popup popup = new() { IsLightDismissEnabled = true, WindowManagerAddShadowHint = false, Placement = PlacementMode.BottomEdgeAlignedLeft };
-    readonly Border panel = new() { Name = TagsInputParts.Popover, ClipToBounds = true };
-    readonly Listbox listbox = new() { Name = TagsInputParts.Listbox, Focusable = false, SelectionMode = SelectionMode.Multiple };
+    readonly ListPopover popover;
+    readonly Listbox listbox;
     readonly Dictionary<string, Tag> tags = [];
     readonly Dictionary<Tag, EventHandler> removers = [];
     readonly Dictionary<string, string> seen = [];
@@ -94,14 +89,12 @@ public class TagsInput : TextInputBase
     /// <summary>新建：没有标签、没有建议。</summary>
     public TagsInput()
     {
-        panel.Child = listbox;
-        popup.Child = new Panel { Margin = new Thickness(0, Offset), Children = { panel } };
-        popup.PlacementTarget = this;
-        LogicalChildren.Add(popup);
-        popup.Closed += (_, _) =>
+        popover = new ListPopover(this, LogicalChildren, () =>
         {
             if (IsOpen) SetOpen(false, OpenChangeReason.Outside);
-        };
+        });
+        listbox = popover.Listbox;
+        listbox.SelectionMode = SelectionMode.Multiple;
         listbox.PropertyChanged += (_, e) =>
         {
             if (e.Property == Listbox.ValuesProperty) OnListChanged();
@@ -405,19 +398,11 @@ public class TagsInput : TextInputBase
     {
         var reason = pending;
         PseudoClasses.Set(":open", IsOpen);
-        var shown = IsOpen && Suggests;
-        if (shown) panel.MinWidth = Bounds.Width;
-        if (popup.IsOpen != shown) popup.IsOpen = shown;
+        popover.Show(IsOpen && Suggests);
         if (reason is { } known) RaiseEvent(new OpenChangedEventArgs(OpenChangedEvent, IsOpen, known));
     }
 
-    /// <summary>弹出层的尺寸按 em：lg 圆角；字号同外壳。</summary>
-    void UpdateMetrics()
-    {
-        var em = FontSize;
-        panel.CornerRadius = new CornerRadius(this.Resource<double>(ThemeKeys.Radius.Lg) * em);
-        panel.SetValue(TextElement.FontSizeProperty, em);
-    }
+    void UpdateMetrics() => popover.UpdateMetrics(FontSize);
 
     /// <inheritdoc />
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
