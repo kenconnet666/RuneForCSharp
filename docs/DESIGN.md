@@ -1352,3 +1352,9 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   - WinForms：子控件各有窗口，容器画不到它们上面，只能另开一个分层窗口（LayeredWindow 的常驻形态：属于窗体、不置顶、WS_EX_TRANSPARENT 点击全穿透），盖住控件露出来的部分（与各层父控件的客户区求交），盯着自己与各层父控件的移动、缩放、显示隐藏。inspect 的控件截图里没有它。
 - 字号、间隙、图片大小是固定的像素（同上游，不跟着外面的字号）；字体用主题的 sans。多行文字用换行分开（TS 的 content 数组）。
 - 踩过的坑：WinForms 的 Form 处理窗口位置变化时按自己记着的 Bounds 改回去，分层窗口显示着时只靠 UpdateLayeredWindow 挪不动，要先设 Bounds（LayeredWindow.Present 里做了，对话框遮罩跟着宿主移动也靠它）。
+
+### LoadingBar（2026-11-14）
+
+- 控制器 LoadingBarController 是孪生文件（上游的 createLoadingBar）：计时用 TimeProvider（测试里换成 FakeTimeProvider 快进），回调回到建它的线程上（界面线程上建，绑定直接能用）；每次开始、结束换一代，已经投递出去的旧回调不做。
+- 显示：Avalonia、WPF 盖在内容上（放进窗口根部的 Panel / Grid、排在内容后面，默认贴顶边、不挡点击），带 accent 色的光；WinForms 盖不到子控件上，停靠在顶边占一条，也画不出控件外面的光。
+- 进度只往前过渡：归零发生在淡出之后，直接到位，不倒着走回去。读屏里是进度条，空闲时 Avalonia 是 Raw、WPF 不算控件、WinForms 是 Invisible。

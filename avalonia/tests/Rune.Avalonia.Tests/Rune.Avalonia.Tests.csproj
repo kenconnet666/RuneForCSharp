@@ -10,6 +10,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
     <!-- 不用 Avalonia.Headless.XUnit：它依赖 xunit v3 的 3.x，这里直接用 Avalonia.Headless 的测试会话 -->
     <PackageReference Include="Avalonia.Headless" />
   </ItemGroup>

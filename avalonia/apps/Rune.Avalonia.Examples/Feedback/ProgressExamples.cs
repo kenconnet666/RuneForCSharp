@@ -12,6 +12,7 @@ static class ProgressExamples
     [
         new("Progress", "progress", "进度条", "Value 与 Max（默认 100）算完成比例，超出时夹住；Tone 表示状态。Label 显示在上方，同时是读屏名称；右侧默认是按语言格式化的百分比，ValueLabel 换成自己的文字（只是显示），读屏念的用 ValueText 改，ShowValueLabel=False 不显示。取值是 decimal。Bands 是量表的用法（磁盘占用、配额、评分这类量出来的数）：值落在哪一段就用哪一段的色调；仪表盘样子的量表用 Gauge。", Bars),
         new("Progress", "rings", "环形与目标", "Shape=circle 是环形：中间显示数值，Label 在下方，直径随 Size 缩放；不写 Value 时一段弧一直转。Target 是目标值：条上画一条竖线、环上画一道刻度，读屏念成\"60%，目标 80%\"。", Rings),
+        new("Progress", "loading-bar", "换页时的加载条", "LoadingBar 是窗口顶部的一条细线，控制器加显示（同 Toast）：LoadingBarController 的 Start 开始、Finish 走满后淡出、Error 变成危险色走满。不知道真实进度，所以先快后慢地涨，停在 90% 前等完成；Delay（默认 200 毫秒）之内就完成的不显示。它只是视觉提示：读屏读到的应当是内容区域的忙碌状态。示例把加载条放进了卡片里，平时它放在窗口根部、贴着顶边。", LoadingBarExample),
         new("Progress", "shapes", "粗细与不确定进度", "Size 跟字号档位缩放粗细，Radius 改圆角；不写 Value 是不确定进度，循环滑动，系统关闭动画时变慢。", Shapes),
     ];
 
@@ -105,6 +106,91 @@ static class ProgressExamples
                 },
             },
         };
+    }
+
+    static readonly (string Id, string Label, int Delay, string[] Rows, bool Fails)[] Pages =
+    [
+        ("orders", "订单列表", 900, ["SO-24101 华东仓 已发货", "SO-24102 华南仓 待出库"], false),
+        ("stock", "库存台账", 1600, ["A-12 轴承 312 件", "B-07 密封圈 1 280 件"], false),
+        ("report", "财务报表", 1200, [], true),
+        ("quick", "个人设置", 120, ["通知：仅提及我", "语言：简体中文"], false),
+    ];
+
+    /// <summary>模拟换页：点标签后加载条走起来，数据回来时走满淡出；"财务报表"那页会加载失败（危险色）。</summary>
+    static Control LoadingBarExample()
+    {
+        var controller = new LoadingBarController();
+        var list = new TabList();
+        global::Avalonia.Automation.AutomationProperties.SetName(list, "页面");
+        foreach (var page in Pages) list.Children.Add(new Tab { Value = page.Id, Content = page.Label });
+        var tabs = new Tabs { Value = "orders", Children = { list } };
+        var body = new Flex { Direction = FlexDirection.Column, Gap = Space.Xs, MinHeight = 63 };
+        var timer = new global::Avalonia.Threading.DispatcherTimer();
+        void Load(string id)
+        {
+            var page = Pages.First(item => item.Id == id);
+            timer.Stop();
+            body.Children.Clear();
+            body.Children.Add(new Small { Tone = TextTone.Muted, Text = $"正在加载{page.Label}…" });
+            controller.Start();
+            timer.Interval = TimeSpan.FromMilliseconds(page.Delay);
+            timer.Tick += Done;
+            timer.Start();
+            void Done(object? sender, EventArgs e)
+            {
+                timer.Tick -= Done;
+                timer.Stop();
+                body.Children.Clear();
+                if (page.Fails)
+                {
+                    controller.Error();
+                    var retry = new Button { Size = TextSize.Xs, Variant = ButtonVariant.Ghost, Content = "重试" };
+                    retry.Click += (_, _) => Load(id);
+                    body.Children.Add(new Flex
+                    {
+                        Align = FlexAlign.Center, Gap = Space.Sm,
+                        Children = { new Badge { Tone = StatusTone.Danger, Size = TextSize.Xs, Content = "加载失败" }, new Small { Tone = TextTone.Muted, Text = "服务器没有响应，请稍后重试" }, retry },
+                    });
+                    return;
+                }
+                controller.Finish();
+                foreach (var row in page.Rows) body.Children.Add(new Text { Size = TextSize.Sm, Text = row });
+            }
+        }
+        tabs.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == Tabs.ValueProperty && tabs.Value is { } id) Load(id);
+        };
+        Load("orders");
+        var card = new Card
+        {
+            Padding = Space.None, ClipToBounds = true,
+            Content = new Panel
+            {
+                Children =
+                {
+                    new Flex { Direction = FlexDirection.Column, Gap = Space.Md, Margin = new global::Avalonia.Thickness(16), Children = { tabs, body } },
+                    new LoadingBar { Controller = controller },
+                },
+            },
+        };
+        Button Manual(string label, Action action, StatusTone tone = default)
+        {
+            var button = new Button { Size = TextSize.Sm, Variant = ButtonVariant.Soft, Tone = tone, Content = label };
+            button.Click += (_, _) => action();
+            return button;
+        }
+        var manual = new Flex
+        {
+            Align = FlexAlign.Center, Gap = Space.Sm, Wrap = FlexWrap.Wrap,
+            Children =
+            {
+                new Small { Tone = TextTone.Muted, Text = "手动控制：" },
+                Manual("Start()", controller.Start), Manual("Finish()", controller.Finish), Manual("Error()", controller.Error, StatusTone.Danger),
+                new Small { Tone = TextTone.Muted, Text = "“个人设置”120ms 就好，不显示加载条" },
+            },
+        };
+        return new Flex { Direction = FlexDirection.Column, Gap = Space.Md, Children = { card, manual } };
     }
 
     static Control Shapes()

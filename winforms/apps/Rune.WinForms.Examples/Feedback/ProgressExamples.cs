@@ -9,6 +9,7 @@ static class ProgressExamples
     [
         new("Progress", "progress", "进度条", "Value 与 Max（默认 100）算完成比例，超出时夹住；Tone 表示状态。Label 显示在上方，同时是读屏名称；右侧默认是按语言格式化的百分比，ValueLabel 换成自己的文字（只是显示），读屏念的用 ValueText 改，ShowValueLabel=false 不显示。取值是 decimal。Bands 是量表的用法（磁盘占用、配额、评分这类量出来的数）：值落在哪一段就用哪一段的色调；仪表盘样子的量表用 Gauge。", Bars),
         new("Progress", "rings", "环形与目标", "Shape=circle 是环形：中间显示数值，Label 在下方，直径随 TextSize 缩放；不写 Value 时一段弧一直转。Target 是目标值：条上画一条竖线、环上画一道刻度，读屏念成\"60%，目标 80%\"。", Rings),
+        new("Progress", "loading-bar", "换页时的加载条", "LoadingBarControl 是窗口顶部的一条细线，控制器加显示（同 Toast）：LoadingBarController 的 Start 开始、Finish 走满后淡出、Error 变成危险色走满。不知道真实进度，所以先快后慢地涨，停在 90% 前等完成；Delay（默认 200 毫秒）之内就完成的不显示。它只是视觉提示：读屏读到的应当是内容区域的忙碌状态。示例把加载条放进了卡片顶上，平时它停靠在窗体的顶边。", LoadingBarExample),
         new("Progress", "shapes", "粗细与不确定进度", "TextSize 跟字号档位缩放粗细，Radius 改圆角；不写 Value 是不确定进度，循环滑动，系统关闭动画时变慢。", Shapes),
     ];
 
@@ -62,6 +63,76 @@ static class ProgressExamples
             new ProgressControl { Shape = ProgressShape.Circle, TextSize = TextSize.Sm, AccessibleName = "正在同步" },
             new TextControl { Text = "不确定进度：弧线一直转", TextSize = TextSize.Sm, Tone = TextTone.Muted },
             new ProgressControl { Shape = ProgressShape.Circle, Value = 100, TextSize = TextSize.Sm, Tone = StatusTone.Success, AccessibleName = "已完成" }));
+
+    static readonly (string Id, string Label, int Delay, string[] Rows, bool Fails)[] Pages =
+    [
+        ("orders", "订单列表", 900, ["SO-24101 华东仓 已发货", "SO-24102 华南仓 待出库"], false),
+        ("stock", "库存台账", 1600, ["A-12 轴承 312 件", "B-07 密封圈 1 280 件"], false),
+        ("report", "财务报表", 1200, [], true),
+        ("quick", "个人设置", 120, ["通知：仅提及我", "语言：简体中文"], false),
+    ];
+
+    /// <summary>模拟换页：点标签后加载条走起来，数据回来时走满淡出；"财务报表"那页会加载失败（危险色）。</summary>
+    static Control LoadingBarExample()
+    {
+        var controller = new LoadingBarController();
+        var tabs = new TabsControl { Value = "orders" };
+        var list = new TabListControl { AccessibleName = "页面" };
+        foreach (var page in Pages)
+        {
+            var tab = new TabItemControl { Value = page.Id };
+            tab.Controls.Add(new TextControl { Text = page.Label });
+            list.Controls.Add(tab);
+        }
+        tabs.Controls.Add(list);
+        var body = new FlexControl { Direction = FlexDirection.Column, Gap = Space.Xs, Align = FlexAlign.Stretch };
+        var timer = new System.Windows.Forms.Timer();
+        void Load(string id)
+        {
+            var page = Pages.First(item => item.Id == id);
+            timer.Stop();
+            body.Controls.Clear();
+            body.Controls.Add(new SmallControl { Tone = TextTone.Muted, Text = $"正在加载{page.Label}…" });
+            controller.Start();
+            timer.Interval = page.Delay;
+            timer.Tick += Done;
+            timer.Start();
+            void Done(object? sender, EventArgs e)
+            {
+                timer.Tick -= Done;
+                timer.Stop();
+                body.Controls.Clear();
+                if (page.Fails)
+                {
+                    controller.Error();
+                    var retry = new ButtonControl { TextSize = TextSize.Xs, Variant = ButtonVariant.Ghost, Text = "重试" };
+                    retry.Click += (_, _) => Load(id);
+                    body.Controls.Add(Build.Flex(new FlexControl { Align = FlexAlign.Center, Gap = Space.Sm },
+                        new BadgeControl { Tone = StatusTone.Danger, TextSize = TextSize.Xs, Text = "加载失败" },
+                        new SmallControl { Tone = TextTone.Muted, Text = "服务器没有响应，请稍后重试" }, retry));
+                    return;
+                }
+                controller.Finish();
+                foreach (var row in page.Rows) body.Controls.Add(new TextControl { TextSize = TextSize.Sm, Text = row });
+            }
+        }
+        tabs.ValueChanged += (_, _) => Load(tabs.Value);
+        Load("orders");
+        var content = Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Md, Align = FlexAlign.Stretch, Padding = new Padding(16) }, tabs, body);
+        content.MinimumSize = new Size(0, content.LogicalToDeviceUnits(120));
+        var card = Build.Card(new CardControl { CardPadding = Space.None }, new LoadingBarControl { Controller = controller }, content);
+        ButtonControl Manual(string label, Action action, StatusTone tone = default)
+        {
+            var button = new ButtonControl { TextSize = TextSize.Sm, Variant = ButtonVariant.Soft, Tone = tone, Text = label };
+            button.Click += (_, _) => action();
+            return button;
+        }
+        var manual = Build.Flex(new FlexControl { Align = FlexAlign.Center, Gap = Space.Sm, Wrap = true },
+            new SmallControl { Tone = TextTone.Muted, Text = "手动控制：" },
+            Manual("Start()", controller.Start), Manual("Finish()", controller.Finish), Manual("Error()", controller.Error, StatusTone.Danger),
+            new SmallControl { Tone = TextTone.Muted, Text = "“个人设置”120ms 就好，不显示加载条" });
+        return Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Md, Align = FlexAlign.Stretch }, card, manual);
+    }
 
     static Control Shapes()
     {
