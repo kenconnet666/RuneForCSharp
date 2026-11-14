@@ -79,6 +79,10 @@ export const COMPONENT_PROP_RENAMES = {
   Countdown: { onEnd: 'Ended' },
   // 一次操作结束是事件
   Slider: { onValueCommit: 'ValueCommitted' },
+  // 收起是布尔属性，按 C# 的习惯带 Is
+  Splitter: { _collapsed: 'IsCollapsed' },
+  // 手柄改的是父元素的宽度：Width、MinWidth、MaxWidth 是平台控件自己的布局属性，这里叫 Length（横线时是高度）；调整了是事件
+  ResizeHandle: { width: 'Length', minWidth: 'MinLength', maxWidth: 'MaxLength', defaultWidth: 'DefaultLength', onWidthChange: 'LengthChanged' },
   // 值是平台 TextBox 的 Text；字符集叫 Charset（Type 是 TextField 的输入类型）；填满是事件
   OtpField: { _value: 'Text', type: 'Charset', onComplete: 'Completed' },
   // 边长是平台的宽度；Margin 是平台的外边距，静区叫 QuietZone；颜色是平台的前景、背景画刷
@@ -196,6 +200,9 @@ export const PROPS_NOT_PORTED = {
   },
   QRCode: {
     propsCode: '模块是 QRCode 自己画的一条路径（同 TS 的单条 path），没有元素可加属性；要自己处理时用 QrEncoder.Encode 的矩阵或 QrEncoder.Svg',
+  },
+  Splitter: {
+    propsScroll: '两栏本身就是 ScrollArea（部件 PART_Start、PART_End），滚动区域的属性用样式写在它们上面',
   },
   Slider: {
     name: FORM_NAME,

@@ -1,0 +1,14 @@
+<!--
+  Splitter 部件的默认外观：收起按钮叠在分隔线上，要不透明的底遮住线（surface）；悬停换成同样不透明的 fillHover
+  （描边按钮自己的悬停色是半透明的，会透出线）。只选分栏自己的按钮，不碰两栏内容里同名的部件
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|Splitter > Border > :is(Panel) > rune|IconButton#PART_Toggle">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Surface}" />
+  </Style>
+  <Style Selector="rune|Splitter > Border > :is(Panel) > rune|IconButton#PART_Toggle:pointerover">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.FillHover}" />
+  </Style>
+</Styles>
