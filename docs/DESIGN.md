@@ -1377,3 +1377,10 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
+
+### NativeSelect（2026-11-15）
+
+- ROADMAP 决定 28：各平台用自己的下拉框，使用方式同平台的 ComboBox。分组是孪生文件 NativeSelectGroups（没有组的在前，各组按第一次出现的顺序）；组名是一行不能选的标题，组里的选项缩进一档。上游的占位项（第一条、hidden disabled）在桌面上是 PlaceholderText，没选时值是 null。
+- Avalonia、WPF 继承平台的 ComboBox，模板换成输入框外壳（同 Select）与我们的弹出面板；选项行由 Options 生成，Tag 是值（WPF 的行是 NativeSelectItem，内边距、圆角按字号算）。WPF 的 ComboBox 自己不处理点击打开，模板里盖一个透明的 ToggleButton。只读：别的选项不可用、不打开，方向键、滚轮也换不了（平台的下拉框关着时用它们换值）。WPF 用平台的 IsReadOnly（NativeSelect 从不可编辑），Avalonia 的 ComboBox 没有，自己加了 IsReadOnly。
+- WinForms 就是 Win32 ComboBox（DropDownList、OwnerDrawVariable）：外框、下拉按钮、列表窗口是系统的，行是自己画的（组名、缩进、占位、已选 accentText）。系统没有不可选的行：落到组名、不可用的行上时跳到同方向的下一项；只读时在 WndProc 里吞掉点击、方向键、F4、Alt+↓、字母与滚轮。出错时在系统外框上描一圈 danger。读屏的名称、说明取所在字段（ComboBox 的读屏对象是平台内部的，只能写 AccessibleName / AccessibleDescription；使用方自己写了别的就不覆盖）。
+- WinForms 的坑：改 ItemHeight 会建句柄（没放进窗口时建不了，等 OnHandleCreated）；设 DropDownHeight 会改 IntegralHeight 并重建句柄（构造里先关掉）；行高不一时系统摆好列表后还会再收几个像素，多出滚动条，打开以后按行高合计重设列表窗口。自然宽度同浏览器的原生 select：最宽的选项加留白与下拉按钮。

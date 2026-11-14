@@ -71,6 +71,8 @@ export const COMPONENT_PROP_RENAMES = {
   SelectedTags: { onRemove: 'RemoveRequested' },
   // 数据是平台的 ItemsSource；自定义选项内容是数据模板；新建是事件（Control 自己有 Created）
   Select: { items: 'ItemsSource', children: 'ItemTemplate', onCreate: 'OptionCreated' },
+  // 平台的 ComboBox 自己有 Items / ItemsSource（选项行由 Options 生成）与 PlaceholderText
+  NativeSelect: { items: 'Options', placeholder: 'PlaceholderText' },
   // 数据是平台的 ItemsSource；执行了一项是事件；输入框的文字同 TextBox 叫 Text；自定义选项内容是数据模板
   CommandPalette: { items: 'ItemsSource', onAction: 'ItemInvoked', _inputValue: 'InputText', renderOption: 'ItemTemplate' },
   // 平台的 ItemsControl 自己有 Items（直接写的项）；数据给 ItemsSource
@@ -106,6 +108,7 @@ export const PLATFORM_PROP_RENAMES = {
 export const PLATFORM_COMPONENT_PROP_RENAMES = {
   // 按数据生成的项的属性（propsItem）：平台的项容器主题，按项不同时绑定到容器的 DataContext（这一项）
   Avalonia: {
+    NativeSelect: { placeholder: 'ComboBox.PlaceholderText' },
     CheckboxGroup: { propsItem: 'ItemContainerTheme' },
     RadioGroup: { propsItem: 'ItemContainerTheme' },
   },
@@ -171,6 +174,10 @@ const BUTTON_TYPE = '表单提交是浏览器的概念；对话框的默认、�
 
 /** 某个组件不移植的 prop 与原因（平台上没有对应的概念）：parity 不报缺 */
 export const PROPS_NOT_PORTED = {
+  NativeSelect: {
+    propsRoot: '外壳就是 NativeSelect 自己（平台 ComboBox 的模板）：样式直接写在它上面',
+    ...Object.fromEntries(['propsChevron', 'propsIcon'].map((prop) => [prop, 'Avalonia、WPF 的下拉箭头、前置图标是模板部件（PART_Chevron、PART_Icon），在主题里选中它们；WinForms 的箭头是系统画的'])),
+  },
   Listbox: {
     id: '桌面没有元素 id：选项与列表的关系由读屏树的父子关系表达（TS 用 id 拼 aria-activedescendant）',
     scroller: '列表总是自己滚动：Select 弹出层里的列表同样带自己的滚动区域',
@@ -276,6 +283,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     CommandPalette: Object.fromEntries(['propsInput', 'propsListbox'].map((prop) => [prop, '面板里的搜索框、列表是 CommandPalette 建的，外观跟着 TextField、Listbox 的主题样式；部件样式键只有搜索行'])),
   },
   WinForms: {
+    NativeSelect: Object.fromEntries(['variant', 'radius', 'icon']
+      .map((prop) => [prop, '就是 Win32 的下拉框：外框、下拉按钮是系统画的，没有外观档位、圆角与前置图标（出错时在系统外框上描一圈 danger）'])),
     Marquee: { fade: '子控件各有窗口，盖不了它们：没有两端渐隐' },
     ActionBar: {
       sticky: '没有网页的 position: sticky（子控件是窗口，和容器的排版抢位置不可靠）：停靠在滚动区域外面的底边，一直看得见',
@@ -382,6 +391,8 @@ export const PLATFORM_PROPS = new Set([
   'Tag',
   'AutomationProperties.Name',
   'ItemsSource',
+  // Avalonia 的 ComboBox 自带占位文字（NativeSelect 继承它，映射见 PLATFORM_COMPONENT_PROP_RENAMES）
+  'ComboBox.PlaceholderText',
   // ItemsControl 的项容器主题（Avalonia）、样式（WPF）：组的 propsItem
   'ItemContainerTheme',
   'ItemContainerStyle',

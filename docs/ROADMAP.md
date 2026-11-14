@@ -54,6 +54,7 @@
 | 25 | 完成标准 | 每个组件过三道核对：样式（ts-styles 的计算样式对 inspect props，加截图）、行为（上游测试用例逐条对应或登记不适用）、无障碍（UIA 对 ARIA 角色与状态）；parity 报告里没有未解释的差异才勾选（2026-11-06） |
 | 26 | 文档站 | 三个平台各做一个桌面文档应用（替换现在的 Gallery），页面、示例与 vue-tsx-pro 文档站一一对应，用组件库自己的组件搭；与上游的像素对照另出静态 HTML 报告，不放进文档应用（用户 2026-11-07 定，规划见 DOCSITE.md） |
 | 27 | 网页内核 | Embed、Video 放在每个平台的可选包 `Rune.*.Web` 里，主包不加依赖；三个平台都用 WebView2（Avalonia 经 Avalonia.Controls.WebView，WPF、WinForms 用 Microsoft.Web.WebView2），Video 是网页内核里的 video 元素，不另做原生播放器；外框、比例、骨架、"减少动态效果时不自动播放"按上游做在组件里（2026-11-14 用户：可以有附加依赖，按 WebView 壳去做） |
+| 28 | NativeSelect | 各平台用自己的下拉框：Avalonia、WPF 继承平台的 ComboBox（键盘、读屏是平台的行为），模板换成我们的输入框外壳与弹出面板；WinForms 继承 Win32 ComboBox（DropDownList，列表是系统画的，外框也是系统的）。选项用 Options（ListboxOption 或字符串），分组插不能选的组标题，占位、只读（其余选项不可选）照上游（2026-11-14 用户：适当取舍后做，使用方式符合各平台的习惯） |
 
 ## 平台化的约定
 
@@ -370,10 +371,6 @@ RuneForBlazor 已经走过一遍这些组件，同一个组件先看它踩过的
 ## 待定的决定
 
 新的待定项写在这里：日期、事项、卡在哪、要决定什么，附上建议。
-
-- **2026-11-14 NativeSelect（vue-tsx-pro 0.27.0）**：上游是原生 select 套输入框的外壳，卖点是"弹出的列表是系统自己的"（手机上的滚轮、自动填充、原生读屏）。桌面上只有 WinForms 有真正系统画的下拉框（Win32 ComboBox）；WPF 的 ComboBox 是框架画的，Avalonia 的 ComboBox 要 Fluent 主题才有模板（组件库只依赖自己的主题），弹出层其实和我们的 Select 是同一类东西。
-  - 要决定：桌面上 NativeSelect 做成什么。A：各平台自带的 ComboBox 套我们的外壳（WinForms 是系统的列表，WPF、Avalonia 要给 ComboBox 写模板，分组插不能选的组标题）；B：做成 Select 的轻量版（同一个弹出层，只收 items、placeholder、只读、分组，API 照上游）；C：登记不适用，文档里指向 Select。
-  - 建议：A。WinForms 上是名副其实的"系统列表"；WPF、Avalonia 至少键盘、读屏是平台 ComboBox 的行为，和 Select 的自绘列表分得开。定下来之前不做，parity 里显示为缺。
 
 - **2026-11-07 Avalonia 的分段语义（工作包 3）**：上游是"使用方 / Provider 的普通值整体替换组件档位的取值，连条件值"。Avalonia 里带伪类的样式（主题里的 `^:solid`、`^:solid:pointerover`）属于"样式触发器"一级，任何不带伪类的使用方样式都盖不过；档位解析出的不继承属性已经放到主题这一层（`Resolved`），但颜色这类由伪类样式按档位给的值仍然盖不过。
   - 做法 A（现在的）：沿用 DESIGN §4 的平台规则"要覆盖档位样式，选择器里至少带一个类或伪类"，写进文档与示例。没有运行时开销。

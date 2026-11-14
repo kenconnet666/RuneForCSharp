@@ -14,6 +14,7 @@ static class SelectExamples
         new("Select", "custom", "异步加载与自定义显示", "Load(搜索词, 第几页, 取消) 在打开时请求（Searchable 时搜索词停下 300 ms 再请求），只采用最后一次，请求期间列表里是骨架行，失败时提示重试；ItemsSource 是第一次结果之前的选项（编辑页放上已选的那几项）。分组来自选项的 Group，ItemTemplate 自定义每个选项。", Custom),
         new("Select", "searchable", "可搜索", "选项多（供应商、人员、件号）时写 Searchable：弹出层顶部是搜索框，打开后焦点就在里面，输入即按显示文字过滤（忽略大小写与重音，Filter 可以换规则），↑↓ 移动、Enter 选中，Esc 关闭并把焦点还给触发框。已选的项被过滤掉、或换成了另一页的搜索结果时，触发框里照样显示它的文字。远程搜索给 Load（见下一个示例）。", Searchable),
         new("Select", "paged", "远程搜索与分页", "选项太多、要分页取时，Load 的第二个参数是第几页（从 1 开始），返回带 Next 的 OptionsPage：滚到列表末尾时带着 Next 取下一页，已有的选项留着、骨架接在后面；没有更多时 Next 为 null。换了搜索词从第一页重来，翻页时重复的项不会出现两次。", Paged),
+        new("Select", "native", "原生下拉框", "NativeSelect 是平台自己的下拉框（ComboBox）套上输入框的外壳：外观、尺寸、出错同别的输入框，键盘、读屏都是平台的行为。选项只是一串文字时选它；要图标、说明、搜索、多选、远程加载，用 Select。Options 带 Group 的按组排（组名是选不了的标题），PlaceholderText 是没选时的占位；Value 双向绑定，没选时是 null；只读（IsReadOnly 或 Field 只读）时别的选项选不了、不打开。", Native),
         new("Select", "appearance", "图标、外观与状态", "前置图标、Variant、Radius、Size 与输入框同一套；在 Field 里沿用出错、必填、只读、不可用。只读时能聚焦、能看，不能打开。", Appearance),
     ];
 
@@ -239,6 +240,31 @@ static class SelectExamples
                 new Field { Label = "适用车型", Description = "只显示前两个", Content = fits },
                 new Field { Label = "工单标签", Description = "输入没有的标签，选“新建”加进选项", Content = picked },
                 summary,
+            },
+        };
+    }
+
+    static readonly ListboxOption[] Cities =
+    [
+        new("sh", "上海") { Group = "华东" }, new("hz", "杭州") { Group = "华东" }, new("nj", "南京") { Group = "华东" },
+        new("gz", "广州") { Group = "华南" }, new("sz", "深圳") { Group = "华南" }, new("hk", "香港（暂不配送）") { Group = "华南", IsDisabled = true },
+    ];
+
+    static FrameworkElement Native()
+    {
+        var city = new NativeSelect { Options = Cities, PlaceholderText = "选择城市", Icon = Lucide.MapPin };
+        var picked = new Small { Tone = TextTone.Muted, Text = "选中的值：（还没选）" };
+        DependencyPropertyDescriptor.FromProperty(NativeSelect.ValueProperty, typeof(NativeSelect))
+            .AddValueChanged(city, (_, _) => picked.Text = $"选中的值：{city.Value ?? "（还没选）"}");
+        return new Grid
+        {
+            MinItemWidth = "14em", Gap = Space.Lg,
+            Children =
+            {
+                new Flex { Direction = FlexDirection.Column, Gap = Space.Xs, Children = { new Field { Label = "收货城市", IsRequired = true, Content = city }, picked } },
+                new Field { Label = "行高（size=\"sm\"）", Content = new NativeSelect { Options = new[] { "紧凑", "标准", "宽松" }, Value = "标准", Size = TextSize.Sm } },
+                new Field { Label = "只读", Content = new NativeSelect { Options = new[] { "只读的值" }, Value = "只读的值", IsReadOnly = true } },
+                new Field { Label = "不可用", IsEnabled = false, Content = new NativeSelect { Options = new[] { "不可用" }, Value = "不可用" } },
             },
         };
     }

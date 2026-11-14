@@ -1,0 +1,110 @@
+<!--
+  NativeSelect 的主题（vue-tsx-pro 的 controlParts、nativeSelectStyles）：外壳同输入框（同 Select：控件高度、左右 space.md、xs 宽的 border 描边、悬停 borderStrong、
+  md 圆角、surface 底；soft 时 fill 底、没有描边；只读 borderMuted 描边、fill 底；出错 danger；不可用半透明；聚焦时焦点环压住边框），指针是手形。
+  里面依次是前置图标、选中的文字（没选时是 textMuted 的占位文字）、下拉箭头（打开时翻转）。弹出的列表是平台 ComboBox 的弹出层：
+  面板 surfaceRaised、xs 描边、lg 阴影、md 圆角，里面留 space.xs；选项一行（上下 space.xs、左右 space.sm、sm 圆角），悬停 fillHover、已选 accentText、
+  不可用半透明。分组标题 sm、textMuted、medium，组里的选项缩进一档。
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="Rune.NativeSelectItem" TargetType="ComboBoxItem">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="Padding" Value="{rune:Em 0.5, 0.25}" />
+    <Setter Property="MinHeight" Value="{rune:ControlHeight}" />
+    <Setter Property="CornerRadius" Value="{rune:Em Resource=Rune.Radius.Sm}" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ContentPresenter Name="PART_ContentPresenter" Background="{TemplateBinding Background}" Foreground="{TemplateBinding Foreground}"
+                          CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}" Content="{TemplateBinding Content}"
+                          VerticalContentAlignment="Center" />
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pointerover"><Setter Property="Background" Value="{DynamicResource Rune.Brush.FillHover}" /></Style>
+    <Style Selector="^:focus-visible"><Setter Property="Background" Value="{DynamicResource Rune.Brush.FillHover}" /></Style>
+    <Style Selector="^:selected"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.AccentText}" /></Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" />
+      <Setter Property="Cursor" Value="Arrow" />
+    </Style>
+    <!-- 组里的选项缩进一档 -->
+    <Style Selector="^.grouped"><Setter Property="Padding" Value="{rune:Em 1.25, 0.25, 0.5, 0.25}" /></Style>
+    <Style Selector="^.group">
+      <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
+      <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
+      <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+      <Setter Property="Opacity" Value="1" />
+      <Setter Property="MinHeight" Value="0" />
+      <Setter Property="Padding" Value="{rune:Em 0.5, 0.5, 0.5, 0.25}" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type rune:NativeSelect}" TargetType="rune:NativeSelect">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Surface}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{rune:Em Resolved=Radius}" />
+    <Setter Property="Padding" Value="{rune:Em 0.75, 0}" />
+    <Setter Property="MinHeight" Value="{rune:ControlHeight}" />
+    <Setter Property="PlaceholderForeground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+    <Setter Property="MaxDropDownHeight" Value="320" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusAdorner" Value="{x:Null}" />
+    <Setter Property="ItemContainerTheme" Value="{StaticResource Rune.NativeSelectItem}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border Name="PART_Root" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
+            <rune:Flex Align="center" Gap="sm">
+              <rune:Icon Name="PART_Icon" Data="{TemplateBinding Icon}" IsVisible="{TemplateBinding Icon, Converter={x:Static ObjectConverters.IsNotNull}}" />
+              <Panel rune:Flex.Grow="True" VerticalAlignment="Center">
+                <TextBlock Name="PART_Placeholder" Text="{TemplateBinding PlaceholderText}" Foreground="{TemplateBinding PlaceholderForeground}" TextTrimming="CharacterEllipsis"
+                           IsVisible="{TemplateBinding SelectionBoxItem, Converter={x:Static ObjectConverters.IsNull}}" />
+                <ContentPresenter Name="PART_Value" Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" />
+              </Panel>
+              <rune:Icon Name="PART_Chevron" Data="{x:Static rune:Lucide.ChevronDown}" RenderTransformOrigin="50%,50%" />
+            </rune:Flex>
+          </Border>
+          <Border Name="PART_FocusRing" IsVisible="False" IsHitTestVisible="False" Margin="-1" BorderThickness="2"
+                  BorderBrush="{DynamicResource Rune.Brush.FocusRing}" CornerRadius="{TemplateBinding CornerRadius}" />
+          <Popup Name="PART_Popup" WindowManagerAddShadowHint="False" IsOpen="{TemplateBinding IsDropDownOpen, Mode=TwoWay}"
+                 MinWidth="{Binding Bounds.Width, RelativeSource={RelativeSource TemplatedParent}}" MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                 PlacementTarget="PART_Root" Placement="BottomEdgeAlignedLeft" IsLightDismissEnabled="True" InheritsTransform="True">
+            <Border Name="PART_Popover" Margin="0,6" Background="{DynamicResource Rune.Brush.SurfaceRaised}" BorderBrush="{DynamicResource Rune.Brush.Border}"
+                    BorderThickness="1" CornerRadius="{rune:Em Resource=Rune.Radius.Md}" BoxShadow="{DynamicResource Rune.Shadow.Lg}" ClipToBounds="True">
+              <rune:ScrollArea>
+                <ItemsPresenter Name="PART_ItemsPresenter" Margin="{rune:Em 0.25}" ItemsPanel="{TemplateBinding ItemsPanel}" />
+              </rune:ScrollArea>
+            </Border>
+          </Popup>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^ /template/ rune|Icon#PART_Icon"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" /></Style>
+    <Style Selector="^ /template/ rune|Icon#PART_Chevron"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" /></Style>
+    <Style Selector="^:dropdownopen /template/ rune|Icon#PART_Chevron"><Setter Property="RenderTransform" Value="rotate(180deg)" /></Style>
+    <Style Selector="^:pointerover"><Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderStrong}" /></Style>
+    <Style Selector="^:focus-visible /template/ Border#PART_FocusRing"><Setter Property="IsVisible" Value="True" /></Style>
+    <Style Selector="^:soft">
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="Background" Value="{DynamicResource Rune.Brush.Fill}" />
+    </Style>
+    <Style Selector="^:soft:pointerover"><Setter Property="Background" Value="{DynamicResource Rune.Brush.FillHover}" /></Style>
+    <Style Selector="^:readonly">
+      <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+      <Setter Property="Background" Value="{DynamicResource Rune.Brush.Fill}" />
+      <Setter Property="Cursor" Value="Arrow" />
+    </Style>
+    <Style Selector="^:invalid"><Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Danger}" /></Style>
+    <Style Selector="^:invalid /template/ Border#PART_FocusRing"><Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Danger}" /></Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" />
+      <Setter Property="Cursor" Value="No" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>
