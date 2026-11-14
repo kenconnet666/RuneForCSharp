@@ -36,6 +36,7 @@
     <ResourceDictionary Source="/Rune.Wpf;component/Display/ValueChange/ValueChange.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Display/AnimatedNumber/AnimatedNumber.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Display/Stat/Stat.xaml" />
+    <ResourceDictionary Source="/Rune.Wpf;component/DocsKit/CodePreview/CodePreview.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Display/UserButton/UserButton.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Display/ItemList/ItemList.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Feedback/Alert/Alert.xaml" />
