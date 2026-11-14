@@ -57,6 +57,7 @@ public sealed record VideoChrome(Lang Lang, double FontSize, IReadOnlyList<doubl
 /// <summary>
 /// Video 放进网页内核里的页面：铺满、黑底、按 contain 放画面的 video 元素（vue-tsx-pro 的 Video 渲染的那个元素），
 /// 自绘控制条时还有控制条（同上游的 controls="custom"：播放 / 暂停、时间、进度、静音与音量、字幕、倍速、全屏，几秒不动收起，键盘快捷键）。
+/// 不知道时长的视频（直播）只显示已播的时间、进度条不可用；有回看范围时取它的末尾当时长。
 /// </summary>
 public static class VideoPage
 {
@@ -197,16 +198,18 @@ public static class VideoPage
         const $=id=>document.getElementById(id),v=$('media'),frame=$('frame'),bar=$('bar'),seek=$('seek'),volume=$('volume');
         const STEP=5,IDLE=2500;let shown=true,timer,menu=null;
         const clock=s=>{if(!isFinite(s))return'0:00';const t=Math.max(0,Math.floor(s)),p=n=>String(n).padStart(2,'0'),h=Math.floor(t/3600),m=Math.floor(t%3600/60);return h>0?`${h}:${p(m)}:${p(t%60)}`:`${m}:${p(t%60)}`};
-        const playing=()=>!v.paused&&!v.ended,duration=()=>isFinite(v.duration)?v.duration:0;
+        const playing=()=>!v.paused&&!v.ended;
+        // 直播、边录边播没有时长（Infinity）：取能跳到的最远处；也没有时是 0，进度条不可用、时间只显示已播多久
+        const duration=()=>{if(isFinite(v.duration))return v.duration;const s=v.seekable,end=s&&s.length?s.end(s.length-1):0;return isFinite(end)?end:0};
         const fill=r=>r.style.setProperty('--p',(r.max>r.min?(r.value-r.min)/(r.max-r.min)*100:0)+'%');
         function show(next){shown=next;bar.classList.toggle('hidden',!next);frame.classList.toggle('idle',!next&&playing())}
         const busy=()=>menu!==null||bar.matches(':hover');
         function wake(){show(true);clearTimeout(timer);if(playing())timer=setTimeout(()=>busy()?wake():show(false),IDLE)}
         function leave(){if(playing()&&!busy())show(false)}
-        function time(){$('time').textContent=clock(v.currentTime)+' / '+clock(duration());seek.value=v.currentTime;seek.setAttribute('aria-valuetext',C.time.replace('\u0001',clock(v.currentTime)).replace('\u0002',clock(duration())));fill(seek)}
+        function time(){const d=duration();$('time').textContent=d>0?clock(v.currentTime)+' / '+clock(d):clock(v.currentTime);seek.max=d||1;seek.disabled=d===0;seek.value=v.currentTime;seek.setAttribute('aria-valuetext',C.time.replace('\u0001',clock(v.currentTime)).replace('\u0002',clock(duration())));fill(seek)}
         function sync(){
           const p=$('play');p.innerHTML=playing()?C.icons.pause:C.icons.play;p.setAttribute('aria-label',playing()?C.pause:C.play);
-          seek.max=duration()||1;seek.disabled=duration()===0;time();
+          time();
           const m=$('mute'),quiet=v.muted||v.volume===0;m.innerHTML=quiet?C.icons.muted:C.icons.volume;m.setAttribute('aria-label',v.muted?C.unmute:C.mute);m.setAttribute('aria-pressed',v.muted);
           volume.value=v.muted?0:v.volume;fill(volume);
           check('speed',String(v.playbackRate));
@@ -214,7 +217,7 @@ public static class VideoPage
         }
         function check(kind,value){const list=document.querySelector(`[data-kind=${kind}]`);if(!list)return;for(const item of list.children)item.setAttribute('aria-checked',item.dataset.value===value)}
         const toggle=()=>v.paused?v.play().catch(()=>{}):v.pause();
-        const seekTo=s=>{v.currentTime=Math.min(Math.max(s,0),duration());time()};
+        const seekTo=s=>{const d=duration();if(d===0)return;v.currentTime=Math.min(Math.max(s,0),d);time()};
         const setVolume=x=>{v.volume=Math.min(Math.max(x,0),1);v.muted=v.volume===0};
         function setCaption(index){[...v.textTracks].forEach((t,i)=>t.mode=String(i)===index?'showing':'disabled');sync()}
         function open(kind){close();menu=document.querySelector(`[data-kind=${kind}]`);menu.hidden=false;$(kind).setAttribute('aria-expanded','true');(menu.querySelector('[aria-checked=true]')||menu.firstElementChild).focus();wake()}

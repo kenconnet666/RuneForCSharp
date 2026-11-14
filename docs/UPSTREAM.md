@@ -430,6 +430,17 @@ defineTheme / defineLang 忽略 undefined——网页专用或 C# 没有 undefin
 
 锁定跟到 0.25.0（fffc0c7f）：token、语言包、图标、配方、文档页面清单都没变（生成器 --check 通过）。
 
+### 第三十九批（2026-11-14，e380a8e7：0.29.0 的内容，发版提交 0de173eb 的 CI 还在跑）
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| 组件上写错绑定名是类型错误：PartProps 去掉原生元素专用的 _value、_checked、_files、_open（之前 `<Switch _value>` 能过类型检查，开关却不跟状态走） | 不涉及 | C# 的组件只有自己声明的属性，写错名字本来就编译不过；Switch、Checkbox 的值是 IsChecked，没有 Value |
+| Video controls="custom" 认不知道时长的视频（直播、边录边播）：时间只显示已播多久，进度条不可用，方向键不把进度跳回开头；有回看范围时取它的末尾当时长 | 已改 | 孪生文件 VideoPage 的脚本照做（duration() 取 seekable 的末尾，时长为 0 时不跳、只显示已播时间、进度条不可用，播放中每次 timeupdate 重算）；在 WebView2 里把 duration 改成 Infinity 核对过 |
+| Affix 的根元素补上部件标记 | 组件还没做 | 做时照新的 |
+| 文档：Combobox"表单提交与自定义匹配"、Cascader"显示、搜索的匹配与状态"、TagsInput 状态示例补 acceptOnBlur / radius / name、Affix"贴在底部的提交栏" | 组件还没做 | 做时照着移植 |
+
+锁定跟到 e380a8e7（CI 绿；0.29.0 的发版提交 0de173eb 只改版本号与变更记录，CI 绿了再跟）：文档页面清单重新生成；token、语言包、图标、配方没变。
+
 ### 第三十八批（2026-11-14，0.28.0 c2be5550 与 Affix 文档 0a335a58：0.27.0 的修补）
 
 | 上游的变化 | 对我们 | 做法 |
