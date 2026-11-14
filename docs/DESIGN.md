@@ -1378,6 +1378,12 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### QRCode（2026-11-15）
+
+- 编码器照上游 utils/qr/encode 移植成孪生文件 QrEncoder（ISO/IEC 18004，字节模式、四档纠错、最小版本、罚分最低的掩码），另加 SvgPath / Svg 导出（桌面示例的"复制 SVG"）；测试照上游另写一个解码器把矩阵读回原文。QRCode 的模块是一条路径：Avalonia、WPF 直接解析 SvgPath，WinForms 拼 GraphicsPath。
+- 颜色是"纸面"：浅色主题下 surface 底、text 色模块，深色主题下固定白底 #1c2024。Avalonia 看 ActualThemeVariant 的根是不是 Dark（放进窗口前没有变体，按浅色），WPF 按主题 surface 画刷的亮度判断，WinForms 用 ThemeTokens.IsDark。上游的 color、bgColor 是 Foreground、Background（WinForms 也是这两个名字、Color?：ForeColor、BackColor 是环境属性，分不出设没设过）；margin 是 QuietZone（Margin 是平台的外边距）；size 是平台的 Width / Size，默认 10em，并且不被父级拉伸（同 inline-block）。
+- logo 是图片或任意控件，放在 3% 内边距、sm 圆角的纸面底板上；有 logo 时纠错默认 H。状态层（加载中、已扫描、已过期与刷新按钮）盖在 logo 上面，底色是 90% 的纸面；刷新按钮只有订阅了 Refresh 才出现（WinForms 是 RefreshRequested：Control 自己有 Refresh 方法）。读屏：图片，名称默认语言包的"二维码"；状态是状态层的名称（Avalonia、WPF，Polite 实时区域）或描述（WinForms，换状态时通知）；logo 不进读屏树。
+
 ### Slider（2026-11-15）
 
 - 上游的 _value 是数字或 [低, 高]：C# 拆成 Value（double）与 Range（SliderRange?，不为 null 时是两个滑块），两个都双向绑定；onValueCommit 是 ValueCommitted 事件。WinForms 另有 ValueChanged、RangeChanged（拖动中也会触发）。取值计算（对齐步长用 decimal，免得 0.1 + 0.2 的浮点误差；两个滑块互相限制；点轨道移动离得近的那个；按键的目标值）在孪生文件 SliderScale。

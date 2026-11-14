@@ -139,8 +139,8 @@ export const PLATFORM_COMPONENT_PROP_RENAMES = {
     },
   },
   WinForms: {
-    // 控件自己有 Size（边长）、ForeColor、BackColor
-    QRCode: { size: 'Size', color: 'ForeColor', bgColor: 'BackColor' },
+    // 控件自己有 Size（边长）与 Refresh 方法
+    QRCode: { size: 'Size', onRefresh: 'RefreshRequested' },
     // 组自己生成控件：生成一项时的事件，处理完之后值由组写回
     CheckboxGroup: { propsItem: 'ItemGenerated' },
     RadioGroup: { propsItem: 'ItemGenerated' },
@@ -310,6 +310,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     Select: Object.fromEntries(['propsListbox', 'propsSearch'].map((prop) => [prop, '弹出层里的列表、搜索框是 Select 建的，外观跟着 Listbox、TextField 的主题样式'])),
     Popconfirm: Object.fromEntries(['propsIcon', 'propsTitle', 'propsDescription', 'propsFooter', 'propsConfirm', 'propsCancel']
       .map((prop) => [prop, '图标、问题、说明、按钮行与按钮是 Popconfirm 代码组合的子元素（同 Dialog），外观跟着各自组件的主题样式；面板、阴影、箭头的部件样式键同 Popover'])),
+    QRCode: Object.fromEntries(['propsLogo', 'propsOverlay', 'propsRefresh'].map((prop) => [prop, 'logo 底板、状态层与刷新按钮是 QRCode 代码组合的子元素（Border、Flex、Button），外观跟着各自组件的主题样式；没有部件样式键'])),
     Checklist: Object.fromEntries(['propsItem', 'propsSummary', 'propsProgress', 'propsList', 'propsStatus', 'propsLabel', 'propsDescription', 'propsMeta', 'propsAction']
       .map((prop) => [prop, '每一项是 ChecklistRow 代码组合的（状态、名称、说明、负责人 · 日期 · 证据、操作），汇总是 Text 与 Progress，外观跟着各自组件的主题样式；没有部件样式键'])),
     LoadingOverlay: Object.fromEntries(['propsOverlay', 'propsSpinner'].map((prop) => [prop, '遮罩与加载指示是 LoadingOverlay 代码组合的 Grid 与 Spinner，外观跟着 token 与 Spinner 的主题样式；没有部件样式键'])),
@@ -379,6 +380,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     },
     Popover: { propsArrow: '面板、阴影与箭头是组件库画在分层窗口上的位图，箭头没有可改样式的部件' },
     HoverCard: { propsArrow: '同 PopoverControl：面板、阴影与箭头是组件库画在分层窗口上的位图，箭头没有可改样式的部件' },
+    QRCode: Object.fromEntries(['propsLogo', 'propsOverlay', 'propsRefresh'].map((prop) => [prop, 'logo 与状态层是 QRCodeControl 画的（刷新按钮是子控件 ButtonControl），没有部件属性记录'])),
     Checklist: Object.fromEntries(['propsItem', 'propsSummary', 'propsProgress', 'propsList', 'propsStatus', 'propsLabel', 'propsDescription', 'propsMeta', 'propsAction']
       .map((prop) => [prop, '每一项是 ChecklistRowControl 组合的子控件（状态、名称、说明、负责人 · 日期 · 证据、操作），没有部件属性记录'])),
     LoadingOverlay: {
