@@ -194,6 +194,16 @@ public class FlexControl : Panel, IExtenderProvider
     /// <summary>flex 排版：量子控件、交给 <see cref="FlexLayout"/> 分，再摆（从右到左时横排镜像）。</summary>
     sealed class FlexEngine(FlexControl owner) : LayoutEngine
     {
+        // 子控件想要的大小：同一次排版里会按同样的宽度量好几遍（自然大小、分行后的大小，外层先 Measure 再 Layout），
+        // 嵌套几层就是指数级的测量（文档应用的一页要几十秒）。记到这个容器下一次排版为止：子控件的大小变了，WinForms 会让父级重新排版
+        readonly Dictionary<(Control, Size), Size> measured = [];
+
+        Size Preferred(Control child, Size proposed)
+        {
+            if (!measured.TryGetValue((child, proposed), out var size)) measured[(child, proposed)] = size = child.GetPreferredSize(proposed);
+            return size;
+        }
+
         bool IsRow => owner.Direction.Value is null or "row" or "row-reverse";
 
         double Em => owner.EmPixels();
@@ -221,7 +231,7 @@ public class FlexControl : Panel, IExtenderProvider
             var proposed = row
                 ? new Size(double.IsInfinity(main) ? 0 : (int)Math.Round(main), 0)
                 : new Size(double.IsInfinity(cross) ? 0 : (int)Math.Round(cross), 0);
-            var size = child.GetPreferredSize(proposed);
+            var size = Preferred(child, proposed);
             var (min, max) = (child.MinimumSize, child.MaximumSize);
             var width = Math.Max(size.Width, min.Width);
             var height = Math.Max(size.Height, min.Height);
@@ -238,7 +248,7 @@ public class FlexControl : Panel, IExtenderProvider
         /// 竖排时是内容的高度。
         /// </summary>
         double MinMain(Control child, double cross) => !child.AutoSize ? Main(child.Size)
-            : IsRow ? child.GetPreferredSize(new Size(2, 0)).Width
+            : IsRow ? Preferred(child, new Size(2, 0)).Width
             : SizeOf(child, double.PositiveInfinity, cross).Height;
 
         (List<FlexLayout.Line> Lines, Size[] Sizes, double[] Ascents) Compute(List<Control> children, double main, double cross)
@@ -280,6 +290,7 @@ public class FlexControl : Panel, IExtenderProvider
 
         public override bool Layout(object container, LayoutEventArgs layoutEventArgs)
         {
+            measured.Clear();
             var area = owner.DisplayRectangle;
             var row = IsRow;
             var children = Shown();

@@ -161,7 +161,7 @@ CodeBlock 的语法高亮先做一个够用的版本（C#、XAML 两种语言）
 1. [x] **对照基础**：画布与缩放对齐、`ts-shots`、`pixels.mjs` 与报告、登记表；已做的页面跑出差异总表（见下面"差异基线"）。
 2. [ ] **文档站要用的组件**：~~Tooltip~~、~~CopyButton~~、~~ScrollArea~~、~~CodeBlock~~（2026-11-07 做了，内置简单高亮）、~~Tabs~~（2026-11-14 补齐可关闭、新建、排序、滚动、全部标签页）、~~Table~~（静态表格）、~~NavList~~（紧凑时分组弹出子项等 HoverCard）、~~TableOfContents~~、~~ToggleGroup~~（分段控件）、~~TextField~~（含 Textarea、format；form 示例等 Form）、~~AppShell~~（顶栏兼作窗口标题栏；抽屉等 Drawer，admin、mixed 示例等 Stat、NavBar）、~~Select~~（2026-11-14 补齐远程选项）、~~CommandPalette~~。
    每个组件照常过取值、行为、像素三道核对。
-3. [ ] **文档应用**（2026-11-14 Avalonia 做了第一版：`apps/Rune.Avalonia.Docs` 替换 Gallery，侧栏按上游分类与顺序、徽标是已移植的示例数，页面是 DocArticle、示例按列放进 DocSection + CodePreview（效果 + 切出来的源码），没移植的示例是空状态，平台特有的示例排在后面，键盘表用 TextTable，右侧本页目录，顶栏切主题；WPF、WinForms，命令面板搜索、上一篇 / 下一篇、API 表还没做）：每个平台一个，替换 Gallery；同时做内容抽取（`docs-gen` 产出页面与示例清单、示例注册改两级、覆盖率），API 表从 XML 文档注释生成。
+3. [ ] **文档应用**（2026-11-14 Avalonia 做了第一版：`apps/Rune.Avalonia.Docs` 替换 Gallery，侧栏按上游分类与顺序、徽标是已移植的示例数，页面是 DocArticle、示例按列放进 DocSection + CodePreview（效果 + 切出来的源码），没移植的示例是空状态，平台特有的示例排在后面，键盘表用 TextTable，右侧本页目录，顶栏切主题；WPF 同日做了同样的一版；WinForms 写好了但先不换：侧栏 130 项、一页十来个示例时要排几十秒才显示，WinForms 的布局引擎要先做性能（Flex 已加测量缓存、导航列表批量更新只排一次，还不够：Grid、VerticalStack 也在反复测量，父级排版设子控件边界时一层层触发重排），先 profile 再改。命令面板搜索、上一篇 / 下一篇、API 表还没做）：每个平台一个，替换 Gallery；同时做内容抽取（`docs-gen` 产出页面与示例清单、示例注册改两级、覆盖率），API 表从 XML 文档注释生成。
 4. [ ] **补齐组件与示例**：按上游的层级把 136 页做齐，每页过三道核对。
 5. [ ] **收敛差异**：差异基线里超过允许值的逐个查，改我们这边或登记原因；WinForms 的行高、焦点环留白另列计划。
 

@@ -134,9 +134,13 @@ public class NavListControl : FlexControl
     /// <summary>当前页、紧凑交给各项；含当前页的分组展开。</summary>
     internal void Sync()
     {
+        // 套状态时每一行都会让所在的容器重排：先把列表与各组挂起，最后只排一次（不然 n 行就是 n 次整个列表的测量，几百页的侧栏要卡几十秒）
+        Control[] containers = [this, .. Members<NavSectionControl>(), .. Members<NavGroupControl>()];
+        foreach (var container in containers) container.SuspendLayout();
         foreach (var row in Members<NavRowControl>()) row.Apply(this);
         foreach (var section in Members<NavSectionControl>()) section.Apply(this);
         foreach (var group in Members<NavGroupControl>()) group.Apply(this);
+        foreach (var container in containers) container.ResumeLayout(false);
         PerformLayout();
     }
 
