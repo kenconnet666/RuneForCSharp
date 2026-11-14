@@ -21,7 +21,7 @@ namespace Rune.Wpf;
 /// 先淡出再请使用方移除，没移除就重新出现。部件样式键见 <see cref="BannerParts"/>。
 /// </summary>
 [ContentProperty(nameof(Content))]
-public class Banner : Control
+public class Banner : CompositeControl
 {
     /// <summary>样式，默认 soft。</summary>
     public static readonly DependencyProperty VariantProperty = DependencyProperty.Register(nameof(Variant), typeof(BannerVariant), typeof(Banner),
@@ -100,8 +100,7 @@ public class Banner : Control
         root.SetBinding(Border.PaddingProperty, new System.Windows.Data.Binding(nameof(Padding)) { Source = this });
         // 字号显式绑过去：在 Gallery、inspect 的宿主里组件自己的子元素没有继承到它（同 Alert）
         root.SetBinding(TextElement.FontSizeProperty, new System.Windows.Data.Binding(nameof(FontSize)) { Source = this });
-        AddVisualChild(root);
-        AddLogicalChild(root);
+        Root = root;
         dismissal = new Dismissal(this, PresenceProperty, RaiseCloseRequested);
         Loaded += (_, _) =>
         {
@@ -178,15 +177,6 @@ public class Banner : Control
     /// <summary>文字行（测试用）：标题与正文。</summary>
     internal TextBlock TextLine => text;
 
-    /// <inheritdoc />
-    protected override int VisualChildrenCount => 1;
-
-    /// <inheritdoc />
-    protected override Visual GetVisualChild(int index) => root;
-
-    /// <inheritdoc />
-    protected override System.Collections.IEnumerator LogicalChildren => new[] { root }.GetEnumerator();
-
     static void OnPartChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((Banner)d).Update();
 
     /// <summary>档位的字号在主题样式的触发器里；写成像素数时是本地值。</summary>
@@ -195,6 +185,9 @@ public class Banner : Control
         if (((TextSize)e.NewValue).Pixels is { } pixels) d.SetValue(FontSizeProperty, pixels);
         else if (((TextSize)e.OldValue).Pixels is not null) d.ClearValue(FontSizeProperty);
     }
+
+    /// <inheritdoc />
+    protected override CompositeChrome OwnChrome => CompositeChrome.All;
 
     /// <inheritdoc />
     protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
@@ -291,20 +284,6 @@ public class Banner : Control
         if (close is null) return;
         if (close.IsMouseOver && Foreground is SolidColorBrush fore) close.Background = new SolidColorBrush(fore.Color) { Opacity = 0.14 * fore.Opacity };
         else close.ClearValue(BackgroundProperty);
-    }
-
-    /// <inheritdoc />
-    protected override Size MeasureOverride(Size constraint)
-    {
-        root.Measure(constraint);
-        return root.DesiredSize;
-    }
-
-    /// <inheritdoc />
-    protected override Size ArrangeOverride(Size arrangeBounds)
-    {
-        root.Arrange(new Rect(arrangeBounds));
-        return arrangeBounds;
     }
 
     /// <inheritdoc />

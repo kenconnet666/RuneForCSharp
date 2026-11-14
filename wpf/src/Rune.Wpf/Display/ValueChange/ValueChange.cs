@@ -15,7 +15,7 @@ namespace Rune.Wpf;
 /// 没有原值（null）时只显示新值。读屏念"原值 改为 新值"（TS 是 del、ins 与给读屏的"改为"，语言包的 FieldCompareTo）。
 /// 文字的原值、新值是 Text；写成元素时原样放，删除线要自己加。部件样式键：<see cref="ValueChangeParts"/>。
 /// </summary>
-public class ValueChange : Control
+public class ValueChange : CompositeControl
 {
     /// <summary>原值；没有（null）时只显示新值。</summary>
     public static readonly DependencyProperty BeforeProperty = DependencyProperty.Register(
@@ -48,8 +48,7 @@ public class ValueChange : Control
         root.Children.Add(before);
         root.Children.Add(arrow);
         root.Children.Add(after);
-        AddVisualChild(root);
-        AddLogicalChild(root);
+        Root = root;
         Update();
     }
 
@@ -68,15 +67,6 @@ public class ValueChange : Control
             return Before is null ? next : $"{Plain(Before)} {Provider.GetLang(this).FieldCompareTo} {next}";
         }
     }
-
-    /// <inheritdoc />
-    protected override int VisualChildrenCount => 1;
-
-    /// <inheritdoc />
-    protected override Visual GetVisualChild(int index) => root;
-
-    /// <inheritdoc />
-    protected override System.Collections.IEnumerator LogicalChildren => new[] { root }.GetEnumerator();
 
     void Update()
     {
@@ -99,20 +89,6 @@ public class ValueChange : Control
         IFormattable formattable => formattable.ToString(null, System.Globalization.CultureInfo.CurrentCulture),
         _ => value.ToString() ?? "",
     };
-
-    /// <inheritdoc />
-    protected override Size MeasureOverride(Size constraint)
-    {
-        root.Measure(constraint);
-        return root.DesiredSize;
-    }
-
-    /// <inheritdoc />
-    protected override Size ArrangeOverride(Size arrangeBounds)
-    {
-        root.Arrange(new Rect(arrangeBounds));
-        return arrangeBounds;
-    }
 
     /// <inheritdoc />
     protected override AutomationPeer OnCreateAutomationPeer() => new ValueChangePeer(this);

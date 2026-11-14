@@ -21,7 +21,7 @@ namespace Rune.Wpf;
 /// 中间的数值 1.5em、半粗、等宽数字，压在半圆的底边上；两端 0.75em、次要色；名称 sm、次要色。
 /// 读屏按 meter 念（进度条控件、只读的范围值）：名称是 <see cref="Label"/>，取值文字是数值（按 ValueFormat 与单位）与目标。
 /// </summary>
-public class Gauge : Control
+public class Gauge : CompositeControl
 {
     /// <summary>当前值。</summary>
     public static readonly DependencyProperty ValueProperty = Register(nameof(Value), typeof(decimal), 0m);
@@ -89,8 +89,7 @@ public class Gauge : Control
         root.Children.Add(dial);
         root.Children.Add(ends);
         root.Children.Add(label);
-        AddVisualChild(root);
-        AddLogicalChild(root);
+        Root = root;
         HorizontalAlignment = HorizontalAlignment.Left;
         Update();
         UpdateMetrics();
@@ -140,15 +139,6 @@ public class Gauge : Control
 
     /// <summary>中间显示的文字（测试用）。</summary>
     internal string ShownValue => value.Text ?? "";
-
-    /// <inheritdoc />
-    protected override int VisualChildrenCount => 1;
-
-    /// <inheritdoc />
-    protected override Visual GetVisualChild(int index) => root;
-
-    /// <inheritdoc />
-    protected override System.Collections.IEnumerator LogicalChildren => new[] { root }.GetEnumerator();
 
     /// <summary>档位的字号：像素数是本地值，档位取主题资源。</summary>
     static void OnSizeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -220,20 +210,6 @@ public class Gauge : Control
         value.FontSize = 1.5 * em;
         min.FontSize = max.FontSize = 0.75 * em;
         label.FontSize = this.Resource<double>(ThemeKeys.FontSize.Sm);
-    }
-
-    /// <inheritdoc />
-    protected override Size MeasureOverride(Size constraint)
-    {
-        root.Measure(constraint);
-        return root.DesiredSize;
-    }
-
-    /// <inheritdoc />
-    protected override Size ArrangeOverride(Size arrangeBounds)
-    {
-        root.Arrange(new Rect(arrangeBounds));
-        return arrangeBounds;
     }
 
     /// <inheritdoc />

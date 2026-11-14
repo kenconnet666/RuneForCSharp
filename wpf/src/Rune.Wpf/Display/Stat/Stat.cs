@@ -22,7 +22,7 @@ namespace Rune.Wpf;
 /// 放进 <see cref="StatGroup"/> 时起始边有一条竖线、左右各空 space.md。部件样式键：<see cref="StatParts"/>。
 /// </summary>
 [ContentProperty(nameof(Content))]
-public class Stat : Control
+public class Stat : CompositeControl
 {
     /// <summary>指标名。</summary>
     public static readonly DependencyProperty LabelProperty = Register(nameof(Label), typeof(string), null);
@@ -130,8 +130,7 @@ public class Stat : Control
         // 组里的竖线与内边距写在 Stat 自己的 BorderThickness、Padding 上（样式盖得过，inspect 也按 Stat 报），里面的 Border 绑过去
         foreach (var (target, source) in new[] { (Border.PaddingProperty, nameof(Padding)), (Border.BorderThicknessProperty, nameof(BorderThickness)), (Border.BorderBrushProperty, nameof(BorderBrush)) })
             root.SetBinding(target, new System.Windows.Data.Binding(source) { Source = this });
-        AddVisualChild(root);
-        AddLogicalChild(root);
+        Root = root;
         loading = new DelayedLoading(ShowSkeleton);
         Loaded += (_, _) =>
         {
@@ -214,15 +213,6 @@ public class Stat : Control
     /// <summary>部件（测试用）。</summary>
     internal (Border Icon, AnimatedNumber Number, Text Text, Text Unit, Flex Change, AnimatedNumber ChangeNumber, Text ChangeLabel, Border Footer) Parts =>
         (iconBox, number, text, unit, change, changeNumber, changeLabel, footer);
-
-    /// <inheritdoc />
-    protected override int VisualChildrenCount => 1;
-
-    /// <inheritdoc />
-    protected override Visual GetVisualChild(int index) => root;
-
-    /// <inheritdoc />
-    protected override System.Collections.IEnumerator LogicalChildren => new[] { root }.GetEnumerator();
 
     void OnPartChanged(DependencyPropertyChangedEventArgs e)
     {
@@ -323,18 +313,7 @@ public class Stat : Control
     }
 
     /// <inheritdoc />
-    protected override Size MeasureOverride(Size constraint)
-    {
-        root.Measure(constraint);
-        return root.DesiredSize;
-    }
-
-    /// <inheritdoc />
-    protected override Size ArrangeOverride(Size arrangeBounds)
-    {
-        root.Arrange(new Rect(arrangeBounds));
-        return arrangeBounds;
-    }
+    protected override CompositeChrome OwnChrome => CompositeChrome.All;
 
     /// <inheritdoc />
     protected override AutomationPeer OnCreateAutomationPeer() => new StatPeer(this);

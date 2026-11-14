@@ -18,7 +18,7 @@ namespace Rune.Wpf;
 /// 部件样式键：<see cref="ResultParts"/>。
 /// </summary>
 [ContentProperty(nameof(Content))]
-public class Result : Control
+public class Result : CompositeControl
 {
     /// <summary>常见状态（403、404、500）：给出图标、色调、状态码与默认的标题、说明。</summary>
     public static readonly DependencyProperty StatusProperty = DependencyProperty.Register(
@@ -84,8 +84,7 @@ public class Result : Control
         foreach (var part in new UIElement[] { icon, code, title, description, content, action }) column.Children.Add(part);
         root.Child = column;
         root.SetBinding(Border.PaddingProperty, new System.Windows.Data.Binding(nameof(Padding)) { Source = this });
-        AddVisualChild(root);
-        AddLogicalChild(root);
+        Root = root;
         Update();
     }
 
@@ -128,15 +127,6 @@ public class Result : Control
     /// <summary>状态码部件（测试用）。</summary>
     internal Text CodePart => code;
 
-    /// <inheritdoc />
-    protected override int VisualChildrenCount => 1;
-
-    /// <inheritdoc />
-    protected override System.Windows.Media.Visual GetVisualChild(int index) => root;
-
-    /// <inheritdoc />
-    protected override System.Collections.IEnumerator LogicalChildren => new[] { root }.GetEnumerator();
-
     static void OnPartChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((Result)d).Update();
 
     /// <summary>档位的字号在主题样式的触发器里；写成像素数时是本地值。</summary>
@@ -145,6 +135,9 @@ public class Result : Control
         if (((TextSize)e.NewValue).Pixels is { } pixels) d.SetValue(FontSizeProperty, pixels);
         else if (((TextSize)e.OldValue).Pixels is not null) d.ClearValue(FontSizeProperty);
     }
+
+    /// <inheritdoc />
+    protected override CompositeChrome OwnChrome => CompositeChrome.Padding;
 
     /// <inheritdoc />
     protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
@@ -194,20 +187,6 @@ public class Result : Control
         // 内边距随字号，写当前值（使用方的本地值、样式盖得过）；inspect 也按 Result 自己的 Padding 报
         var (block, inline) = (this.Resource<double>(ThemeKeys.Space.Xl) * em, this.Resource<double>(ThemeKeys.Space.Lg) * em);
         SetCurrentValue(PaddingProperty, new Thickness(inline, block, inline, block));
-    }
-
-    /// <inheritdoc />
-    protected override Size MeasureOverride(Size constraint)
-    {
-        root.Measure(constraint);
-        return root.DesiredSize;
-    }
-
-    /// <inheritdoc />
-    protected override Size ArrangeOverride(Size arrangeBounds)
-    {
-        root.Arrange(new Rect(arrangeBounds));
-        return arrangeBounds;
     }
 
     /// <inheritdoc />

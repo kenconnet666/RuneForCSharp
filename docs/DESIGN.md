@@ -310,6 +310,7 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   - Avalonia：外层样式能进入模板。
   - WPF：外面的隐式样式只对 **Control 派生**的元素进入模板，FrameworkElement 派生的进不去（已实测）。需要被外层统一定制的子组件就从 Control 派生，或者走部件样式键。
 - **一个元素一个组件**：XAML 里组件本身就是主元素（TS 的 `...rest` 落到主元素），使用方设在组件上的 ToolTip、AutomationProperties 不用转发。
+- **WPF 里代码组合、不用模板的控件从 `CompositeControl` 派生**（`Utils/Layout`，2026-11-14）：一个根元素；继承来的 Background、BorderBrush、BorderThickness、Padding 本来靠模板才起作用，基类统一画在根元素后面、留在根元素四周。组件自己把其中某些接到了带圆角的根元素上（Alert、Banner、Stat 全部，Avatar 的底色与描边，Result 的内边距）时用 `OwnChrome` 说明，基类不重复画。Progress 有多个子元素，不在此列。
 - **事件"使用方先处理、可接管"**：
   - Avalonia 和 WPF 都用隧道阶段：使用方在 Preview/Tunnel 里设 `Handled = true`，组件的内部处理就跳过（已实测）。冒泡阶段的普通订阅在组件处理之后才收到，组件标记 Handled 后就收不到了。
   - WinForms 没有路由事件，由组件提供可取消的前置事件（做组件时定）。

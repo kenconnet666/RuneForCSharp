@@ -24,7 +24,7 @@ namespace Rune.Wpf;
 /// 读屏里每一项是一组，名称是标签，里面是值。部件样式键：<see cref="DescriptionsParts"/>。
 /// </summary>
 [ContentProperty(nameof(Items))]
-public class Descriptions : Control
+public class Descriptions : CompositeControl
 {
     /// <summary>标题。</summary>
     public static readonly DependencyProperty TitleProperty = DependencyProperty.Register(
@@ -79,8 +79,7 @@ public class Descriptions : Control
         root.Children.Add(list);
         Link.SetUnderlineScope(this, LinkUnderline.Hover);
         Items.CollectionChanged += (_, _) => Rebuild();
-        AddVisualChild(root);
-        AddLogicalChild(root);
+        Root = root;
         Rebuild();
     }
 
@@ -115,15 +114,6 @@ public class Descriptions : Control
     internal IReadOnlyList<GridItem> Cells => [.. built.Select(entry => entry.Cell)];
 
     DescriptionsLayout ShownLayout => Layout.Value is null ? DescriptionsLayout.Horizontal : Layout;
-
-    /// <inheritdoc />
-    protected override int VisualChildrenCount => 1;
-
-    /// <inheritdoc />
-    protected override Visual GetVisualChild(int index) => root;
-
-    /// <inheritdoc />
-    protected override System.Collections.IEnumerator LogicalChildren => new[] { root }.GetEnumerator();
 
     /// <summary>档位的字号在主题样式的触发器里；写成像素数时是本地值。</summary>
     static void OnSizeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -262,21 +252,20 @@ public class Descriptions : Control
     protected override Size MeasureOverride(Size constraint)
     {
         var shown = Columns.Value is null ? (DescriptionsColumns)1 : Columns;
-        var count = ShownLayout == DescriptionsLayout.Inline ? 1 : shown.Resolve(constraint.Width, FontSize, MinItemWidth, MaxColumns);
+        var count = ShownLayout == DescriptionsLayout.Inline ? 1 : shown.Resolve(constraint.Width - Inset.Left - Inset.Right, FontSize, MinItemWidth, MaxColumns);
         if (count != columns || grid.Columns != count)
         {
             columns = count;
             grid.Columns = count;
         }
         foreach (var (item, gridItem) in built) gridItem.Span = Math.Clamp(item.Span, 1, count);
-        root.Measure(constraint);
-        return root.DesiredSize;
+        return base.MeasureOverride(constraint);
     }
 
     /// <inheritdoc />
     protected override Size ArrangeOverride(Size arrangeBounds)
     {
-        root.Arrange(new Rect(arrangeBounds));
+        base.ArrangeOverride(arrangeBounds);
         // 边框样式按圆角裁掉格子（TS 的 overflow: hidden）：标签格的底色不盖住外框的圆角
         var radius = list.CornerRadius.TopLeft;
         list.Clip = Bordered ? new RectangleGeometry(new Rect(list.RenderSize), radius, radius) : null;

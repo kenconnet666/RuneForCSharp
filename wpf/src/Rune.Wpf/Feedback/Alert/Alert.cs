@@ -23,7 +23,7 @@ namespace Rune.Wpf;
 /// 部件样式键见 <see cref="AlertParts"/>。
 /// </summary>
 [ContentProperty(nameof(Content))]
-public class Alert : Control
+public class Alert : CompositeControl
 {
     /// <summary>样式，默认 soft。</summary>
     public static readonly DependencyProperty VariantProperty = DependencyProperty.Register(nameof(Variant), typeof(AlertVariant), typeof(Alert),
@@ -120,8 +120,7 @@ public class Alert : Control
         root.SetBinding(Border.PaddingProperty, new System.Windows.Data.Binding(nameof(Padding)) { Source = this });
         // 字号显式绑过去：在 Gallery、inspect 的宿主里组件自己的子元素没有继承到它（测试的宿主里能继承，原因没查清）
         root.SetBinding(TextElement.FontSizeProperty, new System.Windows.Data.Binding(nameof(FontSize)) { Source = this });
-        AddVisualChild(root);
-        AddLogicalChild(root);
+        Root = root;
         dismissal = new Dismissal(this, PresenceProperty, RaiseCloseRequested);
         Loaded += (_, _) =>
         {
@@ -217,13 +216,7 @@ public class Alert : Control
     };
 
     /// <inheritdoc />
-    protected override int VisualChildrenCount => 1;
-
-    /// <inheritdoc />
-    protected override Visual GetVisualChild(int index) => root;
-
-    /// <inheritdoc />
-    protected override System.Collections.IEnumerator LogicalChildren => new[] { root }.GetEnumerator();
+    protected override CompositeChrome OwnChrome => CompositeChrome.All;
 
     /// <inheritdoc />
     protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
@@ -318,20 +311,6 @@ public class Alert : Control
         if (close is null) return;
         if (close.IsMouseOver && Foreground is SolidColorBrush fore) close.Background = new SolidColorBrush(fore.Color) { Opacity = 0.14 * fore.Opacity };
         else close.ClearValue(BackgroundProperty);
-    }
-
-    /// <inheritdoc />
-    protected override Size MeasureOverride(Size constraint)
-    {
-        root.Measure(constraint);
-        return root.DesiredSize;
-    }
-
-    /// <inheritdoc />
-    protected override Size ArrangeOverride(Size arrangeBounds)
-    {
-        root.Arrange(new Rect(arrangeBounds));
-        return arrangeBounds;
     }
 
     /// <inheritdoc />

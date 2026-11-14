@@ -21,7 +21,7 @@ namespace Rune.Wpf;
 /// 部件样式键：<see cref="AvatarGroupParts"/>。
 /// </summary>
 [ContentProperty(nameof(Children))]
-public class AvatarGroup : Control
+public class AvatarGroup : CompositeControl
 {
     /// <summary>最多显示几个头像，其余折叠成"+N"；不写时全部显示。</summary>
     public static readonly DependencyProperty MaxProperty = DependencyProperty.Register(
@@ -54,8 +54,7 @@ public class AvatarGroup : Control
         moreText.SetResourceReference(StyleProperty, AvatarGroupParts.MoreText);
         more.Child = moreText;
         Children.CollectionChanged += (_, _) => Sync();
-        AddVisualChild(stack);
-        AddLogicalChild(stack);
+        Root = stack;
         UpdateMetrics();
     }
 
@@ -76,15 +75,6 @@ public class AvatarGroup : Control
 
     /// <summary>显示出来的（头像与"+N"，测试用）。</summary>
     internal IReadOnlyList<UIElement> Shown => [.. stack.Children.Cast<Ring>().Select(ring => ring.Child)];
-
-    /// <inheritdoc />
-    protected override int VisualChildrenCount => 1;
-
-    /// <inheritdoc />
-    protected override Visual GetVisualChild(int index) => stack;
-
-    /// <inheritdoc />
-    protected override System.Collections.IEnumerator LogicalChildren => new[] { stack }.GetEnumerator();
 
     /// <summary>档位的字号在主题样式的触发器里；写成像素数时是本地值。</summary>
     static void OnSizeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -124,20 +114,6 @@ public class AvatarGroup : Control
         more.Width = more.Height = 2.5 * em;
         more.CornerRadius = new CornerRadius(1.25 * em);
         moreText.FontSize = this.Resource<double>(ThemeKeys.FontSize.Xs) / this.Resource<double>(ThemeKeys.FontSize.Md) * em;
-    }
-
-    /// <inheritdoc />
-    protected override Size MeasureOverride(Size constraint)
-    {
-        stack.Measure(constraint);
-        return stack.DesiredSize;
-    }
-
-    /// <inheritdoc />
-    protected override Size ArrangeOverride(Size arrangeBounds)
-    {
-        stack.Arrange(new Rect(arrangeBounds));
-        return arrangeBounds;
     }
 
     /// <inheritdoc />

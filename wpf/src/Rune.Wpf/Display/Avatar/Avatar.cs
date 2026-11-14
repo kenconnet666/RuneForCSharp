@@ -18,7 +18,7 @@ namespace Rune.Wpf;
 /// 色调文字色，solid 是实底 + 反色；色调默认 accent。读屏：有名字时是一张图片、名称是名字；没有名字时是装饰。
 /// TS 的 name、src 在这里叫 DisplayName、Source（Name 是元素名）。部件样式键：<see cref="AvatarParts"/>。
 /// </summary>
-public class Avatar : Control
+public class Avatar : CompositeControl
 {
     /// <summary>图片；不写、还在下载或失败时显示后备内容。</summary>
     public static readonly DependencyProperty SourceProperty = DependencyProperty.Register(
@@ -79,11 +79,12 @@ public class Avatar : Control
         fallback.SetResourceReference(StyleProperty, AvatarParts.Fallback);
         image.ImageFailed += (_, _) => Fail();
         root.SetBinding(Border.BackgroundProperty, new System.Windows.Data.Binding(nameof(Background)) { Source = this });
+        root.SetBinding(Border.BorderBrushProperty, new System.Windows.Data.Binding(nameof(BorderBrush)) { Source = this });
+        root.SetBinding(Border.BorderThicknessProperty, new System.Windows.Data.Binding(nameof(BorderThickness)) { Source = this });
         layers.Children.Add(fallback);
         layers.Children.Add(image);
         root.Child = layers;
-        AddVisualChild(root);
-        AddLogicalChild(root);
+        Root = root;
         UpdateFallback();
     }
 
@@ -118,15 +119,6 @@ public class Avatar : Control
     internal bool FallbackShown => fallback.Visibility == Visibility.Visible;
 
     double Side => 2.5 * FontSize;
-
-    /// <inheritdoc />
-    protected override int VisualChildrenCount => 1;
-
-    /// <inheritdoc />
-    protected override Visual GetVisualChild(int index) => root;
-
-    /// <inheritdoc />
-    protected override System.Collections.IEnumerator LogicalChildren => new[] { root }.GetEnumerator();
 
     /// <summary>名字的首字母（vue-tsx-pro 的 initials）：中文取最后一个字（通常是名），其他语言取第一个与最后一个词的首字母，大写。</summary>
     /// <param name="name">名字。</param>
@@ -185,6 +177,9 @@ public class Avatar : Control
             ? new Icon { Data = Lucide.User }
             : new Text { Text = Initials(DisplayName), Weight = TextWeight.Medium, Wrap = TextWrap.NoWrap });
     }
+
+    /// <summary>底色与描边接在圆角的根元素上；边长按档位固定，Padding 不起作用。</summary>
+    protected override CompositeChrome OwnChrome => CompositeChrome.All;
 
     /// <inheritdoc />
     protected override Size MeasureOverride(Size constraint)

@@ -25,7 +25,7 @@ public sealed record ProportionSegment(string Key, string Label, double Value, S
 /// 图例在横条下面（space.sm），换行排开（列间距 lg、行间距 xs，sm 的字号）：色点（md）、名称、数量（半粗、等宽数字）与补充。
 /// 横条对读屏是一张图，名称是 <see cref="Label"/> 加上各段的数量；图例是普通文字。
 /// </summary>
-public class ProportionBar : Control
+public class ProportionBar : CompositeControl
 {
     /// <summary>各段：按顺序从起始边排。</summary>
     public static readonly DependencyProperty SegmentsProperty = Register(nameof(Segments), typeof(IReadOnlyList<ProportionSegment>), Array.Empty<ProportionSegment>());
@@ -62,8 +62,7 @@ public class ProportionBar : Control
         legend.SetResourceReference(TextElement.FontSizeProperty, ThemeKeys.FontSize.Sm);
         root.Children.Add(bar);
         root.Children.Add(legend);
-        AddVisualChild(root);
-        AddLogicalChild(root);
+        Root = root;
     }
 
     static DependencyProperty Register(string name, Type type, object? fallback) =>
@@ -96,15 +95,6 @@ public class ProportionBar : Control
     /// <summary>横条给读屏的名称。</summary>
     public string BarLabel => Proportions.Label(Label, Segments.Select(segment => (segment.Label, segment.Value)));
 
-    /// <inheritdoc />
-    protected override int VisualChildrenCount => 1;
-
-    /// <inheritdoc />
-    protected override Visual GetVisualChild(int index) => root;
-
-    /// <inheritdoc />
-    protected override System.Collections.IEnumerator LogicalChildren => new[] { root }.GetEnumerator();
-
     /// <summary>横条按各段重建；图例每段一项 [色点][名称][数量][补充]，间距 space.sm。</summary>
     void Rebuild()
     {
@@ -132,20 +122,6 @@ public class ProportionBar : Control
             ? new Text { Name = "PART_Value", Text = content.ToString(), Weight = TextWeight.Semibold, Numeric = true }
             : new Text { Text = content.ToString() },
     };
-
-    /// <inheritdoc />
-    protected override Size MeasureOverride(Size constraint)
-    {
-        root.Measure(constraint);
-        return root.DesiredSize;
-    }
-
-    /// <inheritdoc />
-    protected override Size ArrangeOverride(Size arrangeBounds)
-    {
-        root.Arrange(new Rect(arrangeBounds));
-        return arrangeBounds;
-    }
 
     /// <summary>
     /// 横条：每段一块（色调的颜色是资源引用，换主题跟着变），按数量分宽、段间空 borderWidths.sm，整根按胶囊裁；读屏是一张图。

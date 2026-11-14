@@ -15,7 +15,7 @@ namespace Rune.Wpf;
 /// 系统关闭动画时直接跳到新值；<see cref="From"/> 给了时加载时就从它滚到 Value。<see cref="Trend"/> 按正负着色（正数成功色、负数危险色）。
 /// 读屏只读终值（连同前后缀的文字）：滚动中的数字不另念；需要播报变化时在外面设实时区域。部件样式键：<see cref="AnimatedNumberParts"/>。
 /// </summary>
-public class AnimatedNumber : Control
+public class AnimatedNumber : CompositeControl
 {
     /// <summary>数值。</summary>
     public static readonly DependencyProperty ValueProperty = DependencyProperty.Register(
@@ -72,8 +72,7 @@ public class AnimatedNumber : Control
         root.Children.Add(prefix);
         root.Children.Add(number);
         root.Children.Add(suffix);
-        AddVisualChild(root);
-        AddLogicalChild(root);
+        Root = root;
         Loaded += (_, _) =>
         {
             if (From is { } start) Play((double)start);
@@ -118,15 +117,6 @@ public class AnimatedNumber : Control
 
     /// <summary>显示的色调（测试用）：Trend 时按正负。</summary>
     internal TextTone ShownTone => Trend ? Direction switch { "up" => TextTone.Success, "down" => TextTone.Danger, _ => Tone } : Tone;
-
-    /// <inheritdoc />
-    protected override int VisualChildrenCount => 1;
-
-    /// <inheritdoc />
-    protected override Visual GetVisualChild(int index) => root;
-
-    /// <inheritdoc />
-    protected override System.Collections.IEnumerator LogicalChildren => new[] { root }.GetEnumerator();
 
     static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
@@ -181,20 +171,6 @@ public class AnimatedNumber : Control
         prefix.Visibility = Prefix is null ? Visibility.Collapsed : Visibility.Visible;
         suffix.Content = Suffix;
         suffix.Visibility = Suffix is null ? Visibility.Collapsed : Visibility.Visible;
-    }
-
-    /// <inheritdoc />
-    protected override Size MeasureOverride(Size constraint)
-    {
-        root.Measure(constraint);
-        return root.DesiredSize;
-    }
-
-    /// <inheritdoc />
-    protected override Size ArrangeOverride(Size arrangeBounds)
-    {
-        root.Arrange(new Rect(arrangeBounds));
-        return arrangeBounds;
     }
 
     /// <inheritdoc />

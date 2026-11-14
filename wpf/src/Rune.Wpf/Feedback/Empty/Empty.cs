@@ -15,7 +15,7 @@ namespace Rune.Wpf;
 /// 部件样式键：<see cref="EmptyParts"/>。
 /// </summary>
 [ContentProperty(nameof(Content))]
-public class Empty : Control
+public class Empty : CompositeControl
 {
     /// <summary>图标，默认 Inbox；null 不显示。</summary>
     public static readonly DependencyProperty IconProperty = DependencyProperty.Register(
@@ -73,8 +73,7 @@ public class Empty : Control
         SetResourceReference(GapFactorProperty, ThemeKeys.Space.Sm);
         foreach (var part in new UIElement[] { icon, title, description, content, action }) column.Children.Add(part);
         root.Child = column;
-        AddVisualChild(root);
-        AddLogicalChild(root);
+        Root = root;
         Update();
     }
 
@@ -95,15 +94,6 @@ public class Empty : Control
 
     /// <summary>字号档位。</summary>
     public TextSize Size { get => (TextSize)GetValue(SizeProperty); set => SetValue(SizeProperty, value); }
-
-    /// <inheritdoc />
-    protected override int VisualChildrenCount => 1;
-
-    /// <inheritdoc />
-    protected override System.Windows.Media.Visual GetVisualChild(int index) => root;
-
-    /// <inheritdoc />
-    protected override System.Collections.IEnumerator LogicalChildren => new[] { root }.GetEnumerator();
 
     static void OnPartChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((Empty)d).Update();
 
@@ -143,19 +133,6 @@ public class Empty : Control
         root.Padding = new Thickness((double)GetValue(InlineFactorProperty) * em, (double)GetValue(BlockFactorProperty) * em, (double)GetValue(InlineFactorProperty) * em, (double)GetValue(BlockFactorProperty) * em);
     }
 
-    /// <inheritdoc />
-    protected override Size MeasureOverride(Size constraint)
-    {
-        root.Measure(constraint);
-        return root.DesiredSize;
-    }
-
-    /// <inheritdoc />
-    protected override Size ArrangeOverride(Size arrangeBounds)
-    {
-        root.Arrange(new Rect(arrangeBounds));
-        return arrangeBounds;
-    }
 }
 
 /// <summary>Empty 的部件样式键：Provider.Styles 里写 <c>&lt;Style x:Key="{x:Static rune:EmptyParts.Icon}" TargetType="rune:Icon"&gt;</c>。</summary>
