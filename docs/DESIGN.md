@@ -1378,6 +1378,14 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### Slider（2026-11-15）
+
+- 上游的 _value 是数字或 [低, 高]：C# 拆成 Value（double）与 Range（SliderRange?，不为 null 时是两个滑块），两个都双向绑定；onValueCommit 是 ValueCommitted 事件。WinForms 另有 ValueChanged、RangeChanged（拖动中也会触发）。取值计算（对齐步长用 decimal，免得 0.1 + 0.2 的浮点误差；两个滑块互相限制；点轨道移动离得近的那个；按键的目标值）在孪生文件 SliderScale。
+- 尺寸照 TS 按字号算：滑块 space.lg + space.xs 的圆，轨道 1.5 倍 space.xs 粗，刻度点 space.xs；点击区域至少 sizes.minTarget；滑块中心对准取值，两端各缩进半个滑块。有文字的刻度下方（纵向时右侧）留 1.5em（3em）。横向时占满给的宽度，纵向默认 10em 高。
+- Avalonia、WPF：轨道、已选范围、刻度点由 Slider 画，滑块是可聚焦的子元素 SliderThumb（读屏是滑块，RangeValue 的范围是它能取的范围，取值文字在条目状态里），刻度文字是 Text；外层不占读屏节点。Avalonia 实现了 ICustomHitTest（整块都能点，轨道很细）；ArrangeOverride 里要按 finalSize 算位置（Bounds 还是上一次的）；Border.Render 密封，焦点环由 Slider 画在滑块外圈。WPF 的指针逻辑收进 PointerDown / PointerMove / PointerUp（合成的鼠标事件拿不到位置，测试直接按位置调用）。
+- WinForms：整个控件自己画；单值时控件本身是读屏的滑块（Value 是取值文字，可写），范围时是一组、两个滑块子节点；范围时 Tab 先在两个滑块之间走再离开（ProcessDialogKey）。刻度文字夹在控件内（子控件画不到自己外面）；不可用时滑块的底色保持不透明（网页是整体半透明，滑块照样盖住轨道）。
+- 不可用时整体半透明（Avalonia、WPF 设 Opacity，WinForms 画的颜色带透明度）；只读时能聚焦、拖动与按键不改值。表单字段名（name）不移植。
+
 ### DateTimeText、RelativeTime、Countdown（2026-11-15）
 
 - 三个平台都有 System.DateTime，上游的 DateTime 叫 DateTimeText（WinForms 是 DateTimeTextControl，parity 的 TYPE_RENAMES）。值是 object：DateTimeOffset、UTC 与本地的 DateTime、带 Z 或偏移的 ISO 字符串是时刻，按语言包的 TimeZone（IANA 或 Windows 的 id，没写时本机时区）换算；未指定时区的 DateTime、不带偏移的字符串是墙上时间，DateOnly 只有日期（同 TS 的 Date / CalendarDateTime / CalendarDate）。MachineValue 是 time 元素的 datetime。
