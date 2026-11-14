@@ -64,7 +64,7 @@ public class StatusDot : Control
     }
 
     /// <summary>色调的实色：中性用 textMuted，其余用色调的实色；不写时 accent。</summary>
-    static string BrushKey(StatusTone tone) => tone.Value switch
+    internal static string BrushKey(StatusTone tone) => tone.Value switch
     {
         null => "Rune.Brush.Accent",
         "neutral" => "Rune.Brush.TextMuted",
