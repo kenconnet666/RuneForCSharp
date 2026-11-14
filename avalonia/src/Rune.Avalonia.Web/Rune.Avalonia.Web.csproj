@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Rune.Avalonia 的可选包：要网页内核的组件（Embed、Video）。主包不带网页内核的依赖，用到的应用才引用它 -->
+  <PropertyGroup>
+    <IsLibrary>true</IsLibrary>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <RootNamespace>Rune.Avalonia</RootNamespace>
+    <Description>Rune.Avalonia 的网页内核组件：嵌入的页面（Embed）、视频（Video），基于 Avalonia.Controls.WebView。</Description>
+    <PackageTags>avalonia;components;ui;webview;video</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Rune.Avalonia\Rune.Avalonia.csproj" />
+    <PackageReference Include="Avalonia.Controls.WebView" />
+    <PackageReference Include="HotAvalonia" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Rune.Avalonia.Tests" />
+  </ItemGroup>
+
+</Project>

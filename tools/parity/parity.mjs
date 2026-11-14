@@ -12,10 +12,11 @@ import { openVue, repoRoot } from '../lib/vue.mjs';
 import { component as inspectComponent } from '../ts-inspect/component.mjs';
 import { COMPONENT_PROP_RENAMES, EXCLUDED, PLATFORM_PROPS, PROP_RENAMES, PLATFORM_COMPONENT_PROP_RENAMES, PLATFORM_PROP_RENAMES, PLATFORM_PROPS_NOT_PORTED, PROPS_NOT_PORTED, TYPE_RENAMES } from './registry.mjs';
 
+// 每个库连同它的可选包（Rune.*.Web：Embed、Video）
 const LIBRARIES = [
-  { name: 'Avalonia', dir: 'avalonia/src/Rune.Avalonia' },
-  { name: 'WPF', dir: 'wpf/src/Rune.Wpf' },
-  { name: 'WinForms', dir: 'winforms/src/Rune.WinForms' },
+  { name: 'Avalonia', dirs: ['avalonia/src/Rune.Avalonia', 'avalonia/src/Rune.Avalonia.Web'] },
+  { name: 'WPF', dirs: ['wpf/src/Rune.Wpf', 'wpf/src/Rune.Wpf.Web'] },
+  { name: 'WinForms', dirs: ['winforms/src/Rune.WinForms', 'winforms/src/Rune.WinForms.Web'] },
 ];
 
 const pascal = (name) => name.replace(/^_/, '').replace(/^\w/, (c) => c.toUpperCase());
@@ -41,7 +42,7 @@ function vueComponents(vue) {
  * 一个库的 C# 源码：公开的类 → 它的公开属性与事件（按文件读，一个文件里的属性算给文件里声明的类），
  * 加上库里基类的（IconButton 的 Variant 在 ButtonCore 里）。限定名的基类（global::Avalonia.Controls.Button）是平台的，不展开
  */
-function csharpTypes(dir) {
+function csharpTypes(dirs) {
   const types = new Map();
   const bases = new Map();
   const walk = (path) => {
@@ -69,7 +70,7 @@ function csharpTypes(dir) {
       }
     }
   };
-  walk(join(repoRoot, dir));
+  for (const dir of dirs) walk(join(repoRoot, dir));
   const inherited = (type, seen = new Set()) =>
     seen.has(type) ? [] : (seen.add(type), [...(types.get(type) ?? []), ...(bases.has(type) ? inherited(bases.get(type), seen) : [])]);
   const merged = new Map([...types.keys()].map((type) => [type, new Set(inherited(type))]));
@@ -112,7 +113,7 @@ const { values: options } = parseArgs({
 const vue = await openVue(options.vue);
 try {
   const components = vueComponents(vue).filter((c) => !options.component || c.name === options.component);
-  const libraries = LIBRARIES.map((library) => ({ ...library, types: csharpTypes(library.dir) }));
+  const libraries = LIBRARIES.map((library) => ({ ...library, types: csharpTypes(library.dirs) }));
   const rows = components.map((c) => ({
     ...c,
     excluded: EXCLUDED[c.name],

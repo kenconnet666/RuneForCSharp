@@ -18,6 +18,8 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Rune.Avalonia.Tests" />
+    <!-- 可选包（网页内核组件）用主包的主题取值、动效设置这些内部工具 -->
+    <InternalsVisibleTo Include="Rune.Avalonia.Web" />
   </ItemGroup>
 
 </Project>

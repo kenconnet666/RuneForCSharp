@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Rune.WinForms\Rune.WinForms.csproj" />
+    <ProjectReference Include="..\..\src\Rune.WinForms.Web\Rune.WinForms.Web.csproj" />
   </ItemGroup>
 
   <ItemGroup>

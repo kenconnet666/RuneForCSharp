@@ -48,6 +48,10 @@ export const COMPONENT_PROP_RENAMES = {
   // Name 是控件名；图片给平台的图片对象
   Avatar: { name: 'DisplayName', src: 'Source' },
   UserButton: { name: 'DisplayName', src: 'Source' },
+  // 地址给 Uri；加载完的事件不叫 Loaded（那是控件放进界面的事件）
+  Embed: { src: 'Source', onLoad: 'PageLoaded' },
+  // Controls 在 WinForms 是子控件集合：三个平台统一叫 ShowControls
+  Video: { src: 'Source', controls: 'ShowControls' },
   // 移除由使用方做：事件是"请求移除"（离场结束才发）
   Tag: { onRemove: 'RemoveRequested' },
   // 关闭由使用方做：事件是"请求关闭"（Avalonia、WPF 离场结束才发）
@@ -178,6 +182,11 @@ export const PROPS_NOT_PORTED = {
     propsContent: '内容区就是里面的 Collapse，没有另包一层：要改样式写在内容控件上',
   },
   AccordionItem: { propsHeading: '没有单独的标题元素：标题层级写在标题按钮的读屏属性上（Accordion 的 HeadingLevel）' },
+  Embed: {
+    propsRoot: '外层就是 Embed 自己（定比例的框）：样式直接写在 Embed 上',
+    propsPlaceholder: '加载中的骨架是内部的 Skeleton（image 形状）：外观跟主题',
+  },
+  Video: { propsRoot: '外层就是 Video 自己（定比例的黑底框）：样式直接写在 Video 上' },
   Abbr: { propsTooltip: '提示就是平台的 ToolTip：位置、箭头写在 Abbr 自己身上（Avalonia、WPF 的 Tooltip.Placement、Tooltip.Arrow 附加属性）；WinForms 自带的提示用默认的位置' },
   Pagination: { propsItem: '外层的 li 是 HTML 列表的结构：桌面上页码按钮、省略号直接排在列表里' },
   NumberField: {
@@ -420,6 +429,7 @@ export const BEHAVIOR_NOT_APPLICABLE = {
   Container: { createContainer: '桌面没有语义标签：要别的语义时从 Container 派生' },
   Grid: { createGrid: '桌面没有语义标签：别的语义容器从 Grid 派生、改读屏角色（GridList 就是这样，测试覆盖）' },
   Stat: { '部件带标记；按色调档位追加样式': 'TS 的 components.Stat 配方定制是网页的样式系统；桌面改部件样式（Avalonia 的 rune|Stat #PART_Number 选择器、WPF 的 StatParts 样式键），数值的色调是 Tone' },
+  Embed: { 'iframe 带 title、src': 'loading="lazy"、referrerpolicy 是 iframe 的属性：桌面的网页内核放进界面就加载，没有懒加载；title 是读屏名称（测试覆盖）' },
   Collapse: { '页内搜索命中': '页内搜索命中收起的内容时展开（hidden="until-found"、beforematch）是浏览器的能力，桌面没有页内搜索' },
 };
 

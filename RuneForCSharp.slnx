@@ -4,6 +4,7 @@
   </Folder>
   <Folder Name="/avalonia/src/">
     <Project Path="avalonia/src/Rune.Avalonia/Rune.Avalonia.csproj" />
+    <Project Path="avalonia/src/Rune.Avalonia.Web/Rune.Avalonia.Web.csproj" />
   </Folder>
   <Folder Name="/avalonia/apps/">
     <Project Path="avalonia/apps/Rune.Avalonia.Examples/Rune.Avalonia.Examples.csproj" />
@@ -20,6 +21,7 @@
   </Folder>
   <Folder Name="/wpf/src/">
     <Project Path="wpf/src/Rune.Wpf/Rune.Wpf.csproj" />
+    <Project Path="wpf/src/Rune.Wpf.Web/Rune.Wpf.Web.csproj" />
   </Folder>
   <Folder Name="/wpf/apps/">
     <Project Path="wpf/apps/Rune.Wpf.Examples/Rune.Wpf.Examples.csproj" />
@@ -36,6 +38,7 @@
   </Folder>
   <Folder Name="/winforms/src/">
     <Project Path="winforms/src/Rune.WinForms/Rune.WinForms.csproj" />
+    <Project Path="winforms/src/Rune.WinForms.Web/Rune.WinForms.Web.csproj" />
   </Folder>
   <Folder Name="/winforms/apps/">
     <Project Path="winforms/apps/Rune.WinForms.Examples/Rune.WinForms.Examples.csproj" />

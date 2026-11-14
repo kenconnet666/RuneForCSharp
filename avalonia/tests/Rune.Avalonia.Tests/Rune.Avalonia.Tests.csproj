@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Rune.Avalonia\Rune.Avalonia.csproj" />
+    <ProjectReference Include="..\..\src\Rune.Avalonia.Web\Rune.Avalonia.Web.csproj" />
   </ItemGroup>
 
   <ItemGroup>

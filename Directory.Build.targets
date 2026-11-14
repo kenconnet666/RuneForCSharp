@@ -30,4 +30,14 @@
     <!-- 第三方数据的许可（Lucide 图标等，tools/ 生成时复制进来），随包分发 -->
     <None Include="$(MSBuildThisFileDirectory)licenses\*.txt" Pack="true" PackagePath="licenses\" Visible="false" />
   </ItemGroup>
+
+  <!--
+    WebView2 包不分 WPF、WinForms，两个宿主的程序集都引用；不用 WPF 的项目（Rune.WinForms.Web 和引用它的）会因为 WPF 宿主要的
+    WindowsBase 版本冲突报 MSB3277。包里没有开关，只能在解析引用之前去掉
+  -->
+  <Target Name="DropWebView2Wpf" BeforeTargets="ResolveAssemblyReferences" Condition="'$(UseWPF)' != 'true'">
+    <ItemGroup>
+      <Reference Remove="@(Reference)" Condition="'%(Filename)' == 'Microsoft.Web.WebView2.Wpf'" />
+    </ItemGroup>
+  </Target>
 </Project>

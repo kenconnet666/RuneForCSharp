@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Rune.WinForms.Tests" />
+    <InternalsVisibleTo Include="Rune.WinForms.Web" />
     <!-- inspect 的 bench 用一个简单的多元素宿主直接测量、绘制元素 -->
     <InternalsVisibleTo Include="Rune.WinForms.Inspect" />
   </ItemGroup>

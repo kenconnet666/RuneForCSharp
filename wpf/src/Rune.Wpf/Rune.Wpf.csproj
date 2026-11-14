@@ -12,6 +12,8 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Rune.Wpf.Tests" />
+    <!-- 可选包（网页内核组件）用主包的动效设置这些内部工具 -->
+    <InternalsVisibleTo Include="Rune.Wpf.Web" />
   </ItemGroup>
 
 </Project>

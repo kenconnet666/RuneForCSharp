@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Rune.Wpf 的可选包：要网页内核的组件（Embed、Video）。主包不带网页内核的依赖，用到的应用才引用它 -->
+  <PropertyGroup>
+    <IsLibrary>true</IsLibrary>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <RootNamespace>Rune.Wpf</RootNamespace>
+    <Description>Rune.Wpf 的网页内核组件：嵌入的页面（Embed）、视频（Video），基于 WebView2。</Description>
+    <PackageTags>wpf;components;ui;webview2;video</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Rune.Wpf\Rune.Wpf.csproj" />
+    <PackageReference Include="Microsoft.Web.WebView2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Rune.Wpf.Tests" />
+  </ItemGroup>
+
+</Project>

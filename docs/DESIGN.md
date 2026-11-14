@@ -30,16 +30,19 @@ RuneForCSharp/
 ├─ avalonia/
 │  ├─ Directory.Build.props           导入根设置
 │  ├─ src/Rune.Avalonia/              组件库
+│  ├─ src/Rune.Avalonia.Web/          可选包：要网页内核的组件（Embed、Video），主包不带这份依赖
 │  ├─ apps/Rune.Avalonia.Docs/        文档应用（Debug 带 HotAvalonia）
 │  └─ tests/Rune.Avalonia.Tests/      headless 测试
 ├─ wpf/
 │  ├─ Directory.Build.props           导入根设置，改成 net10.0-windows + UseWPF
 │  ├─ src/Rune.Wpf/
+│  ├─ src/Rune.Wpf.Web/
 │  ├─ apps/Rune.Wpf.Docs/
 │  └─ tests/Rune.Wpf.Tests/           STA 线程 + 离屏窗口
 └─ winforms/
    ├─ Directory.Build.props           导入根设置，改成 net10.0-windows + UseWindowsForms + PerMonitorV2
    ├─ src/Rune.WinForms/
+   ├─ src/Rune.WinForms.Web/
    ├─ apps/Rune.WinForms.Docs/
    └─ tests/Rune.WinForms.Tests/      STA 线程 + 消息循环
 ```
@@ -1325,3 +1328,16 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   - WPF 没有 IsMouseOverChanged 事件，悬停相关的代码放在 OnMouseEnter / OnMouseLeave。
 - 链接按钮（LinkButton、IconLinkButton）：桌面没有站内地址，Href 是绝对地址，Click、Command 之后用系统打开（Avalonia 的 TopLevel.Launcher，WPF、WinForms 的 Shell）；读屏里是超链接，外部链接（External）没写 IconEnd 时显示外链图标、名称后补语言包的"在新窗口打开"。打开链接走可重写的 Navigate（测试里记下地址）。WinForms 的链接行为在宿主基类里按元素的 ILink 处理，文字按钮的宿主属性在 ButtonControl<T>（ButtonControl、LinkButtonControl 共用）。
 - 缺口：focusableWhenDisabled（平台上不可用的控件不能聚焦，要另做"可聚焦的不可用"状态）；WinForms 的 propsContent（内容层不是元素）；ButtonBase 的示例（自定义外观的卡片要等 Flex）；type（submit、reset）不移植，登记在 parity 的 PROPS_NOT_PORTED。
+
+### Embed、Video（2026-11-14，可选包 Rune.*.Web）
+
+- 共用外壳 WebShell（WinForms 是 WebShellControl）：定比例的框（Ratio，null 时不定比例）→ 外框 → 骨架与网页内核叠在一起。第一次导航结束（成功或失败）才撤骨架，换地址回到骨架。
+- 内核是原生子窗口，盖在框架自己画的内容上面：Avalonia、WPF 加载完之前把内核藏起来（WPF 是 Collapsed，HwndHost 照样建窗口、照样加载）；WinForms 隐藏的子控件不建窗口、不加载，只能让骨架（同级、z 序在上）盖住它。
+- 圆角：Avalonia、WPF 裁不到原生窗口，边角是直的；WinForms 用 CornerClip 给内核设窗口区域，按外框圆角裁掉四角（锯齿边，没有抗锯齿）。
+- Video 是网页内核里的 video 元素：页面由孪生文件 VideoPage 生成，写到临时文件夹再打开（直接给 HTML 字符串时页面不能读本地文件），一个实例一个文件，卸下时删掉。
+- 内核的用户数据放在 `%LocalAppData%\Rune\WebView2`：WebView2 默认放在程序旁边，装在 Program Files 里写不进去。
+- 踩过的坑：
+  - Avalonia 的 NativeWebView 导航到 data: 地址时不发 NavigationCompleted（页面照常显示），Embed 把 HTML 的 data: 地址解出来改用 NavigateToString。
+  - Avalonia 在 Windows 上建原生子窗口要应用清单声明支持 Windows 10（supportedOS），不然报 "Unable to create child window"：Docs 应用加了 app.manifest，使用方的应用同样要有（Avalonia 的模板自带）。
+  - WPF 的 WebShell 里叠骨架与内核用 `System.Windows.Controls.Grid`：在 `Rune.Wpf` 命名空间里 `Grid` 是 Rune 自己的响应式网格，按内容排高度，内核的高度会是 0。
+  - WebView2 包不分宿主，WPF、WinForms 的程序集都引用：纯 WinForms 项目报 MSB3277（WindowsBase 版本冲突），根目录的 Directory.Build.targets 在解析引用前去掉 WPF 那个。

@@ -78,7 +78,8 @@ function platform({ src, tests }) {
     }
   }
   const types = new Set();
-  for (const file of files(join(repoRoot, src), /\.cs$/))
+  // 连同可选包（Rune.*.Web：Embed、Video）
+  for (const file of [src, `${src}.Web`].flatMap((dir) => files(join(repoRoot, dir), /\.cs$/)))
     for (const m of readFileSync(file, 'utf8').matchAll(/\bclass\s+(\w+)/g)) types.add(m[1]);
   return { marks, types };
 }

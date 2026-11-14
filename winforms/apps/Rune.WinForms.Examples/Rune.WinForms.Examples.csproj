@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Rune.WinForms\Rune.WinForms.csproj" />
+    <ProjectReference Include="..\..\src\Rune.WinForms.Web\Rune.WinForms.Web.csproj" />
   </ItemGroup>
 
   <!-- 示例的源文件作为嵌入资源：文档站的"显示代码"按示例切出来（ExampleSources） -->

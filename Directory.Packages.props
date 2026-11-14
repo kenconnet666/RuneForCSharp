@@ -18,6 +18,11 @@
     <PackageVersion Include="HotAvalonia" Version="3.1.5" />
   </ItemGroup>
 
+  <ItemGroup Label="网页内核（Rune.*.Web 可选包：Embed、Video）">
+    <PackageVersion Include="Avalonia.Controls.WebView" Version="12.1.2" />
+    <PackageVersion Include="Microsoft.Web.WebView2" Version="1.0.4314.35" />
+  </ItemGroup>
+
   <ItemGroup Label="测试">
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
     <PackageVersion Include="xunit.v3" Version="4.0.2" />
