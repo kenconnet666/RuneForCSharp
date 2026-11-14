@@ -204,9 +204,6 @@ public class Menu : Control, IMenuHost
     {
         bool focusLast;
 
-        // 面板的外观写在 rune|Popover 的部件样式里：类型选择器只认样式键
-        protected override Type StyleKeyOverride => typeof(Popover);
-
         public void Close(OpenChangeReason reason) => SetOpen(false, reason);
 
         public void OpenAt(Control target, global::Avalonia.Controls.PlacementMode mode) => OpenAt(target, mode, OpenChangeReason.Trigger);
