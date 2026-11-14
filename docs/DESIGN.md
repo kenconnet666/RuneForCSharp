@@ -992,6 +992,19 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   根 Border 的 TextElement.FontSize 绑到控件的 FontSize：Gallery 与 inspect 的宿主里，说明的 TextBlock 没从控件继承到字号（测试里继承正常，原因没查清），绑上就稳了。
 - 示例：tones、status、variants、banner（Banner 在同一页）。Avalonia、WPF 与文档站的取值对照没有差异。
 
+### Stat、StatGroup（2026-11-14）
+
+- 结构同 TS：第一行是图标框（1.75em、accentSoft 底，按 sm 的字号）与指标名（sm、次要色）、结束边是变化量（xs：箭头、空格宽、带符号的百分比、说明），放不下时变化量换到下一行；
+  第二行是数值（xxl、粗体、行高 tight，AnimatedNumber）与单位（xs、次要色，按基线对齐）；再下面是说明、内容（Content）、底栏（上方一条 borderMuted 的线），行间 space.xs。
+  TS 的 value 是数字或字符串：这里数字是 Value（decimal），字符串是 Text。变化量 Change 是 decimal?（不写没有），色调按方向与 InvertChange（持平是 muted）。
+- 读屏顺序：Avalonia、WPF 用私有的 StatLayout 面板，子元素按 TS 的 DOM 顺序（指标名、数值、变化量……），排版时把变化量放到第一行的结束边（TS 用 CSS order）；
+  读屏里是一组，名称是指标名（指标名一行不另念），加载中状态是"加载中"。WinForms 的名称是指标名、描述是数值、单位与变化量，加载中带 Busy。
+- 加载：骨架防闪烁（DelayedLoading），出现过骨架之后换回数值时数值与变化量淡入（同 Card）；WinForms 的子控件不能半透明，直接互换。
+- StatGroup 是 Grid（MinItemWidth 9rem、行间距 md、没有栏间距）：组里的 Stat 左右各空 md、起始边一条竖线；Avalonia、WPF 照 TS 往起始方向挪一条线宽、组裁掉每行第一个的线，
+  WPF 的竖线与内边距写在 Stat 自己的 BorderThickness、Padding 上（同 Result），WinForms 不在一行开头时才画线。
+- WinForms：指标名、图标、单位、说明、字符串值是画的元素，数字与变化量是 AnimatedNumberControl 子控件（它实现了 IBaseline，单位按它的基线对齐），内容、底栏是使用方的控件。
+- 示例：basic、change、group、loading（live 要等 Sparkline）。取值对照：数值一行比文档站高约 4 像素（数字与单位按基线对齐时，桌面的行高分配与 CSS 不同）。
+
 ### AnimatedNumber、NumericFormat（2026-11-14）
 
 - `NumericFormat`（Utils/Data，孪生文件）是 TS 的 NumericFormat：Intl.NumberFormat 的 style（普通、百分比、金额）、最少 / 最多小数位、signDisplay、千位分隔，

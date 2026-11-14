@@ -266,6 +266,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
       .map((prop) => [prop, '加载指示、操作、关闭按钮与额外内容是 AlertControl 的子控件，文字区是排版出来的一块区域：没有部件属性记录（图标、标题、说明是画的元素，有 PropsIcon、PropsTitle、PropsDescription）'])),
     Descriptions: Object.fromEntries(['propsList', 'propsItem', 'propsValue', 'propsCopy']
       .map((prop) => [prop, '列表、格子是 DescriptionsControl 画的面板，控件的值与复制按钮是子控件，没有部件属性记录（标题、标签是画的元素，有 PropsTitle、PropsLabel）'])),
+    Stat: Object.fromEntries(['propsLabel', 'propsValue', 'propsIcon', 'propsNumber', 'propsUnit', 'propsChange', 'propsChangeLabel', 'propsDescription', 'propsBody', 'propsFooter']
+      .map((prop) => [prop, '指标名、图标、单位、说明是 StatControl 画的元素，数字是 AnimatedNumberControl 子控件，内容与底栏是使用方的控件：没有部件属性记录'])),
     AvatarGroup: { propsMore: '"+N"的圆是 AvatarGroupControl 画的，没有部件属性记录（里面的文字有 PropsMoreText）' },
     Result: { propsAction: '操作是 ResultControl 的子控件（排在最下面、居中），没有部件属性记录（图标、状态码、标题、说明是画的元素，有 PropsIcon、PropsCode、PropsTitle、PropsDescription）' },
     Banner: Object.fromEntries(['propsAction', 'propsClose']
@@ -345,6 +347,10 @@ export const PLATFORM_BEHAVIOR_NOT_APPLICABLE = {
     CodeBlock: {
       '部件属性': '代码块是 CodeBlockControl 自己画的，没有部件属性可加（PLATFORM_PROPS_NOT_PORTED）',
     },
+    Stat: {
+      '骨架换回数值时数值与变化量淡入': 'WinForms 的子控件不能半透明：骨架与数值直接互换（同 CardControl）',
+      '每个节点都有部件属性': '指标名、图标、单位、说明是 StatControl 画的元素，数字是 AnimatedNumberControl 子控件，没有部件属性记录（PLATFORM_PROPS_NOT_PORTED）',
+    },
     AppShell: { '部件属性': '各格是 AppShellControl 自己排、自己画的，没有部件属性可加（PLATFORM_PROPS_NOT_PORTED）' },
   },
 };
@@ -361,6 +367,7 @@ export const BEHAVIOR_NOT_APPLICABLE = {
   Flex: { createFlex: '桌面没有语义标签：别的语义容器从 Flex 派生、改读屏角色（FlexList、FlexOrderedList 就是这样，测试覆盖）' },
   Container: { createContainer: '桌面没有语义标签：要别的语义时从 Container 派生' },
   Grid: { createGrid: '桌面没有语义标签：别的语义容器从 Grid 派生、改读屏角色（GridList 就是这样，测试覆盖）' },
+  Stat: { '部件带标记；按色调档位追加样式': 'TS 的 components.Stat 配方定制是网页的样式系统；桌面改部件样式（Avalonia 的 rune|Stat #PART_Number 选择器、WPF 的 StatParts 样式键），数值的色调是 Tone' },
   Collapse: { '页内搜索命中': '页内搜索命中收起的内容时展开（hidden="until-found"、beforematch）是浏览器的能力，桌面没有页内搜索' },
 };
 

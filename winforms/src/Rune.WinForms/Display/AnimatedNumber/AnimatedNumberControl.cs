@@ -11,7 +11,7 @@ namespace Rune.WinForms;
 /// 系统关闭动画时直接跳到新值；<see cref="From"/> 给了时第一次画出来就从它滚到 Value。<see cref="Trend"/> 按正负着色（正数成功色、负数危险色）。
 /// 前后缀是画的文字（TS 的 prefix、suffix），前面的图标写 <see cref="PrefixIcon"/>。读屏只读终值（连同前后缀）。大小跟着终值的文字。
 /// </summary>
-public class AnimatedNumberControl : Control, IElementHost, IScopeAware
+public class AnimatedNumberControl : Control, IElementHost, IScopeAware, IBaseline
 {
     readonly Effect paint;
     readonly Signal<double> current = new(0);
@@ -219,6 +219,16 @@ public class AnimatedNumberControl : Control, IElementHost, IScopeAware
 
     /// <inheritdoc />
     public override Size GetPreferredSize(Size proposedSize) => Arrange();
+
+    /// <summary>数字的基线（Flex、Stat 按基线对齐单位时用）。</summary>
+    int? IBaseline.Baseline
+    {
+        get
+        {
+            Arrange();
+            return number.Baseline(Context) is { } baseline ? number.Bounds.Y + baseline : null;
+        }
+    }
 
     /// <inheritdoc />
     protected override void OnLayout(LayoutEventArgs levent)
