@@ -137,6 +137,17 @@ public class Text : TextBlock
         else SetValue(property, value);
     }
 
+    /// <summary>
+    /// 放进 InlineUIContainer 时按第一行的基线对齐（Abbr 这类放在段落里的文字控件）：平台把嵌入的控件底边放在基线上，
+    /// 只有写了 BaselineOffset 才按它对齐，这里量完写上第一行基线到顶边的距离。
+    /// </summary>
+    protected override global::Avalonia.Size MeasureOverride(global::Avalonia.Size availableSize)
+    {
+        var size = base.MeasureOverride(availableSize);
+        if (TextLayout.TextLines is [var first, ..]) SetCurrentValue(BaselineOffsetProperty, Padding.Top + first.Baseline);
+        return size;
+    }
+
     void SetStruct<T>(StyledProperty<T> property, T? value) where T : struct
     {
         if (value is { } set) SetValue(property, set);

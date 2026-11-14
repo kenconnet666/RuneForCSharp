@@ -173,6 +173,7 @@ export const PROPS_NOT_PORTED = {
     pageScrollbar: '整页的浮层滚动条是网页的：桌面上正文那一列本身是 ScrollArea（AppShell.MainScroll）',
   },
   NavList: { propsList: 'nav > ul 是 HTML 的结构：NavList 本身就是那一列' },
+  Abbr: { propsTooltip: '提示就是平台的 ToolTip：位置、箭头写在 Abbr 自己身上（Avalonia、WPF 的 Tooltip.Placement、Tooltip.Arrow 附加属性）；WinForms 自带的提示用默认的位置' },
   Pagination: { propsItem: '外层的 li 是 HTML 列表的结构：桌面上页码按钮、省略号直接排在列表里' },
   NumberField: {
     valueType: '值固定是 decimal?：十进制精确，金额、大整数不经过浮点数，不必按场景选 number 或 bigint；要别的类型时调用方转换',

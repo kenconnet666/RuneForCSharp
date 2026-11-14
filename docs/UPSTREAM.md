@@ -440,7 +440,8 @@ defineTheme / defineLang 忽略 undefined——网页专用或 C# 没有 undefin
 | 新增 Sub、Sup、Del、Ins、Strike（Text 系列） | 已做 | Avalonia、WPF 是行内文字：Sub、Sup 是 Run（基线对齐不从外层 Span 继承；WPF 用 TextTop / TextBottom，平台的 Superscript 抬得太高），Del、Ins、Strike 是带主题的 Span；WinForms 是单独的控件（同 Code、Mark） |
 | 新增 Figure（caption、captionSide、align、propsCaption） | 已做 | 三个平台；说明在下（top 时在上）、次要色 sm、和内容隔 space.sm，读屏名称取说明。WinForms 的 FigureControl 是竖排的 FlexControl，对齐叫 FigureAlign（Align 是 Flex 自己的） |
 | 新增 AspectRatio（ratio 默认 16 / 9，内容铺满，图片按 cover 裁切） | 已做 | 三个平台；Ratio 是数（宽 ÷ 高），不收 CSS 的"4 / 3"写法；Avalonia、WPF 里的 Image 默认 UniformToFill，WinForms 的 PictureBox 没有 cover，自己选 SizeMode |
-| 新增 Abbr、Embed、Video、PageHeader（patterns），语言包 pageHeaderBack | 还没做 | 语言包已生成；组件接着做（Embed、Video 要看桌面的网页、媒体控件怎么接） |
+| 新增 Abbr（点状下划线、帮助指针、可聚焦，悬停 / 键盘聚焦 / 点按显示全称） | 已做 | 三个平台；全称是平台的提示（停留 200 毫秒），读屏把它当作帮助文字。Avalonia、WPF 放在段落里时包 InlineUIContainer：Avalonia 的 Text 量完写上 BaselineOffset，嵌入的文字控件才按基线对齐 |
+| 新增 Embed、Video、PageHeader（patterns），语言包 pageHeaderBack | 还没做 | 语言包已生成；组件接着做（Embed、Video 要看桌面的网页、媒体控件怎么接） |
 | Progress 的 bands（量表：值落在哪一段用哪一段的色调，role=meter） | 已做 | 三个平台的 Bands（ProgressBand(To, Tone)，孪生文件 ProgressBands.cs）与 ResolvedTone；UIA 没有 meter 这种控件类型，读屏里仍是进度条 |
 | Blockquote 的 source、propsSource（引用下面一行"— 出处"，小一号，不用斜体） | 已做 | 三个平台的 Source（Avalonia、WPF 可以放控件，WinForms 是文字）；部件：Avalonia 的 PART_Source、WPF 的 BlockquoteParts.Source、WinForms 的 PropsSource |
 | Image 的 sources（按格式、媒体条件换图） | 网页专用 | 不涉及 |

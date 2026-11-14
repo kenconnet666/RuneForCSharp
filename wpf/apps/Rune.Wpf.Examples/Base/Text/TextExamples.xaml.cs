@@ -10,7 +10,7 @@ static class TextExamples
         new("Text", "scale", "字号与字重", "Size 对应主题的字号档位，Weight 对应字重；不写时继承外面，Small 默认 xs，Strong 默认 semibold。", () => new TextScale()),
         new("Text", "tones", "色调", "Tone 取主题的文字色，与 Button、Badge 的色调同名：neutral 是正文色，muted 用于次要说明，其余是品牌色与提示色的文字色。", () => new TextTones()),
         new("Text", "numeric", "编号与数字", "Mono 用等宽字体（编号、件号），Numeric 用等宽数字（金额、计数）：上下对齐、变化时不跳动。", () => new TextNumeric()),
-        new("Text", "inline", "行内元素", "Kbd 写按键，Code 写行内代码，Mark 标出要强调的词；Strong、Em、Small 是重要、语气强调与附注。Sub、Sup 是上下标；Strike 是不再有效的内容（原价），文档的增删用 Del、Ins（加进来的是浅绿底，不用下划线，免得和链接分不清）。整段引用用 Blockquote（Source 写出处）。", () => new TextInline()),
+        new("Text", "inline", "行内元素", "Kbd 写按键，Code 写行内代码，Mark 标出要强调的词；Strong、Em、Small 是重要、语气强调与附注。Sub、Sup 是上下标；Strike 是不再有效的内容（原价），文档的增删用 Del、Ins（加进来的是浅绿底，不用下划线，免得和链接分不清）。Abbr 是缩写：全称在提示里，悬停、键盘聚焦、点按都看得到。整段引用用 Blockquote（Source 写出处）。", () => new TextInline()),
         new("Text", "headings", "标题", "H1–H6 各是一个组件，读屏念出级别；默认字号按级别递减，Size 能单独改：视觉层级与文档结构分开。WPF 的 TextBlock 不能调字间距。", () => new TextHeadings()),
         new("Text", "links", "链接", "Link 默认带下划线：正文里的链接不能只靠颜色区分。External 加外链图标并告诉读屏在新窗口打开；Underline 的 hover、none 用在一眼看得出是链接的地方。", () => new TextLinks()),
         new("Text", "overflow", "截断与换行", "Truncate 单行省略，LineClamp 限制行数；Wrap 的 Pretty、Balance 是浏览器的排版优化，桌面上按普通换行。", () => new TextOverflow()),
