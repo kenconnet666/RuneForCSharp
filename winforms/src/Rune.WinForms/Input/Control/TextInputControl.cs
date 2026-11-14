@@ -235,6 +235,9 @@ public abstract class TextInputControl : FlexControl, IFieldControl
         Sync();
     }
 
+    /// <summary>清空按钮该不该显示：可清空、可用、不只读、有内容。</summary>
+    protected bool ClearShown => Clearable && Enabled && !ReadOnly && Text.Length > 0;
+
     /// <summary>内边距、控件高度、只读、清空按钮、字数；输入框的底色跟着外壳（平台的 TextBox 不能透明）。派生类接着同步自己的部件。</summary>
     protected virtual void Sync()
     {
@@ -245,7 +248,7 @@ public abstract class TextInputControl : FlexControl, IFieldControl
         var colors = ProviderControl.ThemeOf(this).Colors;
         input.BackColor = Bare ? colors.SurfaceRaised : ControlShell.Fill(colors, Variant, ReadOnly, hovered);
         input.ForeColor = colors.Text;
-        clear.Visible = Clearable && Enabled && !ReadOnly && Text.Length > 0;
+        clear.Visible = ClearShown;
         count.Visible = ShowCount;
         count.Count = Text.Length;
         count.Max = MaxLength is > 0 and < 32767 ? MaxLength : null;

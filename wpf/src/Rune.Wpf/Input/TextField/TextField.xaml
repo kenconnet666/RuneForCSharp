@@ -154,8 +154,16 @@
                              Visibility="Collapsed" IsHitTestVisible="False" TextWrapping="Wrap" />
                   <rune:ScrollArea x:Name="PART_ContentHost" Focusable="False" IsViewportFocusable="False" />
                 </Grid>
-                <rune:ClearButton x:Name="PART_Clear" Radius="full" Visibility="Collapsed" Cursor="Hand" rune:Flex.AlignSelf="start" />
-                <rune:CharacterCount x:Name="PART_Count" Visibility="Collapsed" rune:Flex.AlignSelf="end" />
+                <!-- 清空在上、计数在下，叠在结束边的同一列：都有时不各占一列（不然清空按钮被挤到计数左边） -->
+                <Grid>
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                  </Grid.RowDefinitions>
+                  <rune:ClearButton x:Name="PART_Clear" Radius="full" Visibility="Collapsed" Cursor="Hand" HorizontalAlignment="Right" VerticalAlignment="Top" />
+                  <rune:CharacterCount x:Name="PART_Count" Grid.Row="2" Visibility="Collapsed" HorizontalAlignment="Right" VerticalAlignment="Bottom" />
+                </Grid>
               </rune:Flex>
             </Border>
             <Border x:Name="PART_FocusRing" Visibility="Collapsed" IsHitTestVisible="False" Margin="-1" BorderThickness="2"

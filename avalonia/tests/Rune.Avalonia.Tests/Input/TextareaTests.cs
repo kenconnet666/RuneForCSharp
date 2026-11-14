@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Automation.Peers;
 using Avalonia.Automation.Provider;
 using Avalonia.Controls;
@@ -13,6 +14,22 @@ namespace Rune.Avalonia.Tests;
 public class TextareaTests
 {
     static T Part<T>(Control owner, string name) where T : Control => owner.GetVisualDescendants().OfType<T>().First(part => part.Name == name);
+
+    [Fact]
+    [Upstream("Textarea", "Textarea：清空与计数都有时叠在同一列")]
+    public Task Clear_and_count_stack_in_one_trailing_column() => HeadlessUi.Run(() =>
+    {
+        var note = new Textarea { Text = "第一行\n第二行", Clearable = true, ShowCount = true, Width = 300 };
+        HeadlessUi.Show(note);
+        var clear = Part<ClearButton>(note, TextInputParts.Clear);
+        var count = Part<CharacterCount>(note, TextInputParts.Count);
+        var clearAt = clear.TranslatePoint(default, note)!.Value;
+        var countAt = count.TranslatePoint(default, note)!.Value;
+
+        // 结束边对齐（清空按钮左右各收进 space.xs 的负外边距，可见的框比那一列多出这一段）
+        Assert.InRange(clearAt.X + clear.Bounds.Width - (countAt.X + count.Bounds.Width), -0.5, 0.25 * 14 + 0.5);
+        Assert.True(clearAt.Y + clear.Bounds.Height <= countAt.Y); // 清空在上、计数在下
+    });
 
     [Fact]
     [Upstream("Textarea", "有内容时显示清空按钮，清空后回到空字符串")]

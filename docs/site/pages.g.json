@@ -2078,6 +2078,33 @@
                   }
                 ]
               }
+            ],
+            [
+              {
+                "id": "bottom",
+                "title": "贴在底部的提交栏",
+                "demo": "SubmitBar",
+                "description": [
+                  {
+                    "code": "offsetBottom"
+                  },
+                  {
+                    "text": " 把它贴在底边：长表单的保存、提交一直够得着，滚到表单末尾时回到原来的位置。还压着下面的内容时有阴影（"
+                  },
+                  {
+                    "code": "shadow={false}"
+                  },
+                  {
+                    "text": " 关掉）、写 data-stuck，"
+                  },
+                  {
+                    "code": "onChange"
+                  },
+                  {
+                    "text": " 报告贴住与离开——这里用它提示下面还有没有内容。"
+                  }
+                ]
+              }
             ]
           ],
           "keyboard": [],
@@ -9816,6 +9843,64 @@
                     "text": " 时表单提交的是文字。"
                   }
                 ]
+              },
+              {
+                "id": "options",
+                "title": "对象数据、外观与状态",
+                "demo": "Options",
+                "description": [
+                  {
+                    "text": "建议可以是任意数据，"
+                  },
+                  {
+                    "code": "toOption"
+                  },
+                  {
+                    "text": " 把它映射成选项："
+                  },
+                  {
+                    "code": "label"
+                  },
+                  {
+                    "text": " 是填进输入框的文字，"
+                  },
+                  {
+                    "code": "description"
+                  },
+                  {
+                    "text": "、"
+                  },
+                  {
+                    "code": "icon"
+                  },
+                  {
+                    "text": "、"
+                  },
+                  {
+                    "code": "group"
+                  },
+                  {
+                    "text": " 照常显示在列表里。"
+                  },
+                  {
+                    "code": "variant"
+                  },
+                  {
+                    "text": "、"
+                  },
+                  {
+                    "code": "size"
+                  },
+                  {
+                    "text": "、"
+                  },
+                  {
+                    "code": "radius"
+                  },
+                  {
+                    "text": " 与其他输入框同一套；必填、出错、只读、不可用可以写在外面的 Field 上，也可以直接写在组件上。"
+                  }
+                ]
               }
             ],
             [
@@ -9936,6 +10021,61 @@
                   },
                   {
                     "text": " 自己渲染。搜索换掉选项之后，提及过的人仍按见过的选项认出来。"
+                  }
+                ]
+              },
+              {
+                "id": "prefix",
+                "title": "换触发字符、字数与显示",
+                "demo": "Topics",
+                "description": [
+                  {
+                    "code": "prefix"
+                  },
+                  {
+                    "text": " 换成别的触发字符（# 引用单据、话题），"
+                  },
+                  {
+                    "code": "MentionText"
+                  },
+                  {
+                    "text": " 与 "
+                  },
+                  {
+                    "code": "mentionSegments"
+                  },
+                  {
+                    "text": " 要写同一个。"
+                  },
+                  {
+                    "code": "empty"
+                  },
+                  {
+                    "text": " 是没有匹配时列表里的一句话；"
+                  },
+                  {
+                    "code": "showCount"
+                  },
+                  {
+                    "text": "、"
+                  },
+                  {
+                    "code": "clearable"
+                  },
+                  {
+                    "text": "、"
+                  },
+                  {
+                    "code": "variant"
+                  },
+                  {
+                    "text": "、只读与不可用同 Textarea。显示时 "
+                  },
+                  {
+                    "code": "renderMention"
+                  },
+                  {
+                    "text": " 自己渲染一个提及：做成链接、悬停卡片。"
                   }
                 ]
               }
@@ -16242,6 +16382,48 @@
                   },
                   {
                     "text": " 写成空数组。"
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "id": "review",
+                "title": "标签在左、只读回看",
+                "demo": "Review",
+                "description": [
+                  {
+                    "text": "标签布局、只读、不可用同 Form："
+                  },
+                  {
+                    "code": "labelPlacement=\"start\""
+                  },
+                  {
+                    "text": " 把标签排在左边，"
+                  },
+                  {
+                    "code": "labelWidth"
+                  },
+                  {
+                    "text": " 定宽、"
+                  },
+                  {
+                    "code": "labelAlign"
+                  },
+                  {
+                    "text": " 对齐。"
+                  },
+                  {
+                    "code": "readonly"
+                  },
+                  {
+                    "text": " 用来回看已经提交的单子：控件都改不了，“下一步”不校验，步骤条上哪一步都能点，最后一步没有提交按钮。"
+                  },
+                  {
+                    "code": "disabled"
+                  },
+                  {
+                    "text": " 时各步同样可以翻看，提交按钮不可用。"
                   }
                 ]
               }

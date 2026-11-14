@@ -140,8 +140,11 @@
                 </Panel>
               </rune:ScrollArea>
               </Panel>
-              <rune:ClearButton Name="PART_Clear" Radius="full" IsVisible="False" Cursor="Hand" rune:Flex.AlignSelf="start" />
-              <rune:CharacterCount Name="PART_Count" IsVisible="False" rune:Flex.AlignSelf="end" />
+              <!-- 清空在上、计数在下，叠在结束边的同一列：都有时不各占一列（不然清空按钮被挤到计数左边） -->
+              <Grid RowDefinitions="Auto,*,Auto">
+                <rune:ClearButton Name="PART_Clear" Radius="full" IsVisible="False" Cursor="Hand" HorizontalAlignment="Right" />
+                <rune:CharacterCount Name="PART_Count" Grid.Row="2" IsVisible="False" HorizontalAlignment="Right" />
+              </Grid>
             </rune:Flex>
           </Border>
           <Border Name="PART_FocusRing" IsVisible="False" IsHitTestVisible="False" Margin="-1" BorderThickness="2"

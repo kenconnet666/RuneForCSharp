@@ -7,6 +7,24 @@ namespace Rune.WinForms.Tests;
 public class TextareaTests
 {
     [Fact]
+    [Upstream("Textarea", "Textarea：清空与计数都有时叠在同一列")]
+    public Task Clear_and_count_stack_in_one_trailing_column() => WinFormsUi.Run(() =>
+    {
+        var note = new TextareaControl { Text = "第一行\r\n第二行", Clearable = true, ShowCount = true, Width = 300 };
+        using var form = WinFormsUi.Show(note);
+        var clear = note.RectangleToClient(note.ClearButton.RectangleToScreen(note.ClearButton.ClientRectangle));
+        var count = note.RectangleToClient(note.Count.RectangleToScreen(note.Count.ClientRectangle));
+
+        Assert.Equal(clear.Right, count.Right); // 结束边对齐
+        Assert.True(clear.Bottom <= count.Top); // 清空在上、计数在下
+
+        // 都不显示时那一列整个藏起来：不在输入框后面多出间距
+        var plain = new TextareaControl { Width = 300 };
+        using var other = WinFormsUi.Show(plain);
+        Assert.False(plain.Count.Parent!.Visible);
+    });
+
+    [Fact]
     [Upstream("Textarea", "有内容时显示清空按钮，清空后回到空字符串")]
     public Task Clearing_a_textarea_empties_it() => WinFormsUi.Run(() =>
     {

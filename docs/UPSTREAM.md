@@ -430,6 +430,18 @@ defineTheme / defineLang 忽略 undefined——网页专用或 C# 没有 undefin
 
 锁定跟到 0.25.0（fffc0c7f）：token、语言包、图标、配方、文档页面清单都没变（生成器 --check 通过）。
 
+### 第三十八批（2026-11-14，0.28.0 c2be5550 与 Affix 文档 0a335a58：0.27.0 的修补）
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| Video 自绘控制条挂载时按 video 现在的状态同步一次（预渲染页面上错过 loadedmetadata，时长显示 0:00、进度条不可用） | 已有 | 第三十七批做自绘控制条时脚本挂上就先 sync() 一次 |
+| Textarea（连带 Mentions）同时开 clearable 与 showCount 时，清空与计数叠在结束边的同一列（清空在上、计数在下），之前各占一列、清空被挤到计数左边 | 已改 | 三个平台原来也是各占一列：Avalonia、WPF 的模板改成结束边一个三行的 Grid；WinForms 是一个竖排的 FlexControl（中间一段空白撑开，只有一个时清空照样贴顶、字数照样贴底；高度按该显示的部件算，两个都不显示时整列藏起来）。三个平台加了同一列的测试。Mentions 还没做 |
+| StepsForm 的 readonly 是真正的回看（下一步不校验、哪一步都能点、没有提交按钮、回车不提交）；disabled 时各步也能翻看 | 组件还没做 | 做时照新的 |
+| Autocomplete 的类型去掉 empty（没有建议时列表不弹出） | 组件还没做 | 做时照新的 |
+| 文档：Autocomplete、Mentions、StepsForm、Affix 的新示例 | 组件还没做 | 做时照着移植 |
+
+锁定跟到 0a335a58（0.28.0 之后的 Affix 文档提交，CI 绿）：文档页面清单重新生成；token、语言包、图标、配方没变。
+
 ### 第三十七批（2026-11-14，0.27.0 b7bbca0a：自己的浮层定位、NativeSelect、Video 自绘控制条）
 
 | 上游的变化 | 对我们 | 做法 |

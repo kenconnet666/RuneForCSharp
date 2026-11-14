@@ -28,6 +28,22 @@ public class TextareaTests
     }
 
     [Fact]
+    [Upstream("Textarea", "Textarea：清空与计数都有时叠在同一列")]
+    public Task Clear_and_count_stack_in_one_trailing_column() => WpfUi.Run(() =>
+    {
+        var note = new Textarea { Text = "第一行\n第二行", Clearable = true, ShowCount = true };
+        WpfUi.Show(Host(note));
+        var clear = note.Part<ClearButton>(TextInputParts.Clear);
+        var count = note.Part<CharacterCount>(TextInputParts.Count);
+        var clearAt = clear.TranslatePoint(default, note);
+        var countAt = count.TranslatePoint(default, note);
+
+        // 结束边对齐（清空按钮左右各收进 space.xs 的负外边距，可见的框比那一列多出这一段）
+        Assert.InRange(clearAt.X + clear.ActualWidth - (countAt.X + count.ActualWidth), -0.5, 0.25 * 14 + 0.5);
+        Assert.True(clearAt.Y + clear.ActualHeight <= countAt.Y); // 清空在上、计数在下
+    });
+
+    [Fact]
     [Upstream("Textarea", "有内容时显示清空按钮，清空后回到空字符串")]
     public Task Clearing_a_textarea_empties_it() => WpfUi.Run(() =>
     {
