@@ -79,7 +79,7 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 | Dialog 的 draggable（237f97d2）：按住标题栏拖，不超出窗口，每次打开回到正中 | 已做 Dialog | 这次做 |
 | FileDrop、Upload 选文件夹（directory，f5d31cdd） | 还没做 | 做时照新的（桌面上是选文件夹的对话框、拖进来的文件夹递归读出文件） |
 | FloatButton、FloatButtonGroup（速拨），BackTop 基于它（77cffad3） | 还没做 | CI 绿了锁定，做时照新的 |
-| useInfiniteList、InfiniteListStatus，语言包 listNoMore；Select、Combobox、Mentions 的 load 分页（page、{ items, next }），ListboxView 的 onRangeChange 与 loading: 'more'（cffe9ad9） | Select 的远程选项已做 | 2026-11-14 做了：Select.Load（OptionsLoader，分页返回 OptionsPage 的 Next），状态是孪生文件 RemoteOptions；Listbox 内部的 Reached、IsLoadingMore 代替 onRangeChange 与 loading: 'more'。测试对上 remote-items 的三条 Select 用例；Combobox、Mentions、TreeSelect 还没做 |
+| useInfiniteList、InfiniteListStatus，语言包 listNoMore；Select、Combobox、Mentions 的 load 分页（page、{ items, next }），ListboxView 的 onRangeChange 与 loading: 'more'（cffe9ad9） | Select 的远程选项已做 | 2026-11-14 做了：Select.Load（OptionsLoader，分页返回 OptionsPage 的 Next），状态是孪生文件 RemoteOptions；Listbox 内部的 Reached、IsLoadingMore 代替 onRangeChange 与 loading: 'more'。测试对上 remote-items 的三条 Select 用例；Combobox、Autocomplete 2026-11-15 做了（同一个 RemoteOptions）；Mentions、TreeSelect 还没做 |
 
 ### 第五批（2026-11-08 通知，master 到 fd628293）
 
@@ -415,7 +415,7 @@ defineTheme / defineLang 忽略 undefined——网页专用或 C# 没有 undefin
 | ContextMenu 触屏、触控笔按住 700ms 打开 | 已做 | 不用改：Avalonia 的长按手势会发 ContextRequested；WPF、WinForms 由 Windows 的按住相当于右键发右键菜单 |
 | NavList 紧凑分组触屏点图标弹出子项 | 紧凑时的弹出还没做（等 HoverCard） | 做时照新的：悬停、聚焦、点按都弹出，点外面、点了链接收起 |
 | 页面组合文案 notificationsNoMatch | 生成文件 | 重新生成 PatternsMessages |
-| ColumnTable empty；TagsInput 回车加打的字；Splitter、ResizeHandle 粗指针的命中区；ConditionBuilder、CodeEditor、Autocomplete 在只读 / 不可用表单里；NavBar 下拉里的徽标；Diagram fitView | Splitter、ResizeHandle、TagsInput 已做，其余还没做 | 粗指针（触屏）扩命中区是网页的 pointer: coarse，桌面上不涉及（分隔条本来整条 space.md 都能按）；TagsInput 照新的做（允许自定义值时打字不自动高亮建议，回车加的是打的字，要选建议按 ↓）；其余做时照新的 |
+| ColumnTable empty；TagsInput 回车加打的字；Splitter、ResizeHandle 粗指针的命中区；ConditionBuilder、CodeEditor、Autocomplete 在只读 / 不可用表单里；NavBar 下拉里的徽标；Diagram fitView | Splitter、ResizeHandle、TagsInput、Autocomplete 已做，其余还没做 | 粗指针（触屏）扩命中区是网页的 pointer: coarse，桌面上不涉及（分隔条本来整条 space.md 都能按）；TagsInput 照新的做（允许自定义值时打字不自动高亮建议，回车加的是打的字，要选建议按 ↓）；Autocomplete 的只读、不可用跟着所在的 Field（TextBox 的只读与平台的 IsEnabled），列表不弹出；其余做时照新的 |
 | usePersistentState、useMediaQuery 水合；sameValue 比 Map / Set；tableToXlsx 的时区 | 网页专用或还没做 | 不涉及 |
 
 锁定跟到 0.24.0（6e7b07b7）：页面组合文案表多了 notificationsNoMatch，docs-gen 的页面清单更新；token、图标、配方、语言包没变。
@@ -445,7 +445,7 @@ defineTheme / defineLang 忽略 undefined——网页专用或 C# 没有 undefin
 | 组件上写错绑定名是类型错误：PartProps 去掉原生元素专用的 _value、_checked、_files、_open（之前 `<Switch _value>` 能过类型检查，开关却不跟状态走） | 不涉及 | C# 的组件只有自己声明的属性，写错名字本来就编译不过；Switch、Checkbox 的值是 IsChecked，没有 Value |
 | Video controls="custom" 认不知道时长的视频（直播、边录边播）：时间只显示已播多久，进度条不可用，方向键不把进度跳回开头；有回看范围时取它的末尾当时长 | 已改 | 孪生文件 VideoPage 的脚本照做（duration() 取 seekable 的末尾，时长为 0 时不跳、只显示已播时间、进度条不可用，播放中每次 timeupdate 重算）；在 WebView2 里把 duration 改成 Infinity 核对过 |
 | Affix 的根元素补上部件标记 | 组件还没做 | 做时照新的 |
-| 文档：Combobox"表单提交与自定义匹配"、Cascader"显示、搜索的匹配与状态"、TagsInput 状态示例补 acceptOnBlur / radius / name、Affix"贴在底部的提交栏" | TagsInput 已做（2026-11-15），其余组件还没做 | TagsInput 的状态示例照着移植（name 是表单字段名，桌面上不移植）；其余做时照着移植 |
+| 文档：Combobox"表单提交与自定义匹配"、Cascader"显示、搜索的匹配与状态"、TagsInput 状态示例补 acceptOnBlur / radius / name、Affix"贴在底部的提交栏" | TagsInput、Combobox 已做（2026-11-15），其余组件还没做 | TagsInput 的状态示例、Combobox 的"表单提交与自定义匹配"照着移植（name 是表单字段名，桌面上不移植：示例改成显示提交的值）；其余做时照着移植 |
 
 锁定跟到 e380a8e7（CI 绿；0.29.0 的发版提交 0de173eb 只改版本号与变更记录，CI 绿了再跟）：文档页面清单重新生成；token、语言包、图标、配方没变。
 
@@ -456,8 +456,8 @@ defineTheme / defineLang 忽略 undefined——网页专用或 C# 没有 undefin
 | Video 自绘控制条挂载时按 video 现在的状态同步一次（预渲染页面上错过 loadedmetadata，时长显示 0:00、进度条不可用） | 已有 | 第三十七批做自绘控制条时脚本挂上就先 sync() 一次 |
 | Textarea（连带 Mentions）同时开 clearable 与 showCount 时，清空与计数叠在结束边的同一列（清空在上、计数在下），之前各占一列、清空被挤到计数左边 | 已改 | 三个平台原来也是各占一列：Avalonia、WPF 的模板改成结束边一个三行的 Grid；WinForms 是一个竖排的 FlexControl（中间一段空白撑开，只有一个时清空照样贴顶、字数照样贴底；高度按该显示的部件算，两个都不显示时整列藏起来）。三个平台加了同一列的测试。Mentions 还没做 |
 | StepsForm 的 readonly 是真正的回看（下一步不校验、哪一步都能点、没有提交按钮、回车不提交）；disabled 时各步也能翻看 | 组件还没做 | 做时照新的 |
-| Autocomplete 的类型去掉 empty（没有建议时列表不弹出） | 组件还没做 | 做时照新的 |
-| 文档：Autocomplete、Mentions、StepsForm、Affix 的新示例 | 组件还没做 | 做时照着移植 |
+| Autocomplete 的类型去掉 empty（没有建议时列表不弹出） | 已做（2026-11-15） | 照新的做：Autocomplete 不用 Empty（空列表不弹出）；WinForms 同样不弹出 |
+| 文档：Autocomplete、Mentions、StepsForm、Affix 的新示例 | Autocomplete 已做（2026-11-15），其余还没做 | Autocomplete 的三个示例照着移植；其余做时照着移植 |
 
 锁定跟到 0a335a58（0.28.0 之后的 Affix 文档提交，CI 绿）：文档页面清单重新生成；token、语言包、图标、配方没变。
 

@@ -1378,6 +1378,14 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### Combobox、Autocomplete（2026-11-15）
+
+- 同 TagsInput：输入框就是控件自己（Avalonia、WPF 从 TextInputBase 派生，WinForms 从 TextInputControl），上游的 inputValue 是平台的 Text，选中项的值是 Value；filter={false} 叫 LocalFilter=false，load 是 Load（同 Select 的 OptionsLoader 与 RemoteOptions，打开时与输入停下 300 毫秒后请求、只采用最后一次、可分页）。
+- 选项弹出层抽成 ListPopover（同上游的名字）：TagsInput 与 Combobox 共用，三个平台各一份（Avalonia 的 Popup、WPF 带阴影层与平台定位回调的 Popup、WinForms 不激活的 FloatingSurface 与"显示期间的失焦、失活不算"的守卫），整理成单独的提交。
+- 组件自己写 Text（选中后填入选项文字、父级改了 Value、选项后到）时用一个标记区分，不当作用户输入：用户输入才改过滤词并打开列表。键盘照 TagsInput 在 TextBox 之前接住（WinForms 的内层 TextBox 把开着时的回车、翻页与要清空时的 Esc 当输入键）；输入法组合中的键不处理。
+- 展开按钮是 IconButton，部件名 PART_Chevron（上游的 propsChevron），不进 Tab 顺序；列表真的弹出时箭头翻转（Avalonia 的 :open、WPF 的 IsShown，WinForms 换成向上的箭头）。WinForms 的空状态只能换说明文字：上游的 empty 叫 EmptyText，没有自定义选项内容。
+- Autocomplete 是 Combobox 的子类，只改默认值：允许自定义值、没有展开按钮、没有可选的项（也不在加载）时不弹出；值就是 Text。表单字段名（name）与弹出位置（placement）不移植。
+
 ### Drawer（2026-11-15）
 
 - 内核同上游（ModalCore）：Drawer 从 Dialog（WinForms 是 DialogControl）派生，遮罩、焦点、Esc、点遮罩、BeforeClose、确认、命令式 ShowAsync 都是对话框的。为此 Dialog 把面板的摆放拆成给子类的钩子（量面板的约束、面板的矩形、面板排好之后、圆角、刚显示出来；WinForms 是 PanelBounds、SquarePanel、ArrangeExtras），行为不变；Avalonia 的 Dialog 部件样式改用 `:is(rune|Dialog)`，派生类也适用。
