@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- 文档应用：页面与示例同 vue-tsx-pro 的文档站（docs/site/pages.g.json），每个示例是一张 CodePreview；dotnet watch 下改了配方会热重载 -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>Rune.WinForms.Docs</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Rune.WinForms.Examples\Rune.WinForms.Examples.csproj" />
+  </ItemGroup>
+
+</Project>

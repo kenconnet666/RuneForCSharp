@@ -30,17 +30,17 @@ RuneForCSharp/
 ├─ avalonia/
 │  ├─ Directory.Build.props           导入根设置
 │  ├─ src/Rune.Avalonia/              组件库
-│  ├─ apps/Rune.Avalonia.Gallery/     组件示例（Debug 带 HotAvalonia）
+│  ├─ apps/Rune.Avalonia.Docs/        文档应用（Debug 带 HotAvalonia）
 │  └─ tests/Rune.Avalonia.Tests/      headless 测试
 ├─ wpf/
 │  ├─ Directory.Build.props           导入根设置，改成 net10.0-windows + UseWPF
 │  ├─ src/Rune.Wpf/
-│  ├─ apps/Rune.Wpf.Gallery/
+│  ├─ apps/Rune.Wpf.Docs/
 │  └─ tests/Rune.Wpf.Tests/           STA 线程 + 离屏窗口
 └─ winforms/
    ├─ Directory.Build.props           导入根设置，改成 net10.0-windows + UseWindowsForms + PerMonitorV2
    ├─ src/Rune.WinForms/
-   ├─ apps/Rune.WinForms.Gallery/
+   ├─ apps/Rune.WinForms.Docs/
    └─ tests/Rune.WinForms.Tests/      STA 线程 + 消息循环
 ```
 
@@ -430,8 +430,8 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - **WinForms**：一个常驻的 STA 线程跑消息循环（`WinFormsUi`）。离屏窗口收不到 WM_PAINT，用 DrawToBitmap 代替绘制，测"失效了哪些控件"。
 - 系统关闭了动画时，断言中间帧的测试跳过（`Assert.SkipUnless(Motion.Enabled, …)`）。
 - 测试框架统一用 xunit.v3 + Microsoft.Testing.Platform（`global.json` 里设了 test runner）。
-- **示例与 inspect**：示例按"组件/示例名"登记在各平台的 `apps/Rune.*.Examples`，Gallery 与 inspect 都用这张表。inspect 把示例放进宿主（背景、文字颜色、字号取主题），输出截图、元素树、属性与来源、读屏树：
-  - Avalonia：headless 平台加 Skia、HarfBuzz（`UseHeadlessDrawing = false`），`CaptureRenderedFrame` 出图，`SetRenderScaling` 做缩放；值的来源取 `GetDiagnostic` 的优先级。样式与 Gallery 相同（FluentTheme 给 UserControl 等平台控件模板）。
+- **示例与 inspect**：示例按"组件/示例名"登记在各平台的 `apps/Rune.*.Examples`，文档应用与 inspect 都用这张表。inspect 把示例放进宿主（背景、文字颜色、字号取主题），输出截图、元素树、属性与来源、读屏树：
+  - Avalonia：headless 平台加 Skia、HarfBuzz（`UseHeadlessDrawing = false`），`CaptureRenderedFrame` 出图，`SetRenderScaling` 做缩放；值的来源取 `GetDiagnostic` 的优先级。样式与文档应用相同（FluentTheme 给 UserControl 等平台控件模板）。
   - WPF：屏幕外的窗口，`RenderTargetBitmap` 出图；来源取 `DependencyPropertyHelper.GetValueSource`（区分主题样式、样式触发器、资源引用）。
   - WinForms：屏幕外的窗体，`DrawToBitmap` 出图；来源暂时只分本地值与默认值（`ShouldSerializeValue`），分层解析做出来后报命中的那一层。读屏树走 MSAA（与窗口层级一致）。
   - 画刷、颜色报出它对应的 token 名（Avalonia、WPF 按画刷对象查主题资源，WinForms 按颜色值查当前主题）。
@@ -499,7 +499,7 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   - 元素的 `Measure` 带可用的大小，文字按宽度换行。宿主同 Label：AutoSize 时不限宽，要换行就设 MaximumSize 或关掉 AutoSize。
   - TextRenderer 画字。行高按 TextRenderer 量一行的高度算（比 `Font.Height` 多一两个像素），LineClamp 的高度才与多行量出来的一致。多行省略用 `WordBreak | TextBoxControl | EndEllipsis`（最后一行放不下时不画半行，在可见的最后一行加省略号）。
   - GDI+ 的字体只有常规与粗体：semibold、bold 画成粗体，light、medium 画成常规。Numeric 不用处理（界面字体的数字默认等宽，GDI 也开不了 OpenType 特性）。
-  - 字体共用（`Fonts`）：同样的（字体、磅值、样式）一个 Font，元素不持有、不释放。主题的字体是一串候选，`Fonts.Installed` 取第一个装了的（Mono 用它；宿主、Gallery 也用它设主题的 Sans）。
+  - 字体共用（`Fonts`）：同样的（字体、磅值、样式）一个 Font，元素不持有、不释放。主题的字体是一串候选，`Fonts.Installed` 取第一个装了的（Mono 用它；宿主、文档应用也用它设主题的 Sans）。
   - 只有写了 Tone、Mono 的文字才读主题，换主题时其余文字不重画（实测：带色调的失效 1 次，跟随 ForeColor 的 0 次）。
 - **WPF**：从 TextBlock 派生（ROADMAP 决定 19）。档位（字号、字重、色调、等宽）是 Generic.xaml 主题样式里的触发器，在主题这一层，使用方任何样式都盖得过（第 4 节"档位的优先级"）；没写档位时继承外面，字号写成像素数时是本地值。默认值也在主题样式里（DefaultStyleKey 每个子类各设一次），`DependencyPropertyHelper` 报 DefaultStyle。
   - TextBlock 没有最大行数：LineClamp 按行高限 MaxHeight（`FontFamily.LineSpacing × FontSize`，或 LineHeight），加 Wrap 与 CharacterEllipsis，最后一行放不下的部分变成省略号。字号、字体、行高变了要重算：TextBlock 的 `OnPropertyChanged` 是密封的，改成覆盖这几个属性的元数据、加变化回调（与基类的回调合并）。
@@ -995,7 +995,7 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   WinForms 的子控件不能半透明，直接请使用方移除。
 - WPF 的 Control 自己有 Padding、BorderThickness：边框写在主题里，内边距随字号用 SetCurrentValue 写当前值（使用方的本地值、样式盖得过），里面的 Border 绑过去；
   inspect 也按 Alert 自己报。不用 EmSize.Padding：它的登记会覆盖 FontSize 的元数据、换掉字号的继承。代码建的部件要有 `Name = "PART_X"`，inspect 才配得上部件。
-  根 Border 的 TextElement.FontSize 绑到控件的 FontSize：Gallery 与 inspect 的宿主里，说明的 TextBlock 没从控件继承到字号（测试里继承正常，原因没查清），绑上就稳了。
+  根 Border 的 TextElement.FontSize 绑到控件的 FontSize：文档应用与 inspect 的宿主里，说明的 TextBlock 没从控件继承到字号（测试里继承正常，原因没查清），绑上就稳了。
 - 示例：tones、status、variants、banner（Banner 在同一页）。Avalonia、WPF 与文档站的取值对照没有差异。
 
 ### Gauge（2026-11-14）

@@ -39,7 +39,7 @@
   </Folder>
   <Folder Name="/winforms/apps/">
     <Project Path="winforms/apps/Rune.WinForms.Examples/Rune.WinForms.Examples.csproj" />
-    <Project Path="winforms/apps/Rune.WinForms.Gallery/Rune.WinForms.Gallery.csproj" />
+    <Project Path="winforms/apps/Rune.WinForms.Docs/Rune.WinForms.Docs.csproj" />
   </Folder>
   <Folder Name="/winforms/tools/">
     <Project Path="winforms/tools/Rune.WinForms.Inspect/Rune.WinForms.Inspect.csproj" />
