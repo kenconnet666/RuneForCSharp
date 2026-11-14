@@ -89,4 +89,18 @@ public class StatTests
         Assert.True(plain.Numbers.Number.Left > 0); // 组里左右空 space.md
         Assert.Equal(0, solo.Numbers.Number.Left);
     });
+
+    [Fact]
+    public Task Unconstrained_width_fits_the_content() => WinFormsUi.Run(() =>
+    {
+        // 横排的 Flex 不限宽：取内容的自然宽度，不按控件当前的宽度截断数值
+        var narrow = new StatControl { Label = "呆滞物料", Value = 7, Unit = "项" };
+        var wide = new StatControl { Label = "库存总额", Value = 101520, Format = new NumericFormat { Style = NumericStyle.Currency } };
+        using var form = WinFormsUi.Show(narrow, wide);
+
+        var size = wide.GetPreferredSize(Size.Empty);
+        Assert.True(size.Width >= wide.Numbers.Number.GetPreferredSize(Size.Empty).Width);
+        Assert.True(narrow.GetPreferredSize(Size.Empty).Width < size.Width);
+        Assert.Equal(300, wide.GetPreferredSize(new Size(300, 0)).Width); // 给了宽度照给的
+    });
 }

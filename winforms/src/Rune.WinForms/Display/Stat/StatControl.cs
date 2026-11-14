@@ -326,6 +326,9 @@ public class StatControl : Panel, IElementHost, IScopeAware
     {
         static Size SizeOf(Control control, int width) => control.AutoSize ? control.GetPreferredSize(new Size(width, 0)) : control.Size;
 
+        /// <summary>上一次排版算出的自然宽度：指标名与变化量一行、数值与单位一行里宽的那个，加内边距。</summary>
+        int natural;
+
         int Run(int width, bool arrange)
         {
             var context = owner.Context;
@@ -388,6 +391,7 @@ public class StatControl : Panel, IElementHost, IScopeAware
             var unitBaseline = unitSize.Height > 0 ? owner.unit.Baseline(context) ?? unitSize.Height : 0;
             var unitTop = Math.Max(0, valueBaseline - unitBaseline);
             var valueHeight = Math.Max(valueSize.Height, unitTop + unitSize.Height);
+            natural = 2 * pad + Math.Max(labelWidth + (changeWidth > 0 ? columnGap + changeWidth : 0), valueSize.Width + (unitSize.Width > 0 ? gap + unitSize.Width : 0));
             if (arrange)
             {
                 Control? valueControl = owner.loading.Shown ? owner.numberSkeleton : owner.Text is null ? owner.number : null;
@@ -423,9 +427,15 @@ public class StatControl : Panel, IElementHost, IScopeAware
             return Math.Max(0, y - gap);
         }
 
+        /// <summary>给了宽度时按它排；不限宽（横排的 Flex 里）时取内容的自然宽度，同网页里 Stat 的 fit-content。</summary>
         public Size Measure(Size proposed)
         {
-            var width = proposed.Width is > 1 and < int.MaxValue ? proposed.Width : owner.Width;
+            var width = proposed.Width is > 1 and < int.MaxValue ? proposed.Width : 0;
+            if (width == 0)
+            {
+                Run(int.MaxValue / 2, arrange: false);
+                width = natural;
+            }
             return new Size(width, Run(width, arrange: false));
         }
 
