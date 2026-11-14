@@ -23,7 +23,7 @@
   </Folder>
   <Folder Name="/wpf/apps/">
     <Project Path="wpf/apps/Rune.Wpf.Examples/Rune.Wpf.Examples.csproj" />
-    <Project Path="wpf/apps/Rune.Wpf.Gallery/Rune.Wpf.Gallery.csproj" />
+    <Project Path="wpf/apps/Rune.Wpf.Docs/Rune.Wpf.Docs.csproj" />
   </Folder>
   <Folder Name="/wpf/tools/">
     <Project Path="wpf/tools/Rune.Wpf.Inspect/Rune.Wpf.Inspect.csproj" />

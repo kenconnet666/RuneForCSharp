@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- 文档应用：页面与示例同 vue-tsx-pro 的文档站（docs/site/pages.g.json），每个示例是一张 CodePreview（Rider 2026.2 起支持 WPF 的 XAML 热重载） -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>Rune.Wpf.Docs</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Rune.Wpf.Examples\Rune.Wpf.Examples.csproj" />
+  </ItemGroup>
+
+</Project>

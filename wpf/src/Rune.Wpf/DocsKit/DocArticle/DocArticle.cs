@@ -33,7 +33,8 @@ public class DocArticle : CompositeControl
     readonly StackPanel root = new();
     readonly Flex header = new() { Direction = FlexDirection.Column, Gap = Space.Lg };
     readonly H1 title = new();
-    readonly Paragraph description = new() { Size = TextSize.Lg, Tone = TextTone.Muted, MaxWidth = 48 * 16 };
+    // 靠起始边：设了 MaxWidth 时拉伸的元素会被居中
+    readonly Paragraph description = new() { Size = TextSize.Lg, Tone = TextTone.Muted, MaxWidth = 48 * 16, HorizontalAlignment = HorizontalAlignment.Left };
     readonly ContentControl lead = new() { Focusable = false };
 
     /// <summary>新建：没有内容。</summary>

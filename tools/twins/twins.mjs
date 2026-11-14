@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// 三个库各有一份、除命名空间外逐字相同的源文件（纯计算或纯数据，不用平台类型：FlexLayout、GridLayout、StatusMap、AvatarInitials、ListboxOption、ListState、FloatingPlacement、ScrollAreaVariants、CodeHighlighting、TabsVariants、TableVariants、ItemListVariants、Workdays、MenuVariants、Selection、ToggleGroupVariants、ControlVariants、TextFieldVariants、TextFormat、DesktopMessages、SelectSearch、RemoteOptions、AlertVariants、Hotkey、IconStrokes、ResultStatus、DescriptionsVariants、NumericFormat、SparklineGeometry、ProportionBarVariants、GaugeGeometry，示例项目的 ExampleSources）。三个库不共享代码（ROADMAP 决定 2），
+// 三个库各有一份、除命名空间外逐字相同的源文件（纯计算或纯数据，不用平台类型：FlexLayout、GridLayout、StatusMap、AvatarInitials、ListboxOption、ListState、FloatingPlacement、ScrollAreaVariants、CodeHighlighting、TabsVariants、TableVariants、ItemListVariants、Workdays、MenuVariants、Selection、ToggleGroupVariants、ControlVariants、TextFieldVariants、TextFormat、DesktopMessages、SelectSearch、RemoteOptions、AlertVariants、Hotkey、IconStrokes、ResultStatus、DescriptionsVariants、NumericFormat、SparklineGeometry、ProportionBarVariants、GaugeGeometry，示例项目的 ExampleSources、DocSite）。三个库不共享代码（ROADMAP 决定 2），
 // 一致性靠这里检查：改了一份，另外两份照抄。用法：node tools/twins/twins.mjs；有不同时退出码为 1
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -39,6 +39,7 @@ const TWINS = [
   ['avalonia/src/Rune.Avalonia/Display/ProportionBar/ProportionBarVariants.cs', 'wpf/src/Rune.Wpf/Display/ProportionBar/ProportionBarVariants.cs', 'winforms/src/Rune.WinForms/Display/ProportionBar/ProportionBarVariants.cs'],
   ['avalonia/src/Rune.Avalonia/Display/Gauge/GaugeGeometry.cs', 'wpf/src/Rune.Wpf/Display/Gauge/GaugeGeometry.cs', 'winforms/src/Rune.WinForms/Display/Gauge/GaugeGeometry.cs'],
   ['avalonia/apps/Rune.Avalonia.Examples/ExampleSources.cs', 'wpf/apps/Rune.Wpf.Examples/ExampleSources.cs', 'winforms/apps/Rune.WinForms.Examples/ExampleSources.cs'],
+  ['avalonia/apps/Rune.Avalonia.Examples/Site/DocSite.cs', 'wpf/apps/Rune.Wpf.Examples/Site/DocSite.cs', 'winforms/apps/Rune.WinForms.Examples/Site/DocSite.cs'],
 ];
 
 /** 去掉命名空间那一行，统一换行符 */
