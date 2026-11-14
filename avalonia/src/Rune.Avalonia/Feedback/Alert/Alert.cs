@@ -7,6 +7,7 @@ using Avalonia.Controls.Presenters;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Metadata;
+using System.Windows.Input;
 using LayoutSize = Avalonia.Size;
 
 namespace Rune.Avalonia;
@@ -85,6 +86,12 @@ public class Alert : Control
     readonly ContentPresenter action = new() { Name = AlertParts.Action, VerticalAlignment = VerticalAlignment.Center };
     readonly TemplateResources resources;
     readonly Dismissal dismissal;
+    /// <summary>请求关闭时调用的命令（MVVM）：设了也算订阅（有关闭按钮）；在 <see cref="CloseRequested"/> 之后调用，参数是 <see cref="CloseCommandParameter"/>。</summary>
+    public static readonly StyledProperty<ICommand?> CloseCommandProperty = AvaloniaProperty.Register<Alert, ICommand?>(nameof(CloseCommand));
+
+    /// <summary><see cref="CloseCommand"/> 的参数。</summary>
+    public static readonly StyledProperty<object?> CloseCommandParameterProperty = AvaloniaProperty.Register<Alert, object?>(nameof(CloseCommandParameter));
+
     EventHandler? closeRequested;
     CloseButton? close;
 
@@ -107,7 +114,7 @@ public class Alert : Control
         title.Bind(TextBlock.FontWeightProperty, title.GetResourceObservable(ThemeKeys.FontWeight.Medium));
         // 说明是正文色（标题、图标随色调）
         description.Bind(TextElement.ForegroundProperty, description.GetResourceObservable(ThemeKeys.Brush.Text));
-        dismissal = new Dismissal(this, PresenceProperty, () => closeRequested?.Invoke(this, EventArgs.Empty));
+        dismissal = new Dismissal(this, PresenceProperty, RaiseCloseRequested);
         Resolved.Bind(this, Resolved.PaletteProperty, Tone.PaletteKey);
         Resolved.Bind(this, Resolved.RadiusProperty, Radius.ResourceKey);
         Update();
@@ -159,6 +166,22 @@ public class Alert : Control
     /// <summary>描边色。</summary>
     public IBrush? BorderBrush { get => GetValue(BorderBrushProperty); set => SetValue(BorderBrushProperty, value); }
 
+    /// <summary>请求关闭时调用的命令。</summary>
+    public ICommand? CloseCommand { get => GetValue(CloseCommandProperty); set => SetValue(CloseCommandProperty, value); }
+
+    /// <summary>关闭命令的参数。</summary>
+    public object? CloseCommandParameter { get => GetValue(CloseCommandParameterProperty); set => SetValue(CloseCommandParameterProperty, value); }
+
+    /// <summary>发 <see cref="CloseRequested"/>，再调 <see cref="CloseCommand"/>（不能执行时不调）。</summary>
+    void RaiseCloseRequested()
+    {
+        closeRequested?.Invoke(this, EventArgs.Empty);
+        if (CloseCommand is { } command && command.CanExecute(CloseCommandParameter)) command.Execute(CloseCommandParameter);
+    }
+
+    /// <summary>有人要关闭：订阅了 <see cref="CloseRequested"/> 或设了 <see cref="CloseCommand"/>。</summary>
+    bool WantsClose => closeRequested is not null || CloseCommand is not null;
+
     /// <summary>请求关闭（TS 的 onClose）：离场结束才发，使用方移除提示条。订阅了才有关闭按钮。</summary>
     public event EventHandler? CloseRequested
     {
@@ -196,6 +219,7 @@ public class Alert : Control
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
+        if (change.Property == CloseCommandProperty) SyncClose();
         if (change.Property == SizeProperty)
         {
             if (Size.Pixels is { } pixels) resources.Set(FontSizeProperty, pixels);
@@ -285,7 +309,7 @@ public class Alert : Control
     /// <summary>订阅了关闭就放上关闭按钮，退订了就拿掉。</summary>
     void SyncClose()
     {
-        if (closeRequested is null)
+        if (!WantsClose)
         {
             if (close is not null) row.Children.Remove(close);
             close = null;

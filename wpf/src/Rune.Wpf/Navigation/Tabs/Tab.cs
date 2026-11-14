@@ -46,6 +46,13 @@ public class Tab : ButtonBase
     public static readonly DependencyProperty IsDraggingProperty = IsDraggingKey.DependencyProperty;
 
     Tabs? owner;
+    /// <summary>请求关闭时调用的命令（MVVM）：设了也算订阅（有关闭按钮）；在 <see cref="CloseRequested"/> 之后调用，参数是 <see cref="CloseCommandParameter"/>。</summary>
+    public static readonly DependencyProperty CloseCommandProperty = DependencyProperty.Register(nameof(CloseCommand), typeof(ICommand), typeof(Tab),
+        new PropertyMetadata(null, (d, _) => ((Tab)d).SyncClose()));
+
+    /// <summary><see cref="CloseCommand"/> 的参数。</summary>
+    public static readonly DependencyProperty CloseCommandParameterProperty = DependencyProperty.Register(nameof(CloseCommandParameter), typeof(object), typeof(Tab));
+
     EventHandler? closeRequested;
     IconButton? close;
     ContentPresenter? closeHost;
@@ -73,6 +80,22 @@ public class Tab : ButtonBase
 
     /// <summary>拖动排序中。</summary>
     public bool IsDragging { get => (bool)GetValue(IsDraggingProperty); internal set => SetValue(IsDraggingKey, value); }
+
+    /// <summary>请求关闭时调用的命令。</summary>
+    public ICommand? CloseCommand { get => (ICommand?)GetValue(CloseCommandProperty); set => SetValue(CloseCommandProperty, value); }
+
+    /// <summary>关闭命令的参数。</summary>
+    public object? CloseCommandParameter { get => GetValue(CloseCommandParameterProperty); set => SetValue(CloseCommandParameterProperty, value); }
+
+    /// <summary>发 <see cref="CloseRequested"/>，再调 <see cref="CloseCommand"/>（不能执行时不调）。</summary>
+    void RaiseCloseRequested()
+    {
+        closeRequested?.Invoke(this, EventArgs.Empty);
+        if (CloseCommand is { } command && command.CanExecute(CloseCommandParameter)) command.Execute(CloseCommandParameter);
+    }
+
+    /// <summary>有人要关闭：订阅了 <see cref="CloseRequested"/> 或设了 <see cref="CloseCommand"/>。</summary>
+    bool WantsClose => closeRequested is not null || CloseCommand is not null;
 
     /// <summary>请求关闭（关闭按钮、Delete、鼠标中键；TS 的 onClose）：使用方移除这个标签。订阅了才有关闭按钮。</summary>
     public event EventHandler? CloseRequested
@@ -142,8 +165,8 @@ public class Tab : ButtonBase
     /// <summary>订阅了关闭就建关闭按钮，退订了就拿掉。</summary>
     void SyncClose()
     {
-        SetValue(IsClosableKey, closeRequested is not null);
-        if (closeRequested is null)
+        SetValue(IsClosableKey, WantsClose);
+        if (!WantsClose)
         {
             ClearValue(AutomationProperties.AcceleratorKeyProperty);
             close = null;
@@ -178,13 +201,13 @@ public class Tab : ButtonBase
     /// <summary>请求关闭（不可用时不关）。</summary>
     internal void RequestClose()
     {
-        if (closeRequested is not null && !IsDisabled) closeRequested.Invoke(this, EventArgs.Empty);
+        if (WantsClose && !IsDisabled) RaiseCloseRequested();
     }
 
     /// <summary>Delete 关闭（TS 的 aria-keyshortcuts="Delete"）。</summary>
     protected override void OnKeyDown(KeyEventArgs e)
     {
-        if (e.Key == Key.Delete && Keyboard.Modifiers == ModifierKeys.None && closeRequested is not null && !IsDisabled)
+        if (e.Key == Key.Delete && Keyboard.Modifiers == ModifierKeys.None && WantsClose && !IsDisabled)
         {
             RequestClose();
             e.Handled = true;

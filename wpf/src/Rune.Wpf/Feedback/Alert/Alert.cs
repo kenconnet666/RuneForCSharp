@@ -3,6 +3,7 @@ using System.Windows.Automation;
 using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Media;
 
@@ -82,6 +83,13 @@ public class Alert : Control
     readonly ContentPresenter content = new() { Name = "PART_Content" };
     readonly ContentPresenter action = new() { Name = "PART_Action", VerticalAlignment = VerticalAlignment.Center };
     readonly Dismissal dismissal;
+    /// <summary>请求关闭时调用的命令（MVVM）：设了也算订阅（有关闭按钮）；在 <see cref="CloseRequested"/> 之后调用，参数是 <see cref="CloseCommandParameter"/>。</summary>
+    public static readonly DependencyProperty CloseCommandProperty = DependencyProperty.Register(nameof(CloseCommand), typeof(ICommand), typeof(Alert),
+        new PropertyMetadata(null, (d, _) => ((Alert)d).SyncClose()));
+
+    /// <summary><see cref="CloseCommand"/> 的参数。</summary>
+    public static readonly DependencyProperty CloseCommandParameterProperty = DependencyProperty.Register(nameof(CloseCommandParameter), typeof(object), typeof(Alert));
+
     EventHandler? closeRequested;
     CloseButton? close;
 
@@ -114,7 +122,7 @@ public class Alert : Control
         root.SetBinding(TextElement.FontSizeProperty, new System.Windows.Data.Binding(nameof(FontSize)) { Source = this });
         AddVisualChild(root);
         AddLogicalChild(root);
-        dismissal = new Dismissal(this, PresenceProperty, () => closeRequested?.Invoke(this, EventArgs.Empty));
+        dismissal = new Dismissal(this, PresenceProperty, RaiseCloseRequested);
         Loaded += (_, _) =>
         {
             UpdateMetrics();
@@ -155,6 +163,22 @@ public class Alert : Control
 
     /// <summary>操作。</summary>
     public object? Action { get => GetValue(ActionProperty); set => SetValue(ActionProperty, value); }
+
+    /// <summary>请求关闭时调用的命令。</summary>
+    public ICommand? CloseCommand { get => (ICommand?)GetValue(CloseCommandProperty); set => SetValue(CloseCommandProperty, value); }
+
+    /// <summary>关闭命令的参数。</summary>
+    public object? CloseCommandParameter { get => GetValue(CloseCommandParameterProperty); set => SetValue(CloseCommandParameterProperty, value); }
+
+    /// <summary>发 <see cref="CloseRequested"/>，再调 <see cref="CloseCommand"/>（不能执行时不调）。</summary>
+    void RaiseCloseRequested()
+    {
+        closeRequested?.Invoke(this, EventArgs.Empty);
+        if (CloseCommand is { } command && command.CanExecute(CloseCommandParameter)) command.Execute(CloseCommandParameter);
+    }
+
+    /// <summary>有人要关闭：订阅了 <see cref="CloseRequested"/> 或设了 <see cref="CloseCommand"/>。</summary>
+    bool WantsClose => closeRequested is not null || CloseCommand is not null;
 
     /// <summary>请求关闭（TS 的 onClose）：离场结束才发，使用方移除提示条。订阅了才有关闭按钮。</summary>
     public event EventHandler? CloseRequested
@@ -271,7 +295,7 @@ public class Alert : Control
     /// <summary>订阅了关闭就放上关闭按钮，退订了就拿掉。</summary>
     void SyncClose()
     {
-        if (closeRequested is null)
+        if (!WantsClose)
         {
             if (close is not null) row.Children.Remove(close);
             close = null;

@@ -68,4 +68,20 @@ public class AlertTests
         ((IInvokeProvider)alert.CloseButton!.Peer().GetPattern(PatternInterface.Invoke)).Invoke();
         WpfUi.Until(() => closed == 1);
     });
+
+    [Fact]
+    public Task A_close_command_also_adds_the_button_and_runs_after_leaving() => WpfUi.Run(() =>
+    {
+        var command = new TestCommand();
+        var alert = new Alert { Content = "x", CloseCommand = command, CloseCommandParameter = "notice-1" };
+        WpfUi.Show(Host(alert));
+
+        Assert.NotNull(alert.CloseButton);
+        ((IInvokeProvider)alert.CloseButton!.Peer().GetPattern(PatternInterface.Invoke)).Invoke();
+        WpfUi.Until(() => command.Executed.Count == 1);
+        Assert.Equal("notice-1", command.Executed[0]);
+
+        alert.CloseCommand = null; // 没有订阅也没有命令：拿掉关闭按钮
+        Assert.Null(alert.CloseButton);
+    });
 }

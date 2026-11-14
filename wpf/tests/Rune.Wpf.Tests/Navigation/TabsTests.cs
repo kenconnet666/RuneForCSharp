@@ -247,4 +247,19 @@ public class TabsTests
         Assert.Equal(list.Scroller.ScrollableWidth, list.Scroller.HorizontalOffset, 0.5);
         Assert.False(next.IsEnabled);
     });
+
+    [Fact]
+    public Task A_close_command_makes_the_tab_closable_and_respects_can_execute() => WpfUi.Run(() =>
+    {
+        var allowed = false;
+        var command = new TestCommand(_ => allowed);
+        var tab = new Tab { Value = "a", Content = "A", CloseCommand = command, CloseCommandParameter = "a" };
+
+        Assert.True(tab.IsClosable);
+        tab.RequestClose();
+        Assert.Empty(command.Executed); // 不能执行：不调
+        allowed = true;
+        tab.RequestClose();
+        Assert.Equal(["a"], command.Executed);
+    });
 }

@@ -46,6 +46,13 @@ public class Tag : Badge
     static readonly DependencyProperty PresenceProperty = DependencyProperty.Register("Presence", typeof(double), typeof(Tag),
         new FrameworkPropertyMetadata(1d, (d, e) => ((Tag)d).ApplyPresence((double)e.NewValue)));
 
+    /// <summary>请求移除时调用的命令（MVVM）：设了也算订阅（有移除按钮）；在 <see cref="RemoveRequested"/> 之后调用，参数是 <see cref="RemoveCommandParameter"/>。</summary>
+    public static readonly DependencyProperty RemoveCommandProperty = DependencyProperty.Register(nameof(RemoveCommand), typeof(ICommand), typeof(Tag),
+        new PropertyMetadata(null, (d, _) => ((Tag)d).SyncRemove()));
+
+    /// <summary><see cref="RemoveCommand"/> 的参数。</summary>
+    public static readonly DependencyProperty RemoveCommandParameterProperty = DependencyProperty.Register(nameof(RemoveCommandParameter), typeof(object), typeof(Tag));
+
     EventHandler? removeRequested;
     CloseButton? remove;
     readonly Dismissal dismissal;
@@ -66,7 +73,7 @@ public class Tag : Badge
     {
         RenderTransformOrigin = new Point(0.5, 0.5);
         SetResourceReference(FocusRingProperty, ThemeKeys.Brush.FocusRing);
-        dismissal = new Dismissal(this, PresenceProperty, () => removeRequested?.Invoke(this, EventArgs.Empty));
+        dismissal = new Dismissal(this, PresenceProperty, RaiseRemoveRequested);
     }
 
     /// <summary>可选中。</summary>
@@ -197,6 +204,22 @@ public class Tag : Badge
     /// <summary>移除按钮的读屏名称。</summary>
     public string? RemoveLabel { get => (string?)GetValue(RemoveLabelProperty); set => SetValue(RemoveLabelProperty, value); }
 
+    /// <summary>请求移除时调用的命令。</summary>
+    public ICommand? RemoveCommand { get => (ICommand?)GetValue(RemoveCommandProperty); set => SetValue(RemoveCommandProperty, value); }
+
+    /// <summary>移除命令的参数。</summary>
+    public object? RemoveCommandParameter { get => GetValue(RemoveCommandParameterProperty); set => SetValue(RemoveCommandParameterProperty, value); }
+
+    /// <summary>发 <see cref="RemoveRequested"/>，再调 <see cref="RemoveCommand"/>（不能执行时不调）。</summary>
+    void RaiseRemoveRequested()
+    {
+        removeRequested?.Invoke(this, EventArgs.Empty);
+        if (RemoveCommand is { } command && command.CanExecute(RemoveCommandParameter)) command.Execute(RemoveCommandParameter);
+    }
+
+    /// <summary>有人要移除：订阅了 <see cref="RemoveRequested"/> 或设了 <see cref="RemoveCommand"/>。</summary>
+    bool WantsRemove => removeRequested is not null || RemoveCommand is not null;
+
     /// <summary>请使用方移除这个标签（离场结束时发）；订阅了才有移除按钮。</summary>
     public event EventHandler? RemoveRequested
     {
@@ -235,7 +258,7 @@ public class Tag : Badge
     /// <summary>有订阅时放上移除按钮，没有时拿掉。</summary>
     void SyncRemove()
     {
-        if (removeRequested is null || IsSelected is not null)
+        if (!WantsRemove || IsSelected is not null)
         {
             Trailing = remove = null;
             return;

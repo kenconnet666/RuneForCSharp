@@ -10,6 +10,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.VisualTree;
+using System.Windows.Input;
 
 namespace Rune.Avalonia;
 
@@ -29,6 +30,12 @@ public class Tab : ButtonBase
     public static readonly DirectProperty<Tab, bool> IsSelectedProperty = AvaloniaProperty.RegisterDirect<Tab, bool>(nameof(IsSelected), tab => tab.IsSelected);
 
     Tabs? owner;
+    /// <summary>请求关闭时调用的命令（MVVM）：设了也算订阅（有关闭按钮）；在 <see cref="CloseRequested"/> 之后调用，参数是 <see cref="CloseCommandParameter"/>。</summary>
+    public static readonly StyledProperty<ICommand?> CloseCommandProperty = AvaloniaProperty.Register<Tab, ICommand?>(nameof(CloseCommand));
+
+    /// <summary><see cref="CloseCommand"/> 的参数。</summary>
+    public static readonly StyledProperty<object?> CloseCommandParameterProperty = AvaloniaProperty.Register<Tab, object?>(nameof(CloseCommandParameter));
+
     EventHandler? closeRequested;
     IconButton? close;
     ContentPresenter? closeHost;
@@ -40,6 +47,19 @@ public class Tab : ButtonBase
 
     /// <summary>选中着。</summary>
     public bool IsSelected { get; private set => SetAndRaise(IsSelectedProperty, ref field, value); }
+
+    /// <summary>请求关闭时调用的命令。</summary>
+    public ICommand? CloseCommand { get => GetValue(CloseCommandProperty); set => SetValue(CloseCommandProperty, value); }
+
+    /// <summary>关闭命令的参数。</summary>
+    public object? CloseCommandParameter { get => GetValue(CloseCommandParameterProperty); set => SetValue(CloseCommandParameterProperty, value); }
+
+    /// <summary>发 <see cref="CloseRequested"/>，再调 <see cref="CloseCommand"/>（不能执行时不调）。</summary>
+    void RaiseCloseRequested()
+    {
+        closeRequested?.Invoke(this, EventArgs.Empty);
+        if (CloseCommand is { } command && command.CanExecute(CloseCommandParameter)) command.Execute(CloseCommandParameter);
+    }
 
     /// <summary>请求关闭（关闭按钮、Delete、鼠标中键；TS 的 onClose）：使用方移除这个标签。订阅了才有关闭按钮。</summary>
     public event EventHandler? CloseRequested
@@ -56,8 +76,8 @@ public class Tab : ButtonBase
         }
     }
 
-    /// <summary>能关闭（订阅了 <see cref="CloseRequested"/>）。</summary>
-    internal bool IsClosable => closeRequested is not null;
+    /// <summary>能关闭：订阅了 <see cref="CloseRequested"/> 或设了 <see cref="CloseCommand"/>。</summary>
+    internal bool IsClosable => closeRequested is not null || CloseCommand is not null;
 
     /// <summary>读屏、菜单里的文字：内容的文字，没有时是值。</summary>
     internal string Label => Field.PlainText(Content) is { Length: > 0 } text ? text : Value ?? "";
@@ -107,6 +127,7 @@ public class Tab : ButtonBase
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
+        if (change.Property == CloseCommandProperty) SyncClose();
         if (change.Property == ContentProperty || change.Property == ValueProperty || change.Property == IsEnabledProperty)
         {
             UpdateCloseLabel();
@@ -185,7 +206,7 @@ public class Tab : ButtonBase
     /// <summary>请求关闭（不可用时不关）。</summary>
     internal void RequestClose()
     {
-        if (IsClosable && !IsDisabled) closeRequested?.Invoke(this, EventArgs.Empty);
+        if (IsClosable && !IsDisabled) RaiseCloseRequested();
     }
 
     /// <summary>Delete 关闭（TS 的 aria-keyshortcuts="Delete"）。</summary>
