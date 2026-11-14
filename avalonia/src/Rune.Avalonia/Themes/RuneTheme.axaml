@@ -16,6 +16,7 @@
         <ResourceInclude Source="avares://Rune.Avalonia/Base/Code/Code.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Base/Blockquote/Blockquote.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Display/Figure/Figure.axaml" />
+        <ResourceInclude Source="avares://Rune.Avalonia/Display/Accordion/Accordion.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Base/Spinner/Spinner.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Base/Badge/Badge.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Base/Button/Button.axaml" />

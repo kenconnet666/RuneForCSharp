@@ -173,6 +173,11 @@ export const PROPS_NOT_PORTED = {
     pageScrollbar: '整页的浮层滚动条是网页的：桌面上正文那一列本身是 ScrollArea（AppShell.MainScroll）',
   },
   NavList: { propsList: 'nav > ul 是 HTML 的结构：NavList 本身就是那一列' },
+  Collapsible: {
+    lazy: '内容是传进来的控件实例：收起后隐藏、不在 Tab 顺序与读屏里，本来就是展开时才有代价（同 Collapse）',
+    propsContent: '内容区就是里面的 Collapse，没有另包一层：要改样式写在内容控件上',
+  },
+  AccordionItem: { propsHeading: '没有单独的标题元素：标题层级写在标题按钮的读屏属性上（Accordion 的 HeadingLevel）' },
   Abbr: { propsTooltip: '提示就是平台的 ToolTip：位置、箭头写在 Abbr 自己身上（Avalonia、WPF 的 Tooltip.Placement、Tooltip.Arrow 附加属性）；WinForms 自带的提示用默认的位置' },
   Pagination: { propsItem: '外层的 li 是 HTML 列表的结构：桌面上页码按钮、省略号直接排在列表里' },
   NumberField: {
@@ -315,6 +320,12 @@ export const PLATFORM_PROPS_NOT_PORTED = {
       ['propsRoot', 'propsIcon', 'propsPrefix', 'propsSuffix', 'propsDecrement', 'propsIncrement', 'propsClear']
         .map((prop) => [prop, '外壳是 TextInputControl 自己画的，里面的图标、前后缀、加减与清空按钮是子控件，没有部件属性：外观跟主题，按钮走 ProviderControl 的组件定制']),
     ),
+    Accordion: {
+      headingLevel: 'WinForms 的读屏接口（AccessibleObject）没有标题层级',
+      size: '字号跟着宿主的 Font（同其他 WinForms 容器）',
+    },
+    AccordionItem: Object.fromEntries(['propsTrigger', 'propsChevron', 'propsContent']
+      .map((prop) => [prop, '标题按钮、箭头、内容区是 AccordionItemControl 建的子控件，没有部件属性：外观跟主题'])),
     PageHeader: Object.fromEntries(
       ['propsBreadcrumbs', 'propsMain', 'propsBack', 'propsHeading', 'propsTitleRow', 'propsTitle', 'propsMeta', 'propsDescription', 'propsActions']
         .map((prop) => [prop, '面包屑、标题行、返回按钮、标题、说明是 PageHeaderControl 建的子控件，外观跟主题（按钮走 ProviderControl 的组件定制）；标记、操作是使用方给的控件，直接改它们']),

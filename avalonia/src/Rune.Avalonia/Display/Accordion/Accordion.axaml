@@ -1,0 +1,17 @@
+<!-- 手风琴标题按钮的主题（vue-tsx-pro 的 accordionStyles.trigger）：整行宽、上下 space.md、左右 space.sm、sm 圆角，悬停 fill 底，medium 字重 -->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:AccordionTrigger}" TargetType="rune:AccordionTrigger" BasedOn="{StaticResource {x:Type rune:ButtonBase}}">
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Padding" Value="{rune:Em 0.5, 0.75}" />
+    <Setter Property="CornerRadius" Value="{rune:Em Resource=Rune.Radius.Sm}" />
+    <Setter Property="MinHeight" Value="24" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
+    <Style Selector="^:pointerover"><Setter Property="Background" Value="{DynamicResource Rune.Brush.Fill}" /></Style>
+    <Style Selector="^:disabled"><Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" /></Style>
+  </ControlTheme>
+</ResourceDictionary>

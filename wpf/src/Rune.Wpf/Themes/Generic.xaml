@@ -49,6 +49,7 @@
     <ResourceDictionary Source="/Rune.Wpf;component/Base/Code/Code.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Base/Blockquote/Blockquote.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Display/Figure/Figure.xaml" />
+    <ResourceDictionary Source="/Rune.Wpf;component/Display/Accordion/Accordion.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Base/Button/Button.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Base/CodeBlock/CodeBlock.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Input/Choice/Choice.xaml" />
