@@ -56,6 +56,9 @@ jobs:
           $inspect = Get-ChildItem ${{ matrix.platform }}/tools -Recurse -Filter 'Rune.*.Inspect.exe' -ErrorAction SilentlyContinue |
             Where-Object FullName -Match '[\\/]bin[\\/]Release[\\/]' | Select-Object -First 1
           if (-not $inspect) { Write-Output '这个平台还没有 inspect'; exit 0 }
+          # 文档站的"显示代码"：每个示例都要切得出源码
+          & $inspect.FullName source all
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
           foreach ($example in (& $inspect.FullName list --json | ConvertFrom-Json)) {
             foreach ($theme in 'light', 'dark') {
               & $inspect.FullName snapshot $example.'示例' --theme $theme

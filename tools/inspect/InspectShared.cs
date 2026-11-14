@@ -26,6 +26,7 @@ sealed record InspectOptions(string Command, string? Key, string Theme, double W
     public const string Usage = """
         用法：inspect <命令> [组件/示例] [选项]
           list                       列出全部示例
+          source <组件/示例|all>      示例的源码（文档站"显示代码"取的那一段）；all 时核对每个示例都切得出源码
           snapshot <组件/示例>        渲染成 PNG（artifacts/inspect/<平台>/）
           tree <组件/示例>            元素树：类型、名字、类、边界
           props <组件/示例>           每个元素解析后的属性与值的来源
@@ -63,7 +64,7 @@ sealed record InspectOptions(string Command, string? Key, string Theme, double W
             }
         }
         var command = args[0];
-        if (command is not ("list" or "snapshot" or "tree" or "props" or "uia" or "styles" or "bench")) throw new UsageException($"不认识的命令 {command}");
+        if (command is not ("list" or "source" or "snapshot" or "tree" or "props" or "uia" or "styles" or "bench")) throw new UsageException($"不认识的命令 {command}");
         if (command is not ("list" or "bench") && key is null) throw new UsageException($"{command} 要写示例（组件/示例名，如 Icon/basic）");
         if (runs < 2) throw new UsageException("--runs 至少 2（第一轮预热，不计）");
         return new InspectOptions(command, key, theme ?? "light", width, padding, minHeight, scale, exact, json, outPath, (int)count, (int)runs);

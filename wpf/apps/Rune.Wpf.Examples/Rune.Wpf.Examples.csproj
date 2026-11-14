@@ -9,4 +9,9 @@
     <ProjectReference Include="..\..\src\Rune.Wpf\Rune.Wpf.csproj" />
   </ItemGroup>
 
+  <!-- 示例的源文件作为嵌入资源：文档站的"显示代码"按示例切出来（ExampleSources） -->
+  <ItemGroup>
+    <EmbeddedResource Include="**\*.cs;**\*.xaml" Exclude="bin\**;obj\**" LogicalName="Source/%(RecursiveDir)%(Filename)%(Extension)" WithCulture="false" />
+  </ItemGroup>
+
 </Project>

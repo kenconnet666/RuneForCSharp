@@ -29,7 +29,7 @@ static class Program
             .UseHarfBuzz()
             .UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false })
             .SetupWithoutStarting();
-        return options.Command == "bench" ? BenchRunner.Run(options) : Inspector.Run(options);
+        return options.Command switch { "bench" => BenchRunner.Run(options), "source" => Inspector.Source(options), _ => Inspector.Run(options) };
     });
 }
 
@@ -57,6 +57,20 @@ static class Inspector
         var table = new ReportTable("示例", "标题", "说明");
         foreach (var example in ExampleCatalog.All) table.Add(example.Key, example.Title, example.Description);
         return table.Render(options.Json);
+    }
+
+    /// <summary>示例的源码；all 时核对每个示例都切得出（XAML 示例要新建出来才知道是哪个控件）。</summary>
+    public static string Source(InspectOptions options)
+    {
+        static string? Of(Example example) => ExampleSources.Of(example.Create, example.Create.Method.Name.StartsWith('<') ? example.Create() : null);
+        if (options.Key == "all")
+        {
+            var missing = ExampleCatalog.All.Where(example => Of(example) is null).Select(example => example.Key).ToList();
+            if (missing.Count > 0) throw new UsageException($"切不出源码：{string.Join("、", missing)}");
+            return $"全部 {ExampleCatalog.All.Count} 个示例都切得出源码";
+        }
+        var found = ExampleCatalog.Find(options.Key!) ?? throw new UsageException($"没有示例 {options.Key}；inspect list 列出全部");
+        return Of(found) ?? throw new UsageException($"{options.Key} 切不出源码");
     }
 
     public static string Run(InspectOptions options)
