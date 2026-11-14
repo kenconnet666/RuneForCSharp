@@ -54,6 +54,8 @@ export const COMPONENT_PROP_RENAMES = {
   Video: { src: 'Source', controls: 'ControlBar' },
   // 文字多行用换行分开（TS 是字符串数组）；Width、Height 是控件自己的大小，图片的大小另起名字
   Watermark: { content: 'Text', width: 'ImageWidth', height: 'ImageHeight' },
+  // 布尔状态按平台习惯带 Is
+  Marquee: { paused: 'IsPaused' },
   // 移除由使用方做：事件是"请求移除"（离场结束才发）
   Tag: { onRemove: 'RemoveRequested' },
   // 关闭由使用方做：事件是"请求关闭"（Avalonia、WPF 离场结束才发）
@@ -188,6 +190,8 @@ export const PROPS_NOT_PORTED = {
     propsRoot: '外层就是 Embed 自己（定比例的框）：样式直接写在 Embed 上',
     propsPlaceholder: '加载中的骨架是内部的 Skeleton（image 形状）：外观跟主题',
   },
+  Marquee: Object.fromEntries(['propsTrack', 'propsGroup']
+    .map((prop) => [prop, '做动画的那一层、每一份内容是内部的面板（复制的那份是画出来的），没有部件属性：间距用 Gap'])),
   Watermark: { propsLayer: '水印层是内部画出来的一层（Avalonia 的子元素或窗口浮层里的元素、WPF 的子元素或装饰、WinForms 的分层窗口），只画不交互，外观由 Color、FontSize 等属性决定' },
   Video: {
     propsRoot: '外层就是 Video 自己（定比例的黑底框）：样式直接写在 Video 上',
@@ -271,6 +275,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     CommandPalette: Object.fromEntries(['propsInput', 'propsListbox'].map((prop) => [prop, '面板里的搜索框、列表是 CommandPalette 建的，外观跟着 TextField、Listbox 的主题样式；部件样式键只有搜索行'])),
   },
   WinForms: {
+    Marquee: { fade: '子控件各有窗口，盖不了它们：没有两端渐隐' },
     UserButton: { propsAvatar: '头像是 UserButton 画的 Avatar 元素，WinForms 还没有头像的部件属性记录（AvatarProps）；尺寸是 sm，配色跟着 Avatar 的作用域默认值' },
     SelectedTags: { propsMore: '“+N”同其余标签是 SelectedTagsControl 建的 sm、soft 的 TagControl（同 propsTag），WinForms 没有部件样式' },
     Tabs: { ripple: '标签是组件库画的容器控件（里面放文字与计数），没有按下的波纹' },

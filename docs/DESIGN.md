@@ -1358,3 +1358,9 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 控制器 LoadingBarController 是孪生文件（上游的 createLoadingBar）：计时用 TimeProvider（测试里换成 FakeTimeProvider 快进），回调回到建它的线程上（界面线程上建，绑定直接能用）；每次开始、结束换一代，已经投递出去的旧回调不做。
 - 显示：Avalonia、WPF 盖在内容上（放进窗口根部的 Panel / Grid、排在内容后面，默认贴顶边、不挡点击），带 accent 色的光；WinForms 盖不到子控件上，停靠在顶边占一条，也画不出控件外面的光。
 - 进度只往前过渡：归零发生在淡出之后，直接到位，不倒着走回去。读屏里是进度条，空闲时 Avalonia 是 Raw、WPF 不算控件、WinForms 是 Invisible。
+
+### Marquee（2026-11-14）
+
+- 上游把内容复制一份接在后面、纯 CSS 平移；桌面上控件不能出现在两处：Avalonia、WPF 的复制是 VisualBrush 画出来的那一份（点不到、读屏里没有，正好是上游的 inert + aria-hidden），WinForms 是内容的位图快照，画在自己的背景上（内容变了大小时重拍，内容自己的动画不会跟着动）。
+- 逐帧推进（Avalonia 的 RequestAnimationFrame、WPF 的 CompositionTarget.Rendering、WinForms 15ms 的计时器），位移 = 走过的距离对一份长度取余（孪生文件 MarqueeVariants 的 MarqueeMotion）；暂停、悬停、焦点在里面时不累加，接着走不跳。WinForms 的指针停在子控件上时自己收不到鼠标事件，每帧看指针的位置。
+- 系统关闭动画时不复制、不走，改成能聚焦、能手动滚动的区域（Avalonia、WPF 套 ScrollArea，WinForms 用 AutoScroll）。WinForms 盖不了子控件，没有两端渐隐。
