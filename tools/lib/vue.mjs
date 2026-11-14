@@ -91,6 +91,18 @@ class Vue {
     return this.#trees.get(file);
   }
 
+  /** 组件库以外的文件（文档站的页面）的原文与语法树：路径相对 vue-tsx-pro 仓库根 */
+  siteFile(path) {
+    const key = `site:${path}`;
+    if (!this.#trees.has(key)) {
+      const text = readFileSync(join(this.root, path), 'utf8');
+      const retained = this.#api.createSourceFile(join(this.root, path), text);
+      retained.dispose();
+      this.#trees.set(key, { text, tree: retained.sourceFile });
+    }
+    return this.#trees.get(key);
+  }
+
   /** 相对导入解析成源码文件；不是组件库里的文件返回 undefined */
   resolveImport(from, specifier) {
     if (!specifier.startsWith('.')) return undefined;

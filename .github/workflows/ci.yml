@@ -111,5 +111,6 @@ jobs:
           node tools/lang-gen/lang-gen.mjs --check
           node tools/icons-gen/icons-gen.mjs --check
           node tools/recipe-gen/recipe-gen.mjs --check
+          node tools/docs-gen/docs-gen.mjs --check
           node tools/twins/twins.mjs
           node tools/parity/parity.mjs >> "$GITHUB_STEP_SUMMARY"
