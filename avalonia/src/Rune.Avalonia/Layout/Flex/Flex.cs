@@ -221,7 +221,18 @@ public class Flex : Panel
         var gaps = Gaps;
         var main = contentMain = lines.Select(line => line.Main.Sum() + gaps.Main * (line.Count - 1)).DefaultIfEmpty().Max();
         var cross = lines.Sum(line => line.Cross) + gaps.Cross * Math.Max(0, lines.Count - 1);
+        // 行内的 Flex 放进 InlineUIContainer：平台只认 BaselineOffset，不写时底边落在基线上、比旁边的文字高出一截。
+        // 同 CSS 的 inline-flex：基线取第一行第一项的基线
+        if (Inline) SetCurrentValue(TextBlock.BaselineOffsetProperty, FirstBaseline(children, row));
         return Of(main, cross, row);
+    }
+
+    double FirstBaseline(IReadOnlyList<Control> children, bool row)
+    {
+        if (!row || lines is not [var line, ..] || line.Count == 0) return 0;
+        var items = Enumerable.Range(0, line.Count).Select(k => (Cross(children[line.Start + k].DesiredSize, row), ascents[line.Start + k], AlignOf(children[line.Start + k]))).ToList();
+        var (offset, _) = FlexLayout.Align(items[0].Item1, line.Cross, items[0].Item3, items[0].Item2, FlexLayout.LineCross(items).Ascent);
+        return offset + items[0].Item2;
     }
 
     /// <inheritdoc />

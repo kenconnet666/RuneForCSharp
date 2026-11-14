@@ -171,4 +171,16 @@ public class FlexTests
         Assert.Equal(city.DesiredSize.Width, city.Bounds.Width, 0.5);
         Assert.True(name.Bounds.Width < 120 - city.Bounds.Width + 0.5);
     });
+
+    [Fact]
+    public Task Inline_flex_reports_the_first_items_baseline_for_inline_containers() => HeadlessUi.Run(() =>
+    {
+        // 放进一段文字（InlineUIContainer）时与旁边的文字对齐：基线是第一项的基线，不是底边
+        var label = new Text { Text = "已通过" };
+        var flex = new Flex { Inline = true, Align = FlexAlign.Center, Children = { label } };
+        HeadlessUi.Show(new StackPanel { Children = { flex } });
+
+        Assert.Equal(label.BaselineOffset, flex.GetValue(TextBlock.BaselineOffsetProperty), 1);
+        Assert.True(flex.GetValue(TextBlock.BaselineOffsetProperty) < flex.Bounds.Height);
+    });
 }
