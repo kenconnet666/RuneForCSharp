@@ -277,6 +277,10 @@ export const PLATFORM_PROPS_NOT_PORTED = {
   },
   WinForms: {
     Marquee: { fade: '子控件各有窗口，盖不了它们：没有两端渐隐' },
+    ActionBar: {
+      sticky: '没有网页的 position: sticky（子控件是窗口，和容器的排版抢位置不可靠）：停靠在滚动区域外面的底边，一直看得见',
+      ...Object.fromEntries(['propsStart', 'propsActions'].map((prop) => [prop, '说明是 TextControl、按钮区是 FlexControl（Actions 是它的子控件集合），没有部件属性：外观跟主题'])),
+    },
     UserButton: { propsAvatar: '头像是 UserButton 画的 Avatar 元素，WinForms 还没有头像的部件属性记录（AvatarProps）；尺寸是 sm，配色跟着 Avatar 的作用域默认值' },
     SelectedTags: { propsMore: '“+N”同其余标签是 SelectedTagsControl 建的 sm、soft 的 TagControl（同 propsTag），WinForms 没有部件样式' },
     Tabs: { ripple: '标签是组件库画的容器控件（里面放文字与计数），没有按下的波纹' },

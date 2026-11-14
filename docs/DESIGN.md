@@ -1372,3 +1372,8 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 焦点离开才关：Avalonia 在 headless 里弹出层的窗口会清掉主窗口的焦点，焦点"没有了"不算移走，落到别的元素上才关。
 - WinForms：卡片窗口不激活（不抢宿主窗体的激活），所以键盘不能 Tab 进卡片；子控件吞掉鼠标进出事件，指针在触发器、卡片、外面每 50 毫秒看一次，变了再告诉 HoverIntent。
 - 顺手：Avalonia 的 Link 量完写上文字第一行的基线（放进 InlineUIContainer 时和正文对齐），Popover 把触发器的基线转给自己。
+
+### ActionBar（2026-11-14）
+
+- 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
+- WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
