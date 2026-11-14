@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // 从 vue-tsx-pro 的语言包（packages/ui/src/config/lang）生成三个库的 Lang（Config/Generated/Lang.g.cs）：
 // 每条文案一个属性，带 lang.ts 里的说明；内置 ZhCn、EnUs；插值文案翻译成 C# 的 lambda（translate.mjs）。
-// 页面组合自带的文案表（patterns/messages.ts 的 PatternsMessages）同样生成 Config/Generated/PatternsMessages.g.cs。
+// 页面组合、文档站组件自带的文案表（patterns/messages.ts 的 PatternsMessages、docs-kit/messages.ts 的 DocsKitMessages）同样生成 Config/Generated/<表名>.g.cs。
 // 用法：node tools/lang-gen/lang-gen.mjs [--check] [--vue <路径>]
 import { parseArgs } from 'node:util';
 import { interfaceMembers, LANG_PACKS, langMembers, langValues, messageValues } from '../lib/lang.mjs';
@@ -18,7 +18,10 @@ const LIBRARIES = [
 ];
 
 /** 页面组合的文案表：上游的文件、接口、表，C# 的类名 */
-const MESSAGE_TABLES = [{ file: 'patterns/messages.ts', interface: 'PatternsMessages', table: 'patternsMessages', cs: 'PatternsMessages', summary: '页面组合（AppShell、FilterBar、NotificationCenter……）自带的文案' }];
+const MESSAGE_TABLES = [
+  { file: 'patterns/messages.ts', interface: 'PatternsMessages', table: 'patternsMessages', cs: 'PatternsMessages', summary: '页面组合（AppShell、FilterBar、NotificationCenter……）自带的文案' },
+  { file: 'docs-kit/messages.ts', interface: 'DocsKitMessages', table: 'docsKitMessages', cs: 'DocsKitMessages', summary: '文档站组件（CodePreview、PropsTable）自带的文案' },
+];
 
 const PACK_NAMES = { 'zh-CN': { id: 'ZhCn', summary: '简体中文（默认）' }, 'en-US': { id: 'EnUs', summary: '美国英语' } };
 
