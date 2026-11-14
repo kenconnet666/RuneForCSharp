@@ -1,0 +1,41 @@
+<!--
+  OtpField 的主题（vue-tsx-pro 的 OtpField）：格子是 OtpSlots 画的（外壳的颜色同 TextField），真正的输入框（TextPresenter）透明地盖在格子上，
+  文字、光标、选中都看不见。不可用时半透明。外壳的伪类（:soft、:invalid、:readonly）由 OtpSlots 读 OtpField 的状态来画。
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:OtpField}" TargetType="rune:OtpField">
+    <Setter Property="Foreground" Value="Transparent" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="CaretBrush" Value="Transparent" />
+    <Setter Property="SelectionBrush" Value="Transparent" />
+    <Setter Property="SelectionForegroundBrush" Value="Transparent" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="Cursor" Value="Ibeam" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <rune:OtpSlots Name="PART_Slots" />
+          <TextPresenter Name="PART_TextPresenter"
+                         Text="{TemplateBinding Text, Mode=TwoWay}"
+                         CaretIndex="{TemplateBinding CaretIndex}"
+                         SelectionStart="{TemplateBinding SelectionStart}"
+                         SelectionEnd="{TemplateBinding SelectionEnd}"
+                         TextWrapping="NoWrap"
+                         Foreground="Transparent"
+                         PasswordChar="{TemplateBinding PasswordChar}"
+                         SelectionBrush="Transparent"
+                         SelectionForegroundBrush="Transparent"
+                         CaretBrush="Transparent"
+                         Background="Transparent"
+                         VerticalAlignment="Stretch" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:disabled">
+      <Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" />
+      <Setter Property="Cursor" Value="No" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

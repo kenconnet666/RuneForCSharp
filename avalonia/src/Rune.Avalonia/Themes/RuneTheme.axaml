@@ -32,6 +32,7 @@
         <ResourceInclude Source="avares://Rune.Avalonia/Navigation/TableOfContents/TableOfContents.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Input/ToggleGroup/ToggleGroup.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Input/TextField/TextField.axaml" />
+        <ResourceInclude Source="avares://Rune.Avalonia/Input/OtpField/OtpField.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Input/Listbox/Listbox.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Input/Select/Select.axaml" />
         <ResourceInclude Source="avares://Rune.Avalonia/Input/NativeSelect/NativeSelect.axaml" />

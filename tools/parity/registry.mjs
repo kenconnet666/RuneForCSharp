@@ -79,6 +79,8 @@ export const COMPONENT_PROP_RENAMES = {
   Countdown: { onEnd: 'Ended' },
   // 一次操作结束是事件
   Slider: { onValueCommit: 'ValueCommitted' },
+  // 值是平台 TextBox 的 Text；字符集叫 Charset（Type 是 TextField 的输入类型）；填满是事件
+  OtpField: { _value: 'Text', type: 'Charset', onComplete: 'Completed' },
   // 边长是平台的宽度；Margin 是平台的外边距，静区叫 QuietZone；颜色是平台的前景、背景画刷
   QRCode: { size: 'Width', margin: 'QuietZone', color: 'Foreground', bgColor: 'Background' },
   // Intl 的逐项选项是 .NET 的格式字符串（按语言包的文化）
@@ -188,6 +190,10 @@ const BUTTON_TYPE = '表单提交是浏览器的概念；对话框的默认、�
 
 /** 某个组件不移植的 prop 与原因（平台上没有对应的概念）：parity 不报缺 */
 export const PROPS_NOT_PORTED = {
+  OtpField: {
+    propsRoot: '格子的容器是 OtpField 自己（模板里的格子与透明的输入框）：样式直接写在它上面',
+    ...Object.fromEntries(['propsSlot', 'propsSeparator'].map((prop) => [prop, '格子与分隔是画出来的（Avalonia、WPF 的 OtpSlots，WinForms 的 OtpFieldControl），外壳的颜色同输入框的主题；没有每格的元素可加属性'])),
+  },
   QRCode: {
     propsCode: '模块是 QRCode 自己画的一条路径（同 TS 的单条 path），没有元素可加属性；要自己处理时用 QrEncoder.Encode 的矩阵或 QrEncoder.Svg',
   },
