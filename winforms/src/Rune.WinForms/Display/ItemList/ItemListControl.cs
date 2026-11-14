@@ -61,20 +61,29 @@ public class ItemListControl : FlexControl
     protected override void OnControlAdded(ControlEventArgs e)
     {
         base.OnControlAdded(e);
-        ApplyLooks();
+        ApplyEndLooks();
     }
 
     /// <inheritdoc />
     protected override void OnControlRemoved(ControlEventArgs e)
     {
         base.OnControlRemoved(e);
-        ApplyLooks();
+        ApplyEndLooks();
     }
 
-    /// <summary>条目增减、设置变了：每一条按列表的设置换外观（最后一条变了，分隔线跟着换）。</summary>
+    /// <summary>设置变了：每一条按列表的设置换外观。</summary>
     void ApplyLooks()
     {
         foreach (var item in Controls.OfType<ItemListItemControl>()) item.ApplyLook();
+    }
+
+    /// <summary>
+    /// 条目增减只影响分隔线（最后一条下面没有）：末尾两条换外观就够，新加的那条挂上时自己会换。
+    /// 每加一条都整列重换的话，一列几十条是几万次换外观。
+    /// </summary>
+    void ApplyEndLooks()
+    {
+        foreach (var item in Controls.OfType<ItemListItemControl>().TakeLast(2)) item.ApplyLook();
     }
 }
 
