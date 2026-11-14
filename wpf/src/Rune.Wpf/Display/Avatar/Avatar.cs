@@ -28,6 +28,9 @@ public class Avatar : Control
     public static readonly DependencyProperty DisplayNameProperty = DependencyProperty.Register(
         nameof(DisplayName), typeof(string), typeof(Avatar), new FrameworkPropertyMetadata(null, (d, _) => ((Avatar)d).UpdateFallback()));
 
+    /// <summary>只是装饰：名字已经写在旁边（用户按钮、成员列表的一行）时对读屏隐藏，DisplayName 仍用来生成首字母。</summary>
+    public static readonly DependencyProperty DecorativeProperty = DependencyProperty.Register(nameof(Decorative), typeof(bool), typeof(Avatar));
+
     /// <summary>后备内容，默认是名字的首字母，没有名字时是人像图标。</summary>
     public static readonly DependencyProperty FallbackProperty = DependencyProperty.Register(
         nameof(Fallback), typeof(object), typeof(Avatar), new FrameworkPropertyMetadata(null, (d, _) => ((Avatar)d).UpdateFallback()));
@@ -89,6 +92,9 @@ public class Avatar : Control
 
     /// <summary>名字。</summary>
     public string? DisplayName { get => (string?)GetValue(DisplayNameProperty); set => SetValue(DisplayNameProperty, value); }
+
+    /// <summary>只是装饰（对读屏隐藏）。</summary>
+    public bool Decorative { get => (bool)GetValue(DecorativeProperty); set => SetValue(DecorativeProperty, value); }
 
     /// <summary>后备内容。</summary>
     public object? Fallback { get => GetValue(FallbackProperty); set => SetValue(FallbackProperty, value); }
@@ -201,7 +207,7 @@ public class Avatar : Control
     /// <inheritdoc />
     protected override AutomationPeer OnCreateAutomationPeer() => new AvatarAutomationPeer(this);
 
-    /// <summary>有名字时是一张图片、名称是名字（里面的首字母、图片不另念）；没有名字时是装饰（TS 的 aria-hidden）。</summary>
+    /// <summary>有名字时是一张图片、名称是名字（里面的首字母、图片不另念）；没有名字或标成装饰时对读屏隐藏（TS 的 aria-hidden）。</summary>
     sealed class AvatarAutomationPeer(Avatar owner) : FrameworkElementAutomationPeer(owner)
     {
         protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Image;
@@ -210,7 +216,7 @@ public class Avatar : Control
 
         protected override string GetNameCore() => owner.DisplayName ?? "";
 
-        protected override bool IsControlElementCore() => !string.IsNullOrWhiteSpace(owner.DisplayName);
+        protected override bool IsControlElementCore() => !owner.Decorative && !string.IsNullOrWhiteSpace(owner.DisplayName);
 
         protected override bool IsContentElementCore() => IsControlElementCore();
 

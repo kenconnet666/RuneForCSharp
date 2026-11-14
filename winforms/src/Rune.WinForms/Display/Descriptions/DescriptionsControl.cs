@@ -341,9 +341,11 @@ public class DescriptionsControl : Panel, IElementHost, IScopeAware
             if (item.Value is Control control) Controls.Add(value = control);
             else
             {
-                text = new Text { Content = item.ValueText };
+                // 没有值时显示 EmptyValue（—），不留一格空白（上游 hasContent）
+                var shown = item.ValueText is { Length: > 0 } valueText ? valueText : ElementContext.Of(owner).Lang.EmptyValue;
+                text = new Text { Content = shown };
                 text.Host = this;
-                AccessibleDescription = item.ValueText;
+                AccessibleDescription = shown;
             }
             if (item.Copyable)
             {
@@ -518,7 +520,7 @@ public class DescriptionItem
     /// <summary>值的文字：控件时为空。</summary>
     internal string ValueText => Value switch
     {
-        null or Control => "",
+        null or Control or bool => "",
         IFormattable formattable => formattable.ToString(null, System.Globalization.CultureInfo.CurrentCulture),
         _ => Value.ToString() ?? "",
     };

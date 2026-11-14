@@ -39,6 +39,7 @@ public class CopyButton : IconButton
     public static readonly DirectProperty<CopyButton, bool> IsCopiedProperty = AvaloniaProperty.RegisterDirect<CopyButton, bool>(nameof(IsCopied), button => button.IsCopied);
 
     int copies;
+    string? status;
 
     /// <summary>新建：读屏的实时区域（复制后念出项状态）。</summary>
     public CopyButton() => AutomationProperties.SetLiveSetting(this, AutomationLiveSetting.Polite);
@@ -96,6 +97,8 @@ public class CopyButton : IconButton
             if (factory is not null) IsLoading = false;
         }
         if (success) ShowCopied();
+        // 失败不能和成功一样安静：不然用户以为已经复制了
+        else Announce(Provider.GetLang(this).CopyFailed);
         RaiseEvent(new CopiedEventArgs(CopiedEvent, success, error));
     }
 
@@ -106,7 +109,7 @@ public class CopyButton : IconButton
     void ShowCopied()
     {
         SetCopied(true);
-        (ControlAutomationPeer.FromElement(this) as AutomationPeer)?.RaisePropertyChangedEvent(AutomationElementIdentifiers.ItemStatusProperty, "", Provider.GetLang(this).Copied);
+        Announce(Provider.GetLang(this).Copied);
         Pop();
         var version = ++copies;
         _ = Task.Delay(Timeout).ContinueWith(_ => Dispatcher.UIThread.Post(() =>
@@ -115,8 +118,16 @@ public class CopyButton : IconButton
         }), TaskScheduler.Default);
     }
 
+    /// <summary>读屏播报：Avalonia 没有通知事件，用项状态的变化；项状态留到复原（失败的留到下一次点击）。</summary>
+    void Announce(string text)
+    {
+        status = text;
+        (ControlAutomationPeer.FromElement(this) as AutomationPeer)?.RaisePropertyChangedEvent(AutomationElementIdentifiers.ItemStatusProperty, "", text);
+    }
+
     void SetCopied(bool value)
     {
+        if (!value) status = null;
         IsCopied = value;
         PseudoClasses.Set(":copied", value);
     }
@@ -151,7 +162,7 @@ public class CopyButton : IconButton
     {
         protected override string? GetNameCore() => base.GetNameCore() is { Length: > 0 } name ? name : Provider.GetLang(owner).Copy;
 
-        protected override string? GetItemStatusCore() => owner.IsCopied ? Provider.GetLang(owner).Copied : base.GetItemStatusCore();
+        protected override string? GetItemStatusCore() => owner.status ?? base.GetItemStatusCore();
     }
 }
 

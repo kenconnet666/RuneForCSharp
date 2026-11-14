@@ -128,6 +128,11 @@ public class ListboxControl : Control, IFieldControl
     [DefaultValue(null)]
     public bool? IsRequired { get; set { field = value; SyncSelection(); } }
 
+    /// <summary>只读：能聚焦、看得到选中项，不能改（查看详情、审批时）；不写时跟着所在的字段。</summary>
+    [Category("Behavior")]
+    [DefaultValue(null)]
+    public bool? IsReadOnly { get; set; }
+
     /// <summary>加载中：选项换成骨架行（很快完成时不闪）。</summary>
     [Category("Behavior")]
     [DefaultValue(false)]
@@ -184,6 +189,9 @@ public class ListboxControl : Control, IFieldControl
     bool Multiple => SelectionMode == SelectionMode.Multiple;
 
     bool Required => IsRequired ?? FieldControl.Of(this)?.IsRequired ?? false;
+
+    // 只读时键盘、点选都不响应（上游 keydown 里同不可用一起返回），只看
+    bool ReadOnly => IsReadOnly ?? FieldControl.Of(this)?.IsReadOnly ?? false;
 
     float Em => this.EmPixels();
 
@@ -322,7 +330,7 @@ public class ListboxControl : Control, IFieldControl
     /// <summary>点选了一项：切换选中、发 Picked。</summary>
     internal void Pick(string value)
     {
-        if (!Enabled) return;
+        if (!Enabled || ReadOnly) return;
         State.SetActive(value);
         State.Select(value);
         Picked?.Invoke(this, new ListboxPickedEventArgs(value));
@@ -335,7 +343,7 @@ public class ListboxControl : Control, IFieldControl
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
-        if (e.Handled || !Enabled || ToListKey(e.KeyData) is not { } key) return;
+        if (e.Handled || !Enabled || ReadOnly || ToListKey(e.KeyData) is not { } key) return;
         e.Handled = State.Handle(key, picked: value => Picked?.Invoke(this, new ListboxPickedEventArgs(value)));
         // 空格的字符不再交给类型搜索
         e.SuppressKeyPress = e.Handled;
@@ -345,7 +353,7 @@ public class ListboxControl : Control, IFieldControl
     protected override void OnKeyPress(KeyPressEventArgs e)
     {
         base.OnKeyPress(e);
-        if (!e.Handled && Enabled && !char.IsControl(e.KeyChar)) e.Handled = State.Typeahead(e.KeyChar.ToString());
+        if (!e.Handled && Enabled && !ReadOnly && !char.IsControl(e.KeyChar)) e.Handled = State.Typeahead(e.KeyChar.ToString());
     }
 
     /// <summary>平台的按键 → 列表的按键（带 Ctrl、Alt 的不算）；不是列表认的键时为 null。</summary>

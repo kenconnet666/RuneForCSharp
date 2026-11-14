@@ -88,6 +88,8 @@ public class CopyButton : IconButton
             if (factory is not null) IsLoading = false;
         }
         if (success) ShowCopied();
+        // 失败不能和成功一样安静：不然用户以为已经复制了（上游 assertive）
+        else UIElementAutomationPeer.FromElement(this)?.RaiseNotificationEvent(AutomationNotificationKind.ActionAborted, AutomationNotificationProcessing.ImportantAll, Provider.GetLang(this).CopyFailed, "Rune.CopyButton.CopyFailed");
         RaiseEvent(new CopiedEventArgs(CopiedEvent, success, error));
     }
 

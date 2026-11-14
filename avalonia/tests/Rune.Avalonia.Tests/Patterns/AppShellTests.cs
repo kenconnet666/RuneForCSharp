@@ -264,4 +264,21 @@ public class AppShellTests
         Assert.False(window.ExtendClientAreaToDecorationsHint);
         Assert.False(Part<StackPanel>(shell, AppShellParts.CaptionButtons).IsVisible);
     });
+
+    [Fact]
+    public Task Focus_follows_the_fullscreen_buttons() => HeadlessUi.Run(() =>
+    {
+        var shell = new AppShell { Content = new TextBlock { Text = "正文" } };
+        Show(shell, 1100);
+        var enter = Part<IconButton>(shell, AppShellParts.FullscreenButton);
+        var exit = Part<IconButton>(shell, AppShellParts.FullscreenExit);
+
+        // 焦点是当场移过去的；不再排队刷新：键盘焦点会弹出按钮的提示，headless 里提示是单独的窗口，显示时被激活、把焦点拿走
+        enter.Focus();
+        Invoke(enter); // 进入的按钮随顶栏隐藏：焦点跟到退出按钮上
+        Assert.True(exit.IsFocused);
+
+        Invoke(exit);
+        Assert.True(enter.IsFocused);
+    });
 }

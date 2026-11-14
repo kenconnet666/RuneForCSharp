@@ -23,6 +23,7 @@ public class AvatarTests
     [InlineData("Ada Lovelace", "AL")]
     [InlineData("grace", "G")]
     [InlineData("  ", "")]
+    [InlineData("😀 Smith", "😀S")] // 按码点取：表情是两个码元
     public void Initials_take_the_given_name_or_first_and_last_words(string name, string expected) => Assert.Equal(expected, Avatar.Initials(name));
 
     [Upstream("Avatar", "role=")]
@@ -43,6 +44,9 @@ public class AvatarTests
         Assert.Equal(named.ActualWidth / 2, center.X, 1);
         Assert.Equal(named.ActualHeight / 2, center.Y, 1);
         Assert.False(UIElementAutomationPeer.CreatePeerForElement(anonymous).IsControlElement()); // 没有名字：装饰
+        named.Decorative = true; // 名字写在旁边：只是装饰
+        Assert.False(peer.IsControlElement());
+        named.Decorative = false;
         Assert.Single(WpfUi.Descendants(anonymous).OfType<Icon>()); // 后备内容是人像图标
         Assert.False(photo.FallbackShown); // 有图片时显示图片
         photo.Source = null;

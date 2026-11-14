@@ -138,6 +138,9 @@ public class CopyButtonControl : ButtonControlBase<CopyButton>
             if (factory is not null) IsLoading = false;
         }
         if (success) ShowCopied();
+        // 失败不能和成功一样安静：不然用户以为已经复制了（上游 assertive）
+        else if (IsHandleCreated)
+            AccessibilityObject.RaiseAutomationNotification(AutomationNotificationKind.ActionAborted, AutomationNotificationProcessing.ImportantAll, ProviderControl.LangOf(this).CopyFailed);
         Copied?.Invoke(this, new CopiedEventArgs(success, error));
     }
 

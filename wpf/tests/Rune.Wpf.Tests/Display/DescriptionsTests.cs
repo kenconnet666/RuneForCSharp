@@ -100,4 +100,15 @@ public class DescriptionsTests
         Assert.IsType<Flex>(System.Windows.Media.VisualTreeHelper.GetParent(descriptions.Cells[0])); // 换行的一排，不是网格
         Assert.Equal(descriptions.Cells[0].TranslatePoint(default, descriptions).Y, descriptions.Cells[1].TranslatePoint(default, descriptions).Y); // 同一行
     });
+
+    [Fact]
+    public Task Empty_values_show_the_empty_placeholder() => WpfUi.Run(() =>
+    {
+        var descriptions = Of(new Descriptions(), new DescriptionItem { Label = "备注" }, new DescriptionItem { Label = "邮箱", Value = "" });
+        Host(600, descriptions);
+
+        var values = WpfUi.Descendants(descriptions).OfType<System.Windows.Controls.Border>().Where(border => border.Name == "PART_Value").ToList();
+        Assert.Equal(2, values.Count);
+        Assert.All(values, value => Assert.Contains(WpfUi.Descendants(value).OfType<Text>(), text => text.Text == "—"));
+    });
 }

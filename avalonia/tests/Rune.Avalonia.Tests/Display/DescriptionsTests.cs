@@ -94,4 +94,14 @@ public class DescriptionsTests
         Assert.IsType<Flex>(descriptions.Cells[0].Parent); // 换行的一排，不是网格
         Assert.Equal(descriptions.Cells[0].Bounds.Y, descriptions.Cells[1].Bounds.Y); // 同一行
     });
+
+    [Fact]
+    public Task Empty_values_show_the_empty_placeholder() => HeadlessUi.Run(() =>
+    {
+        var descriptions = Of(new Descriptions(), new DescriptionItem { Label = "备注" }, new DescriptionItem { Label = "邮箱", Value = "" });
+        HeadlessUi.Show(new StackPanel { Width = 600, Children = { descriptions } });
+
+        var values = descriptions.GetVisualDescendants().OfType<Border>().Where(border => border.Name == DescriptionsParts.Value).ToList();
+        Assert.All(values, value => Assert.Contains(value.GetVisualDescendants().OfType<Text>(), text => text.Text == "—"));
+    });
 }

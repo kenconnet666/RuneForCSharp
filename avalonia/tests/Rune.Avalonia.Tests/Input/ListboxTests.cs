@@ -77,6 +77,18 @@ public class ListboxTests
     });
 
     [Fact]
+    public Task Read_only_listboxes_keep_the_value() => HeadlessUi.Run(() =>
+    {
+        var picks = 0;
+        var listbox = new Listbox { ItemsSource = Fruits, Value = "cherry", IsReadOnly = true };
+        listbox.Picked += (_, _) => picks++;
+        HeadlessUi.Show(listbox);
+
+        listbox.Pick("apple");
+        Assert.Equal(("cherry", 0), (listbox.Value, picks));
+    });
+
+    [Fact]
     [Upstream("Listbox", "role=")]
     public Task Focus_highlights_the_selection_and_keys_move_and_select() => HeadlessUi.Run(() =>
     {

@@ -48,6 +48,9 @@ public class Listbox : FrameworkElement, IFieldControl
     public static readonly DependencyProperty IsRequiredProperty = DependencyProperty.Register(nameof(IsRequired), typeof(bool?), typeof(Listbox),
         new FrameworkPropertyMetadata(null, (d, _) => ((Listbox)d).SyncSelection()));
 
+    /// <summary>只读：能聚焦、看得到选中项，不能改（查看详情、审批时）；不写时跟着所在的 Field。</summary>
+    public static readonly DependencyProperty IsReadOnlyProperty = DependencyProperty.Register(nameof(IsReadOnly), typeof(bool?), typeof(Listbox));
+
     /// <summary>加载中：选项换成骨架行（很快完成时不闪）。</summary>
     public static readonly DependencyProperty IsLoadingProperty = DependencyProperty.Register(nameof(IsLoading), typeof(bool), typeof(Listbox),
         new FrameworkPropertyMetadata(false, (d, _) => ((Listbox)d).loading.Update(((Listbox)d).IsLoading || ((Listbox)d).loadingMore)));
@@ -135,6 +138,9 @@ public class Listbox : FrameworkElement, IFieldControl
     /// <summary>必选。</summary>
     public bool? IsRequired { get => (bool?)GetValue(IsRequiredProperty); set => SetValue(IsRequiredProperty, value); }
 
+    /// <summary>只读。</summary>
+    public bool? IsReadOnly { get => (bool?)GetValue(IsReadOnlyProperty); set => SetValue(IsReadOnlyProperty, value); }
+
     /// <summary>加载中。</summary>
     public bool IsLoading { get => (bool)GetValue(IsLoadingProperty); set => SetValue(IsLoadingProperty, value); }
 
@@ -160,6 +166,9 @@ public class Listbox : FrameworkElement, IFieldControl
     bool Multiple => SelectionMode == SelectionMode.Multiple;
 
     bool Required => IsRequired ?? Field.Of(this)?.IsRequired ?? false;
+
+    // 只读时键盘、点选都不响应（上游 keydown 里同不可用一起返回），只看
+    bool ReadOnly => IsReadOnly ?? Field.Of(this)?.IsReadOnly ?? false;
 
     void IFieldControl.FieldChanged() => SyncSelection();
 
@@ -300,7 +309,7 @@ public class Listbox : FrameworkElement, IFieldControl
     /// <summary>点选了一项：切换选中、发 Picked。</summary>
     internal void Pick(string value)
     {
-        if (!IsEnabled) return;
+        if (!IsEnabled || ReadOnly) return;
         State.SetActive(value);
         State.Select(value);
         RaiseEvent(new ListboxPickedEventArgs(PickedEvent, value));
@@ -310,7 +319,7 @@ public class Listbox : FrameworkElement, IFieldControl
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
-        if (e.Handled || !IsEnabled || (Keyboard.Modifiers & ~ModifierKeys.Shift) != 0) return;
+        if (e.Handled || !IsEnabled || ReadOnly || (Keyboard.Modifiers & ~ModifierKeys.Shift) != 0) return;
         if (ToListKey(e.Key) is { } key) e.Handled = State.Handle(key, picked: value => RaiseEvent(new ListboxPickedEventArgs(PickedEvent, value)));
     }
 
@@ -318,7 +327,7 @@ public class Listbox : FrameworkElement, IFieldControl
     protected override void OnTextInput(TextCompositionEventArgs e)
     {
         base.OnTextInput(e);
-        if (!e.Handled && IsEnabled && e.Text is { Length: 1 } text) e.Handled = State.Typeahead(text);
+        if (!e.Handled && IsEnabled && !ReadOnly && e.Text is { Length: 1 } text) e.Handled = State.Typeahead(text);
     }
 
     /// <summary>平台的按键 → 列表的按键；不是列表认的键时为 null。</summary>

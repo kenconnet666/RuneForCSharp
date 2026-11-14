@@ -30,6 +30,9 @@ public class Avatar : Control
     /// <summary>名字：读屏的名称，也用来生成首字母；不写时头像是装饰。</summary>
     public static readonly StyledProperty<string?> DisplayNameProperty = AvaloniaProperty.Register<Avatar, string?>(nameof(DisplayName));
 
+    /// <summary>只是装饰：名字已经写在旁边（用户按钮、成员列表的一行）时对读屏隐藏，DisplayName 仍用来生成首字母。</summary>
+    public static readonly StyledProperty<bool> DecorativeProperty = AvaloniaProperty.Register<Avatar, bool>(nameof(Decorative));
+
     /// <summary>后备内容，默认是名字的首字母，没有名字时是人像图标。</summary>
     public static readonly StyledProperty<object?> FallbackProperty = AvaloniaProperty.Register<Avatar, object?>(nameof(Fallback));
 
@@ -77,6 +80,9 @@ public class Avatar : Control
 
     /// <summary>名字。</summary>
     public string? DisplayName { get => GetValue(DisplayNameProperty); set => SetValue(DisplayNameProperty, value); }
+
+    /// <summary>只是装饰（对读屏隐藏）。</summary>
+    public bool Decorative { get => GetValue(DecorativeProperty); set => SetValue(DecorativeProperty, value); }
 
     /// <summary>后备内容。</summary>
     public object? Fallback { get => GetValue(FallbackProperty); set => SetValue(FallbackProperty, value); }
@@ -166,14 +172,14 @@ public class Avatar : Control
     /// <inheritdoc />
     protected override AutomationPeer OnCreateAutomationPeer() => new AvatarAutomationPeer(this);
 
-    /// <summary>有名字时是一张图片、名称是名字（里面的首字母、图片不另念）；没有名字时是装饰（TS 的 aria-hidden）。</summary>
+    /// <summary>有名字时是一张图片、名称是名字（里面的首字母、图片不另念）；没有名字或标成装饰时对读屏隐藏（TS 的 aria-hidden）。</summary>
     sealed class AvatarAutomationPeer(Avatar owner) : ControlAutomationPeer(owner)
     {
         protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Image;
 
         protected override string? GetNameCore() => owner.DisplayName;
 
-        protected override bool IsControlElementCore() => !string.IsNullOrWhiteSpace(owner.DisplayName);
+        protected override bool IsControlElementCore() => !owner.Decorative && !string.IsNullOrWhiteSpace(owner.DisplayName);
 
         protected override bool IsContentElementCore() => IsControlElementCore();
 

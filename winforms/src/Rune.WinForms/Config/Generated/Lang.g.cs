@@ -192,6 +192,9 @@ public sealed partial record Lang
     /// <summary>复制成功后读屏播报的提示，默认“已复制”</summary>
     public required string Copied { get; init; }
 
+    /// <summary>复制失败（没有剪贴板权限、不是安全上下文）时读屏播报的提示，默认“复制失败”</summary>
+    public required string CopyFailed { get; init; }
+
     /// <summary>没有值时显示的占位（表格单元格、图表提示、描述列表），默认“—”</summary>
     public required string EmptyValue { get; init; }
 
@@ -702,6 +705,9 @@ public sealed partial record Lang
     /// <summary>横向导航里收起来的项的菜单按钮，默认“更多”</summary>
     public required string NavBarMore { get; init; }
 
+    /// <summary>浮动按钮组（速拨）的主按钮没写名称时的名称，默认“更多操作”</summary>
+    public required string FloatButtonMore { get; init; }
+
     /// <summary>树搜索没有匹配时的提示，默认“没有匹配的节点”</summary>
     public required string TreeNoMatch { get; init; }
 
@@ -1104,6 +1110,7 @@ public sealed partial record Lang
         Remove = "移除",
         Copy = "复制",
         Copied = "已复制",
+        CopyFailed = "复制失败",
         EmptyValue = "—",
         FormRequired = "必填",
         FormErrorSummary = count => string.Create(CultureInfo.InvariantCulture, $"有 {count} 项需要修改"),
@@ -1279,6 +1286,7 @@ public sealed partial record Lang
         TabScrollNext = "往后滚",
         TabMoved = (label, position, total) => string.Create(CultureInfo.InvariantCulture, $"{label}移到第 {position} 个，共 {total} 个"),
         NavBarMore = "更多",
+        FloatButtonMore = "更多操作",
         TreeNoMatch = "没有匹配的节点",
         TreeMoved = (item, parent, position) => !string.IsNullOrEmpty(parent) ? string.Create(CultureInfo.InvariantCulture, $"{item}移到{parent}下第 {position} 位") : string.Create(CultureInfo.InvariantCulture, $"{item}移到第一层第 {position} 位"),
         TransferSource = "可选",
@@ -1526,6 +1534,7 @@ public sealed partial record Lang
         Remove = "Remove",
         Copy = "Copy",
         Copied = "Copied",
+        CopyFailed = "Copy failed",
         EmptyValue = "—",
         FormRequired = "Required",
         FormErrorSummary = count => (count == 1 ? "There is 1 problem" : string.Create(CultureInfo.InvariantCulture, $"There are {count} problems")),
@@ -1681,7 +1690,7 @@ public sealed partial record Lang
         SelectCreate = text => $"Create “{text}”",
         SelectSummary = labels => string.Join(", ", labels),
         SelectMoreTags = count => string.Create(CultureInfo.InvariantCulture, $"+{count}"),
-        PaginationTotal = total => $"{(LangFormat.Number(total, "en-US"))} items",
+        PaginationTotal = total => $"{(LangFormat.Number(total, "en-US"))} {(total == 1 ? "item" : "items")}",
         PaginationRange = (from, to, total) => $"{(LangFormat.Number(from, "en-US"))}–{(LangFormat.Number(to, "en-US"))} of {(LangFormat.Number(total, "en-US"))} items",
         Pagination = "Pagination",
         PageSizeOption = size => string.Create(CultureInfo.InvariantCulture, $"{size} / page"),
@@ -1701,6 +1710,7 @@ public sealed partial record Lang
         TabScrollNext = "Scroll forward",
         TabMoved = (label, position, total) => string.Create(CultureInfo.InvariantCulture, $"Moved {label} to position {position} of {total}"),
         NavBarMore = "More",
+        FloatButtonMore = "More actions",
         TreeNoMatch = "No matching items",
         TreeMoved = (item, parent, position) => !string.IsNullOrEmpty(parent) ? string.Create(CultureInfo.InvariantCulture, $"Moved {item} into {parent} at position {position}") : string.Create(CultureInfo.InvariantCulture, $"Moved {item} to the top level at position {position}"),
         TransferSource = "Available",

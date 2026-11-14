@@ -18,6 +18,7 @@ public class AvatarTests
     [InlineData("Ada Lovelace", "AL")]
     [InlineData("grace", "G")]
     [InlineData("  ", "")]
+    [InlineData("😀 Smith", "😀S")] // 按码点取：表情是两个码元
     public void Initials_take_the_given_name_or_first_and_last_words(string name, string expected) => Assert.Equal(expected, Avatar.Initials(name));
 
     [Upstream("Avatar", "role=")]
@@ -33,6 +34,10 @@ public class AvatarTests
         Assert.Equal((AutomationControlType.Image, "张三", true), (peer.GetAutomationControlType(), peer.GetName(), peer.IsControlElement()));
         Assert.Equal("三", named.GetVisualDescendants().OfType<TextBlock>().Single().Text);
         Assert.False(ControlAutomationPeer.CreatePeerForElement(anonymous).IsControlElement()); // 没有名字：装饰
+        named.Decorative = true; // 名字写在旁边：只是装饰，首字母照旧
+        Assert.False(peer.IsControlElement());
+        Assert.Equal("三", named.GetVisualDescendants().OfType<TextBlock>().Single().Text);
+        named.Decorative = false;
         Assert.Single(anonymous.GetVisualDescendants().OfType<Icon>()); // 后备内容是人像图标
         Assert.False(photo.FallbackShown); // 有图片时显示图片
         photo.Source = null;

@@ -245,4 +245,18 @@ public class AppShellTests
         Assert.False(shell.IsTitleBar);
         Assert.All(shell.CaptionButtons, button => Assert.False(button.Visible));
     });
+
+    [Fact]
+    public Task Focus_follows_the_fullscreen_buttons() => WinFormsUi.Run(() =>
+    {
+        var shell = new AppShellControl { Content = new TextControl { Text = "正文" } };
+        using var form = Show(shell, 1100);
+
+        shell.FullscreenButtonPart.Focus();
+        Invoke(shell.FullscreenButtonPart); // 进入的按钮随顶栏隐藏：焦点跟到退出按钮上
+        Assert.True(shell.FullscreenExitPart.Focused);
+
+        Invoke(shell.FullscreenExitPart);
+        Assert.True(shell.FullscreenButtonPart.Focused);
+    });
 }

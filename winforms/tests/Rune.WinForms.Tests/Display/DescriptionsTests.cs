@@ -93,4 +93,13 @@ public class DescriptionsTests
         Assert.Equal(descriptions.Cells[0].Top, descriptions.Cells[1].Top); // 同一行
         Assert.True(descriptions.Cells[1].Left > descriptions.Cells[0].Right);
     });
+
+    [Fact]
+    public Task Empty_values_show_the_empty_placeholder() => WinFormsUi.Run(() =>
+    {
+        var descriptions = Of(new DescriptionsControl { Dock = DockStyle.Top }, new DescriptionItem { Label = "备注" }, new DescriptionItem { Label = "邮箱", Value = "" });
+        using var form = WinFormsUi.Show(descriptions);
+
+        Assert.Equal(["—", "—"], descriptions.Cells.Select(cell => cell.AccessibilityObject.Description));
+    });
 }

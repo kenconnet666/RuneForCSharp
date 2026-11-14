@@ -104,6 +104,8 @@ public class UserButton : ButtonBase
         var (described, compact) = (!string.IsNullOrEmpty(Description), Compact);
         SetValue(IsDescribedKey, described);
         avatar.DisplayName = DisplayName;
+        // 名字就写在旁边时头像只是装饰：不然按钮的名称里名字出现两遍
+        avatar.Decorative = !compact;
         avatar.Source = Source;
         name.Text = DisplayName;
         description.Text = Description;

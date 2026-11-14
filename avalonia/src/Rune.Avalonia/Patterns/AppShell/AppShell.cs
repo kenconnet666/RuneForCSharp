@@ -450,6 +450,17 @@ public class AppShell : Control
             else if (!IsFullscreen && host.WindowState == WindowState.FullScreen) host.WindowState = restoreState;
         }
         Sync();
+        FollowFullscreenFocus();
+    }
+
+    /// <summary>
+    /// 进入、退出后焦点跟到对应的按钮上：原来聚焦的按钮随顶栏隐藏（或被移除），焦点会掉到窗口开头。
+    /// 焦点还在看得见的地方（正文里的控件、用 Esc 退出时）不动。
+    /// </summary>
+    void FollowFullscreenFocus()
+    {
+        if (TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() is Visual { IsEffectivelyVisible: true } focused && focused is not TopLevel) return;
+        (IsFullscreen ? fullscreenExit : fullscreenButton).Focus(NavigationMethod.Tab);
     }
 
     /// <summary>顶栏兼作标题栏：去掉系统的标题栏、保留缩放边框，内容延伸到原来标题栏的位置；窗口按钮自绘。</summary>

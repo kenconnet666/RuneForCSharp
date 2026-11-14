@@ -168,7 +168,7 @@ public class Descriptions : Control
         foreach (var item in Items)
         {
             var label = new Border { Name = "PART_Label", Child = Content(item.Label) };
-            var value = new Border { Name = "PART_Value", Child = item.Copyable ? WithCopy(item, lang) : Content(item.Value) };
+            var value = new Border { Name = "PART_Value", Child = item.Copyable ? WithCopy(item, lang) : ValueContent(item.Value, lang) };
             label.SetResourceReference(StyleProperty, DescriptionsParts.Label);
             value.SetResourceReference(StyleProperty, DescriptionsParts.Value);
             var row = new Flex
@@ -206,12 +206,15 @@ public class Descriptions : Control
         copy.SetResourceReference(StyleProperty, DescriptionsParts.Copy);
         AutomationProperties.SetName(copy, lang.DescriptionsCopy(PlainText(item.Label) is { Length: > 0 } label ? label : lang.Copy));
         var row = new CopyRow { Align = FlexAlign.Baseline, Gap = Space.Xs };
-        row.Children.Add(Content(item.Value));
+        row.Children.Add(ValueContent(item.Value, lang));
         row.Children.Add(copy);
         return row;
     }
 
     /// <summary>文字放进会换行的 Text；控件原样放。</summary>
+    /// <summary>值的内容；没有值（null、空串、布尔，同上游的 hasContent）时显示语言包的 EmptyValue（—），不留一格空白。</summary>
+    static UIElement ValueContent(object? content, Lang lang) => content is null or bool or "" ? new Text { Text = lang.EmptyValue } : Content(content);
+
     static UIElement Content(object? content) => content switch
     {
         UIElement element => element,

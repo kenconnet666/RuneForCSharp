@@ -152,7 +152,7 @@ public class Descriptions : Control
         foreach (var item in Items)
         {
             var label = new Border { Name = DescriptionsParts.Label, Child = Content(item.Label) };
-            var value = new Border { Name = DescriptionsParts.Value, Child = item.Copyable ? WithCopy(item, lang) : Content(item.Value) };
+            var value = new Border { Name = DescriptionsParts.Value, Child = item.Copyable ? WithCopy(item, lang) : ValueContent(item.Value, lang) };
             // 标签已经是这一组的名称，不再单独念
             AutomationProperties.SetAccessibilityView(label, AccessibilityView.Raw);
             var row = new Flex
@@ -180,10 +180,13 @@ public class Descriptions : Control
     {
         var copy = new CopyButton { Name = DescriptionsParts.Copy, Size = TextSize.Xs, Value = item.CopyText ?? (item.Value is string or IFormattable ? Convert.ToString(item.Value, System.Globalization.CultureInfo.CurrentCulture) : "") };
         AutomationProperties.SetName(copy, lang.DescriptionsCopy(PlainText(item.Label) is { Length: > 0 } label ? label : lang.Copy));
-        return new CopyRow { Align = FlexAlign.Baseline, Gap = Space.Xs, Children = { Content(item.Value), copy } };
+        return new CopyRow { Align = FlexAlign.Baseline, Gap = Space.Xs, Children = { ValueContent(item.Value, lang), copy } };
     }
 
     /// <summary>文字放进会换行的 Text（值很长时按字断开，TS 的 overflow-wrap: anywhere）；控件原样放。</summary>
+    /// <summary>值的内容；没有值（null、空串、布尔，同上游的 hasContent）时显示语言包的 EmptyValue（—），不留一格空白。</summary>
+    static Control ValueContent(object? content, Lang lang) => content is null or bool or "" ? new Text { Text = lang.EmptyValue } : Content(content);
+
     static Control Content(object? content) => content switch
     {
         Control control => control,

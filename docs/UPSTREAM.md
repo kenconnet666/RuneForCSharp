@@ -385,6 +385,24 @@ Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_
 
 锁定跟到 0.22.0（6e6f831d）：生成文件没变；行为对照新增的 Field 两条、Listbox 一条都对上了。
 
+### 第三十三批（2026-11-14，0.23.0 b7b09011：第二轮审查）
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| 语言包：copyFailed、floatButtonMore；英文 paginationTotal 分单复数 | 生成文件 | 重新生成语言包 |
+| CopyButton 复制失败要播报（assertive）；CodeBlock 的复制按钮四周补一圈同色底 | CopyButton 已做 | 已跟：失败时 Avalonia 用项状态、WPF / WinForms 用读屏通知（ActionAborted、ImportantAll）念复制失败。复制按钮的一圈底色还没跟 |
+| Avatar 加 decorative（名字写在旁边时对读屏隐藏）；首字母按码点取；UserButton 展开时头像标成装饰 | 已做 | 已跟：三个平台加 Decorative；AvatarInitials（孪生）按码点取首尾字；UserButton（Avalonia、WPF）不紧凑时头像 Decorative，WinForms 的头像是画出来的，不在读屏树里 |
+| Descriptions 空值显示 emptyValue | 已做 | 已跟：null、空串、布尔（同 hasContent）显示语言包的 EmptyValue（—） |
+| Listbox 加 readonly（能聚焦、看得到选中，键盘与点选都不响应；aria-readonly） | 已做 | 已跟：三个平台加 IsReadOnly（不写时跟着 Field） |
+| ContextMenu：里层（嵌套的）已经处理过的右键外层不再打开 | 已做 | 不用改：WPF、Avalonia 检查 Handled，WinForms 里层吞掉 WM_CONTEXTMENU 不再往父窗口传 |
+| Popover：没有箭头时高度限制在视口剩余空间（fitHeight），有箭头时不限制 | 已做 Popover | 还没跟：面板最大高度按屏幕剩余空间、内容滚动 |
+| AppShell 进出全屏后焦点跟到对应按钮（原来的按钮随顶栏隐藏） | 已做 | 已跟：三个平台；焦点还在看得见的地方时不动 |
+| useFormat：文件大小 NaN 显示 emptyValue、999,999 B 进到 1 MB；负数取整成 0 时不带负号 | NumericFormat 本来就按取整后的值判断正负 | 文件大小格式还没做 |
+| mergeDefaults、defineLang 忽略值为 undefined 的键；Provider 只在配置了语言的那一层写 lang / dir | C# 没有 undefined；作用域本来就是写了的才算 | 不涉及 |
+| 表格、图表、日期、表单、页面组合、ColorPicker、Upload 等一批修正 | 还没做 | 做时照新的 |
+
+锁定跟到 0.23.0（b7b09011）：语言包重新生成，token、图标、配方没变。
+
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 
 计划：vue-tsx-pro 的 `.claude/reports/style-overhaul-plan.md`（阶段 0 护栏 → 1 引擎 → 2 架构与 API → 3 整理 → 4 美学 → 5 文档）。

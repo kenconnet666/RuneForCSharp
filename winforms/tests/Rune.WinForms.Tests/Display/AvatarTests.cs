@@ -9,6 +9,7 @@ public class AvatarTests
     [InlineData("Ada Lovelace", "AL")]
     [InlineData("grace", "G")]
     [InlineData("  ", "")]
+    [InlineData("😀 Smith", "😀S")] // 按码点取：表情是两个码元
     public void Initials_take_the_given_name_or_first_and_last_words(string name, string expected) => Assert.Equal(expected, AvatarInitials.Of(name));
 
     [Upstream("Avatar", "role=")]
@@ -23,6 +24,10 @@ public class AvatarTests
         Assert.Equal((AccessibleRole.Graphic, "张三"), (named.AccessibilityObject.Role, named.AccessibilityObject.Name));
         Assert.Equal("三", named.Element.FallbackText);
         Assert.Equal(AccessibleRole.None, anonymous.AccessibilityObject.Role); // 没有名字：装饰
+        named.Decorative = true; // 名字写在旁边：只是装饰，首字母照旧
+        Assert.Equal(AccessibleRole.None, named.AccessibilityObject.Role);
+        Assert.Equal("三", named.Element.FallbackText);
+        named.Decorative = false;
         Assert.Equal("", anonymous.Element.FallbackText); // 画人像图标
         Assert.Equal(new Size((int)MathF.Round(2.5f * em), (int)MathF.Round(2.5f * em)), named.Size);
     });

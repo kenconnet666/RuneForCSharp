@@ -135,6 +135,17 @@ public partial class AppShell
             UpdateFrameMargin();
         }
         Sync();
+        Dispatcher.BeginInvoke(FollowFullscreenFocus, System.Windows.Threading.DispatcherPriority.Loaded);
+    }
+
+    /// <summary>
+    /// 进入、退出后焦点跟到对应的按钮上：原来聚焦的按钮随顶栏隐藏（或被移除），焦点会掉到窗口开头。
+    /// 焦点还在看得见的地方（正文里的控件、用 Esc 退出时）不动。
+    /// </summary>
+    void FollowFullscreenFocus()
+    {
+        if (System.Windows.Input.Keyboard.FocusedElement is UIElement { IsVisible: true } focused && focused is not Window) return;
+        (IsFullscreen ? fullscreenExit : fullscreenButton).Focus();
     }
 
     void OnWindowStateChanged(object? sender, EventArgs e)

@@ -271,4 +271,20 @@ public class AppShellTests
         Assert.False(shell.CaptionButtonsPart.IsVisible);
         window.Close();
     });
+
+    [Fact]
+    public Task Focus_follows_the_fullscreen_buttons() => WpfUi.Run(() =>
+    {
+        var shell = new AppShell { Content = new TextBlock { Text = "正文" } };
+        Show(shell, 1100);
+
+        shell.FullscreenButtonPart.Focus();
+        Invoke(shell.FullscreenButtonPart); // 进入的按钮随顶栏隐藏：焦点跟到退出按钮上
+        WpfUi.Flush();
+        Assert.True(shell.FullscreenExitPart.IsKeyboardFocused);
+
+        Invoke(shell.FullscreenExitPart);
+        WpfUi.Flush();
+        Assert.True(shell.FullscreenButtonPart.IsKeyboardFocused);
+    });
 }

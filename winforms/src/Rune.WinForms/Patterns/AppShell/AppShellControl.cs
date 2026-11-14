@@ -167,8 +167,12 @@ public partial class AppShellControl : Control
             if (field == value) return;
             field = value;
             if (value) IsSidebarOpen = false;
+            // WinForms 在聚焦的控件隐藏时会把焦点挪到下一个控件，所以先记下焦点是不是在全屏按钮上
+            var onButton = fullscreenButton.ContainsFocus || fullscreenExit.ContainsFocus || FindForm()?.ActiveControl is null;
             ApplyFullscreen();
             Sync();
+            // 进入、退出后焦点跟到对应的按钮上（上游 AppShell）；焦点本来在正文里的不动
+            if (onButton) (value ? fullscreenExit : fullscreenButton).Focus();
             IsFullscreenChanged?.Invoke(this, EventArgs.Empty);
         }
     }

@@ -147,6 +147,20 @@ public class AvatarControl : ElementControl<Avatar>
         }
     }
 
+    /// <summary>只是装饰：名字已经写在旁边（用户按钮、成员列表的一行）时对读屏隐藏，DisplayName 仍用来生成首字母。</summary>
+    [Category("Accessibility")]
+    [Description("只是装饰：名字已经写在旁边时对读屏隐藏，DisplayName 仍用来生成首字母。")]
+    [DefaultValue(false)]
+    public bool Decorative
+    {
+        get;
+        set
+        {
+            field = value;
+            UpdateRole();
+        }
+    }
+
     /// <summary>后备文字。</summary>
     [Category("Appearance")]
     [Description("后备文字；不写时是名字的首字母，没有名字时是人像图标。")]
@@ -196,7 +210,7 @@ public class AvatarControl : ElementControl<Avatar>
 
     void UpdateRole()
     {
-        var named = !string.IsNullOrWhiteSpace(DisplayName);
+        var named = !Decorative && !string.IsNullOrWhiteSpace(DisplayName);
         AccessibleRole = named ? AccessibleRole.Graphic : AccessibleRole.None;
         AccessibleName = named ? DisplayName : null;
     }

@@ -206,6 +206,9 @@ public sealed partial record PatternsMessages
     /// <summary>导入：完成：`(118)` → “已导入 118 行”</summary>
     public required Func<double, string> DataImportDone { get; init; }
 
+    /// <summary>导入：onImport 失败时提示的标题（下面是错误的说明），默认“导入失败”</summary>
+    public required string DataImportFailed { get; init; }
+
     /// <summary>导入：再导入一份，默认“再导入一份”</summary>
     public required string DataImportAgain { get; init; }
 
@@ -349,6 +352,7 @@ public sealed partial record PatternsMessages
         DataImportEditHint = "有错的格子可以直接改，改完重新校验",
         DataImportSubmit = count => string.Create(CultureInfo.InvariantCulture, $"导入 {count} 行"),
         DataImportDone = count => string.Create(CultureInfo.InvariantCulture, $"已导入 {count} 行"),
+        DataImportFailed = "导入失败",
         DataImportAgain = "再导入一份",
         DataImportNotNumber = "不是数字",
         DataImportPreview = "导入预览",
@@ -444,6 +448,7 @@ public sealed partial record PatternsMessages
         DataImportEditHint = "Fix cells in place; they are checked again",
         DataImportSubmit = count => string.Create(CultureInfo.InvariantCulture, $"Import {count} rows"),
         DataImportDone = count => string.Create(CultureInfo.InvariantCulture, $"Imported {count} rows"),
+        DataImportFailed = "Import failed",
         DataImportAgain = "Import another file",
         DataImportNotNumber = "Not a number",
         DataImportPreview = "Import preview",

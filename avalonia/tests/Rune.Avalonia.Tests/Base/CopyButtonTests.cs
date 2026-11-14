@@ -67,6 +67,7 @@ public class CopyButtonTests
         Assert.Equal((false, failed), (result!.Success, result.Error));
         Assert.False(button.IsCopied);
         Assert.False(button.IsLoading); // 出错后不再转圈
+        Assert.Equal("复制失败", button.Peer().GetItemStatus()); // 失败也播报
     });
 
     [Fact]
