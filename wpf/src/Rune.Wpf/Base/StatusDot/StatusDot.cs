@@ -52,13 +52,15 @@ public class StatusDot : FrameworkElement
     /// <summary>读屏念的含义。</summary>
     public string? Label { get => (string?)GetValue(LabelProperty); set => SetValue(LabelProperty, value); }
 
+    void UpdateToneBrush() => SetResourceReference(ToneBrushProperty, BrushKey(Tone));
+
     /// <summary>色调的实色：中性用 textMuted，其余用色调的实色；不写时 accent。</summary>
-    void UpdateToneBrush() => SetResourceReference(ToneBrushProperty, Tone.Value switch
+    internal static string BrushKey(StatusTone tone) => tone.Value switch
     {
         null => "Rune.Brush.Accent",
         "neutral" => "Rune.Brush.TextMuted",
         var name => $"Rune.Brush.{char.ToUpperInvariant(name[0])}{name[1..]}",
-    });
+    };
 
     /// <inheritdoc />
     protected override Size MeasureOverride(Size availableSize) => new(Size.Pixels, Size.Pixels);
