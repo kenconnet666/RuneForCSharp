@@ -1378,6 +1378,14 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### Splitter、ResizeHandle（2026-11-15）
+
+- 比例的计算（夹在范围里保留一位小数、拖动换算、按键的目标、收起时读屏的 0 / 100、两栏按比例分、收起按钮的箭头方向、手柄的长度与方向）在孪生文件 SplitterScale，同 TS 的网格模板：分隔条占 space.md，剩下的按 size : 100 − size 分，收起的一栏不占位置。拖动的比例按整个分栏的长度算（含分隔条，同 TS 量 root 的宽度）。
+- Avalonia、WPF 的 Splitter 是代码组合的：表面 Border（Bordered 时 1 像素边框、lg 圆角、surface 底，裁掉子元素）里一个排版面板放两栏的 ScrollArea（两个方向）、分隔条 SplitterHandle 与收起按钮 IconButton（最后加，叠在线与两栏上；不进 Tab 顺序，键盘在分隔条上按 Enter）。分隔条自己画线：平时 xs、borderMuted，悬停、拖动 md、borderStrong，键盘聚焦 md、强调色，粗细有 sm 的过渡；读屏是分隔符，RangeValue 的取值是比例。Avalonia 实现 ICustomHitTest（透明处也能按）；WPF 的线色引用资源（换主题跟着变），指针逻辑收进 PointerDown / PointerMove / PointerUp。收起按钮要不透明的 surface 底遮住线、悬停 fillHover：Avalonia 是 SplitterParts.axaml 里只选分栏自己的按钮的样式，WPF 是部件样式里排在配方后面的触发器。
+- WinForms 的 SplitterControl：上游的 size 叫 Ratio（Control 自己有 Size），范围叫 MinRatio、MaxRatio，另有 RatioChanged、CollapsedChanged 事件；分隔条叫 Divider（Control 自己有 Handle）。WinForms 的子控件不随 RightToLeft 镜像，从右到左时自己把起始一栏排到右边、拖动方向取反；Bordered 时两栏按圆角裁（CornerClip）。收起按钮的底色用 ButtonSx，悬停时换成 fillHover。
+- ResizeHandle 放在要调整的元素里，改的是父元素的 Width（横线时 Height），值夹在范围里、取整像素，再触发 LengthChanged；上游的 width、minWidth、maxWidth、defaultWidth 叫 Length、MinLength、MaxLength、DefaultLength（Width 这些是控件自己的布局属性）。Avalonia、WPF 要放在 Panel / Grid 里叠在内容上，自己按 Edge、Orientation 设对齐贴边；WinForms 的 ResizeHandleControl 跟着父控件的排版自己摆到边上、放到最上面。拖动按父元素的容器（WinForms 按屏幕）的坐标量：父元素在拖动中变大，贴着起始边时它的原点也在动。
+- 粗指针（触屏）扩命中区是网页的事，桌面上不做；上游的 usePersistentState 记比例，桌面上交给使用方（双向绑定或 RatioChanged）。
+
 ### OtpField（2026-11-15）
 
 - 同上游（input-otp 的做法）：只有一个真正的输入框，格子只是显示。Avalonia、WPF 的 OtpField 从 TextInputBase（平台 TextBox）派生，模板是自绘的 OtpSlots 加一个透明的文字层（Avalonia 的 TextPresenter、WPF 的 PART_ContentHost，前景、光标、选中都透明）；粘贴、退格、输入法、撤销、读屏的编辑框、字段的标签与出错都是现成的。WinForms 的 OtpFieldControl 自己画格子，真正的输入框是放在控件外面（看不见）的 TextBox，焦点转给它，读屏名称跟着字段的标签。

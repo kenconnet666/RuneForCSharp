@@ -173,7 +173,7 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 | Listbox 自己滚动时焦点环画在里面（focusRingStyles.inset） | 核对时发现 Avalonia、WPF 的 Listbox 键盘聚焦时根本没有焦点环（焦点装饰、焦点框都关了；Avalonia 的说明以为由 ScrollArea 画，其实 ScrollArea 只在自己有焦点时画）；WinForms 本来就画在里面 | 已修：Avalonia 借 ScrollArea 里侧 2 像素的那圈（列表 :focus-visible 时显示），WPF 在根上叠一圈 2 像素、键盘聚焦时显示 |
 | CodeBlock 的复制按钮焦点环画在里面 | 我们的复制按钮同 IconButton，焦点环本来就压在按钮里面 | 不涉及 |
 | Tabs 的标签（列表可横向滚动）焦点环画在里面 | 我们的 Tab 从 ButtonBase 派生，焦点环本来就压在里面（外面一圈的是 TabPanel 的，上游同样画在外面） | 不涉及 |
-| DataTable 表头排序按钮、Splitter 把手 | 还没做 | 做时照新的 |
+| DataTable 表头排序按钮、Splitter 把手 | Splitter 已做（2026-11-15），DataTable 还没做 | Splitter 的分隔条聚焦时是线加粗、变成强调色（同上游，不画外圈）；DataTable 做时照新的 |
 
 ### 第十三批（2026-11-08 通知，master a3ae9428：焦点环不再被容器裁掉，全站检查清零）
 
@@ -358,7 +358,7 @@ Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_
 | 状态层 stateLayerStyles：ghost（悬停 14%、按下 22% 文字色）给 Alert、Banner、Tag 的关闭按钮；overlay（悬停叠 8%）给可选中的 Tag（f5e4c5a6、e48a7c38） | Tag 已做；Alert、Banner 还没做 | 已跟：Tag 三个平台。按下沿用按钮本来的波纹（文字色的 22%）。Alert、Banner 做时照新的 |
 | Link：下划线平时 50% 文字色、悬停实色；tone=muted 悬停换正文色（d8e0429f、f5e4c5a6） | Link 已做 | 已跟：三个平台（WinForms 的下划线改成自己画） |
 | Switch 轨道悬停混进正文色（关 15%、开 12%，oklab）；输入外壳 soft 悬停 fillHover（bbdf86c9） | 已做 | 已跟：Switch 的 TrackHover（sRGB 里混，差不到一个色阶），TextField、Select 的 soft 悬停 |
-| Checklist、KanbanBoard、Upload、色块、Image、Carousel、Splitter 的悬停（bbdf86c9），Splitter / ResizeHandle 的悬停聚焦拖动（1046ed37） | 还没做 | 做时照新的 |
+| Checklist、KanbanBoard、Upload、色块、Image、Carousel、Splitter 的悬停（bbdf86c9），Splitter / ResizeHandle 的悬停聚焦拖动（1046ed37） | Checklist、Splitter、ResizeHandle 已做，其余还没做 | Splitter、ResizeHandle 照新的做（2026-11-15）：悬停、拖动 borderStrong，键盘聚焦强调色，分隔线加粗到 md；收起按钮不透明的 surface 底、悬停 fillHover；其余做时照新的 |
 | TabList 横排可滚时可滚的一头渐隐（604d1334） | TabList 已做滚动 | 2026-11-14 做了：Avalonia、WPF 是滚动区域的 OpacityMask；WinForms 的标签是各自的窗口，没有渐隐 |
 | Steps 横排连接线对齐圆圈中线（4a257b71） | 已做（2026-11-14 移植时照新的） | 连接线按圆圈的中线画 |
 | AppShell：收起按钮从侧栏底部挪到品牌格结束边，收起后品牌格只放居中的展开按钮，AppShellBrand 不再按收起隐藏产品名（cb28b280） | 已做 | 已跟：三个平台，去掉 CollapseBar 部件、WPF 的 AppShellBrand.IsCompact 附加属性、WinForms 的 IsCompact |
@@ -380,7 +380,7 @@ Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
 | 部件属性合并：undefined 不表态、null 才清掉；aria-describedby 拼接去重；嵌套 propsXxx 递归合并；同名事件合成 | WinForms 的部件属性记录本来就是 null = 不改、逐字段合并；Avalonia、WPF 用样式 | 已跟：读屏的帮助文字（aria-describedby）三个平台都改成字段的说明、错误与控件自己的拼在一起去重——原来 TextField、Select、Listbox、ToggleGroup 根本没念字段的说明，勾选项只在自己没写时才念 |
-| Listbox disabled 时点选项不改值、不触发 onPick；Link external 的 target、rel 是默认层；Popconfirm、TagsInput、日期、Pagination、Rating、Splitter 等一批行为修正；输入法组合中 DataTable、Cascader 等不处理按键 | Listbox、Popconfirm、Rating 已做，其余还没做 | Listbox 本来就拦下（补了测试）；Popconfirm 照新的做（确认进行中被关掉、结果出来没确认成才算取消）；Rating 照新的做（只读时名称里总有分数）；其余做时照新的 |
+| Listbox disabled 时点选项不改值、不触发 onPick；Link external 的 target、rel 是默认层；Popconfirm、TagsInput、日期、Pagination、Rating、Splitter 等一批行为修正；输入法组合中 DataTable、Cascader 等不处理按键 | Listbox、Popconfirm、Rating、Splitter 已做，其余还没做 | Listbox 本来就拦下（补了测试）；Popconfirm 照新的做（确认进行中被关掉、结果出来没确认成才算取消）；Rating 照新的做（只读时名称里总有分数）；Splitter 照新的做（只认主键拖动，拖动中离开分隔条也保持"拖动中"的样子）；其余做时照新的 |
 | 新部件属性：NavBar、QuarterCalendar、DataTable 表头按钮、ImageCropper、QueryTable | 还没做 | 做时照新的 |
 
 锁定跟到 0.22.0（6e6f831d）：生成文件没变；行为对照新增的 Field 两条、Listbox 一条都对上了。
@@ -415,7 +415,7 @@ defineTheme / defineLang 忽略 undefined——网页专用或 C# 没有 undefin
 | ContextMenu 触屏、触控笔按住 700ms 打开 | 已做 | 不用改：Avalonia 的长按手势会发 ContextRequested；WPF、WinForms 由 Windows 的按住相当于右键发右键菜单 |
 | NavList 紧凑分组触屏点图标弹出子项 | 紧凑时的弹出还没做（等 HoverCard） | 做时照新的：悬停、聚焦、点按都弹出，点外面、点了链接收起 |
 | 页面组合文案 notificationsNoMatch | 生成文件 | 重新生成 PatternsMessages |
-| ColumnTable empty；TagsInput 回车加打的字；Splitter、ResizeHandle 粗指针的命中区；ConditionBuilder、CodeEditor、Autocomplete 在只读 / 不可用表单里；NavBar 下拉里的徽标；Diagram fitView | 还没做 | 做时照新的 |
+| ColumnTable empty；TagsInput 回车加打的字；Splitter、ResizeHandle 粗指针的命中区；ConditionBuilder、CodeEditor、Autocomplete 在只读 / 不可用表单里；NavBar 下拉里的徽标；Diagram fitView | Splitter、ResizeHandle 已做，其余还没做 | 粗指针（触屏）扩命中区是网页的 pointer: coarse，桌面上不涉及（分隔条本来整条 space.md 都能按）；其余做时照新的 |
 | usePersistentState、useMediaQuery 水合；sameValue 比 Map / Set；tableToXlsx 的时区 | 网页专用或还没做 | 不涉及 |
 
 锁定跟到 0.24.0（6e7b07b7）：页面组合文案表多了 notificationsNoMatch，docs-gen 的页面清单更新；token、图标、配方、语言包没变。
