@@ -20,20 +20,18 @@ public class StatusDot : Element
     public StatusDotSize Size { get; set { field = value; InvalidateMeasure(); } }
 
     /// <summary>当前主题里的颜色。</summary>
-    Color Resolve(ElementContext context)
+    Color Resolve(ElementContext context) => Color ?? ToneColor(Tone, context.Theme.Colors);
+
+    /// <summary>色调的实色：中性用 textMuted，其余用色调的实色；不写时 accent（ProportionBar 的段也用它）。</summary>
+    internal static Color ToneColor(StatusTone tone, ThemeColors c) => tone.Value switch
     {
-        if (Color is { } color) return color;
-        var c = context.Theme.Colors;
-        return Tone.Value switch
-        {
-            "neutral" => c.TextMuted,
-            "info" => c.Info,
-            "success" => c.Success,
-            "warning" => c.Warning,
-            "danger" => c.Danger,
-            _ => c.Accent,
-        };
-    }
+        "neutral" => c.TextMuted,
+        "info" => c.Info,
+        "success" => c.Success,
+        "warning" => c.Warning,
+        "danger" => c.Danger,
+        _ => c.Accent,
+    };
 
     /// <inheritdoc />
     protected internal override Size Measure(ElementContext context, Size available)

@@ -115,6 +115,8 @@ export const PLATFORM_COMPONENT_PROP_RENAMES = {
     Card: { padding: 'CardPadding' },
     // 控件自己有 Layout 事件
     Descriptions: { layout: 'ItemLayout' },
+    // 横条的粗细不是字号档位（同名的 TextSize 会误导）
+    ProportionBar: { size: 'BarSize' },
     // 标题是控件的 Text（同按钮、导航项的文字）
     ItemListItem: { title: 'Text' },
     // 同 TextFieldControl

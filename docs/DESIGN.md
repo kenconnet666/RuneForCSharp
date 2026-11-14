@@ -992,6 +992,16 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   根 Border 的 TextElement.FontSize 绑到控件的 FontSize：Gallery 与 inspect 的宿主里，说明的 TextBlock 没从控件继承到字号（测试里继承正常，原因没查清），绑上就稳了。
 - 示例：tones、status、variants、banner（Banner 在同一页）。Avalonia、WPF 与文档站的取值对照没有差异。
 
+### ProportionBar（2026-11-14）
+
+- 结构同 TS：横条（胶囊，sm 8 像素、md 12 像素，段间空 borderWidths.sm，数量为 0 的段不画）在上，图例在下（space.sm，换行，列间距 lg、行间距 xs，sm 的字号）：
+  色点（StatusDot md）、名称、数量（半粗、等宽数字）、补充。段的颜色同 StatusDot 的色调实色（StatusDot 的取色抽成了内部的 BrushKey / ToneColor）或任意颜色；
+  没写色调的按 accent、info、success、warning、danger、neutral 的顺序取（孪生文件 ProportionBarVariants 里的 Proportions，连同读屏名称的拼法）。
+- TS 的 aria-label 叫 Label；段是 `ProportionSegment` 记录（Avalonia、WPF 的 Color 是画刷，WinForms 是 Color）；ValueText、LegendExtra 是函数，Avalonia、WPF 可以返回控件，
+  WinForms 返回文字（补充画成次要色、xs）；WinForms 的 size 叫 BarSize（不是字号档位）。
+- 横条读屏是一张图，名称带上各段的数量。Avalonia 渲染时查色调资源、换主题时重画；WPF 的每段是资源引用的 Border（换主题跟着变）；WinForms 全是画的，读屏的子项是横条与图例各项。
+- 示例在 Sparkline 页（proportion-bar），取值对照与文档站一致。
+
 ### Sparkline（2026-11-14）
 
 - 几何是孪生文件 `SparklineGeometry`（Display/Sparkline）：横坐标按位置（折线 0 到 n-1、柱每个占一格），纵坐标 0（上）到 100（下），空值处断开，柱从 0 起、0.7 格宽，
