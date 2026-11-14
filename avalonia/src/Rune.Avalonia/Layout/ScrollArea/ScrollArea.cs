@@ -164,12 +164,12 @@ public class ScrollArea : ScrollViewer
     void ScheduleHide()
     {
         var version = ++hides;
-        _ = Task.Delay(HideDelay).ContinueWith(_ => Dispatcher.UIThread.Post(() =>
+        UiDelay.Run(HideDelay, () =>
         {
             if (version != hides) return;
             scrolled = false;
             UpdateActive();
-        }), TaskScheduler.Default);
+        });
     }
 
     void UpdateActive()

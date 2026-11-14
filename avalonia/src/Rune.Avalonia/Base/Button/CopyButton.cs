@@ -112,10 +112,10 @@ public class CopyButton : IconButton
         Announce(Provider.GetLang(this).Copied);
         Pop();
         var version = ++copies;
-        _ = Task.Delay(Timeout).ContinueWith(_ => Dispatcher.UIThread.Post(() =>
+        UiDelay.Run(Timeout, () =>
         {
             if (version == copies) SetCopied(false);
-        }), TaskScheduler.Default);
+        });
     }
 
     /// <summary>读屏播报：Avalonia 没有通知事件，用项状态的变化；项状态留到复原（失败的留到下一次点击）。</summary>

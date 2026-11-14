@@ -42,11 +42,11 @@ public sealed class DelayedLoading(Action<bool> changed, bool loading = false)
     public void Stop() => pending++;
 
     void Schedule(TimeSpan wait, bool next, int version) =>
-        _ = Task.Delay(wait > TimeSpan.Zero ? wait : TimeSpan.Zero).ContinueWith(_ => Dispatcher.UIThread.Post(() =>
+        UiDelay.Run(wait, () =>
         {
             if (version != pending) return;
             Shown = next;
             if (next) shownAt = DateTime.UtcNow;
             changed(next);
-        }), TaskScheduler.Default);
+        });
 }
