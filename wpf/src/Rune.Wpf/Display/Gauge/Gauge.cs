@@ -167,7 +167,7 @@ public class Gauge : Control
     }
 
     /// <summary>色调的实色（TS 的 gaugeToneStyles）：中性是 borderStrong，其余是色调的实色。</summary>
-    static string BrushKey(StatusTone tone) => tone.Value == "neutral" ? "Rune.Brush.BorderStrong" : StatusDot.BrushKey(tone);
+    static string BrushKey(StatusTone tone) => tone.Value == "neutral" ? ThemeKeys.Brush.BorderStrong : StatusDot.BrushKey(tone);
 
     /// <summary>文字与刻度盘：轨道、数值弧、外圈的区间、目标刻度按画布坐标重建。</summary>
     void Update()
@@ -182,14 +182,14 @@ public class Gauge : Control
         AutomationProperties.SetName(this, Label ?? "");
         canvas.Children.Clear();
         var (low, high) = ((double)Min, (double)Max);
-        canvas.Children.Add(Arc(0, 1, GaugeGeometry.Radius, "Rune.Brush.Fill", GaugeGeometry.ArcWidth));
+        canvas.Children.Add(Arc(0, 1, GaugeGeometry.Radius, ThemeKeys.Brush.Fill, GaugeGeometry.ArcWidth));
         canvas.Children.Add(Arc(0, GaugeGeometry.Fraction((double)Value, low, high), GaugeGeometry.Radius, BrushKey(ShownTone), GaugeGeometry.ArcWidth));
         foreach (var (from, to, tone) in GaugeGeometry.Bands(Bands, low, high)) canvas.Children.Add(Arc(from, to, GaugeGeometry.BandRadius, BrushKey(tone), GaugeGeometry.BandWidth));
         if (Target is { } target)
         {
             var (a, b) = GaugeGeometry.Tick(GaugeGeometry.Fraction((double)target, low, high));
             var tick = new Line { X1 = a.X, Y1 = a.Y - GaugeGeometry.Top, X2 = b.X, Y2 = b.Y - GaugeGeometry.Top, StrokeThickness = GaugeGeometry.TargetWidth, StrokeStartLineCap = PenLineCap.Round, StrokeEndLineCap = PenLineCap.Round };
-            tick.SetResourceReference(Shape.StrokeProperty, "Rune.Brush.Text");
+            tick.SetResourceReference(Shape.StrokeProperty, ThemeKeys.Brush.Text);
             canvas.Children.Add(tick);
         }
     }
@@ -219,7 +219,7 @@ public class Gauge : Control
         Width = 10 * em;
         value.FontSize = 1.5 * em;
         min.FontSize = max.FontSize = 0.75 * em;
-        label.FontSize = TryFindResource("Rune.FontSize.Sm") is double sm ? sm : 13;
+        label.FontSize = this.Resource<double>(ThemeKeys.FontSize.Sm);
     }
 
     /// <inheritdoc />

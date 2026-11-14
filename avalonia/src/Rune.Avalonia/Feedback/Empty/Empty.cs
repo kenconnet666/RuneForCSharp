@@ -64,10 +64,10 @@ public class Empty : Control
         root.Child = column;
         LogicalChildren.Add(root);
         VisualChildren.Add(root);
-        resources.Bind(TextElement.ForegroundProperty, "Rune.Brush.Text");
-        resources.Bind(BlockFactorProperty, "Rune.Space.Xl");
-        resources.Bind(InlineFactorProperty, "Rune.Space.Lg");
-        resources.Bind(GapFactorProperty, "Rune.Space.Sm");
+        resources.Bind(TextElement.ForegroundProperty, ThemeKeys.Brush.Text);
+        resources.Bind(BlockFactorProperty, ThemeKeys.Space.Xl);
+        resources.Bind(InlineFactorProperty, ThemeKeys.Space.Lg);
+        resources.Bind(GapFactorProperty, ThemeKeys.Space.Sm);
         Update();
     }
 

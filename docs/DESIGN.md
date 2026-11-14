@@ -223,6 +223,7 @@ TS 版的规则是"显式 prop > 最近一层 Provider > createUi > 组件默认
 - 分部类里生成的静态成员不能依赖手写部分的静态字段：各文件的静态字段谁先初始化不确定。WPF 的 `CubicBezierEase.Standard` 因此放在嵌套类里创建（踩过：依赖属性还没注册，构造时抛 ArgumentNullException）。
 - 取值的解析只认 vue-tsx-pro 里出现的写法，认不出、或新加了没登记的组就报错；平台上用不了的 token（`sizes.full` 是 100%）登记在跳过表里，并写进生成文件。
 - 时长只取默认值；"减少动态效果"由作用域里的 Transitions 资源负责（第 8 节）。
+- **代码里的键**（Avalonia、WPF）：生成 `ThemeKeys`（`ThemeKeys.Space.Md`、`ThemeKeys.Brush.Border`……）的常量，代码里查资源、设资源引用都用它，不写字符串字面量。查值用 `this.Resource<T>(key)`（`ThemeResources`）：查不到（没合并 RuneTheme）时取 `ThemeKeys.Fallback` 里的生成值（随主题变的长度取亮色主题的；颜色、阴影、字体没有默认值），组件里不再各写一份兜底数字（以前手写的兜底有的已经与上游不一致，如圆角 md 写成 0.375）。WinForms 没有资源系统，直接用 `Tokens` 常量。
 
 ### 语言包的生成（tools/lang-gen）
 

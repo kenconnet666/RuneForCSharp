@@ -239,7 +239,7 @@ public class Listbox : Control, IFieldControl
     {
         if (Reached is null || State.Options.Count == 0) return;
         var remaining = scroll.Extent.Height - scroll.Offset.Y - scroll.Viewport.Height;
-        if (remaining <= 5 * this.Resource("Rune.Size.Control", 2.25) * TextElement.GetFontSize(this)) Reached(State.Options.Count - 1);
+        if (remaining <= 5 * this.Resource<double>(ThemeKeys.Size.Control) * TextElement.GetFontSize(this)) Reached(State.Options.Count - 1);
     }
 
     /// <summary>行、骨架、空状态三选一（取下一页时行与骨架都在）。</summary>
@@ -258,8 +258,8 @@ public class Listbox : Control, IFieldControl
     void UpdateMetrics()
     {
         var em = TextElement.GetFontSize(this);
-        var xs = this.Resource("Rune.Space.Xs", 0.25) * em;
-        var sm = this.Resource("Rune.Space.Sm", 0.5) * em;
+        var xs = this.Resource<double>(ThemeKeys.Space.Xs) * em;
+        var sm = this.Resource<double>(ThemeKeys.Space.Sm) * em;
         ((Panel)scroll.Content!).Margin = new Thickness(xs);
         scroll.MaxHeight = double.IsNaN(Height) ? ScrollMaxHeight ?? 20 * em : double.PositiveInfinity;
         foreach (var bar in skeleton.Children.OfType<Skeleton>())
@@ -480,10 +480,10 @@ public class ListboxItem : Control
         AutomationProperties.SetHelpText(this, option.Group);
         var em = TextElement.GetFontSize(this);
         // 行高 lineHeights.normal：TextBlock.LineHeight 不往下继承，直接设在文字上
-        label.LineHeight = this.Resource("Rune.LineHeight.Normal", 1.5) * em;
-        root.Padding = new Thickness(this.Resource("Rune.Space.Sm", 0.5) * em, this.Resource("Rune.Space.Xs", 0.25) * em);
-        root.CornerRadius = new CornerRadius(this.Resource("Rune.Radius.Sm", 0.25) * em);
-        root.MinHeight = ControlHeight.Of(em, this.Resource("Rune.Size.Control", 2.25));
+        label.LineHeight = this.Resource<double>(ThemeKeys.LineHeight.Normal) * em;
+        root.Padding = new Thickness(this.Resource<double>(ThemeKeys.Space.Sm) * em, this.Resource<double>(ThemeKeys.Space.Xs) * em);
+        root.CornerRadius = new CornerRadius(this.Resource<double>(ThemeKeys.Radius.Sm) * em);
+        root.MinHeight = ControlHeight.Of(em, this.Resource<double>(ThemeKeys.Size.Control));
     }
 
     /// <summary>指针移过：高亮（不可用的不高亮）。</summary>

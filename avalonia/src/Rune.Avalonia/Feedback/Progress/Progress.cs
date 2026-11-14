@@ -108,10 +108,10 @@ public class Progress : Control
     public Progress()
     {
         resources = new TemplateResources(this);
-        resources.Bind(TrackColorProperty, "Rune.Color.Fill");
-        resources.Bind(TextColorProperty, "Rune.Color.Text");
-        resources.Bind(GapFactorProperty, "Rune.Space.Xs");
-        resources.Bind(LineWidthProperty, "Rune.BorderWidth.Sm");
+        resources.Bind(TrackColorProperty, ThemeKeys.Color.Fill);
+        resources.Bind(TextColorProperty, ThemeKeys.Color.Text);
+        resources.Bind(GapFactorProperty, ThemeKeys.Space.Xs);
+        resources.Bind(LineWidthProperty, ThemeKeys.BorderWidth.Sm);
         resources.Bind(RadiusFactorProperty, Radius.Full.ResourceKey);
         BindTone();
         track = new ProgressTrack(this);
@@ -223,8 +223,8 @@ public class Progress : Control
     /// <summary>着色：中性用次要文字色、accent 用强调色，其余状态色用各自的文字色（与轨道之间有 3:1）。</summary>
     void BindTone() => resources.Bind(IndicatorColorProperty, Tone.Value switch
     {
-        "neutral" => "Rune.Color.TextMuted",
-        "accent" or null => "Rune.Color.Accent",
+        "neutral" => ThemeKeys.Color.TextMuted,
+        "accent" or null => ThemeKeys.Color.Accent,
         var tone => $"Rune.Color.{char.ToUpperInvariant(tone[0])}{tone[1..]}Text",
     });
 
@@ -269,7 +269,7 @@ public class Progress : Control
         fill = null;
         SetValue(FractionProperty, to);
         var duration = VisualRoot is null ? TimeSpan.Zero
-            : Motion.Duration(this, "Rune.Duration.Md", TimeSpan.FromMilliseconds(200));
+            : Motion.Duration(this, ThemeKeys.Duration.Md);
         if (duration <= TimeSpan.Zero || Math.Abs(from - to) < 1e-9) return;
         fill = new CancellationTokenSource();
         _ = new Animation
@@ -284,7 +284,7 @@ public class Progress : Control
         }.RunAsync(this, fill.Token);
     }
 
-    Easing Standard => this.Resource<Easing>("Rune.Easing.Standard", new CubicEaseInOut());
+    Easing Standard => this.Resource<Easing>(ThemeKeys.Easing.Standard);
 
     /// <summary>不确定进度：挂在可视树上时一直循环（条形 1.4 秒、环形 1 秒；系统关闭动画时 3 秒）。</summary>
     void Spin()

@@ -2,6 +2,7 @@
 import { argbHex } from '../lib/css.mjs';
 import { cap, checkPalettes, paletteOf, TONES } from "./palette.mjs";
 import { comment, customThemes, describe, escape, FONT_WEIGHTS, HEADER, number, themeTitle, timeSpan } from './format.mjs';
+import { themeKeys } from './keys.mjs';
 
 const DIR = 'avalonia/src/Rune.Avalonia/Config/Generated';
 
@@ -134,5 +135,12 @@ export function avalonia(model) {
   return [
     { path: `${DIR}/Tokens.g.axaml`, content: axaml(model) },
     { path: `${DIR}/RuneThemeVariants.g.cs`, content: variants(model) },
+    themeKeys(model, {
+      namespace: 'Rune.Avalonia',
+      path: `${DIR}/ThemeKeys.g.cs`,
+      lookup: '<see cref="ThemeResources.Resource{T}(global::Avalonia.Controls.Control, string)"/>',
+      fontWeight: (value) => `global::Avalonia.Media.FontWeight.${FONT_WEIGHTS[value]}`,
+      easing: (_, [x1, y1, x2, y2]) => `new global::Avalonia.Animation.Easings.SplineEasing(${[x1, y1, x2, y2].map((n) => number(n) + 'd').join(', ')})`,
+    }),
   ];
 }

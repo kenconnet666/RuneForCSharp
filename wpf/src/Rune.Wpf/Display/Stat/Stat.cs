@@ -278,45 +278,43 @@ public class Stat : Control
         ShowParts(shown);
         if (shown) revealing = true;
         if (shown || !revealing) return;
-        var duration = Motion.Duration(this, "Rune.Duration.Lg", TimeSpan.FromMilliseconds(300));
+        var duration = Motion.Duration(this, ThemeKeys.Duration.Lg);
         if (duration <= TimeSpan.Zero) return;
         foreach (var part in new UIElement[] { value, change })
-            part.BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, duration) { EasingFunction = TryFindResource("Rune.Easing.Enter") as IEasingFunction });
+            part.BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, duration) { EasingFunction = this.Resource<IEasingFunction>(ThemeKeys.Easing.Enter) });
     }
 
     /// <summary>在 StatGroup 里：起始边一条竖线、左右各空 space.md；竖线往起始方向挪一条线宽，每行第一个的竖线被组裁掉。</summary>
     void UpdateGrouped()
     {
         var grouped = Parent is StatGroup || VisualTreeHelper.GetParent(this) is StatGroup;
-        var line = Resource("Rune.BorderWidth.Xs", 1.0);
-        var md = Resource("Rune.Space.Md", 0.75) * FontSize;
+        var line = this.Resource<double>(ThemeKeys.BorderWidth.Xs);
+        var md = this.Resource<double>(ThemeKeys.Space.Md) * FontSize;
         SetCurrentValue(BorderThicknessProperty, grouped ? new Thickness(line, 0, 0, 0) : default);
         SetCurrentValue(PaddingProperty, grouped ? new Thickness(md, 0, md, 0) : default);
         root.Margin = grouped ? new Thickness(-line, 0, 0, 0) : default;
-        if (grouped) SetResourceReference(BorderBrushProperty, "Rune.Brush.BorderMuted");
+        if (grouped) SetResourceReference(BorderBrushProperty, ThemeKeys.Brush.BorderMuted);
     }
-
-    double Resource(string key, double fallback) => TryFindResource(key) is double value ? value : fallback;
 
     /// <summary>em 尺寸：指标名一行 sm（图标框 1.75em、圆角 md 按它算）；数值 xxl；单位、变化量、说明、底栏 xs；骨架同数值、变化量高。</summary>
     void UpdateMetrics()
     {
         var em = FontSize;
-        var (xs, sm, xxl) = (Resource("Rune.FontSize.Xs", 12.0), Resource("Rune.FontSize.Sm", 13.0), Resource("Rune.FontSize.Xxl", 24.0));
+        var (xs, sm, xxl) = (this.Resource<double>(ThemeKeys.FontSize.Xs), this.Resource<double>(ThemeKeys.FontSize.Sm), this.Resource<double>(ThemeKeys.FontSize.Xxl));
         label.SetValue(TextElement.FontSizeProperty, sm);
         iconBox.Width = iconBox.Height = 1.75 * sm;
-        iconBox.CornerRadius = new CornerRadius(Resource("Rune.Radius.Md", 0.4) * sm);
+        iconBox.CornerRadius = new CornerRadius(this.Resource<double>(ThemeKeys.Radius.Md) * sm);
         icon.Size = sm;
-        column.Gap = Resource("Rune.Space.Xs", 0.25) * em;
-        column.ColumnGap = Resource("Rune.Space.Sm", 0.5) * em;
+        column.Gap = this.Resource<double>(ThemeKeys.Space.Xs) * em;
+        column.ColumnGap = this.Resource<double>(ThemeKeys.Space.Sm) * em;
         number.FontSize = text.FontSize = xxl;
         unit.FontSize = description.FontSize = xs;
         change.SetValue(TextElement.FontSizeProperty, xs);
         footer.SetValue(TextElement.FontSizeProperty, xs);
         // 底栏是 xs 的字号：上面多空 space.xs、线下面空 space.sm 都按它算
-        footer.Margin = new Thickness(0, Resource("Rune.Space.Xs", 0.25) * xs, 0, 0);
-        footer.Padding = new Thickness(0, Resource("Rune.Space.Sm", 0.5) * xs, 0, 0);
-        footer.BorderThickness = new Thickness(0, Resource("Rune.BorderWidth.Xs", 1.0), 0, 0);
+        footer.Margin = new Thickness(0, this.Resource<double>(ThemeKeys.Space.Xs) * xs, 0, 0);
+        footer.Padding = new Thickness(0, this.Resource<double>(ThemeKeys.Space.Sm) * xs, 0, 0);
+        footer.BorderThickness = new Thickness(0, this.Resource<double>(ThemeKeys.BorderWidth.Xs), 0, 0);
         numberSkeleton.Width = 4 * xxl;
         numberSkeleton.Height = 1.25 * xxl;
         changeSkeleton.Width = 6 * xs;

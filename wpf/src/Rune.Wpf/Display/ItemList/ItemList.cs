@@ -218,12 +218,11 @@ public class ItemListItem : ButtonBase
         SetValue(IsInteractiveKey, interactive);
         SetValue(IsHoverableKey, hoverable);
         SetValue(HasDividerKey, list is { Divided: true } && list.Children.OfType<ItemListItem>().LastOrDefault() != this);
-        double Factor(string key) => TryFindResource(key) as double? ?? 0;
-        var block = Factor(list?.Density == ItemListDensity.Compact ? "Rune.Space.Xs" : "Rune.Space.Sm");
-        var gutter = (list?.Inset ?? (hoverable || interactive ? Space.Sm : null)) is { ResourceKey: { } key } ? Factor(key) : 0;
+        var block = this.Resource<double>(list?.Density == ItemListDensity.Compact ? ThemeKeys.Space.Xs : ThemeKeys.Space.Sm);
+        var gutter = (list?.Inset ?? (hoverable || interactive ? Space.Sm : null)) is { ResourceKey: { } key } ? this.Resource<double>(key) : 0;
         SetCurrentValue(EmSize.PaddingProperty, new Thickness(gutter, block, gutter, block));
         SetCurrentValue(FocusableProperty, interactive);
-        if (start is not null) start.MinHeight = Align == ItemListAlign.Start ? Factor("Rune.LineHeight.Normal") * FontSize : 0;
+        if (start is not null) start.MinHeight = Align == ItemListAlign.Start ? this.Resource<double>(ThemeKeys.LineHeight.Normal) * FontSize : 0;
         // 说明是普通文字（不是 Text）：WPF 的行高按像素继承，按它自己的 xs 字号重算（上游 12px 的说明行高 18）
         if (description is not null) TextBlock.SetLineHeight(description, Leading.GetFactor(this) * TextElement.GetFontSize(description));
     }

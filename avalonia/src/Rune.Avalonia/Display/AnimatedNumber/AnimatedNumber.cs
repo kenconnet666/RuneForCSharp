@@ -134,7 +134,7 @@ public class AnimatedNumber : Control
     {
         tween?.Cancel();
         var to = (double)Value;
-        var duration = Motion.Duration(Duration ?? this.Resource("Rune.Duration.Lg", TimeSpan.FromMilliseconds(300)));
+        var duration = Motion.Duration(Duration ?? this.Resource<TimeSpan>(ThemeKeys.Duration.Lg));
         // 先写终值：动画在动画优先级上盖住它，结束或被打断后留下的就是终值
         SetValue(CurrentProperty, to);
         if (duration <= TimeSpan.Zero || from == to) return;
@@ -142,7 +142,7 @@ public class AnimatedNumber : Control
         _ = new Animation
         {
             Duration = duration,
-            Easing = this.Resource<Easing>("Rune.Easing.Standard", new CubicEaseInOut()),
+            Easing = this.Resource<Easing>(ThemeKeys.Easing.Standard),
             Children =
             {
                 new KeyFrame { Cue = new Cue(0), Setters = { new Setter(CurrentProperty, from) } },

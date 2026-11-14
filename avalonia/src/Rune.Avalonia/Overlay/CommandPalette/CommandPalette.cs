@@ -211,8 +211,8 @@ public class CommandPalette : Control
     void UpdateMetrics()
     {
         var em = TextElement.GetFontSize(this);
-        search.Padding = new Thickness(this.Resource("Rune.Space.Md", 0.75) * em, this.Resource("Rune.Space.Sm", 0.5) * em);
-        search.SetValue(TextElement.FontSizeProperty, this.Resource<double>("Rune.FontSize.Lg", 18));
+        search.Padding = new Thickness(this.Resource<double>(ThemeKeys.Space.Md) * em, this.Resource<double>(ThemeKeys.Space.Sm) * em);
+        search.SetValue(TextElement.FontSizeProperty, this.Resource<double>(ThemeKeys.FontSize.Lg));
         listbox.ScrollMaxHeight = Math.Min(24 * 16, (host?.ClientSize.Height ?? 800) / 2);
         defaultTrigger.MinWidth = 12 * 16;
     }

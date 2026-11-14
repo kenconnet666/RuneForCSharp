@@ -165,10 +165,10 @@ public class MenuSub : Control, IMenuHost
     void UpdateMetrics()
     {
         var em = TextElement.GetFontSize(this);
-        panel.CornerRadius = new CornerRadius(this.Resource("Rune.Radius.Lg", 0.5) * em);
+        panel.CornerRadius = new CornerRadius(this.Resource<double>(ThemeKeys.Radius.Lg) * em);
         panel.MinWidth = 12 * em;
         panel.Margin = new Thickness(2, 0);
-        items.Margin = new Thickness(this.Resource("Rune.Space.Xs", 0.25) * em);
+        items.Margin = new Thickness(this.Resource<double>(ThemeKeys.Space.Xs) * em);
     }
 
     /// <summary>改开关并记下原因（属性变化时报告）。</summary>

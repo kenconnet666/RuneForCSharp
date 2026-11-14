@@ -113,7 +113,7 @@ public class AvatarGroup : Control
         var em = FontSize;
         more.Width = more.Height = 2.5 * em;
         more.CornerRadius = new CornerRadius(1.25 * em);
-        moreText.FontSize = this.Resource("Rune.FontSize.Xs", 12.0) / this.Resource("Rune.FontSize.Md", 14.0) * em;
+        moreText.FontSize = this.Resource<double>(ThemeKeys.FontSize.Xs) / this.Resource<double>(ThemeKeys.FontSize.Md) * em;
     }
 
     /// <inheritdoc />
@@ -142,8 +142,8 @@ public class AvatarGroup : Control
         public override void Render(DrawingContext context)
         {
             base.Render(context);
-            var width = this.Resource("Rune.BorderWidth.Sm", 2.0);
-            if (this.Resource<IBrush?>("Rune.Brush.Background", null) is not { } brush || width <= 0) return;
+            var width = this.Resource<double>(ThemeKeys.BorderWidth.Sm);
+            if (this.Resource<IBrush?>(ThemeKeys.Brush.Background) is not { } brush || width <= 0) return;
             var radius = Child switch { Avatar avatar => avatar.CornerRadius, Border border => border.CornerRadius.TopLeft, _ => 0 };
             context.DrawRectangle(null, new Pen(brush, width), new RoundedRect(new Rect(Bounds.Size).Inflate(width / 2), radius + width / 2));
         }

@@ -57,7 +57,7 @@ public class Tag : Badge
     /// <summary>新建：焦点环的颜色绑到主题；移除时先离场（Dismissal）。</summary>
     public Tag()
     {
-        new TemplateResources(this).Bind(FocusRingProperty, "Rune.Brush.FocusRing");
+        new TemplateResources(this).Bind(FocusRingProperty, ThemeKeys.Brush.FocusRing);
         dismissal = new Dismissal(this, PresenceProperty, () => removeRequested?.Invoke(this, EventArgs.Empty));
     }
 

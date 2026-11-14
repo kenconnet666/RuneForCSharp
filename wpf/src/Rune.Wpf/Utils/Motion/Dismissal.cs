@@ -27,7 +27,7 @@ sealed class Dismissal(FrameworkElement owner, DependencyProperty presence, Acti
         if (IsDismissing) return;
         IsDismissing = true;
         var candidates = owner.IsKeyboardFocusWithin ? FocusCandidates() : [];
-        Animate(0, "Rune.Easing.Exit", () =>
+        Animate(0, ThemeKeys.Easing.Exit, () =>
         {
             IsDismissing = false;
             requested();
@@ -35,7 +35,7 @@ sealed class Dismissal(FrameworkElement owner, DependencyProperty presence, Acti
             {
                 if (PresentationSource.FromVisual(owner) is not null)
                 {
-                    Animate(1, "Rune.Easing.Enter", null);
+                    Animate(1, ThemeKeys.Easing.Enter, null);
                     return;
                 }
                 if (Keyboard.FocusedElement is UIElement { IsVisible: true }) return;
@@ -79,14 +79,14 @@ sealed class Dismissal(FrameworkElement owner, DependencyProperty presence, Acti
         var from = (double)owner.GetValue(presence);
         // 先写终值：过渡结束（FillBehavior.Stop）或被打断后留下的就是它
         owner.SetValue(presence, to);
-        var duration = owner.IsLoaded ? Motion.Duration(owner, "Rune.Duration.Sm", TimeSpan.FromMilliseconds(120)) : TimeSpan.Zero;
+        var duration = owner.IsLoaded ? Motion.Duration(owner, ThemeKeys.Duration.Sm) : TimeSpan.Zero;
         if (duration <= TimeSpan.Zero || from == to)
         {
             owner.BeginAnimation(presence, null);
             completed?.Invoke();
             return;
         }
-        var animation = new DoubleAnimation(from, to, duration) { EasingFunction = owner.TryFindResource(easingKey) as IEasingFunction, FillBehavior = FillBehavior.Stop };
+        var animation = new DoubleAnimation(from, to, duration) { EasingFunction = owner.Resource<IEasingFunction>(easingKey), FillBehavior = FillBehavior.Stop };
         if (completed is not null) animation.Completed += (_, _) => completed();
         owner.BeginAnimation(presence, animation);
     }

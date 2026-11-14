@@ -173,7 +173,7 @@ public class Gauge : Control
         Width = 10 * em;
         value.FontSize = 1.5 * em;
         min.FontSize = max.FontSize = 0.75 * em;
-        label.FontSize = this.Resource("Rune.FontSize.Sm", 13.0);
+        label.FontSize = this.Resource<double>(ThemeKeys.FontSize.Sm);
     }
 
     /// <inheritdoc />
@@ -194,7 +194,7 @@ public class Gauge : Control
     protected override AutomationPeer OnCreateAutomationPeer() => new GaugePeer(this);
 
     /// <summary>色调的实色（TS 的 gaugeToneStyles）：中性是 borderStrong，其余是色调的实色。</summary>
-    static string BrushKey(StatusTone tone) => tone.Value == "neutral" ? "Rune.Brush.BorderStrong" : StatusDot.BrushKey(tone);
+    static string BrushKey(StatusTone tone) => tone.Value == "neutral" ? ThemeKeys.Brush.BorderStrong : StatusDot.BrushKey(tone);
 
     /// <summary>半圆：轨道、数值弧、外圈的区间与目标刻度，按宽度把 200 × 108 的画布缩放着画；高 = 宽 × 108 / 200。</summary>
     sealed class Dial : Control
@@ -218,7 +218,7 @@ public class Gauge : Control
         {
             var scale = Bounds.Width / GaugeGeometry.Width;
             Point At((double X, double Y) point) => new(point.X * scale, (point.Y - GaugeGeometry.Top) * scale);
-            IBrush? Brush(string key) => owner.Resource<IBrush?>(key, null);
+            IBrush? Brush(string key) => owner.Resource<IBrush?>(key);
             void Arc(double from, double to, double radius, IBrush? brush, double width)
             {
                 if (brush is null || to <= from) return;
@@ -233,10 +233,10 @@ public class Gauge : Control
             }
 
             var (min, max, current) = ((double)owner.Min, (double)owner.Max, (double)owner.Value);
-            Arc(0, 1, GaugeGeometry.Radius, Brush("Rune.Brush.Fill"), GaugeGeometry.ArcWidth);
+            Arc(0, 1, GaugeGeometry.Radius, Brush(ThemeKeys.Brush.Fill), GaugeGeometry.ArcWidth);
             Arc(0, GaugeGeometry.Fraction(current, min, max), GaugeGeometry.Radius, Brush(BrushKey(owner.ShownTone)), GaugeGeometry.ArcWidth);
             foreach (var (from, to, tone) in GaugeGeometry.Bands(owner.Bands, min, max)) Arc(from, to, GaugeGeometry.BandRadius, Brush(BrushKey(tone)), GaugeGeometry.BandWidth);
-            if (owner.Target is { } target && Brush("Rune.Brush.Text") is { } text)
+            if (owner.Target is { } target && Brush(ThemeKeys.Brush.Text) is { } text)
             {
                 var (a, b) = GaugeGeometry.Tick(GaugeGeometry.Fraction((double)target, min, max));
                 context.DrawLine(new Pen(text, GaugeGeometry.TargetWidth * scale, lineCap: PenLineCap.Round), At(a), At(b));

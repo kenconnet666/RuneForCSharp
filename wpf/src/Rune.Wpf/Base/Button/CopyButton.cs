@@ -100,9 +100,9 @@ public class CopyButton : IconButton
     void Pop()
     {
         if (GetTemplateChild("PART_Icon") is not Icon icon) return;
-        var duration = Motion.Duration(this, "Rune.Duration.Md", TimeSpan.FromMilliseconds(200));
+        var duration = Motion.Duration(this, ThemeKeys.Duration.Md);
         if (duration <= TimeSpan.Zero) return;
-        var easing = TryFindResource("Rune.Easing.Enter") as IEasingFunction;
+        var easing = this.Resource<IEasingFunction>(ThemeKeys.Easing.Enter);
         var scale = new ScaleTransform();
         icon.RenderTransformOrigin = new Point(0.5, 0.5);
         icon.RenderTransform = scale;

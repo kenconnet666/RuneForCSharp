@@ -164,9 +164,9 @@ public class MenuSub : FrameworkElement, IMenuHost
     void UpdateMetrics()
     {
         var em = TextElement.GetFontSize(this);
-        panel.CornerRadius = shadow.CornerRadius = new CornerRadius((TryFindResource("Rune.Radius.Lg") as double? ?? 0.5) * em);
+        panel.CornerRadius = shadow.CornerRadius = new CornerRadius(this.Resource<double>(ThemeKeys.Radius.Lg) * em);
         panel.MinWidth = 12 * em;
-        items.Margin = new Thickness((TryFindResource("Rune.Space.Xs") as double? ?? 0.25) * em);
+        items.Margin = new Thickness(this.Resource<double>(ThemeKeys.Space.Xs) * em);
     }
 
     /// <summary>往书写方向的结束边弹出，顶边对齐这一项；放不下时翻到另一边。浮层四周的阴影空白抵掉。</summary>

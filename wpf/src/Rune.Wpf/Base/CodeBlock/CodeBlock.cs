@@ -281,9 +281,9 @@ public class CodeBlock : FrameworkElement
             var number = index + 1;
             var row = new DockPanel { LastChildFill = true, Background = Brushes.Transparent };
             row.SetResourceReference(StyleProperty, CodeBlockParts.Line);
-            var background = marks.Added.Contains(number) ? "Rune.Brush.CodeInserted"
-                : marks.Removed.Contains(number) ? "Rune.Brush.CodeDeleted"
-                : marks.Highlighted.Contains(number) ? "Rune.Brush.Fill" : null;
+            var background = marks.Added.Contains(number) ? ThemeKeys.Brush.CodeInserted
+                : marks.Removed.Contains(number) ? ThemeKeys.Brush.CodeDeleted
+                : marks.Highlighted.Contains(number) ? ThemeKeys.Brush.Fill : null;
             if (background is not null) row.SetResourceReference(Panel.BackgroundProperty, background);
             row.Tag = marks.Added.Contains(number) ? "added" : marks.Removed.Contains(number) ? "removed" : marks.Highlighted.Contains(number) ? "highlighted" : null;
             if (LineNumbers)
@@ -331,14 +331,14 @@ public class CodeBlock : FrameworkElement
     /// <summary>高亮种类的画刷（同上游 Shiki 主题的映射）。</summary>
     static string BrushKey(CodeTokenKind kind) => kind switch
     {
-        CodeTokenKind.Comment or CodeTokenKind.Punctuation => "Rune.Brush.CodeComment",
-        CodeTokenKind.Keyword => "Rune.Brush.CodeKeyword",
-        CodeTokenKind.String => "Rune.Brush.CodeString",
-        CodeTokenKind.Number => "Rune.Brush.CodeNumber",
-        CodeTokenKind.Function => "Rune.Brush.CodeFunction",
-        CodeTokenKind.Type => "Rune.Brush.CodeType",
-        CodeTokenKind.Tag => "Rune.Brush.CodeTag",
-        _ => "Rune.Brush.CodeAttribute",
+        CodeTokenKind.Comment or CodeTokenKind.Punctuation => ThemeKeys.Brush.CodeComment,
+        CodeTokenKind.Keyword => ThemeKeys.Brush.CodeKeyword,
+        CodeTokenKind.String => ThemeKeys.Brush.CodeString,
+        CodeTokenKind.Number => ThemeKeys.Brush.CodeNumber,
+        CodeTokenKind.Function => ThemeKeys.Brush.CodeFunction,
+        CodeTokenKind.Type => ThemeKeys.Brush.CodeType,
+        CodeTokenKind.Tag => ThemeKeys.Brush.CodeTag,
+        _ => ThemeKeys.Brush.CodeAttribute,
     };
 
     /// <summary>
@@ -353,7 +353,7 @@ public class CodeBlock : FrameworkElement
         var titleSize = 0.86 * em;
         TextElement.SetFontSize(pre, code);
         TextElement.SetFontSize(header, titleSize);
-        root.CornerRadius = Flush ? default : new CornerRadius((TryFindResource("Rune.Radius.Md") as double? ?? 0.375) * em);
+        root.CornerRadius = Flush ? default : new CornerRadius(this.Resource<double>(ThemeKeys.Radius.Md) * em);
         root.BorderThickness = Flush ? default : new Thickness(1);
         if (Flush) root.Background = Brushes.Transparent;
         else root.ClearValue(Border.BackgroundProperty);
@@ -362,7 +362,7 @@ public class CodeBlock : FrameworkElement
         var withCopy = Copyable && Title is null;
         var end = withCopy ? 0.75 * code + ControlHeight.Of(code, ControlHeight.DefaultFactor) : code;
         pre.Padding = new Thickness(byLine ? 0 : code, 0.75 * code, byLine ? 0 : end, 0.75 * code);
-        var lineHeight = (TryFindResource("Rune.LineHeight.Normal") as double? ?? Leading.Normal) * code;
+        var lineHeight = this.Resource<double>(ThemeKeys.LineHeight.Normal) * code;
         TextBlock.SetLineHeight(pre, lineHeight);
         TextBlock.SetLineStackingStrategy(pre, LineStackingStrategy.BlockLineHeight);
         foreach (var row in Rows)

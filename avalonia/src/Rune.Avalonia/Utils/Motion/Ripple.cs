@@ -29,7 +29,7 @@ public static class Ripple
     {
         var (width, height) = (layer.Bounds.Width, layer.Bounds.Height);
         var radius = Math.Sqrt(Math.Pow(Math.Max(origin.X, width - origin.X), 2) + Math.Pow(Math.Max(origin.Y, height - origin.Y), 2));
-        var expand = Motion.Duration(layer, "Rune.Duration.Lg", TimeSpan.FromMilliseconds(300));
+        var expand = Motion.Duration(layer, ThemeKeys.Duration.Lg);
         var scale = new ScaleTransform(expand > TimeSpan.Zero ? 0 : 1, expand > TimeSpan.Zero ? 0 : 1);
         var ripple = new Ellipse
         {
@@ -44,7 +44,7 @@ public static class Ripple
         layer.Children.Add(ripple);
         if (expand > TimeSpan.Zero)
         {
-            var easing = layer.Resource<Easing>("Rune.Easing.Standard", new LinearEasing());
+            var easing = layer.Resource<Easing>(ThemeKeys.Easing.Standard);
             scale.Transitions = [Transition(ScaleTransform.ScaleXProperty, expand, easing), Transition(ScaleTransform.ScaleYProperty, expand, easing)];
             // 加进树之后再改值，过渡才会播
             Dispatcher.UIThread.Post(() => scale.ScaleX = scale.ScaleY = 1, DispatcherPriority.Background);
@@ -55,8 +55,8 @@ public static class Ripple
         {
             if (released) return;
             released = true;
-            var fade = Motion.Duration(layer, "Rune.Duration.Md", TimeSpan.FromMilliseconds(200));
-            ripple.Transitions = [Transition(Visual.OpacityProperty, fade, layer.Resource<Easing>("Rune.Easing.Exit", new LinearEasing()))];
+            var fade = Motion.Duration(layer, ThemeKeys.Duration.Md);
+            ripple.Transitions = [Transition(Visual.OpacityProperty, fade, layer.Resource<Easing>(ThemeKeys.Easing.Exit))];
             ripple.Opacity = 0;
             DispatcherTimer.RunOnce(() => layer.Children.Remove(ripple), fade + TimeSpan.FromMilliseconds(50));
         };

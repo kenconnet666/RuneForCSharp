@@ -173,7 +173,7 @@ public class TableOfContents : FrameworkElement
         indicator.Visibility = link is null ? Visibility.Collapsed : Visibility.Visible;
         if (link is null || link.ActualHeight <= 0) return;
         var (y, height) = (link.TranslatePoint(default, listContent).Y, link.ActualHeight);
-        var duration = placed ? Motion.Duration(this, "Rune.Duration.Md", TimeSpan.FromMilliseconds(200)) : TimeSpan.Zero;
+        var duration = placed ? Motion.Duration(this, ThemeKeys.Duration.Md) : TimeSpan.Zero;
         placed = true;
         if (duration <= TimeSpan.Zero)
         {
@@ -183,7 +183,7 @@ public class TableOfContents : FrameworkElement
             indicator.Height = height;
             return;
         }
-        var easing = TryFindResource("Rune.Easing.Standard") as IEasingFunction;
+        var easing = this.Resource<IEasingFunction>(ThemeKeys.Easing.Standard);
         shift.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(y, duration) { EasingFunction = easing });
         indicator.BeginAnimation(HeightProperty, new DoubleAnimation(height, duration) { EasingFunction = easing });
     }

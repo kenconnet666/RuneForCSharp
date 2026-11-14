@@ -467,8 +467,8 @@ public class Select : TemplatedControl, IFieldControl
     void UpdateMetrics()
     {
         var em = FontSize;
-        panel.CornerRadius = new CornerRadius(this.Resource("Rune.Radius.Lg", 0.5) * em);
-        header.Padding = new Thickness(this.Resource("Rune.Space.Xs", 0.25) * em);
+        panel.CornerRadius = new CornerRadius(this.Resource<double>(ThemeKeys.Radius.Lg) * em);
+        header.Padding = new Thickness(this.Resource<double>(ThemeKeys.Space.Xs) * em);
         // 弹出层不在外壳里：字号同外壳
         panel.SetValue(TextElement.FontSizeProperty, em);
     }

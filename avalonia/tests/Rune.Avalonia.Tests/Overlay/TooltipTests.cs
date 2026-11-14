@@ -51,11 +51,11 @@ public class TooltipTests
         var panel = Part<Border>(tip, TooltipParts.Panel);
         Assert.Equal(button.ThemeColor("Rune.Brush.InverseSurface"), Lookup.ColorOf(panel.Background));
         Assert.Equal(button.ThemeColor("Rune.Brush.InverseText"), Lookup.ColorOf(tip.Foreground));
-        var em = button.Resource("Rune.FontSize.Sm", 0d);
+        var em = button.Resource<double>("Rune.FontSize.Sm");
         Assert.Equal(em, tip.FontSize);
         Assert.Equal(new Thickness(0.5 * em, 0.25 * em), panel.Padding);
         Assert.Equal(20 * em, panel.MaxWidth);
-        Assert.Equal(button.Resource("Rune.Radius.Sm", 0d) * em, panel.CornerRadius.TopLeft, 3);
+        Assert.Equal(button.Resource<double>("Rune.Radius.Sm") * em, panel.CornerRadius.TopLeft, 3);
         Assert.False(Part<Border>(tip, TooltipParts.Arrow).IsVisible);
     });
 

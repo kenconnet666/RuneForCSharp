@@ -111,11 +111,11 @@ public static class Tooltip
     /// <summary>淡入：durations.md、enter 缓动；系统关闭动画时直接显示。</summary>
     static void FadeIn(Control control, ToolTip tip)
     {
-        var duration = Motion.Duration(control, "Rune.Duration.Md", TimeSpan.FromMilliseconds(200));
+        var duration = Motion.Duration(control, ThemeKeys.Duration.Md);
         tip.Transitions = null;
         tip.Opacity = duration > TimeSpan.Zero ? 0 : 1;
         if (duration <= TimeSpan.Zero) return;
-        tip.Transitions = [new DoubleTransition { Property = Visual.OpacityProperty, Duration = duration, Easing = control.Resource<Easing>("Rune.Easing.Enter", new CubicEaseOut()) }];
+        tip.Transitions = [new DoubleTransition { Property = Visual.OpacityProperty, Duration = duration, Easing = control.Resource<Easing>(ThemeKeys.Easing.Enter) }];
         tip.Opacity = 1;
     }
 

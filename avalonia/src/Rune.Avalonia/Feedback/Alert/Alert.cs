@@ -104,9 +104,9 @@ public class Alert : Control
         VisualChildren.Add(root);
         root.Bind(Border.BackgroundProperty, this.GetObservable(BackgroundProperty));
         root.Bind(Border.BorderBrushProperty, this.GetObservable(BorderBrushProperty));
-        title.Bind(TextBlock.FontWeightProperty, title.GetResourceObservable("Rune.FontWeight.Medium"));
+        title.Bind(TextBlock.FontWeightProperty, title.GetResourceObservable(ThemeKeys.FontWeight.Medium));
         // 说明是正文色（标题、图标随色调）
-        description.Bind(TextElement.ForegroundProperty, description.GetResourceObservable("Rune.Brush.Text"));
+        description.Bind(TextElement.ForegroundProperty, description.GetResourceObservable(ThemeKeys.Brush.Text));
         dismissal = new Dismissal(this, PresenceProperty, () => closeRequested?.Invoke(this, EventArgs.Empty));
         Resolved.Bind(this, Resolved.PaletteProperty, Tone.PaletteKey);
         Resolved.Bind(this, Resolved.RadiusProperty, Radius.ResourceKey);
@@ -269,15 +269,15 @@ public class Alert : Control
     void UpdateMetrics()
     {
         var em = FontSize;
-        root.Padding = new Thickness(this.Resource("Rune.Space.Md", 0.75) * em);
+        root.Padding = new Thickness(this.Resource<double>(ThemeKeys.Space.Md) * em);
         root.CornerRadius = new CornerRadius((Resolved.GetRadius(this) ?? 0.375) * em);
-        root.SetValue(TextBlock.LineHeightProperty, this.Resource("Rune.LineHeight.Normal", 1.5) * em);
+        root.SetValue(TextBlock.LineHeightProperty, this.Resource<double>(ThemeKeys.LineHeight.Normal) * em);
         icon.Margin = spinner.Margin = new Thickness(0, 0.25 * em);
         if (close is not null)
         {
             // 小一档（TS 的 relativeFontSizeStyles.sm：sm / md）
-            close.FontSize = this.Resource("Rune.FontSize.Sm", 13.0) / this.Resource("Rune.FontSize.Md", 14.0) * em;
-            var xs = this.Resource("Rune.Space.Xs", 0.25) * em;
+            close.FontSize = this.Resource<double>(ThemeKeys.FontSize.Sm) / this.Resource<double>(ThemeKeys.FontSize.Md) * em;
+            var xs = this.Resource<double>(ThemeKeys.Space.Xs) * em;
             close.Margin = new Thickness(0, -xs);
         }
     }

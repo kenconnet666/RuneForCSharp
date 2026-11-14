@@ -385,7 +385,7 @@ public class NavGroup : Control
         if (current) SetCurrentValue(IsOpenProperty, true);
         // 子列表左边缩进 space.lg、上面 space.xs；紧凑时不缩进（TS 的 compactNested）
         var em = TextElement.GetFontSize(this);
-        list.Margin = new Thickness(owner.IsCompact ? 0 : this.Resource("Rune.Space.Lg", 1.0) * em, this.Resource("Rune.Space.Xs", 0.25) * em, 0, 0);
+        list.Margin = new Thickness(owner.IsCompact ? 0 : this.Resource<double>(ThemeKeys.Space.Lg) * em, this.Resource<double>(ThemeKeys.Space.Xs) * em, 0, 0);
     }
 
     /// <summary>展开、收起。</summary>
@@ -546,7 +546,7 @@ public class NavSection : Control
         labelRow.Padding = iconOnly ? new Thickness(0, 0.5 * em, 0, 0.25 * em) : new Thickness(0.75 * em, 0.25 * em);
         labelRow.BorderThickness = iconOnly ? new Thickness(0, 1, 0, 0) : default;
         var first = Parent is Panel panel && panel.Children.OfType<Control>().FirstOrDefault(child => child.IsVisible) == this;
-        Margin = new Thickness(0, first ? 0 : this.Resource("Rune.Space.Lg", 1.0) * em, 0, 0);
+        Margin = new Thickness(0, first ? 0 : this.Resource<double>(ThemeKeys.Space.Lg) * em, 0, 0);
     }
 }
 

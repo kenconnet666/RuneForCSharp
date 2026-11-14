@@ -149,13 +149,13 @@ public class AnimatedNumber : Control
     {
         var to = (double)Value;
         SetValue(CurrentProperty, to);
-        var duration = Duration is { } own ? (Motion.Enabled ? own : TimeSpan.Zero) : Motion.Duration(this, "Rune.Duration.Lg", TimeSpan.FromMilliseconds(300));
+        var duration = Duration is { } own ? (Motion.Enabled ? own : TimeSpan.Zero) : Motion.Duration(this, ThemeKeys.Duration.Lg);
         if (duration <= TimeSpan.Zero || from == to)
         {
             BeginAnimation(CurrentProperty, null);
             return;
         }
-        BeginAnimation(CurrentProperty, new DoubleAnimation(from, to, duration) { EasingFunction = TryFindResource("Rune.Easing.Standard") as IEasingFunction, FillBehavior = FillBehavior.Stop });
+        BeginAnimation(CurrentProperty, new DoubleAnimation(from, to, duration) { EasingFunction = this.Resource<IEasingFunction>(ThemeKeys.Easing.Standard), FillBehavior = FillBehavior.Stop });
     }
 
     /// <summary>停在终值时按原值格式化（decimal 不经过浮点数）；过渡中按终值的小数位取整，整数不会滚出一串小数。</summary>

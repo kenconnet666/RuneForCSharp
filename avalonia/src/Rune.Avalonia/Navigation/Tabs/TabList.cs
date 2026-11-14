@@ -88,7 +88,7 @@ public class TabList : Control
         VisualChildren.Add(frame);
         SyncBar();
 
-        indicator.Bind(Border.BackgroundProperty, indicator.GetResourceObservable("Rune.Brush.Accent"), BindingPriority.Template);
+        indicator.Bind(Border.BackgroundProperty, indicator.GetResourceObservable(ThemeKeys.Brush.Accent), BindingPriority.Template);
         focus = new RovingFocus(strip, control => control is Tab) { Loop = true };
         strip.Children.CollectionChanged += OnTabsChanged;
         strip.AddHandler(KeyDownEvent, OnStripKeyDown, RoutingStrategies.Tunnel);
@@ -193,11 +193,11 @@ public class TabList : Control
         // 横排 line 的分隔线画在整个标签栏上；竖排在列表的结束边，标签与指示条压在它上面
         frame.BorderThickness = line && !vertical ? new Thickness(0, 0, 0, 1) : default;
         box.BorderThickness = line && vertical ? new Thickness(0, 0, 1, 0) : default;
-        var divider = this.GetResourceObservable("Rune.Brush.BorderMuted");
+        var divider = this.GetResourceObservable(ThemeKeys.Brush.BorderMuted);
         frame.Bind(Border.BorderBrushProperty, divider, BindingPriority.Template);
         box.Bind(Border.BorderBrushProperty, divider, BindingPriority.Template);
         if (line) box.ClearValue(Border.BackgroundProperty);
-        else box.Bind(Border.BackgroundProperty, this.GetResourceObservable("Rune.Brush.Fill"), BindingPriority.Template);
+        else box.Bind(Border.BackgroundProperty, this.GetResourceObservable(ThemeKeys.Brush.Fill), BindingPriority.Template);
         indicator.IsVisible = line;
         scroller.Axis = vertical ? ScrollAreaAxis.Y : ScrollAreaAxis.X;
         // 竖排不滚；横排能滚但不显示滚动条（触控板、拖动照样能滚）
@@ -420,8 +420,8 @@ public class TabList : Control
         }
         else if (Transitions is null)
         {
-            var duration = Motion.Duration(this, "Rune.Duration.Md", TimeSpan.FromMilliseconds(200));
-            var easing = this.Resource<Easing>("Rune.Easing.Standard", new CubicEaseInOut());
+            var duration = Motion.Duration(this, ThemeKeys.Duration.Md);
+            var easing = this.Resource<Easing>(ThemeKeys.Easing.Standard);
             if (duration > TimeSpan.Zero)
                 Transitions =
                 [
@@ -443,7 +443,7 @@ public class TabList : Control
         // 随字号的尺寸：soft 的 xs 内边距、md 圆角
         var em = TextElement.GetFontSize(this);
         box.Padding = Line ? default : new Thickness(0.25 * em);
-        box.CornerRadius = Line ? default : new CornerRadius(this.Resource("Rune.Radius.Md", 0.375) * em);
+        box.CornerRadius = Line ? default : new CornerRadius(this.Resource<double>(ThemeKeys.Radius.Md) * em);
         return base.MeasureOverride(availableSize);
     }
 

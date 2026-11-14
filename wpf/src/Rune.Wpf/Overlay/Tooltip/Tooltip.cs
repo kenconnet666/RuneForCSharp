@@ -124,9 +124,9 @@ public static class Tooltip
     /// <summary>淡入：durations.md、enter 缓动；系统关闭动画时直接显示。</summary>
     static void FadeIn(ToolTip tip)
     {
-        var duration = Motion.Duration(tip, "Rune.Duration.Md", TimeSpan.FromMilliseconds(200));
+        var duration = Motion.Duration(tip, ThemeKeys.Duration.Md);
         tip.BeginAnimation(UIElement.OpacityProperty, duration <= TimeSpan.Zero ? null
-            : new DoubleAnimation(0, 1, duration) { EasingFunction = tip.TryFindResource("Rune.Easing.Enter") as IEasingFunction, FillBehavior = FillBehavior.Stop });
+            : new DoubleAnimation(0, 1, duration) { EasingFunction = tip.Resource<IEasingFunction>(ThemeKeys.Easing.Enter), FillBehavior = FillBehavior.Stop });
     }
 
     /// <summary>箭头贴着朝向触发器的那条边：边按提示与触发器在屏幕上的实际位置判断（空间不够时翻到了另一边）。</summary>

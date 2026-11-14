@@ -111,12 +111,12 @@ public class Radio : ChoiceBase
     protected override void OnCheckedChanged(bool oldValue, bool newValue)
     {
         var to = newValue ? 1d : 0d;
-        var duration = joined ? Motion.Duration(this, "Rune.Duration.Sm", TimeSpan.FromMilliseconds(120)) : TimeSpan.Zero;
+        var duration = joined ? Motion.Duration(this, ThemeKeys.Duration.Sm) : TimeSpan.Zero;
         foreach (var axis in new[] { ScaleTransform.ScaleXProperty, ScaleTransform.ScaleYProperty })
         {
             scale.SetValue(axis, to);
             scale.BeginAnimation(axis, duration <= TimeSpan.Zero ? null
-                : new DoubleAnimation(1 - to, to, duration) { EasingFunction = TryFindResource("Rune.Easing.Standard") as IEasingFunction, FillBehavior = FillBehavior.Stop });
+                : new DoubleAnimation(1 - to, to, duration) { EasingFunction = this.Resource<IEasingFunction>(ThemeKeys.Easing.Standard), FillBehavior = FillBehavior.Stop });
         }
         if (UIElementAutomationPeer.FromElement(this) is RadioAutomationPeer peer)
             peer.RaisePropertyChangedEvent(SelectionItemPatternIdentifiers.IsSelectedProperty, oldValue, newValue);

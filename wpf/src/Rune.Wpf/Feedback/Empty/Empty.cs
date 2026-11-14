@@ -68,9 +68,9 @@ public class Empty : Control
         title.SetResourceReference(StyleProperty, EmptyParts.Title);
         description.SetResourceReference(StyleProperty, EmptyParts.Description);
         action.SetResourceReference(StyleProperty, EmptyParts.Action);
-        SetResourceReference(BlockFactorProperty, "Rune.Space.Xl");
-        SetResourceReference(InlineFactorProperty, "Rune.Space.Lg");
-        SetResourceReference(GapFactorProperty, "Rune.Space.Sm");
+        SetResourceReference(BlockFactorProperty, ThemeKeys.Space.Xl);
+        SetResourceReference(InlineFactorProperty, ThemeKeys.Space.Lg);
+        SetResourceReference(GapFactorProperty, ThemeKeys.Space.Sm);
         foreach (var part in new UIElement[] { icon, title, description, content, action }) column.Children.Add(part);
         root.Child = column;
         AddVisualChild(root);

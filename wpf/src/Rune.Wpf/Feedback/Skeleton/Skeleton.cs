@@ -59,7 +59,7 @@ public class Skeleton : FrameworkElement
         holder.SetResourceReference(StyleProperty, SkeletonParts.Content);
         AddVisualChild(holder);
         AddLogicalChild(holder);
-        SetResourceReference(TextColorProperty, "Rune.Color.Text");
+        SetResourceReference(TextColorProperty, ThemeKeys.Color.Text);
         BindRadius();
         UpdateLoading();
         IsVisibleChanged += (_, _) => Sweep();
@@ -92,7 +92,7 @@ public class Skeleton : FrameworkElement
     void BindRadius()
     {
         if (Shape.Value == "circle") ClearValue(RadiusFactorProperty);
-        else SetResourceReference(RadiusFactorProperty, Shape.Value is "button" or "image" ? "Rune.Radius.Md" : "Rune.Radius.Sm");
+        else SetResourceReference(RadiusFactorProperty, Shape.Value is "button" or "image" ? ThemeKeys.Radius.Md : ThemeKeys.Radius.Sm);
     }
 
     /// <summary>加载时内容不可见、不可交互；加载完内容照常显示。</summary>

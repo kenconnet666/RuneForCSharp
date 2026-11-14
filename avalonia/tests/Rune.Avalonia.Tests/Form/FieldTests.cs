@@ -107,7 +107,7 @@ public class FieldTests
         var label = field.Part<FieldLabel>(FieldParts.Label);
         var em = field.FontSize;
 
-        Assert.Equal(8 * em + field.Resource("Rune.Space.Md", 0d) * em, toggle.Bounds.X, tolerance: 0.5); // 标签列 8em + 列距 md
+        Assert.Equal(8 * em + field.Resource<double>("Rune.Space.Md") * em, toggle.Bounds.X, tolerance: 0.5); // 标签列 8em + 列距 md
         Assert.Equal(8 * em, label.Bounds.Right, tolerance: 0.5); // 标签贴着控件（end）
         Assert.Equal(Field.FirstBaseline(toggle)!.Value + toggle.Bounds.Y, label.Baseline!.Value + label.Bounds.Y, tolerance: 1); // 第一行基线对齐
         Assert.True(field.Part<Text>(FieldParts.Description).Bounds.X >= toggle.Bounds.X); // 说明在控件列

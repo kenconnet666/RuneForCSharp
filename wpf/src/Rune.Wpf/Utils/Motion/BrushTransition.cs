@@ -19,10 +19,7 @@ namespace Rune.Wpf;
 public static class BrushTransition
 {
     /// <summary>默认的时长 token（tools/token-gen 生成的资源键）：悬停、档位切换这类颜色变化。</summary>
-    public const string DefaultDurationKey = "Rune.Duration.Sm";
-
-    /// <summary>查不到时长 token（没合并 RuneTheme）时用 vue-tsx-pro 的 sm 档（120ms）。</summary>
-    static readonly TimeSpan fallback = TimeSpan.FromMilliseconds(120);
+    public const string DefaultDurationKey = ThemeKeys.Duration.Sm;
 
     /// <summary>开启背景色过渡。</summary>
     public static readonly DependencyProperty EnabledProperty = DependencyProperty.RegisterAttached(
@@ -62,7 +59,7 @@ public static class BrushTransition
         // 自己换上的动画画刷也会走到这里
         if (applying || d is not Border border) return;
         if (e.OldValue is not SolidColorBrush from || e.NewValue is not SolidColorBrush to || from.Color == to.Color) return;
-        var duration = Motion.Duration(border, GetDurationKey(border), fallback);
+        var duration = Motion.Duration(border, GetDurationKey(border));
         if (duration <= TimeSpan.Zero) return;
 
         // 从当前显示的颜色开始（上一次过渡没播完时也连贯）

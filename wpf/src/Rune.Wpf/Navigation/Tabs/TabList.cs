@@ -87,9 +87,9 @@ public class TabList : FrameworkElement
         AddVisualChild(frame);
         SyncBar();
 
-        indicator.SetResourceReference(Border.BackgroundProperty, "Rune.Brush.Accent");
-        frame.SetResourceReference(Border.BorderBrushProperty, "Rune.Brush.BorderMuted");
-        box.SetResourceReference(Border.BorderBrushProperty, "Rune.Brush.BorderMuted");
+        indicator.SetResourceReference(Border.BackgroundProperty, ThemeKeys.Brush.Accent);
+        frame.SetResourceReference(Border.BorderBrushProperty, ThemeKeys.Brush.BorderMuted);
+        box.SetResourceReference(Border.BorderBrushProperty, ThemeKeys.Brush.BorderMuted);
         focus = new RovingFocus(strip, element => element is Tab);
         // 方向键移动了焦点之后（漫游焦点先处理）：自动切换时切到新聚焦的标签
         strip.AddHandler(KeyDownEvent, new KeyEventHandler((_, _) =>
@@ -202,7 +202,7 @@ public class TabList : FrameworkElement
         frame.BorderThickness = line && !vertical ? new Thickness(0, 0, 0, 1) : default;
         box.BorderThickness = line && vertical ? new Thickness(0, 0, 1, 0) : default;
         if (line) box.ClearValue(Border.BackgroundProperty);
-        else box.SetResourceReference(Border.BackgroundProperty, "Rune.Brush.Fill");
+        else box.SetResourceReference(Border.BackgroundProperty, ThemeKeys.Brush.Fill);
         indicator.Visibility = line ? Visibility.Visible : Visibility.Collapsed;
         scroller.Axis = vertical ? ScrollAreaAxis.Y : ScrollAreaAxis.X;
         // 竖排不滚；横排能滚但不显示滚动条（触控板、拖动照样能滚）
@@ -432,7 +432,7 @@ public class TabList : FrameworkElement
         var offset = selected.TranslatePoint(new Point(), strip);
         var (start, length) = Horizontal ? (offset.X, selected.ActualWidth) : (offset.Y, selected.ActualHeight);
         if (Math.Abs(start - (double)GetValue(IndicatorStartProperty)) < 0.01 && Math.Abs(length - (double)GetValue(IndicatorLengthProperty)) < 0.01) return;
-        var duration = placed ? Motion.Duration(this, "Rune.Duration.Md", TimeSpan.FromMilliseconds(200)) : TimeSpan.Zero;
+        var duration = placed ? Motion.Duration(this, ThemeKeys.Duration.Md) : TimeSpan.Zero;
         placed = true;
         Animate(IndicatorStartProperty, start, duration);
         Animate(IndicatorLengthProperty, length, duration);
@@ -448,7 +448,7 @@ public class TabList : FrameworkElement
         }
         var from = (double)GetValue(property);
         SetValue(property, to);
-        BeginAnimation(property, new DoubleAnimation(from, to, duration) { EasingFunction = TryFindResource("Rune.Easing.Standard") as IEasingFunction, FillBehavior = FillBehavior.Stop });
+        BeginAnimation(property, new DoubleAnimation(from, to, duration) { EasingFunction = this.Resource<IEasingFunction>(ThemeKeys.Easing.Standard), FillBehavior = FillBehavior.Stop });
     }
 
     /// <inheritdoc />
@@ -457,7 +457,7 @@ public class TabList : FrameworkElement
         // 随字号的尺寸：soft 的 xs 内边距、md 圆角
         var em = TextElement.GetFontSize(this);
         box.Padding = Line ? default : new Thickness(0.25 * em);
-        box.CornerRadius = Line ? default : new CornerRadius((TryFindResource("Rune.Radius.Md") as double? ?? 0.375) * em);
+        box.CornerRadius = Line ? default : new CornerRadius(this.Resource<double>(ThemeKeys.Radius.Md) * em);
         frame.Measure(availableSize);
         return frame.DesiredSize;
     }

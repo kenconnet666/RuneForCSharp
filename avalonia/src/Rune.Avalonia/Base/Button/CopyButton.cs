@@ -117,9 +117,9 @@ public class CopyButton : IconButton
     void Pop()
     {
         if (this.GetVisualDescendants().OfType<Icon>().FirstOrDefault(icon => icon.Name == IconButtonParts.Icon) is not { } icon) return;
-        var duration = Motion.Duration(this, "Rune.Duration.Md", TimeSpan.FromMilliseconds(200));
+        var duration = Motion.Duration(this, ThemeKeys.Duration.Md);
         if (duration <= TimeSpan.Zero) return;
-        var easing = this.Resource<Easing>("Rune.Easing.Enter", new CubicEaseOut());
+        var easing = this.Resource<Easing>(ThemeKeys.Easing.Enter);
         // 关键帧动画没有 TransformOperations 的插值器：先无过渡地跳到起点，再挂上过渡放大回原样
         icon.Transitions = null;
         icon.RenderTransform = PopStart;

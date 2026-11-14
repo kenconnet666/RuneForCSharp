@@ -67,7 +67,7 @@ public class Checkbox : ChoiceBase
     public Checkbox()
     {
         resources = new TemplateResources(this);
-        resources.Bind(RadiusFactorProperty, "Rune.Radius.Sm");
+        resources.Bind(RadiusFactorProperty, ThemeKeys.Radius.Sm);
         control = new CheckboxStack(this) { Name = CheckboxParts.Control };
         control.Children.AddRange([box, indicator, focusRing]);
         Compose(control);

@@ -93,8 +93,8 @@ public class Field : Control
         error.SetResourceReference(StyleProperty, FieldParts.Error);
         errorText.SetResourceReference(StyleProperty, FieldParts.ErrorText);
         errorIcon.SetResourceReference(StyleProperty, FieldParts.ErrorIcon);
-        SetResourceReference(GapFactorProperty, "Rune.Space.Xs");
-        SetResourceReference(ColumnGapFactorProperty, "Rune.Space.Md");
+        SetResourceReference(GapFactorProperty, ThemeKeys.Space.Xs);
+        SetResourceReference(ColumnGapFactorProperty, ThemeKeys.Space.Md);
         error.Children.Add(errorIcon);
         error.Children.Add(errorText);
         foreach (var child in new UIElement[] { label, description, error })

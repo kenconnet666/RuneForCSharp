@@ -59,7 +59,7 @@ public class ProportionBar : Control
     public ProportionBar()
     {
         bar = new Strip(this) { Name = "PART_Bar" };
-        legend.SetResourceReference(TextElement.FontSizeProperty, "Rune.FontSize.Sm");
+        legend.SetResourceReference(TextElement.FontSizeProperty, ThemeKeys.FontSize.Sm);
         root.Children.Add(bar);
         root.Children.Add(legend);
         AddVisualChild(root);
@@ -176,7 +176,7 @@ public class ProportionBar : Control
 
         protected override Size ArrangeOverride(Size finalSize)
         {
-            var gap = TryFindResource("Rune.BorderWidth.Sm") is double value ? value : 2;
+            var gap = this.Resource<double>(ThemeKeys.BorderWidth.Sm);
             var room = Math.Max(0, finalSize.Width - gap * (shares.Count - 1));
             var total = shares.Sum();
             var x = 0.0;

@@ -407,7 +407,7 @@ public class NavGroup : FrameworkElement
         if (current) SetCurrentValue(IsOpenProperty, true);
         // 子列表左边缩进 space.lg、上面 space.xs；紧凑时不缩进（TS 的 compactNested）
         var em = TextElement.GetFontSize(this);
-        list.Margin = new Thickness(owner.IsCompact ? 0 : (TryFindResource("Rune.Space.Lg") as double? ?? 1) * em, (TryFindResource("Rune.Space.Xs") as double? ?? 0.25) * em, 0, 0);
+        list.Margin = new Thickness(owner.IsCompact ? 0 : this.Resource<double>(ThemeKeys.Space.Lg) * em, this.Resource<double>(ThemeKeys.Space.Xs) * em, 0, 0);
     }
 
     /// <summary>展开、收起。</summary>
@@ -480,9 +480,9 @@ public sealed class NavGroupHeader : NavRow
     double Angle(bool open) => !open ? 0 : FlowDirection == FlowDirection.RightToLeft ? -90 : 90;
 
     internal void Turn(bool open) =>
-        turn.BeginAnimation(RotateTransform.AngleProperty, new DoubleAnimation(Angle(open), Motion.Duration(this, "Rune.Duration.Sm", TimeSpan.FromMilliseconds(120)))
+        turn.BeginAnimation(RotateTransform.AngleProperty, new DoubleAnimation(Angle(open), Motion.Duration(this, ThemeKeys.Duration.Sm))
         {
-            EasingFunction = TryFindResource("Rune.Easing.Standard") as IEasingFunction,
+            EasingFunction = this.Resource<IEasingFunction>(ThemeKeys.Easing.Standard),
         });
 
     /// <inheritdoc />
@@ -613,7 +613,7 @@ public class NavSection : FrameworkElement
         labelRow.Padding = iconOnly ? new Thickness(0, 0.5 * em, 0, 0.25 * em) : new Thickness(0.75 * em, 0.25 * em, 0.75 * em, 0.25 * em);
         labelRow.BorderThickness = iconOnly ? new Thickness(0, 1, 0, 0) : default;
         var first = VisualTreeHelper.GetParent(this) is Panel panel && panel.Children.OfType<UIElement>().FirstOrDefault(child => child.Visibility == Visibility.Visible) == this;
-        Margin = new Thickness(0, first ? 0 : (TryFindResource("Rune.Space.Lg") as double? ?? 1) * em, 0, 0);
+        Margin = new Thickness(0, first ? 0 : this.Resource<double>(ThemeKeys.Space.Lg) * em, 0, 0);
     }
 }
 

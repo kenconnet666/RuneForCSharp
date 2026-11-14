@@ -69,7 +69,7 @@ public class Checkbox : ChoiceBase
         box.SetResourceReference(StyleProperty, CheckboxParts.Box);
         indicator.SetResourceReference(StyleProperty, CheckboxParts.Indicator);
         focusRing.SetResourceReference(StyleProperty, CheckboxParts.FocusRing);
-        SetResourceReference(RadiusFactorProperty, "Rune.Radius.Sm");
+        SetResourceReference(RadiusFactorProperty, ThemeKeys.Radius.Sm);
         foreach (var part in new UIElement[] { box, indicator, focusRing }) control.Children.Add(part);
         Compose(control);
         Loaded += (_, _) =>

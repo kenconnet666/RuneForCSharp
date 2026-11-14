@@ -65,7 +65,7 @@ public class Tag : Badge
     public Tag()
     {
         RenderTransformOrigin = new Point(0.5, 0.5);
-        SetResourceReference(FocusRingProperty, "Rune.Brush.FocusRing");
+        SetResourceReference(FocusRingProperty, ThemeKeys.Brush.FocusRing);
         dismissal = new Dismissal(this, PresenceProperty, () => removeRequested?.Invoke(this, EventArgs.Empty));
     }
 

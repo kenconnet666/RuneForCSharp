@@ -319,9 +319,9 @@ public class AppShell : Control
     protected override LayoutSize MeasureOverride(LayoutSize availableSize)
     {
         var width = availableSize.Width;
-        var nextWide = width >= this.Resource("Rune.Size.Lg", 1024.0);
-        var nextAsideWide = width >= this.Resource("Rune.Size.Xl", 1280.0);
-        var nextFits = width >= this.Resource("Rune.Size.Md", 768.0);
+        var nextWide = width >= this.Resource<double>(ThemeKeys.Size.Lg);
+        var nextAsideWide = width >= this.Resource<double>(ThemeKeys.Size.Xl);
+        var nextFits = width >= this.Resource<double>(ThemeKeys.Size.Md);
         if (nextWide != wide || nextAsideWide != asideWide || nextFits != fullscreenFits)
         {
             // 变宽后侧栏已经常驻，抽屉没必要再开着
@@ -363,7 +363,7 @@ public class AppShell : Control
         var collapsible = hasSidebar && SidebarCollapsible && wide;
         var brandCell = hasBrand || collapsible;
         var em = TextElement.GetFontSize(this);
-        var lg = this.Resource("Rune.Space.Lg", 1.0) * em;
+        var lg = this.Resource<double>(ThemeKeys.Space.Lg) * em;
         PseudoClasses.Set(":wide", wide);
         PseudoClasses.Set(":rail", rail);
         PseudoClasses.Set(":fullscreen", IsFullscreen);
@@ -383,7 +383,7 @@ public class AppShell : Control
         headerRow.Margin = new Thickness(brandRail ? 0 : lg, 0, lg, 0);
         brand.Width = brandRail ? rail ? RailWidth : SidebarWidth : double.NaN;
         Flex.SetAlignSelf(brand, brandRail ? FlexAlign.Stretch : FlexAlign.Center);
-        brand.Padding = brandRail ? new Thickness(rail ? this.Resource("Rune.Space.Xs", 0.25) * em : lg, 0) : default;
+        brand.Padding = brandRail ? new Thickness(rail ? this.Resource<double>(ThemeKeys.Space.Xs) * em : lg, 0) : default;
         brand.BorderThickness = brandRail ? new Thickness(0, 0, 1, 0) : default;
         // 收起后品牌格只放展开按钮（居中）；展开时按钮贴着结束边
         brandContent.IsVisible = hasBrand && !rail;
@@ -431,7 +431,7 @@ public class AppShell : Control
         if (open == drawerLayer.IsVisible) return;
         var focusInside = TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() is Visual focused && drawer.IsVisualAncestorOf(focused);
         drawerLayer.IsVisible = open;
-        drawer.Width = Math.Min(this.Resource("Rune.Size.Xs", 480.0), Bounds.Width);
+        drawer.Width = Math.Min(this.Resource<double>(ThemeKeys.Size.Xs), Bounds.Width);
         if (open) drawerClose.Focus();
         else if (focusInside) menuButton.Focus();
     }

@@ -94,7 +94,7 @@ public class Text : TextBlock
         }
         else if (change.Property == WeightProperty) Bindings.Bind(FontWeightProperty, Weight.ResourceKey);
         else if (change.Property == ToneProperty) Bindings.Bind(ForegroundProperty, Tone.BrushKey);
-        else if (change.Property == MonoProperty) Bindings.Bind(FontFamilyProperty, Mono ? "Rune.Font.Mono" : null);
+        else if (change.Property == MonoProperty) Bindings.Bind(FontFamilyProperty, Mono ? ThemeKeys.Font.Mono : null);
         else if (change.Property == NumericProperty) Set(FontFeaturesProperty, Numeric ? TabularNumbers : null);
         else if (change.Property == AlignProperty) SetStruct(TextAlignmentProperty, Align switch
         {

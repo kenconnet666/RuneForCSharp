@@ -123,10 +123,8 @@ public class AvatarGroup : Control
         var em = FontSize;
         more.Width = more.Height = 2.5 * em;
         more.CornerRadius = new CornerRadius(1.25 * em);
-        moreText.FontSize = Resource("Rune.FontSize.Xs", 12.0) / Resource("Rune.FontSize.Md", 14.0) * em;
+        moreText.FontSize = this.Resource<double>(ThemeKeys.FontSize.Xs) / this.Resource<double>(ThemeKeys.FontSize.Md) * em;
     }
-
-    double Resource(string key, double fallback) => TryFindResource(key) is double value ? value : fallback;
 
     /// <inheritdoc />
     protected override Size MeasureOverride(Size constraint)
@@ -163,8 +161,8 @@ public class AvatarGroup : Control
     {
         protected override void OnRender(DrawingContext drawingContext)
         {
-            var width = TryFindResource("Rune.BorderWidth.Sm") is double value ? value : 2;
-            if (TryFindResource("Rune.Brush.Background") is not Brush brush || width <= 0) return;
+            var width = this.Resource<double>(ThemeKeys.BorderWidth.Sm);
+            if (TryFindResource(ThemeKeys.Brush.Background) is not Brush brush || width <= 0) return;
             var radius = Child switch { Avatar avatar => avatar.CornerRadius, Border border => border.CornerRadius.TopLeft, _ => 0 };
             var rect = new Rect(RenderSize);
             rect.Inflate(width / 2, width / 2);

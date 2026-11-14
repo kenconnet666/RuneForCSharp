@@ -227,7 +227,7 @@ public class Card : FrameworkElement
     {
         var padding = new Thickness((double)GetValue(PaddingFactorProperty) * Em);
         body.Padding = padding;
-        var (inline, block) = ((TryFindResource("Rune.Space.Md") as double? ?? 0.75) * Em, (TryFindResource("Rune.Space.Sm") as double? ?? 0.5) * Em);
+        var (inline, block) = (this.Resource<double>(ThemeKeys.Space.Md) * Em, this.Resource<double>(ThemeKeys.Space.Sm) * Em);
         header.Padding = footer.Padding = Padding == Space.None ? new Thickness(inline, block, inline, block) : padding;
         var radius = new CornerRadius(Radius.Value == "full" ? 9999 : (double)GetValue(RadiusFactorProperty) * Em);
         surface.CornerRadius = shadow.CornerRadius = radius;
@@ -250,9 +250,9 @@ public class Card : FrameworkElement
         body.Child = next;
         if (shown) revealing = true;
         if (!revealing) return;
-        var duration = Motion.Duration(this, "Rune.Duration.Lg", TimeSpan.FromMilliseconds(300));
+        var duration = Motion.Duration(this, ThemeKeys.Duration.Lg);
         if (duration <= TimeSpan.Zero) return;
-        next.BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, duration) { EasingFunction = TryFindResource("Rune.Easing.Enter") as IEasingFunction });
+        next.BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, duration) { EasingFunction = this.Resource<IEasingFunction>(ThemeKeys.Easing.Enter) });
     }
 
     /// <inheritdoc />

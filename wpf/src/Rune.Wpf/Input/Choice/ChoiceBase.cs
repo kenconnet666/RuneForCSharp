@@ -132,13 +132,13 @@ public abstract class ChoiceBase : Control, IFieldControl
         label.SetResourceReference(StyleProperty, ChoiceBaseParts.Label);
         description.SetResourceReference(StyleProperty, ChoiceBaseParts.Description);
         end.SetResourceReference(StyleProperty, ChoiceBaseParts.End);
-        SetResourceReference(GapFactorProperty, "Rune.Space.Sm");
-        SetResourceReference(MinTargetProperty, "Rune.Size.MinTarget");
-        SetResourceReference(CardPaddingFactorProperty, "Rune.Space.Md");
-        SetResourceReference(CardRadiusFactorProperty, "Rune.Radius.Md");
-        SetResourceReference(CardSurfaceProperty, "Rune.Brush.Surface");
-        SetResourceReference(CardBorderProperty, "Rune.Brush.Border");
-        SetResourceReference(CardBorderStrongProperty, "Rune.Brush.BorderStrong");
+        SetResourceReference(GapFactorProperty, ThemeKeys.Space.Sm);
+        SetResourceReference(MinTargetProperty, ThemeKeys.Size.MinTarget);
+        SetResourceReference(CardPaddingFactorProperty, ThemeKeys.Space.Md);
+        SetResourceReference(CardRadiusFactorProperty, ThemeKeys.Radius.Md);
+        SetResourceReference(CardSurfaceProperty, ThemeKeys.Brush.Surface);
+        SetResourceReference(CardBorderProperty, ThemeKeys.Brush.Border);
+        SetResourceReference(CardBorderStrongProperty, ThemeKeys.Brush.BorderStrong);
         BindTone();
     }
 

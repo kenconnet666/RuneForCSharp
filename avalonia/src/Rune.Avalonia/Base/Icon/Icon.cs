@@ -138,7 +138,7 @@ public class Icon : Control
     async void PlayDraw()
     {
         drawing?.Cancel();
-        var duration = Motion.Duration(this, "Rune.Duration.Xl", TimeSpan.FromMilliseconds(500));
+        var duration = Motion.Duration(this, ThemeKeys.Duration.Xl);
         if (duration <= TimeSpan.Zero)
         {
             SetValue(DrawnProperty, 1);
@@ -150,7 +150,7 @@ public class Icon : Control
         _ = new Animation
         {
             Duration = duration,
-            Easing = this.Resource<Easing>("Rune.Easing.Enter", new CubicEaseOut()),
+            Easing = this.Resource<Easing>(ThemeKeys.Easing.Enter),
             Children =
             {
                 new KeyFrame { Cue = new Cue(0), Setters = { new Setter(DrawnProperty, 0d) } },

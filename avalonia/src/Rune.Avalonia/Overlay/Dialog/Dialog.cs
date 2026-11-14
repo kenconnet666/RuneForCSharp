@@ -293,9 +293,9 @@ public class Dialog : Control
     void UpdateMetrics()
     {
         var em = Em;
-        double Space(string key, double fallback) => this.Resource($"Rune.Space.{key}", fallback) * em;
-        var (xs, sm, lg, xl) = (Space("Xs", 0.25), Space("Sm", 0.5), Space("Lg", 1), Space("Xl", 1.5));
-        panel.CornerRadius = new CornerRadius(this.Resource("Rune.Radius.Xl", 1.0) * em);
+        double Space(string key) => this.Resource<double>(key) * em;
+        var (xs, sm, lg, xl) = (Space(ThemeKeys.Space.Xs), Space(ThemeKeys.Space.Sm), Space(ThemeKeys.Space.Lg), Space(ThemeKeys.Space.Xl));
+        panel.CornerRadius = new CornerRadius(this.Resource<double>(ThemeKeys.Radius.Xl) * em);
         header.Margin = new Thickness(xl, xl, xl, 0);
         close.Margin = new Thickness(0, -xs, -sm, -xs);
         description.Margin = new Thickness(xl, xs, xl, 0);
@@ -443,7 +443,7 @@ public class Dialog : Control
         {
             var em = owner.Em;
             var room = Math.Max(0, area.Width - 2 * em);
-            var width = owner.Size == DialogSize.Full ? room : Math.Min(room, owner.Resource(owner.Size.ResourceKey!, 480.0));
+            var width = owner.Size == DialogSize.Full ? room : Math.Min(room, owner.Resource<double>(owner.Size.ResourceKey!));
             return (width, Math.Max(0, area.Height - 2 * em));
         }
 

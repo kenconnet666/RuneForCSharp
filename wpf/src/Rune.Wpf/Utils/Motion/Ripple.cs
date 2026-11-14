@@ -35,10 +35,10 @@ public static class Ripple
         Canvas.SetTop(ripple, origin.Y - radius);
         layer.Children.Add(ripple);
 
-        var expand = Motion.Duration(layer, "Rune.Duration.Lg", TimeSpan.FromMilliseconds(300));
+        var expand = Motion.Duration(layer, ThemeKeys.Duration.Lg);
         if (expand > TimeSpan.Zero)
         {
-            var grow = new DoubleAnimation(0, 1, expand) { EasingFunction = layer.TryFindResource("Rune.Easing.Standard") as IEasingFunction };
+            var grow = new DoubleAnimation(0, 1, expand) { EasingFunction = layer.Resource<IEasingFunction>(ThemeKeys.Easing.Standard) };
             scale.BeginAnimation(ScaleTransform.ScaleXProperty, grow);
             scale.BeginAnimation(ScaleTransform.ScaleYProperty, grow);
         }
@@ -48,13 +48,13 @@ public static class Ripple
         {
             if (released) return;
             released = true;
-            var fade = Motion.Duration(layer, "Rune.Duration.Md", TimeSpan.FromMilliseconds(200));
+            var fade = Motion.Duration(layer, ThemeKeys.Duration.Md);
             if (fade <= TimeSpan.Zero)
             {
                 layer.Children.Remove(ripple);
                 return;
             }
-            var out_ = new DoubleAnimation(0, fade) { EasingFunction = layer.TryFindResource("Rune.Easing.Exit") as IEasingFunction };
+            var out_ = new DoubleAnimation(0, fade) { EasingFunction = layer.Resource<IEasingFunction>(ThemeKeys.Easing.Exit) };
             out_.Completed += (_, _) => layer.Children.Remove(ripple);
             ripple.BeginAnimation(UIElement.OpacityProperty, out_);
         };

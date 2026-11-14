@@ -47,7 +47,7 @@ public class FieldLabel : Control
     {
         content.SetResourceReference(StyleProperty, FieldLabelParts.Content);
         required.SetResourceReference(StyleProperty, FieldLabelParts.Required);
-        SetResourceReference(GapFactorProperty, "Rune.Space.Xs");
+        SetResourceReference(GapFactorProperty, ThemeKeys.Space.Xs);
         foreach (var child in new UIElement[] { content, required })
         {
             AddVisualChild(child);

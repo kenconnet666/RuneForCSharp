@@ -75,13 +75,13 @@ public abstract class ChoiceBase : Control, IFieldControl
     protected ChoiceBase()
     {
         resources = new TemplateResources(this);
-        resources.Bind(GapFactorProperty, "Rune.Space.Sm");
-        resources.Bind(MinTargetProperty, "Rune.Size.MinTarget");
-        resources.Bind(CardPaddingFactorProperty, "Rune.Space.Md");
-        resources.Bind(CardRadiusFactorProperty, "Rune.Radius.Md");
-        resources.Bind(CardSurfaceProperty, "Rune.Brush.Surface");
-        resources.Bind(CardBorderProperty, "Rune.Brush.Border");
-        resources.Bind(CardBorderStrongProperty, "Rune.Brush.BorderStrong");
+        resources.Bind(GapFactorProperty, ThemeKeys.Space.Sm);
+        resources.Bind(MinTargetProperty, ThemeKeys.Size.MinTarget);
+        resources.Bind(CardPaddingFactorProperty, ThemeKeys.Space.Md);
+        resources.Bind(CardRadiusFactorProperty, ThemeKeys.Radius.Md);
+        resources.Bind(CardSurfaceProperty, ThemeKeys.Brush.Surface);
+        resources.Bind(CardBorderProperty, ThemeKeys.Brush.Border);
+        resources.Bind(CardBorderStrongProperty, ThemeKeys.Brush.BorderStrong);
         BindTone();
         UpdateMetrics();
     }

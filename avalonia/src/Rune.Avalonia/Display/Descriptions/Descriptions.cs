@@ -203,16 +203,16 @@ public class Descriptions : Control
     void UpdateMetrics()
     {
         var em = FontSize;
-        var line = this.Resource("Rune.BorderWidth.Xs", 1.0);
+        var line = this.Resource<double>(ThemeKeys.BorderWidth.Xs);
         var layout = ShownLayout;
         root.Gap = Space.Md;
-        title.FontSize = this.Resource("Rune.FontSize.Md", 14.0);
+        title.FontSize = this.Resource<double>(ThemeKeys.FontSize.Md);
         (grid.ColumnGap, grid.RowGap) = Bordered ? (Space.None, Space.None) : (Space.Xl, Space.Md);
         (inline.ColumnGap, inline.RowGap) = (Space.Xl, Space.Xs);
         list.BorderThickness = new Thickness(Bordered ? line : 0);
-        list.CornerRadius = new CornerRadius(Bordered ? this.Resource("Rune.Radius.Md", 0.375) * em : 0);
+        list.CornerRadius = new CornerRadius(Bordered ? this.Resource<double>(ThemeKeys.Radius.Md) * em : 0);
         list.ClipToBounds = Bordered;
-        var padding = Bordered ? new Thickness(this.Resource("Rune.Space.Md", 0.75) * em, this.Resource("Rune.Space.Sm", 0.5) * em) : default;
+        var padding = Bordered ? new Thickness(this.Resource<double>(ThemeKeys.Space.Md) * em, this.Resource<double>(ThemeKeys.Space.Sm) * em) : default;
         foreach (var (_, gridItem) in built)
         {
             var cell = (Border)gridItem.Child!;

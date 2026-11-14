@@ -62,8 +62,8 @@ public class Textarea : TextInputBase
         base.Sync();
         if (rows is null) return;
         var lineHeight = TextBlock.GetLineHeight(this);
-        var line = double.IsNaN(lineHeight) || lineHeight <= 0 ? FontSize * (TryFindResource("Rune.LineHeight.Normal") as double? ?? 1.5) : lineHeight;
-        var inset = (TryFindResource("Rune.Space.Xs") as double? ?? 0.25) * FontSize;
+        var line = double.IsNaN(lineHeight) || lineHeight <= 0 ? FontSize * this.Resource<double>(ThemeKeys.LineHeight.Normal) : lineHeight;
+        var inset = this.Resource<double>(ThemeKeys.Space.Xs) * FontSize;
         var min = Rows * line + 2 * inset;
         rows.MinHeight = min;
         rows.MaxHeight = Fixed ? min : MaxRows is { } max ? Math.Max(min, max * line) : double.PositiveInfinity;

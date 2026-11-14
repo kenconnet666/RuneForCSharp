@@ -226,7 +226,7 @@ public class Field : Control
 
     double Em => FontSize;
 
-    double Spacing(string key, double fallback) => this.Resource(key, fallback) * Em;
+    double Spacing(string key) => this.Resource<double>(key) * Em;
 
     double LabelColumn => double.IsNaN(LabelWidth) ? 8 * Em : LabelWidth;
 
@@ -235,8 +235,8 @@ public class Field : Control
     /// <inheritdoc />
     protected override LayoutSize MeasureOverride(LayoutSize availableSize)
     {
-        var gap = Spacing("Rune.Space.Xs", 0.25);
-        var column = Start ? LabelColumn + Spacing("Rune.Space.Md", 1) : 0;
+        var gap = Spacing(ThemeKeys.Space.Xs);
+        var column = Start ? LabelColumn + Spacing(ThemeKeys.Space.Md) : 0;
         var inner = availableSize.Deflate(new Thickness(column, 0, 0, 0));
         var height = 0d;
         var width = 0d;
@@ -265,8 +265,8 @@ public class Field : Control
     /// <summary>上方：标签、控件、说明、错误竖排；起始边：标签一列，控件、说明、错误一列，标签与控件第一行文字的基线对齐。</summary>
     protected override LayoutSize ArrangeOverride(LayoutSize finalSize)
     {
-        var gap = Spacing("Rune.Space.Xs", 0.25);
-        var x = Start ? LabelColumn + Spacing("Rune.Space.Md", 1) : 0;
+        var gap = Spacing(ThemeKeys.Space.Xs);
+        var x = Start ? LabelColumn + Spacing(ThemeKeys.Space.Md) : 0;
         var width = Math.Max(0, finalSize.Width - x);
         var y = 0d;
         if (label.IsVisible && !Start)

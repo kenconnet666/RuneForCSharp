@@ -185,8 +185,8 @@ public class Descriptions : Control
             if (Bordered)
             {
                 // 边框样式的颜色：分隔线 borderMuted、标签格 fill 底（部件样式里写的盖不过，要改用 Provider 的主题）
-                cell.SetResourceReference(Border.BorderBrushProperty, "Rune.Brush.BorderMuted");
-                label.SetResourceReference(Border.BackgroundProperty, "Rune.Brush.Fill");
+                cell.SetResourceReference(Border.BorderBrushProperty, ThemeKeys.Brush.BorderMuted);
+                label.SetResourceReference(Border.BackgroundProperty, ThemeKeys.Brush.Fill);
             }
             var gridItem = new GridItem { Child = cell };
             built.Add((item, gridItem));
@@ -194,7 +194,7 @@ public class Descriptions : Control
             else grid.Children.Add(gridItem);
         }
         list.Child = layout == DescriptionsLayout.Inline ? inline : grid;
-        if (Bordered) list.SetResourceReference(Border.BorderBrushProperty, "Rune.Brush.BorderMuted");
+        if (Bordered) list.SetResourceReference(Border.BorderBrushProperty, ThemeKeys.Brush.BorderMuted);
         else list.ClearValue(Border.BorderBrushProperty);
         UpdateMetrics();
     }
@@ -231,13 +231,13 @@ public class Descriptions : Control
     void UpdateMetrics()
     {
         var em = FontSize;
-        var line = Resource("Rune.BorderWidth.Xs", 1.0);
+        var line = this.Resource<double>(ThemeKeys.BorderWidth.Xs);
         var layout = ShownLayout;
-        title.FontSize = Resource("Rune.FontSize.Md", 14.0);
+        title.FontSize = this.Resource<double>(ThemeKeys.FontSize.Md);
         (grid.ColumnGap, grid.RowGap) = Bordered ? (Space.None, Space.None) : (Space.Xl, Space.Md);
         list.BorderThickness = new Thickness(Bordered ? line : 0);
-        list.CornerRadius = new CornerRadius(Bordered ? Resource("Rune.Radius.Md", 0.4) * em : 0);
-        var padding = Bordered ? new Thickness(Resource("Rune.Space.Md", 0.75) * em, Resource("Rune.Space.Sm", 0.5) * em, Resource("Rune.Space.Md", 0.75) * em, Resource("Rune.Space.Sm", 0.5) * em) : default;
+        list.CornerRadius = new CornerRadius(Bordered ? this.Resource<double>(ThemeKeys.Radius.Md) * em : 0);
+        var padding = Bordered ? new Thickness(this.Resource<double>(ThemeKeys.Space.Md) * em, this.Resource<double>(ThemeKeys.Space.Sm) * em, this.Resource<double>(ThemeKeys.Space.Md) * em, this.Resource<double>(ThemeKeys.Space.Sm) * em) : default;
         foreach (var (_, gridItem) in built)
         {
             var cell = (Border)gridItem.Child;
@@ -254,8 +254,6 @@ public class Descriptions : Control
         }
         InvalidateMeasure();
     }
-
-    double Resource(string key, double fallback) => TryFindResource(key) is double value ? value : fallback;
 
     /// <inheritdoc />
     protected override Size MeasureOverride(Size constraint)

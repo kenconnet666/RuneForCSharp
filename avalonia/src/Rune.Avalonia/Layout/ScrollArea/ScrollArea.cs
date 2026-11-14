@@ -90,8 +90,8 @@ public class ScrollArea : ScrollViewer
         vertical = e.NameScope.Find<ScrollBar>(ScrollAreaParts.VerticalScrollbar);
         horizontal = e.NameScope.Find<ScrollBar>(ScrollAreaParts.HorizontalScrollbar);
         SizeBars();
-        var duration = Motion.Duration(this, "Rune.Duration.Md", TimeSpan.FromMilliseconds(200));
-        var easing = this.Resource<Easing>("Rune.Easing.Standard", new CubicEaseInOut());
+        var duration = Motion.Duration(this, ThemeKeys.Duration.Md);
+        var easing = this.Resource<Easing>(ThemeKeys.Easing.Standard);
         foreach (var name in new[] { ScrollAreaParts.VerticalScrollbar, ScrollAreaParts.HorizontalScrollbar })
             if (e.NameScope.Find<ScrollBar>(name) is { } bar && duration > TimeSpan.Zero)
                 bar.Transitions = [new DoubleTransition { Property = OpacityProperty, Duration = duration, Easing = easing }];

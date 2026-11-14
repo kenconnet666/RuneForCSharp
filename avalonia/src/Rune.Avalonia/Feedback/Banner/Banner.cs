@@ -84,8 +84,8 @@ public class Banner : Control
         LogicalChildren.Add(root);
         VisualChildren.Add(root);
         root.Bind(Border.BackgroundProperty, this.GetObservable(BackgroundProperty));
-        title.Bind(TextElement.FontWeightProperty, title.GetResourceObservable("Rune.FontWeight.Medium"));
-        action.Bind(TextElement.FontWeightProperty, action.GetResourceObservable("Rune.FontWeight.Medium"));
+        title.Bind(TextElement.FontWeightProperty, title.GetResourceObservable(ThemeKeys.FontWeight.Medium));
+        action.Bind(TextElement.FontWeightProperty, action.GetResourceObservable(ThemeKeys.FontWeight.Medium));
         dismissal = new Dismissal(this, PresenceProperty, () => closeRequested?.Invoke(this, EventArgs.Empty));
         Resolved.Bind(this, Resolved.PaletteProperty, Tone.PaletteKey);
         Update();
@@ -236,11 +236,11 @@ public class Banner : Control
     void UpdateMetrics()
     {
         var em = FontSize;
-        var (sm, lg) = (this.Resource("Rune.Space.Sm", 0.5) * em, this.Resource("Rune.Space.Lg", 1.0) * em);
+        var (sm, lg) = (this.Resource<double>(ThemeKeys.Space.Sm) * em, this.Resource<double>(ThemeKeys.Space.Lg) * em);
         row.Margin = new Thickness(lg, sm, lg + (close is null ? 0 : 2 * em), sm);
-        root.SetValue(TextBlock.LineHeightProperty, this.Resource("Rune.LineHeight.Normal", 1.5) * em);
+        root.SetValue(TextBlock.LineHeightProperty, this.Resource<double>(ThemeKeys.LineHeight.Normal) * em);
         if (close is null) return;
-        close.FontSize = this.Resource("Rune.FontSize.Sm", 13.0) / this.Resource("Rune.FontSize.Md", 14.0) * em;
+        close.FontSize = this.Resource<double>(ThemeKeys.FontSize.Sm) / this.Resource<double>(ThemeKeys.FontSize.Md) * em;
         close.Margin = new Thickness(0, 0, sm, 0);
     }
 

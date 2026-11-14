@@ -88,8 +88,8 @@ public class Switch : ChoiceBase
     public Switch()
     {
         control = new SwitchStack(this) { Name = "PART_Control" };
-        SetResourceReference(TrackOffProperty, "Rune.Brush.BorderStrong");
-        SetResourceReference(TextBrushProperty, "Rune.Brush.Text");
+        SetResourceReference(TrackOffProperty, ThemeKeys.Brush.BorderStrong);
+        SetResourceReference(TextBrushProperty, ThemeKeys.Brush.Text);
         control.SetResourceReference(StyleProperty, SwitchParts.Control);
         track.SetResourceReference(StyleProperty, SwitchParts.Track);
         focusRing.SetResourceReference(StyleProperty, SwitchParts.FocusRing);
@@ -189,13 +189,13 @@ public class Switch : ChoiceBase
         var (from, to) = ((double)GetValue(PositionProperty), IsChecked ? 1d : 0d);
         // 先写终值：过渡结束（FillBehavior.Stop）或被打断后留下的就是它
         SetValue(PositionProperty, to);
-        var duration = IsLoaded ? Motion.Duration(this, "Rune.Duration.Sm", TimeSpan.FromMilliseconds(120)) : TimeSpan.Zero;
+        var duration = IsLoaded ? Motion.Duration(this, ThemeKeys.Duration.Sm) : TimeSpan.Zero;
         if (duration <= TimeSpan.Zero || from == to)
         {
             BeginAnimation(PositionProperty, null);
             return;
         }
-        BeginAnimation(PositionProperty, new DoubleAnimation(from, to, duration) { EasingFunction = TryFindResource("Rune.Easing.Standard") as IEasingFunction, FillBehavior = FillBehavior.Stop });
+        BeginAnimation(PositionProperty, new DoubleAnimation(from, to, duration) { EasingFunction = this.Resource<IEasingFunction>(ThemeKeys.Easing.Standard), FillBehavior = FillBehavior.Stop });
     }
 
     /// <inheritdoc />

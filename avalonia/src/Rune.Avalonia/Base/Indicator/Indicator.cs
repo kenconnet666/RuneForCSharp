@@ -73,7 +73,7 @@ public class Indicator : Control
     public Indicator()
     {
         resources = new TemplateResources(this);
-        resources.Bind(RingProperty, "Rune.Color.Background");
+        resources.Bind(RingProperty, ThemeKeys.Color.Background);
         AutomationProperties.SetAccessibilityView(count, AccessibilityView.Raw);
         badge.Child = count;
         VisualChildren.Add(badge);

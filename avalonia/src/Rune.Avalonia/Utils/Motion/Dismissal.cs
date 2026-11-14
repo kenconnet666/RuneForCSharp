@@ -31,14 +31,14 @@ sealed class Dismissal(Control owner, StyledProperty<double> presence, Action re
         if (IsDismissing) return;
         IsDismissing = true;
         var candidates = owner.IsKeyboardFocusWithin ? FocusCandidates() : [];
-        await Animate(0, "Rune.Easing.Exit", new CubicEaseIn());
+        await Animate(0, ThemeKeys.Easing.Exit);
         IsDismissing = false;
         requested();
         Dispatcher.UIThread.Post(() =>
         {
             if (TopLevel.GetTopLevel(owner) is not null)
             {
-                _ = Animate(1, "Rune.Easing.Enter", new CubicEaseOut());
+                _ = Animate(1, ThemeKeys.Easing.Enter);
                 return;
             }
             if (candidates.Count == 0 || TopLevel.GetTopLevel(candidates[0]) is not { } top) return;
@@ -69,11 +69,11 @@ sealed class Dismissal(Control owner, StyledProperty<double> presence, Action re
         return [.. following, .. preceding];
     }
 
-    async Task Animate(double to, string easingKey, Easing fallback)
+    async Task Animate(double to, string easingKey)
     {
         transition?.Cancel();
         var from = owner.GetValue(presence);
-        var duration = TopLevel.GetTopLevel(owner) is null ? TimeSpan.Zero : Motion.Duration(owner, "Rune.Duration.Sm", TimeSpan.FromMilliseconds(120));
+        var duration = TopLevel.GetTopLevel(owner) is null ? TimeSpan.Zero : Motion.Duration(owner, ThemeKeys.Duration.Sm);
         if (duration <= TimeSpan.Zero || from == to)
         {
             owner.SetValue(presence, to);
@@ -85,7 +85,7 @@ sealed class Dismissal(Control owner, StyledProperty<double> presence, Action re
         _ = new Animation
         {
             Duration = duration,
-            Easing = owner.Resource(easingKey, fallback),
+            Easing = owner.Resource<Easing>(easingKey),
             Children =
             {
                 new KeyFrame { Cue = new Cue(0), Setters = { new Setter(presence, from) } },

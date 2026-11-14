@@ -100,7 +100,7 @@ public class Listbox : FrameworkElement, IFieldControl
         root.Children.Add(empty);
         rows.AddHandler(ScrollViewer.ScrollChangedEvent, new ScrollChangedEventHandler((_, e) => CheckReached(e.ExtentHeight - e.VerticalOffset - e.ViewportHeight)));
         // 键盘聚焦时一圈 2 像素的焦点环画在里面：列表自己滚动，外面一圈会被滚动区域裁掉（上游 c6b0309d 同样画在里面）
-        focusRing.SetResourceReference(Border.BorderBrushProperty, "Rune.Brush.FocusRing");
+        focusRing.SetResourceReference(Border.BorderBrushProperty, ThemeKeys.Brush.FocusRing);
         root.Children.Add(focusRing);
         AddLogicalChild(root);
         AddVisualChild(root);
@@ -265,7 +265,7 @@ public class Listbox : FrameworkElement, IFieldControl
     void CheckReached(double remaining)
     {
         if (Reached is null || State.Options.Count == 0) return;
-        if (remaining <= 5 * (TryFindResource("Rune.Size.Control") as double? ?? 2.25) * TextElement.GetFontSize(this)) Reached(State.Options.Count - 1);
+        if (remaining <= 5 * this.Resource<double>(ThemeKeys.Size.Control) * TextElement.GetFontSize(this)) Reached(State.Options.Count - 1);
     }
 
     /// <summary>行、骨架、空状态三选一（取下一页时行与骨架都在）。</summary>
@@ -285,8 +285,8 @@ public class Listbox : FrameworkElement, IFieldControl
     void UpdateMetrics()
     {
         var em = TextElement.GetFontSize(this);
-        var xs = (TryFindResource("Rune.Space.Xs") as double? ?? 0.25) * em;
-        var sm = (TryFindResource("Rune.Space.Sm") as double? ?? 0.5) * em;
+        var xs = this.Resource<double>(ThemeKeys.Space.Xs) * em;
+        var sm = this.Resource<double>(ThemeKeys.Space.Sm) * em;
         rows.Padding = new Thickness(xs);
         skeleton.Margin = new Thickness(xs);
         rows.MaxHeight = double.IsNaN(Height) ? ScrollMaxHeight ?? 20 * em : double.PositiveInfinity;
@@ -575,11 +575,11 @@ public class ListboxItem : Control
         AutomationProperties.SetName(this, option.Label);
         AutomationProperties.SetHelpText(this, option.Group ?? "");
         var em = FontSize;
-        label.LineHeight = (TryFindResource("Rune.LineHeight.Normal") as double? ?? 1.5) * em;
-        root.Padding = new Thickness((TryFindResource("Rune.Space.Sm") as double? ?? 0.5) * em, (TryFindResource("Rune.Space.Xs") as double? ?? 0.25) * em,
-            (TryFindResource("Rune.Space.Sm") as double? ?? 0.5) * em, (TryFindResource("Rune.Space.Xs") as double? ?? 0.25) * em);
-        root.CornerRadius = new CornerRadius((TryFindResource("Rune.Radius.Sm") as double? ?? 0.25) * em);
-        root.MinHeight = ControlHeight.Of(em, TryFindResource("Rune.Size.Control") as double? ?? 2.25);
+        label.LineHeight = this.Resource<double>(ThemeKeys.LineHeight.Normal) * em;
+        root.Padding = new Thickness(this.Resource<double>(ThemeKeys.Space.Sm) * em, this.Resource<double>(ThemeKeys.Space.Xs) * em,
+            this.Resource<double>(ThemeKeys.Space.Sm) * em, this.Resource<double>(ThemeKeys.Space.Xs) * em);
+        root.CornerRadius = new CornerRadius(this.Resource<double>(ThemeKeys.Radius.Sm) * em);
+        root.MinHeight = ControlHeight.Of(em, this.Resource<double>(ThemeKeys.Size.Control));
     }
 
     /// <summary>指针移过：高亮（不可用的收不到指针）。</summary>

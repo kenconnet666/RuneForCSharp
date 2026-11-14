@@ -108,7 +108,7 @@ public class UserButton : ButtonBase
         indicator.IsVisible = !compact && ShowIndicator;
 
         var em = TextElement.GetFontSize(this);
-        var (xs, sm) = (this.Resource("Rune.Space.Xs", 0.25) * em, this.Resource("Rune.Space.Sm", 0.5) * em);
+        var (xs, sm) = (this.Resource<double>(ThemeKeys.Space.Xs) * em, this.Resource<double>(ThemeKeys.Space.Sm) * em);
         name.FontSize = 0.93 * em;
         description.FontSize = 0.86 * em;
         var row = described && !compact;
@@ -118,7 +118,7 @@ public class UserButton : ButtonBase
         shape.AddRange(new[]
         {
             SetValue(PaddingProperty, compact ? new Thickness(xs) : row ? new Thickness(sm, xs) : new Thickness(xs, xs, sm, xs), BindingPriority.Template),
-            SetValue(CornerRadiusProperty, new CornerRadius(row ? this.Resource("Rune.Radius.Md", 0.375) * em : 9999), BindingPriority.Template),
+            SetValue(CornerRadiusProperty, new CornerRadius(row ? this.Resource<double>(ThemeKeys.Radius.Md) * em : 9999), BindingPriority.Template),
             SetValue(HorizontalAlignmentProperty, row ? HorizontalAlignment.Stretch : HorizontalAlignment.Left, BindingPriority.Template),
         }.OfType<IDisposable>());
     }

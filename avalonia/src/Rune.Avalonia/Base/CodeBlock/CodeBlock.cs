@@ -285,7 +285,7 @@ public class CodeBlock : Control
         var em = TextElement.GetFontSize(this);
         var code = TextElement.GetFontSize(pre);
         var title = TextElement.GetFontSize(header);
-        root.CornerRadius = Flush ? default : new CornerRadius(this.Resource("Rune.Radius.Md", 0.375) * em);
+        root.CornerRadius = Flush ? default : new CornerRadius(this.Resource<double>(ThemeKeys.Radius.Md) * em);
         header.Padding = new Thickness(title, 0, 0.25 * title, 0);
         header.MinHeight = ControlHeight.Of(title, ControlHeight.DefaultFactor);
         var byLine = pre.Classes.Contains("lines");
@@ -362,14 +362,14 @@ public class CodeBlock : Control
     /// <summary>高亮种类的画刷（同上游 Shiki 主题的映射）。</summary>
     static string BrushKey(CodeTokenKind kind) => kind switch
     {
-        CodeTokenKind.Comment or CodeTokenKind.Punctuation => "Rune.Brush.CodeComment",
-        CodeTokenKind.Keyword => "Rune.Brush.CodeKeyword",
-        CodeTokenKind.String => "Rune.Brush.CodeString",
-        CodeTokenKind.Number => "Rune.Brush.CodeNumber",
-        CodeTokenKind.Function => "Rune.Brush.CodeFunction",
-        CodeTokenKind.Type => "Rune.Brush.CodeType",
-        CodeTokenKind.Tag => "Rune.Brush.CodeTag",
-        _ => "Rune.Brush.CodeAttribute",
+        CodeTokenKind.Comment or CodeTokenKind.Punctuation => ThemeKeys.Brush.CodeComment,
+        CodeTokenKind.Keyword => ThemeKeys.Brush.CodeKeyword,
+        CodeTokenKind.String => ThemeKeys.Brush.CodeString,
+        CodeTokenKind.Number => ThemeKeys.Brush.CodeNumber,
+        CodeTokenKind.Function => ThemeKeys.Brush.CodeFunction,
+        CodeTokenKind.Type => ThemeKeys.Brush.CodeType,
+        CodeTokenKind.Tag => ThemeKeys.Brush.CodeTag,
+        _ => ThemeKeys.Brush.CodeAttribute,
     };
 
     /// <summary>超过 <see cref="MaxLines"/> 行时折叠：代码区最高 MaxLines 行加上下内边距（0.75em），底部出现展开按钮，箭头展开后翻转。</summary>

@@ -85,8 +85,8 @@ public class Switch : ChoiceBase
     public Switch()
     {
         var themed = new TemplateResources(this);
-        themed.Bind(TrackOffProperty, "Rune.Brush.BorderStrong");
-        themed.Bind(TextBrushProperty, "Rune.Brush.Text");
+        themed.Bind(TrackOffProperty, ThemeKeys.Brush.BorderStrong);
+        themed.Bind(TextBrushProperty, ThemeKeys.Brush.Text);
         loading = new DelayedLoading(shown => spinner.IsVisible = shown);
         onContent.Child = onText;
         offContent.Child = offText;
@@ -182,13 +182,13 @@ public class Switch : ChoiceBase
         slide = null;
         SetValue(PositionProperty, to);
         var duration = VisualRoot is null ? TimeSpan.Zero
-            : Motion.Duration(this, "Rune.Duration.Sm", TimeSpan.FromMilliseconds(120));
+            : Motion.Duration(this, ThemeKeys.Duration.Sm);
         if (duration <= TimeSpan.Zero) return;
         slide = new CancellationTokenSource();
         _ = new Animation
         {
             Duration = duration,
-            Easing = this.Resource<Easing>("Rune.Easing.Standard", new CubicEaseInOut()),
+            Easing = this.Resource<Easing>(ThemeKeys.Easing.Standard),
             Children =
             {
                 new KeyFrame { Cue = new Cue(0), Setters = { new Setter(PositionProperty, from) } },

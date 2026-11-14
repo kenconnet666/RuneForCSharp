@@ -116,10 +116,10 @@ public class Progress : Control
         header.SetResourceReference(StyleProperty, ProgressParts.Header);
         foreach (var text in new[] { label, ringLabel }) text.SetResourceReference(StyleProperty, ProgressParts.Label);
         foreach (var text in new[] { valueLabel, ringValue }) text.SetResourceReference(StyleProperty, ProgressParts.ValueLabel);
-        SetResourceReference(TrackBrushProperty, "Rune.Brush.Fill");
-        SetResourceReference(TextBrushProperty, "Rune.Brush.Text");
-        SetResourceReference(GapFactorProperty, "Rune.Space.Xs");
-        SetResourceReference(LineWidthProperty, "Rune.BorderWidth.Sm");
+        SetResourceReference(TrackBrushProperty, ThemeKeys.Brush.Fill);
+        SetResourceReference(TextBrushProperty, ThemeKeys.Brush.Text);
+        SetResourceReference(GapFactorProperty, ThemeKeys.Space.Xs);
+        SetResourceReference(LineWidthProperty, ThemeKeys.BorderWidth.Sm);
         header.Children.Add(label);
         header.Children.Add(valueLabel);
         children = [header, track, ring, ringLabel];
@@ -230,8 +230,8 @@ public class Progress : Control
     /// <summary>环形的着色：中性用次要文字色、accent 用强调色，其余状态色用各自的文字色（条形的进度在部件样式的触发器里）。</summary>
     void BindTone() => SetResourceReference(IndicatorBrushProperty, Tone.Value switch
     {
-        "neutral" => "Rune.Brush.TextMuted",
-        "accent" or null => "Rune.Brush.Accent",
+        "neutral" => ThemeKeys.Brush.TextMuted,
+        "accent" or null => ThemeKeys.Brush.Accent,
         var tone => $"Rune.Brush.{char.ToUpperInvariant(tone[0])}{tone[1..]}Text",
     });
 
@@ -277,13 +277,13 @@ public class Progress : Control
     {
         var from = (double)GetValue(FractionProperty);
         SetValue(FractionProperty, to);
-        var duration = IsLoaded ? Motion.Duration(this, "Rune.Duration.Md", TimeSpan.FromMilliseconds(200)) : TimeSpan.Zero;
+        var duration = IsLoaded ? Motion.Duration(this, ThemeKeys.Duration.Md) : TimeSpan.Zero;
         if (duration <= TimeSpan.Zero || Math.Abs(from - to) < 1e-9)
         {
             BeginAnimation(FractionProperty, null);
             return;
         }
-        BeginAnimation(FractionProperty, new DoubleAnimation(from, to, duration) { EasingFunction = TryFindResource("Rune.Easing.Standard") as IEasingFunction, FillBehavior = FillBehavior.Stop });
+        BeginAnimation(FractionProperty, new DoubleAnimation(from, to, duration) { EasingFunction = this.Resource<IEasingFunction>(ThemeKeys.Easing.Standard), FillBehavior = FillBehavior.Stop });
     }
 
     /// <summary>不确定进度：加载后一直循环（条形 1.4 秒、环形 1 秒；系统关闭动画时 3 秒）。</summary>
@@ -298,7 +298,7 @@ public class Progress : Control
         BeginAnimation(PhaseProperty, new DoubleAnimation(0, 1, TimeSpan.FromSeconds(seconds))
         {
             RepeatBehavior = RepeatBehavior.Forever,
-            EasingFunction = Circle ? null : TryFindResource("Rune.Easing.Standard") as IEasingFunction,
+            EasingFunction = Circle ? null : this.Resource<IEasingFunction>(ThemeKeys.Easing.Standard),
         });
     }
 
@@ -367,7 +367,7 @@ public class Progress : Control
         {
             this.owner = owner;
             indicator.SetResourceReference(StyleProperty, ProgressParts.Indicator);
-            target.SetResourceReference(Border.BackgroundProperty, "Rune.Brush.Text");
+            target.SetResourceReference(Border.BackgroundProperty, ThemeKeys.Brush.Text);
             foreach (var child in new UIElement[] { indicator, target })
             {
                 AddVisualChild(child);

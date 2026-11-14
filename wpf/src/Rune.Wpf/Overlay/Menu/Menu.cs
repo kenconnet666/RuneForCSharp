@@ -205,7 +205,7 @@ public class Menu : FrameworkElement, IMenuHost
         private protected override Thickness PanelPadding(double em)
         {
             Panel.MinWidth = 12 * em;
-            owner.items.Margin = new Thickness((TryFindResource("Rune.Space.Xs") as double? ?? 0.25) * em);
+            owner.items.Margin = new Thickness(this.Resource<double>(ThemeKeys.Space.Xs) * em);
             return default;
         }
 

@@ -178,8 +178,8 @@ public class ButtonBase : global::Avalonia.Controls.Button
     /// </summary>
     Transitions ColorTransitions()
     {
-        var duration = Motion.Duration(this, "Rune.Duration.Sm", TimeSpan.FromMilliseconds(120));
-        var easing = this.Resource<Easing>("Rune.Easing.Standard", Linear);
+        var duration = Motion.Duration(this, ThemeKeys.Duration.Sm);
+        var easing = this.Resource<Easing>(ThemeKeys.Easing.Standard);
         lock (SharedTransitions)
         {
             if (SharedTransitions.TryGetValue((duration, easing), out var shared)) return shared;

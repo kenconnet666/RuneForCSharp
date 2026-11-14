@@ -82,7 +82,7 @@ public class Banner : Control
         icon.SetResourceReference(StyleProperty, BannerParts.Icon);
         text.SetResourceReference(StyleProperty, BannerParts.Content);
         action.SetResourceReference(StyleProperty, BannerParts.Action);
-        title.SetResourceReference(TextElement.FontWeightProperty, "Rune.FontWeight.Medium");
+        title.SetResourceReference(TextElement.FontWeightProperty, ThemeKeys.FontWeight.Medium);
         foreach (var part in new UIElement[] { icon, text, action }) row.Children.Add(part);
         layers.Children.Add(row);
         root.Child = layers;
@@ -229,14 +229,13 @@ public class Banner : Control
     void UpdateMetrics()
     {
         var em = FontSize;
-        double Resource(string key, double fallback) => TryFindResource(key) as double? ?? fallback;
-        var (sm, lg) = (Resource("Rune.Space.Sm", 0.5) * em, Resource("Rune.Space.Lg", 1) * em);
+        var (sm, lg) = (this.Resource<double>(ThemeKeys.Space.Sm) * em, this.Resource<double>(ThemeKeys.Space.Lg) * em);
         // 内边距随字号与有没有关闭按钮，写当前值（使用方的本地值、样式盖得过）
         SetCurrentValue(PaddingProperty, new Thickness(lg, sm, lg + (close is null ? 0 : 2 * em), sm));
-        TextBlock.SetLineHeight(root, Resource("Rune.LineHeight.Normal", 1.5) * em);
+        TextBlock.SetLineHeight(root, this.Resource<double>(ThemeKeys.LineHeight.Normal) * em);
         icon.Size = em;
         if (close is null) return;
-        close.FontSize = Resource("Rune.FontSize.Sm", 13) / Resource("Rune.FontSize.Md", 14) * em;
+        close.FontSize = this.Resource<double>(ThemeKeys.FontSize.Sm) / this.Resource<double>(ThemeKeys.FontSize.Md) * em;
         // 关闭按钮贴着横幅的结束边（不在内边距里）
         close.Margin = new Thickness(0, -sm, sm - lg - 2 * em, -sm);
     }

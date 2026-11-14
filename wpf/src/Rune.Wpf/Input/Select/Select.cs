@@ -546,8 +546,8 @@ public class Select : Control, IFieldControl
     void UpdateMetrics()
     {
         var em = FontSize;
-        panel.CornerRadius = shadow.CornerRadius = new CornerRadius((TryFindResource("Rune.Radius.Lg") as double? ?? 0.5) * em);
-        header.Padding = new Thickness((TryFindResource("Rune.Space.Xs") as double? ?? 0.25) * em);
+        panel.CornerRadius = shadow.CornerRadius = new CornerRadius(this.Resource<double>(ThemeKeys.Radius.Lg) * em);
+        header.Padding = new Thickness(this.Resource<double>(ThemeKeys.Space.Xs) * em);
         TextElement.SetFontSize(panel, em);
         TextInputBase.FitInnerButton(clear, em);
     }

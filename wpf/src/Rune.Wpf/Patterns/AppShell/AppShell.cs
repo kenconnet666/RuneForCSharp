@@ -325,9 +325,9 @@ public partial class AppShell : FrameworkElement
     protected override Size MeasureOverride(Size availableSize)
     {
         var width = availableSize.Width;
-        var nextWide = width >= Resource("Rune.Size.Lg", 1024);
-        var nextAsideWide = width >= Resource("Rune.Size.Xl", 1280);
-        var nextFits = width >= Resource("Rune.Size.Md", 768);
+        var nextWide = width >= this.Resource<double>(ThemeKeys.Size.Lg);
+        var nextAsideWide = width >= this.Resource<double>(ThemeKeys.Size.Xl);
+        var nextFits = width >= this.Resource<double>(ThemeKeys.Size.Md);
         if (nextWide != wide || nextAsideWide != asideWide || nextFits != fullscreenFits)
         {
             // 变宽后侧栏已经常驻，抽屉没必要再开着
@@ -360,7 +360,7 @@ public partial class AppShell : FrameworkElement
     double Resource(string key, double fallback) => TryFindResource(key) as double? ?? fallback;
 
     /// <summary>space 档位的系数 × 字号。</summary>
-    double Em(string size) => Resource($"Rune.Space.{size}", 1) * TextElement.GetFontSize(this);
+    double Em(string size) => this.Resource<double>($"Rune.Space.{size}") * TextElement.GetFontSize(this);
 
     void UpdateSlots()
     {
@@ -428,7 +428,7 @@ public partial class AppShell : FrameworkElement
         main.Padding = new Thickness(xl);
         // 页脚是 sm 字号：内边距按它自己的字号算
         var footerEm = TextElement.GetFontSize(footer);
-        footer.Padding = new Thickness(Resource("Rune.Space.Xl", 1.5) * footerEm, Resource("Rune.Space.Lg", 1) * footerEm, Resource("Rune.Space.Xl", 1.5) * footerEm, Resource("Rune.Space.Lg", 1) * footerEm);
+        footer.Padding = new Thickness(this.Resource<double>(ThemeKeys.Space.Xl) * footerEm, this.Resource<double>(ThemeKeys.Space.Lg) * footerEm, this.Resource<double>(ThemeKeys.Space.Xl) * footerEm, this.Resource<double>(ThemeKeys.Space.Lg) * footerEm);
         asideContent.Padding = new Thickness(lg, xl, lg, xl);
         footer.Visibility = Show(Footer is not null);
         fullscreenExit.Visibility = Show(IsFullscreen);
@@ -468,7 +468,7 @@ public partial class AppShell : FrameworkElement
         if (open == (drawerLayer.Visibility == Visibility.Visible)) return;
         var focusInside = drawer.IsKeyboardFocusWithin;
         drawerLayer.Visibility = Show(open);
-        drawer.Width = drawerShadow.Width = Math.Min(Resource("Rune.Size.Xs", 480), ActualWidth > 0 ? ActualWidth : double.PositiveInfinity);
+        drawer.Width = drawerShadow.Width = Math.Min(this.Resource<double>(ThemeKeys.Size.Xs), ActualWidth > 0 ? ActualWidth : double.PositiveInfinity);
         if (open) drawerClose.Focus();
         else if (focusInside) menuButton.Focus();
     }

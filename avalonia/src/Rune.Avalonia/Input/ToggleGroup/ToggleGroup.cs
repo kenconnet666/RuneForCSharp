@@ -180,9 +180,9 @@ public class ToggleGroup : Flex, IFieldControl
         }
         else if (Transitions is null)
         {
-            var duration = Motion.Duration(this, "Rune.Duration.Md", TimeSpan.FromMilliseconds(200));
+            var duration = Motion.Duration(this, ThemeKeys.Duration.Md);
             if (duration > TimeSpan.Zero)
-                Transitions = [new RectTransition { Property = IndicatorProperty, Duration = duration, Easing = this.Resource<Easing>("Rune.Easing.Standard", new CubicEaseInOut()) }];
+                Transitions = [new RectTransition { Property = IndicatorProperty, Duration = duration, Easing = this.Resource<Easing>(ThemeKeys.Easing.Standard) }];
         }
         Indicator = bounds;
     }
@@ -212,12 +212,12 @@ public class ToggleGroup : Flex, IFieldControl
     void Paint(DrawingContext context)
     {
         var em = TextElement.GetFontSize(this);
-        if (this.Resource<IBrush?>("Rune.Brush.Fill", null) is { } fill)
-            context.DrawRectangle(fill, null, new RoundedRect(new Rect(Bounds.Size), this.Resource("Rune.Radius.Md", 0.375) * em));
+        if (this.Resource<IBrush?>(ThemeKeys.Brush.Fill) is { } fill)
+            context.DrawRectangle(fill, null, new RoundedRect(new Rect(Bounds.Size), this.Resource<double>(ThemeKeys.Radius.Md) * em));
         if (!Sliding || SelectedValues.Count == 0 || Indicator.Width <= 0) return;
-        var pen = this.Resource<IBrush?>("Rune.Brush.AccentBorder", null) is { } border ? new Pen(border, 1) : null;
-        var radius = Items.FirstOrDefault(item => item.IsSelected)?.CornerRadius.TopLeft ?? this.Resource("Rune.Radius.Sm", 0.25) * em;
-        context.DrawRectangle(this.Resource<IBrush?>("Rune.Brush.AccentSoft", null), pen, new RoundedRect(Snap(Indicator).Deflate(0.5), Math.Max(0, radius - 0.5)));
+        var pen = this.Resource<IBrush?>(ThemeKeys.Brush.AccentBorder) is { } border ? new Pen(border, 1) : null;
+        var radius = Items.FirstOrDefault(item => item.IsSelected)?.CornerRadius.TopLeft ?? this.Resource<double>(ThemeKeys.Radius.Sm) * em;
+        context.DrawRectangle(this.Resource<IBrush?>(ThemeKeys.Brush.AccentSoft), pen, new RoundedRect(Snap(Indicator).Deflate(0.5), Math.Max(0, radius - 0.5)));
     }
 
     /// <summary>

@@ -116,7 +116,7 @@ public class Radio : ChoiceBase
             Bind(SizeCoreProperty, group.GetObservable(RadioGroup.SizeProperty));
             group.Sync();
         }
-        var duration = Motion.Duration(this, "Rune.Duration.Sm", TimeSpan.FromMilliseconds(120));
+        var duration = Motion.Duration(this, ThemeKeys.Duration.Sm);
         dot.Transitions = duration > TimeSpan.Zero ? [new TransformOperationsTransition { Property = RenderTransformProperty, Duration = duration }] : null;
     }
 

@@ -255,17 +255,16 @@ public class Alert : Control
     void UpdateMetrics()
     {
         var em = FontSize;
-        double Resource(string key, double fallback) => TryFindResource(key) as double? ?? fallback;
-        root.CornerRadius = new CornerRadius((Radius.ResourceKey is { } key ? Resource(key, 0.375) : 0.375) * em);
+        root.CornerRadius = new CornerRadius(this.Resource<double>(Radius.ResourceKey ?? ThemeKeys.Radius.Md) * em);
         // 内边距随字号，写当前值（使用方的本地值、样式盖得过）；EmSize 的登记会换掉字号的继承，不用它
-        SetCurrentValue(PaddingProperty, new Thickness(Resource("Rune.Space.Md", 0.75) * em));
-        TextBlock.SetLineHeight(root, Resource("Rune.LineHeight.Normal", 1.5) * em);
+        SetCurrentValue(PaddingProperty, new Thickness(this.Resource<double>(ThemeKeys.Space.Md) * em));
+        TextBlock.SetLineHeight(root, this.Resource<double>(ThemeKeys.LineHeight.Normal) * em);
         icon.Size = em;
         icon.Margin = spinner.Margin = new Thickness(0, 0.25 * em, 0, 0.25 * em);
         if (close is null) return;
         // 小一档（TS 的 relativeFontSizeStyles.sm：sm / md）
-        close.FontSize = Resource("Rune.FontSize.Sm", 13) / Resource("Rune.FontSize.Md", 14) * em;
-        var xs = Resource("Rune.Space.Xs", 0.25) * em;
+        close.FontSize = this.Resource<double>(ThemeKeys.FontSize.Sm) / this.Resource<double>(ThemeKeys.FontSize.Md) * em;
+        var xs = this.Resource<double>(ThemeKeys.Space.Xs) * em;
         close.Margin = new Thickness(0, -xs, 0, -xs);
     }
 

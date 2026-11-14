@@ -50,7 +50,7 @@ public sealed class TooltipChrome : FrameworkElement
 
     /// <summary>箭头的边长：提示字号（sm）的 0.625 倍。</summary>
     /// <param name="scope">从这个元素往上查字号 token。</param>
-    internal static double ArrowSize(FrameworkElement scope) => 0.625 * (scope.TryFindResource("Rune.FontSize.Sm") as double? ?? 13);
+    internal static double ArrowSize(FrameworkElement scope) => 0.625 * scope.Resource<double>(ThemeKeys.FontSize.Sm);
 
     /// <summary>箭头伸出面板的长度：旋转 45° 后对角线的一半（约 0.71 倍边长）。</summary>
     internal static double Overhang(double arrowSize) => Math.Ceiling(0.71 * arrowSize);
@@ -82,7 +82,7 @@ public sealed class TooltipChrome : FrameworkElement
     {
         var em = Em;
         // 行高 lineHeights.normal：继承给里面的文字
-        SetValue(TextBlock.LineHeightProperty, (TryFindResource("Rune.LineHeight.Normal") as double? ?? Leading.Normal) * em);
+        SetValue(TextBlock.LineHeightProperty, this.Resource<double>(ThemeKeys.LineHeight.Normal) * em);
         SetValue(TextBlock.LineStackingStrategyProperty, LineStackingStrategy.BlockLineHeight);
         panel.Background = Background;
         panel.CornerRadius = new CornerRadius(Radius * em);

@@ -170,8 +170,8 @@ public class TableOfContents : Control
         if (link is null || link.Bounds.Height <= 0) return;
         if (placed && indicator.Transitions is null)
         {
-            var duration = Motion.Duration(this, "Rune.Duration.Md", TimeSpan.FromMilliseconds(200));
-            var easing = this.Resource<global::Avalonia.Animation.Easings.Easing?>("Rune.Easing.Standard", null) ?? new global::Avalonia.Animation.Easings.LinearEasing();
+            var duration = Motion.Duration(this, ThemeKeys.Duration.Md);
+            var easing = this.Resource<global::Avalonia.Animation.Easings.Easing>(ThemeKeys.Easing.Standard);
             indicator.Transitions =
             [
                 new TransformOperationsTransition { Property = RenderTransformProperty, Duration = duration, Easing = easing },

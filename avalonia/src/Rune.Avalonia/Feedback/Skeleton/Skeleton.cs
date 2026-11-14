@@ -61,7 +61,7 @@ public class Skeleton : Control
     public Skeleton()
     {
         resources = new TemplateResources(this);
-        resources.Bind(TextColorProperty, "Rune.Color.Text");
+        resources.Bind(TextColorProperty, ThemeKeys.Color.Text);
         BindRadius();
         LogicalChildren.Add(holder);
         VisualChildren.Add(holder);
@@ -100,8 +100,8 @@ public class Skeleton : Control
     void BindRadius() => resources.Bind(RadiusFactorProperty, Shape.Value switch
     {
         "circle" => null,
-        "button" or "image" => "Rune.Radius.Md",
-        _ => "Rune.Radius.Sm",
+        "button" or "image" => ThemeKeys.Radius.Md,
+        _ => ThemeKeys.Radius.Sm,
     });
 
     /// <summary>加载时内容不可见、不可交互，占位对读屏隐藏；加载完内容照常显示。</summary>

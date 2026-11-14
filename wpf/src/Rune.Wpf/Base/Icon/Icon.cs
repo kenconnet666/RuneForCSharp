@@ -119,7 +119,7 @@ public class Icon : Control
     void PlayDraw()
     {
         SetValue(DrawnProperty, 1d);
-        var duration = Motion.Duration(this, "Rune.Duration.Xl", TimeSpan.FromMilliseconds(500));
+        var duration = Motion.Duration(this, ThemeKeys.Duration.Xl);
         if (duration <= TimeSpan.Zero)
         {
             BeginAnimation(DrawnProperty, null);
@@ -127,7 +127,7 @@ public class Icon : Control
         }
         BeginAnimation(DrawnProperty, new DoubleAnimation(0, 1, duration)
         {
-            EasingFunction = TryFindResource("Rune.Easing.Enter") as IEasingFunction,
+            EasingFunction = this.Resource<IEasingFunction>(ThemeKeys.Easing.Enter),
             FillBehavior = FillBehavior.Stop,
         });
     }

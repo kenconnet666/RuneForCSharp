@@ -50,8 +50,8 @@ public class Textarea : TextInputBase
     {
         base.Sync();
         if (area is null) return;
-        var line = double.IsNaN(LineHeight) || LineHeight <= 0 ? FontSize * this.Resource("Rune.LineHeight.Normal", 1.5) : LineHeight;
-        var min = Rows * line + 2 * this.Resource("Rune.Space.Xs", 0.25) * FontSize;
+        var line = double.IsNaN(LineHeight) || LineHeight <= 0 ? FontSize * this.Resource<double>(ThemeKeys.LineHeight.Normal) : LineHeight;
+        var min = Rows * line + 2 * this.Resource<double>(ThemeKeys.Space.Xs) * FontSize;
         area.MinHeight = min;
         area.MaxHeight = Fixed ? min : MaxRows is { } max ? Math.Max(min, max * line) : double.PositiveInfinity;
     }

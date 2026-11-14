@@ -186,17 +186,15 @@ public class Result : Control
         var em = FontSize;
         // 图标按自己的 Size 画（不看 Width、Height）：设成 4em 的像素数
         icon.Size = 4 * em;
-        icon.Margin = new Thickness(0, 0, 0, Resource("Rune.Space.Sm", 0.5) * em);
+        icon.Margin = new Thickness(0, 0, 0, this.Resource<double>(ThemeKeys.Space.Sm) * em);
         code.FontSize = 2.5 * em;
-        title.FontSize = Resource("Rune.FontSize.Xl", 18.0) / Resource("Rune.FontSize.Md", 14.0) * em;
+        title.FontSize = this.Resource<double>(ThemeKeys.FontSize.Xl) / this.Resource<double>(ThemeKeys.FontSize.Md) * em;
         description.MaxWidth = 36 * em;
-        action.Margin = new Thickness(0, Resource("Rune.Space.Md", 0.75) * em, 0, 0);
+        action.Margin = new Thickness(0, this.Resource<double>(ThemeKeys.Space.Md) * em, 0, 0);
         // 内边距随字号，写当前值（使用方的本地值、样式盖得过）；inspect 也按 Result 自己的 Padding 报
-        var (block, inline) = (Resource("Rune.Space.Xl", 1.5) * em, Resource("Rune.Space.Lg", 1.0) * em);
+        var (block, inline) = (this.Resource<double>(ThemeKeys.Space.Xl) * em, this.Resource<double>(ThemeKeys.Space.Lg) * em);
         SetCurrentValue(PaddingProperty, new Thickness(inline, block, inline, block));
     }
-
-    double Resource(string key, double fallback) => TryFindResource(key) is double value ? value : fallback;
 
     /// <inheritdoc />
     protected override Size MeasureOverride(Size constraint)

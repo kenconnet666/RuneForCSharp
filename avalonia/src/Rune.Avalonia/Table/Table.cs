@@ -118,7 +118,7 @@ public class Table : Control
             if (caption is not null) stack.Insert(0, caption);
         }
         var compact = Density == TableDensity.Compact;
-        if (compact) Bind(TextElement.FontSizeProperty, this.GetResourceObservable("Rune.FontSize.Sm"));
+        if (compact) Bind(TextElement.FontSizeProperty, this.GetResourceObservable(ThemeKeys.FontSize.Sm));
         else ClearValue(TextElement.FontSizeProperty);
         ApplyRoot();
         grid.Rebuild();
@@ -129,9 +129,9 @@ public class Table : Control
     {
         var ghost = Variant == TableVariant.Ghost;
         root.BorderThickness = ghost ? default : new Thickness(1);
-        root.Bind(Border.BorderBrushProperty, this.GetResourceObservable("Rune.Brush.Border"));
-        root.Bind(Border.BackgroundProperty, this.GetResourceObservable(ghost ? "Rune.Brush.Background" : "Rune.Brush.Surface"));
-        root.CornerRadius = ghost ? default : new CornerRadius(this.Resource("Rune.Radius.Lg", 0.5) * TextElement.GetFontSize(this));
+        root.Bind(Border.BorderBrushProperty, this.GetResourceObservable(ThemeKeys.Brush.Border));
+        root.Bind(Border.BackgroundProperty, this.GetResourceObservable(ghost ? ThemeKeys.Brush.Background : ThemeKeys.Brush.Surface));
+        root.CornerRadius = ghost ? default : new CornerRadius(this.Resource<double>(ThemeKeys.Radius.Lg) * TextElement.GetFontSize(this));
     }
 
     /// <inheritdoc />
@@ -368,8 +368,8 @@ public class Table : Control
         /// </summary>
         void DrawRows(DrawingContext context, Rect area, Func<TableSection, bool> include, bool edge)
         {
-            IBrush? Brush(string key) => owner.Resource<IBrush?>(key, null);
-            var rowBrush = Brush(owner.Variant == TableVariant.Ghost ? "Rune.Brush.Background" : "Rune.Brush.Surface");
+            IBrush? Brush(string key) => owner.Resource<IBrush?>(key);
+            var rowBrush = Brush(owner.Variant == TableVariant.Ghost ? ThemeKeys.Brush.Background : ThemeKeys.Brush.Surface);
             // 行的上下边吸附到设备像素（同浏览器画表格）：行高带小数时分隔线不发虚。网格自己可能不在整像素上，按到根的偏移算
             var scale = TopLevel.GetTopLevel(this)?.RenderScaling ?? 1;
             var offset = VisualRoot is Visual root ? this.TranslatePoint(default, root)?.Y ?? 0 : 0;
@@ -383,17 +383,17 @@ public class Table : Control
                 var bottom = y + heights[r];
                 if (include(section))
                 {
-                    var background = section is TableHead ? Brush("Rune.Brush.Fill")
-                        : r == hovered && section is TableBody ? Brush("Rune.Brush.FillHover")
-                        : row.IsStriped ? Brush("Rune.Brush.Fill") : rowBrush;
+                    var background = section is TableHead ? Brush(ThemeKeys.Brush.Fill)
+                        : r == hovered && section is TableBody ? Brush(ThemeKeys.Brush.FillHover)
+                        : row.IsStriped ? Brush(ThemeKeys.Brush.Fill) : rowBrush;
                     if (background is not null) context.FillRectangle(background, Band(y, bottom));
                     if (section is TableFoot)
                     {
-                        if (Brush("Rune.Brush.Border") is { } line) context.FillRectangle(line, Band(y, y + 1));
+                        if (Brush(ThemeKeys.Brush.Border) is { } line) context.FillRectangle(line, Band(y, y + 1));
                     }
-                    else if (Brush(section is TableHead ? "Rune.Brush.Border" : "Rune.Brush.BorderMuted") is { } line)
+                    else if (Brush(section is TableHead ? ThemeKeys.Brush.Border : ThemeKeys.Brush.BorderMuted) is { } line)
                         context.FillRectangle(line, Band(bottom - 1, bottom));
-                    if (edge && Brush("Rune.Brush.BorderMuted") is { } side) context.FillRectangle(side, new Rect(area.Right - 1, Snap(y), 1, Snap(bottom) - Snap(y)));
+                    if (edge && Brush(ThemeKeys.Brush.BorderMuted) is { } side) context.FillRectangle(side, new Rect(area.Right - 1, Snap(y), 1, Snap(bottom) - Snap(y)));
                 }
                 y = bottom;
             }

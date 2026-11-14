@@ -188,8 +188,8 @@ public class ItemListItem : ButtonBase
         PseudoClasses.Set(":align-start", Align == ItemListAlign.Start);
         PseudoClasses.Set(":has-start", Start is not null);
 
-        var block = this.Resource(list?.Density == ItemListDensity.Compact ? "Rune.Space.Xs" : "Rune.Space.Sm", 0d);
-        var gutter = (list?.Inset ?? (hoverable || interactive ? Space.Sm : null)) is { ResourceKey: { } key } ? this.Resource(key, 0d) : 0;
+        var block = this.Resource<double>(list?.Density == ItemListDensity.Compact ? ThemeKeys.Space.Xs : ThemeKeys.Space.Sm);
+        var gutter = (list?.Inset ?? (hoverable || interactive ? Space.Sm : null)) is { ResourceKey: { } key } ? this.Resource<double>(key) : 0;
         padding?.Dispose();
         padding = SetValue(PaddingProperty, new Thickness(gutter * FontSize, block * FontSize), BindingPriority.Template);
         focusable?.Dispose();

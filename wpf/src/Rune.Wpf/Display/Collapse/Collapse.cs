@@ -83,7 +83,7 @@ public class Collapse : FrameworkElement
         var (from, to) = ((double)GetValue(OpennessProperty), open ? 1d : 0d);
         // 先写终值：过渡结束（FillBehavior.Stop）或被打断后留下的就是它
         SetValue(OpennessProperty, to);
-        var duration = IsLoaded ? Motion.Duration(this, "Rune.Duration.Md", TimeSpan.FromMilliseconds(200)) : TimeSpan.Zero;
+        var duration = IsLoaded ? Motion.Duration(this, ThemeKeys.Duration.Md) : TimeSpan.Zero;
         if (duration <= TimeSpan.Zero)
         {
             transition = null;
@@ -91,7 +91,7 @@ public class Collapse : FrameworkElement
             Settle();
             return;
         }
-        var animation = new DoubleAnimation(from, to, duration) { EasingFunction = TryFindResource("Rune.Easing.Standard") as IEasingFunction, FillBehavior = FillBehavior.Stop };
+        var animation = new DoubleAnimation(from, to, duration) { EasingFunction = this.Resource<IEasingFunction>(ThemeKeys.Easing.Standard), FillBehavior = FillBehavior.Stop };
         animation.Completed += (_, _) =>
         {
             if (transition == animation) Settle();

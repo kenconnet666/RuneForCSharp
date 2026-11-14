@@ -171,7 +171,7 @@ public class ToggleGroup : Flex, IFieldControl
         if (!Sliding || Items.FirstOrDefault(item => item.IsSelected) is not { IsArrangeValid: true, ActualWidth: > 0 } selected) return;
         var bounds = new Rect(selected.TranslatePoint(default, this), selected.RenderSize);
         if (bounds == (Rect)GetValue(IndicatorProperty) && placed) return;
-        var duration = placed ? Motion.Duration(this, "Rune.Duration.Md", TimeSpan.FromMilliseconds(200)) : TimeSpan.Zero;
+        var duration = placed ? Motion.Duration(this, ThemeKeys.Duration.Md) : TimeSpan.Zero;
         placed = true;
         if (duration <= TimeSpan.Zero)
         {
@@ -179,7 +179,7 @@ public class ToggleGroup : Flex, IFieldControl
             SetValue(IndicatorProperty, bounds);
             return;
         }
-        BeginAnimation(IndicatorProperty, new RectAnimation(bounds, duration) { EasingFunction = TryFindResource("Rune.Easing.Standard") as IEasingFunction });
+        BeginAnimation(IndicatorProperty, new RectAnimation(bounds, duration) { EasingFunction = this.Resource<IEasingFunction>(ThemeKeys.Easing.Standard) });
     }
 
     /// <summary>四周 space.xs 的内边距（Flex 没有 Padding：量之前收进去、排完再挪过去）。</summary>
@@ -211,16 +211,16 @@ public class ToggleGroup : Flex, IFieldControl
     {
         base.OnRender(context);
         var em = TextElement.GetFontSize(this);
-        var radius = (TryFindResource("Rune.Radius.Md") as double? ?? 0.375) * em;
-        if (TryFindResource("Rune.Brush.Fill") is Brush fill) context.DrawRoundedRectangle(fill, null, new Rect(RenderSize), radius, radius);
+        var radius = this.Resource<double>(ThemeKeys.Radius.Md) * em;
+        if (TryFindResource(ThemeKeys.Brush.Fill) is Brush fill) context.DrawRoundedRectangle(fill, null, new Rect(RenderSize), radius, radius);
         var indicator = (Rect)GetValue(IndicatorProperty);
         if (!Sliding || SelectedValues.Count == 0 || indicator.IsEmpty || indicator.Width <= 0) return;
-        var pen = TryFindResource("Rune.Brush.AccentBorder") is Brush border ? new Pen(border, 1) : null;
+        var pen = TryFindResource(ThemeKeys.Brush.AccentBorder) is Brush border ? new Pen(border, 1) : null;
         var corner = Math.Max(0, (Items.FirstOrDefault(item => item.IsSelected)?.CornerRadius.TopLeft ?? 0.25 * em) - 0.5);
         var inner = new Rect(indicator.X + 0.5, indicator.Y + 0.5, Math.Max(0, indicator.Width - 1), Math.Max(0, indicator.Height - 1));
         // 滑块的四边吸附到设备像素（同浏览器画盒子的边）：组的内边距 0.25em 带小数，不吸附时 1 像素的描边压在两行之间发虚
         context.PushGuidelineSet(new GuidelineSet([indicator.Left, indicator.Right], [indicator.Top, indicator.Bottom]));
-        context.DrawRoundedRectangle(TryFindResource("Rune.Brush.AccentSoft") as Brush, pen, inner, corner, corner);
+        context.DrawRoundedRectangle(TryFindResource(ThemeKeys.Brush.AccentSoft) as Brush, pen, inner, corner, corner);
         context.Pop();
     }
 

@@ -163,7 +163,7 @@ public abstract class MenuItemBase : ButtonBase
     /// </summary>
     private protected virtual void UpdateMetrics()
     {
-        var gap = (TryFindResource("Rune.Space.Lg") as double? ?? 1) * FontSize;
+        var gap = this.Resource<double>(ThemeKeys.Space.Lg) * FontSize;
         if (shortcutPart is not null) shortcutPart.Margin = new Thickness(gap, 0, 0, 0);
         if (descriptionPart is not null) TextBlock.SetLineHeight(descriptionPart, Leading.GetFactor(this) * TextElement.GetFontSize(descriptionPart));
     }
@@ -336,8 +336,8 @@ public class MenuGroup : FrameworkElement
     void UpdateMetrics()
     {
         var em = label.FontSize;
-        label.Padding = new Thickness((TryFindResource("Rune.Space.Sm") as double? ?? 0.5) * em, (TryFindResource("Rune.Space.Xs") as double? ?? 0.25) * em,
-            (TryFindResource("Rune.Space.Sm") as double? ?? 0.5) * em, (TryFindResource("Rune.Space.Xs") as double? ?? 0.25) * em);
+        label.Padding = new Thickness(this.Resource<double>(ThemeKeys.Space.Sm) * em, this.Resource<double>(ThemeKeys.Space.Xs) * em,
+            this.Resource<double>(ThemeKeys.Space.Sm) * em, this.Resource<double>(ThemeKeys.Space.Xs) * em);
     }
 
     /// <inheritdoc />

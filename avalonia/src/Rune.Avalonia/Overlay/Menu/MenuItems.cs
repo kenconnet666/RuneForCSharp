@@ -298,7 +298,7 @@ public class MenuGroup : Control
     void UpdateMetrics()
     {
         var em = label.FontSize;
-        label.Padding = new Thickness(this.Resource("Rune.Space.Sm", 0.5) * em, this.Resource("Rune.Space.Xs", 0.25) * em);
+        label.Padding = new Thickness(this.Resource<double>(ThemeKeys.Space.Sm) * em, this.Resource<double>(ThemeKeys.Space.Xs) * em);
     }
 
     /// <inheritdoc />

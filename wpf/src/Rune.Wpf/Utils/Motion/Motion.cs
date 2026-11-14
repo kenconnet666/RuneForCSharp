@@ -16,12 +16,11 @@ public static class Motion
     /// 系统关闭了动画、或时长不为正时返回 <see cref="TimeSpan.Zero"/>。
     /// </summary>
     /// <param name="element">从这个元素向上查资源。</param>
-    /// <param name="key">时长 token 的资源键。</param>
-    /// <param name="fallback">查不到时的时长。</param>
-    public static TimeSpan Duration(FrameworkElement element, object key, TimeSpan fallback)
+    /// <param name="key">时长 token 的资源键（<see cref="ThemeKeys.Duration"/>）。</param>
+    public static TimeSpan Duration(FrameworkElement element, object key)
     {
         if (!Enabled) return TimeSpan.Zero;
-        var value = element.TryFindResource(key) is TimeSpan t ? t : fallback;
+        var value = element.Resource<TimeSpan>(key);
         return value > TimeSpan.Zero ? value : TimeSpan.Zero;
     }
 }

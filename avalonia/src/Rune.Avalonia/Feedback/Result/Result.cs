@@ -73,7 +73,7 @@ public class Result : Control
         root.Child = column;
         LogicalChildren.Add(root);
         VisualChildren.Add(root);
-        resources.Bind(TextElement.ForegroundProperty, "Rune.Brush.Text");
+        resources.Bind(TextElement.ForegroundProperty, ThemeKeys.Brush.Text);
         Update();
     }
 
@@ -170,13 +170,13 @@ public class Result : Control
         var em = FontSize;
         // 图标按自己的 Size 画（不看 Width、Height）：设成 4em 的像素数
         icon.Size = 4 * em;
-        icon.Margin = new Thickness(0, 0, 0, this.Resource("Rune.Space.Sm", 0.5) * em);
+        icon.Margin = new Thickness(0, 0, 0, this.Resource<double>(ThemeKeys.Space.Sm) * em);
         code.FontSize = 2.5 * em;
-        code.LetterSpacing = this.Resource("Rune.LetterSpacing.Tight", -0.01) * code.FontSize;
-        title.FontSize = this.Resource("Rune.FontSize.Xl", 18.0) / this.Resource("Rune.FontSize.Md", 14.0) * em;
+        code.LetterSpacing = this.Resource<double>(ThemeKeys.LetterSpacing.Tight) * code.FontSize;
+        title.FontSize = this.Resource<double>(ThemeKeys.FontSize.Xl) / this.Resource<double>(ThemeKeys.FontSize.Md) * em;
         description.MaxWidth = 36 * em;
-        action.Margin = new Thickness(0, this.Resource("Rune.Space.Md", 0.75) * em, 0, 0);
-        root.Padding = new Thickness(this.Resource("Rune.Space.Lg", 1.0) * em, this.Resource("Rune.Space.Xl", 1.5) * em);
+        action.Margin = new Thickness(0, this.Resource<double>(ThemeKeys.Space.Md) * em, 0, 0);
+        root.Padding = new Thickness(this.Resource<double>(ThemeKeys.Space.Lg) * em, this.Resource<double>(ThemeKeys.Space.Xl) * em);
     }
 
     /// <inheritdoc />

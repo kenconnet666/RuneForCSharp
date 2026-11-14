@@ -259,13 +259,13 @@ public class Stat : Control
         ShowParts(shown);
         if (shown) revealing = true;
         if (shown || !revealing) return;
-        var duration = Motion.Duration(this, "Rune.Duration.Lg", TimeSpan.FromMilliseconds(300));
+        var duration = Motion.Duration(this, ThemeKeys.Duration.Lg);
         if (duration <= TimeSpan.Zero) return;
         foreach (var part in new Control[] { value, change })
             _ = new Animation
             {
                 Duration = duration,
-                Easing = this.Resource<Easing>("Rune.Easing.Enter", new CubicEaseOut()),
+                Easing = this.Resource<Easing>(ThemeKeys.Easing.Enter),
                 Children =
                 {
                     new KeyFrame { Cue = new Cue(0), Setters = { new Setter(OpacityProperty, 0d) } },
@@ -296,8 +296,8 @@ public class Stat : Control
     void UpdateGrouped()
     {
         var grouped = Parent is StatGroup;
-        var line = this.Resource("Rune.BorderWidth.Xs", 1.0);
-        var md = this.Resource("Rune.Space.Md", 0.75) * FontSize;
+        var line = this.Resource<double>(ThemeKeys.BorderWidth.Xs);
+        var md = this.Resource<double>(ThemeKeys.Space.Md) * FontSize;
         root.BorderThickness = grouped ? new Thickness(line, 0, 0, 0) : default;
         root.Padding = grouped ? new Thickness(md, 0) : default;
         root.Margin = grouped ? new Thickness(-line, 0, 0, 0) : default;
@@ -308,24 +308,24 @@ public class Stat : Control
     void UpdateMetrics()
     {
         var em = FontSize;
-        double Token(string key, double fallback) => this.Resource(key, fallback);
-        var (xs, sm, xxl) = (Token("Rune.FontSize.Xs", 12.0), Token("Rune.FontSize.Sm", 13.0), Token("Rune.FontSize.Xxl", 24.0));
+        double Token(string key) => this.Resource<double>(key);
+        var (xs, sm, xxl) = (Token(ThemeKeys.FontSize.Xs), Token(ThemeKeys.FontSize.Sm), Token(ThemeKeys.FontSize.Xxl));
         // 指标名一行是 sm 的字号：图标框 1.75em、图标 1em 按它算
         label.SetValue(TextElement.FontSizeProperty, sm);
         iconBox.Width = iconBox.Height = 1.75 * sm;
-        iconBox.CornerRadius = new CornerRadius(Token("Rune.Radius.Md", 0.4) * sm);
+        iconBox.CornerRadius = new CornerRadius(Token(ThemeKeys.Radius.Md) * sm);
         icon.Size = sm;
-        column.Gap = Token("Rune.Space.Xs", 0.25) * em;
-        column.ColumnGap = Token("Rune.Space.Sm", 0.5) * em;
+        column.Gap = Token(ThemeKeys.Space.Xs) * em;
+        column.ColumnGap = Token(ThemeKeys.Space.Sm) * em;
         number.SetValue(TextElement.FontSizeProperty, xxl);
         text.FontSize = xxl;
         unit.FontSize = description.FontSize = xs;
         change.SetValue(TextElement.FontSizeProperty, xs);
         footer.SetValue(TextElement.FontSizeProperty, xs);
         // 底栏是 xs 的字号：上面多空 space.xs、线下面空 space.sm 都按它算
-        footer.Margin = new Thickness(0, Token("Rune.Space.Xs", 0.25) * xs, 0, 0);
-        footer.Padding = new Thickness(0, Token("Rune.Space.Sm", 0.5) * xs, 0, 0);
-        footer.BorderThickness = new Thickness(0, Token("Rune.BorderWidth.Xs", 1.0), 0, 0);
+        footer.Margin = new Thickness(0, Token(ThemeKeys.Space.Xs) * xs, 0, 0);
+        footer.Padding = new Thickness(0, Token(ThemeKeys.Space.Sm) * xs, 0, 0);
+        footer.BorderThickness = new Thickness(0, Token(ThemeKeys.BorderWidth.Xs), 0, 0);
         numberSkeleton.Width = 4 * xxl;
         numberSkeleton.Height = 1.25 * xxl;
         changeSkeleton.Width = 6 * xs;

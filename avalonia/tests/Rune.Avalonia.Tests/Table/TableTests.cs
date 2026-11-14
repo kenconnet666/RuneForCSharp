@@ -97,7 +97,7 @@ public class TableTests
 
         var head = Cell(table, 0, 0);
         Assert.Contains(":head", head.Classes);
-        Assert.Equal(table.Resource("Rune.FontSize.Sm", 0d), head.FontSize);
+        Assert.Equal(table.Resource<double>("Rune.FontSize.Sm"), head.FontSize);
         Assert.Equal(table.ThemeColor("Rune.Brush.TextMuted"), Lookup.ColorOf(head.Foreground));
         var rowHeader = Cell(table, 1, 0);
         Assert.Contains(":row-header", rowHeader.Classes);

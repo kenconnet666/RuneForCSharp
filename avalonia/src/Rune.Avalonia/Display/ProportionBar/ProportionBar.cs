@@ -103,7 +103,7 @@ public class ProportionBar : Control
         legend.Children.Clear();
         legend.IsVisible = Legend;
         if (!Legend) return;
-        legend.SetValue(TextElement.FontSizeProperty, this.Resource("Rune.FontSize.Sm", 13.0));
+        legend.SetValue(TextElement.FontSizeProperty, this.Resource<double>(ThemeKeys.FontSize.Sm));
         for (var index = 0; index < Segments.Count; index++)
         {
             var segment = Segments[index];
@@ -158,7 +158,7 @@ public class ProportionBar : Control
             var shown = owner.Segments.Select((segment, index) => (Segment: segment, Index: index)).Where(entry => entry.Segment.Value > 0).ToList();
             var total = shown.Sum(entry => entry.Segment.Value);
             if (total <= 0) return;
-            var gap = owner.Resource("Rune.BorderWidth.Sm", 2.0);
+            var gap = owner.Resource<double>(ThemeKeys.BorderWidth.Sm);
             var (width, height) = (Bounds.Width, Bounds.Height);
             var room = Math.Max(0, width - gap * (shown.Count - 1));
             // 整根按胶囊（radii.full）裁，两头的段是圆的
@@ -167,7 +167,7 @@ public class ProportionBar : Control
             foreach (var (segment, index) in shown)
             {
                 var share = room * segment.Value / total;
-                var brush = segment.Color ?? owner.Resource<IBrush?>(StatusDot.BrushKey(Proportions.ToneAt(segment.Tone, index)), null);
+                var brush = segment.Color ?? owner.Resource<IBrush?>(StatusDot.BrushKey(Proportions.ToneAt(segment.Tone, index)));
                 if (brush is not null) context.FillRectangle(brush, new Rect(x, 0, share, height));
                 x += share + gap;
             }

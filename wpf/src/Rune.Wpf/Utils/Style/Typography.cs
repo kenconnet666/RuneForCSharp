@@ -93,13 +93,13 @@ public readonly record struct TextTone(string Value) : IVariant<TextTone>
     /// <summary>文字颜色的画刷资源键（同 vue-tsx-pro 的 toneStyles）；不写、inherit 或使用方扩展的取值为 null，跟随外面的文字颜色。</summary>
     public string? BrushKey => Value switch
     {
-        "neutral" => "Rune.Brush.Text",
-        "muted" => "Rune.Brush.TextMuted",
-        "accent" => "Rune.Brush.AccentText",
-        "danger" => "Rune.Brush.DangerText",
-        "success" => "Rune.Brush.SuccessText",
-        "warning" => "Rune.Brush.WarningText",
-        "info" => "Rune.Brush.InfoText",
+        "neutral" => ThemeKeys.Brush.Text,
+        "muted" => ThemeKeys.Brush.TextMuted,
+        "accent" => ThemeKeys.Brush.AccentText,
+        "danger" => ThemeKeys.Brush.DangerText,
+        "success" => ThemeKeys.Brush.SuccessText,
+        "warning" => ThemeKeys.Brush.WarningText,
+        "info" => ThemeKeys.Brush.InfoText,
         _ => null,
     };
 

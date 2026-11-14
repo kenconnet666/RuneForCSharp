@@ -98,8 +98,8 @@ public class CommandPalette : FrameworkElement
     {
         search.SetResourceReference(StyleProperty, CommandPaletteParts.Search);
         // 文字 textMuted：本地值压过按钮配方里样式 × 色调的触发器
-        defaultTrigger.SetResourceReference(Control.ForegroundProperty, "Rune.Brush.TextMuted");
-        searchIcon.SetResourceReference(Control.ForegroundProperty, "Rune.Brush.TextMuted");
+        defaultTrigger.SetResourceReference(Control.ForegroundProperty, ThemeKeys.Brush.TextMuted);
+        searchIcon.SetResourceReference(Control.ForegroundProperty, ThemeKeys.Brush.TextMuted);
         Flex.SetGrow(triggerLabel, true);
         defaultTrigger.Content = new Flex { Align = FlexAlign.Center, Gap = Space.Sm, Children = { triggerLabel, triggerKbd } };
         Flex.SetGrow(input, true);
@@ -226,9 +226,8 @@ public class CommandPalette : FrameworkElement
     void UpdateMetrics()
     {
         var em = TextElement.GetFontSize(this);
-        double Resource(string key, double fallback) => TryFindResource(key) as double? ?? fallback;
-        search.Padding = new Thickness(Resource("Rune.Space.Md", 0.75) * em, Resource("Rune.Space.Sm", 0.5) * em, Resource("Rune.Space.Md", 0.75) * em, Resource("Rune.Space.Sm", 0.5) * em);
-        TextElement.SetFontSize(search, Resource("Rune.FontSize.Lg", 18));
+        search.Padding = new Thickness(this.Resource<double>(ThemeKeys.Space.Md) * em, this.Resource<double>(ThemeKeys.Space.Sm) * em, this.Resource<double>(ThemeKeys.Space.Md) * em, this.Resource<double>(ThemeKeys.Space.Sm) * em);
+        TextElement.SetFontSize(search, this.Resource<double>(ThemeKeys.FontSize.Lg));
         listbox.ScrollMaxHeight = Math.Min(24 * 16, (host?.ActualHeight ?? 800) / 2);
         defaultTrigger.MinWidth = 12 * 16;
     }

@@ -202,14 +202,14 @@ public class ScrollArea : ScrollViewer
     void Fade(bool animate)
     {
         var visible = IsScrollbarVisible;
-        var duration = animate ? Motion.Duration(this, "Rune.Duration.Md", TimeSpan.FromMilliseconds(200)) : TimeSpan.Zero;
+        var duration = animate ? Motion.Duration(this, ThemeKeys.Duration.Md) : TimeSpan.Zero;
         foreach (var bar in new[] { vertical, horizontal })
         {
             if (bar is null) continue;
             bar.IsHitTestVisible = visible;
             bar.Opacity = visible ? 1 : 0;
             bar.BeginAnimation(OpacityProperty, duration <= TimeSpan.Zero ? null
-                : new DoubleAnimation(visible ? 1 : 0, duration) { EasingFunction = TryFindResource("Rune.Easing.Standard") as IEasingFunction, FillBehavior = FillBehavior.Stop });
+                : new DoubleAnimation(visible ? 1 : 0, duration) { EasingFunction = this.Resource<IEasingFunction>(ThemeKeys.Easing.Standard), FillBehavior = FillBehavior.Stop });
         }
     }
 }

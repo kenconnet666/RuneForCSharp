@@ -59,7 +59,7 @@ public class Sparkline : Control
     {
         resources = new TemplateResources(this);
         resources.Bind(FillProperty, ToneFill.Keys(default).Fill);
-        resources.Bind(SurfaceProperty, "Rune.Brush.Surface");
+        resources.Bind(SurfaceProperty, ThemeKeys.Brush.Surface);
     }
 
     /// <summary>各个值。</summary>
@@ -148,7 +148,7 @@ public class Sparkline : Control
         }
         if (!ShowLast || geometry.Last is not { } last) return;
         // 最后一个点 6 像素，外面一圈表面色（borderWidths.sm）把点与线分开
-        var ring = this.Resource("Rune.BorderWidth.Sm", 2.0);
+        var ring = this.Resource<double>(ThemeKeys.BorderWidth.Sm);
         var center = At(last);
         if (GetValue(SurfaceProperty) is { } surface) context.DrawEllipse(surface, null, center, 3 + ring, 3 + ring);
         context.DrawEllipse(fill, null, center, 3, 3);

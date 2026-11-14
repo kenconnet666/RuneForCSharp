@@ -34,7 +34,7 @@ public abstract class Heading : Text
     {
         letterSpacing?.Dispose();
         letterSpacing = null;
-        var key = Size.Value switch { "xxl" => "Rune.LetterSpacing.Tight", "xxxl" => "Rune.LetterSpacing.Tighter", _ => null };
+        var key = Size.Value switch { "xxl" => ThemeKeys.LetterSpacing.Tight, "xxxl" => ThemeKeys.LetterSpacing.Tighter, _ => null };
         if (key is not null && this.TryFindResource(key, ActualThemeVariant, out var factor) && factor is double em)
             letterSpacing = SetValue(LetterSpacingProperty, em * FontSize, BindingPriority.Template);
     }

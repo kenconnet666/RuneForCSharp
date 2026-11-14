@@ -121,7 +121,7 @@ public class Table : FrameworkElement
             caption = next;
             if (caption is not null) stack.Insert(0, caption);
         }
-        if (Density == TableDensity.Compact) SetResourceReference(TextElement.FontSizeProperty, "Rune.FontSize.Sm");
+        if (Density == TableDensity.Compact) SetResourceReference(TextElement.FontSizeProperty, ThemeKeys.FontSize.Sm);
         else ClearValue(TextElement.FontSizeProperty);
         ApplyRoot();
         grid.Rebuild();
@@ -132,9 +132,9 @@ public class Table : FrameworkElement
     {
         var ghost = Variant == TableVariant.Ghost;
         root.BorderThickness = ghost ? default : new Thickness(1);
-        root.SetResourceReference(Border.BorderBrushProperty, "Rune.Brush.Border");
-        root.SetResourceReference(Border.BackgroundProperty, ghost ? "Rune.Brush.Background" : "Rune.Brush.Surface");
-        root.CornerRadius = ghost ? default : new CornerRadius((TryFindResource("Rune.Radius.Lg") as double? ?? 0.5) * TextElement.GetFontSize(this));
+        root.SetResourceReference(Border.BorderBrushProperty, ThemeKeys.Brush.Border);
+        root.SetResourceReference(Border.BackgroundProperty, ghost ? ThemeKeys.Brush.Background : ThemeKeys.Brush.Surface);
+        root.CornerRadius = ghost ? default : new CornerRadius(this.Resource<double>(ThemeKeys.Radius.Lg) * TextElement.GetFontSize(this));
     }
 
     /// <inheritdoc />
@@ -426,7 +426,7 @@ public class Table : FrameworkElement
         void DrawRows(DrawingContext context, Rect area, Func<TableSection, bool> include, bool edge)
         {
             Brush? Brush(string key) => owner.TryFindResource(key) as Brush;
-            var rowBrush = Brush(owner.Variant == TableVariant.Ghost ? "Rune.Brush.Background" : "Rune.Brush.Surface");
+            var rowBrush = Brush(owner.Variant == TableVariant.Ghost ? ThemeKeys.Brush.Background : ThemeKeys.Brush.Surface);
             context.PushTransform(new TranslateTransform(-area.X, -area.Y));
             // 行的上下边吸附到设备像素（同浏览器画表格）：行高带小数时分隔线不发虚
             var guidelines = new GuidelineSet();
@@ -446,17 +446,17 @@ public class Table : FrameworkElement
                 var height = heights[r];
                 if (include(section))
                 {
-                    var background = section is TableHead ? Brush("Rune.Brush.Fill")
-                        : r == hovered && section is TableBody ? Brush("Rune.Brush.FillHover")
-                        : row.IsStriped ? Brush("Rune.Brush.Fill") : rowBrush;
+                    var background = section is TableHead ? Brush(ThemeKeys.Brush.Fill)
+                        : r == hovered && section is TableBody ? Brush(ThemeKeys.Brush.FillHover)
+                        : row.IsStriped ? Brush(ThemeKeys.Brush.Fill) : rowBrush;
                     if (background is not null) context.DrawRectangle(background, null, new Rect(area.X, y, area.Width, height));
                     if (section is TableFoot)
                     {
-                        if (Brush("Rune.Brush.Border") is { } line) context.DrawRectangle(line, null, new Rect(area.X, y, area.Width, 1));
+                        if (Brush(ThemeKeys.Brush.Border) is { } line) context.DrawRectangle(line, null, new Rect(area.X, y, area.Width, 1));
                     }
-                    else if (Brush(section is TableHead ? "Rune.Brush.Border" : "Rune.Brush.BorderMuted") is { } line)
+                    else if (Brush(section is TableHead ? ThemeKeys.Brush.Border : ThemeKeys.Brush.BorderMuted) is { } line)
                         context.DrawRectangle(line, null, new Rect(area.X, y + height - 1, area.Width, 1));
-                    if (edge && Brush("Rune.Brush.BorderMuted") is { } side) context.DrawRectangle(side, null, new Rect(area.Right - 1, y, 1, height));
+                    if (edge && Brush(ThemeKeys.Brush.BorderMuted) is { } side) context.DrawRectangle(side, null, new Rect(area.Right - 1, y, 1, height));
                 }
                 y += height;
             }

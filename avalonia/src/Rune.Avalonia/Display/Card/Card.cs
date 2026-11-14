@@ -186,7 +186,7 @@ public class Card : Control
         var padding = new Thickness(GetValue(PaddingFactorProperty) * FontSize);
         body.Padding = padding;
         header.Padding = footer.Padding = Padding == Space.None
-            ? new Thickness(this.Resource("Rune.Space.Md", 0.75) * FontSize, this.Resource("Rune.Space.Sm", 0.5) * FontSize)
+            ? new Thickness(this.Resource<double>(ThemeKeys.Space.Md) * FontSize, this.Resource<double>(ThemeKeys.Space.Sm) * FontSize)
             : padding;
         surface.CornerRadius = new CornerRadius(Radius.Value == "full" ? 9999 : GetValue(RadiusFactorProperty) * FontSize);
     }
@@ -197,9 +197,9 @@ public class Card : Control
         body.Child = shown ? skeleton : bodyContent;
         if (shown) revealing = true;
         if (!revealing) return;
-        var duration = Motion.Duration(this, "Rune.Duration.Lg", TimeSpan.FromMilliseconds(300));
+        var duration = Motion.Duration(this, ThemeKeys.Duration.Lg);
         if (duration <= TimeSpan.Zero) return;
-        var easing = this.Resource<Easing>("Rune.Easing.Enter", new CubicEaseOut());
+        var easing = this.Resource<Easing>(ThemeKeys.Easing.Enter);
         _ = new Animation
         {
             Duration = duration,

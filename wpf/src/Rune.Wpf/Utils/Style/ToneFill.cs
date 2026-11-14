@@ -10,11 +10,11 @@ public static class ToneFill
     /// <param name="tone">色调；default 按 accent。</param>
     public static (string Fill, string OnFill) Keys(StatusTone tone) => tone.Value switch
     {
-        "neutral" => ("Rune.Brush.InverseSurface", "Rune.Brush.InverseText"),
-        "info" => ("Rune.Brush.InfoText", "Rune.Brush.Background"),
-        "success" => ("Rune.Brush.SuccessText", "Rune.Brush.Background"),
-        "warning" => ("Rune.Brush.WarningText", "Rune.Brush.Background"),
-        "danger" => ("Rune.Brush.DangerText", "Rune.Brush.Background"),
-        _ => ("Rune.Brush.Accent", "Rune.Brush.AccentContrast"),
+        "neutral" => (ThemeKeys.Brush.InverseSurface, ThemeKeys.Brush.InverseText),
+        "info" => (ThemeKeys.Brush.InfoText, ThemeKeys.Brush.Background),
+        "success" => (ThemeKeys.Brush.SuccessText, ThemeKeys.Brush.Background),
+        "warning" => (ThemeKeys.Brush.WarningText, ThemeKeys.Brush.Background),
+        "danger" => (ThemeKeys.Brush.DangerText, ThemeKeys.Brush.Background),
+        _ => (ThemeKeys.Brush.Accent, ThemeKeys.Brush.AccentContrast),
     };
 }

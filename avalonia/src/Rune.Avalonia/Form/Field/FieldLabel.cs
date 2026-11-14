@@ -115,7 +115,7 @@ public class FieldLabel : Control
     }
 
     /// <summary>文字与星号的间距：space.xs。</summary>
-    double Gap => (this.Resource<double>("Rune.Space.Xs", 0.25)) * FontSize;
+    double Gap => this.Resource<double>(ThemeKeys.Space.Xs) * FontSize;
 
     /// <summary>读屏：标签（名称是文字），指向目标。</summary>
     protected override AutomationPeer OnCreateAutomationPeer() => new FieldLabelAutomationPeer(this);

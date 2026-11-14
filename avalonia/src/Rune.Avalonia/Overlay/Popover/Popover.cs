@@ -184,14 +184,14 @@ public class Popover : Control
     void UpdateMetrics()
     {
         var em = TextElement.GetFontSize(this);
-        panel.CornerRadius = new CornerRadius(this.Resource("Rune.Radius.Lg", 0.5) * em);
+        panel.CornerRadius = new CornerRadius(this.Resource<double>(ThemeKeys.Radius.Lg) * em);
         panel.Padding = PanelPadding(em);
         arrow.Width = arrow.Height = ArrowSize;
     }
 
     /// <summary>面板的内边距：space.md。菜单的面板不留（内边距在里面的内容层上，滚动条贴着边缘）。</summary>
     /// <param name="em">字号。</param>
-    private protected virtual Thickness PanelPadding(double em) => new(this.Resource("Rune.Space.Md", 0.75) * em);
+    private protected virtual Thickness PanelPadding(double em) => new(this.Resource<double>(ThemeKeys.Space.Md) * em);
 
     /// <summary>打开后聚焦哪个元素：里面第一个能聚焦的；没有时聚焦面板。</summary>
     private protected virtual InputElement? FocusTarget() =>

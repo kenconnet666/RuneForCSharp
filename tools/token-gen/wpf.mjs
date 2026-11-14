@@ -2,6 +2,7 @@
 // RuneTheme.g.cs（内置主题清单）、CubicBezierEase.g.cs（缓动 token）
 import { argbHex } from '../lib/css.mjs';
 import { comment, describe, escape, FONT_WEIGHTS, HEADER, number, summary, themeTitle, timeSpan } from './format.mjs';
+import { themeKeys } from './keys.mjs';
 
 const DIR = 'wpf/src/Rune.Wpf/Config/Generated';
 const NAMESPACES = [
@@ -126,5 +127,12 @@ export function wpf(model) {
     })),
     { path: `${DIR}/RuneTheme.g.cs`, content: themeList(model) },
     { path: `${DIR}/CubicBezierEase.g.cs`, content: easings(model) },
+    themeKeys(model, {
+      namespace: 'Rune.Wpf',
+      path: `${DIR}/ThemeKeys.g.cs`,
+      lookup: '<see cref="ThemeResources.Resource{T}"/>',
+      fontWeight: (value) => `global::System.Windows.FontWeights.${FONT_WEIGHTS[value]}`,
+      easing: (name) => `CubicBezierEase.${name}`,
+    }),
   ];
 }
