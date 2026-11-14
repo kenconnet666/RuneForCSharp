@@ -377,6 +377,11 @@ export const PLATFORM_PROPS_NOT_PORTED = {
       ...Object.fromEntries(['propsValue', 'propsTags', 'propsClear', 'propsChevron', 'propsPopover', 'propsListbox', 'propsSearch', 'propsIcon']
         .map((prop) => [prop, '部件是 SelectControl 组合的子控件与两层窗口，没有部件属性记录'])),
     },
+    TagsInput: {
+      children: 'WinForms 的建议是 ListboxControl 画出来的，没有自定义内容（同 SelectControl）',
+      ...Object.fromEntries(['propsRoot', 'propsTag', 'propsClear', 'propsPopover', 'propsListbox', 'propsIcon']
+        .map((prop) => [prop, '外壳是 TagsInputControl 自己，标签、图标、清空按钮是子控件，弹出层是两层窗口：没有部件属性记录（同 SelectControl）'])),
+    },
     ...Object.fromEntries(['Dialog', 'AlertDialog'].map((name) => [name, Object.fromEntries(['propsHeader', 'propsTitle', 'propsClose', 'propsDescription', 'propsBody', 'propsFooter', 'propsCancel', 'propsConfirm']
       .map((prop) => [prop, '标题行、正文、页脚是 DialogControl 组合的子控件，面板与遮罩是两层窗口画的，没有部件属性记录']))])),
     CommandPalette: {
