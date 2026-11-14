@@ -77,6 +77,8 @@ export const COMPONENT_PROP_RENAMES = {
   Popconfirm: { onCancel: 'Canceled' },
   // 到点是事件
   Countdown: { onEnd: 'Ended' },
+  // 一次操作结束是事件
+  Slider: { onValueCommit: 'ValueCommitted' },
   // Intl 的逐项选项是 .NET 的格式字符串（按语言包的文化）
   DateTime: { options: 'Format' },
   // 数据是平台的 ItemsSource；执行了一项是事件；输入框的文字同 TextBox 叫 Text；自定义选项内容是数据模板
@@ -182,6 +184,12 @@ const BUTTON_TYPE = '表单提交是浏览器的概念；对话框的默认、�
 
 /** 某个组件不移植的 prop 与原因（平台上没有对应的概念）：parity 不报缺 */
 export const PROPS_NOT_PORTED = {
+  Slider: {
+    name: FORM_NAME,
+    propsRoot: '外层就是 Slider 自己：样式直接写在它上面',
+    ...Object.fromEntries(['propsTrack', 'propsRange', 'propsMark'].map((prop) => [prop, '轨道、已选范围与刻度点是 Slider 自己画的（色调、字号跟着 Tone、Size），没有元素可加属性；滑块是 SliderThumb（WinForms 是读屏子节点）'])),
+    propsMarkLabel: '刻度文字是 Slider 建的 Text（sm、textMuted），外观跟着 Text 的主题样式',
+  },
   Rating: {
     name: FORM_NAME,
     propsStar: '星是 Rating 自己画的（空心描线打底、按比例裁出的实色），没有每颗星的元素；分数的单选项是透明的点击区域（Avalonia、WPF 的 RatingOption，WinForms 的读屏子节点）',
@@ -507,6 +515,7 @@ export const BEHAVIOR_NOT_APPLICABLE = {
   Embed: { 'iframe 带 title、src': 'loading="lazy"、referrerpolicy 是 iframe 的属性：桌面的网页内核放进界面就加载，没有懒加载；title 是读屏名称（测试覆盖）' },
   Video: { '自绘控制条跟着 video 的事件走': '控制条的脚本在网页内核的页面里跑，测试里没有内核：页面的元素与文案由 Custom_bar 的测试核对，事件与键盘在真实窗口里核对' },
   Collapse: { '页内搜索命中': '页内搜索命中收起的内容时展开（hidden="until-found"、beforematch）是浏览器的能力，桌面没有页内搜索' },
+  Slider: { '轨道与已选范围都能加属性': '轨道与已选范围是 Slider 自己画的，没有元素可加属性（PROPS_NOT_PORTED）' },
   RelativeTime: { '服务端渲染记下': '桌面没有服务端渲染与水合：控件在界面线程上直接按此刻渲染；要固定"现在"（截图、测试）写 Now' },
 };
 
