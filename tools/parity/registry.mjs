@@ -315,6 +315,10 @@ export const PLATFORM_PROPS_NOT_PORTED = {
       ['propsRoot', 'propsIcon', 'propsPrefix', 'propsSuffix', 'propsDecrement', 'propsIncrement', 'propsClear']
         .map((prop) => [prop, '外壳是 TextInputControl 自己画的，里面的图标、前后缀、加减与清空按钮是子控件，没有部件属性：外观跟主题，按钮走 ProviderControl 的组件定制']),
     ),
+    PageHeader: Object.fromEntries(
+      ['propsBreadcrumbs', 'propsMain', 'propsBack', 'propsHeading', 'propsTitleRow', 'propsTitle', 'propsMeta', 'propsDescription', 'propsActions']
+        .map((prop) => [prop, '面包屑、标题行、返回按钮、标题、说明是 PageHeaderControl 建的子控件，外观跟主题（按钮走 ProviderControl 的组件定制）；标记、操作是使用方给的控件，直接改它们']),
+    ),
     PageJump: Object.fromEntries(
       ['propsBefore', 'propsInput', 'propsAfter'].map((prop) => [prop, '"跳至""页"与输入框是 PageJumpControl 的子控件，没有部件属性：外观跟主题，宽度与字号按 TextSize']),
     ),
