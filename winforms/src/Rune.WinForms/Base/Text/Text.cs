@@ -168,6 +168,19 @@ public class Text : Element
         }
     }
 
+    /// <summary>
+    /// 排在 <see cref="Element.Bounds"/> 里省略了内容：Truncate 时一行比 Bounds 宽，LineClamp 时比限的行数高（差 1 像素以内是取整）。
+    /// Ellipsis 按它决定给不给看全文的办法。
+    /// </summary>
+    internal bool Overflows(ElementContext context)
+    {
+        if (Content.Length == 0 || !Truncate && LineClamp is null) return false;
+        var font = ResolveFont(context);
+        var flags = TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding | (Truncate ? TextFormatFlags.SingleLine : TextFormatFlags.WordBreak);
+        var natural = Fonts.Measure(Content, font, new Size(Truncate ? int.MaxValue : Bounds.Width, int.MaxValue), flags);
+        return Truncate ? natural.Width > Bounds.Width + 1 : natural.Height > LineClamp!.Value * Fonts.LineHeight(font) + 1;
+    }
+
     /// <inheritdoc />
     protected internal override void Paint(Graphics graphics, ElementContext context) =>
         TextRenderer.DrawText(graphics, Content, ResolveFont(context), Bounds, Tone.ColorIn(context), Flags(context));

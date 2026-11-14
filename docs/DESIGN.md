@@ -1378,6 +1378,13 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### Ellipsis（2026-11-15）
+
+- 文字是 Text 的 Truncate（一行）或 LineClamp（多行），展开时去掉限制。截断与否在排好以后量（同 TS 的 ResizeObserver 加每次渲染后），展开时不量：Avalonia 看排好的文字有没有省略过的行（TextLine.HasCollapsed）；WPF 用同样的字体按不限宽（多行时按现在的宽度、不限高）排一个 TextBlock 比实际大小；WinForms 的 Text 元素加了 Overflows（自然大小比 Bounds 大）。
+- 截断且有提示时文字能 Tab 聚焦，提示用各平台的提示（Avalonia 的 ToolTip.Tip、WPF 的 ToolTip、WinForms 自带一个 TooltipProvider），键盘聚焦也显示；提示也是读屏的帮助文字 / 描述。Tooltip 不写时是文字本身（Expandable 时不提示），写 null 不提示。
+- 展开按钮是链接样式（accentText、悬停下划线、和文字一样大），读屏是带展开状态的按钮：Avalonia 是 Link，WPF 是 ButtonBase 包一段 Text，WinForms 是 LinkControl 的子类（PushButton 角色、Expanded / Collapsed，空格也能按）。
+- 顺手加了 Flex 的 Shrink（CSS 的 flex-shrink: 0）：Avalonia、WPF 的 Flex 原来让每项都能缩到 MinWidth，名称旁边的城市被挤成竖排；Shrink=False 的项不比内容窄（WinForms 的 FlexControl 原来按内容最窄的宽度，中文一个字就能换行，也加了 SetShrink）。
+
 ### Timeline（2026-11-15）
 
 - 项是普通的 TimelineItem（标题、说明、操作人、详情可以是文字或控件；时间是显示的文字，DateTime 是机器可读的时间，做成时间的读屏帮助文字 / 描述）。Timeline 按项、Pending、Reverse、MaxVisible、IsExpanded 重建各行（同 TS 每次渲染重算）：收起的按钮在旧的那一端，倒序时在最后。重建前先放开旧行里使用方给的元素（一个元素只能有一个父元素）。
