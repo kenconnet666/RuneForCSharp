@@ -33,19 +33,6 @@ sealed class MainForm : Form
         Text = "Rune.WinForms 文档";
         ClientSize = LogicalToDeviceUnits(new Size(1360, 880));
         Font = new Font(Fonts.Installed(RuneTheme.Current.Peek().Fonts.Sans), Tokens.FontSize.Md * 72 / 96);
-        // 一百多个导航项：填完再排一次版（每加一组都整体重排的话要好几秒）
-        navigation.SuspendLayout();
-        foreach (var category in DocSite.Current.Categories)
-        {
-            var section = new NavSectionControl { Label = category.Label };
-            foreach (var page in category.Pages)
-            {
-                var ported = ExampleCatalog.All.Count(example => example.Component == page.Name);
-                section.Controls.Add(new NavItemControl { Href = page.Name, Text = page.Title, Badge = ported, BadgeTone = StatusTone.Neutral });
-            }
-            navigation.Controls.Add(section);
-        }
-        navigation.ResumeLayout();
         navigation.Navigate += (_, e) => Show(e.Href);
         filler.Tick += (_, _) => FillNext();
         var header = new FlexControl { Justify = FlexJustify.End, AutoSize = true };
@@ -60,6 +47,19 @@ sealed class MainForm : Form
         };
         contents.ScrollRoot = shell.MainScroll;
         Controls.Add(shell);
+        // 一百多个导航项：侧栏挂上窗体之后再填（字体已是窗体的，挂上时不用整列重套），填完再排一次版
+        navigation.SuspendLayout();
+        foreach (var category in DocSite.Current.Categories)
+        {
+            var section = new NavSectionControl { Label = category.Label };
+            foreach (var page in category.Pages)
+            {
+                var ported = ExampleCatalog.All.Count(example => example.Component == page.Name);
+                section.Controls.Add(new NavItemControl { Href = page.Name, Text = page.Title, Badge = ported, BadgeTone = StatusTone.Neutral });
+            }
+            navigation.Controls.Add(section);
+        }
+        navigation.ResumeLayout();
         var first = DocSite.Current.Pages.First(page => ExampleCatalog.All.Any(example => example.Component == page.Name));
         navigation.CurrentHref = first.Name;
         Show(first.Name);

@@ -90,7 +90,7 @@ public class NavListControl : FlexControl
     internal TooltipProvider Tips => tips;
 
     /// <summary>属于这个导航的成员（不进到里面另一个 NavListControl）。</summary>
-    IEnumerable<T> Members<T>() => Descendants(this).OfType<T>();
+    IEnumerable<T> Members<T>(Control? within = null) => Descendants(within ?? this).Prepend(within ?? this).OfType<T>();
 
     static IEnumerable<Control> Descendants(Control parent)
     {
@@ -114,7 +114,8 @@ public class NavListControl : FlexControl
     protected override void OnControlAdded(ControlEventArgs e)
     {
         base.OnControlAdded(e);
-        Sync();
+        // 只给新加的这一支套状态：一组组往里加时每次都整棵重套，一百多项的侧栏是平方级
+        Sync(e.Control);
     }
 
     /// <summary>内边距、控件高度、缩进都按字号：字体（从窗体继承来的也算）或 DPI 变了重新算。</summary>
@@ -131,15 +132,15 @@ public class NavListControl : FlexControl
         Sync();
     }
 
-    /// <summary>当前页、紧凑交给各项；含当前页的分组展开。</summary>
-    internal void Sync()
+    /// <summary>当前页、紧凑交给各项（within 给出时只管这一支）；含当前页的分组展开。</summary>
+    internal void Sync(Control? within = null)
     {
         // 套状态时每一行都会让所在的容器重排：先把列表与各组挂起，最后只排一次（不然 n 行就是 n 次整个列表的测量，几百页的侧栏要卡几十秒）
-        Control[] containers = [this, .. Members<NavSectionControl>(), .. Members<NavGroupControl>()];
+        Control[] containers = [this, .. Members<NavSectionControl>(within), .. Members<NavGroupControl>(within)];
         foreach (var container in containers) container.SuspendLayout();
-        foreach (var row in Members<NavRowControl>()) row.Apply(this);
-        foreach (var section in Members<NavSectionControl>()) section.Apply(this);
-        foreach (var group in Members<NavGroupControl>()) group.Apply(this);
+        foreach (var row in Members<NavRowControl>(within)) row.Apply(this);
+        foreach (var section in Members<NavSectionControl>(within)) section.Apply(this);
+        foreach (var group in Members<NavGroupControl>(within)) group.Apply(this);
         foreach (var container in containers) container.ResumeLayout(false);
         PerformLayout();
     }
@@ -521,7 +522,7 @@ public class NavGroupControl : FlexControl
         header = new NavGroupHeader(this);
         collapse.Controls.Add(list);
         Controls.AddRange([header, collapse]);
-        list.ControlAdded += (_, _) => NavListControl.Owner(this)?.Sync();
+        list.ControlAdded += (_, e) => NavListControl.Owner(this)?.Sync(e.Control);
     }
 
     /// <summary>展开、收起了。</summary>
@@ -635,7 +636,7 @@ public class NavSectionControl : FlexControl
         AutoSize = true;
         labelRow.Controls.AddRange([icon, text]);
         Controls.AddRange([labelRow, list]);
-        list.ControlAdded += (_, _) => NavListControl.Owner(this)?.Sync();
+        list.ControlAdded += (_, e) => NavListControl.Owner(this)?.Sync(e.Control);
     }
 
     /// <summary>小节里的导航项。</summary>
