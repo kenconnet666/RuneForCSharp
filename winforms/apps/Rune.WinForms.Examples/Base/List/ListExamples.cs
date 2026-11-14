@@ -1,12 +1,12 @@
 namespace Rune.WinForms.Examples;
 
-/// <summary>List 的示例（vue-tsx-pro 文档站 base/List）。</summary>
+/// <summary>List 的示例：在 vue-tsx-pro 文档站 base/Text 页的 lists、list-icons 两节（上游把 List 页并进了 Text 页）。</summary>
 static class ListExamples
 {
     public static Example[] All =>
     [
-        new("List", "basic", "无序、有序与嵌套", "正文里的列表：UnorderedListControl 是圆点（WinForms 自己有 ListControl），OrderedListControl 是编号（Start 从几开始），Gap 调项之间的间距。ListItemControl 的 Text 是项的文字，嵌套的列表加成它的子控件。", Basic),
-        new("List", "icons", "图标代替圆点", "Icon 让每项前面画一个图标（功能清单的对勾），PropsIcon 改图标颜色；ListItemControl 的 Icon、PropsIcon 逐项覆盖。图标是装饰，读屏照常念\"列表，几项\"。TextSize 是字号档位。", Features),
+        new("Text", "lists", "列表：无序、有序与嵌套", "正文里的列表：UnorderedListControl 是圆点（WinForms 自己有 ListControl），OrderedListControl 是编号（Start 从几开始），Gap 调项之间的间距。ListItemControl 的 Text 是项的文字，嵌套的列表加成它的子控件。", Basic),
+        new("Text", "list-icons", "图标代替圆点", "Icon 让每项前面画一个图标（功能清单的对勾），PropsIcon 改图标颜色；ListItemControl 的 Icon、PropsIcon 逐项覆盖。图标是装饰，读屏照常念\"列表，几项\"。TextSize 是字号档位。", Features),
     ];
 
     static readonly (string Name, string Price, (string Feature, bool Included)[] Features)[] Plans =

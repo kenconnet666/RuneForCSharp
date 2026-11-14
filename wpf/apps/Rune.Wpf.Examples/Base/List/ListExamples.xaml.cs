@@ -3,13 +3,13 @@ using System.Windows.Controls;
 
 namespace Rune.Wpf.Examples;
 
-/// <summary>List 的示例（vue-tsx-pro 文档站 base/List）。</summary>
+/// <summary>List 的示例：在 vue-tsx-pro 文档站 base/Text 页的 lists、list-icons 两节（上游把 List 页并进了 Text 页）。</summary>
 static class ListExamples
 {
     public static Example[] All =>
     [
-        new("List", "basic", "无序、有序与嵌套", "正文里的列表：List 是圆点，OrderedList 是编号（Start 从几开始），Gap 调项之间的间距。项里先是文字、再是嵌套的列表时，ListItem 的内容放一个 StackPanel。", () => new ListBasic()),
-        new("List", "icons", "图标代替圆点", "Icon 让每项前面画一个图标（功能清单的对勾），部件样式键 ListParts.Icon 改颜色；ListItem 的 Icon 逐项覆盖。图标是装饰，读屏照常念\"列表，几项\"。Size 是字号档位。", Features),
+        new("Text", "lists", "列表：无序、有序与嵌套", "正文里的列表：List 是圆点，OrderedList 是编号（Start 从几开始），Gap 调项之间的间距。项里先是文字、再是嵌套的列表时，ListItem 的内容放一个 StackPanel。", () => new ListBasic()),
+        new("Text", "list-icons", "图标代替圆点", "Icon 让每项前面画一个图标（功能清单的对勾），部件样式键 ListParts.Icon 改颜色；ListItem 的 Icon 逐项覆盖。图标是装饰，读屏照常念\"列表，几项\"。Size 是字号档位。", Features),
     ];
 
     static readonly (string Name, string Price, (string Feature, bool Included)[] Features)[] Plans =
@@ -56,7 +56,7 @@ static class ListExamples
     }
 }
 
-/// <summary>List/basic：无序、有序与嵌套。</summary>
+/// <summary>Text/lists：无序、有序与嵌套。</summary>
 public partial class ListBasic : UserControl
 {
     /// <summary>加载示例。</summary>
