@@ -7,7 +7,6 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
 using System.Windows.Input;
-using LayoutGrid = System.Windows.Controls.Grid;
 
 namespace Rune.Wpf;
 
@@ -83,16 +82,8 @@ public class TagsInput : TextInputBase
     static readonly DependencyProperty ListValuesProperty = DependencyProperty.Register("ListValues", typeof(IReadOnlyList<string>), typeof(TagsInput),
         new FrameworkPropertyMetadata(null, (d, _) => ((TagsInput)d).OnListChanged()));
 
-    /// <summary>与外壳的距离（像素）。</summary>
-    const double Offset = 6;
-
-    /// <summary>弹出层四周给阴影留的透明边（像素）。</summary>
-    const double Overhang = 16;
-
-    readonly Popup popup = new() { StaysOpen = false, AllowsTransparency = true, Placement = PlacementMode.Custom };
-    readonly Border shadow = new();
-    readonly Border panel = new() { ClipToBounds = true };
-    readonly Listbox listbox = new() { Focusable = false, SelectionMode = SelectionMode.Multiple };
+    readonly ListPopover popover;
+    readonly Listbox listbox;
     readonly Dictionary<string, Tag> tags = [];
     readonly Dictionary<Tag, EventHandler> removers = [];
     readonly Dictionary<string, string> seen = [];
@@ -108,20 +99,13 @@ public class TagsInput : TextInputBase
     /// <summary>新建：没有标签、没有建议。</summary>
     public TagsInput()
     {
-        shadow.SetResourceReference(StyleProperty, TagsInputParts.PopoverShadow);
-        panel.SetResourceReference(StyleProperty, TagsInputParts.Popover);
-        panel.Child = listbox;
-        var layer = new LayoutGrid { Margin = new Thickness(Overhang) };
-        layer.Children.Add(shadow);
-        layer.Children.Add(panel);
-        popup.Child = layer;
-        popup.PlacementTarget = this;
-        popup.CustomPopupPlacementCallback = Place;
-        AddLogicalChild(popup);
-        popup.Closed += (_, _) =>
+        popover = new ListPopover(this, TagsInputParts.Popover, TagsInputParts.PopoverShadow, () =>
         {
             if (IsOpen) SetOpen(false, OpenChangeReason.Outside);
-        };
+        });
+        listbox = popover.Listbox;
+        listbox.SelectionMode = SelectionMode.Multiple;
+        AddLogicalChild(popover.Popup);
         SetBinding(ListValuesProperty, new System.Windows.Data.Binding(nameof(Listbox.Values)) { Source = listbox });
         listbox.Picked += (_, _) => SetCurrentValue(TextProperty, "");
         TextChanged += (_, _) => OnTextChanged();
@@ -189,7 +173,7 @@ public class TagsInput : TextInputBase
     bool ReadOnlyNow => ShowsReadOnly;
 
     /// <inheritdoc />
-    protected override IEnumerator LogicalChildren => new object[] { popup }.GetEnumerator();
+    protected override IEnumerator LogicalChildren => new object[] { popover.Popup }.GetEnumerator();
 
     /// <inheritdoc />
     protected override void OnTemplateParts()
@@ -411,33 +395,16 @@ public class TagsInput : TextInputBase
     void Toggle()
     {
         var reason = pending;
-        var shown = IsOpen && Suggests;
-        if (shown) panel.MinWidth = ActualWidth;
-        if (popup.IsOpen != shown) popup.IsOpen = shown;
+        popover.Show(IsOpen && Suggests);
         if (reason is { } known) RaiseEvent(new OpenChangedEventArgs(OpenChangedEvent, IsOpen, known));
     }
 
-    /// <summary>平台的位置：外壳下方、起始边对齐，放不下时翻到上方（同 Select）。尺寸是设备像素。</summary>
-    CustomPopupPlacement[] Place(System.Windows.Size popupSize, System.Windows.Size targetSize, Point offset)
-    {
-        var scale = ActualWidth > 0 ? targetSize.Width / ActualWidth : 1;
-        var margin = Overhang * scale;
-        var gap = Offset * scale;
-        var x = FlowDirection == FlowDirection.LeftToRight ? -margin : targetSize.Width - popupSize.Width + margin;
-        return
-        [
-            new(new Point(x, targetSize.Height + gap - margin), PopupPrimaryAxis.Horizontal),
-            new(new Point(x, -gap - popupSize.Height + margin), PopupPrimaryAxis.Horizontal),
-        ];
-    }
-
-    /// <summary>按 em 的尺寸：输入框至少 6em；面板 lg 圆角，弹出层不在外壳里，字号同外壳。</summary>
+    /// <summary>按 em 的尺寸：输入框至少 6em；弹出层的面板。</summary>
     void UpdateMetrics()
     {
         var em = FontSize;
         if (input is not null) input.MinWidth = 6 * em;
-        panel.CornerRadius = shadow.CornerRadius = new CornerRadius(this.Resource<double>(ThemeKeys.Radius.Lg) * em);
-        TextElement.SetFontSize(panel, em);
+        popover.UpdateMetrics(em);
     }
 
     /// <inheritdoc />
