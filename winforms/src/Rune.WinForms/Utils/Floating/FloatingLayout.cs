@@ -6,7 +6,10 @@ static class FloatingLayout
     /// <summary>与屏幕边缘至少留出的距离。</summary>
     const int ViewportPadding = 8;
 
-    /// <summary>面板在屏幕上的位置与最终的边：先试要的那一边，放不下时翻到对面（对面也放不下时留在原边），最后贴着屏幕边挪回来。</summary>
+    /// <summary>
+    /// 面板在屏幕上的位置与最终的边（同上游 computePlacement）：先试要的那一边，放不下时翻到对面；两边都放不下时选溢出少（空间大）的一边；
+    /// 最后沿对齐的方向贴着屏幕边挪回来，比屏幕还宽时贴着起始边。
+    /// </summary>
     public static (string Side, Rectangle Panel) Position(FloatingPlacement placement, bool rightToLeft, Rectangle target, Size panel, float gap, Rectangle area)
     {
         Rectangle At(string side)
@@ -34,16 +37,21 @@ static class FloatingLayout
                 _ => new Rectangle(x, target.Top - distance - panel.Height, panel.Width, panel.Height),
             };
         }
-        bool Fits(Rectangle rect, string side) => side switch
+        // 这一边还差多少放不下（≤ 0 放得下）
+        int Overflow(string side)
         {
-            "bottom" => rect.Bottom <= area.Bottom - ViewportPadding,
-            "left" => rect.Left >= area.Left + ViewportPadding,
-            "right" => rect.Right <= area.Right - ViewportPadding,
-            _ => rect.Top >= area.Top + ViewportPadding,
-        };
+            var rect = At(side);
+            return side switch
+            {
+                "bottom" => rect.Bottom - (area.Bottom - ViewportPadding),
+                "left" => area.Left + ViewportPadding - rect.Left,
+                "right" => rect.Right - (area.Right - ViewportPadding),
+                _ => area.Top + ViewportPadding - rect.Top,
+            };
+        }
         var wanted = placement.Side;
         var opposite = wanted switch { "bottom" => "top", "left" => "right", "right" => "left", _ => "bottom" };
-        var side = Fits(At(wanted), wanted) || !Fits(At(opposite), opposite) ? wanted : opposite;
+        var side = Overflow(wanted) <= 0 || Overflow(wanted) <= Overflow(opposite) ? wanted : opposite;
         var rect = At(side);
         // 贴着屏幕边挪回来（只挪对齐的那条轴，不压到触发器上）
         if (side is "top" or "bottom")

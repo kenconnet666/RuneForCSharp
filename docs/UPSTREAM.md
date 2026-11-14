@@ -430,6 +430,18 @@ defineTheme / defineLang 忽略 undefined——网页专用或 C# 没有 undefin
 
 锁定跟到 0.25.0（fffc0c7f）：token、语言包、图标、配方、文档页面清单都没变（生成器 --check 通过）。
 
+### 第三十七批（2026-11-14，0.27.0 b7bbca0a：自己的浮层定位、NativeSelect、Video 自绘控制条）
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| 浮层定位改成自己的纯函数 computePlacement（去掉 @floating-ui/dom）：想要的一侧放不下换对侧，都放不下选空间大的一侧，再沿对齐方向挪回视口；坐标对齐设备像素；箭头对准锚点中心 | WinForms 已改；Avalonia、WPF 交给平台弹出层 | WinForms 的 FloatingLayout 原来两侧都放不下时留在原侧，改成选溢出少的一侧；上游 floating.test.ts 的位置、镜像、翻转、挪回、可见区域几条移植成 FloatingLayoutTests（坐标本来就是整像素，箭头本来就对准触发器中心）。Avalonia 的弹出层按平台的约束调整（翻转不行时回到原侧再缩小），WPF 的自定义位置给两个候选由平台挑；两侧都放不下的少见情形与上游不同，等做 Tour（crossAxisFallback）时一起换成自己算 |
+| autoUpdate：滚动、视口、锚点与浮层的尺寸、锚点位移都重新定位 | 平台的弹出层各自跟随 | 不涉及：Avalonia、WPF 的 Popup 跟着目标；WinForms 的浮层监听宿主窗体的移动、缩放 |
+| 新增 NativeSelect（原生 select 套输入框外壳：items 同 Select 的选项，group → optgroup，placeholder 是第一条占位项，readonly 时其余选项不可选） | 待做（下一轮） | 桌面上的"原生"是平台自己的下拉框：WinForms 用 Win32 ComboBox（DropDownList），WPF、Avalonia 用框架的 ComboBox，套我们的输入框外壳；分组按平台能力（WPF 的 GroupStyle，Avalonia、WinForms 插不能选的组标题） |
+| Video 的 controls="custom"：播放/暂停、时间与进度、静音与音量、字幕菜单、倍速菜单（speeds，默认 0.5–2）、全屏；播放中鼠标离开或 2.5 秒不动收起，键盘 Space/K、←→、↑↓、M、F；语言包 12 条 video* | 语言包已生成；控制条待做（下一轮） | 我们的 Video 是网页内核里的页面（VideoPage），自绘控制条也做在页面里（HTML、脚本），文案从语言包传进去；挂载时先按 video 的现状同步一次（上游 be10b748 修的预渲染页面时长显示 0:00，同一个坑） |
+| FormErrorSummary 的链接换成 Link（tone danger）；CalendarView 的标题按钮换成 ButtonBase | 组件还没做 | 做时照新的 |
+
+锁定跟到 0.27.0（b7bbca0a）：语言包多 12 条 video*、文档页面清单重新生成；token、图标、配方没变。之后 master 上的 5d42e704 等还没有 CI 结果，不锁。
+
 ### 第三十六批（2026-11-14，0.26.0 c42b2f39：补齐 HTML 标签、SearchField、页头）
 
 | 上游的变化 | 对我们 | 做法 |

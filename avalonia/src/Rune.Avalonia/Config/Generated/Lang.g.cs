@@ -93,6 +93,42 @@ public sealed partial record Lang
     /// <summary>图片预览：下一张，默认“下一张”</summary>
     public required string LightboxNext { get; init; }
 
+    /// <summary>视频：播放按钮，默认“播放”</summary>
+    public required string VideoPlay { get; init; }
+
+    /// <summary>视频：暂停按钮，默认“暂停”</summary>
+    public required string VideoPause { get; init; }
+
+    /// <summary>视频：静音按钮，默认“静音”</summary>
+    public required string VideoMute { get; init; }
+
+    /// <summary>视频：取消静音按钮，默认“取消静音”</summary>
+    public required string VideoUnmute { get; init; }
+
+    /// <summary>视频：音量滑块的名称，默认“音量”</summary>
+    public required string VideoVolume { get; init; }
+
+    /// <summary>视频：进度滑块的名称，默认“播放进度”</summary>
+    public required string VideoSeek { get; init; }
+
+    /// <summary>视频：进度滑块念的取值：`('1:05', '3:20')` → “1:05，共 3:20”</summary>
+    public required Func<string, string, string> VideoTime { get; init; }
+
+    /// <summary>视频：倍速菜单的名称，默认“播放速度”</summary>
+    public required string VideoSpeed { get; init; }
+
+    /// <summary>视频：字幕菜单的名称，默认“字幕”</summary>
+    public required string VideoCaptions { get; init; }
+
+    /// <summary>视频：字幕菜单里“不显示”的一项，默认“关闭”</summary>
+    public required string VideoCaptionsOff { get; init; }
+
+    /// <summary>视频：全屏按钮，默认“全屏”</summary>
+    public required string VideoFullscreen { get; init; }
+
+    /// <summary>视频：退出全屏按钮，默认“退出全屏”</summary>
+    public required string VideoExitFullscreen { get; init; }
+
     /// <summary>描述列表里复制一项的值的按钮：`('订单号')` → “复制订单号”</summary>
     public required Func<string, string> DescriptionsCopy { get; init; }
 
@@ -1070,6 +1106,18 @@ public sealed partial record Lang
         LightboxDownload = "下载",
         LightboxPrevious = "上一张",
         LightboxNext = "下一张",
+        VideoPlay = "播放",
+        VideoPause = "暂停",
+        VideoMute = "静音",
+        VideoUnmute = "取消静音",
+        VideoVolume = "音量",
+        VideoSeek = "播放进度",
+        VideoTime = (current, duration) => $"{current}，共 {duration}",
+        VideoSpeed = "播放速度",
+        VideoCaptions = "字幕",
+        VideoCaptionsOff = "关闭",
+        VideoFullscreen = "全屏",
+        VideoExitFullscreen = "退出全屏",
         DescriptionsCopy = label => $"复制{label}",
         FieldCompareHeaders = ["字段", "原值", "新值", "变化"],
         FieldCompareTo = "改为",
@@ -1494,6 +1542,18 @@ public sealed partial record Lang
         LightboxDownload = "Download",
         LightboxPrevious = "Previous image",
         LightboxNext = "Next image",
+        VideoPlay = "Play",
+        VideoPause = "Pause",
+        VideoMute = "Mute",
+        VideoUnmute = "Unmute",
+        VideoVolume = "Volume",
+        VideoSeek = "Seek",
+        VideoTime = (current, duration) => $"{current} of {duration}",
+        VideoSpeed = "Playback speed",
+        VideoCaptions = "Captions",
+        VideoCaptionsOff = "Off",
+        VideoFullscreen = "Full screen",
+        VideoExitFullscreen = "Exit full screen",
         DescriptionsCopy = label => $"Copy {label}",
         FieldCompareHeaders = ["Field", "Before", "After", "Change"],
         FieldCompareTo = "changed to",

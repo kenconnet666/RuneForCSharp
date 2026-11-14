@@ -3764,7 +3764,32 @@
                     "code": "autoplay"
                   },
                   {
-                    "text": " 默认静音、行内播放，系统要求减少动态效果时不自动播放并显示控制条。倍速、清晰度这类自绘的控制条不在这里。"
+                    "text": " 默认静音、行内播放，系统要求减少动态效果时不自动播放并显示控制条。要倍速、跟主题走的控制条见下一个示例。"
+                  }
+                ]
+              },
+              {
+                "id": "player",
+                "title": "自绘的控制条",
+                "demo": "Player",
+                "description": [
+                  {
+                    "code": "controls=\"custom\""
+                  },
+                  {
+                    "text": " 换成跟主题走的控制条：播放 / 暂停、时间与进度、静音与音量、字幕（有 "
+                  },
+                  {
+                    "code": "tracks"
+                  },
+                  {
+                    "text": " 时）、倍速（"
+                  },
+                  {
+                    "code": "speeds"
+                  },
+                  {
+                    "text": "）、全屏。播放中鼠标离开画面、或几秒不动就收起，暂停、移动鼠标、键盘聚焦、菜单开着时留着；点画面切换播放。各家浏览器的原生控制条长得不一样，要统一外观时用它；只要能播，默认的原生控制条更稳。"
                   }
                 ]
               },
@@ -3801,7 +3826,48 @@
               }
             ]
           ],
-          "keyboard": [],
+          "keyboard": [
+            {
+              "keys": "Space / K",
+              "action": [
+                {
+                  "text": "自绘控制条的视频：播放、暂停"
+                }
+              ]
+            },
+            {
+              "keys": "← / →",
+              "action": [
+                {
+                  "text": "快退、快进 5 秒（焦点在进度滑块上时按滑块的步长）"
+                }
+              ]
+            },
+            {
+              "keys": "↑ / ↓",
+              "action": [
+                {
+                  "text": "音量加、减"
+                }
+              ]
+            },
+            {
+              "keys": "M",
+              "action": [
+                {
+                  "text": "静音、取消静音"
+                }
+              ]
+            },
+            {
+              "keys": "F",
+              "action": [
+                {
+                  "text": "全屏、退出全屏"
+                }
+              ]
+            }
+          ],
           "api": [
             "Figure",
             "AspectRatio",
@@ -6330,7 +6396,7 @@
           "name": "Popover",
           "slug": "popover",
           "title": "Popover 弹出框",
-          "description": "贴着触发器弹出的非模态浮层：点击打开的 Popover、悬停打开的 HoverCard 与 Tooltip。原生 popover 负责顶层与 Esc，floating-ui 负责定位。",
+          "description": "贴着触发器弹出的非模态浮层：点击打开的 Popover、悬停打开的 HoverCard 与 Tooltip。原生 popover 负责顶层与 Esc，位置由组件库自己计算（翻转、贴边、箭头、限高）。",
           "order": 2,
           "wide": true,
           "columns": [
@@ -6392,6 +6458,46 @@
                   },
                   {
                     "text": " 显示指向触发器的小箭头。"
+                  }
+                ]
+              },
+              {
+                "id": "compute",
+                "title": "自己算位置",
+                "demo": "Compute",
+                "description": [
+                  {
+                    "text": "组件用的定位规则是一个纯函数 "
+                  },
+                  {
+                    "code": "computePlacement"
+                  },
+                  {
+                    "text": "：给锚点的矩形、浮层的大小和边界，返回左上角、最后落在哪一侧、箭头的位置与可用高度，不碰 DOM。想要的一侧放不下换对侧，都放不下选空间大的一侧，再沿边缘挪回边界里。自己写贴着元素的浮层用 "
+                  },
+                  {
+                    "code": "anchorFloating(anchor, floating, options)"
+                  },
+                  {
+                    "text": "：它量尺寸、写位置，滚动、尺寸变化时重新定位，关闭时调返回的 "
+                  },
+                  {
+                    "code": "stop"
+                  },
+                  {
+                    "text": "；锚点可以是元素，也可以是只有位置的虚拟锚点（指针的位置用 "
+                  },
+                  {
+                    "code": "pointAnchor(x, y)"
+                  },
+                  {
+                    "text": "）。只要“位置可能变了”的通知时用 "
+                  },
+                  {
+                    "code": "autoUpdate"
+                  },
+                  {
+                    "text": "。"
                   }
                 ]
               },
@@ -8955,6 +9061,37 @@
                 ]
               },
               {
+                "id": "native",
+                "title": "原生下拉框",
+                "demo": "Native",
+                "description": [
+                  {
+                    "code": "NativeSelect"
+                  },
+                  {
+                    "text": " 是原生的 select 放进输入框的外壳：外观、尺寸、出错同别的输入框，弹出的列表是浏览器、系统自己的——手机上是滚轮或底部列表，自动填充、读屏、键盘都是原生的行为。选项只是一串文字、主要在手机上用时选它；要图标、说明、搜索、多选、远程加载，用 "
+                  },
+                  {
+                    "code": "Select"
+                  },
+                  {
+                    "text": "。带 "
+                  },
+                  {
+                    "code": "group"
+                  },
+                  {
+                    "text": " 的选项排进 optgroup；"
+                  },
+                  {
+                    "code": "placeholder"
+                  },
+                  {
+                    "text": " 是第一条选不了的占位项。"
+                  }
+                ]
+              },
+              {
                 "id": "appearance",
                 "title": "图标、外观与状态",
                 "demo": "Appearance",
@@ -9087,6 +9224,7 @@
           ],
           "api": [
             "SelectBase",
+            "NativeSelect",
             "ListPopover",
             "SelectedTags"
           ]
