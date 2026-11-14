@@ -173,6 +173,8 @@ export const PLATFORM_COMPONENT_PROP_RENAMES = {
     Dialog: { size: 'DialogSize' },
     // 同上；面板宽度也不能用控件自己的 Width、MinWidth（抽屉不参与排版，但 WinForms 的控件尺寸照样存在、会被设计器序列化）
     Drawer: { size: 'DialogSize', _width: 'PanelWidth', minWidth: 'MinPanelWidth' },
+    // 选项是画出来的，没有匹配时只能换说明文字（同 CommandPalette）
+    Combobox: { empty: 'EmptyText' },
     // 选项是画出来的，没有匹配时只能换说明文字
     CommandPalette: { empty: 'EmptyText' },
     // 扩展组件：每个控件多出的属性前面带 Tooltip（设计器里是"Tooltip 在 tooltipProvider1 上"）
@@ -388,6 +390,11 @@ export const PLATFORM_PROPS_NOT_PORTED = {
       ...Object.fromEntries(['propsValue', 'propsTags', 'propsClear', 'propsChevron', 'propsPopover', 'propsListbox', 'propsSearch', 'propsIcon']
         .map((prop) => [prop, '部件是 SelectControl 组合的子控件与两层窗口，没有部件属性记录'])),
     },
+    ...Object.fromEntries(['Combobox', 'Autocomplete'].map((name) => [name, {
+      children: 'WinForms 的选项是 ListboxControl 画出来的，没有自定义内容（同 SelectControl）',
+      ...Object.fromEntries(['propsRoot', 'propsClear', 'propsChevron', 'propsPopover', 'propsListbox', 'propsIcon']
+        .map((prop) => [prop, '外壳是 ComboboxControl 自己，图标、清空与展开按钮是子控件，弹出层是两层窗口：没有部件属性记录（同 SelectControl）'])),
+    }])),
     TagsInput: {
       children: 'WinForms 的建议是 ListboxControl 画出来的，没有自定义内容（同 SelectControl）',
       ...Object.fromEntries(['propsRoot', 'propsTag', 'propsClear', 'propsPopover', 'propsListbox', 'propsIcon']
