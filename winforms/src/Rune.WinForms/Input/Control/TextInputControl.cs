@@ -36,6 +36,10 @@ public abstract class TextInputControl : FlexControl, IFieldControl
         };
         input.GotFocus += (_, _) => Invalidate();
         input.LostFocus += (_, _) => Invalidate();
+        // 焦点在里面的 TextBox 上：按键转给外壳，使用方照常订阅外壳的 KeyDown（回车搜索、提交）；设 Handled / SuppressKeyPress 同样生效
+        input.KeyDown += (_, e) => OnKeyDown(e);
+        input.KeyUp += (_, e) => OnKeyUp(e);
+        input.KeyPress += (_, e) => OnKeyPress(e);
         clear.Click += (_, _) => ClearText();
         ControlAdded += (_, e) =>
         {

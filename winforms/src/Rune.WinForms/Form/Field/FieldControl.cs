@@ -239,7 +239,8 @@ public class FieldControl : Panel
         static IEnumerable<Control> Descendants(Control node)
         {
             yield return node;
-            foreach (Control child in node.Controls)
+            // 按 Tab 顺序，不按 z 序（相连的一组会把悬停、聚焦的那个调到最上面）
+            foreach (var child in node.Controls.Cast<Control>().OrderBy(child => child.TabIndex))
                 foreach (var descendant in Descendants(child)) yield return descendant;
         }
     }
