@@ -320,8 +320,52 @@ public class Dialog : FrameworkElement
     /// <summary>正文不留内边距（命令面板的搜索行、列表贴边）。</summary>
     internal bool BodyFlush { get; set { field = value; UpdateMetrics(); } }
 
-    /// <summary>面板（测试用）。</summary>
+    /// <summary>面板（测试用；Drawer 改它的描边与位移）。</summary>
     internal Border Panel => panel;
+
+    /// <summary>面板后面画阴影的那一层（Drawer 跟着面板一起位移）。</summary>
+    private protected Border Shadow => shadow;
+
+    /// <summary>弹出层的根（Drawer 往里放宽度调整手柄）。</summary>
+    private protected Panel Layer => layer;
+
+    /// <summary>窗口客户区的大小（弹出层铺满它）。</summary>
+    private protected Size Area => host?.Content is FrameworkElement root ? new Size(root.ActualWidth, root.ActualHeight) : default;
+
+    /// <summary>面板的圆角：xl（Drawer 贴边，没有圆角）。</summary>
+    private protected virtual CornerRadius PanelCornerRadius(double em) => new(this.Resource<double>(ThemeKeys.Radius.Xl) * em);
+
+    /// <summary>量面板时给的尺寸：宽度按档位、不超出窗口（四周至少 1em），高度不超出窗口。</summary>
+    private protected virtual Size PanelConstraint(Size area)
+    {
+        var em = Em;
+        var room = Math.Max(0, area.Width - 2 * em);
+        var width = Size == DialogSize.Full ? room : Math.Min(room, this.Resource<double>(Size.ResourceKey!));
+        return new Size(width, Math.Max(0, area.Height - 2 * em));
+    }
+
+    /// <summary>面板的位置：居中（命令面板停在上部），加上拖出来的位移，整块不超出窗口。</summary>
+    private protected virtual Rect PanelBox(Size area, Size constraint, Size desired)
+    {
+        var height = Size == DialogSize.Full ? constraint.Height : Math.Min(constraint.Height, desired.Height);
+        var top = TopFraction is { } fraction ? Math.Min(area.Height * fraction, (area.Height - height) / 2) : (area.Height - height) / 2;
+        var box = new Rect((area.Width - constraint.Width) / 2, top, constraint.Width, height);
+        Offset = new Vector(
+            Math.Clamp(Offset.X, -box.X, Math.Max(-box.X, area.Width - box.Right)),
+            Math.Clamp(Offset.Y, -box.Y, Math.Max(-box.Y, area.Height - box.Bottom)));
+        box.Offset(Offset);
+        return box;
+    }
+
+    /// <summary>面板排好之后（Drawer 摆宽度调整手柄）。</summary>
+    private protected virtual void ArrangeExtras(Rect panelBox)
+    {
+    }
+
+    /// <summary>面板刚显示出来（Drawer 从所在一侧滑入）。</summary>
+    private protected virtual void OnPanelOpened()
+    {
+    }
 
     /// <summary>遮罩（测试用）。</summary>
     internal Border Scrim => scrim;
@@ -372,7 +416,7 @@ public class Dialog : FrameworkElement
         var em = Em;
         double Space(string key) => this.Resource<double>(key) * em;
         var (xs, sm, lg, xl) = (Space(ThemeKeys.Space.Xs), Space(ThemeKeys.Space.Sm), Space(ThemeKeys.Space.Lg), Space(ThemeKeys.Space.Xl));
-        panel.CornerRadius = shadow.CornerRadius = new CornerRadius(this.Resource<double>(ThemeKeys.Radius.Xl) * em);
+        panel.CornerRadius = shadow.CornerRadius = PanelCornerRadius(em);
         header.Margin = new Thickness(xl, xl, xl, 0);
         close.Margin = new Thickness(0, -xs, -sm, -xs);
         description.Margin = new Thickness(xl, xs, xl, 0);
@@ -403,6 +447,7 @@ public class Dialog : FrameworkElement
             UpdateMetrics();
             layer.InvalidateMeasure();
             popup.IsOpen = true;
+            OnPanelOpened();
             Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () => (InitialFocus ?? FirstFocusable(panel) ?? panel).Focus());
         }
         else
@@ -512,43 +557,24 @@ public class Dialog : FrameworkElement
         }
     }
 
-    /// <summary>弹出层的根：和窗口的客户区一样大；遮罩铺满，面板居中，宽度按档位、不超出窗口（四周至少 1em），高度按内容、不超出窗口。</summary>
+    /// <summary>弹出层的根：和窗口的客户区一样大；遮罩铺满，面板与阴影层的尺寸与位置由 Dialog 定（<see cref="PanelConstraint"/>、<see cref="PanelBox"/>）。</summary>
     sealed class DialogLayer(Dialog owner) : Panel
     {
-        Size Area => owner.host?.Content is FrameworkElement root ? new Size(root.ActualWidth, root.ActualHeight) : default;
-
-        (double Width, double MaxHeight) PanelLimits(Size area)
-        {
-            var em = owner.Em;
-            var room = Math.Max(0, area.Width - 2 * em);
-            var width = owner.Size == DialogSize.Full ? room : Math.Min(room, owner.Resource<double>(owner.Size.ResourceKey!));
-            return (width, Math.Max(0, area.Height - 2 * em));
-        }
-
         protected override Size MeasureOverride(Size availableSize)
         {
-            var area = Area;
-            owner.scrim.Measure(area);
-            var (width, maxHeight) = PanelLimits(area);
-            owner.panel.Measure(new Size(width, maxHeight));
-            owner.shadow.Measure(new Size(width, maxHeight));
+            var area = owner.Area;
+            var constraint = owner.PanelConstraint(area);
+            foreach (UIElement child in InternalChildren) child.Measure(child == owner.panel || child == owner.shadow ? constraint : area);
             return area;
         }
 
         protected override Size ArrangeOverride(Size finalSize)
         {
             owner.scrim.Arrange(new Rect(finalSize));
-            var (width, maxHeight) = PanelLimits(finalSize);
-            var height = owner.Size == DialogSize.Full ? maxHeight : Math.Min(maxHeight, owner.panel.DesiredSize.Height);
-            var top = owner.TopFraction is { } fraction ? Math.Min(finalSize.Height * fraction, (finalSize.Height - height) / 2) : (finalSize.Height - height) / 2;
-            var box = new Rect((finalSize.Width - width) / 2, top, width, height);
-            // 拖出来的位移：整块不超出窗口
-            owner.Offset = new Vector(
-                Math.Clamp(owner.Offset.X, -box.X, Math.Max(-box.X, finalSize.Width - box.Right)),
-                Math.Clamp(owner.Offset.Y, -box.Y, Math.Max(-box.Y, finalSize.Height - box.Bottom)));
-            box.Offset(owner.Offset);
+            var box = owner.PanelBox(finalSize, owner.PanelConstraint(finalSize), owner.panel.DesiredSize);
             owner.shadow.Arrange(box);
             owner.panel.Arrange(box);
+            owner.ArrangeExtras(box);
             return finalSize;
         }
     }
