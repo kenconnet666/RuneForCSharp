@@ -157,7 +157,7 @@ public class TableOfContentsControl : FlexControl
 
         public void Rebuild(IReadOnlyList<HeadingEntry> items)
         {
-            Controls.Clear();
+            Controls.Cast<Control>().DisposeAll();
             foreach (var item in items) Controls.Add(new TableOfContentsLink(owner, item));
             Padding = new Padding(LogicalToDeviceUnits(1), 0, 0, 0);
         }

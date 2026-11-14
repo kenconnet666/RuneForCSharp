@@ -20,4 +20,17 @@ public class SkeletonTextTests
         Assert.Equal((int)Math.Round(1.5 * em), lines[1].Top);
         Assert.Equal(AccessibleRole.None, text.AccessibilityObject.Role);
     });
+
+    [Fact]
+    public Task Rebuilding_disposes_the_old_lines() => WinFormsUi.Run(() =>
+    {
+        var text = new SkeletonTextControl { Lines = 3 };
+        using var form = WinFormsUi.Show(text);
+        var old = text.Controls.Cast<Control>().ToList();
+
+        text.Lines = 2;
+
+        Assert.All(old, line => Assert.True(line.IsDisposed));
+        Assert.Equal(2, text.Controls.Count);
+    });
 }

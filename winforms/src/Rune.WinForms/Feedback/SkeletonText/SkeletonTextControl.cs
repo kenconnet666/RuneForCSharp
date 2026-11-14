@@ -42,7 +42,7 @@ public class SkeletonTextControl : Panel
 
     void Rebuild()
     {
-        Controls.Clear();
+        Controls.Cast<Control>().DisposeAll();
         for (var i = 0; i < Math.Max(0, Lines); i++) Controls.Add(new SkeletonControl { Shape = SkeletonShape.Text, Delay = Delay + i * Stagger, AutoSize = false });
         Height = engine.Height;
         PerformLayout();
