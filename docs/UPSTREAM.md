@@ -442,7 +442,7 @@ defineTheme / defineLang 忽略 undefined——网页专用或 C# 没有 undefin
 | 新增 AspectRatio（ratio 默认 16 / 9，内容铺满，图片按 cover 裁切） | 已做 | 三个平台；Ratio 是数（宽 ÷ 高），不收 CSS 的"4 / 3"写法；Avalonia、WPF 里的 Image 默认 UniformToFill，WinForms 的 PictureBox 没有 cover，自己选 SizeMode |
 | 新增 Abbr（点状下划线、帮助指针、可聚焦，悬停 / 键盘聚焦 / 点按显示全称） | 已做 | 三个平台；全称是平台的提示（停留 200 毫秒），读屏把它当作帮助文字。Avalonia、WPF 放在段落里时包 InlineUIContainer：Avalonia 的 Text 量完写上 BaselineOffset，嵌入的文字控件才按基线对齐 |
 | 新增 PageHeader（patterns：面包屑、返回、标题与标记、说明、结束边的操作、下面的内容），语言包 pageHeaderBack | 已做 | 三个平台；onBack 是 Back 事件（订阅了才有返回按钮，Avalonia、WPF 另有 BackCommand），backHref 是 BackHref（返回是链接）；标题 H1–H3（HeadingLevel）、xxl；Meta、Actions 是控件（几个时放进 Flex）；Avalonia、WPF 的部件名在 PageHeaderParts |
-| 新增 Embed、Video | 还没做 | 要看桌面的网页、媒体控件怎么接 |
+| 新增 Embed、Video | 待定 | 三个平台都要加网页、视频控件的依赖（WebView2、LibVLCSharp 等），按 ROADMAP 的规则写进"待定的决定"（2026-11-14），定下来再做 |
 | Progress 的 bands（量表：值落在哪一段用哪一段的色调，role=meter） | 已做 | 三个平台的 Bands（ProgressBand(To, Tone)，孪生文件 ProgressBands.cs）与 ResolvedTone；UIA 没有 meter 这种控件类型，读屏里仍是进度条 |
 | Blockquote 的 source、propsSource（引用下面一行"— 出处"，小一号，不用斜体） | 已做 | 三个平台的 Source（Avalonia、WPF 可以放控件，WinForms 是文字）；部件：Avalonia 的 PART_Source、WPF 的 BlockquoteParts.Source、WinForms 的 PropsSource |
 | Image 的 sources（按格式、媒体条件换图） | 网页专用 | 不涉及 |

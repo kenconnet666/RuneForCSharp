@@ -370,6 +370,9 @@ RuneForBlazor 已经走过一遍这些组件，同一个组件先看它踩过的
 
 新的待定项写在这里：日期、事项、卡在哪、要决定什么，附上建议。
 
+- **2026-11-14 Embed、Video（vue-tsx-pro 0.26.0）**：上游是 iframe 与原生 video。三个平台都没有不加依赖的做法：Avalonia 没有网页与视频控件（要 WebView 的第三方包、LibVLCSharp 或 FFmpeg 绑定）；WPF 有 MediaElement（Windows Media Foundation，系统自带）放视频，网页要 WebView2（Microsoft.Web.WebView2 包，依赖系统的 Edge WebView2 运行时），自带的 WebBrowser 是 IE 内核、已经不维护；WinForms 同样网页要 WebView2，视频只有 Windows Media Player 的 COM 控件。
+  - 要决定：组件库加不加这些依赖；加的话放在主包里，还是拆成 `Rune.*.Web`、`Rune.*.Media` 这样的可选包（只有用到的应用才带上）。
+  - 建议：拆成可选包，主包不加依赖。Web 包三个平台用 WebView2（Avalonia 在 Windows 上同样能嵌 WebView2 的窗口），Media 包 WPF 用 MediaElement、Avalonia 与 WinForms 用 LibVLCSharp；外框、比例、骨架、封面、"减少动态效果时不自动播放"按上游做在组件里。定下来之前这两个组件不做，parity 里登记为待定。
 - **2026-11-07 Avalonia 的分段语义（工作包 3）**：上游是"使用方 / Provider 的普通值整体替换组件档位的取值，连条件值"。Avalonia 里带伪类的样式（主题里的 `^:solid`、`^:solid:pointerover`）属于"样式触发器"一级，任何不带伪类的使用方样式都盖不过；档位解析出的不继承属性已经放到主题这一层（`Resolved`），但颜色这类由伪类样式按档位给的值仍然盖不过。
   - 做法 A（现在的）：沿用 DESIGN §4 的平台规则"要覆盖档位样式，选择器里至少带一个类或伪类"，写进文档与示例。没有运行时开销。
   - 做法 B：Provider 的样式按上游语义合成——给 Provider 里不带伪类的样式，照主题里设了同一属性的每条伪类样式补一条同条件、同值的样式（要在运行时改写选择器，Avalonia 的选择器解析器不公开，得自己按选择器对象重建）；补出来的样式各带激活器，开销随定制的属性数涨。
