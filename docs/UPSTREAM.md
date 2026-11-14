@@ -14,6 +14,7 @@ vue-tsx-pro 那边的会话改了设计时会发通知过来（每完成一个�
 | 2026-11-07 | Checkbox、Radio、Switch | 原生 input 不继承字体，方框、轨道的 em 按浏览器给 input 的 13.333px 算，sm、lg 档与文字、滑块对不上 | input 加 `font: 'inherit'` | 已修（9f7be887，0.11.1；锁定跟到 875797ae） |
 | 2026-11-08 | UserButton | 样式引擎按 StyleX 的优先级排（长属性 3000 > 简写 2000）：compact 变体的 `padding: _xs` 压不过基础的 `paddingInlineEnd: _sm`，整行 compound 的 `paddingInline: _sm` 压不过 `paddingInlineStart: _xs`；compact 右边 7px、整行左边 3.5px，两边不对称 | 变体、compound 改写成同级的长属性（`paddingInlineStart`、`paddingInlineEnd`）；recipe 的开发期检查可以提示被压住的简写。我们按配方本意做 | 已修（84e6cde2，[#5](https://github.com/kenconnet666/vue-tsx-pro/issues/5) 已关；锁定 5e9f0735 后重截：user-button Avalonia 0.39%、WPF 0.18%） |
 | 2026-11-07 | Listbox | multiple 示例写的 `height: 16rem` 落在有 padding: xs 的根元素上，默认 content-box，列表实际高 16rem + 0.5em；桌面上 Height 是整个控件，对照矮 7 像素 | listboxStyles.root 加 `boxSizing: 'border-box'`（同 control、itemStyles），或示例注明不含内边距 | 部分修复（313f0e23）：规则只罩带 data-part 的元素，Listbox 的根元素没有，ad4a77ac 上仍高 16rem + 0.5em；已再通知（2026-11-07） |
+| 2026-11-14 | Gauge | 数值弧（`<path>`）与中间的数值（`<span>`）都标成 `gaugePart('value')`：`[data-part="value"]` 同时命中弧与文字，按部件改文字的样式会作用到弧上；文件头的部件说明里弧不是部件 | 弧改用自己的部件名（如 `arc`），`value` 只留给中间的数值。我们的部件只有 PART_Value（中间的数值）与 PART_Label，取值对照里这几行是配对错位 | 待修（[#6](https://github.com/kenconnet666/vue-tsx-pro/issues/6)） |
 
 ## 下一阶段计划（2026-11-07 收到通知，ROADMAP 阶段 25，上游无人值守执行）
 
