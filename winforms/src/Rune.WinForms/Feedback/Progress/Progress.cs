@@ -33,6 +33,15 @@ public class Progress : Element
     /// <summary>色调；不写时取作用域的默认值（<see cref="ProgressDefaults"/>），再没有时 accent。</summary>
     public StatusTone Tone { get => tone.Or(ScopeDefaults?.Tone, StatusTone.Accent); set { tone = value; Invalidate(); } }
 
+    /// <summary>
+    /// 量表的区间（按 To 从小到大）：值落在哪一段就用哪一段的色调（盖过 Tone）。磁盘占用、配额、密码强度这类"量出来的数"用它，
+    /// 任务的完成进度不写；仪表盘样子的量表用 Gauge。
+    /// </summary>
+    public IReadOnlyList<ProgressBand>? Bands { get; set { field = value; Invalidate(); } }
+
+    /// <summary>实际用的色调：有量表区间时是值所在那一段的，否则是 Tone。</summary>
+    public StatusTone ResolvedTone => ProgressBands.ToneAt(Value, Bands) ?? Tone;
+
     /// <summary>字号档位：粗细、直径随之缩放；不写时跟随宿主的字体。</summary>
     public TextSize Size { get => size.Or(ScopeDefaults?.Size, default); set { size = value; InvalidateMeasure(); } }
 
@@ -179,7 +188,7 @@ public class Progress : Element
         context = context.Sized(Size);
         SizeTexts(context);
         var colors = context.Theme.Colors;
-        var indicatorColor = ResolvedSx?.IndicatorColor ?? Tone.Value switch
+        var indicatorColor = ResolvedSx?.IndicatorColor ?? ResolvedTone.Value switch
         {
             "neutral" => colors.TextMuted,
             "info" => colors.InfoText,
@@ -348,6 +357,11 @@ public class ProgressControl : ElementControl<Progress>
     [Category("Appearance")]
     [Description("色调：neutral、accent（默认）、info、success、warning、danger。")]
     public StatusTone Tone { get => Element.Tone; set => Element.Tone = value; }
+
+    /// <summary>量表的区间：值落在哪一段就用哪一段的色调（盖过 Tone）。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public IReadOnlyList<ProgressBand>? Bands { get => Element.Bands; set => Element.Bands = value; }
 
     /// <summary>字号档位。</summary>
     [Category("Appearance")]

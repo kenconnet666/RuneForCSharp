@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// 三个库各有一份、除命名空间外逐字相同的源文件（纯计算或纯数据，不用平台类型：FlexLayout、GridLayout、StatusMap、AvatarInitials、ListboxOption、ListState、FloatingPlacement、ScrollAreaVariants、CodeHighlighting、TabsVariants、TableVariants、ItemListVariants、Workdays、MenuVariants、Selection、ToggleGroupVariants、ControlVariants、TextFieldVariants、TextFormat、DesktopMessages、SelectSearch、RemoteOptions、AlertVariants、Hotkey、IconStrokes、ResultStatus、DescriptionsVariants、NumericFormat、SparklineGeometry、ProportionBarVariants、GaugeGeometry、StepsVariants、PaginationItems、NumberRules、AttachedVariants，示例项目的 ExampleSources、DocSite）。三个库不共享代码（ROADMAP 决定 2），
+// 三个库各有一份、除命名空间外逐字相同的源文件（纯计算或纯数据，不用平台类型：FlexLayout、GridLayout、StatusMap、AvatarInitials、ListboxOption、ListState、FloatingPlacement、ScrollAreaVariants、CodeHighlighting、TabsVariants、TableVariants、ItemListVariants、Workdays、MenuVariants、Selection、ToggleGroupVariants、ControlVariants、TextFieldVariants、TextFormat、DesktopMessages、SelectSearch、RemoteOptions、AlertVariants、Hotkey、IconStrokes、ResultStatus、DescriptionsVariants、NumericFormat、SparklineGeometry、ProportionBarVariants、GaugeGeometry、StepsVariants、PaginationItems、NumberRules、AttachedVariants、ProgressBands，示例项目的 ExampleSources、DocSite）。三个库不共享代码（ROADMAP 决定 2），
 // 一致性靠这里检查：改了一份，另外两份照抄。用法：node tools/twins/twins.mjs；有不同时退出码为 1
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -38,6 +38,7 @@ const TWINS = [
   ['avalonia/src/Rune.Avalonia/Display/Sparkline/SparklineGeometry.cs', 'wpf/src/Rune.Wpf/Display/Sparkline/SparklineGeometry.cs', 'winforms/src/Rune.WinForms/Display/Sparkline/SparklineGeometry.cs'],
   ['avalonia/src/Rune.Avalonia/Display/ProportionBar/ProportionBarVariants.cs', 'wpf/src/Rune.Wpf/Display/ProportionBar/ProportionBarVariants.cs', 'winforms/src/Rune.WinForms/Display/ProportionBar/ProportionBarVariants.cs'],
   ['avalonia/src/Rune.Avalonia/Display/Gauge/GaugeGeometry.cs', 'wpf/src/Rune.Wpf/Display/Gauge/GaugeGeometry.cs', 'winforms/src/Rune.WinForms/Display/Gauge/GaugeGeometry.cs'],
+  ['avalonia/src/Rune.Avalonia/Feedback/Progress/ProgressBands.cs', 'wpf/src/Rune.Wpf/Feedback/Progress/ProgressBands.cs', 'winforms/src/Rune.WinForms/Feedback/Progress/ProgressBands.cs'],
   ['avalonia/src/Rune.Avalonia/Utils/Style/AttachedVariants.cs', 'wpf/src/Rune.Wpf/Utils/Style/AttachedVariants.cs', 'winforms/src/Rune.WinForms/Utils/Style/AttachedVariants.cs'],
   ['avalonia/src/Rune.Avalonia/Navigation/Steps/StepsVariants.cs', 'wpf/src/Rune.Wpf/Navigation/Steps/StepsVariants.cs', 'winforms/src/Rune.WinForms/Navigation/Steps/StepsVariants.cs'],
   ['avalonia/src/Rune.Avalonia/Navigation/Pagination/PaginationItems.cs', 'wpf/src/Rune.Wpf/Navigation/Pagination/PaginationItems.cs', 'winforms/src/Rune.WinForms/Navigation/Pagination/PaginationItems.cs'],

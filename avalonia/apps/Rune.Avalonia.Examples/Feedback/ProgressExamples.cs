@@ -10,7 +10,7 @@ static class ProgressExamples
 {
     public static Example[] All =>
     [
-        new("Progress", "progress", "进度条", "Value 与 Max（默认 100）算完成比例，超出时夹住；Tone 表示状态。Label 显示在上方，同时是读屏名称；右侧默认是按语言格式化的百分比，ValueLabel 换成自己的文字（只是显示），读屏念的用 ValueText 改，ShowValueLabel=False 不显示。取值是 decimal。", Bars),
+        new("Progress", "progress", "进度条", "Value 与 Max（默认 100）算完成比例，超出时夹住；Tone 表示状态。Label 显示在上方，同时是读屏名称；右侧默认是按语言格式化的百分比，ValueLabel 换成自己的文字（只是显示），读屏念的用 ValueText 改，ShowValueLabel=False 不显示。取值是 decimal。Bands 是量表的用法（磁盘占用、配额、评分这类量出来的数）：值落在哪一段就用哪一段的色调；仪表盘样子的量表用 Gauge。", Bars),
         new("Progress", "rings", "环形与目标", "Shape=circle 是环形：中间显示数值，Label 在下方，直径随 Size 缩放；不写 Value 时一段弧一直转。Target 是目标值：条上画一条竖线、环上画一道刻度，读屏念成\"60%，目标 80%\"。", Rings),
         new("Progress", "shapes", "粗细与不确定进度", "Size 跟字号档位缩放粗细，Radius 改圆角；不写 Value 是不确定进度，循环滑动，系统关闭动画时变慢。", Shapes),
     ];
@@ -25,8 +25,8 @@ static class ProgressExamples
 
     static readonly CultureInfo Chinese = CultureInfo.GetCultureInfo("zh-CN");
 
-    /// <summary>用量越接近上限越醒目：80% 以上警告，超出为危险。</summary>
-    static StatusTone ToneOf(decimal ratio) => ratio > 1 ? StatusTone.Danger : ratio >= 0.8m ? StatusTone.Warning : StatusTone.Accent;
+    /// <summary>用量是量出来的数（量表）：越接近上限越醒目——八成以内正常，到上限为止警告，超出为危险。</summary>
+    static ProgressBand[] BandsOf(decimal total) => [new(total * 0.8m, StatusTone.Accent), new(total, StatusTone.Warning), new(decimal.MaxValue, StatusTone.Danger)];
 
     static string Number(decimal value) => value.ToString("#,0.##", Chinese);
 
@@ -37,7 +37,7 @@ static class ProgressExamples
         {
             var progress = new Progress
             {
-                Value = used, Max = total, Tone = ToneOf(used / total), Label = name,
+                Value = used, Max = total, Bands = BandsOf(total), Label = name,
                 ValueLabel = $"{Number(used)} / {Number(total)} {unit}",
                 ValueText = (value, max) => $"{value} / {max} {unit}",
             };

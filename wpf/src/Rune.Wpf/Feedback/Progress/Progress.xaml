@@ -24,11 +24,11 @@
   <Style x:Key="{x:Static rune:ProgressParts.Indicator}" TargetType="Border">
     <Setter Property="Background" Value="{DynamicResource Rune.Brush.Accent}" />
     <Style.Triggers>
-      <DataTrigger Binding="{Binding Tone.Value, RelativeSource={RelativeSource AncestorType=rune:Progress}}" Value="neutral"><Setter Property="Background" Value="{DynamicResource Rune.Brush.TextMuted}" /></DataTrigger>
-      <DataTrigger Binding="{Binding Tone.Value, RelativeSource={RelativeSource AncestorType=rune:Progress}}" Value="info"><Setter Property="Background" Value="{DynamicResource Rune.Brush.InfoText}" /></DataTrigger>
-      <DataTrigger Binding="{Binding Tone.Value, RelativeSource={RelativeSource AncestorType=rune:Progress}}" Value="success"><Setter Property="Background" Value="{DynamicResource Rune.Brush.SuccessText}" /></DataTrigger>
-      <DataTrigger Binding="{Binding Tone.Value, RelativeSource={RelativeSource AncestorType=rune:Progress}}" Value="warning"><Setter Property="Background" Value="{DynamicResource Rune.Brush.WarningText}" /></DataTrigger>
-      <DataTrigger Binding="{Binding Tone.Value, RelativeSource={RelativeSource AncestorType=rune:Progress}}" Value="danger"><Setter Property="Background" Value="{DynamicResource Rune.Brush.DangerText}" /></DataTrigger>
+      <DataTrigger Binding="{Binding ResolvedTone.Value, RelativeSource={RelativeSource AncestorType=rune:Progress}}" Value="neutral"><Setter Property="Background" Value="{DynamicResource Rune.Brush.TextMuted}" /></DataTrigger>
+      <DataTrigger Binding="{Binding ResolvedTone.Value, RelativeSource={RelativeSource AncestorType=rune:Progress}}" Value="info"><Setter Property="Background" Value="{DynamicResource Rune.Brush.InfoText}" /></DataTrigger>
+      <DataTrigger Binding="{Binding ResolvedTone.Value, RelativeSource={RelativeSource AncestorType=rune:Progress}}" Value="success"><Setter Property="Background" Value="{DynamicResource Rune.Brush.SuccessText}" /></DataTrigger>
+      <DataTrigger Binding="{Binding ResolvedTone.Value, RelativeSource={RelativeSource AncestorType=rune:Progress}}" Value="warning"><Setter Property="Background" Value="{DynamicResource Rune.Brush.WarningText}" /></DataTrigger>
+      <DataTrigger Binding="{Binding ResolvedTone.Value, RelativeSource={RelativeSource AncestorType=rune:Progress}}" Value="danger"><Setter Property="Background" Value="{DynamicResource Rune.Brush.DangerText}" /></DataTrigger>
     </Style.Triggers>
   </Style>
   <Style x:Key="{x:Static rune:ProgressParts.Header}" TargetType="rune:Flex" />

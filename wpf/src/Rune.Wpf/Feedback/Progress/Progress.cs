@@ -48,6 +48,18 @@ public class Progress : Control
     public static readonly DependencyProperty ToneProperty = DependencyProperty.Register(
         nameof(Tone), typeof(StatusTone), typeof(Progress), new FrameworkPropertyMetadata(default(StatusTone), (d, _) => ((Progress)d).BindTone()));
 
+    /// <summary>
+    /// 量表的区间（按 To 从小到大）：值落在哪一段就用哪一段的色调（盖过 Tone）。磁盘占用、配额、密码强度这类"量出来的数"用它，
+    /// 任务的完成进度不写；仪表盘样子的量表用 Gauge。
+    /// </summary>
+    public static readonly DependencyProperty BandsProperty = DependencyProperty.Register(
+        nameof(Bands), typeof(IReadOnlyList<ProgressBand>), typeof(Progress), new FrameworkPropertyMetadata(null, (d, _) => ((Progress)d).BindTone()));
+
+    static readonly DependencyPropertyKey ResolvedToneKey = DependencyProperty.RegisterReadOnly(nameof(ResolvedTone), typeof(StatusTone), typeof(Progress), new PropertyMetadata(default(StatusTone)));
+
+    /// <summary>实际用的色调：有量表区间时是值所在那一段的，否则是 Tone（主题的触发器按它着色）。</summary>
+    public static readonly DependencyProperty ResolvedToneProperty = ResolvedToneKey.DependencyProperty;
+
     /// <summary>字号档位：粗细、直径随之缩放；不写时继承。</summary>
     public static readonly DependencyProperty SizeProperty = DependencyProperty.Register(
         nameof(Size), typeof(TextSize), typeof(Progress), new FrameworkPropertyMetadata(default(TextSize), OnSizeChanged));
@@ -151,6 +163,12 @@ public class Progress : Control
     /// <summary>色调。</summary>
     public StatusTone Tone { get => (StatusTone)GetValue(ToneProperty); set => SetValue(ToneProperty, value); }
 
+    /// <summary>量表的区间。</summary>
+    public IReadOnlyList<ProgressBand>? Bands { get => (IReadOnlyList<ProgressBand>?)GetValue(BandsProperty); set => SetValue(BandsProperty, value); }
+
+    /// <summary>实际用的色调。</summary>
+    public StatusTone ResolvedTone => (StatusTone)GetValue(ResolvedToneProperty);
+
     /// <summary>字号档位。</summary>
     public TextSize Size { get => (TextSize)GetValue(SizeProperty); set => SetValue(SizeProperty, value); }
 
@@ -210,7 +228,12 @@ public class Progress : Control
     /// <inheritdoc />
     protected override System.Collections.IEnumerator LogicalChildren => children.GetEnumerator();
 
-    static void OnChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((Progress)d).Update();
+    static void OnChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        var progress = (Progress)d;
+        progress.Update();
+        if (e.Property == ValueProperty && progress.Bands is not null) progress.BindTone();
+    }
 
     static void OnFrame(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
@@ -228,12 +251,19 @@ public class Progress : Control
     }
 
     /// <summary>环形的着色：中性用次要文字色、accent 用强调色，其余状态色用各自的文字色（条形的进度在部件样式的触发器里）。</summary>
-    void BindTone() => SetResourceReference(IndicatorBrushProperty, Tone.Value switch
+    /// <remarks>有量表区间时按值所在的那一段取色调；同一个色调不重复设（取值每变一次都会来）。</remarks>
+    void BindTone()
     {
-        "neutral" => ThemeKeys.Brush.TextMuted,
-        "accent" or null => ThemeKeys.Brush.Accent,
-        var tone => $"Rune.Brush.{char.ToUpperInvariant(tone[0])}{tone[1..]}Text",
-    });
+        var tone = ProgressBands.ToneAt(Value, Bands) ?? Tone;
+        if (ResolvedTone == tone && ReadLocalValue(IndicatorBrushProperty) != DependencyProperty.UnsetValue) return;
+        SetValue(ResolvedToneKey, tone);
+        SetResourceReference(IndicatorBrushProperty, tone.Value switch
+        {
+            "neutral" => ThemeKeys.Brush.TextMuted,
+            "accent" or null => ThemeKeys.Brush.Accent,
+            var value => $"Rune.Brush.{char.ToUpperInvariant(value[0])}{value[1..]}Text",
+        });
+    }
 
     void BindRadius()
     {

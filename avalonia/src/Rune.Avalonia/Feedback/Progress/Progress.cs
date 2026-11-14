@@ -49,6 +49,12 @@ public class Progress : Control
     /// <summary>色调，默认 accent。</summary>
     public static readonly StyledProperty<StatusTone> ToneProperty = AvaloniaProperty.Register<Progress, StatusTone>(nameof(Tone), StatusTone.Accent);
 
+    /// <summary>
+    /// 量表的区间（按 To 从小到大）：值落在哪一段就用哪一段的色调（盖过 Tone）。磁盘占用、配额、密码强度这类"量出来的数"用它，
+    /// 任务的完成进度不写；仪表盘样子的量表用 Gauge。
+    /// </summary>
+    public static readonly StyledProperty<IReadOnlyList<ProgressBand>?> BandsProperty = AvaloniaProperty.Register<Progress, IReadOnlyList<ProgressBand>?>(nameof(Bands));
+
     /// <summary>字号档位：粗细、直径随之缩放；不写时继承。</summary>
     public static readonly StyledProperty<TextSize> SizeProperty = AvaloniaProperty.Register<Progress, TextSize>(nameof(Size));
 
@@ -141,6 +147,12 @@ public class Progress : Control
     /// <summary>色调。</summary>
     public StatusTone Tone { get => GetValue(ToneProperty); set => SetValue(ToneProperty, value); }
 
+    /// <summary>量表的区间。</summary>
+    public IReadOnlyList<ProgressBand>? Bands { get => GetValue(BandsProperty); set => SetValue(BandsProperty, value); }
+
+    /// <summary>实际用的色调：有量表区间时是值所在那一段的，否则是 Tone。</summary>
+    public StatusTone ResolvedTone => ProgressBands.ToneAt(Value, Bands) ?? Tone;
+
     /// <summary>字号档位。</summary>
     public TextSize Size { get => GetValue(SizeProperty); set => SetValue(SizeProperty, value); }
 
@@ -203,11 +215,15 @@ public class Progress : Control
             if (Size.Pixels is { } pixels) resources.Set(FontSizeProperty, pixels);
             else resources.Bind(FontSizeProperty, Size.ResourceKey);
         }
-        else if (change.Property == ToneProperty) BindTone();
+        else if (change.Property == ToneProperty || change.Property == BandsProperty) BindTone();
         else if (change.Property == RadiusProperty) resources.Bind(RadiusFactorProperty, Radius.ResourceKey);
         else if (change.Property == ValueProperty || change.Property == MaxProperty || change.Property == ShapeProperty || change.Property == TargetProperty
                  || change.Property == LabelProperty || change.Property == ShowValueLabelProperty || change.Property == ValueLabelProperty
-                 || change.Property == ValueTextProperty) Update();
+                 || change.Property == ValueTextProperty)
+        {
+            Update();
+            if (change.Property == ValueProperty && Bands is not null) BindTone();
+        }
         else if (change.Property == FractionProperty || change.Property == PhaseProperty || change.Property == TrackColorProperty
                  || change.Property == IndicatorColorProperty || change.Property == TextColorProperty || change.Property == RadiusFactorProperty
                  || change.Property == LineWidthProperty)
@@ -221,12 +237,21 @@ public class Progress : Control
     }
 
     /// <summary>着色：中性用次要文字色、accent 用强调色，其余状态色用各自的文字色（与轨道之间有 3:1）。</summary>
-    void BindTone() => resources.Bind(IndicatorColorProperty, Tone.Value switch
+    /// <remarks>有量表区间时按值所在的那一段取色调；同一个色调不重复绑定（取值每变一次都会来）。</remarks>
+    void BindTone()
     {
-        "neutral" => ThemeKeys.Color.TextMuted,
-        "accent" or null => ThemeKeys.Color.Accent,
-        var tone => $"Rune.Color.{char.ToUpperInvariant(tone[0])}{tone[1..]}Text",
-    });
+        var tone = ResolvedTone;
+        if (boundTone == tone) return;
+        boundTone = tone;
+        resources.Bind(IndicatorColorProperty, tone.Value switch
+        {
+            "neutral" => ThemeKeys.Color.TextMuted,
+            "accent" or null => ThemeKeys.Color.Accent,
+            var value => $"Rune.Color.{char.ToUpperInvariant(value[0])}{value[1..]}Text",
+        });
+    }
+
+    StatusTone? boundTone;
 
     /// <summary>按取值重排：哪些部分显示、文字、状态、着色比例的过渡、不确定进度的循环。</summary>
     void Update()
