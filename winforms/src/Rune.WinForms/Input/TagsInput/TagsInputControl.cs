@@ -22,19 +22,15 @@ namespace Rune.WinForms;
 [Description("标签输入：回车或逗号加一个标签，可以带建议列表。")]
 public class TagsInputControl : TextInputControl
 {
-    /// <summary>与外壳的距离（设备无关像素）。</summary>
-    const float Offset = 6;
-
     readonly IconControl icon = new() { Tone = TextTone.Muted, Visible = false };
-    readonly FloatingSurface surface;
-    readonly ListboxControl listbox = new() { Embedded = true, Dock = DockStyle.Fill, SelectionMode = SelectionMode.Multiple };
+    readonly ListPopover popover;
+    readonly ListboxControl listbox;
     readonly Dictionary<string, TagControl> tags = [];
     readonly Dictionary<TagControl, EventHandler> removers = [];
     readonly Dictionary<string, string> seen = [];
     IReadOnlyList<object?> all = [];
     bool syncing;
     bool open;
-    bool presenting;
 
     /// <summary>新建：没有标签、没有建议。</summary>
     public TagsInputControl() : base(new TagsTextBox())
@@ -46,13 +42,9 @@ public class TagsInputControl : TextInputControl
         RowGap = Space.Xs;
         Controls.AddRange([icon, Input, ClearButton]);
         SetGrow(Input, true);
-        surface = new FloatingSurface(this);
-        surface.Form.Controls.Add(listbox);
-        surface.Outside += (_, _) =>
-        {
-            if (!presenting) SetOpen(false, OpenChangeReason.Outside);
-        };
-        surface.Form.Escape += (_, _) => SetOpen(false, OpenChangeReason.Escape);
+        popover = new ListPopover(this, Input, () => SetOpen(false, OpenChangeReason.Outside), () => SetOpen(false, OpenChangeReason.Escape));
+        listbox = popover.Listbox;
+        listbox.SelectionMode = SelectionMode.Multiple;
         listbox.ValuesChanged += (_, _) => OnListChanged();
         listbox.Picked += (_, _) => Text = "";
         Input.TextChanged += (_, _) => OnInputChanged();
@@ -331,7 +323,7 @@ public class TagsInputControl : TextInputControl
     /// <summary>失焦（焦点离开输入框，包括移到标签的移除按钮上）：关上建议，按需把没确认的文字加成标签。</summary>
     void OnInputLostFocus()
     {
-        if (presenting) return;
+        if (popover.Presenting) return;
         if (open) SetOpen(false, OpenChangeReason.Focus);
         if (AcceptOnBlur && Text.Trim().Length > 0 && !ReadOnly && Add([Text])) Text = "";
     }
@@ -348,39 +340,19 @@ public class TagsInputControl : TextInputControl
         if (next == open) return;
         open = next;
         if (next) Present();
-        else surface.Hide();
+        else popover.Hide();
         OpenChanged?.Invoke(this, new OpenChangedEventArgs(next, reason));
     }
 
-    /// <summary>面板 = 列表 + 描边，与外壳同宽；放在外壳下方（放不下时上方），隔 6。不抢焦点：焦点留在输入框里。</summary>
     void Present()
     {
-        if (!IsHandleCreated || !Suggests) return;
-        var context = ElementContext.Of(this);
-        var border = FloatingSurface.Border(context);
-        var listHeight = listbox.GetPreferredSize(new Size(Width - 2 * border, 0)).Height;
-        var panelSize = new Size(Width, listHeight + 2 * border);
-        var target = RectangleToScreen(ClientRectangle);
-        var (_, panel) = FloatingLayout.Position(FloatingPlacement.BottomStart, context.RightToLeft, target, panelSize, context.Scale(Offset), Screen.FromControl(this).WorkingArea);
-        surface.Form.AccessibleName = AccessibleName;
-        // 显示浮层窗口时平台可能把焦点从输入框拿走一下、让宿主窗体失活：都不算失焦或点了外面，显示完把焦点还给输入框
-        var focused = Input.Focused;
-        presenting = true;
-        try
-        {
-            surface.Show(panel, border, context, null);
-            if (focused && !Input.Focused) Input.Focus();
-        }
-        finally
-        {
-            presenting = false;
-        }
+        if (Suggests) popover.Show();
     }
 
     /// <inheritdoc />
     protected override void Dispose(bool disposing)
     {
-        if (disposing) surface.Dispose();
+        if (disposing) popover.Dispose();
         base.Dispose(disposing);
     }
 
