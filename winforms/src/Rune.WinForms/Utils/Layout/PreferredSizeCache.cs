@@ -9,17 +9,26 @@ namespace Rune.WinForms;
 sealed class PreferredSizeCache
 {
     readonly Dictionary<Size, Size> sizes = [];
+    readonly Control owner;
 
     public PreferredSizeCache(Control owner)
     {
+        this.owner = owner;
         // Layout 事件在布局引擎之前发：这一趟排版里量到的都是新的
         owner.Layout += (_, _) => sizes.Clear();
         owner.FontChanged += (_, _) => sizes.Clear();
         owner.VisibleChanged += (_, _) => sizes.Clear();
     }
 
+    /// <summary>
+    /// 先把给的大小夹到 MaximumSize 再量（基类 GetPreferredSize 也这样做，重写后要自己做）：
+    /// 否则限了最大宽度的卡片按不限宽量出一行的高度，宽度随后被夹窄，内容换行后被裁掉。
+    /// </summary>
     public Size Get(Size proposed, Func<Size, Size> measure)
     {
+        var max = owner.MaximumSize;
+        if (max.Width > 0 && (proposed.Width is <= 1 || proposed.Width > max.Width)) proposed.Width = max.Width;
+        if (max.Height > 0 && (proposed.Height is <= 1 || proposed.Height > max.Height)) proposed.Height = max.Height;
         if (!sizes.TryGetValue(proposed, out var size)) sizes[proposed] = size = measure(proposed);
         return size;
     }
