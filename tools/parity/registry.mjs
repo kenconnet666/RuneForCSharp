@@ -340,6 +340,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
       .map((prop) => [prop, '标题行、标题、关闭按钮、说明、正文、页脚、按钮是 Dialog 代码组合的子元素，部件样式键只有面板、遮罩与阴影；外观跟着各自组件的主题样式']))])),
     Select: Object.fromEntries(['propsListbox', 'propsSearch'].map((prop) => [prop, '弹出层里的列表、搜索框是 Select 建的，外观跟着 Listbox、TextField 的主题样式'])),
     TagsInput: { propsListbox: '弹出层里的列表是 TagsInput 建的 Listbox，外观跟着 Listbox 的主题样式（同 Select）' },
+    ...Object.fromEntries(['Combobox', 'Autocomplete'].map((name) => [name, { propsListbox: '弹出层里的列表是 ListPopover 建的 Listbox，外观跟着 Listbox 的主题样式（同 Select）' }])),
     Popconfirm: Object.fromEntries(['propsIcon', 'propsTitle', 'propsDescription', 'propsFooter', 'propsConfirm', 'propsCancel']
       .map((prop) => [prop, '图标、问题、说明、按钮行与按钮是 Popconfirm 代码组合的子元素（同 Dialog），外观跟着各自组件的主题样式；面板、阴影、箭头的部件样式键同 Popover'])),
     QRCode: Object.fromEntries(['propsLogo', 'propsOverlay', 'propsRefresh'].map((prop) => [prop, 'logo 底板、状态层与刷新按钮是 QRCode 代码组合的子元素（Border、Flex、Button），外观跟着各自组件的主题样式；没有部件样式键'])),

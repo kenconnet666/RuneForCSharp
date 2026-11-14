@@ -1,0 +1,59 @@
+<!--
+  Combobox、Autocomplete 的主题样式（vue-tsx-pro 的 controlParts、disclosureStyles）：外壳同输入框（Rune.TextInput）；里面依次是前置图标、文字、清空按钮、
+  展开按钮（radius full、紧凑尺寸同清空按钮，列表弹出时箭头翻转）。弹出层同 Select：面板 surfaceRaised、border 描边，阴影层 lg。
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Rune.Wpf;component/Input/TextField/TextField.xaml" />
+    <ResourceDictionary Source="/Rune.Wpf;component/Base/Button/Button.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <Style TargetType="rune:Combobox" BasedOn="{StaticResource Rune.TextInput}">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="rune:Combobox">
+          <Grid>
+            <Border x:Name="PART_Root" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
+              <rune:Flex Align="center" Gap="sm">
+                <rune:Icon x:Name="PART_Icon" Data="{TemplateBinding Icon}" Foreground="{DynamicResource Rune.Brush.TextMuted}" />
+                <Grid rune:Flex.Grow="True" VerticalAlignment="Center">
+                  <TextBlock x:Name="PART_Placeholder" Text="{TemplateBinding PlaceholderText}" Foreground="{DynamicResource Rune.Brush.TextPlaceholder}"
+                             Visibility="Collapsed" IsHitTestVisible="False" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                  <ScrollViewer x:Name="PART_ContentHost" Focusable="False" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"
+                                VerticalAlignment="Center" />
+                </Grid>
+                <rune:ClearButton x:Name="PART_Clear" Radius="full" Visibility="Collapsed" Cursor="Hand" />
+                <rune:IconButton x:Name="PART_Chevron" Radius="full" Icon="{x:Static rune:Lucide.ChevronDown}" Focusable="False" Cursor="Hand"
+                                 RenderTransformOrigin="0.5,0.5" />
+              </rune:Flex>
+            </Border>
+            <Border x:Name="PART_FocusRing" Visibility="Collapsed" IsHitTestVisible="False" Margin="-1" BorderThickness="2"
+                    BorderBrush="{DynamicResource Rune.Brush.FocusRing}" CornerRadius="{TemplateBinding CornerRadius}" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="Icon" Value="{x:Null}"><Setter TargetName="PART_Icon" Property="Visibility" Value="Collapsed" /></Trigger>
+            <Trigger Property="Text" Value=""><Setter TargetName="PART_Placeholder" Property="Visibility" Value="Visible" /></Trigger>
+            <Trigger Property="IsKeyboardFocusWithin" Value="True"><Setter TargetName="PART_FocusRing" Property="Visibility" Value="Visible" /></Trigger>
+            <Trigger Property="ShowsInvalid" Value="True"><Setter TargetName="PART_FocusRing" Property="BorderBrush" Value="{DynamicResource Rune.Brush.Danger}" /></Trigger>
+            <Trigger Property="IsShown" Value="True">
+              <Setter TargetName="PART_Chevron" Property="RenderTransform"><Setter.Value><RotateTransform Angle="180" /></Setter.Value></Setter>
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style TargetType="rune:Autocomplete" BasedOn="{StaticResource {x:Type rune:Combobox}}" />
+  <Style x:Key="{x:Static rune:ComboboxParts.Popover}" TargetType="Border">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.SurfaceRaised}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+  </Style>
+  <Style x:Key="{x:Static rune:ComboboxParts.PopoverShadow}" TargetType="Border">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.SurfaceRaised}" />
+    <Setter Property="Effect" Value="{DynamicResource Rune.Shadow.Lg}" />
+  </Style>
+</ResourceDictionary>
