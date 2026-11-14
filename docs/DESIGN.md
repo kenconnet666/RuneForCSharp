@@ -1335,6 +1335,7 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 内核是原生子窗口，盖在框架自己画的内容上面：Avalonia、WPF 加载完之前把内核藏起来（WPF 是 Collapsed，HwndHost 照样建窗口、照样加载）；WinForms 隐藏的子控件不建窗口、不加载，只能让骨架（同级、z 序在上）盖住它。
 - 圆角：Avalonia、WPF 裁不到原生窗口，边角是直的；WinForms 用 CornerClip 给内核设窗口区域，按外框圆角裁掉四角（锯齿边，没有抗锯齿）。
 - Video 是网页内核里的 video 元素：页面由孪生文件 VideoPage 生成，写到临时文件夹再打开（直接给 HTML 字符串时页面不能读本地文件），一个实例一个文件，卸下时删掉。
+- 自绘控制条（ControlBar=Custom）也在页面里：VideoPage 按 VideoChrome（主题颜色、字号、倍速、语言包）写进 CSS 变量与脚本的配置；主题、语言包换了不重载页面（重载会丢播放进度），下次加载时才跟上。
 - 内核的用户数据放在 `%LocalAppData%\Rune\WebView2`：WebView2 默认放在程序旁边，装在 Program Files 里写不进去。
 - 踩过的坑：
   - Avalonia 的 NativeWebView 导航到 data: 地址时不发 NavigationCompleted（页面照常显示），Embed 把 HTML 的 data: 地址解出来改用 NavigateToString。

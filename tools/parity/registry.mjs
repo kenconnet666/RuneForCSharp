@@ -50,8 +50,8 @@ export const COMPONENT_PROP_RENAMES = {
   UserButton: { name: 'DisplayName', src: 'Source' },
   // 地址给 Uri；加载完的事件不叫 Loaded（那是控件放进界面的事件）
   Embed: { src: 'Source', onLoad: 'PageLoaded' },
-  // Controls 在 WinForms 是子控件集合：三个平台统一叫 ShowControls
-  Video: { src: 'Source', controls: 'ShowControls' },
+  // Controls 在 WinForms 是子控件集合：三个平台统一叫 ControlBar（Native、Custom、None 对应 true、'custom'、false）
+  Video: { src: 'Source', controls: 'ControlBar' },
   // 文字多行用换行分开（TS 是字符串数组）；Width、Height 是控件自己的大小，图片的大小另起名字
   Watermark: { content: 'Text', width: 'ImageWidth', height: 'ImageHeight' },
   // 移除由使用方做：事件是"请求移除"（离场结束才发）
@@ -189,7 +189,10 @@ export const PROPS_NOT_PORTED = {
     propsPlaceholder: '加载中的骨架是内部的 Skeleton（image 形状）：外观跟主题',
   },
   Watermark: { propsLayer: '水印层是内部画出来的一层（Avalonia 的子元素或窗口浮层里的元素、WPF 的子元素或装饰、WinForms 的分层窗口），只画不交互，外观由 Color、FontSize 等属性决定' },
-  Video: { propsRoot: '外层就是 Video 自己（定比例的黑底框）：样式直接写在 Video 上' },
+  Video: {
+    propsRoot: '外层就是 Video 自己（定比例的黑底框）：样式直接写在 Video 上',
+    ...Object.fromEntries(['propsControls', 'propsButton', 'propsSeek', 'propsVolume'].map((prop) => [prop, '自绘控制条画在网页内核的页面里（HTML 元素），外观跟主题的颜色与字号，没有部件属性'])),
+  },
   Abbr: { propsTooltip: '提示就是平台的 ToolTip：位置、箭头写在 Abbr 自己身上（Avalonia、WPF 的 Tooltip.Placement、Tooltip.Arrow 附加属性）；WinForms 自带的提示用默认的位置' },
   Pagination: { propsItem: '外层的 li 是 HTML 列表的结构：桌面上页码按钮、省略号直接排在列表里' },
   NumberField: {
@@ -433,6 +436,7 @@ export const BEHAVIOR_NOT_APPLICABLE = {
   Grid: { createGrid: '桌面没有语义标签：别的语义容器从 Grid 派生、改读屏角色（GridList 就是这样，测试覆盖）' },
   Stat: { '部件带标记；按色调档位追加样式': 'TS 的 components.Stat 配方定制是网页的样式系统；桌面改部件样式（Avalonia 的 rune|Stat #PART_Number 选择器、WPF 的 StatParts 样式键），数值的色调是 Tone' },
   Embed: { 'iframe 带 title、src': 'loading="lazy"、referrerpolicy 是 iframe 的属性：桌面的网页内核放进界面就加载，没有懒加载；title 是读屏名称（测试覆盖）' },
+  Video: { '自绘控制条跟着 video 的事件走': '控制条的脚本在网页内核的页面里跑，测试里没有内核：页面的元素与文案由 Custom_bar 的测试核对，事件与键盘在真实窗口里核对' },
   Collapse: { '页内搜索命中': '页内搜索命中收起的内容时展开（hidden="until-found"、beforematch）是浏览器的能力，桌面没有页内搜索' },
 };
 

@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Controls;
+using Avalonia.Controls.Documents;
 using Avalonia.Media;
 
 namespace Rune.Avalonia;
@@ -9,7 +10,8 @@ namespace Rune.Avalonia;
 /// 视频（vue-tsx-pro 的 Video）：网页内核里的 video 元素——内核自己的控制条，加上固定的宽高比（加载前就占好位置）、封面、多种格式、字幕轨道。
 /// <code>
 /// &lt;rune:Video Source="https://example.com/demo.mp4" Poster="https://example.com/cover.jpg" AutomationProperties.Name="产品演示" /&gt;
-/// &lt;rune:Video Source="{Binding Loop}" Autoplay="True" Loop="True" ShowControls="False" AutomationProperties.Name="背景动画" /&gt;
+/// &lt;rune:Video Source="{Binding Demo}" ControlBar="Custom" AutomationProperties.Name="产品演示" /&gt;      自绘的控制条：倍速、字幕、全屏
+/// &lt;rune:Video Source="{Binding Loop}" Autoplay="True" Loop="True" ControlBar="None" AutomationProperties.Name="背景动画" /&gt;
 /// </code>
 /// <list type="bullet">
 /// <item>自动播放：默认静音（内核不允许带声音的自动播放）；系统关掉动画（减少动态效果）时不自动播放，并显示控制条。</item>
@@ -17,7 +19,10 @@ namespace Rune.Avalonia;
 /// <item>多种格式用 <see cref="Sources"/>（内核取第一个能播的），字幕用 <see cref="Tracks"/>；默认只预加载元数据。</item>
 /// <item>本地文件也能播：页面写在临时文件夹里再打开（直接给内核一段 HTML 时，它不让页面读本地文件）。</item>
 /// </list>
-/// 自绘的控制条（倍速、清晰度、弹幕）不在这里，要的话用专门的播放器。内核是原生窗口，边角是直的。
+/// <item><see cref="ControlBar"/> 为 Custom 时是自绘的控制条（同上游 controls="custom"，画在页面里）：播放 / 暂停、时间与进度、静音与音量、字幕菜单（有 Tracks 时）、
+/// 倍速菜单（<see cref="Speeds"/>）、全屏；播放中鼠标离开画面或 2.5 秒不动收起，键盘聚焦、菜单开着、鼠标停在控制条上时留着；点画面切换播放；
+/// 键盘 Space / K、← →（±5 秒）、↑ ↓（音量）、M、F。颜色、文案取页面加载时的主题与语言包。</item>
+/// 内核是原生窗口，边角是直的。
 /// </summary>
 public class Video : WebShell
 {
@@ -33,8 +38,11 @@ public class Video : WebShell
     /// <summary>文本轨道：字幕、说明。</summary>
     public static readonly StyledProperty<IReadOnlyList<VideoTrack>?> TracksProperty = AvaloniaProperty.Register<Video, IReadOnlyList<VideoTrack>?>(nameof(Tracks));
 
-    /// <summary>显示内核的控制条，默认 true（自动播放的装饰视频可以关掉；减少动态效果时仍会显示）。</summary>
-    public static readonly StyledProperty<bool> ShowControlsProperty = AvaloniaProperty.Register<Video, bool>(nameof(ShowControls), true);
+    /// <summary>控制条：内核自己的（默认）、自绘的、不要（自动播放的装饰视频；减少动态效果时仍显示内核的）。</summary>
+    public static readonly StyledProperty<VideoControlBar> ControlBarProperty = AvaloniaProperty.Register<Video, VideoControlBar>(nameof(ControlBar));
+
+    /// <summary>倍速菜单里的选项（自绘控制条），默认 0.5、0.75、1、1.25、1.5、2。</summary>
+    public static readonly StyledProperty<IReadOnlyList<double>?> SpeedsProperty = AvaloniaProperty.Register<Video, IReadOnlyList<double>?>(nameof(Speeds));
 
     /// <summary>自动播放：静音；减少动态效果时不自动播放。</summary>
     public static readonly StyledProperty<bool> AutoplayProperty = AvaloniaProperty.Register<Video, bool>(nameof(Autoplay));
@@ -67,8 +75,11 @@ public class Video : WebShell
     /// <summary>文本轨道。</summary>
     public IReadOnlyList<VideoTrack>? Tracks { get => GetValue(TracksProperty); set => SetValue(TracksProperty, value); }
 
-    /// <summary>显示控制条。</summary>
-    public bool ShowControls { get => GetValue(ShowControlsProperty); set => SetValue(ShowControlsProperty, value); }
+    /// <summary>控制条。</summary>
+    public VideoControlBar ControlBar { get => GetValue(ControlBarProperty); set => SetValue(ControlBarProperty, value); }
+
+    /// <summary>倍速菜单里的选项。</summary>
+    public IReadOnlyList<double>? Speeds { get => GetValue(SpeedsProperty); set => SetValue(SpeedsProperty, value); }
 
     /// <summary>自动播放。</summary>
     public bool Autoplay { get => GetValue(AutoplayProperty); set => SetValue(AutoplayProperty, value); }
@@ -86,8 +97,9 @@ public class Video : WebShell
         {
             // 减少动态效果：不自动播放，显示控制条，交给人自己点
             var plays = Autoplay && Motion.Enabled;
-            return VideoPage.Html(Source?.AbsoluteUri, Sources, Poster?.AbsoluteUri, Tracks, ShowControls || (Autoplay && !plays), plays, Loop, Muted,
-                AutomationProperties.GetName(this));
+            var bar = ControlBar == VideoControlBar.None && Autoplay && !plays ? VideoControlBar.Native : ControlBar;
+            return VideoPage.Html(Source?.AbsoluteUri, Sources, Poster?.AbsoluteUri, Tracks, bar, plays, Loop, Muted,
+                AutomationProperties.GetName(this), bar == VideoControlBar.Custom ? Chrome() : null);
         }
     }
 
@@ -96,8 +108,17 @@ public class Video : WebShell
     {
         base.OnPropertyChanged(change);
         if (change.Property == SourceProperty || change.Property == SourcesProperty || change.Property == PosterProperty || change.Property == TracksProperty
-            || change.Property == ShowControlsProperty || change.Property == AutoplayProperty || change.Property == LoopProperty || change.Property == MutedProperty)
+            || change.Property == ControlBarProperty || change.Property == SpeedsProperty || change.Property == AutoplayProperty || change.Property == LoopProperty || change.Property == MutedProperty)
             Reload();
+    }
+
+    /// <summary>自绘控制条的外观与文案：取自所在作用域的主题、语言包。</summary>
+    VideoChrome Chrome()
+    {
+        string Css(string key) => this.Resource<Color>(key) is var color ? VideoChrome.Css(color.A, color.R, color.G, color.B) : "";
+        return new VideoChrome(Provider.GetLang(this), TextElement.GetFontSize(this), Speeds ?? VideoChrome.DefaultSpeeds,
+            Css(ThemeKeys.Color.OnScrim), Css(ThemeKeys.Color.ScrimStrong), Css(ThemeKeys.Color.SurfaceRaised), Css(ThemeKeys.Color.Text),
+            Css(ThemeKeys.Color.Border), Css(ThemeKeys.Color.FillHover), Css(ThemeKeys.Color.FocusRing));
     }
 
     /// <inheritdoc />

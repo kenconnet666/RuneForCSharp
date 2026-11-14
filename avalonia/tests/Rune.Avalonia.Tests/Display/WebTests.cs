@@ -12,7 +12,7 @@ public class WebTests
     public void Video_page_mutes_autoplay_and_lists_sources_and_tracks()
     {
         var html = VideoPage.Html("a.mp4", [new VideoSource("b.webm", "video/webm"), new VideoSource("c.mp4")], "cover.jpg",
-            [new VideoTrack("zh.vtt", "zh", "中文", Default: true)], controls: true, autoplay: true, loop: false, muted: false, label: "演示 \"1\"");
+            [new VideoTrack("zh.vtt", "zh", "中文", Default: true)], controls: VideoControlBar.Native, autoplay: true, loop: false, muted: false, label: "演示 \"1\"");
 
         Assert.DoesNotContain("src=\"a.mp4\"", html); // 有 Sources 时不用 Src
         Assert.Contains("<source src=\"b.webm\" type=\"video/webm\">", html);
@@ -27,7 +27,7 @@ public class WebTests
     [Fact]
     public void Video_page_without_controls_or_autoplay()
     {
-        var html = VideoPage.Html("a.mp4", null, null, null, controls: false, autoplay: false, loop: true, muted: true, label: null);
+        var html = VideoPage.Html("a.mp4", null, null, null, controls: VideoControlBar.None, autoplay: false, loop: true, muted: true, label: null);
         Assert.Contains("src=\"a.mp4\"", html);
         Assert.DoesNotContain(" controls", html);
         Assert.DoesNotContain("autoplay", html);
@@ -67,7 +67,25 @@ public class WebTests
     [Fact]
     public Task Reduced_motion_never_autoplays() => HeadlessUi.Run(() =>
     {
-        var video = new Video { Source = new Uri("https://example.com/a.mp4"), Autoplay = true, ShowControls = false };
+        var video = new Video { Source = new Uri("https://example.com/a.mp4"), Autoplay = true, ControlBar = VideoControlBar.None };
         Assert.Contains(Motion.Enabled ? "autoplay muted" : " controls", video.Html);
     });
+
+    [Fact]
+    [Upstream("Video", "controls=")]
+    public void Custom_bar_replaces_the_native_controls_with_themed_buttons_and_menus()
+    {
+        var chrome = new VideoChrome(Lang.ZhCn, 14, [1, 1.5], "rgba(255,255,255,1)", "rgba(0,0,0,0.6)", "#fff", "#111", "#ddd", "#eee", "#33f");
+        var html = VideoPage.Html("a.mp4", null, null, [new VideoTrack("zh.vtt", "zh", "中文")], VideoControlBar.Custom, autoplay: false, loop: false, muted: false, label: "演示", chrome);
+
+        Assert.DoesNotContain(" controls", html); // 不要内核的控制条
+        Assert.Contains("aria-label=\"播放\"", html);
+        Assert.Contains("aria-label=\"播放进度\"", html);
+        Assert.Contains("data-kind=\"captions\"", html); // 有字幕轨道时才有字幕菜单
+        Assert.Contains("data-value=\"1.5\"", html); // 倍速菜单的选项
+        Assert.Contains("--on:rgba(255,255,255,1)", html);
+        Assert.DoesNotContain("data-kind=\"captions\"", VideoPage.Html("a.mp4", null, null, null, VideoControlBar.Custom, false, false, false, null, chrome));
+        Assert.Throws<ArgumentNullException>(() => VideoPage.Html("a.mp4", null, null, null, VideoControlBar.Custom, false, false, false, null));
+        Assert.Equal("rgba(10,20,30,0.502)", VideoChrome.Css(128, 10, 20, 30));
+    }
 }
