@@ -70,6 +70,9 @@ export const COMPONENT_PROP_RENAMES = {
   CodeBlock: { lang: 'Language' },
   // 同 CodeBlock；显示源码是布尔的状态，按 Is 前缀
   CodePreview: { lang: 'Language', _showCode: 'IsCodeShown' },
+  // Table 自己有 Rows（表体的行）；DocSection 的 id 是锚点，控件自己有 Name
+  TextTable: { rows: 'TextRows' },
+  DocSection: { id: 'SectionId' },
   // 控件自己有 Width
   TableHeaderCell: { width: 'ColumnWidth' },
   // Avalonia、WPF 沿用平台的提示（ToolTip.Tip、ToolTipService），组件库只补位置、距离、箭头
@@ -190,6 +193,7 @@ export const PROPS_NOT_PORTED = {
   Tooltip: { trigger: '提示挂在触发器上（Avalonia、WPF 的 ToolTip 附加属性，WinForms 的扩展属性），不用渲染函数' },
   ScrollArea: { propsContent: '内容就是 Content 本身，平台的滚动呈现器直接排它，中间没有包一层' },
   Table: { propsRoot: '外层的外框与滚动区域由 Table 管：滚动方向是 ScrollAxis（WinForms 外面套 ScrollAreaControl），外观按密度、样式、斑马纹与主题 token' },
+  TextTable: { propsRoot: 'TextTable 本身就是 Table：同 Table 的 propsRoot' },
   ...Object.fromEntries(['TableHead', 'TableBody', 'TableFoot', 'TableRow', 'TableCaption', 'TableCell', 'TableHeaderCell'].map((name) => [name, { propsRoot: '行、单元格、各部分本身就是元素：样式直接写在它们身上' }])),
   Select: {
     placement: '弹出层固定贴着外壳下方、至少与它同宽（放不下时翻到上方），同平台的下拉框',
