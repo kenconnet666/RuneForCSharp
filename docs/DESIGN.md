@@ -858,6 +858,18 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   四边各窄 1 像素，组里两个实底之间露出一条缝——按钮家族、ItemList、NavList、Tabs 的模板把底色拆成单独一层（`PART_Fill`）；WinForms 的 ButtonCore
   按描边的路径填底色，窄半个边宽，改成底色铺满、描边居中画在里面，并按 ControlShell 的做法用 PixelOffsetMode.Half（2 像素的边框之前糊成 3 像素）。
 
+### ControlGroup（2026-11-14）
+
+- 与 ButtonGroup 共用相连的一组：三个平台都抽出了 `AttachedGroup`（WinForms 是 `AttachedGroupControl`）——排列、叠边框、交叉轴拉齐、写角、
+  悬停与聚焦浮上来、读屏的组；派生类只说哪些控件分剩余宽度（ControlGroup 的输入框，TS 的 attached 横排 flex-grow: 1）与自己的默认值。
+- 收角接到所有外壳上：Avalonia 的 `Attached.SquareCornersOf<T>()`（ButtonBase、TextInputBase、Select 的静态构造里调用）；WPF 本来就走
+  EmSize.CoerceCornerRadius；WinForms 的输入框、选择框由 ControlShell 画，角记在 `Attached` 里（按钮家族记在 ButtonCore 上）。
+- 默认占满一行（`Inline` 时按内容宽）；放在 Field 里时组是 Field 的控件（实现 IFieldControl，Field 找控件时不再往里走）：标签、说明给组的读屏名称与帮助文字，
+  里面的控件各写名称。点标签聚焦组里第一个控件——WinForms 的 FieldControl 原来按 Controls（z 序）找，组会把悬停、聚焦的那个调到最上面，改成按 Tab 顺序。
+- WinForms 的按钮在组里与输入框等高：不留焦点环的边距；焦点环按宿主留的边距决定画在外面还是收进按钮里面（ButtonGroup 相邻一侧、ControlGroup 四周）。
+- 做的时候补上 WinForms 文字输入的按键事件：焦点在里面的 TextBox 上，外壳的 KeyDown、KeyUp、KeyPress 收不到（回车搜索写不了），改成转给外壳。
+- TS 里组隔开了 Field 的出错状态（只把不可用、只读交下去）；这里组里的控件仍按所在 Field 显示出错。
+
 ### NumberField（2026-11-14）
 
 - 值是 `decimal?`（TS 的 valueType 在 number 与 bigint 之间选，C# 的 decimal 十进制精确，金额、大整数都不经过浮点数），空着时 null；

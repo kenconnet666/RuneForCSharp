@@ -293,19 +293,15 @@ public abstract class ButtonCore : Element
 
     /// <summary>一个波纹：圆心、最终半径、扩散进度与不透明度（Animator 驱动的信号，绘制时读，变了只重画这个按钮）。</summary>
     /// <summary>
-    /// 焦点环的矩形：四周外扩 1.5 个环宽（画笔居中，outline 宽 2、偏移 2）。组里相邻的一侧没有给环留的边距（邻居紧贴着），
-    /// 那一侧的环收进按钮里面、压在边框上。
+    /// 焦点环的矩形：四周外扩 1.5 个环宽（画笔居中，outline 宽 2、偏移 2），画在宿主给它留的 Padding 里。没留够位置的一侧
+    /// （ButtonGroup 里相邻的一侧、ControlGroup 里与输入框等高的按钮）环收进按钮里面、压在边框上。
     /// </summary>
     RectangleF FocusRing(RectangleF bounds, float gap)
     {
+        var room = (Host as Control)?.Padding ?? System.Windows.Forms.Padding.Empty;
         var outset = 1.5f * gap;
-        var inset = -gap / 2;
-        bool Inner(AttachedCorners side) => (Attached & side) == side;
-        var left = Inner(AttachedCorners.TopLeft | AttachedCorners.BottomLeft) ? inset : outset;
-        var right = Inner(AttachedCorners.TopRight | AttachedCorners.BottomRight) ? inset : outset;
-        var top = Inner(AttachedCorners.TopLeft | AttachedCorners.TopRight) ? inset : outset;
-        var bottom = Inner(AttachedCorners.BottomLeft | AttachedCorners.BottomRight) ? inset : outset;
-        return RectangleF.FromLTRB(bounds.Left - left, bounds.Top - top, bounds.Right + right, bounds.Bottom + bottom);
+        float Side(int space) => space >= outset ? outset : -gap / 2;
+        return RectangleF.FromLTRB(bounds.Left - Side(room.Left), bounds.Top - Side(room.Top), bounds.Right + Side(room.Right), bounds.Bottom + Side(room.Bottom));
     }
 
     sealed record RippleState(PointF Origin, float Radius, Signal<double> Scale, Signal<double> Alpha)

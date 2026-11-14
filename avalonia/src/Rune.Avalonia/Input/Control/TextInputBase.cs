@@ -42,6 +42,9 @@ public abstract class TextInputBase : TextBox, IFieldControl
     ButtonBase? clear;
     CharacterCount? count;
 
+    // 放进 ControlGroup 时相邻一侧不要圆角
+    static TextInputBase() => Attached.SquareCornersOf<TextInputBase>();
+
     /// <summary>新建：字号、圆角按档位解析成主题资源。</summary>
     protected TextInputBase()
     {

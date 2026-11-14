@@ -53,20 +53,22 @@ static class ControlShell
         graphics.SmoothingMode = SmoothingMode.AntiAlias;
         graphics.PixelOffsetMode = PixelOffsetMode.Half;
         var corner = Math.Min((radius.In(theme.Radii) ?? 0) * em, height / 2f);
-        using (var path = Drawing.RoundedRectangle(new RectangleF(0, 0, width, height), corner))
+        // 放在 ControlGroup 里时相邻一侧是直角
+        var squared = Attached.Get(host);
+        using (var path = Drawing.RoundedRectangle(new RectangleF(0, 0, width, height), corner, squared))
         using (var fill = new SolidBrush(Fill(colors, variant, state.ReadOnly, state.Hovered)))
             graphics.FillPath(fill, path);
         var line = host.LogicalToDeviceUnits(1);
         Color? border = state.Invalid ? colors.Danger : state.ReadOnly ? colors.BorderMuted : variant == ControlVariant.Soft ? null : state.Hovered ? colors.BorderStrong : colors.Border;
         if (border is { } stroke)
         {
-            using var outline = Drawing.RoundedRectangle(new RectangleF(line / 2f, line / 2f, width - line, height - line), Math.Max(0, corner - line / 2f));
+            using var outline = Drawing.RoundedRectangle(new RectangleF(line / 2f, line / 2f, width - line, height - line), Math.Max(0, corner - line / 2f), squared);
             using var pen = new Pen(stroke, line);
             graphics.DrawPath(pen, outline);
         }
         if (!state.Focused) return;
         var ring = host.LogicalToDeviceUnits(2);
-        using var focus = Drawing.RoundedRectangle(new RectangleF(ring / 2f, ring / 2f, width - ring, height - ring), Math.Max(0, corner - ring / 2f));
+        using var focus = Drawing.RoundedRectangle(new RectangleF(ring / 2f, ring / 2f, width - ring, height - ring), Math.Max(0, corner - ring / 2f), squared);
         using var focusPen = new Pen(state.Invalid ? colors.Danger : colors.FocusRing, ring);
         graphics.DrawPath(focusPen, focus);
     }

@@ -48,13 +48,7 @@ public class ButtonBase : global::Avalonia.Controls.Button
     Action? releasePointerRipple;
     Action? releaseKeyRipple;
 
-    static ButtonBase()
-    {
-        // 放进 ButtonGroup 时相邻一侧不要圆角：主题按 Radius 算出的圆角在这里收掉
-        CornerRadiusProperty.OverrideMetadata<ButtonBase>(new StyledPropertyMetadata<CornerRadius>(
-            coerce: (button, radius) => Attached.Square(radius, Attached.GetCorners((ButtonBase)button))));
-        Attached.CornersProperty.Changed.AddClassHandler<ButtonBase>((button, _) => button.CoerceValue(CornerRadiusProperty));
-    }
+    static ButtonBase() => Attached.SquareCornersOf<ButtonBase>();
 
     /// <summary>新建按钮：颜色在 durations.sm 内过渡。</summary>
     public ButtonBase() => AttachedToVisualTree += (_, _) => Transitions = ColorTransitions();

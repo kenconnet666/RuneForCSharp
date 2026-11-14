@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 
 namespace Rune.Avalonia;
 
@@ -18,6 +19,17 @@ public static class Attached
 
     /// <summary>写去掉圆角的角。</summary>
     public static void SetCorners(Control control, AttachedCorners value) => control.SetValue(CornersProperty, value);
+
+    /// <summary>
+    /// 在控件的静态构造里调用：外壳的圆角（主题按 Radius 算出的 CornerRadius）在强制回调里收掉组写上的角，放进、移出组时重算。
+    /// 按钮家族、文字输入、选择框都接上：放进 ButtonGroup、ControlGroup 时相邻一侧不要圆角。
+    /// </summary>
+    public static void SquareCornersOf<T>() where T : TemplatedControl
+    {
+        TemplatedControl.CornerRadiusProperty.OverrideMetadata<T>(new StyledPropertyMetadata<CornerRadius>(
+            coerce: (control, radius) => Square(radius, GetCorners((Control)control))));
+        CornersProperty.Changed.AddClassHandler<T>((control, _) => control.CoerceValue(TemplatedControl.CornerRadiusProperty));
+    }
 
     /// <summary>把这几个角的圆角收成 0。</summary>
     public static CornerRadius Square(CornerRadius radius, AttachedCorners corners) => corners == AttachedCorners.None

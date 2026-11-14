@@ -126,6 +126,9 @@ public class Select : TemplatedControl, IFieldControl
     OpenChangeReason? pending;
     bool syncing;
 
+    // 放进 ControlGroup 时相邻一侧不要圆角
+    static Select() => Attached.SquareCornersOf<Select>();
+
     /// <summary>新建：外壳的字号、圆角按档位解析成主题资源；弹出层（搜索框、列表）。</summary>
     public Select()
     {
