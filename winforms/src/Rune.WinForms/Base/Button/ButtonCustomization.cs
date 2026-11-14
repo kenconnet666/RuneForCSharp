@@ -55,6 +55,9 @@ public sealed record ButtonSx : IScopeRecord<ButtonSx>
     /// <summary>上下内边距（em）。</summary>
     public float? PaddingBlock { get; init; }
 
+    /// <summary>最小宽度（em，同控件高度的算法）：页码这类等宽的按钮。</summary>
+    public float? MinWidth { get; init; }
+
     /// <inheritdoc />
     public ButtonSx Merge(ButtonSx? over) => over is null ? this : new()
     {
@@ -64,5 +67,6 @@ public sealed record ButtonSx : IScopeRecord<ButtonSx>
         Radius = over.Radius ?? Radius,
         PaddingInline = over.PaddingInline ?? PaddingInline,
         PaddingBlock = over.PaddingBlock ?? PaddingBlock,
+        MinWidth = over.MinWidth ?? MinWidth,
     };
 }

@@ -1,0 +1,46 @@
+<!--
+  Pagination 与 Pager 的主题样式（vue-tsx-pro 的 paginationStyles、pagerStyles）。部件的默认外观写在部件样式里（DESIGN §7）。
+  页码按钮至少一个控件高度宽（翻页时位置不晃）、左右内边距 space.xs；省略号次要色（宽度在 Pagination.cs 里按字号算）；总条数次要色。
+  Pager 的链接卡片：xs 的 border 边框、md 圆角、内边距 space.md，悬停时边框换品牌色；提示一行次要色 sm、下面 space.xs，标题 accentText、中等字重。
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Rune.Wpf;component/Base/Button/Button.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <Style x:Key="{x:Static rune:PaginationParts.List}" TargetType="rune:Flex" />
+  <Style x:Key="{x:Static rune:PaginationParts.Page}" TargetType="rune:Button" BasedOn="{StaticResource {x:Type rune:Button}}">
+    <Setter Property="rune:EmSize.MinWidth" Value="{DynamicResource Rune.Size.Control}" />
+    <Setter Property="rune:EmSize.Padding" Value="0.25,0" />
+  </Style>
+  <Style x:Key="{x:Static rune:PaginationParts.Step}" TargetType="rune:IconButton" BasedOn="{StaticResource {x:Type rune:IconButton}}" />
+  <Style x:Key="{x:Static rune:PaginationParts.Ellipsis}" TargetType="Border">
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+  </Style>
+  <Style x:Key="{x:Static rune:PaginationParts.Total}" TargetType="TextBlock">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+  </Style>
+  <!-- 卡片的外观是主题样式（默认样式）：EmSize 的内边距系数只盖默认样式里的值；部件样式留给使用方 -->
+  <Style TargetType="rune:PagerLinkCard" BasedOn="{StaticResource {x:Type rune:ButtonBase}}">
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+    <Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.Md}" />
+    <Setter Property="rune:EmSize.Padding" Value="0.75" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Style.Triggers>
+      <Trigger Property="IsMouseOver" Value="True"><Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Accent}" /></Trigger>
+    </Style.Triggers>
+  </Style>
+  <Style x:Key="{x:Static rune:PagerParts.Link}" TargetType="rune:PagerLinkCard" />
+  <Style x:Key="{x:Static rune:PagerParts.Hint}" TargetType="rune:Flex">
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+    <Setter Property="TextElement.FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
+    <Setter Property="Margin" Value="0,0,0,4" />
+  </Style>
+  <Style x:Key="{x:Static rune:PagerParts.Label}" TargetType="TextBlock">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.AccentText}" />
+    <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
+  </Style>
+</ResourceDictionary>

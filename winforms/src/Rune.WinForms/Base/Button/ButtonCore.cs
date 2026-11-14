@@ -187,6 +187,7 @@ public abstract class ButtonCore : Element
         var control = ControlHeight.Of(context, em, ControlHeight.Factor(Size));
         if (Variant != ButtonVariant.Link) height = Math.Max(height, control);
         if (Square) width = control;
+        else if (ResolvedSx?.MinWidth is { } min) width = Math.Max(width, ControlHeight.Of(context, em, min));
         return new Size((int)MathF.Ceiling(width), (int)MathF.Ceiling(height));
     }
 

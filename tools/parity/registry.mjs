@@ -169,6 +169,7 @@ export const PROPS_NOT_PORTED = {
     pageScrollbar: '整页的浮层滚动条是网页的：桌面上正文那一列本身是 ScrollArea（AppShell.MainScroll）',
   },
   NavList: { propsList: 'nav > ul 是 HTML 的结构：NavList 本身就是那一列' },
+  Pagination: { propsItem: '外层的 li 是 HTML 列表的结构：桌面上页码按钮、省略号直接排在列表里' },
   Steps: { propsConnector: '连接线由 Steps 按圆圈的位置自己画（横竖两种画法统一；WinForms 的子控件是各自的窗口，会盖住父级画的东西），不是一个元素' },
   NavItem: { propsItem: '外层的 li 是 HTML 列表的结构：桌面上导航项本身就是列表里的一行' },
   ItemListItem: Object.fromEntries(['propsLink', 'propsButton'].map((prop) => [prop, '标题里伸展的链接、按钮是网页让整条可点的写法：桌面上整条就是一个可点的控件（Href、Invoked），没有里面那一层'])),

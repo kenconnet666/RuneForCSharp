@@ -26,6 +26,7 @@
     <ResourceDictionary Source="/Rune.Wpf;component/Navigation/TableOfContents/TableOfContents.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Navigation/Breadcrumbs/Breadcrumbs.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Navigation/Steps/Steps.xaml" />
+    <ResourceDictionary Source="/Rune.Wpf;component/Navigation/Pagination/Pagination.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Table/Table.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Feedback/Skeleton/Skeleton.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Feedback/SkeletonText/SkeletonText.xaml" />

@@ -815,6 +815,22 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   这一步已完成时品牌色。WinForms 的子控件是各自的窗口，会盖住父级画的东西，所以每步按自然宽度放、不撑满一格，线画在空出来的地方。
   圆圈在 WinForms 是一个元素（StepIndicator：圆、边框、对勾 / 警示图标 / 图标 / 序号），WPF 的状态色由附加属性 `Steps.State` 上的样式触发器给。
 
+### Pagination、Pager（2026-11-14）
+
+- 页码序列是孪生文件 `Navigation/Pagination/PaginationItems.cs`（TS 的 paginationItems，同 MUI：首尾各 boundaries 页、当前页左右各 siblings 页，
+  中间省略号，序列长度固定；省略号是 null）；`PageCount(pageCount, total, pageSize)` 算总页数。
+- Pagination：`Page`（Avalonia、WPF 默认双向绑定；WinForms 发 `PageChanged`）、PageCount、Total、PageSize、Siblings、Boundaries、ShowTotal、
+  `Href`（Func&lt;int, string&gt;：给了时页码是 LinkButton、上一页下一页是 IconLinkButton）、Size（WinForms 叫 TextSize，默认 sm）；不可用用平台的
+  IsEnabled / Enabled。Page 超出范围时显示时夹回去。当前页 soft 品牌色、读屏"当前页"（WinForms 写在说明上），其余中性 ghost；
+  页码按钮至少一个控件高度宽、左右内边距 xs（WinForms 为此给 ButtonSx 加了 `MinWidth`：按钮的底色按元素量出的盒子画，控件的最小尺寸撑不宽它），
+  省略号同宽、次要色。
+- Pager：`Previous`、`Next` 是 `PagerLink(Href, Label)`，两张链接卡片（提示一行带箭头、次要色 sm，标题 accentText 中等字重，border 边框、md 圆角，
+  悬停边框品牌色），每张至少 14rem、平分，放不下时换行；只有下一篇时前面空一格。WPF 的卡片外观在它自己的默认样式里：EmSize 的内边距系数只盖
+  默认样式（主题）里的值，部件样式 BasedOn 了 ButtonBase 的样式时 Padding 来源成了"样式"，系数就不生效。
+- WinForms 的可点一块（Steps 可点回的步骤、Pager 的卡片）共用内部的 `PressableFlex`（Utils/Layout）：能聚焦，点击、Enter、空格发 Click，
+  子控件的点击、悬停转给它，默认悬停 fillHover 底、sm 圆角、键盘聚焦画焦点环，子类换圆角与底色、边框的画法。
+- 同页的分页栏（PaginationBar）、跳页（PageJump）、每页条数（PageSizeSelect）还没做。
+
 ### ToggleGroup（2026-11-07）
 
 - 照上游：ToggleGroup（SelectionMode、Value / Values、IsRequired、IsReadOnly、Orientation、Size、Ripple）> ToggleItem（Value、Icon、文字）。TS 的 `_value`
