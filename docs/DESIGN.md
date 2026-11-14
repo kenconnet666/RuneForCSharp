@@ -992,6 +992,18 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   根 Border 的 TextElement.FontSize 绑到控件的 FontSize：Gallery 与 inspect 的宿主里，说明的 TextBlock 没从控件继承到字号（测试里继承正常，原因没查清），绑上就稳了。
 - 示例：tones、status、variants、banner（Banner 在同一页）。Avalonia、WPF 与文档站的取值对照没有差异。
 
+### Gauge（2026-11-14）
+
+- 几何与读法是孪生文件 `GaugeGeometry`：画布 200 × 108（TS 的 viewBox 0 -4 200 108），圆心 (100, 100)，数值弧半径 80、线宽 14，外圈区间半径 94、线宽 4，
+  目标刻度从 70 到 98、线宽 2.5；比例 0 在左、1 在右，经过上方；数值弧的色调是写了的、否则值所在的区间（超出最后一段取最后一段）、没有区间时 accent；
+  读屏的取值文字是数值（单位写成后缀）与"目标 …"（Lang.ProgressTarget）。区间是 `GaugeBand(To, Tone)`，值是 decimal。
+- 宽 10em，刻度盘高 = 宽 × 108 / 200；轨道 fill，数值弧与区间用色调的实色（中性是 borderStrong，同 StatusDot 的取色），目标刻度正文色；
+  中间的数值 1.5em、半粗、行高 1 压在底边上；两端 0.75em、次要色；名称 sm、次要色。读屏是只读的进度条（范围值夹在 Min–Max，取值文字在 Value 里），名称是 Label。
+- Avalonia 自绘弧（换主题重画）；WPF 把 200 × 108 的 Canvas 放进 Viewbox，弧是资源引用颜色的 Path（线宽跟着缩，同 SVG）；WinForms 是元素（GaugeControl 宿主），
+  用 GDI 的 DrawArc（角度从 x 轴顺时针量，左端 180°），TS 的 size 叫 TextSize，部件属性 PropsValue、PropsLabel。
+- 上游把数值弧与中间的数值都标成 data-part="value"（[#6](https://github.com/kenconnet666/vue-tsx-pro/issues/6)），取值对照里这几行是配对错位；我们的部件只有 Value、Label。
+- 示例在 Sparkline 页（gauge、gauge-sizes）。
+
 ### ProportionBar（2026-11-14）
 
 - 结构同 TS：横条（胶囊，sm 8 像素、md 12 像素，段间空 borderWidths.sm，数量为 0 的段不画）在上，图例在下（space.sm，换行，列间距 lg、行间距 xs，sm 的字号）：
