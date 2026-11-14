@@ -114,7 +114,7 @@ public class Badge : Element
         var colors = BadgeRecipe.Colors(Variant.Value, Tone.Value, hover: false, context.Theme.Colors);
         if (ResolvedSx is { } sx) colors = (sx.Background ?? colors.Background, sx.Foreground ?? colors.Foreground, sx.BorderColor ?? colors.Border);
         var points = (Size.Pixels ?? Tokens.FontSize.Xs) * 72 / 96;
-        var font = Fonts.Get(context.Font.FontFamily.Name, points, context.Font.Style);
+        var font = Fonts.Get(context.Font.FamilyName(), points, context.Font.Style);
         return (context with { Font = font, ForeColor = colors.Foreground }, colors);
     }
 

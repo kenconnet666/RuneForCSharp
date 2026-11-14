@@ -100,5 +100,5 @@ public readonly record struct ElementContext(int Dpi, Font Font, Color ForeColor
     /// <summary>字号档位换掉宿主的字号（em 尺寸都按它算）；档位没写时原样。</summary>
     /// <param name="size">字号档位或像素数。</param>
     public ElementContext Sized(TextSize size) =>
-        size.Pixels is { } pixels ? this with { Font = Fonts.Get(Font.FontFamily.Name, pixels * 72 / 96, Font.Style) } : this;
+        size.Pixels is { } pixels ? this with { Font = Fonts.Get(Font.FamilyName(), pixels * 72 / 96, Font.Style) } : this;
 }

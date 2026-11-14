@@ -192,7 +192,7 @@ public class SelectControl : FlexControl, IFieldControl
         set
         {
             field = value;
-            if (value.Pixels is { } pixels) Font = Fonts.Get(Font.FontFamily.Name, pixels * 72 / 96, Font.Style);
+            if (value.Pixels is { } pixels) Font = Fonts.Get(Font.FamilyName(), pixels * 72 / 96, Font.Style);
             else ResetFont();
         }
     }

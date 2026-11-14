@@ -29,6 +29,11 @@ public static class Fonts
     internal static Font Get(string family, float points, FontStyle style) =>
         fonts.GetOrAdd((family, points, style), key => new Font(key.Family, key.Points, key.Style));
 
+    static readonly ConditionalWeakTable<Font, string> familyNames = [];
+
+    /// <summary>字体族的名字。按字体缓存：FontFamily.Name 每次都是一次 GDI+ 调用，排版时每个文字元素每次测量都要取（换字号、字重时）。</summary>
+    internal static string FamilyName(this Font font) => familyNames.GetValue(font, key => key.FontFamily.Name);
+
     /// <summary>1em 是多少设备像素：字号（磅）按 DPI 换算。</summary>
     internal static float EmPixels(this Font font, int dpi) => font.SizeInPoints * dpi / 72f;
 

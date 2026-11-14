@@ -42,7 +42,7 @@ public class Separator : Element
 
     /// <summary>文字的环境：0.93em。</summary>
     static ElementContext LabelContext(ElementContext context) =>
-        context with { Font = Fonts.Get(context.Font.FontFamily.Name, context.Font.SizeInPoints * 0.93f, context.Font.Style) };
+        context with { Font = Fonts.Get(context.Font.FamilyName(), context.Font.SizeInPoints * 0.93f, context.Font.Style) };
 
     static int Thickness(ElementContext context) => Math.Max(1, (int)MathF.Round(context.Scale(Tokens.BorderWidth.Xs)));
 

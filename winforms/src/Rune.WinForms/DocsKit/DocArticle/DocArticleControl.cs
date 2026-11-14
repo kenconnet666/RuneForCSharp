@@ -88,7 +88,7 @@ public class DocArticleControl : Panel
     void UpdateFont()
     {
         if (Parent is not { } parent) return;
-        Font = ArticleFont(parent.Font.FontFamily.Name);
+        Font = ArticleFont(parent.Font.FamilyName());
         description.MaximumSize = new Size(LogicalToDeviceUnits(48 * 16), 0);
     }
 

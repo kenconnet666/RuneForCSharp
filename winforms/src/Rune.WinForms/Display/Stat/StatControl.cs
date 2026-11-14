@@ -236,7 +236,7 @@ public class StatControl : Panel, IElementHost, IScopeAware
     /// <summary>字号档位：指标名 sm，数值 xxl 粗体，单位、变化量、说明 xs（固定档位，不随 Stat 的字体缩放，同 TS）。</summary>
     void ApplyFonts()
     {
-        var family = Font.FontFamily.Name;
+        var family = Font.FamilyName();
         number.Font = Fonts.Get(family, Tokens.FontSize.Xxl * 72 / 96, FontStyle.Bold);
         changeNumber.Font = Fonts.Get(family, Tokens.FontSize.Xs * 72 / 96, FontStyle.Regular);
         label.Size = Tokens.FontSize.Sm;

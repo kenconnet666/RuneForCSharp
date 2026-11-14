@@ -57,7 +57,7 @@ public abstract class ListBaseControl : Panel
             return;
         }
         var outer = Parent?.Font ?? Font;
-        Font = Fonts.Get(outer.FontFamily.Name, pixels * 72 / 96, outer.Style);
+        Font = Fonts.Get(outer.FamilyName(), pixels * 72 / 96, outer.Style);
     }
 
     /// <inheritdoc />

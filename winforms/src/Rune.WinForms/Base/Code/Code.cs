@@ -50,7 +50,7 @@ static class ChipText
 {
     /// <summary>字号乘上倍数（CSS 的 <c>font-size: 0.9em</c>）。</summary>
     public static ElementContext Scaled(ElementContext context, float scale) =>
-        context with { Font = Fonts.Get(context.Font.FontFamily.Name, context.Font.SizeInPoints * scale, context.Font.Style) };
+        context with { Font = Fonts.Get(context.Font.FamilyName(), context.Font.SizeInPoints * scale, context.Font.Style) };
 
     public static Size Measure(Text text, ElementContext context, float paddingInline)
     {

@@ -115,7 +115,19 @@ public class CodePreviewControl : CardControl
         {
             if (field is { } old) layout.Controls.Remove(old);
             field = value;
-            if (value is not null) layout.Controls.Add(value);
+            if (value is null) return;
+            // 先藏着挂上、按效果区的宽度排好再显示：藏着的控件不建窗口，换成卡片的字体、量大小、摆子控件都不发窗口消息；
+            // 显示时各个窗口直接建在最终位置（不然窗口先建出来再一层层挪，填一个示例要上百毫秒）
+            var shown = value.Visible;
+            value.Visible = false;
+            layout.Controls.Add(value);
+            if (value.AutoSize)
+            {
+                var inner = Math.Max(1, scroll.ClientSize.Width - layout.Padding.Horizontal);
+                var wanted = value.GetPreferredSize(new Size(inner, 0));
+                value.Size = new Size(Align == CodePreviewAlign.Center ? Math.Min(wanted.Width, inner) : inner, wanted.Height);
+            }
+            value.Visible = shown;
         }
     }
 

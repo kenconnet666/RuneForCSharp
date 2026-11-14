@@ -150,7 +150,7 @@ public abstract class ButtonCore : Element
         var points = Size.Pixels is { } pixels ? pixels * 72 / 96 : host.SizeInPoints;
         // GDI 只有常规与粗体：medium 画成常规（外面是粗体也不继承，同 TS 的 fontWeight: medium）
         var style = host.Style & ~FontStyle.Bold;
-        return context with { Font = Fonts.Get(host.FontFamily.Name, points, style), ForeColor = fore };
+        return context with { Font = Fonts.Get(host.FamilyName(), points, style), ForeColor = fore };
     }
 
     /// <summary>文字与图标用 textMuted（命令面板的默认触发按钮画成输入框外壳）；外观覆盖写了前景色时仍以它为准。</summary>

@@ -155,12 +155,19 @@ public class TableOfContentsControl : FlexControl
             paint = new Effect(Invalidate);
         }
 
-        /// <summary>换一组链接：加完再排一次（每加一个都整列重排的话，一页二十节要排两百多遍）。</summary>
+        /// <summary>
+        /// 换一组链接：已有的链接改个目录项接着用，多了才加、少了才删（每次换页都销毁、新建一列窗口很慢）；改完再排一次。
+        /// </summary>
         public void Rebuild(IReadOnlyList<HeadingEntry> items)
         {
             SuspendLayout();
-            Controls.Cast<Control>().DisposeAll();
-            foreach (var item in items) Controls.Add(new TableOfContentsLink(owner, item));
+            var links = Controls.OfType<TableOfContentsLink>().ToList();
+            for (var index = 0; index < items.Count; index++)
+            {
+                if (index < links.Count) links[index].Entry = items[index];
+                else Controls.Add(new TableOfContentsLink(owner, items[index]));
+            }
+            links.Skip(items.Count).DisposeAll();
             Padding = new Padding(LogicalToDeviceUnits(1), 0, 0, 0);
             ResumeLayout();
         }
@@ -235,7 +242,6 @@ public sealed class TableOfContentsLink : Control
     {
         owner = toc;
         Entry = entry;
-        Text = entry.Label;
         AccessibleRole = AccessibleRole.Link;
         Cursor = Cursors.Hand;
         AutoSize = true;
@@ -244,12 +250,24 @@ public sealed class TableOfContentsLink : Control
     }
 
     /// <summary>对应的目录项。</summary>
-    public HeadingEntry Entry { get; }
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public HeadingEntry Entry
+    {
+        get;
+        internal set
+        {
+            field = value;
+            Text = value.Label;
+            IsCurrent = false;
+            Invalidate();
+        }
+    }
 
     /// <summary>是不是当前节。</summary>
     public bool IsCurrent { get; private set; }
 
-    Font LinkFont => Fonts.Get(Font.FontFamily.Name, Tokens.FontSize.Sm * 72 / 96, FontStyle.Regular);
+    Font LinkFont => Fonts.Get(Font.FamilyName(), Tokens.FontSize.Sm * 72 / 96, FontStyle.Regular);
 
     float Em => Tokens.FontSize.Sm * DeviceDpi / 96f;
 

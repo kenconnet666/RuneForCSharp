@@ -190,8 +190,8 @@ public class Text : Element
         if (Italic) style |= FontStyle.Italic;
         if (Strikethrough) style |= FontStyle.Strikeout;
         // 只有写了 Mono（或是标题）才读主题：没写的文字换主题时不重画
-        var family = Mono ? Fonts.Installed(context.Theme.Fonts.Mono) : HeadingFont ? Fonts.Installed(context.Theme.Fonts.Heading) : host.FontFamily.Name;
-        return family == host.FontFamily.Name && points == host.SizeInPoints && style == host.Style ? host : Fonts.Get(family, points, style);
+        var family = Mono ? Fonts.Installed(context.Theme.Fonts.Mono) : HeadingFont ? Fonts.Installed(context.Theme.Fonts.Heading) : host.FamilyName();
+        return family == host.FamilyName() && points == host.SizeInPoints && style == host.Style ? host : Fonts.Get(family, points, style);
     }
 
     TextFormatFlags Flags(ElementContext context)

@@ -370,7 +370,7 @@ public class TableCaptionControl : Control
     const TextFormatFlags Flags = TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding | TextFormatFlags.WordBreak;
 
     /// <summary>sm 字号。</summary>
-    internal void Apply(TableControl table) => Font = Fonts.Get(table.Font.FontFamily.Name, Tokens.FontSize.Sm * 72 / 96, table.Font.Style);
+    internal void Apply(TableControl table) => Font = Fonts.Get(table.Font.FamilyName(), Tokens.FontSize.Sm * 72 / 96, table.Font.Style);
 
     /// <inheritdoc />
     protected override void OnTextChanged(EventArgs e)
@@ -648,7 +648,7 @@ public class TableCellControl : Control
         SectionKind = section is TableHeadControl ? "head" : section is TableFootControl ? "foot" : "body";
         var points = SectionKind == "head" ? Tokens.FontSize.Sm * 72 / 96 : table.FontPixels * 72 / DeviceDpi;
         var style = SectionKind == "foot" ? table.Font.Style | FontStyle.Bold : table.Font.Style & ~FontStyle.Bold;
-        Font = Fonts.Get(table.Font.FontFamily.Name, points, style);
+        Font = Fonts.Get(table.Font.FamilyName(), points, style);
         AccessibleRole = this is not TableHeaderCellControl ? AccessibleRole.Cell : SectionKind == "head" ? AccessibleRole.ColumnHeader : AccessibleRole.RowHeader;
         OnForeColorChanged(EventArgs.Empty);
         Invalidate(true);

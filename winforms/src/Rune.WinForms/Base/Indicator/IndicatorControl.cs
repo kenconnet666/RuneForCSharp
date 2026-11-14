@@ -134,7 +134,7 @@ public class IndicatorControl : Panel
     }
 
     /// <summary>计数的字体：0.75em、粗体（GDI 只有常规与粗体，semibold 按粗体画）。</summary>
-    internal Font CountFont => Fonts.Get(Font.FontFamily.Name, Font.SizeInPoints * 0.75f, FontStyle.Bold);
+    internal Font CountFont => Fonts.Get(Font.FamilyName(), Font.SizeInPoints * 0.75f, FontStyle.Bold);
 
     /// <summary>读屏念的说明。</summary>
     internal string Description => Label ?? (Dot ? ProviderControl.LangOf(this).IndicatorDot : ProviderControl.LangOf(this).IndicatorCount(Count ?? 0));

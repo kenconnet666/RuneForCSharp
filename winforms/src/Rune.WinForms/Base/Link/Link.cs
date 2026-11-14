@@ -56,7 +56,7 @@ public class Link : Element
     static ElementContext Inner(ElementContext context)
     {
         var style = context.Font.Style & ~FontStyle.Underline;
-        return style == context.Font.Style ? context : context with { Font = Fonts.Get(context.Font.FontFamily.Name, context.Font.SizeInPoints, style) };
+        return style == context.Font.Style ? context : context with { Font = Fonts.Get(context.Font.FamilyName(), context.Font.SizeInPoints, style) };
     }
 
     /// <summary>要画下划线：always，或 hover 时指针在上面。</summary>

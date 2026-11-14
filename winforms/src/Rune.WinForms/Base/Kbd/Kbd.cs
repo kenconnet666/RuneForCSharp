@@ -24,7 +24,7 @@ public class Kbd : Element
 
     /// <summary>按键里面的环境：字号 0.86 倍。</summary>
     static ElementContext Inner(ElementContext context) =>
-        context with { Font = Fonts.Get(context.Font.FontFamily.Name, context.Font.SizeInPoints * FontScale, context.Font.Style), ForeColor = context.Theme.Colors.Text };
+        context with { Font = Fonts.Get(context.Font.FamilyName(), context.Font.SizeInPoints * FontScale, context.Font.Style), ForeColor = context.Theme.Colors.Text };
 
     /// <summary>描边：上、左、右 borderWidths.xs，底边 borderWidths.sm（设备像素）。</summary>
     static (float Side, float Bottom) Borders(ElementContext context) => (context.Scale(Tokens.BorderWidth.Xs), context.Scale(Tokens.BorderWidth.Sm));

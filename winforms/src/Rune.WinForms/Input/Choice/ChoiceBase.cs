@@ -191,7 +191,7 @@ public abstract class ChoiceBase : Element
     }
 
     Font LabelFont(ElementContext inner) =>
-        label.Size.Pixels is { } pixels ? Fonts.Get(inner.Font.FontFamily.Name, pixels * 72 / 96, inner.Font.Style) : inner.Font;
+        label.Size.Pixels is { } pixels ? Fonts.Get(inner.Font.FamilyName(), pixels * 72 / 96, inner.Font.Style) : inner.Font;
 
     /// <inheritdoc />
     protected internal override Size Measure(ElementContext context, Size available)

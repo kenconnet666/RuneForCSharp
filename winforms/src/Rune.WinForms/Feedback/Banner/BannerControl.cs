@@ -205,7 +205,7 @@ public class BannerControl : Panel, IElementHost, IScopeAware
         if (TextSize.Pixels is { } pixels)
         {
             var outer = Parent?.Font ?? Font;
-            Font = Fonts.Get(outer.FontFamily.Name, pixels * 72 / 96, outer.Style);
+            Font = Fonts.Get(outer.FamilyName(), pixels * 72 / 96, outer.Style);
         }
         else ResetFont();
         Relayout();

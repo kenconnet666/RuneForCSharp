@@ -517,7 +517,7 @@ public class CodeBlockControl : Control, IScopeAware
             var graphics = e.Graphics;
             graphics.Clear(hovered ? colors.Fill : colors.SurfaceMuted);
             using (var line = new Pen(colors.BorderMuted, LogicalToDeviceUnits(1))) graphics.DrawLine(line, 0, 0.5f, Width, 0.5f);
-            var font = Fonts.Get(owner.Font.FontFamily.Name, TextSize.Sm.Pixels!.Value * 72 / 96, FontStyle.Regular);
+            var font = Fonts.Get(owner.Font.FamilyName(), TextSize.Sm.Pixels!.Value * 72 / 96, FontStyle.Regular);
             var text = owner.ExpandText;
             AccessibleName = text;
             var size = Fonts.Measure(text, font, Size.Empty, TextFormatFlags.NoPadding);

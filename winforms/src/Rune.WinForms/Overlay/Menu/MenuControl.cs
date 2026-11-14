@@ -233,7 +233,7 @@ public class MenuControl : Control, IMenuHost, IScopeAware
         if (!IsHandleCreated) return;
         var context = ElementContext.Of(this);
         var em = context.Em;
-        list.Font = TextSize.Pixels is { } pixels ? Fonts.Get(Font.FontFamily.Name, pixels * 72 / 96, Font.Style) : Font;
+        list.Font = TextSize.Pixels is { } pixels ? Fonts.Get(Font.FamilyName(), pixels * 72 / 96, Font.Style) : Font;
         list.UpdateMetrics(list.Font.EmPixels(DeviceDpi));
         var inset = FloatingSurface.Border(context);
         var content = list.GetPreferredSize(Size.Empty);
