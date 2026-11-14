@@ -43,6 +43,8 @@ export const COMPONENT_PROP_RENAMES = {
   Prose: { measure: 'LimitLineLength' },
   // 每页条数本身叫 PageSize，换了条数的事件跟着叫 PageSizeChanged
   PageSizeSelect: { onSizeChange: 'PageSizeChanged' },
+  // Search 是立即搜索的方法，事件叫 SearchRequested
+  SearchField: { onSearch: 'SearchRequested' },
   // Name 是控件名；图片给平台的图片对象
   Avatar: { name: 'DisplayName', src: 'Source' },
   UserButton: { name: 'DisplayName', src: 'Source' },
@@ -304,10 +306,10 @@ export const PLATFORM_PROPS_NOT_PORTED = {
       ['empty', 'propsOption', 'propsGroupLabel', 'propsCheck', 'propsEmpty', 'propsSkeleton']
         .map((prop) => [prop, '选项、组名、已选标记是 ListboxControl 画出来的，空状态与骨架是固定的子控件，没有部件属性与自定义内容']),
     ),
-    TextField: Object.fromEntries(
+    ...Object.fromEntries(['TextField', 'SearchField'].map((name) => [name, Object.fromEntries(
       ['propsRoot', 'propsIcon', 'propsIconEnd', 'propsPrefix', 'propsSuffix', 'propsCount', 'propsClear', 'propsReveal']
         .map((prop) => [prop, '外壳是 TextInputControl 自己画的，里面的图标、前后缀、按钮、字数是子控件，没有部件属性：外观跟主题，按钮走 ProviderControl 的组件定制']),
-    ),
+    )])),
     NumberField: Object.fromEntries(
       ['propsRoot', 'propsIcon', 'propsPrefix', 'propsSuffix', 'propsDecrement', 'propsIncrement', 'propsClear']
         .map((prop) => [prop, '外壳是 TextInputControl 自己画的，里面的图标、前后缀、加减与清空按钮是子控件，没有部件属性：外观跟主题，按钮走 ProviderControl 的组件定制']),

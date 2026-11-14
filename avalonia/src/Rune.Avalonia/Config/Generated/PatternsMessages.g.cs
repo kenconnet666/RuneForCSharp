@@ -110,6 +110,9 @@ public sealed partial record PatternsMessages
     /// <summary>页签的右键菜单：关闭右边的，默认“关闭右侧”</summary>
     public required string PageTabsCloseRight { get; init; }
 
+    /// <summary>页头：返回按钮的名称，默认“返回”</summary>
+    public required string PageHeaderBack { get; init; }
+
     /// <summary>查询表格：刷新，默认“刷新”</summary>
     public required string QueryTableRefresh { get; init; }
 
@@ -323,6 +326,7 @@ public sealed partial record PatternsMessages
         PageTabsClose = "关闭",
         PageTabsCloseOthers = "关闭其他",
         PageTabsCloseRight = "关闭右侧",
+        PageHeaderBack = "返回",
         QueryTableRefresh = "刷新",
         QueryTableRetry = "重试",
         QueryTableDensity = "行高",
@@ -420,6 +424,7 @@ public sealed partial record PatternsMessages
         PageTabsClose = "Close",
         PageTabsCloseOthers = "Close others",
         PageTabsCloseRight = "Close tabs to the right",
+        PageHeaderBack = "Back",
         QueryTableRefresh = "Refresh",
         QueryTableRetry = "Retry",
         QueryTableDensity = "Row height",

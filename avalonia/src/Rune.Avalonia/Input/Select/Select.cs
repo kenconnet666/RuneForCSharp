@@ -114,7 +114,7 @@ public class Select : TemplatedControl, IFieldControl
     readonly Popup popup = new() { IsLightDismissEnabled = true, WindowManagerAddShadowHint = false, Placement = PlacementMode.BottomEdgeAlignedLeft };
     readonly Border panel = new() { Name = SelectParts.Popover, ClipToBounds = true };
     readonly Border header = new() { Name = SelectParts.Header, IsVisible = false };
-    readonly TextField search = new() { Name = SelectParts.Search, Icon = Lucide.Search, Variant = ControlVariant.Soft };
+    readonly SearchField search = new() { Name = SelectParts.Search, Variant = ControlVariant.Soft };
     readonly Listbox listbox = new() { Name = SelectParts.Listbox, Focusable = false };
     readonly RemoteOptions remote;
     readonly Dictionary<string, string> seen = [];
@@ -254,7 +254,7 @@ public class Select : TemplatedControl, IFieldControl
     internal Listbox List => listbox;
 
     /// <summary>弹出层顶部的搜索框（测试用）。</summary>
-    internal TextField SearchBox => search;
+    internal SearchField SearchBox => search;
 
     /// <summary>那一排已选标签（测试用）。</summary>
     internal SelectedTags? TagRow => tags;

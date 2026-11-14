@@ -13,10 +13,37 @@ static class TextFieldExamples
     public static Example[] All =>
     [
         new("TextField", "textarea", "Textarea", "高度随内容在 Rows 与 MaxRows 之间增长（改 Text 也会跟着变）；Fixed 关掉自动增高，Clearable 在右上角放清空按钮。字数计数超出上限时变成危险色，读屏念完整的句子。", Comment),
+        new("TextField", "search", "搜索框", "SearchField 是 Type=search 的 TextField：带搜索图标、清空按钮，名称与占位文字默认是“搜索”。Text 每敲一个字都更新，本地过滤直接用它；SearchRequested 只在该查的时候发——停手 Delay（默认 300ms）、按回车、清空，同一个词不重复，发请求用它。下拉、表头筛选里的搜索框都是它。", Search),
         new("TextField", "appearance", "样式、尺寸与状态", "Variant 是 surface（默认）或 soft；Size 缩放整个输入框；Radius=\"full\" 是胶囊形。不可用、只读、出错可以写在 Field 上，里面的输入框沿用。", Appearance),
         new("TextField", "adornments", "图标、前后缀、清空与字数", "Icon / IconEnd 放在框的两头，Prefix / Suffix 是不算在值里的固定文字，Clearable 有内容时显示清空按钮。Field 的 Error 让框标红并把错误作为说明。自己做的输入组件用 CharacterCount 显示字数。", Adornments),
         new("TextField", "formats", "手机号、身份证号、银行卡号", "Format 让输入时自动分组显示（TextFormat.Phone、IdCard、BankCard，别的用 TextFormat.Grouped 写）：Value 是去掉分隔的原文，过滤掉不接受的字符、截到最长，在中间插字光标也不跳。只管显示，校验写在表单里。", Formats),
     ];
+
+    static readonly string[] Parts = ["显示器支架", "支架底座", "铰链盖板", "夹持环", "加强筋", "防尘罩"];
+
+    static FrameworkElement Search()
+    {
+        var list = new List();
+        var search = new SearchField { PlaceholderText = "搜索零件" };
+        AutomationProperties.SetName(search, "搜索零件");
+        var requests = new List<string>();
+        var log = new Small { Tone = TextTone.Muted };
+        void Filter()
+        {
+            list.Children.Clear();
+            foreach (var part in Parts.Where(part => part.Contains((search.Text ?? "").Trim()))) list.Children.Add(new ListItem { Content = part });
+            log.Text = $"列表跟着每个字过滤；SearchRequested 只在停手 300ms、回车、清空时发，最近几次：{(requests.Count > 0 ? string.Join("、", requests) : "还没有")}";
+        }
+        search.TextChanged += (_, _) => Filter();
+        search.SearchRequested += (_, text) =>
+        {
+            requests.Add(text.Length > 0 ? text : "（清空）");
+            if (requests.Count > 3) requests.RemoveAt(0);
+            Filter();
+        };
+        Filter();
+        return new Flex { Direction = FlexDirection.Column, Gap = Space.Md, Children = { search, list, log } };
+    }
 
     static FrameworkElement Comment()
     {

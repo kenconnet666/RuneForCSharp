@@ -34,7 +34,7 @@ public class SelectControl : FlexControl, IFieldControl
     readonly IconControl chevron = new() { Tone = TextTone.Muted, Data = Lucide.ChevronDown };
     readonly FloatingSurface surface;
     readonly HeaderPanel header = new() { Dock = DockStyle.Top, Visible = false };
-    readonly TextFieldControl search = new() { Icon = Lucide.Search, Variant = ControlVariant.Soft, Dock = DockStyle.Fill };
+    readonly SearchFieldControl search = new() { Variant = ControlVariant.Soft, Dock = DockStyle.Fill };
     readonly ListboxControl listbox = new() { Embedded = true, Dock = DockStyle.Fill };
     readonly RemoteOptions remote;
     readonly Dictionary<string, string> seen = [];
@@ -250,7 +250,7 @@ public class SelectControl : FlexControl, IFieldControl
     internal ListboxControl List => listbox;
 
     /// <summary>弹出层顶部的搜索框（测试用）。</summary>
-    internal TextFieldControl SearchBox => search;
+    internal SearchFieldControl SearchBox => search;
 
     /// <summary>搜索框那一行（测试用）。</summary>
     internal Control Header => header;

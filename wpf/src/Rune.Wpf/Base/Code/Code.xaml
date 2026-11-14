@@ -1,4 +1,4 @@
-<!-- Code、Mark 的主题样式（vue-tsx-pro 的 codeStyles.root、markStyles.root）：行内文字只有字体、颜色、底色可设 -->
+<!-- 行内文字的主题样式：Code、Mark（vue-tsx-pro 的 codeStyles、markStyles），Del、Ins、Strike（Text 系列的标签样式）；行内文字只有字体、颜色、底色、装饰线可设 -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:rune="clr-namespace:Rune.Wpf">
@@ -9,5 +9,15 @@
   </Style>
   <Style TargetType="rune:Mark">
     <Setter Property="Background" Value="{DynamicResource Rune.Brush.Highlight}" />
+  </Style>
+  <Style TargetType="rune:Del">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+    <Setter Property="TextDecorations" Value="Strikethrough" />
+  </Style>
+  <Style TargetType="rune:Ins">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.SuccessSoft}" />
+  </Style>
+  <Style TargetType="rune:Strike">
+    <Setter Property="TextDecorations" Value="Strikethrough" />
   </Style>
 </ResourceDictionary>

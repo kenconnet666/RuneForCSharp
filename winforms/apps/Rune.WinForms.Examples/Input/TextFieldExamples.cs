@@ -9,10 +9,38 @@ static class TextFieldExamples
     public static Example[] All =>
     [
         new("TextField", "textarea", "Textarea", "TextareaControl 的高度随内容在 Rows 与 MaxRows 之间增长；Fixed 关掉自动增高，Clearable 在右上角放清空按钮。字数计数超出上限时变成危险色，读屏念完整的句子。", Comment),
+        new("TextField", "search", "搜索框", "SearchFieldControl 是 Type=search 的 TextField：带搜索图标、清空按钮，名称与占位文字默认是“搜索”。Text 每敲一个字都更新，本地过滤直接用它；SearchRequested 只在该查的时候发——停手 Delay（默认 300ms）、按回车、清空，同一个词不重复，发请求用它。下拉、表头筛选里的搜索框都是它。", Search),
         new("TextField", "appearance", "样式、尺寸与状态", "Variant 是 surface（默认）或 soft；TextSize 缩放整个输入框；Radius = full 是胶囊形。只读、出错可以写在 FieldControl 上，里面的输入框沿用。", Appearance),
         new("TextField", "adornments", "图标、前后缀、清空与字数", "Icon / IconEnd 放在框的两头，Prefix / Suffix 是不算在值里的固定文字，Clearable 有内容时显示清空按钮。FieldControl 的 Error 让框标红并把错误作为说明。自己做的输入组件用 CharacterCountControl 显示字数。", Adornments),
         new("TextField", "formats", "手机号、身份证号、银行卡号", "Format 让输入时自动分组显示（TextFormat.Phone、IdCard、BankCard，别的用 TextFormat.Grouped 写）：Value 是去掉分隔的原文，过滤掉不接受的字符、截到最长，在中间插字光标也不跳。只管显示，校验写在表单里。", Formats),
     ];
+
+    static readonly string[] Parts = ["显示器支架", "支架底座", "铰链盖板", "夹持环", "加强筋", "防尘罩"];
+
+    static Control Search()
+    {
+        var list = new UnorderedListControl();
+        var search = new SearchFieldControl { PlaceholderText = "搜索零件", AccessibleName = "搜索零件" };
+        var requests = new List<string>();
+        var log = new SmallControl { Tone = TextTone.Muted };
+        void Filter()
+        {
+            list.SuspendLayout();
+            list.Controls.Cast<Control>().ToList().ForEach(item => item.Dispose());
+            list.Controls.AddRange([.. Parts.Where(part => part.Contains(search.Text.Trim())).Select(part => new ListItemControl { Text = part })]);
+            list.ResumeLayout();
+            log.Text = $"列表跟着每个字过滤；SearchRequested 只在停手 300ms、回车、清空时发，最近几次：{(requests.Count > 0 ? string.Join("、", requests) : "还没有")}";
+        }
+        search.TextChanged += (_, _) => Filter();
+        search.SearchRequested += (_, text) =>
+        {
+            requests.Add(text.Length > 0 ? text : "（清空）");
+            if (requests.Count > 3) requests.RemoveAt(0);
+            Filter();
+        };
+        Filter();
+        return Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Md }, search, list, log);
+    }
 
     static Control Comment()
     {

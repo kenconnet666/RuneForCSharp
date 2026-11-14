@@ -167,7 +167,7 @@ public class Select : Control, IFieldControl
     readonly Border shadow = new();
     readonly Border panel = new() { ClipToBounds = true };
     readonly Border header = new() { Visibility = Visibility.Collapsed };
-    readonly TextField search = new() { Icon = Lucide.Search, Variant = ControlVariant.Soft };
+    readonly SearchField search = new() { Variant = ControlVariant.Soft };
     readonly Listbox listbox = new() { Focusable = false };
     readonly RemoteOptions remote;
     readonly Dictionary<string, string> seen = [];
@@ -332,7 +332,7 @@ public class Select : Control, IFieldControl
     internal Listbox List => listbox;
 
     /// <summary>弹出层顶部的搜索框（测试用）。</summary>
-    internal TextField SearchBox => search;
+    internal SearchField SearchBox => search;
 
     /// <summary>搜索框那一行（测试用）。</summary>
     internal Border Header => header;

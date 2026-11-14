@@ -8,7 +8,7 @@
           "name": "Text",
           "slug": "text",
           "title": "Text 文字与列表",
-          "description": "正文、链接、标题与列表：字号、字重、色调、截断与换行；Paragraph、Strong、Em、Small、Link、Mark、Kbd、Blockquote、H1–H6，正文里的 List、OrderedList。",
+          "description": "正文、链接、标题与列表：字号、字重、色调、截断与换行；Paragraph、Strong、Em、Small、Sub、Sup、Del、Ins、Strike、Abbr、Link、Mark、Kbd、Blockquote、H1–H6，正文里的 List、OrderedList。",
           "order": 0,
           "wide": true,
           "columns": [
@@ -203,7 +203,49 @@
                     "code": "Blockquote"
                   },
                   {
-                    "text": "（引用）。"
+                    "text": "（引用，"
+                  },
+                  {
+                    "code": "source"
+                  },
+                  {
+                    "text": " 写出处）。"
+                  },
+                  {
+                    "code": "Sub"
+                  },
+                  {
+                    "text": "、"
+                  },
+                  {
+                    "code": "Sup"
+                  },
+                  {
+                    "text": " 是上下标，不撑高所在的行；"
+                  },
+                  {
+                    "code": "Strike"
+                  },
+                  {
+                    "text": " 是不再有效的内容（原价），文档的增删用 "
+                  },
+                  {
+                    "code": "Del"
+                  },
+                  {
+                    "text": "、"
+                  },
+                  {
+                    "code": "Ins"
+                  },
+                  {
+                    "text": "（加进来的是浅绿底，不用下划线，免得和链接分不清）。"
+                  },
+                  {
+                    "code": "Abbr"
+                  },
+                  {
+                    "text": " 是缩写：全称在提示里，悬停、键盘聚焦、触屏点按都看得到（原生的 title 只有鼠标悬停才有）。"
                   }
                 ]
               },
@@ -282,6 +324,7 @@
             "Link",
             "Mark",
             "Kbd",
+            "Abbr",
             "Blockquote",
             "List",
             "OrderedList",
@@ -3373,6 +3416,36 @@
                   },
                   {
                     "text": " 换成自己的内容。"
+                  },
+                  {
+                    "code": "sources"
+                  },
+                  {
+                    "text": " 让它渲染成 picture：新格式回退（avif、webp 排在前面，都不认时用 "
+                  },
+                  {
+                    "code": "src"
+                  },
+                  {
+                    "text": "）、窄屏或暗色换一张图（"
+                  },
+                  {
+                    "code": "media"
+                  },
+                  {
+                    "text": "）；只是同一张图的不同尺寸时，直接写 "
+                  },
+                  {
+                    "code": "srcset"
+                  },
+                  {
+                    "text": "、"
+                  },
+                  {
+                    "code": "sizes"
+                  },
+                  {
+                    "text": "。"
                   }
                 ]
               }
@@ -3565,6 +3638,175 @@
           "api": [
             "VirtualList",
             "InfiniteListStatus"
+          ]
+        },
+        {
+          "name": "Figure",
+          "slug": "figure",
+          "title": "Figure 插图、视频与嵌入",
+          "description": "带说明的插图（figure）、固定宽高比的框（AspectRatio）、视频（Video）、嵌入的页面（Embed，iframe）：说明是内容的名称，比例框加载前就占好位置。",
+          "order": 8.5,
+          "wide": true,
+          "columns": [
+            [
+              {
+                "id": "captions",
+                "title": "图片与表格的说明",
+                "demo": "Captions",
+                "description": [
+                  {
+                    "code": "Figure"
+                  },
+                  {
+                    "text": " 是 figure 元素，"
+                  },
+                  {
+                    "code": "caption"
+                  },
+                  {
+                    "text": " 是 figcaption：读屏把说明当作这块内容的名称。图片、图表的说明在下面；表格的说明习惯放上面（"
+                  },
+                  {
+                    "code": "captionSide=\"top\""
+                  },
+                  {
+                    "text": "）。"
+                  },
+                  {
+                    "code": "align"
+                  },
+                  {
+                    "text": " 让内容与说明一起对齐。"
+                  }
+                ]
+              },
+              {
+                "id": "embed",
+                "title": "嵌入的页面",
+                "demo": "Embedded",
+                "description": [
+                  {
+                    "code": "Embed"
+                  },
+                  {
+                    "text": " 是带外框的 iframe："
+                  },
+                  {
+                    "code": "title"
+                  },
+                  {
+                    "text": " 必填（读屏靠它知道这一块是什么），默认延迟加载（滚到附近才加载）、"
+                  },
+                  {
+                    "code": "referrerpolicy"
+                  },
+                  {
+                    "text": " 是 strict-origin-when-cross-origin，加载完之前显示骨架。嵌入不受信任的页面时写 "
+                  },
+                  {
+                    "code": "sandbox"
+                  },
+                  {
+                    "text": "，只放开需要的权限；"
+                  },
+                  {
+                    "code": "allow"
+                  },
+                  {
+                    "text": "、"
+                  },
+                  {
+                    "code": "srcdoc"
+                  },
+                  {
+                    "text": " 这些原生属性照常落到 iframe 上。"
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "id": "video",
+                "title": "视频",
+                "demo": "Clip",
+                "description": [
+                  {
+                    "code": "Video"
+                  },
+                  {
+                    "text": " 用浏览器自己的控制条，外面是定比例的框（"
+                  },
+                  {
+                    "code": "ratio"
+                  },
+                  {
+                    "text": "），画面完整放进去、四周黑底；"
+                  },
+                  {
+                    "code": "poster"
+                  },
+                  {
+                    "text": " 是封面，"
+                  },
+                  {
+                    "code": "sources"
+                  },
+                  {
+                    "text": " 给几种格式，"
+                  },
+                  {
+                    "code": "tracks"
+                  },
+                  {
+                    "text": " 是字幕。"
+                  },
+                  {
+                    "code": "autoplay"
+                  },
+                  {
+                    "text": " 默认静音、行内播放，系统要求减少动态效果时不自动播放并显示控制条。倍速、清晰度这类自绘的控制条不在这里。"
+                  }
+                ]
+              },
+              {
+                "id": "ratio",
+                "title": "固定宽高比",
+                "demo": "Ratio",
+                "description": [
+                  {
+                    "code": "AspectRatio"
+                  },
+                  {
+                    "text": " 的宽度跟着容器，高度按比例算，里面的元素铺满它（图片、视频按 cover 裁切）。封面、地图、播放器在加载前就占好位置，加载完不把下面的内容顶开。"
+                  },
+                  {
+                    "code": "ratio"
+                  },
+                  {
+                    "text": " 接受数（"
+                  },
+                  {
+                    "code": "{16 / 9}"
+                  },
+                  {
+                    "text": "）或 CSS 的写法（"
+                  },
+                  {
+                    "code": "\"4 / 3\""
+                  },
+                  {
+                    "text": "）。"
+                  }
+                ]
+              }
+            ]
+          ],
+          "keyboard": [],
+          "api": [
+            "Figure",
+            "AspectRatio",
+            "Video",
+            "Embed"
           ]
         },
         {
@@ -4944,6 +5186,18 @@
                   },
                   {
                     "text": " 不显示。值也可以是 bigint、Decimal。"
+                  },
+                  {
+                    "code": "bands"
+                  },
+                  {
+                    "text": " 是量表的用法（磁盘占用、配额、评分这类量出来的数）：值落在哪一段就用哪一段的色调，角色换成 "
+                  },
+                  {
+                    "code": "role=\"meter\""
+                  },
+                  {
+                    "text": "；仪表盘样子的量表用 Gauge。"
                   }
                 ]
               },
@@ -7665,7 +7919,7 @@
           "name": "TextField",
           "slug": "text-field",
           "title": "TextField 文本框",
-          "description": "单行的 TextField 与自动增高的 Textarea：前后图标、固定的前后缀、一键清空、显示密码、字数计数；放进 Field 自动关联标签、说明与错误。",
+          "description": "单行的 TextField、搜索框 SearchField 与自动增高的 Textarea：前后图标、固定的前后缀、一键清空、显示密码、字数计数；放进 Field 自动关联标签、说明与错误。",
           "order": 1,
           "wide": true,
           "columns": [
@@ -7747,6 +8001,43 @@
                   },
                   {
                     "text": " 在右上角放清空按钮。字数计数超出上限时变成危险色，读屏念完整的句子。"
+                  }
+                ]
+              },
+              {
+                "id": "search",
+                "title": "搜索框",
+                "demo": "Search",
+                "description": [
+                  {
+                    "code": "SearchField"
+                  },
+                  {
+                    "text": " 是 "
+                  },
+                  {
+                    "code": "type=\"search\""
+                  },
+                  {
+                    "text": " 的 TextField：带搜索图标、清空按钮，名称与占位文字默认是“搜索”。"
+                  },
+                  {
+                    "code": "_value"
+                  },
+                  {
+                    "text": " 每敲一个字都更新，本地过滤直接用它；"
+                  },
+                  {
+                    "code": "onSearch"
+                  },
+                  {
+                    "text": " 只在该查的时候调用——停手 "
+                  },
+                  {
+                    "code": "delay"
+                  },
+                  {
+                    "text": "（默认 300ms）、按回车、清空，同一个词不重复，发请求用它。下拉、穿梭框、树、表头筛选里的搜索框都是它。"
                   }
                 ]
               }
@@ -7877,9 +8168,19 @@
               }
             ]
           ],
-          "keyboard": [],
+          "keyboard": [
+            {
+              "keys": "Enter",
+              "action": [
+                {
+                  "text": "搜索框：立即触发 onSearch（不等停手）"
+                }
+              ]
+            }
+          ],
           "api": [
             "TextField",
+            "SearchField",
             "Textarea",
             "CharacterCount"
           ]
@@ -15155,6 +15456,101 @@
           "api": [
             "AppShell",
             "AppShellBrand"
+          ]
+        },
+        {
+          "name": "PageHeader",
+          "slug": "page-header",
+          "title": "PageHeader 页头",
+          "description": "页面开头的那一块：面包屑、返回、标题与状态、说明、结束边的操作，下面接摘要或标签页；列表页、详情页、表单页不用各自拿 Flex 拼。",
+          "order": 1.5,
+          "wide": true,
+          "columns": [
+            [
+              {
+                "id": "detail",
+                "title": "详情页",
+                "demo": "Detail",
+                "description": [
+                  {
+                    "code": "breadcrumbs"
+                  },
+                  {
+                    "text": " 是面包屑（最后一项是当前页），"
+                  },
+                  {
+                    "code": "meta"
+                  },
+                  {
+                    "text": " 放标题后面的状态、标签，"
+                  },
+                  {
+                    "code": "actions"
+                  },
+                  {
+                    "text": " 靠结束边、放不下时整块换到标题下面。给了 "
+                  },
+                  {
+                    "code": "onBack"
+                  },
+                  {
+                    "text": " 就有返回按钮；给 "
+                  },
+                  {
+                    "code": "backHref"
+                  },
+                  {
+                    "text": " 时返回是链接，能在新标签页打开。"
+                  },
+                  {
+                    "code": "children"
+                  },
+                  {
+                    "text": " 排在最下面，放摘要。"
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "id": "simple",
+                "title": "列表页：标题、说明与标签页",
+                "demo": "Simple",
+                "description": [
+                  {
+                    "text": "只写 "
+                  },
+                  {
+                    "code": "title"
+                  },
+                  {
+                    "text": " 就是一个 h1；标题与 "
+                  },
+                  {
+                    "code": "description"
+                  },
+                  {
+                    "text": " 在 hgroup 里。标签页放在 "
+                  },
+                  {
+                    "code": "children"
+                  },
+                  {
+                    "text": "。页头嵌在页面里的一块（抽屉、分栏的右侧）时用 "
+                  },
+                  {
+                    "code": "headingLevel"
+                  },
+                  {
+                    "text": " 把标题降到 h2、h3。"
+                  }
+                ]
+              }
+            ]
+          ],
+          "keyboard": [],
+          "api": [
+            "PageHeader"
           ]
         },
         {

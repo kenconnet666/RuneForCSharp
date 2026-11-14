@@ -13,7 +13,7 @@ static class TextExamples
         new("Text", "scale", "字号与字重", "TextSize 对应主题的字号档位，Weight 对应字重；不写时跟随字体，SmallControl 默认 xs，StrongControl 默认 semibold。GDI 的字体只有常规与粗体。", Scale),
         new("Text", "tones", "色调", "Tone 取主题的文字色，与 Button、Badge 的色调同名：neutral 是正文色，muted 用于次要说明，其余是品牌色与提示色的文字色。", Tones),
         new("Text", "numeric", "编号与数字", "Mono 用等宽字体（编号、件号）；界面字体的数字本来就等宽，Numeric 只记下意图。", Numeric),
-        new("Text", "inline", "行内元素", "Kbd 写按键，Code 写行内代码，Mark 标出要强调的词；整段引用用 BlockquoteControl。WinForms 的文字是整段画的，Code、Mark 是单独的控件，不跟着一段文字换行。", Inline),
+        new("Text", "inline", "行内元素", "Kbd 写按键，Code 写行内代码，Mark 标出要强调的词；Sub、Sup 是上下标；Strike 是不再有效的内容（原价），文档的增删用 Del、Ins（加进来的是浅绿底，不用下划线）。整段引用用 BlockquoteControl。WinForms 的文字是整段画的，Code、Mark、Sub、Sup、Del、Ins、Strike 是单独的控件，不跟着一段文字换行。", Inline),
         new("Text", "headings", "标题", "H1–H6 各是一个控件，默认字号按级别递减，TextSize 能单独改：视觉层级与文档结构分开。GDI 画不出收紧的字间距。", Headings),
         new("Text", "links", "链接", "LinkControl 默认带下划线：正文里的链接不能只靠颜色区分。External 加外链图标并告诉读屏在新窗口打开；Underline 的 hover、none 用在一眼看得出是链接的地方。WinForms 的链接是单独的控件，不跟着一段文字换行。", Links),
         new("Text", "overflow", "截断与换行", "Truncate 单行省略，LineClamp 限制行数（都要有宽度：放在 Flex、Grid、Card 里由它们给，或设 MaximumSize）；Wrap 的 Pretty、Balance 在桌面上同普通换行。", Overflow),
@@ -82,6 +82,10 @@ static class TextExamples
             new MarkControl { Text = "Button 按钮" }, new TextControl { Text = "与它的全部示例。" },
             new StrongControl { Text = "Strong" }, new TextControl { Text = " 表示重要，" }, new EmControl { Text = "Em" }, new TextControl { Text = " 表示语气上的强调，" },
             new SmallControl { Text = "Small 用于附注与版权信息" }, new TextControl { Text = "。" }),
+        Build.Flex(new FlexControl { Align = FlexAlign.Center, Wrap = true },
+            new TextControl { Text = "仓库面积 860 m" }, new SupControl { Text = "2" }, new TextControl { Text = "，冷却液的主要成分是 H" }, new SubControl { Text = "2" },
+            new TextControl { Text = "O；SLA 承诺可用率 99.9%。会员价 " }, new StrikeControl { Text = "¥199", Tone = TextTone.Muted }, new TextControl { Text = " ¥149。交期从 " },
+            new DelControl { Text = "10 月 20 日" }, new TextControl { Text = " 改到 " }, new InsControl { Text = "11 月 5 日" }, new TextControl { Text = "。" }),
         Quote(new ParagraphControl { Text = "渐进式框架：可以只在页面的一小块里用它，也可以用它搭建完整的单页应用。" }, new SmallControl { Text = "—— Vue 文档", Tone = TextTone.Muted }));
 
     /// <summary>引用：竖线在起始边，里面的内容竖着排。</summary>

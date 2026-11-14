@@ -1,4 +1,4 @@
-<!-- Code、Mark 的主题（vue-tsx-pro 的 codeStyles.root、markStyles.root）：行内文字只有字体、颜色、底色可设 -->
+<!-- 行内文字的主题：Code、Mark（vue-tsx-pro 的 codeStyles、markStyles），Sub、Sup、Del、Ins、Strike（Text 系列的标签样式）；行内文字只有字体、颜色、底色、装饰线、基线可设 -->
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:rune="clr-namespace:Rune.Avalonia">
@@ -9,5 +9,22 @@
   </ControlTheme>
   <ControlTheme x:Key="{x:Type rune:Mark}" TargetType="rune:Mark">
     <Setter Property="Background" Value="{DynamicResource Rune.Brush.Highlight}" />
+  </ControlTheme>
+  <!-- 上下标：TS 让它不占行高、相对基线挪位置；这里交给排版的上下标基线 -->
+  <ControlTheme x:Key="{x:Type rune:Sub}" TargetType="rune:Sub">
+    <Setter Property="BaselineAlignment" Value="Subscript" />
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type rune:Sup}" TargetType="rune:Sup">
+    <Setter Property="BaselineAlignment" Value="Superscript" />
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type rune:Del}" TargetType="rune:Del">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+    <Setter Property="TextDecorations" Value="Strikethrough" />
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type rune:Ins}" TargetType="rune:Ins">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.SuccessSoft}" />
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type rune:Strike}" TargetType="rune:Strike">
+    <Setter Property="TextDecorations" Value="Strikethrough" />
   </ControlTheme>
 </ResourceDictionary>

@@ -430,6 +430,19 @@ defineTheme / defineLang 忽略 undefined——网页专用或 C# 没有 undefin
 
 锁定跟到 0.25.0（fffc0c7f）：token、语言包、图标、配方、文档页面清单都没变（生成器 --check 通过）。
 
+### 第三十六批（2026-11-14，0.26.0 c42b2f39：补齐 HTML 标签、SearchField、页头）
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| Collapse 的内容区宽度就是容器宽度（网格列 minmax(0, 1fr)、内容 min-width: 0），不再被最宽的内容撑开（2c45e89e） | 三个平台本来就按给的宽度量、按容器宽度排 | 不用改：Avalonia、WPF 按可用宽度量内容、按最终宽度排；WinForms 的 VerticalStack 取内容宽与给的宽度里小的那个 |
+| 新增 SearchField：搜索图标、清空、默认名称与占位文字是 selectSearch；onSearch 在停手 delay、回车、清空时调用，同一个词不重复，父级从外面改值不触发 | 已做 | 三个平台的 SearchField（WinForms 是 SearchFieldControl）：事件叫 SearchRequested（Search 是立即搜索的方法），Delay 是 TimeSpan。桌面分不出"父级改值"与"输入"：没有焦点时改的 Text 算从外面改 |
+| Select、Cascader、TreeSelect、Transfer、PeoplePicker、JsonViewer、表头筛选的搜索框换成 SearchField（有清空按钮） | Select 已换；其余组件还没做 | 做时用 SearchField |
+| 新增 Sub、Sup、Del、Ins、Strike（Text 系列） | 已做 | Avalonia、WPF 是行内文字：Sub、Sup 是 Run（基线对齐不从外层 Span 继承；WPF 用 TextTop / TextBottom，平台的 Superscript 抬得太高），Del、Ins、Strike 是带主题的 Span；WinForms 是单独的控件（同 Code、Mark） |
+| 新增 Abbr、Figure、AspectRatio、Embed、Video、PageHeader（patterns），语言包 pageHeaderBack | 还没做 | 语言包已生成；组件接着做（Embed、Video 要看桌面的网页、媒体控件怎么接） |
+| Blockquote 的 source、Image 的 sources、Progress 的 bands（量表） | 还没做 | 接着做；Image 的 sources（按格式、媒体条件换图）是网页的，桌面不涉及 |
+
+锁定跟到 0.26.0（c42b2f39）：语言包多一个 pageHeaderBack、文档页面清单重新生成；token、图标、配方没变。
+
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 
 计划：vue-tsx-pro 的 `.claude/reports/style-overhaul-plan.md`（阶段 0 护栏 → 1 引擎 → 2 架构与 API → 3 整理 → 4 美学 → 5 文档）。
