@@ -10,11 +10,8 @@
     <rune:Paragraph>
       仓库面积 860 m<rune:Sup>2</rune:Sup>，冷却液的主要成分是 H<rune:Sub>2</rune:Sub>O；SLA 承诺可用率 99.9%。会员价 <rune:Strike Foreground="{DynamicResource Rune.Brush.TextMuted}">¥199</rune:Strike> ¥149。交期从 <rune:Del>10 月 20 日</rune:Del> 改到 <rune:Ins>11 月 5 日</rune:Ins>。
     </rune:Paragraph>
-    <rune:Blockquote>
-      <StackPanel>
-        <rune:Paragraph>渐进式框架：可以只在页面的一小块里用它，也可以用它搭建完整的单页应用。</rune:Paragraph>
-        <rune:Small Tone="muted">—— Vue 文档</rune:Small>
-      </StackPanel>
+    <rune:Blockquote Source="Vue 文档">
+      <rune:Paragraph>渐进式框架：可以只在页面的一小块里用它，也可以用它搭建完整的单页应用。</rune:Paragraph>
     </rune:Blockquote>
   </StackPanel>
 </UserControl>

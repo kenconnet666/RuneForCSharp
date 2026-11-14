@@ -6,14 +6,17 @@ namespace Rune.WinForms;
 /// 引用（vue-tsx-pro 的 Blockquote）：起始边一条竖线（从右到左时在右边），里面的文字是次要文字色。提示、警告用 Alert，不用引用。
 /// 是一个放子控件的面板（同 Panel）：子控件的文字颜色跟随它（ForeColor 是环境属性）。
 /// <code>
-/// var quote = new BlockquoteControl();
+/// var quote = new BlockquoteControl { Source = "Vue 文档" };
 /// quote.Controls.Add(new ParagraphControl { Text = "渐进式框架……", Dock = DockStyle.Top });
 /// </code>
+/// <see cref="Source"/> 是给人看的出处（作者、书名、来源的名字）：停在底边的一行，前面带破折号，小一号。
 /// 竖线 borderWidths.md、颜色 borderStrong；上下内边距 space.xs、起始边 space.lg（按字体的 em，随字体与 DPI 重算）。
 /// </summary>
 public class BlockquoteControl : Panel, IScopeAware
 {
     readonly Effect theme;
+    // 出处：停在底边，和上面的内容隔开 space.xs
+    readonly TextControl source = new() { TextSize = TextSize.Sm, Dock = DockStyle.Bottom, Visible = false };
 
     /// <summary>新建：自动大小，跟随主题。</summary>
     public BlockquoteControl()
@@ -22,8 +25,37 @@ public class BlockquoteControl : Panel, IScopeAware
         AutoSize = true;
         AutoSizeMode = AutoSizeMode.GrowAndShrink;
         theme = new Effect(ApplyTheme);
+        Controls.Add(source);
         ApplyTheme();
         UpdatePadding();
+    }
+
+    /// <summary>出处（作者、书名、来源的名字）；不写时没有这一行。</summary>
+    [Category("Appearance")]
+    [DefaultValue(null)]
+    public string? Source
+    {
+        get;
+        set
+        {
+            field = value;
+            source.Text = string.IsNullOrEmpty(value) ? "" : $"— {value}";
+            source.Visible = !string.IsNullOrEmpty(value);
+        }
+    }
+
+    /// <summary>出处那一行的部件属性（TS 的 propsSource）：字号、色调、字重等，盖过默认的 sm。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public TextProps? PropsSource
+    {
+        get;
+        set
+        {
+            field = value;
+            source.TextSize = TextSize.Sm;
+            value?.ApplyTo(source.Element);
+        }
     }
 
     /// <summary>内边距由字体与 DPI 算出（起始边留出竖线与 space.lg），不在设计器里改。</summary>
@@ -55,6 +87,7 @@ public class BlockquoteControl : Panel, IScopeAware
     {
         var start = (int)MathF.Round(Rule + Tokens.Space.Lg * Em);
         var block = (int)MathF.Round(Tokens.Space.Xs * Em);
+        source.Padding = new Padding(0, block, 0, 0);
         base.Padding = RightToLeft == RightToLeft.Yes ? new Padding(0, block, start, block) : new Padding(start, block, 0, block);
     }
 

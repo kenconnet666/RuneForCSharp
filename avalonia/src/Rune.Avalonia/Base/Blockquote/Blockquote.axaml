@@ -12,7 +12,16 @@
       <ControlTemplate>
         <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
                 BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
-          <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" />
+          <StackPanel>
+            <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" />
+            <!-- 出处：小一号，和引用隔开 space.xs；书名、作者不用斜体 -->
+            <StackPanel Name="PART_Source" Orientation="Horizontal" Margin="{rune:Em 0, 0.25, 0, 0}"
+                        IsVisible="{TemplateBinding Source, Converter={x:Static ObjectConverters.IsNotNull}}"
+                        TextElement.FontSize="{DynamicResource Rune.FontSize.Sm}">
+              <TextBlock Text="— " />
+              <ContentPresenter Content="{TemplateBinding Source}" />
+            </StackPanel>
+          </StackPanel>
         </Border>
       </ControlTemplate>
     </Setter>

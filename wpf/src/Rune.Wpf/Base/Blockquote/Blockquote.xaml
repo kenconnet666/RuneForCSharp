@@ -13,8 +13,18 @@
         <ControlTemplate TargetType="rune:Blockquote">
           <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
                   BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
-            <ContentPresenter />
+            <StackPanel>
+              <ContentPresenter />
+              <!-- 出处：小一号，和引用隔开 space.xs；书名、作者不用斜体 -->
+              <StackPanel x:Name="PART_Source" Style="{DynamicResource {x:Static rune:BlockquoteParts.Source}}" Orientation="Horizontal" TextElement.FontSize="{DynamicResource Rune.FontSize.Sm}" Margin="0,4,0,0">
+                <TextBlock Text="— " />
+                <ContentPresenter Content="{TemplateBinding Source}" />
+              </StackPanel>
+            </StackPanel>
           </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="Source" Value="{x:Null}"><Setter TargetName="PART_Source" Property="Visibility" Value="Collapsed" /></Trigger>
+          </ControlTemplate.Triggers>
         </ControlTemplate>
       </Setter.Value>
     </Setter>

@@ -440,7 +440,8 @@ defineTheme / defineLang 忽略 undefined——网页专用或 C# 没有 undefin
 | 新增 Sub、Sup、Del、Ins、Strike（Text 系列） | 已做 | Avalonia、WPF 是行内文字：Sub、Sup 是 Run（基线对齐不从外层 Span 继承；WPF 用 TextTop / TextBottom，平台的 Superscript 抬得太高），Del、Ins、Strike 是带主题的 Span；WinForms 是单独的控件（同 Code、Mark） |
 | 新增 Abbr、Figure、AspectRatio、Embed、Video、PageHeader（patterns），语言包 pageHeaderBack | 还没做 | 语言包已生成；组件接着做（Embed、Video 要看桌面的网页、媒体控件怎么接） |
 | Progress 的 bands（量表：值落在哪一段用哪一段的色调，role=meter） | 已做 | 三个平台的 Bands（ProgressBand(To, Tone)，孪生文件 ProgressBands.cs）与 ResolvedTone；UIA 没有 meter 这种控件类型，读屏里仍是进度条 |
-| Blockquote 的 source、Image 的 sources | 还没做 | Blockquote 接着做；Image 的 sources（按格式、媒体条件换图）是网页的，桌面不涉及 |
+| Blockquote 的 source、propsSource（引用下面一行"— 出处"，小一号，不用斜体） | 已做 | 三个平台的 Source（Avalonia、WPF 可以放控件，WinForms 是文字）；部件：Avalonia 的 PART_Source、WPF 的 BlockquoteParts.Source、WinForms 的 PropsSource |
+| Image 的 sources（按格式、媒体条件换图） | 网页专用 | 不涉及 |
 
 锁定跟到 0.26.0（c42b2f39）：语言包多一个 pageHeaderBack、文档页面清单重新生成；token、图标、配方没变。
 
