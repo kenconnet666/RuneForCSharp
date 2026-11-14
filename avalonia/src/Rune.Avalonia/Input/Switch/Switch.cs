@@ -45,6 +45,9 @@ public class Switch : ChoiceBase
     /// <summary>切换中（如等接口返回）：滑块里转圈，点击无效。</summary>
     public static readonly StyledProperty<bool> IsLoadingProperty = AvaloniaProperty.Register<Switch, bool>(nameof(IsLoading));
 
+    /// <summary>文字下方的说明（次要颜色、小一号）：设置项里解释这个开关管什么；读屏作为帮助文字念出来（同 Checkbox、Radio）。</summary>
+    public static readonly StyledProperty<object?> DescriptionProperty = DescriptionCoreProperty.AddOwner<Switch>();
+
     /// <summary>打开时轨道里的文字或图标（如"开"、对勾）。</summary>
     public static readonly StyledProperty<object?> CheckedContentProperty = AvaloniaProperty.Register<Switch, object?>(nameof(CheckedContent));
 
@@ -118,6 +121,9 @@ public class Switch : ChoiceBase
 
     /// <summary>打开时轨道里的内容。</summary>
     public object? CheckedContent { get => GetValue(CheckedContentProperty); set => SetValue(CheckedContentProperty, value); }
+
+    /// <summary>文字下方的说明。</summary>
+    public object? Description { get => GetValue(DescriptionProperty); set => SetValue(DescriptionProperty, value); }
 
     /// <summary>关闭时轨道里的内容。</summary>
     public object? UncheckedContent { get => GetValue(UncheckedContentProperty); set => SetValue(UncheckedContentProperty, value); }

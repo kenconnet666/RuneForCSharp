@@ -403,6 +403,23 @@ Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_
 
 锁定跟到 0.23.0（b7b09011）：语言包重新生成，token、图标、配方没变。
 
+另外核对了维护 vue-tsx-pro 的会话发来的 0.23.0 要点（2026-11-14）：模态快速关了再开不被迟到的 close 关掉——我们的 Dialog 关上是立即的，没有迟到的关闭；
+实色底上的文字色（readableText）——我们没有运行时算对比色的地方（调色板由 token-gen 按主题生成）；Provider 只在配置了语言的那一层写 lang、dir、
+defineTheme / defineLang 忽略 undefined——网页专用或 C# 没有 undefined，不涉及；页面组合文案 dataImportFailed 随语言包生成。
+
+### 第三十四批（2026-11-14，0.24.0 6e7b07b7：水合、触屏、只读表单）
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| Switch 加 description / propsDescription（同 Checkbox、Radio，aria-describedby 指向它） | 已做 | 已跟：三个平台加 Description（WinForms 另有 PropsDescription），布局与读屏的帮助文字用 ChoiceBase 现成的 |
+| ContextMenu 触屏、触控笔按住 700ms 打开 | 已做 | 不用改：Avalonia 的长按手势会发 ContextRequested；WPF、WinForms 由 Windows 的按住相当于右键发右键菜单 |
+| NavList 紧凑分组触屏点图标弹出子项 | 紧凑时的弹出还没做（等 HoverCard） | 做时照新的：悬停、聚焦、点按都弹出，点外面、点了链接收起 |
+| 页面组合文案 notificationsNoMatch | 生成文件 | 重新生成 PatternsMessages |
+| ColumnTable empty；TagsInput 回车加打的字；Splitter、ResizeHandle 粗指针的命中区；ConditionBuilder、CodeEditor、Autocomplete 在只读 / 不可用表单里；NavBar 下拉里的徽标；Diagram fitView | 还没做 | 做时照新的 |
+| usePersistentState、useMediaQuery 水合；sameValue 比 Map / Set；tableToXlsx 的时区 | 网页专用或还没做 | 不涉及 |
+
+锁定跟到 0.24.0（6e7b07b7）：页面组合文案表多了 notificationsNoMatch，docs-gen 的页面清单更新；token、图标、配方、语言包没变。
+
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 
 计划：vue-tsx-pro 的 `.claude/reports/style-overhaul-plan.md`（阶段 0 护栏 → 1 引擎 → 2 架构与 API → 3 整理 → 4 美学 → 5 文档）。

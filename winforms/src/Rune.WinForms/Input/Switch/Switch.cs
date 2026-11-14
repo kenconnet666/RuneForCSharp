@@ -27,6 +27,12 @@ public class Switch : ChoiceBase
     /// <summary>只读：能聚焦，不能切换（查看详情、审批时）；外观照常。</summary>
     public bool IsReadOnly { get => readOnly ?? false; set => readOnly = value; }
 
+    /// <summary>文字下方的说明（次要颜色、小一号）：设置项里解释这个开关管什么；读屏的帮助文字（同 Checkbox、Radio）。</summary>
+    public string? Description { get => DescriptionText; set => DescriptionText = value; }
+
+    /// <summary>说明部件的属性（TS 的 propsDescription）。</summary>
+    public TextProps? PropsDescription { get => DescriptionProps; set => DescriptionProps = value; }
+
     /// <summary>必填（外观不变，供表单用）。</summary>
     public bool IsRequired { get => required ?? false; set => required = value; }
 
@@ -231,6 +237,17 @@ public class SwitchControl : ChoiceControl<Switch>
     [Description("只读：能聚焦，不能切换；外观照常。")]
     [DefaultValue(false)]
     public bool IsReadOnly { get => Element.IsReadOnly; set { Element.IsReadOnly = value; AccessibilityNotifyClients(AccessibleEvents.StateChange, -1); } }
+
+    /// <summary>文字下方的说明。</summary>
+    [Category("Appearance")]
+    [Description("文字下方的说明（读屏的帮助文字）。")]
+    [DefaultValue(null)]
+    public string? Description { get => Element.Description; set => Element.Description = value; }
+
+    /// <summary>说明部件的属性（代码里设）。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public TextProps? PropsDescription { get => Element.PropsDescription; set => Element.PropsDescription = value; }
 
     /// <summary>必填。</summary>
     [Category("Behavior")]

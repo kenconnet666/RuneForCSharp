@@ -247,4 +247,14 @@ public class SwitchTests
         Assert.True(properties[nameof(SwitchControl.CheckedContent)]!.ShouldSerializeValue(toggle));
         Assert.Equal("开", properties[nameof(SwitchControl.CheckedContent)]!.Converter.ConvertToString(toggle.CheckedContent));
     });
+
+    [Fact]
+    [Upstream("Switch", "description：文字下面的说明，读屏作为描述念出来")]
+    public Task The_description_sits_under_the_label_and_is_read_as_help() => WinFormsUi.Run(() =>
+    {
+        var toggle = new SwitchControl { Text = "订单通知", Description = "有新订单时发邮件" };
+        using var form = WinFormsUi.Show(toggle);
+
+        Assert.Equal("有新订单时发邮件", toggle.AccessibilityObject.Help);
+    });
 }

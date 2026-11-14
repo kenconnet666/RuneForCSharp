@@ -8,6 +8,7 @@ using Avalonia.Headless;
 using Avalonia.Input;
 using Avalonia.LogicalTree;
 using Avalonia.Media;
+using Avalonia.VisualTree;
 
 namespace Rune.Avalonia.Tests;
 
@@ -139,5 +140,18 @@ public class SwitchTests
         Toggle(toggle).Toggle();
         Assert.False(toggle.IsChecked); // 拦下了：接口回来再写 IsChecked
         Assert.Equal(toggle.ThemeColor("Rune.Brush.SuccessText"), Lookup.ColorOf(toggle.ToneFill));
+    });
+
+    [Fact]
+    [Upstream("Switch", "description：文字下面的说明，读屏作为描述念出来")]
+    public Task The_description_sits_under_the_label_and_is_read_as_help() => HeadlessUi.Run(() =>
+    {
+        var toggle = new Switch { Content = "订单通知", Description = "有新订单时发邮件" };
+        HeadlessUi.Show(toggle);
+
+        var description = toggle.GetVisualDescendants().OfType<global::Avalonia.Controls.Presenters.ContentPresenter>().Single(part => part.Name == ChoiceBaseParts.Description);
+        Assert.Equal("有新订单时发邮件", description.Content);
+        Assert.True(description.IsVisible);
+        Assert.Equal("有新订单时发邮件", toggle.Peer().GetHelpText());
     });
 }

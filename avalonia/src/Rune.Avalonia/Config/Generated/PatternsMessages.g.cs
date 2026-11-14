@@ -65,6 +65,9 @@ public sealed partial record PatternsMessages
     /// <summary>通知中心：没有通知，默认“没有通知”</summary>
     public required string NotificationsEmpty { get; init; }
 
+    /// <summary>通知：有通知，但按类型、只看未读筛选后一条都没有，默认“没有符合条件的通知”</summary>
+    public required string NotificationsNoMatch { get; init; }
+
     /// <summary>通知中心：一条未读的标记（读屏），默认“未读”</summary>
     public required string NotificationUnreadMark { get; init; }
 
@@ -305,6 +308,7 @@ public sealed partial record PatternsMessages
         NotificationsAll = "全部",
         NotificationsUnreadOnly = "只看未读",
         NotificationsEmpty = "没有通知",
+        NotificationsNoMatch = "没有符合条件的通知",
         NotificationUnreadMark = "未读",
         KanbanInstructions = "按空格拿起，左右方向键换列、上下方向键调整位置，再按空格放下，Esc 取消",
         KanbanEmpty = "没有",
@@ -401,6 +405,7 @@ public sealed partial record PatternsMessages
         NotificationsAll = "All",
         NotificationsUnreadOnly = "Unread only",
         NotificationsEmpty = "No notifications",
+        NotificationsNoMatch = "No matching notifications",
         NotificationUnreadMark = "Unread",
         KanbanInstructions = "Press space to pick up, use the left and right arrow keys to change column and the up and down arrow keys to change position, press space again to drop, Escape to cancel",
         KanbanEmpty = "None",

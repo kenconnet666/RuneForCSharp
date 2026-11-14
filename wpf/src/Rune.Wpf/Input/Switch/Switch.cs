@@ -42,6 +42,9 @@ public class Switch : ChoiceBase
     public static readonly DependencyProperty IsLoadingProperty = DependencyProperty.Register(
         nameof(IsLoading), typeof(bool), typeof(Switch), new PropertyMetadata(false, (d, e) => ((Switch)d).OnIsLoadingChanged((bool)e.NewValue)));
 
+    /// <summary>文字下方的说明（次要颜色、小一号）：设置项里解释这个开关管什么；读屏作为帮助文字念出来（同 Checkbox、Radio）。</summary>
+    public static readonly DependencyProperty DescriptionProperty = DescriptionCoreProperty.AddOwner(typeof(Switch));
+
     /// <summary>打开时轨道里的文字或图标（如"开"、对勾）。</summary>
     public static readonly DependencyProperty CheckedContentProperty = DependencyProperty.Register(
         nameof(CheckedContent), typeof(object), typeof(Switch), new FrameworkPropertyMetadata(null, (d, _) => ((Switch)d).Update()));
@@ -126,6 +129,9 @@ public class Switch : ChoiceBase
 
     /// <summary>打开时轨道里的内容。</summary>
     public object? CheckedContent { get => GetValue(CheckedContentProperty); set => SetValue(CheckedContentProperty, value); }
+
+    /// <summary>文字下方的说明。</summary>
+    public object? Description { get => GetValue(DescriptionProperty); set => SetValue(DescriptionProperty, value); }
 
     /// <summary>关闭时轨道里的内容。</summary>
     public object? UncheckedContent { get => GetValue(UncheckedContentProperty); set => SetValue(UncheckedContentProperty, value); }

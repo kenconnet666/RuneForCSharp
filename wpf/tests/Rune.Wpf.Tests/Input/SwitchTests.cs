@@ -222,4 +222,16 @@ public class SwitchTests
         Assert.Equal(toggle.FindResource("Rune.Opacity.Disabled"), disabled.Opacity);
         Assert.Throws<ElementNotEnabledException>(() => Toggle(disabled).Toggle());
     });
+
+    [Fact]
+    [Upstream("Switch", "description：文字下面的说明，读屏作为描述念出来")]
+    public Task The_description_sits_under_the_label_and_is_read_as_help() => WpfUi.Run(() =>
+    {
+        var toggle = new Switch { Content = "订单通知", Description = "有新订单时发邮件" };
+        var host = new System.Windows.Controls.StackPanel { Children = { toggle } };
+        host.Resources.MergedDictionaries.Add(new RuneTheme());
+        WpfUi.Show(host);
+
+        Assert.Equal("有新订单时发邮件", toggle.Peer().GetHelpText());
+    });
 }
