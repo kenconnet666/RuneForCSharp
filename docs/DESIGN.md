@@ -801,7 +801,19 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 外观：整条 sm 字号、横排换行、项与项、图标与文字之间 space.xs；链接次要色、悬停下划线；当前页正文色、中等字重（GDI 只有常规与粗体，WinForms 画成常规）；
   分隔符次要色。WPF 的 Link 是行内元素（Hyperlink），放在 Text 里，图标是行内控件，与文字之间一个空格（约 0.25em）；WinForms 的链接只有文字，图标放在旁边，同链接是次要色。
 - 部件：Avalonia、WPF 有 List、Item、CollapsedItem、Link、Button、Menu、Label、Current、Separator、Expand；WinForms 没有部件属性（同 TableOfContents，记在 parity 的欠账里）。
-- 同页的 Steps 还没做。
+
+### Steps（2026-11-14）
+
+- 照上游：`Items`（`StepItem(Title)` 加 Description、Icon、Status、Href、IsDisabled）、`Current`（Avalonia、WPF 默认双向绑定；WinForms 发 `CurrentChanged`）、
+  `Orientation`、`Size`（WinForms 叫 TextSize）、`Navigable`。`StepsOrientation`、`StepState`、`StepItem` 与推状态的规则（`StepRules`：写了 Status 用它，
+  否则之前已完成、当前、之后未开始；已完成或出错、又没标不可用的才能点回）是孪生文件 `Navigation/Steps/StepsVariants.cs`。
+- 可点回的步骤（有地址或 Navigable）是按钮：点了写回 Current，有地址时打开链接；悬停 fillHover 底、sm 圆角。读屏：Avalonia、WPF 每步的项状态是这一步的状态
+  （当前步骤、已完成、未开始、出错，取语言包的 stepState），WinForms 写在说明上。
+- 外观：圆圈直径 2 × 0.93em、xs 边框、加粗，按状态换色（已完成品牌色底、对勾；当前品牌色边；未开始 border 边、次要色；出错 danger 边、dangerSoft 底、警示图标）；
+  文字区上面留 0.3em、标题中等字重、说明 0.93em 次要色。横排各步等宽（TS 的 flex: 1 1 0，我们的 Grid 等宽列，间距 sm），竖排间距 lg。
+- 连接线不是元素，由 Steps 按圆圈的位置自己画：横排从圆圈与文字的右边隔 sm 延伸到这一格的右边、对齐圆圈中线；竖排从圆圈下面隔 xs 连到下一步的圆圈上面 xs；
+  这一步已完成时品牌色。WinForms 的子控件是各自的窗口，会盖住父级画的东西，所以每步按自然宽度放、不撑满一格，线画在空出来的地方。
+  圆圈在 WinForms 是一个元素（StepIndicator：圆、边框、对勾 / 警示图标 / 图标 / 序号），WPF 的状态色由附加属性 `Steps.State` 上的样式触发器给。
 
 ### ToggleGroup（2026-11-07）
 

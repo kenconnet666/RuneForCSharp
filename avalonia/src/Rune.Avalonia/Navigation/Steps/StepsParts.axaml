@@ -1,0 +1,49 @@
+<!--
+  Steps 部件的默认外观（vue-tsx-pro 的 stepsStyles、stepsStateStyles）：圆圈 xs 边框、加粗；已完成品牌色底与边、accentContrast 字，
+  当前品牌色边、accentText 字，未开始 border 边、次要色字，出错 danger 边、dangerSoft 底、dangerText 字，换状态时颜色在 durations.md 内过渡；
+  标题中等字重、说明次要色；可点回的步骤悬停时 fillHover 底。尺寸（直径、字号、间距、圆角）按字号在 Steps.cs 里，连接线在 Steps 的 Render 里画。
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|Steps Border#PART_Indicator">
+    <Setter Property="TextElement.FontWeight" Value="{DynamicResource Rune.FontWeight.Semibold}" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.2" />
+        <BrushTransition Property="BorderBrush" Duration="0:0:0.2" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="rune|Steps Border#PART_Indicator.complete">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Accent}" />
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Accent}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.AccentContrast}" />
+  </Style>
+  <Style Selector="rune|Steps Border#PART_Indicator.current">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Accent}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.AccentText}" />
+  </Style>
+  <Style Selector="rune|Steps Border#PART_Indicator.upcoming">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+  </Style>
+  <Style Selector="rune|Steps Border#PART_Indicator.error">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Danger}" />
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.DangerSoft}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.DangerText}" />
+  </Style>
+  <Style Selector="rune|Steps TextBlock#PART_Title">
+    <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
+  </Style>
+  <Style Selector="rune|Steps TextBlock#PART_Description">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+  </Style>
+  <Style Selector="rune|Steps rune|ButtonBase#PART_Trigger">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Padding" Value="0" />
+  </Style>
+  <Style Selector="rune|Steps rune|ButtonBase#PART_Trigger:pointerover">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.FillHover}" />
+  </Style>
+</Styles>

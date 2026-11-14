@@ -3,13 +3,57 @@ using System.Windows.Automation;
 
 namespace Rune.Wpf.Examples;
 
-/// <summary>Breadcrumbs 的示例（vue-tsx-pro 文档站 navigation/Breadcrumbs；同页的 Steps 还没移植）。</summary>
+/// <summary>Breadcrumbs 与 Steps 的示例（vue-tsx-pro 文档站 navigation/Breadcrumbs）。</summary>
 static class BreadcrumbsExamples
 {
     public static Example[] All =>
     [
         new("Breadcrumbs", "breadcrumbs", "面包屑", "最后一项是当前页（读屏的项状态是\"当前页\"），不是链接。路径太长时 MaxItems 把中间几级收进菜单（同 Radix Themes），不会把布局撑乱。分隔符从右到左排版时翻转。", Paths),
+        new("Breadcrumbs", "steps", "下单流程", "Current 是当前步骤的序号，默认双向绑定；Navigable 时已完成的步骤可以点回去，有 Href 的已完成步骤是链接。已完成的显示对勾，读屏里当前步骤的项状态是\"当前步骤\"，其余的状态另有文字；图标可以自定义，StepItem 的 Status 改写某一步的状态（出错的一步）。", Checkout),
+        new("Breadcrumbs", "vertical", "竖排与出错", "Orientation=Vertical 适合说明文字长的流程，步骤之间有竖的连接线；Status=Error 标出出错的步骤，IsDisabled 的步骤不能点。", Deploy),
     ];
+
+    static FrameworkElement Checkout()
+    {
+        StepItem[] items =
+        [
+            new("购物车") { Description = "3 件商品", Icon = Lucide.ShoppingCart }, new("收货地址") { Description = "上海市徐汇区", Icon = Lucide.MapPin },
+            new("支付") { Description = "微信 / 支付宝", Icon = Lucide.CreditCard }, new("完成") { Icon = Lucide.PackageCheck },
+        ];
+        var steps = new Steps { Items = items, Current = 1, Navigable = true };
+        var body = new Paragraph { MinHeight = 4 * 16 };
+        var back = new Button { Variant = ButtonVariant.Ghost, Tone = StatusTone.Neutral, Content = "上一步" };
+        var next = new Button();
+        void Sync()
+        {
+            var step = steps.Current;
+            body.Text = step < items.Length - 1 ? $"第 {step + 1} 步：{items[step].Title}。已完成的步骤可以点回去修改。" : "订单已提交，预计明天送达。";
+            back.IsEnabled = step > 0;
+            next.IsEnabled = step < items.Length - 1;
+            next.Content = step == items.Length - 2 ? "提交订单" : "下一步";
+        }
+        back.Click += (_, _) => steps.Current--;
+        next.Click += (_, _) => steps.Current++;
+        System.ComponentModel.DependencyPropertyDescriptor.FromProperty(Steps.CurrentProperty, typeof(Steps)).AddValueChanged(steps, (_, _) => Sync());
+        Sync();
+        var actions = new Flex { Justify = FlexJustify.End, Gap = Space.Sm, Children = { back, next } };
+        return new Flex
+        {
+            Direction = FlexDirection.Column, Gap = Space.Lg,
+            Children = { steps, new Card { Content = new Flex { Direction = FlexDirection.Column, Gap = Space.Md, Children = { body, actions } } } },
+        };
+    }
+
+    static FrameworkElement Deploy() => new Steps
+    {
+        Orientation = StepsOrientation.Vertical, Size = TextSize.Sm, Current = 2,
+        Items =
+        [
+            new("拉取代码") { Description = "main@3f9c2e1 · 12 秒" }, new("安装依赖") { Description = "pnpm install · 41 秒" },
+            new("运行测试") { Description = "978 个通过，2 个失败", Status = StepState.Error }, new("构建") { Description = "等待测试通过" },
+            new("发布到生产环境") { Description = "需要审批", IsDisabled = true },
+        ],
+    };
 
     static FrameworkElement Paths()
     {
