@@ -204,8 +204,7 @@ public class Gauge : Control
         public Dial(Gauge owner)
         {
             this.owner = owner;
-            // 颜色是渲染时查的资源：换主题要重画
-            ActualThemeVariantChanged += (_, _) => InvalidateVisual();
+            this.RedrawOnResourceChanges(owner);
         }
 
         protected override LayoutSize MeasureOverride(LayoutSize availableSize)

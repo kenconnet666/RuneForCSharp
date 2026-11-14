@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Controls;
 
 namespace Rune.Avalonia;
@@ -11,4 +12,17 @@ static class ThemeResources
     public static T Resource<T>(this Control control, string key) =>
         control.TryFindResource(key, control.ActualThemeVariant, out var value) && value is T typed ? typed
         : ThemeKeys.Fallback(key) is T fallback ? fallback : default!;
+
+    /// <summary>
+    /// 在 Render 里查资源的控件：资源变了就重画。Render 里查的资源不经过绑定，Avalonia 不会因为它们变了而重画；
+    /// 换主题只触发 ActualThemeVariantChanged，作用域里改了 token（对应上游 sx 改 CSS 变量）只触发 ResourcesChanged，
+    /// 后者沿逻辑树往下传，所以订阅在逻辑树里的 <paramref name="host"/> 上（自绘的部件常常只是视觉子元素）。
+    /// </summary>
+    /// <param name="target">要重画的控件。</param>
+    /// <param name="host">在逻辑树里的组件。</param>
+    public static void RedrawOnResourceChanges(this Visual target, StyledElement host)
+    {
+        host.ActualThemeVariantChanged += (_, _) => target.InvalidateVisual();
+        host.ResourcesChanged += (_, _) => target.InvalidateVisual();
+    }
 }
