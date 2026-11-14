@@ -1,0 +1,33 @@
+<!--
+  Stat 部件的默认外观（vue-tsx-pro 的 statRecipe）：指标名次要色；图标框 accentSoft 底、accentText 色；数值粗体、行高 tight、等宽数字；
+  单位、变化量的说明、补充说明、底栏次要色，底栏上方一条 borderMuted 的线；组里的竖线 borderMuted。字号与 em 尺寸在 Stat.cs 里。
+  写成主题里的样式（DESIGN §7），使用方的部件样式排在后面，盖得过
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|Stat">
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+  </Style>
+  <Style Selector="rune|Stat:grouped > Border">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+  </Style>
+  <Style Selector="rune|Stat rune|Flex#PART_Label">
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+  </Style>
+  <Style Selector="rune|Stat Border#PART_Icon">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.AccentSoft}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.AccentText}" />
+  </Style>
+  <Style Selector="rune|Stat rune|AnimatedNumber#PART_Number, rune|Stat rune|Text#PART_Number">
+    <Setter Property="TextElement.FontWeight" Value="{DynamicResource Rune.FontWeight.Bold}" />
+    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Tight}" />
+  </Style>
+  <Style Selector="rune|Stat rune|Text#PART_Unit, rune|Stat rune|Text#PART_ChangeLabel, rune|Stat rune|Text#PART_Description">
+    <Setter Property="Tone" Value="muted" />
+  </Style>
+  <Style Selector="rune|Stat Border#PART_Footer">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+  </Style>
+</Styles>

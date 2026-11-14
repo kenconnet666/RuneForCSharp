@@ -2,13 +2,81 @@ using Avalonia.Controls;
 
 namespace Rune.Avalonia.Examples;
 
-/// <summary>Stat 页的示例（vue-tsx-pro 文档站 display/Stat）。Stat、StatGroup 的示例等 Stat。</summary>
+/// <summary>Stat 页的示例（vue-tsx-pro 文档站 display/Stat）。live 要等 Sparkline。</summary>
 static class StatExamples
 {
     public static Example[] All =>
     [
+        new("Stat", "basic", "基础用法", "Stat 只是内容，放进 Card、Grid 里组合。数字按当前语言格式化，Format 控制小数位与缩放：金额以元给出、按万元显示时写 Scale = 10000 并配 Unit=\"万元\"，decimal 不丢精度。读屏里是一组，名称是指标名，图标对读屏隐藏。", Basic),
+        new("Stat", "change", "变化量", "Change 默认按百分比显示，上升为成功色、下降为危险色；成本、耗时这类越低越好的指标写 InvertChange。变化量是绝对数时用 ChangeFormat 换格式。", Changes),
         new("Stat", "animated-number", "AnimatedNumber 单独使用", "值变化时从旧值滚到新值，等宽数字不抖动。Format 是 Intl.NumberFormat 的选项加上缩放 Scale（NumericFormat），金额不写币种时用语言包的币种；值是 decimal，中间帧按浮点数算，停下时按原值格式化，不丢精度。Trend 按正负着色；Prefix、Suffix 放在数字前后（图标、单位）。", Numbers),
+        new("Stat", "group", "一排指标", "StatGroup 把几个 Stat 排成一排，按宽度换行（MinItemWidth，默认 9rem），同一行里之间一条竖线。超时、缺漏这类要引起注意的数写 Tone=\"danger\"，数值换成危险色。", Group),
+        new("Stat", "loading", "加载中", "IsLoading 时数值与变化量换成骨架，一道光带从起始边扫过，指标名照常显示；Card 的 IsLoading 把正文换成几行骨架。骨架对读屏隐藏，读屏的状态是“加载中”；很快完成的加载不出现骨架，系统关闭动画时不扫光。", Loading),
     ];
+
+    // 接口给的金额以元为单位（decimal 不丢精度），卡片上按万元显示
+    static readonly NumericFormat WanYuan = new() { Scale = 10_000, MinimumFractionDigits = 2, MaximumFractionDigits = 2 };
+
+    static Grid Cards(string minItemWidth, params Control[] contents)
+    {
+        var grid = new Grid { MinItemWidth = minItemWidth, Balanced = true, Gap = Space.Md };
+        grid.Children.AddRange(contents.Select(content => content is Card ? content : new Card { Content = content }));
+        return grid;
+    }
+
+    static Control Basic()
+    {
+        const decimal expected = 10875000m, actual = 9103600.35m;
+        return Cards("14em",
+            new Stat { Label = "项目总数", Value = 6, Unit = "项", Icon = Lucide.ClipboardList },
+            new Stat { Label = "预期销售额", Value = expected, Format = WanYuan, Unit = "万元", Icon = Lucide.JapaneseYen },
+            new Stat { Label = "实际销售额", Value = actual, Format = WanYuan, Unit = "万元", Icon = Lucide.ChartColumn },
+            new Stat { Label = "销售达成率", Value = actual / expected, Format = new NumericFormat { Style = NumericStyle.Percent, MaximumFractionDigits = 1 }, Icon = Lucide.TrendingUp });
+    }
+
+    static Control Changes() => Cards("12em",
+        new Stat { Label = "订单数", Value = 1284, Change = 0.123m, ChangeLabel = "较上月" },
+        new Stat { Label = "客单价", Value = 86.4m, Unit = "元", Change = -0.042m, ChangeLabel = "较上月" },
+        new Stat { Label = "平均响应时间", Value = 212, Unit = "ms", Change = -0.18m, ChangeLabel = "较上周", InvertChange = true, Description = "越低越好：下降显示为改善" },
+        // 变化量是绝对数而不是比例：ChangeFormat 换成带符号的整数
+        new Stat { Label = "新增会员", Value = 342, Unit = "人", Change = 58, ChangeFormat = new NumericFormat { SignDisplay = NumericSign.ExceptZero }, ChangeLabel = "较昨日" });
+
+    // 一排指标：按宽度换行，同一行里之间一条竖线；要引起注意的数用 Tone 标红
+    static Control Group()
+    {
+        (string Label, IconData Icon, int Value, bool Urgent)[] items =
+        [
+            ("超时", Lucide.AlarmClock, 10, true), ("7 天内到期", Lucide.CalendarClock, 6, false),
+            ("待验收", Lucide.BadgeCheck, 5, false), ("可关闭", Lucide.PackageCheck, 0, false),
+        ];
+        var group = new StatGroup();
+        group.Children.AddRange(items.Select(item => new Stat
+        {
+            Label = item.Label, Icon = item.Icon, Value = item.Value, Unit = "项",
+            Tone = item.Urgent && item.Value > 0 ? TextTone.Danger : default,
+            Footer = item.Value > 0 ? new Link { Href = new Uri("https://example.com/todo"), Content = "去处理" } : new Small { Tone = TextTone.Muted, Text = "没有" },
+        }));
+        return new Card { Variant = CardVariant.Outline, Padding = Space.Md, Header = "需要处理", Content = group };
+    }
+
+    static Control Loading()
+    {
+        var toggle = new Switch { Content = "加载中", IsChecked = true };
+        var count = new Stat { Label = "项目总数", Value = 6, Unit = "项", Icon = Lucide.ClipboardList, IsLoading = true };
+        var sales = new Stat
+        {
+            Label = "实际销售额", Value = 910.36m, Format = new NumericFormat { MinimumFractionDigits = 2 }, Unit = "万元", Icon = Lucide.JapaneseYen,
+            Change = 0.123m, ChangeLabel = "较上月", IsLoading = true,
+        };
+        var note = new Card { Header = "本月说明", IsLoading = true, Content = new Text { Text = "实际销售额按财务口径统计，每月 5 日更新上月数据。" } };
+        toggle.PropertyChanged += (_, e) =>
+        {
+            if (e.Property != ChoiceBase.IsCheckedProperty) return;
+            count.IsLoading = sales.IsLoading = note.IsLoading = toggle.IsChecked == true;
+        };
+        return new Flex { Direction = FlexDirection.Column, Gap = Space.Md, Children = { new Flex { Children = { toggle } }, Cards("12em", count, sales, note) } };
+    }
+
 
     static Control Numbers()
     {
