@@ -24,8 +24,10 @@
       <Setter.Value>
         <ControlTemplate TargetType="rune:ItemListItem">
           <Grid>
-            <Border x:Name="PART_Root" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
-                    BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" rune:BrushTransition.Enabled="True">
+            <!-- 底色单独一层、铺到边框下面（CSS 的 background-clip: border-box）：WPF 的 Border 只在边框里面填底色，透明边框的实底按钮会窄一圈 -->
+            <Border x:Name="PART_Fill" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}" rune:BrushTransition.Enabled="True" />
+            <Border x:Name="PART_Root" BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}">
               <Grid>
                 <Canvas x:Name="PART_Ripples" IsHitTestVisible="False" />
                 <rune:Flex x:Name="PART_Row" Align="center" Gap="sm" Margin="{TemplateBinding Padding}">
