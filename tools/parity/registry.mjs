@@ -52,6 +52,8 @@ export const COMPONENT_PROP_RENAMES = {
   Embed: { src: 'Source', onLoad: 'PageLoaded' },
   // Controls 在 WinForms 是子控件集合：三个平台统一叫 ShowControls
   Video: { src: 'Source', controls: 'ShowControls' },
+  // 文字多行用换行分开（TS 是字符串数组）；Width、Height 是控件自己的大小，图片的大小另起名字
+  Watermark: { content: 'Text', width: 'ImageWidth', height: 'ImageHeight' },
   // 移除由使用方做：事件是"请求移除"（离场结束才发）
   Tag: { onRemove: 'RemoveRequested' },
   // 关闭由使用方做：事件是"请求关闭"（Avalonia、WPF 离场结束才发）
@@ -186,6 +188,7 @@ export const PROPS_NOT_PORTED = {
     propsRoot: '外层就是 Embed 自己（定比例的框）：样式直接写在 Embed 上',
     propsPlaceholder: '加载中的骨架是内部的 Skeleton（image 形状）：外观跟主题',
   },
+  Watermark: { propsLayer: '水印层是内部画出来的一层（Avalonia 的子元素或窗口浮层里的元素、WPF 的子元素或装饰、WinForms 的分层窗口），只画不交互，外观由 Color、FontSize 等属性决定' },
   Video: { propsRoot: '外层就是 Video 自己（定比例的黑底框）：样式直接写在 Video 上' },
   Abbr: { propsTooltip: '提示就是平台的 ToolTip：位置、箭头写在 Abbr 自己身上（Avalonia、WPF 的 Tooltip.Placement、Tooltip.Arrow 附加属性）；WinForms 自带的提示用默认的位置' },
   Pagination: { propsItem: '外层的 li 是 HTML 列表的结构：桌面上页码按钮、省略号直接排在列表里' },

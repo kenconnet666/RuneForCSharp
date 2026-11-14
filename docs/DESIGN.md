@@ -1341,3 +1341,13 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   - Avalonia 在 Windows 上建原生子窗口要应用清单声明支持 Windows 10（supportedOS），不然报 "Unable to create child window"：Docs 应用加了 app.manifest，使用方的应用同样要有（Avalonia 的模板自带）。
   - WPF 的 WebShell 里叠骨架与内核用 `System.Windows.Controls.Grid`：在 `Rune.Wpf` 命名空间里 `Grid` 是 Rune 自己的响应式网格，按内容排高度，内核的高度会是 0。
   - WebView2 包不分宿主，WPF、WinForms 的程序集都引用：纯 WinForms 项目报 MSB3277（WindowsBase 版本冲突），根目录的 Directory.Build.targets 在解析引用前去掉 WPF 那个。
+
+### Watermark（2026-11-14）
+
+- 平铺同上游 canvas 的那一格：两行两列的单元斜对角各一份，铺开后相邻两行错开半格；单元裁在自己里面，整层再裁在水印的范围里（网页背景不会画出元素）。计算是孪生文件 WatermarkTiles，三个平台各自画（每次画都逐块画，不先画一格再平铺：区域不大，省掉缓存与高 DPI 的放大）。
+- 水印层要盖在内容上面、不挡点击、读屏不念：
+  - Avalonia：Decorator 里多一个视觉子元素，ZIndex 最大（Decorator 换内容时新的子元素加在最后，靠顺序会被盖住）、不参与命中、AccessibilityView=Raw。整个窗口时挪进窗口的 OverlayLayer，浮层像 Canvas 不拉伸子元素，宽高跟着浮层设。
+  - WPF：Decorator 里多一个视觉子元素；整个窗口时画在窗口内容的 AdornerLayer 里。
+  - WinForms：子控件各有窗口，容器画不到它们上面，只能另开一个分层窗口（LayeredWindow 的常驻形态：属于窗体、不置顶、WS_EX_TRANSPARENT 点击全穿透），盖住控件露出来的部分（与各层父控件的客户区求交），盯着自己与各层父控件的移动、缩放、显示隐藏。inspect 的控件截图里没有它。
+- 字号、间隙、图片大小是固定的像素（同上游，不跟着外面的字号）；字体用主题的 sans。多行文字用换行分开（TS 的 content 数组）。
+- 踩过的坑：WinForms 的 Form 处理窗口位置变化时按自己记着的 Bounds 改回去，分层窗口显示着时只靠 UpdateLayeredWindow 挪不动，要先设 Bounds（LayeredWindow.Present 里做了，对话框遮罩跟着宿主移动也靠它）。

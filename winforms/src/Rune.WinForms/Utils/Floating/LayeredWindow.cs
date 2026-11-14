@@ -7,10 +7,11 @@ namespace Rune.WinForms;
 /// 浮层的画面窗口（提示整个是它，弹出框的面板、阴影与箭头画在它上面）：不抢焦点的置顶分层窗口，整张画好的位图
 /// （逐像素透明：圆角、阴影、伸出面板的箭头抗锯齿）用 UpdateLayeredWindow 贴上去，淡入改整体的不透明度。
 /// 平台的 ToolTip、普通窗体都是系统画的矩形，画不出圆角、阴影与箭头。
+/// 水印用它的常驻形态：不置顶（只在所属窗体上面，切到别的程序时不挡别人）、点击全部穿透。
 /// </summary>
 sealed class LayeredWindow : Form
 {
-    const int WsExLayered = 0x80000, WsExToolWindow = 0x80, WsExNoActivate = 0x8000000, WsExTopmost = 0x8;
+    const int WsExLayered = 0x80000, WsExToolWindow = 0x80, WsExNoActivate = 0x8000000, WsExTopmost = 0x8, WsExTransparent = 0x20;
     const int WsPopup = unchecked((int)0x80000000);
 
     Bitmap? frame;
@@ -18,9 +19,14 @@ sealed class LayeredWindow : Form
     readonly System.Windows.Forms.Timer fade = new() { Interval = 15 };
     System.Diagnostics.Stopwatch? fading;
     TimeSpan fadeDuration;
+    readonly bool topmost, clickThrough;
 
-    public LayeredWindow()
+    /// <summary>新建。</summary>
+    /// <param name="topmost">置顶：浮层是临时的，要盖过所有窗口。</param>
+    /// <param name="clickThrough">点击全部穿透到下面（WS_EX_TRANSPARENT，别的线程的窗口也收得到）。</param>
+    public LayeredWindow(bool topmost = true, bool clickThrough = false)
     {
+        (this.topmost, this.clickThrough) = (topmost, clickThrough);
         FormBorderStyle = FormBorderStyle.None;
         ShowInTaskbar = false;
         StartPosition = FormStartPosition.Manual;
@@ -46,7 +52,7 @@ sealed class LayeredWindow : Form
         {
             var parameters = base.CreateParams;
             parameters.Style = WsPopup;
-            parameters.ExStyle |= WsExLayered | WsExToolWindow | WsExNoActivate | WsExTopmost;
+            parameters.ExStyle |= WsExLayered | WsExToolWindow | WsExNoActivate | (topmost ? WsExTopmost : 0) | (clickThrough ? WsExTransparent : 0);
             return parameters;
         }
     }
@@ -74,11 +80,14 @@ sealed class LayeredWindow : Form
         fadeDuration = fadeIn;
         fading = fadeIn > TimeSpan.Zero ? System.Diagnostics.Stopwatch.StartNew() : null;
         Alpha = fading is null ? (byte)255 : (byte)0;
+        // 显示着时也要先改 Bounds：Form 处理窗口位置变化时按自己记着的 Bounds 改回去，只靠 UpdateLayeredWindow 挪不动
+        var bounds = new Rectangle(at, bitmap.Size);
         if (!Visible)
         {
-            Bounds = new Rectangle(at, bitmap.Size);
+            Bounds = bounds;
             Show();
         }
+        else if (Bounds != bounds) Bounds = bounds;
         Apply();
         if (fading is not null) fade.Start();
     }
