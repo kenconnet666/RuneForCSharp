@@ -73,6 +73,8 @@ export const COMPONENT_PROP_RENAMES = {
   Select: { items: 'ItemsSource', children: 'ItemTemplate', onCreate: 'OptionCreated' },
   // 平台的 ComboBox 自己有 Items / ItemsSource（选项行由 Options 生成）与 PlaceholderText
   NativeSelect: { items: 'Options', placeholder: 'PlaceholderText' },
+  // C# 的事件用过去式（同 Canceled、Closed），不和取消按钮的部件名 Cancel 重名
+  Popconfirm: { onCancel: 'Canceled' },
   // 数据是平台的 ItemsSource；执行了一项是事件；输入框的文字同 TextBox 叫 Text；自定义选项内容是数据模板
   CommandPalette: { items: 'ItemsSource', onAction: 'ItemInvoked', _inputValue: 'InputText', renderOption: 'ItemTemplate' },
   // 平台的 ItemsControl 自己有 Items（直接写的项）；数据给 ItemsSource
@@ -200,6 +202,7 @@ export const PROPS_NOT_PORTED = {
   Marquee: Object.fromEntries(['propsTrack', 'propsGroup']
     .map((prop) => [prop, '做动画的那一层、每一份内容是内部的面板（复制的那份是画出来的），没有部件属性：间距用 Gap'])),
   HoverCard: { lazy: '内容是传进来的控件实例：关着时在弹出层里不显示、不排版，本来就是打开时才有代价（同 Popover）' },
+  Popconfirm: { lazy: '问题、说明与按钮是 Popconfirm 建的控件：关着时在弹出层里不显示、不排版，本来就是打开时才有代价（同 Popover）' },
   Watermark: { propsLayer: '水印层是内部画出来的一层（Avalonia 的子元素或窗口浮层里的元素、WPF 的子元素或装饰、WinForms 的分层窗口），只画不交互，外观由 Color、FontSize 等属性决定' },
   Video: {
     propsRoot: '外层就是 Video 自己（定比例的黑底框）：样式直接写在 Video 上',
@@ -280,6 +283,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     ...Object.fromEntries(['Dialog', 'AlertDialog'].map((name) => [name, Object.fromEntries(['propsHeader', 'propsTitle', 'propsClose', 'propsDescription', 'propsBody', 'propsFooter', 'propsCancel', 'propsConfirm']
       .map((prop) => [prop, '标题行、标题、关闭按钮、说明、正文、页脚、按钮是 Dialog 代码组合的子元素，部件样式键只有面板、遮罩与阴影；外观跟着各自组件的主题样式']))])),
     Select: Object.fromEntries(['propsListbox', 'propsSearch'].map((prop) => [prop, '弹出层里的列表、搜索框是 Select 建的，外观跟着 Listbox、TextField 的主题样式'])),
+    Popconfirm: Object.fromEntries(['propsIcon', 'propsTitle', 'propsDescription', 'propsFooter', 'propsConfirm', 'propsCancel']
+      .map((prop) => [prop, '图标、问题、说明、按钮行与按钮是 Popconfirm 代码组合的子元素（同 Dialog），外观跟着各自组件的主题样式；面板、阴影、箭头的部件样式键同 Popover'])),
     CommandPalette: Object.fromEntries(['propsInput', 'propsListbox'].map((prop) => [prop, '面板里的搜索框、列表是 CommandPalette 建的，外观跟着 TextField、Listbox 的主题样式；部件样式键只有搜索行'])),
   },
   WinForms: {
@@ -343,6 +348,11 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     },
     Popover: { propsArrow: '面板、阴影与箭头是组件库画在分层窗口上的位图，箭头没有可改样式的部件' },
     HoverCard: { propsArrow: '同 PopoverControl：面板、阴影与箭头是组件库画在分层窗口上的位图，箭头没有可改样式的部件' },
+    Popconfirm: {
+      propsArrow: '同 PopoverControl：面板、阴影与箭头是组件库画在分层窗口上的位图，箭头没有可改样式的部件',
+      ...Object.fromEntries(['propsIcon', 'propsTitle', 'propsDescription', 'propsFooter', 'propsConfirm', 'propsCancel']
+        .map((prop) => [prop, '图标、问题、说明、按钮行与按钮是 PopconfirmControl 组合的子控件，没有部件属性记录；外观跟着各自组件与主题'])),
+    },
     Listbox: Object.fromEntries(
       ['empty', 'propsOption', 'propsGroupLabel', 'propsCheck', 'propsEmpty', 'propsSkeleton']
         .map((prop) => [prop, '选项、组名、已选标记是 ListboxControl 画出来的，空状态与骨架是固定的子控件，没有部件属性与自定义内容']),

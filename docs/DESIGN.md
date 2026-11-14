@@ -1378,6 +1378,12 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### Popconfirm（2026-11-15）
+
+- 三个平台都是 Popover 的子类（同 HoverCard），默认在上方：内容是自己建的图标、问题、说明与"取消 / 确认"，打开时焦点落在取消上（Popover 的 FocusTarget）。确认是 `Func<Task<bool>>`（同 Dialog 的 Confirm）：进行中确认按钮加载、取消不可用；结果为 false 或抛异常时保持打开。上游的 onCancel 是 Canceled 事件：确认后关闭的不算，确认进行中被 Esc、点外面关掉的等结果出来、没确认成才算。
+- 读屏：浮层以问题为名称、说明为帮助文字（Avalonia、WPF 写在面板上；WinForms 写在内容窗口上，PopoverControl 加了可重写的 SurfaceName，默认仍取触发器）。最宽 20rem（按根字号 16 换算成 320）。
+- 顺手修的（Avalonia）：Popover 面板、箭头的部件样式用的是 `rune|Popover`，类型选择器只认样式键，HoverCard 打开时面板没有底色、描边与阴影（headless 测试看不出）；改成 `:is(rune|Popover)`，派生类都套上，Menu 的弹出层不用再改样式键。ButtonBase 的主题去掉平台主题（Fluent）的焦点框：按钮自己画焦点环，键盘聚焦时原来会再叠一个黑框。
+
 ### NativeSelect（2026-11-15）
 
 - ROADMAP 决定 28：各平台用自己的下拉框，使用方式同平台的 ComboBox。分组是孪生文件 NativeSelectGroups（没有组的在前，各组按第一次出现的顺序）；组名是一行不能选的标题，组里的选项缩进一档。上游的占位项（第一条、hidden disabled）在桌面上是 PlaceholderText，没选时值是 null。

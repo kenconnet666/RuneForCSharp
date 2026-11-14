@@ -131,6 +131,9 @@ public class PopoverControl : Control, IBaseline, IScopeAware
     /// <param name="em">字号（像素）。</param>
     private protected virtual int? MaxPanelWidth(float em) => null;
 
+    /// <summary>内容窗口的读屏名称：默认取触发器（气泡确认取问题）。</summary>
+    private protected virtual string? SurfaceName => Trigger is { } trigger ? trigger.AccessibleName ?? trigger.Text : null;
+
     /// <summary>画面板的窗口（测试用）；没打开过时为 null。</summary>
     internal LayeredWindow? Backdrop => surface.Backdrop;
 
@@ -193,7 +196,7 @@ public class PopoverControl : Control, IBaseline, IScopeAware
         var gap = context.Scale(Offset) + 0.7f * arrow;
         var target = RectangleToScreen(ClientRectangle);
         var (side, panel) = FloatingLayout.Position(Placement, context.RightToLeft, target, panelSize, gap, Screen.FromControl(this).WorkingArea);
-        surface.Form.AccessibleName = Trigger is { } trigger ? trigger.AccessibleName ?? trigger.Text : null;
+        surface.Form.AccessibleName = SurfaceName;
         surface.Show(panel, inset, context, Arrow ? (side, target, arrow) : null);
     }
 
