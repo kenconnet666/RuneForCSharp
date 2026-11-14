@@ -24,7 +24,7 @@ public class ContainerPanel : Panel
     [Description("左右内边距档位，默认 lg。")]
     public Space InlinePadding { get => field.Value is null ? Space.Lg : field; set { field = value; Relayout(); } }
 
-    float Em => Font.SizeInPoints * DeviceDpi / 72f;
+    float Em => this.EmPixels();
 
     /// <summary>居中的那一栏：宽度不超过最大宽度，再去掉左右内边距。</summary>
     public override Rectangle DisplayRectangle

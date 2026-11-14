@@ -174,7 +174,7 @@ public class ScrollAreaControl : Control
     Size MaxOffset => new(Math.Max(0, extent.Width - ClientSize.Width), Math.Max(0, extent.Height - ClientSize.Height));
 
     /// <summary>滚动条的粗细：0.5em 的滑块加两侧各 2 像素。</summary>
-    int Thickness => (int)MathF.Round(0.5f * Font.SizeInPoints * DeviceDpi / 72f) + 2 * Inset;
+    int Thickness => (int)MathF.Round(0.5f * this.EmPixels()) + 2 * Inset;
 
     int Inset => LogicalToDeviceUnits(2);
 

@@ -234,7 +234,7 @@ public class MenuControl : Control, IMenuHost, IScopeAware
         var context = ElementContext.Of(this);
         var em = context.Em;
         list.Font = TextSize.Pixels is { } pixels ? Fonts.Get(Font.FontFamily.Name, pixels * 72 / 96, Font.Style) : Font;
-        list.UpdateMetrics(list.Font.SizeInPoints * DeviceDpi / 72f);
+        list.UpdateMetrics(list.Font.EmPixels(DeviceDpi));
         var inset = FloatingSurface.Border(context);
         var content = list.GetPreferredSize(Size.Empty);
         var area = Screen.FromControl(this).WorkingArea;

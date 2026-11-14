@@ -70,17 +70,13 @@ public class SelectedTagsControl : Control
 
     bool Responsive => MaxTagCount is { Count: null };
 
-    float Em => Font.SizeInPoints * DeviceDpi / 72f;
+    float Em => this.EmPixels();
 
     /// <summary>每个已选项一个标签（数字上限时只建前几个），最后是"+N"。</summary>
     void Rebuild()
     {
         SuspendLayout();
-        foreach (var tag in tags)
-        {
-            Controls.Remove(tag);
-            tag.Dispose();
-        }
+        tags.DisposeAll();
         tags.Clear();
         var shown = MaxTagCount?.Count is { } count ? Tags.Take(count) : Tags;
         foreach (var item in shown)

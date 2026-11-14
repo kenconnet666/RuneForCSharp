@@ -38,7 +38,7 @@ public class SkeletonTextControl : Panel
     /// <inheritdoc />
     public override LayoutEngine LayoutEngine => engine;
 
-    float Em => Font.SizeInPoints * DeviceDpi / 72f;
+    float Em => this.EmPixels();
 
     void Rebuild()
     {

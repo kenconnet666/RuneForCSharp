@@ -180,7 +180,7 @@ public class AlertControl : Panel, IElementHost, IScopeAware
     /// <inheritdoc />
     public override LayoutEngine LayoutEngine => engine;
 
-    float Em => Font.SizeInPoints * DeviceDpi / 72f;
+    float Em => this.EmPixels();
 
     ElementContext Context => ElementContext.Of(this);
 

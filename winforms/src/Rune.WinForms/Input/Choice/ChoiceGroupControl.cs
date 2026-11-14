@@ -106,11 +106,11 @@ public abstract class ChoiceGroupControl : FlexControl, IFieldControl
     protected override void OnLayout(LayoutEventArgs levent)
     {
         // 横排至少与单行控件一样高
-        var minHeight = Orientation == Orientation.Horizontal ? (int)MathF.Ceiling(ControlHeight.Of(ElementContext.Of(this), Font.SizeInPoints * DeviceDpi / 72f, ControlHeight.Factor(default))) : 0;
+        var minHeight = Orientation == Orientation.Horizontal ? (int)MathF.Ceiling(ControlHeight.Of(ElementContext.Of(this), this.EmPixels(), ControlHeight.Factor(default))) : 0;
         if (MinimumSize.Height != minHeight) MinimumSize = new Size(0, minHeight);
         if (Card && Orientation == Orientation.Horizontal && Controls.Count > 0)
         {
-            var em = Font.SizeInPoints * DeviceDpi / 72f;
+            var em = this.EmPixels();
             var width = ClientSize.Width - Padding.Horizontal;
             var gap = Tokens.Space.Lg * em;
             var columns = GridLayout.Columns(width, gap, null, MinItemWidth.Pixels(em), Controls.Count, false);
@@ -127,11 +127,7 @@ public abstract class ChoiceGroupControl : FlexControl, IFieldControl
     /// <summary>按 <see cref="ItemsSource"/> 重新生成项：值、文字、说明、不可用取自选项。</summary>
     void Generate()
     {
-        foreach (var control in generated)
-        {
-            Controls.Remove(control);
-            control.Dispose();
-        }
+        generated.DisposeAll();
         generated.Clear();
         if (ItemsSource is null) return;
         foreach (var item in ItemsSource)

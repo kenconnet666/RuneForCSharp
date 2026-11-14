@@ -196,7 +196,7 @@ public abstract class TextInputControl : FlexControl, IFieldControl
     protected bool ReadOnly => IsReadOnly ?? FieldControl.Of(this)?.IsReadOnly ?? false;
 
     /// <summary>1em 是多少设备像素。</summary>
-    protected float Em => Font.SizeInPoints * DeviceDpi / 72f;
+    protected float Em => this.EmPixels();
 
     void IFieldControl.FieldChanged() => Sync();
 

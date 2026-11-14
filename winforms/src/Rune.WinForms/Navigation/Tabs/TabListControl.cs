@@ -105,7 +105,7 @@ public class TabListControl : FlexControl
 
     bool IsSoft => owner?.Variant == TabsVariant.Soft;
 
-    float Em => Font.SizeInPoints * DeviceDpi / 72f;
+    float Em => this.EmPixels();
 
     /// <summary>读屏念的那句话（测试用）。</summary>
     internal string? Announcement { get; private set; }
@@ -213,11 +213,7 @@ public class TabListControl : FlexControl
     internal void SyncMenuItems()
     {
         if (allGroup is null) return;
-        foreach (var item in allGroup.Controls.OfType<MenuRadioItemControl>().ToList())
-        {
-            allGroup.Controls.Remove(item);
-            item.Dispose();
-        }
+        allGroup.Controls.OfType<MenuRadioItemControl>().DisposeAll();
         foreach (var tab in Controls.OfType<TabItemControl>())
             allGroup.Controls.Add(new MenuRadioItemControl { Value = tab.Value, Text = tab.Label, Enabled = tab.Enabled });
         allGroup.Value = owner?.SelectedValue;

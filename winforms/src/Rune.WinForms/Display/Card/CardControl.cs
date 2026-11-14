@@ -141,7 +141,7 @@ public class CardControl : Panel, IScopeAware
 
     void ResetRadius() => Radius = default;
 
-    float Em => Font.SizeInPoints * DeviceDpi / 72f;
+    float Em => this.EmPixels();
 
     /// <summary>正文的内边距：space 系数 × 字号。</summary>
     int Inset => (int)MathF.Round((CardPadding.Factor ?? 0) * Em);

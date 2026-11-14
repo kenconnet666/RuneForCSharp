@@ -222,7 +222,7 @@ public class ToggleGroupControl : FlexControl, IFieldControl
     {
         var selected = SelectedValues;
         foreach (var item in Controls.OfType<ToggleItemControl>()) item.Apply(this, item.Value is { } value && selected.Contains(value));
-        Padding = new Padding((int)MathF.Round(0.25f * Font.SizeInPoints * DeviceDpi / 72f));
+        Padding = new Padding((int)MathF.Round(0.25f * this.EmPixels()));
         SyncTabStops();
         PerformLayout();
         Invalidate();
@@ -304,7 +304,7 @@ public class ToggleGroupControl : FlexControl, IFieldControl
         var graphics = e.Graphics;
         graphics.SmoothingMode = SmoothingMode.AntiAlias;
         graphics.PixelOffsetMode = PixelOffsetMode.Half;
-        var em = Font.SizeInPoints * DeviceDpi / 72f;
+        var em = this.EmPixels();
         using (var path = Drawing.RoundedRectangle(new RectangleF(0, 0, Width, Height), theme.Radii.Md * em))
         using (var fill = new SolidBrush(theme.Colors.Fill))
             graphics.FillPath(fill, path);
@@ -386,7 +386,7 @@ public class ToggleItemControl : ButtonControl<ToggleItem>
     public bool IsSelected { get; private set; }
 
     /// <summary>这一项的 em（像素），按自己的字号档位。</summary>
-    internal float ItemEm => TextSize.Pixels is { } pixels ? pixels * DeviceDpi / 96f : Font.SizeInPoints * DeviceDpi / 72f;
+    internal float ItemEm => TextSize.Pixels is { } pixels ? pixels * DeviceDpi / 96f : this.EmPixels();
 
     /// <summary>跟着组：选中状态、外观（样式、色调、字号、波纹）。</summary>
     internal void Apply(ToggleGroupControl group, bool selected)

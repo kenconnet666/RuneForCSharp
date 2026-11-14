@@ -185,7 +185,7 @@ public class ListboxControl : Control, IFieldControl
 
     bool Required => IsRequired ?? FieldControl.Of(this)?.IsRequired ?? false;
 
-    float Em => Font.SizeInPoints * DeviceDpi / 72f;
+    float Em => this.EmPixels();
 
     void IFieldControl.FieldChanged() => SyncSelection();
 

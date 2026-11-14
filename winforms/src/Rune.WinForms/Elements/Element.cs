@@ -95,7 +95,7 @@ public readonly record struct ElementContext(int Dpi, Font Font, Color ForeColor
     public float Scale(float dip) => dip * Dpi / 96f;
 
     /// <summary>1em 是多少设备像素：字体的磅值按 DPI 换算（DESIGN §6）。</summary>
-    public float Em => Font.SizeInPoints * Dpi / 72f;
+    public float Em => Font.EmPixels(Dpi);
 
     /// <summary>字号档位换掉宿主的字号（em 尺寸都按它算）；档位没写时原样。</summary>
     /// <param name="size">字号档位或像素数。</param>

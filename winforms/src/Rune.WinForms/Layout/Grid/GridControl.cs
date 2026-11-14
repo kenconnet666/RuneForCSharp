@@ -174,7 +174,7 @@ public class GridControl : Panel, IExtenderProvider
     /// <summary>grid 排版：交给 <see cref="GridLayout"/> 放、算行高，再摆（从右到左时镜像）。</summary>
     sealed class GridEngine(GridControl owner) : LayoutEngine
     {
-        double Em => owner.Font.SizeInPoints * owner.DeviceDpi / 72f;
+        double Em => owner.EmPixels();
 
         (double Row, double Column) Gaps =>
             (Math.Round(((owner.RowGap.Value is null ? owner.Gap : owner.RowGap).Factor ?? 0) * Em),

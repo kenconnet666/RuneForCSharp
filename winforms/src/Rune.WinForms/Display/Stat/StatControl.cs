@@ -150,7 +150,7 @@ public class StatControl : Panel, IElementHost, IScopeAware
 
     ElementContext Context => ElementContext.Of(this);
 
-    float Em => Font.SizeInPoints * DeviceDpi / 72f;
+    float Em => this.EmPixels();
 
     /// <summary>变化的方向：up、down、flat（TS 的 data-trend）；没有变化量时为 null。</summary>
     public string? Direction => Change is not { } delta ? null : delta > 0 ? "up" : delta < 0 ? "down" : "flat";

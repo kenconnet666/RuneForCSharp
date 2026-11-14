@@ -101,7 +101,7 @@ public class IndicatorControl : Panel
     /// <summary>角标显示吗：有 Dot，或计数大于 0（ShowZero 时 0 也算）。</summary>
     bool Shown => Dot || Count is { } n && (n > 0 || ShowZero);
 
-    float Em => Font.SizeInPoints * DeviceDpi / 72f;
+    float Em => this.EmPixels();
 
     /// <summary>角标外面一圈页面底色的宽度（borderWidths.sm）。</summary>
     int Ring => (int)MathF.Round(Tokens.BorderWidth.Sm * DeviceDpi / 96f);

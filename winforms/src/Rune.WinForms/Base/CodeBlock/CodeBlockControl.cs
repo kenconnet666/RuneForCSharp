@@ -167,7 +167,7 @@ public class CodeBlockControl : Control, IScopeAware
 
     bool Collapsed => Collapsible && !IsExpanded;
 
-    float Em => Font.SizeInPoints * DeviceDpi / 72f;
+    float Em => this.EmPixels();
 
     ElementContext Context => ElementContext.Of(this);
 
@@ -509,7 +509,7 @@ public class CodeBlockControl : Control, IScopeAware
             var text = owner.ExpandText;
             AccessibleName = text;
             var size = TextRenderer.MeasureText(text, font, Size.Empty, TextFormatFlags.NoPadding);
-            var icon = (int)MathF.Round(font.SizeInPoints * DeviceDpi / 72f);
+            var icon = (int)MathF.Round(font.EmPixels(DeviceDpi));
             var gap = (int)MathF.Round(0.25f * icon);
             var x = (Width - size.Width - gap - icon) / 2;
             TextRenderer.DrawText(graphics, text, font, new Point(x, (Height - size.Height) / 2), colors.TextMuted, TextFormatFlags.NoPadding);

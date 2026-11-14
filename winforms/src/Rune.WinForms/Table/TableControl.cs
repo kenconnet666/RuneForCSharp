@@ -92,7 +92,7 @@ public class TableControl : Control
 
     TableCaptionControl? Caption => Controls.OfType<TableCaptionControl>().FirstOrDefault();
 
-    float Em => Font.SizeInPoints * DeviceDpi / 72f;
+    float Em => this.EmPixels();
 
     /// <summary>外框的宽：surface 1 像素，ghost 没有。</summary>
     int Border => Variant == TableVariant.Ghost ? 0 : LogicalToDeviceUnits(1);
@@ -159,7 +159,7 @@ public class TableControl : Control
     /// <summary>单元格的内边距：左右 space.md，上下按密度（都按单元格自己的字号）。</summary>
     internal Padding CellPadding(TableCellControl cell)
     {
-        var em = cell.Font.SizeInPoints * DeviceDpi / 72f;
+        var em = cell.Font.EmPixels(DeviceDpi);
         var block = Density == TableDensity.Compact ? 0.25f : Density == TableDensity.Comfortable ? 0.75f : 0.5f;
         var (x, y) = ((int)MathF.Round(0.75f * em), (int)MathF.Round(block * em));
         return new Padding(x, y, x, y);
@@ -365,7 +365,7 @@ public class TableCaptionControl : Control
         BackColor = Color.Transparent;
     }
 
-    float Em => Font.SizeInPoints * DeviceDpi / 72f;
+    float Em => this.EmPixels();
 
     const TextFormatFlags Flags = TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding | TextFormatFlags.WordBreak;
 
@@ -628,7 +628,7 @@ public class TableCellControl : Control
 
     TableControl? Table => Parent?.Parent?.Parent as TableControl;
 
-    float Em => Font.SizeInPoints * DeviceDpi / 72f;
+    float Em => this.EmPixels();
 
     bool Wraps => !Nowrap && !(this is TableHeaderCellControl && SectionKind == "head");
 

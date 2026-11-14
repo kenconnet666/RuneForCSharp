@@ -13,7 +13,7 @@ public abstract class ListBaseControl : Panel
 
     private protected ListBaseControl()
     {
-        layout = new VerticalStack(() => (int)MathF.Round((Gap.Factor ?? 0) * Font.SizeInPoints * DeviceDpi / 72f));
+        layout = new VerticalStack(() => (int)MathF.Round((Gap.Factor ?? 0) * this.EmPixels()));
         AutoSize = true;
         AutoSizeMode = AutoSizeMode.GrowAndShrink;
         AccessibleRole = AccessibleRole.List;

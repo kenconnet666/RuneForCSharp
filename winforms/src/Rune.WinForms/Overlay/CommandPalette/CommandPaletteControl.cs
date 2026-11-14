@@ -189,7 +189,7 @@ public class CommandPaletteControl : Control
     /// <summary>默认的触发按钮（测试用）。</summary>
     internal ButtonControl DefaultTrigger => defaultTrigger;
 
-    float Em => Font.SizeInPoints * DeviceDpi / 72f;
+    float Em => this.EmPixels();
 
     /// <summary>名称、占位文字、快捷键的显示与读屏写法。</summary>
     void Sync()
@@ -359,7 +359,7 @@ public class CommandPaletteControl : Control
             Controls.AddRange([owner.input, owner.listbox]);
         }
 
-        float Em => Font.SizeInPoints * DeviceDpi / 72f;
+        float Em => this.EmPixels();
 
         int Line => Math.Max(1, (int)MathF.Round(ElementContext.Of(this).Scale(Tokens.BorderWidth.Xs)));
 

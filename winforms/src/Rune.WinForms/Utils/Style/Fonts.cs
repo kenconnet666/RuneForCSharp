@@ -29,6 +29,12 @@ public static class Fonts
     internal static Font Get(string family, float points, FontStyle style) =>
         fonts.GetOrAdd((family, points, style), key => new Font(key.Family, key.Points, key.Style));
 
+    /// <summary>1em 是多少设备像素：字号（磅）按 DPI 换算。</summary>
+    internal static float EmPixels(this Font font, int dpi) => font.SizeInPoints * dpi / 72f;
+
+    /// <summary>控件的 1em（设备像素）：按控件的字体与所在显示器的 DPI。</summary>
+    internal static float EmPixels(this Control control) => control.Font.EmPixels(control.DeviceDpi);
+
     static readonly ConditionalWeakTable<Font, StrongBox<int>> lineHeights = [];
 
     /// <summary>

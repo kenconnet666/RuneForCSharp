@@ -212,7 +212,7 @@ public class ItemListItemControl : FlexControl
 
     bool ShouldSerializeAlign() => Align != ItemListAlign.Center;
 
-    float Em => Font.SizeInPoints * DeviceDpi / 72f;
+    float Em => this.EmPixels();
 
     ItemListControl? List => Parent as ItemListControl;
 

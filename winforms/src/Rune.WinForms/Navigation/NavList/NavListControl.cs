@@ -263,7 +263,7 @@ public abstract class NavRowControl : FlexControl
         set => base.ForeColor = value;
     }
 
-    float Em => Font.SizeInPoints * DeviceDpi / 72f;
+    float Em => this.EmPixels();
 
     /// <summary>子控件也算这一行：点它们同点这一行，指针在它们上面也算悬停。</summary>
     void Forward(Control child)
@@ -562,7 +562,7 @@ public class NavGroupControl : FlexControl
         var current = list.Controls.OfType<NavItemControl>().Any(item => item.IsCurrent);
         header.SetCurrent(current && owner.IsCompact);
         if (current) IsOpen = true;
-        var em = Font.SizeInPoints * DeviceDpi / 72f;
+        var em = this.EmPixels();
         list.Padding = new Padding(owner.IsCompact ? 0 : (int)MathF.Round(Tokens.Space.Lg * em), (int)MathF.Round(Tokens.Space.Xs * em), 0, 0);
     }
 
@@ -674,7 +674,7 @@ public class NavSectionControl : FlexControl
         text.Visible = !iconOnly;
         labelRow.Justify = iconOnly ? FlexJustify.Center : FlexJustify.Start;
         labelRow.Divider = iconOnly;
-        var em = Font.SizeInPoints * DeviceDpi / 72f;
+        var em = this.EmPixels();
         var (inline, block) = ((int)MathF.Round(0.75f * em), (int)MathF.Round(0.25f * em));
         // 与链接行同一套内边距（上下 space.xs、左右 space.md）；紧凑时上面多留到 space.sm，再加细线
         labelRow.Padding = iconOnly ? new Padding(0, (int)MathF.Round(0.5f * em) + LogicalToDeviceUnits(1), 0, block) : new Padding(inline, block, inline, block);

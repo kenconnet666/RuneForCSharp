@@ -481,7 +481,7 @@ public class DialogControl : Control, IAnchored
     /// </summary>
     sealed class DialogLayout(DialogControl owner) : Panel
     {
-        float Em => owner.Font.SizeInPoints * DeviceDpi / 72f;
+        float Em => owner.Font.EmPixels(DeviceDpi);
 
         int Px(float space) => (int)MathF.Round(space * Em);
 

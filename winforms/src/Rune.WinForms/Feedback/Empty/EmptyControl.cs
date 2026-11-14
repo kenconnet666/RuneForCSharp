@@ -125,7 +125,7 @@ public class EmptyControl : Panel, IElementHost, IScopeAware
 
     void ResetTextSize() => TextSize = default;
 
-    float Em => Font.SizeInPoints * DeviceDpi / 72f;
+    float Em => this.EmPixels();
 
     /// <summary>图标元素（测试用）。</summary>
     internal Icon IconElement => icon;

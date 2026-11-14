@@ -281,7 +281,7 @@ public class SelectControl : FlexControl, IFieldControl
 
     bool WithSearch => Searchable || Creatable;
 
-    float Em => Font.SizeInPoints * DeviceDpi / 72f;
+    float Em => this.EmPixels();
 
     /// <summary>已选的值（单选的空字符串算没有选中）。</summary>
     IReadOnlyList<string> Selected => Multiple ? Values : string.IsNullOrEmpty(Value) ? [] : [Value];

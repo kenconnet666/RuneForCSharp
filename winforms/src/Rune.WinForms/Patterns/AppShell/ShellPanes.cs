@@ -253,7 +253,7 @@ sealed class ShellDrawer : Control
     /// <summary>标题行：上 space.xl、左右 space.xl，关闭按钮贴着结束边；下面是滚动区域，内容上下 space.lg、左右 space.xl。</summary>
     void LayoutPanel()
     {
-        var em = Font.SizeInPoints * DeviceDpi / 72f;
+        var em = this.EmPixels();
         var xl = (int)MathF.Round(Tokens.Space.Xl * em);
         var lg = (int)MathF.Round(Tokens.Space.Lg * em);
         var line = LogicalToDeviceUnits(1);

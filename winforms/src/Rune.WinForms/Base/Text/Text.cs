@@ -184,7 +184,7 @@ public class Text : Element
     {
         var font = ResolveFont(context);
         var family = font.FontFamily;
-        return (int)MathF.Round(font.SizeInPoints * context.Dpi / 72f * family.GetCellAscent(font.Style) / family.GetEmHeight(font.Style));
+        return (int)MathF.Round(font.EmPixels(context.Dpi) * family.GetCellAscent(font.Style) / family.GetEmHeight(font.Style));
     }
 
     /// <summary>宿主的字体按字号、字重、等宽、斜体改过之后的字体（共用，不要释放）。</summary>

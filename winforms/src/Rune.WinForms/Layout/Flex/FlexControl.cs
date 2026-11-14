@@ -196,7 +196,7 @@ public class FlexControl : Panel, IExtenderProvider
     {
         bool IsRow => owner.Direction.Value is null or "row" or "row-reverse";
 
-        double Em => owner.Font.SizeInPoints * owner.DeviceDpi / 72f;
+        double Em => owner.EmPixels();
 
         (double Main, double Cross) Gaps
         {

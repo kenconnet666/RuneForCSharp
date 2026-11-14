@@ -55,7 +55,7 @@ public class SkeletonControl : Panel
 
     void ResetShape() => Shape = default;
 
-    float Em => Font.SizeInPoints * DeviceDpi / 72f;
+    float Em => this.EmPixels();
 
     void UpdateLoading()
     {

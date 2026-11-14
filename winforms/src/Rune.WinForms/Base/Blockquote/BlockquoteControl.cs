@@ -31,7 +31,7 @@ public class BlockquoteControl : Panel, IScopeAware
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public new Padding Padding { get => base.Padding; set => base.Padding = value; }
 
-    float Em => Font.SizeInPoints * DeviceDpi / 72f;
+    float Em => this.EmPixels();
 
     float Rule => Tokens.BorderWidth.Md * DeviceDpi / 96f;
 

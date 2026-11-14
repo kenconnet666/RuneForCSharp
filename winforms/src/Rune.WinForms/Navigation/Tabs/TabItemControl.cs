@@ -94,7 +94,7 @@ public class TabItemControl : FlexControl
     {
         owner = tabs;
         IsSelected = selected;
-        var em = Font.SizeInPoints * DeviceDpi / 72f;
+        var em = this.EmPixels();
         var inline = (int)MathF.Round(0.75f * em);
         var line = tabs.Variant != TabsVariant.Soft;
         var vertical = tabs.Orientation == TabsOrientation.Vertical;
@@ -234,7 +234,7 @@ public class TabItemControl : FlexControl
         if (close is null) return;
         var ring = close.Padding;
         var size = close.GetPreferredSize(Size.Empty) - ring.Size;
-        var margin = (int)MathF.Round(0.25f * close.Font.SizeInPoints * DeviceDpi / 72f);
+        var margin = (int)MathF.Round(0.25f * close.Font.EmPixels(DeviceDpi));
         var bar = owner?.Variant != TabsVariant.Soft && owner?.Orientation == TabsOrientation.Vertical ? LogicalToDeviceUnits(2) : 0;
         var left = Width - bar - margin - size.Width;
         var top = (Height - size.Height) / 2;
@@ -297,7 +297,7 @@ public class TabItemControl : FlexControl
         var theme = ProviderControl.ThemeOf(this);
         var graphics = e.Graphics;
         graphics.SmoothingMode = SmoothingMode.AntiAlias;
-        var radius = theme.Radii.Sm * Font.SizeInPoints * DeviceDpi / 72f;
+        var radius = theme.Radii.Sm * this.EmPixels();
         if (owner?.Variant == TabsVariant.Soft && IsSelected)
         {
             using var path = Drawing.RoundedRectangle(new RectangleF(0, 0, Width - 0.5f, Height - 0.5f), radius);

@@ -111,7 +111,7 @@ public class DescriptionsControl : Panel, IElementHost, IScopeAware
     /// <inheritdoc />
     public override LayoutEngine LayoutEngine { get; }
 
-    float Em => Font.SizeInPoints * DeviceDpi / 72f;
+    float Em => this.EmPixels();
 
     ElementContext Context => ElementContext.Of(this);
 

@@ -127,7 +127,7 @@ public abstract class MenuItemControlBase : FlexControl
         for (var node = Parent; node is not null; node = node is FloatingForm floating ? floating.Origin : node.Parent) yield return node;
     }
 
-    float Em => Font.SizeInPoints * DeviceDpi / 72f;
+    float Em => this.EmPixels();
 
     /// <summary>平时 text，危险操作 dangerText，不可用 textDisabled；没写色调的文字、图标跟着它。</summary>
     public override Color ForeColor
@@ -496,7 +496,7 @@ public class MenuGroupControl : FlexControl
     /// <summary>标题的外边距：上下 space.xs、左右 space.sm（按标题自己的 sm 字号）。</summary>
     void ApplyMetrics()
     {
-        var em = label.Font.SizeInPoints * DeviceDpi / 72f;
+        var em = label.Font.EmPixels(DeviceDpi);
         var (inline, block) = ((int)MathF.Round(Tokens.Space.Sm * em), (int)MathF.Round(Tokens.Space.Xs * em));
         label.Margin = new Padding(inline, block, inline, block);
     }

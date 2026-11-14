@@ -206,7 +206,7 @@ public partial class AppShellControl : Control
     internal Control FooterPart => footer;
     internal Control DrawerPart => drawer.Panel;
 
-    float Em => Font.SizeInPoints * DeviceDpi / 72f;
+    float Em => this.EmPixels();
 
     int Dip(float value) => (int)MathF.Round(value * DeviceDpi / 96f);
 
