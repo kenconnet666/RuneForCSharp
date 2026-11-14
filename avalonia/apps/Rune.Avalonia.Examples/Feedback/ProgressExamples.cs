@@ -5,7 +5,7 @@ using Avalonia.Styling;
 
 namespace Rune.Avalonia.Examples;
 
-/// <summary>Progress 的示例（vue-tsx-pro 文档站 feedback/Progress）。spinner 在 Spinner 页，overlay 要等 LoadingOverlay、Field。</summary>
+/// <summary>Progress 的示例（vue-tsx-pro 文档站 feedback/Progress）。spinner 在 Spinner 页。</summary>
 static class ProgressExamples
 {
     public static Example[] All =>
@@ -13,6 +13,7 @@ static class ProgressExamples
         new("Progress", "progress", "进度条", "Value 与 Max（默认 100）算完成比例，超出时夹住；Tone 表示状态。Label 显示在上方，同时是读屏名称；右侧默认是按语言格式化的百分比，ValueLabel 换成自己的文字（只是显示），读屏念的用 ValueText 改，ShowValueLabel=False 不显示。取值是 decimal。Bands 是量表的用法（磁盘占用、配额、评分这类量出来的数）：值落在哪一段就用哪一段的色调；仪表盘样子的量表用 Gauge。", Bars),
         new("Progress", "rings", "环形与目标", "Shape=circle 是环形：中间显示数值，Label 在下方，直径随 Size 缩放；不写 Value 时一段弧一直转。Target 是目标值：条上画一条竖线、环上画一道刻度，读屏念成\"60%，目标 80%\"。", Rings),
         new("Progress", "loading-bar", "换页时的加载条", "LoadingBar 是窗口顶部的一条细线，控制器加显示（同 Toast）：LoadingBarController 的 Start 开始、Finish 走满后淡出、Error 变成危险色走满。不知道真实进度，所以先快后慢地涨，停在 90% 前等完成；Delay（默认 200 毫秒）之内就完成的不显示。它只是视觉提示：读屏读到的应当是内容区域的忙碌状态。示例把加载条放进了卡片里，平时它放在窗口根部、贴着顶边。", LoadingBarExample),
+        new("Progress", "overlay", "加载遮罩", "LoadingOverlay 盖住一块区域，内容保留在下面，读屏的“忙”立即生效；很快完成时不出现，出现后至少显示一会儿，淡入淡出。Blur 模糊下面的内容。遮罩挡住指针，键盘仍能操作下面的内容：需要禁止时由内容自己处理（这里保存时输入框不可用）。", OverlayExample),
         new("Progress", "shapes", "粗细与不确定进度", "Size 跟字号档位缩放粗细，Radius 改圆角；不写 Value 是不确定进度，循环滑动，系统关闭动画时变慢。", Shapes),
     ];
 
@@ -191,6 +192,46 @@ static class ProgressExamples
             },
         };
         return new Flex { Direction = FlexDirection.Column, Gap = Space.Md, Children = { card, manual } };
+    }
+
+    static Control OverlayExample()
+    {
+        var name = new TextField { Text = "vue-tsx-pro" };
+        var owner = new TextField { Text = "林小满" };
+        var save = new Button { Content = "保存" };
+        var blur = new Switch { Content = "模糊下面的内容", IsChecked = true };
+        var overlay = new LoadingOverlay
+        {
+            Label = "正在保存", Blur = true,
+            Content = new Card
+            {
+                Content = new Flex
+                {
+                    Direction = FlexDirection.Column, Gap = Space.Md,
+                    Children =
+                    {
+                        new Grid { MinItemWidth = "12em", Balanced = true, Gap = Space.Md, Children = { new Field { Label = "项目名称", Content = name }, new Field { Label = "负责人", Content = owner } } },
+                        new Flex { Justify = FlexJustify.End, Children = { save } },
+                    },
+                },
+            },
+        };
+        void Saving(bool value)
+        {
+            overlay.IsLoading = save.IsLoading = value;
+            name.IsEnabled = owner.IsEnabled = !value;
+        }
+        save.Click += async (_, _) =>
+        {
+            Saving(true);
+            await Task.Delay(1600);
+            Saving(false);
+        };
+        blur.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == Switch.IsCheckedProperty) overlay.Blur = blur.IsChecked == true;
+        };
+        return new Flex { Direction = FlexDirection.Column, Gap = Space.Md, Children = { blur, overlay } };
     }
 
     static Control Shapes()

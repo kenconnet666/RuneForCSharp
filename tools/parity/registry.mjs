@@ -289,6 +289,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     Select: Object.fromEntries(['propsListbox', 'propsSearch'].map((prop) => [prop, '弹出层里的列表、搜索框是 Select 建的，外观跟着 Listbox、TextField 的主题样式'])),
     Popconfirm: Object.fromEntries(['propsIcon', 'propsTitle', 'propsDescription', 'propsFooter', 'propsConfirm', 'propsCancel']
       .map((prop) => [prop, '图标、问题、说明、按钮行与按钮是 Popconfirm 代码组合的子元素（同 Dialog），外观跟着各自组件的主题样式；面板、阴影、箭头的部件样式键同 Popover'])),
+    LoadingOverlay: Object.fromEntries(['propsOverlay', 'propsSpinner'].map((prop) => [prop, '遮罩与加载指示是 LoadingOverlay 代码组合的 Grid 与 Spinner，外观跟着 token 与 Spinner 的主题样式；没有部件样式键'])),
     Ellipsis: Object.fromEntries(['propsText', 'propsToggle'].map((prop) => [prop, '文字与展开按钮是 Ellipsis 代码组合的 Text 与 ButtonBase，外观跟着它们的主题样式；没有部件样式键'])),
     Timeline: Object.fromEntries(['propsItem', 'propsRail', 'propsMarker', 'propsLine', 'propsContent', 'propsTitle', 'propsMeta', 'propsTime', 'propsDescription', 'propsDetails', 'propsToggle', 'propsAvatar', 'propsPending']
       .map((prop) => [prop, '每一行是 TimelineRow 代码组合的（节点、连接线、标题、操作人、时间、说明、详情、展开按钮），外观跟着各自组件的主题样式与 token；没有部件样式键'])),
@@ -355,6 +356,10 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     },
     Popover: { propsArrow: '面板、阴影与箭头是组件库画在分层窗口上的位图，箭头没有可改样式的部件' },
     HoverCard: { propsArrow: '同 PopoverControl：面板、阴影与箭头是组件库画在分层窗口上的位图，箭头没有可改样式的部件' },
+    LoadingOverlay: {
+      blur: '遮罩画在属于窗体的分层窗口里，子控件各有窗口，画不到也模糊不了它们的内容',
+      ...Object.fromEntries(['propsOverlay', 'propsSpinner'].map((prop) => [prop, '遮罩与加载指示整张画在分层窗口的位图上，没有部件属性记录'])),
+    },
     Ellipsis: Object.fromEntries(['propsText', 'propsToggle'].map((prop) => [prop, '文字与展开按钮是 EllipsisControl 组合的 TextControl 与链接样式的按钮，没有部件属性记录'])),
     Timeline: Object.fromEntries(['propsItem', 'propsRail', 'propsMarker', 'propsLine', 'propsContent', 'propsTitle', 'propsMeta', 'propsTime', 'propsDescription', 'propsDetails', 'propsToggle', 'propsAvatar', 'propsPending']
       .map((prop) => [prop, '节点与连接线是 TimelineRowControl 画的，标题、操作人、时间、说明、详情、展开按钮是它组合的子控件，没有部件属性记录'])),

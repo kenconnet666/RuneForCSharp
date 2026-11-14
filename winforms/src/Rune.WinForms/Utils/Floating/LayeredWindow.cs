@@ -92,6 +92,14 @@ sealed class LayeredWindow : Form
         if (fading is not null) fade.Start();
     }
 
+    /// <summary>换一张画面（加载遮罩里转动的指示），位置、面板与正在进行的淡入不变。</summary>
+    public void Redraw(Bitmap bitmap)
+    {
+        frame?.Dispose();
+        frame = bitmap;
+        Apply();
+    }
+
     /// <summary>藏起来（不销毁窗口，下次接着用）。</summary>
     public void Dismiss()
     {

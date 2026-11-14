@@ -1378,6 +1378,13 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### LoadingOverlay（2026-11-15）
+
+- 防闪烁用已有的 DelayedLoading（200 毫秒内完成的不出现，出现后至少 500 毫秒）；读屏的"忙"（Avalonia、WPF 的 ItemStatus，WinForms 的 Busy 状态）与挡指针按 IsLoading 立即生效：遮罩出现前先盖一层看不见的。
+- Avalonia、WPF：内容、挡指针的一层、遮罩叠在一起；遮罩的底是单独一层 surface 刷子、不透明度 0.7（TS 的 color-mix：资源里没有混好的刷子，跟着主题走），指示不跟着变淡；durations.md 淡入淡出；Blur 是内容本身的 BlurEffect（TS 是 backdrop-filter）。
+- WinForms：子控件各有窗口，遮罩画在属于窗体的分层窗口里（同 Watermark，跟着控件移动、缩放）；遮罩出现前是 1/255 不透明的底（分层窗口只有不透明的像素才接点击），出现后每秒约 30 帧重画转动的指示（LayeredWindow 加了 Redraw：换画面不重新淡入）。没有 Blur，离场不淡出。
+- 核对 WinForms 的分层窗口：屏幕截图（CopyFromScreen）拍不到分层窗口，直接把画好的那一帧存下来看。
+
 ### Ellipsis（2026-11-15）
 
 - 文字是 Text 的 Truncate（一行）或 LineClamp（多行），展开时去掉限制。截断与否在排好以后量（同 TS 的 ResizeObserver 加每次渲染后），展开时不量：Avalonia 看排好的文字有没有省略过的行（TextLine.HasCollapsed）；WPF 用同样的字体按不限宽（多行时按现在的宽度、不限高）排一个 TextBlock 比实际大小；WinForms 的 Text 元素加了 Overflows（自然大小比 Bounds 大）。
