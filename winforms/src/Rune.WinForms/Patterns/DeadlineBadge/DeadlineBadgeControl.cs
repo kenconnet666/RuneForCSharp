@@ -62,10 +62,10 @@ public class DeadlineBadgeControl : BadgeControl
     public string? Tip { get; private set; }
 
     /// <inheritdoc />
-    protected override void OnParentChanged(EventArgs e)
+    protected override void OnScopeChanged()
     {
-        base.OnParentChanged(e);
         Recompute();
+        base.OnScopeChanged();
     }
 
     /// <summary>按时限换色调、文字、提示与读屏名称；工作日历、语言包取所在的作用域。</summary>

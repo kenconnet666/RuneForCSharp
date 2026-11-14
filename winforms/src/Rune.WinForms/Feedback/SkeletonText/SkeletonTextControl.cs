@@ -15,10 +15,11 @@ public class SkeletonTextControl : Panel
 
     readonly LinesEngine engine;
 
-    /// <summary>新建：3 行，读屏里没有角色。</summary>
+    /// <summary>新建：3 行，读屏里没有角色；同 SkeletonControl 是 AutoSize（FlexControl 只拉伸、量 AutoSize 的子控件），高度跟着行数。</summary>
     public SkeletonTextControl()
     {
         engine = new LinesEngine(this);
+        AutoSize = true;
         AccessibleRole = AccessibleRole.None;
         Rebuild();
     }

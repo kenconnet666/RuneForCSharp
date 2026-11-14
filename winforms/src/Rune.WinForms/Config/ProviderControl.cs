@@ -97,6 +97,17 @@ public class ProviderControl : Panel
 
     static T? Merge<T>(T? below, T? over) where T : class, IScopeRecord<T> => below is null ? over : below.Merge(over);
 
+    /// <summary>
+    /// 加进来一整块控件（先拼好再放进作用域）：WinForms 只通知直接换了父级的那一个，里面的组件看不到换了作用域，这里通知整块。
+    /// </summary>
+    protected override void OnControlAdded(ControlEventArgs e)
+    {
+        base.OnControlAdded(e);
+        if (e.Control is not { } added) return;
+        if (added is IScopeAware aware) aware.ScopeChanged();
+        NotifyDescendants(added);
+    }
+
     /// <summary>这一层变了：里面的组件重新排版、重画（嵌套的作用域也通知，它们看到的合并结果跟着变）。</summary>
     void Changed()
     {

@@ -46,6 +46,18 @@ public class DeadlineBadgeTests
     }
 
     [Fact]
+    public void Holidays_apply_when_an_assembled_block_moves_into_the_provider()
+    {
+        // 先拼好一整块（标记在里层），再放进作用域：标记不是直接换父级，也要按作用域的日历重算
+        var badge = new DeadlineBadgeControl { Due = D("2026-10-26"), Today = Today };
+        var row = new FlexControl();
+        row.Controls.Add(badge);
+        using var provider = new ProviderControl { WorkCalendar = new WorkCalendar(holidays: [(D("2026-10-22"), D("2026-10-23"))]) };
+        provider.Controls.Add(row);
+        Assert.Equal("剩 1 个工作日", badge.Text);
+    }
+
+    [Fact]
     [Upstream("DeadlineBadge", "没有截止日时什么都不画")]
     public Task Nothing_without_a_deadline() => WinFormsUi.Run(() =>
     {
