@@ -73,6 +73,10 @@ export const COMPONENT_PROP_RENAMES = {
   Select: { items: 'ItemsSource', children: 'ItemTemplate', onCreate: 'OptionCreated' },
   // 输入框就是平台 TextBox：没确认的文字是 Text；已选的值是 Values（同多选 Select）
   TagsInput: { _value: 'Values', items: 'ItemsSource', _inputValue: 'Text', children: 'ItemTemplate' },
+  // 输入框就是平台 TextBox：输入的文字是 Text，选中项的值是 Value
+  Combobox: { items: 'ItemsSource', _inputValue: 'Text', children: 'ItemTemplate' },
+  // 值就是输入框里的文字：平台 TextBox 的 Text
+  Autocomplete: { _value: 'Text', items: 'ItemsSource', children: 'ItemTemplate' },
   // 平台的 ComboBox 自己有 Items / ItemsSource（选项行由 Options 生成）与 PlaceholderText
   NativeSelect: { items: 'Options', placeholder: 'PlaceholderText' },
   // C# 的事件用过去式（同 Canceled、Closed），不和取消按钮的部件名 Cancel 重名
@@ -298,6 +302,10 @@ export const PROPS_NOT_PORTED = {
     placement: '弹出层固定贴着外壳下方、至少与它同宽（放不下时翻到上方），同 Select',
     name: FORM_NAME,
   },
+  ...Object.fromEntries(['Combobox', 'Autocomplete'].map((name) => [name, {
+    placement: '弹出层固定贴着外壳下方、至少与它同宽（放不下时翻到上方），同 Select',
+    name: FORM_NAME,
+  }])),
   // 上游没声明的属性落到对话框上：桌面上命令面板的对话框是固定的一种
   CommandPalette: Object.fromEntries(['closable', 'dismissible', 'beforeClose', 'onConfirm', 'confirmText', 'cancelText', 'tone', 'lazy', 'size',
     'propsConfirm', 'propsCancel', 'propsHeader', 'propsTitle', 'propsDescription', 'propsClose', 'propsBody', 'propsFooter']

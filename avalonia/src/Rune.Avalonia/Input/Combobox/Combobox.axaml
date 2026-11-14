@@ -1,0 +1,50 @@
+<!--
+  Combobox、Autocomplete 的主题（vue-tsx-pro 的 controlParts、disclosureStyles）：外壳同输入框（Rune.TextInput）；里面依次是前置图标、文字、清空按钮、
+  展开按钮（radius full、紧凑尺寸同清空按钮，打开时箭头翻转）。弹出层的面板同 Select（SelectParts.axaml）。
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:Combobox}" TargetType="rune:Combobox" BasedOn="{StaticResource Rune.TextInput}">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border Name="PART_Root" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
+            <rune:Flex Align="center" Gap="sm">
+              <rune:Icon Name="PART_Icon" Data="{TemplateBinding Icon}" IsVisible="{TemplateBinding Icon, Converter={x:Static ObjectConverters.IsNotNull}}" />
+              <Panel rune:Flex.Grow="True" ClipToBounds="True" VerticalAlignment="Center">
+                <TextBlock Name="PART_Placeholder" Text="{TemplateBinding PlaceholderText}" Foreground="{TemplateBinding PlaceholderForeground}"
+                           IsVisible="False" IsHitTestVisible="False" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                <TextPresenter Name="PART_TextPresenter"
+                               Text="{TemplateBinding Text, Mode=TwoWay}"
+                               CaretBlinkInterval="{TemplateBinding CaretBlinkInterval}"
+                               CaretIndex="{TemplateBinding CaretIndex}"
+                               SelectionStart="{TemplateBinding SelectionStart}"
+                               SelectionEnd="{TemplateBinding SelectionEnd}"
+                               TextWrapping="NoWrap"
+                               LineHeight="{TemplateBinding LineHeight}"
+                               SelectionBrush="{TemplateBinding SelectionBrush}"
+                               SelectionForegroundBrush="{TemplateBinding SelectionForegroundBrush}"
+                               CaretBrush="{TemplateBinding CaretBrush}"
+                               VerticalAlignment="Center" />
+              </Panel>
+              <rune:ClearButton Name="PART_Clear" Radius="full" IsVisible="False" Cursor="Hand" />
+              <rune:IconButton Name="PART_Chevron" Radius="full" Icon="{x:Static rune:Lucide.ChevronDown}" Focusable="False" Cursor="Hand" RenderTransformOrigin="50%,50%" />
+            </rune:Flex>
+          </Border>
+          <Border Name="PART_FocusRing" IsVisible="False" IsHitTestVisible="False" Margin="-1" BorderThickness="2"
+                  BorderBrush="{DynamicResource Rune.Brush.FocusRing}" CornerRadius="{TemplateBinding CornerRadius}" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^ /template/ rune|Icon#PART_Icon"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" /></Style>
+    <Style Selector="^ /template/ rune|IconButton#PART_Chevron">
+      <Setter Property="Width" Value="{rune:Em 1.5, Min=24}" />
+      <Setter Property="MinHeight" Value="{rune:Em 1.5, Min=24}" />
+      <Setter Property="Margin" Value="{rune:Em -0.25, 0}" />
+    </Style>
+    <Style Selector="^:open /template/ rune|IconButton#PART_Chevron"><Setter Property="RenderTransform" Value="rotate(180deg)" /></Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type rune:Autocomplete}" TargetType="rune:Autocomplete" BasedOn="{StaticResource {x:Type rune:Combobox}}" />
+</ResourceDictionary>
