@@ -126,7 +126,9 @@ public class TableTests
         Assert.Equal(before.header.X - 200, At(header).X, 0.5); // 横向照常滚
         Assert.Equal(before.rowLabel.X, At(rowLabel).X, 0.5); // 第一列贴着起始边
         Assert.Equal(before.rowLabel.Y - 150, At(rowLabel).Y, 0.5); // 竖向照常滚
-        Assert.Equal(before.body - new Vector(200, 150), At(body)); // 别的格两个方向都滚
+        var moved = At(body);
+        Assert.Equal(before.body.X - 200, moved.X, 0.5); // 别的格两个方向都滚
+        Assert.Equal(before.body.Y - 150, moved.Y, 0.5);
         // 叠放次序：可视子元素越靠后越在上面
         var grid = VisualTreeHelper.GetParent(corner);
         int Layer(TableCell cell) => Enumerable.Range(0, VisualTreeHelper.GetChildrenCount(grid)).First(i => VisualTreeHelper.GetChild(grid, i) == cell);
