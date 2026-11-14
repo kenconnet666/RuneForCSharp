@@ -1,0 +1,46 @@
+<!--
+  Stat 的主题样式（vue-tsx-pro 的 statRecipe）：正文色；指标名次要色；图标框 accentSoft 底、accentText 色；数值粗体、行高 tight；
+  单位、变化量的说明、补充说明、底栏次要色，底栏上方一条 borderMuted 的线。字号与 em 尺寸、组里的竖线在 Stat.cs 里
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Rune.Wpf;component/Display/AnimatedNumber/AnimatedNumber.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <Style TargetType="rune:Stat">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+  </Style>
+  <!-- 部件的默认外观写在部件样式里（DESIGN §7），使用方同键的样式叠在上面，盖得过 -->
+  <Style x:Key="{x:Static rune:StatParts.Label}" TargetType="rune:Flex">
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+  </Style>
+  <Style x:Key="{x:Static rune:StatParts.Icon}" TargetType="Border">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.AccentSoft}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.AccentText}" />
+  </Style>
+  <Style x:Key="{x:Static rune:StatParts.Value}" TargetType="rune:Flex" />
+  <Style x:Key="{x:Static rune:StatParts.Number}" TargetType="rune:AnimatedNumber" BasedOn="{StaticResource {x:Type rune:AnimatedNumber}}">
+    <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Bold}" />
+    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Tight}" />
+  </Style>
+  <Style x:Key="{x:Static rune:StatParts.Text}" TargetType="rune:Text">
+    <Setter Property="Weight" Value="bold" />
+    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Tight}" />
+  </Style>
+  <Style x:Key="{x:Static rune:StatParts.Unit}" TargetType="rune:Text">
+    <Setter Property="Tone" Value="muted" />
+  </Style>
+  <Style x:Key="{x:Static rune:StatParts.Change}" TargetType="rune:Flex" />
+  <Style x:Key="{x:Static rune:StatParts.ChangeLabel}" TargetType="rune:Text">
+    <Setter Property="Tone" Value="muted" />
+  </Style>
+  <Style x:Key="{x:Static rune:StatParts.Description}" TargetType="rune:Text">
+    <Setter Property="Tone" Value="muted" />
+  </Style>
+  <Style x:Key="{x:Static rune:StatParts.Body}" TargetType="ContentPresenter" />
+  <Style x:Key="{x:Static rune:StatParts.Footer}" TargetType="Border">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+  </Style>
+</ResourceDictionary>
