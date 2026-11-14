@@ -58,6 +58,11 @@ public abstract class ButtonControlBase<T> : ElementControl<T>, IButtonControl w
     [DefaultValue(false)]
     public bool IsLoading { get => Element.IsLoading; set => Element.IsLoading = value; }
 
+    /// <summary>它控制的区域展开了没有（TS 的 aria-expanded，如"显示代码"）；null 时不是展开收起的开关。菜单、弹出框的触发器按它们的开合。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    internal bool? Expanded { get; set; }
+
     /// <summary>按下时的波纹；不写时沿用全局开关。</summary>
     [Category("Behavior")]
     [Description("按下时的波纹；空着时沿用 Ripple.Enabled。")]
@@ -266,7 +271,7 @@ public abstract class ButtonControlBase<T> : ElementControl<T>, IButtonControl w
         {
             MenuControl menu => AccessibleStates.HasPopup | (menu.IsOpen ? AccessibleStates.Expanded : AccessibleStates.Collapsed),
             PopoverControl popover => AccessibleStates.HasPopup | (popover.IsOpen ? AccessibleStates.Expanded : AccessibleStates.Collapsed),
-            _ => 0,
+            _ => owner.Expanded switch { true => AccessibleStates.Expanded, false => AccessibleStates.Collapsed, null => 0 },
         };
 
         public override void DoDefaultAction() => (Owner as ButtonControlBase<T>)?.PerformClick();
