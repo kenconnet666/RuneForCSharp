@@ -1,0 +1,18 @@
+<!--
+  Breadcrumbs 部件的默认外观（vue-tsx-pro 的 breadcrumbsStyles）：整条 sm 字号；当前页正文色、中等字重；分隔符次要色。
+  链接是次要色、悬停下划线（Breadcrumbs.cs 里写在 Link 上），折叠按钮 sm。
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|Breadcrumbs">
+    <Setter Property="TextElement.FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
+  </Style>
+  <Style Selector="rune|Breadcrumbs Border#PART_Current">
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="TextElement.FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
+  </Style>
+  <Style Selector="rune|Breadcrumbs rune|Icon#PART_Separator">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+  </Style>
+</Styles>

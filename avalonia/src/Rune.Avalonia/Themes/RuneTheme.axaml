@@ -66,6 +66,7 @@
   <StyleInclude Source="avares://Rune.Avalonia/Form/Field/FieldParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Navigation/NavList/NavListParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Navigation/TableOfContents/TableOfContentsParts.axaml" />
+  <StyleInclude Source="avares://Rune.Avalonia/Navigation/Breadcrumbs/BreadcrumbsParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Patterns/AppShell/AppShellParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Input/Listbox/ListboxParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Overlay/Popover/PopoverParts.axaml" />

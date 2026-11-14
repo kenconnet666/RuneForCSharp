@@ -789,6 +789,20 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   指示条 2 像素宽、圆角、品牌色，盖住细线，对准当前链接，第一次直接到位、之后滑过去（durations.md、standard）。
 - 像素对照（nav-list 页的 toc）：Avalonia、WPF 0.01%；WinForms 0.9%–1.0%（GDI 的文字换行宽度与行高）。
 
+### Breadcrumbs（2026-11-14）
+
+- `Items` 是 `BreadcrumbItem(Label, Href, Icon)`（TS 的 BreadcrumbItem；key 是 Vue 的列表标识，不要）；`Href` 同 NavList 是字符串，链接上按相对或绝对地址转成 Uri。
+  `Separator` 只收图标（TS 是任意节点：同一个控件不能放在多处，每处要新建一个；示例里的分隔符也只是图标），不写时是右向 chevron、从右到左时翻转。
+- `MaxItems`：超过 max(MaxItems, 3) 项时留第一项与最后两项，中间换成菜单按钮（sm 的 IconButton，名称取语言包），被折叠的各级在菜单里：有地址的是链接项，
+  没有地址的交给导航，没人处理时不可用。
+- 应用内的层级（TS 的 onNavigate）：Avalonia、WPF 是冒泡的路由事件 `Navigate` 加 `NavigateCommand`（参数是那一级），WinForms 是 CLR 事件；
+  订阅了事件（或写了命令）时没有地址的各级才是 link 样式的按钮——事件的 add / remove 访问器记着订阅数并重建。当前一级的读屏状态是"当前位置"，否则"当前页"
+  （Avalonia、WPF 的 ItemStatus；WinForms 没有 aria-current，写在 AccessibleDescription 上）。名称没写时取语言包（面包屑）。
+- 外观：整条 sm 字号、横排换行、项与项、图标与文字之间 space.xs；链接次要色、悬停下划线；当前页正文色、中等字重（GDI 只有常规与粗体，WinForms 画成常规）；
+  分隔符次要色。WPF 的 Link 是行内元素（Hyperlink），放在 Text 里，图标是行内控件，与文字之间一个空格（约 0.25em）；WinForms 的链接只有文字，图标放在旁边，同链接是次要色。
+- 部件：Avalonia、WPF 有 List、Item、CollapsedItem、Link、Button、Menu、Label、Current、Separator、Expand；WinForms 没有部件属性（同 TableOfContents，记在 parity 的欠账里）。
+- 同页的 Steps 还没做。
+
 ### ToggleGroup（2026-11-07）
 
 - 照上游：ToggleGroup（SelectionMode、Value / Values、IsRequired、IsReadOnly、Orientation、Size、Ripple）> ToggleItem（Value、Icon、文字）。TS 的 `_value`
