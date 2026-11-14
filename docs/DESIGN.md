@@ -1378,6 +1378,14 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### TagsInput（2026-11-15）
+
+- 同上游：输入框就是控件自己。Avalonia、WPF 的 TagsInput 从 TextInputBase（平台 TextBox）派生，模板里图标、标签、文字区排在一个会换行的 Flex 里（列间 sm、行间 xs，文字区至少 6em），清空按钮靠结束边；标签是代码按值插进那一排的 surface 样式 Tag（按值复用，焦点在移除按钮上时不丢），只读、不可用时不订阅 RemoveRequested，就没有移除按钮。WinForms 的 TagsInputControl 从 TextInputControl 派生，标签是 TagControl 子控件，按"图标、标签、输入框、清空按钮"重排 Controls 的顺序。
+- 上游的 _value 是 Values（同多选 Select），inputValue 是平台的 Text；filter={false}（异步取建议）叫 LocalFilter=false，Filter 是自定义的匹配函数。拆分、文字换成值、去重与上限在孪生文件 TagsText；默认分隔符 , ， ; ；，换行与制表符总是分隔。
+- 键盘在 TextBox 自己处理之前接住：Avalonia 覆写 OnKeyDown 先判断，WPF 用 PreviewKeyDown，WinForms 转到外壳的 OnKeyDown（SuppressKeyPress），并让内层 TextBox 把回车、开着时的 Esc 当作输入键（不触发窗体的默认、取消按钮）。输入法组合中的键是 ImeProcessed / ProcessKey，不处理。粘贴：Avalonia 拦 PastingFromClipboard 再读剪贴板（TryGetTextAsync），WPF 用 DataObject.Pasting，WinForms 拦 WM_PASTE；只有一段时照常粘贴。
+- 建议列表照 Select：Avalonia、WPF 是 Popup 里不可聚焦的 Listbox，WinForms 是不激活的 FloatingSurface 两层窗口，焦点一直在输入框里。WinForms 显示浮层窗口时平台可能把焦点拿走一下、让宿主窗体失活：显示期间的失焦与"点了外面"不算，显示完把焦点还给输入框。从建议里选的也受 Max 限制：拒绝时把列表的已选退回去（WPF、Avalonia 要给新的列表实例，列表才重新同步）。
+- 失焦时加入没确认的文字只认输入框自己失焦（焦点移到标签的移除按钮上也算，同上游的 blur）。表单字段名（name）与弹出位置（placement，固定下方起始边对齐，同 Select）不移植；WinForms 的建议没有自定义内容模板。
+
 ### Splitter、ResizeHandle（2026-11-15）
 
 - 比例的计算（夹在范围里保留一位小数、拖动换算、按键的目标、收起时读屏的 0 / 100、两栏按比例分、收起按钮的箭头方向、手柄的长度与方向）在孪生文件 SplitterScale，同 TS 的网格模板：分隔条占 space.md，剩下的按 size : 100 − size 分，收起的一栏不占位置。拖动的比例按整个分栏的长度算（含分隔条，同 TS 量 root 的宽度）。

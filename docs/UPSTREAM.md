@@ -380,7 +380,7 @@ Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
 | 部件属性合并：undefined 不表态、null 才清掉；aria-describedby 拼接去重；嵌套 propsXxx 递归合并；同名事件合成 | WinForms 的部件属性记录本来就是 null = 不改、逐字段合并；Avalonia、WPF 用样式 | 已跟：读屏的帮助文字（aria-describedby）三个平台都改成字段的说明、错误与控件自己的拼在一起去重——原来 TextField、Select、Listbox、ToggleGroup 根本没念字段的说明，勾选项只在自己没写时才念 |
-| Listbox disabled 时点选项不改值、不触发 onPick；Link external 的 target、rel 是默认层；Popconfirm、TagsInput、日期、Pagination、Rating、Splitter 等一批行为修正；输入法组合中 DataTable、Cascader 等不处理按键 | Listbox、Popconfirm、Rating、Splitter 已做，其余还没做 | Listbox 本来就拦下（补了测试）；Popconfirm 照新的做（确认进行中被关掉、结果出来没确认成才算取消）；Rating 照新的做（只读时名称里总有分数）；Splitter 照新的做（只认主键拖动，拖动中离开分隔条也保持"拖动中"的样子）；其余做时照新的 |
+| Listbox disabled 时点选项不改值、不触发 onPick；Link external 的 target、rel 是默认层；Popconfirm、TagsInput、日期、Pagination、Rating、Splitter 等一批行为修正；输入法组合中 DataTable、Cascader 等不处理按键 | Listbox、Popconfirm、Rating、Splitter、TagsInput 已做，其余还没做 | Listbox 本来就拦下（补了测试）；Popconfirm 照新的做（确认进行中被关掉、结果出来没确认成才算取消）；Rating 照新的做（只读时名称里总有分数）；Splitter 照新的做（只认主键拖动，拖动中离开分隔条也保持"拖动中"的样子）；TagsInput 照新的做（输入法组合中的 Enter 是平台的 ImeProcessed / ProcessKey，不加标签）；其余做时照新的 |
 | 新部件属性：NavBar、QuarterCalendar、DataTable 表头按钮、ImageCropper、QueryTable | 还没做 | 做时照新的 |
 
 锁定跟到 0.22.0（6e6f831d）：生成文件没变；行为对照新增的 Field 两条、Listbox 一条都对上了。
@@ -415,7 +415,7 @@ defineTheme / defineLang 忽略 undefined——网页专用或 C# 没有 undefin
 | ContextMenu 触屏、触控笔按住 700ms 打开 | 已做 | 不用改：Avalonia 的长按手势会发 ContextRequested；WPF、WinForms 由 Windows 的按住相当于右键发右键菜单 |
 | NavList 紧凑分组触屏点图标弹出子项 | 紧凑时的弹出还没做（等 HoverCard） | 做时照新的：悬停、聚焦、点按都弹出，点外面、点了链接收起 |
 | 页面组合文案 notificationsNoMatch | 生成文件 | 重新生成 PatternsMessages |
-| ColumnTable empty；TagsInput 回车加打的字；Splitter、ResizeHandle 粗指针的命中区；ConditionBuilder、CodeEditor、Autocomplete 在只读 / 不可用表单里；NavBar 下拉里的徽标；Diagram fitView | Splitter、ResizeHandle 已做，其余还没做 | 粗指针（触屏）扩命中区是网页的 pointer: coarse，桌面上不涉及（分隔条本来整条 space.md 都能按）；其余做时照新的 |
+| ColumnTable empty；TagsInput 回车加打的字；Splitter、ResizeHandle 粗指针的命中区；ConditionBuilder、CodeEditor、Autocomplete 在只读 / 不可用表单里；NavBar 下拉里的徽标；Diagram fitView | Splitter、ResizeHandle、TagsInput 已做，其余还没做 | 粗指针（触屏）扩命中区是网页的 pointer: coarse，桌面上不涉及（分隔条本来整条 space.md 都能按）；TagsInput 照新的做（允许自定义值时打字不自动高亮建议，回车加的是打的字，要选建议按 ↓）；其余做时照新的 |
 | usePersistentState、useMediaQuery 水合；sameValue 比 Map / Set；tableToXlsx 的时区 | 网页专用或还没做 | 不涉及 |
 
 锁定跟到 0.24.0（6e7b07b7）：页面组合文案表多了 notificationsNoMatch，docs-gen 的页面清单更新；token、图标、配方、语言包没变。
@@ -445,7 +445,7 @@ defineTheme / defineLang 忽略 undefined——网页专用或 C# 没有 undefin
 | 组件上写错绑定名是类型错误：PartProps 去掉原生元素专用的 _value、_checked、_files、_open（之前 `<Switch _value>` 能过类型检查，开关却不跟状态走） | 不涉及 | C# 的组件只有自己声明的属性，写错名字本来就编译不过；Switch、Checkbox 的值是 IsChecked，没有 Value |
 | Video controls="custom" 认不知道时长的视频（直播、边录边播）：时间只显示已播多久，进度条不可用，方向键不把进度跳回开头；有回看范围时取它的末尾当时长 | 已改 | 孪生文件 VideoPage 的脚本照做（duration() 取 seekable 的末尾，时长为 0 时不跳、只显示已播时间、进度条不可用，播放中每次 timeupdate 重算）；在 WebView2 里把 duration 改成 Infinity 核对过 |
 | Affix 的根元素补上部件标记 | 组件还没做 | 做时照新的 |
-| 文档：Combobox"表单提交与自定义匹配"、Cascader"显示、搜索的匹配与状态"、TagsInput 状态示例补 acceptOnBlur / radius / name、Affix"贴在底部的提交栏" | 组件还没做 | 做时照着移植 |
+| 文档：Combobox"表单提交与自定义匹配"、Cascader"显示、搜索的匹配与状态"、TagsInput 状态示例补 acceptOnBlur / radius / name、Affix"贴在底部的提交栏" | TagsInput 已做（2026-11-15），其余组件还没做 | TagsInput 的状态示例照着移植（name 是表单字段名，桌面上不移植）；其余做时照着移植 |
 
 锁定跟到 e380a8e7（CI 绿；0.29.0 的发版提交 0de173eb 只改版本号与变更记录，CI 绿了再跟）：文档页面清单重新生成；token、语言包、图标、配方没变。
 
