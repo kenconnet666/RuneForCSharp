@@ -92,11 +92,7 @@ public abstract class ChoiceControl<T> : ElementControl<T>, IFieldControl where 
     }
 
     /// <inheritdoc />
-    protected override void OnEnabledChanged(EventArgs e)
-    {
-        base.OnEnabledChanged(e);
-        Element.IsEnabled = Enabled;
-    }
+    protected override void OnEffectiveEnabledChanged() => Element.IsEnabled = Enabled;
 
     /// <summary>卡片外观时不留画焦点环的 Padding：焦点环贴着方框，画在卡片的内边距里；卡片的边就是控件的边。</summary>
     protected override void OnLayout(LayoutEventArgs levent)

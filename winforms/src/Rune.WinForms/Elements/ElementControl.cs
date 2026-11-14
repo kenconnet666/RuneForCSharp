@@ -105,6 +105,29 @@ public abstract class ElementControl<T> : Control, IElementHost, IBaseline, ISco
     {
         base.OnParentChanged(e);
         OnScopeChanged();
+        OnEffectiveEnabledChanged();
+    }
+
+    /// <inheritdoc />
+    protected override void OnEnabledChanged(EventArgs e)
+    {
+        base.OnEnabledChanged(e);
+        OnEffectiveEnabledChanged();
+    }
+
+    /// <inheritdoc />
+    protected override void OnParentEnabledChanged(EventArgs e)
+    {
+        base.OnParentEnabledChanged(e);
+        OnEffectiveEnabledChanged();
+    }
+
+    /// <summary>
+    /// 实际的可用状态（<see cref="Control.Enabled"/>，跟着父控件）可能变了：元素有自己的 IsEnabled 的宿主在这里同步。
+    /// 平台只在自己的可用标记还开着时把父控件的变化转成 OnEnabledChanged，换父控件也不发：光靠 OnEnabledChanged 会漏（自己先关、父控件后关时元素停在可用）。
+    /// </summary>
+    protected virtual void OnEffectiveEnabledChanged()
+    {
     }
 
     /// <inheritdoc />

@@ -36,18 +36,7 @@ public abstract class Element
     /// </summary>
     /// <param name="enabled">元素可用。</param>
     /// <param name="colors">主题颜色（宿主往上都透明时用页面底色）。</param>
-    private protected Func<Color, Color> Dimmer(bool enabled, ThemeColors colors)
-    {
-        if (enabled) return color => color;
-        var back = colors.Background;
-        for (var control = Host as Control; control is not null; control = control.Parent)
-            if (control.BackColor.A == 255)
-            {
-                back = control.BackColor;
-                break;
-            }
-        return color => Drawing.Mix(back, color, Tokens.Opacity.Disabled);
-    }
+    private protected Func<Color, Color> Dimmer(bool enabled, ThemeColors colors) => Drawing.Dimmer(Host as Control, enabled, colors);
 
     /// <summary>所在作用域的语言包（没有作用域时应用级的）。</summary>
     protected internal Lang CurrentLang => Scope?.EffectiveLang ?? RuneLang.Current.Value;

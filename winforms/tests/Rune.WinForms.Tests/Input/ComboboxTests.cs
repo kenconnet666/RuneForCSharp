@@ -178,4 +178,19 @@ public class ComboboxTests
         other.Input.Focus();
         Assert.Equal("自定义的文字", box.Text);
     });
+
+    [Fact]
+    public Task A_disabled_field_dims_the_shell_and_the_chevron() => WinFormsUi.Run(() =>
+    {
+        var box = new ComboboxControl { ItemsSource = Cities, Value = "上海" };
+        var enabled = new ComboboxControl { ItemsSource = Cities, Value = "上海" };
+        // 先放进已经不可用的字段：平台不为它发 OnEnabledChanged，元素的可用状态要靠 OnEffectiveEnabledChanged 同步
+        var field = new FieldControl { Label = "不可用", Enabled = false, Content = box };
+        using var form = WinFormsUi.Show(Host(field, enabled));
+
+        Assert.False(box.Toggle.Element.IsEnabled);
+        Assert.True(enabled.Toggle.Element.IsEnabled);
+        // 里面的 TextBox 底色跟着外壳变淡，和外壳接得上
+        Assert.NotEqual(enabled.Input.BackColor, box.Input.BackColor);
+    });
 }

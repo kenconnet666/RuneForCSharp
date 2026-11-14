@@ -108,11 +108,7 @@ public class FieldLabelControl : ElementControl<FieldLabel>
     }
 
     /// <inheritdoc />
-    protected override void OnEnabledChanged(EventArgs e)
-    {
-        base.OnEnabledChanged(e);
-        Element.IsEnabled = Enabled;
-    }
+    protected override void OnEffectiveEnabledChanged() => Element.IsEnabled = Enabled;
 
     /// <summary>点标签：聚焦目标。</summary>
     protected override void OnMouseDown(MouseEventArgs e)

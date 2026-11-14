@@ -17,6 +17,15 @@ static class ControlShell
     public static Color Fill(ThemeColors colors, ControlVariant variant, bool readOnly, bool hovered = false) =>
         readOnly ? colors.Fill : variant == ControlVariant.Soft ? hovered ? colors.FillHover : colors.Fill : colors.Surface;
 
+    /// <summary>外壳实际画出来的底色：不可用时变淡（里面的 TextBox 用它作底色，和外壳接得上）。</summary>
+    /// <param name="host">外壳。</param>
+    /// <param name="colors">主题的颜色。</param>
+    /// <param name="variant">样式。</param>
+    /// <param name="readOnly">只读。</param>
+    /// <param name="hovered">指针在上面。</param>
+    public static Color ShownFill(Control host, ThemeColors colors, ControlVariant variant, bool readOnly, bool hovered = false) =>
+        Drawing.Dimmer(host, host.Enabled, colors)(Fill(colors, variant, readOnly, hovered));
+
     /// <summary>左右 space.md 的内边距、控件高度的最小尺寸。</summary>
     /// <param name="host">外壳。</param>
     /// <param name="em">外壳的字号（设备像素）。</param>
@@ -55,15 +64,17 @@ static class ControlShell
         var corner = Math.Min((radius.In(theme.Radii) ?? 0) * em, height / 2f);
         // 放在 ControlGroup 里时相邻一侧是直角
         var squared = Attached.Get(host);
+        // 不可用时整体半透明（同上游的 opacities.disabled）：GDI 的颜色按比例混进后面的底色
+        var dim = Drawing.Dimmer(host, host.Enabled, colors);
         using (var path = Drawing.RoundedRectangle(new RectangleF(0, 0, width, height), corner, squared))
-        using (var fill = new SolidBrush(Fill(colors, variant, state.ReadOnly, state.Hovered)))
+        using (var fill = new SolidBrush(ShownFill(host, colors, variant, state.ReadOnly, state.Hovered)))
             graphics.FillPath(fill, path);
         var line = host.LogicalToDeviceUnits(1);
         Color? border = state.Invalid ? colors.Danger : state.ReadOnly ? colors.BorderMuted : variant == ControlVariant.Soft ? null : state.Hovered ? colors.BorderStrong : colors.Border;
         if (border is { } stroke)
         {
             using var outline = Drawing.RoundedRectangle(new RectangleF(line / 2f, line / 2f, width - line, height - line), Math.Max(0, corner - line / 2f), squared);
-            using var pen = new Pen(stroke, line);
+            using var pen = new Pen(dim(stroke), line);
             graphics.DrawPath(pen, outline);
         }
         if (!state.Focused) return;

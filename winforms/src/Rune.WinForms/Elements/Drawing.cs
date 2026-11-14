@@ -5,6 +5,26 @@ namespace Rune.WinForms;
 /// <summary>自绘元素共用的图形。</summary>
 static class Drawing
 {
+    /// <summary>
+    /// 画颜色用的"变淡"：不可用时把颜色按 opacities.disabled 混进 <paramref name="from"/> 往上第一个不透明的背景色（GDI 的文字不认 alpha，混色等于整体半透明）；
+    /// 可用时原样返回。
+    /// </summary>
+    /// <param name="from">从这个控件往上找背景色。</param>
+    /// <param name="enabled">可用。</param>
+    /// <param name="colors">主题颜色（往上都透明时用页面底色）。</param>
+    public static Func<Color, Color> Dimmer(Control? from, bool enabled, ThemeColors colors)
+    {
+        if (enabled) return color => color;
+        var back = colors.Background;
+        for (var control = from; control is not null; control = control.Parent)
+            if (control.BackColor.A == 255)
+            {
+                back = control.BackColor;
+                break;
+            }
+        return color => Mix(back, color, Tokens.Opacity.Disabled);
+    }
+
     /// <summary>两个颜色按比例混合（逐通道，含不透明度）：<paramref name="amount"/> 为 0 是 <paramref name="from"/>，1 是 <paramref name="to"/>。</summary>
     public static Color Mix(Color from, Color to, double amount)
     {

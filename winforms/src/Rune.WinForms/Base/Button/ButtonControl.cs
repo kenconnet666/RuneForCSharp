@@ -137,11 +137,7 @@ public abstract class ButtonControlBase<T> : ElementControl<T>, IButtonControl, 
     protected virtual void Navigate(Uri href) => LinkLauncher.Open(href);
 
     /// <inheritdoc />
-    protected override void OnEnabledChanged(EventArgs e)
-    {
-        base.OnEnabledChanged(e);
-        Element.IsEnabled = Enabled;
-    }
+    protected override void OnEffectiveEnabledChanged() => Element.IsEnabled = Enabled;
 
     /// <inheritdoc />
     protected override void OnMouseEnter(EventArgs e)

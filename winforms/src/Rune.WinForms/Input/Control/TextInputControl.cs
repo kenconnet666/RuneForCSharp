@@ -246,7 +246,7 @@ public abstract class TextInputControl : FlexControl, IFieldControl
         ControlShell.FitInnerButton(clear, Em);
         input.ReadOnly = ReadOnly;
         var colors = ProviderControl.ThemeOf(this).Colors;
-        input.BackColor = Bare ? colors.SurfaceRaised : ControlShell.Fill(colors, Variant, ReadOnly, hovered);
+        input.BackColor = Bare ? colors.SurfaceRaised : ControlShell.ShownFill(this, colors, Variant, ReadOnly, hovered);
         input.ForeColor = colors.Text;
         clear.Visible = ClearShown;
         count.Visible = ShowCount;
@@ -267,7 +267,7 @@ public abstract class TextInputControl : FlexControl, IFieldControl
         if (hovered == value) return;
         hovered = value;
         // 输入框的底色跟着外壳（soft 悬停时加深）
-        if (!Bare) input.BackColor = ControlShell.Fill(ProviderControl.ThemeOf(this).Colors, Variant, ReadOnly, hovered);
+        if (!Bare) input.BackColor = ControlShell.ShownFill(this, ProviderControl.ThemeOf(this).Colors, Variant, ReadOnly, hovered);
         Invalidate();
     }
 
