@@ -658,7 +658,7 @@ defineTheme / defineLang 忽略 undefined——网页专用或 C# 没有 undefin
 | 一.5 公开 API 收口（内部样式表不导出，hotStyles、VarTheme） | 已有 | WinForms 配方是 internal；XAML 资源键在 DESIGN 写明不稳定（随第 2 包） |
 | 二 variant 只表示外观（Skeleton shape、图表 type） | 做时照做 | Skeleton、Sparkline、TimelineChart、WaveGrid 还没做 |
 | 二 `Tone` → `TextTone`；StatusTone 不变 | 待定（第 1 包） | 三个平台各有 `Tone` 记录结构（Typography.cs），属性名 `Tone` 不变；公开类型改名，不留旧名 |
-| 二 不改的（Container/Dialog/Drawer size、NavList compact、Result status） | 做时照做 | 组件还没做 |
+| 二 不改的（Container/Dialog/Drawer size、NavList compact、Result status） | Dialog、Drawer 已做（size 照旧：Avalonia、WPF 是 Size，WinForms 是 DialogSize），其余做时照做 | 组件还没做的做时照做 |
 | 三 去掉 ocean、新增 high-contrast-dark | 合入后 | 重新生成 token 与语言包；token-gen 会删掉 Ocean 的主题文件 |
 | 三 跟随系统时按对比度偏好选高对比 | 做时照做 | 做"跟随系统"的主题切换时接平台的高对比设置 |
 | 三 scrim、scrimStrong、onScrim | 已有 | 已按 9d5af3f3 生成 |

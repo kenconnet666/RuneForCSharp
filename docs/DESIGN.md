@@ -1378,6 +1378,13 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### Drawer（2026-11-15）
+
+- 内核同上游（ModalCore）：Drawer 从 Dialog（WinForms 是 DialogControl）派生，遮罩、焦点、Esc、点遮罩、BeforeClose、确认、命令式 ShowAsync 都是对话框的。为此 Dialog 把面板的摆放拆成给子类的钩子（量面板的约束、面板的矩形、面板排好之后、圆角、刚显示出来；WinForms 是 PanelBounds、SquarePanel、ArrangeExtras），行为不变；Avalonia 的 Dialog 部件样式改用 `:is(rune|Dialog)`，派生类也适用。
+- 位置：左右两侧占满窗口高、宽度按 Size 档位（默认 xs）或 Width，上下两侧占满窗口宽、高度按内容；贴边的一侧没有描边、没有圆角。上游的 width 是控件自己的 Width（Avalonia、WPF 默认双向绑定：抽屉自己不参与排版，Width 正好空着），minWidth 是 MinWidth（默认 48）；WinForms 的控件尺寸照样会被设计器序列化，改叫 PanelWidth、MinPanelWidth，另有 PanelWidthChanged。
+- 宽度调整手柄就是 ResizeHandle：给它加了内部的长度读写钩子，改的是抽屉面板的宽度而不是父元素；手柄放在弹出层里、贴着面板靠正文的一边，最多拖到窗口宽减 48，双击回到打开时的宽度。拖窄以后内容保持 20em（不超出窗口减 3em），被面板裁掉。
+- 滑入：Avalonia 动画一个附加的进度属性换算位移，WPF 是面板与阴影层共用的 TranslateTransform（durations.lg、enter；系统关闭动画时不播），离场不播（Dialog 也没有离场动画）。WinForms 的面板是两层窗口，没有滑入动画；直角由 FloatingSurface.Show 的 square 画，贴边一侧的描边照常画在窗体边上。
+
 ### TagsInput（2026-11-15）
 
 - 同上游：输入框就是控件自己。Avalonia、WPF 的 TagsInput 从 TextInputBase（平台 TextBox）派生，模板里图标、标签、文字区排在一个会换行的 Flex 里（列间 sm、行间 xs，文字区至少 6em），清空按钮靠结束边；标签是代码按值插进那一排的 surface 样式 Tag（按值复用，焦点在移除按钮上时不丢），只读、不可用时不订阅 RemoveRequested，就没有移除按钮。WinForms 的 TagsInputControl 从 TextInputControl 派生，标签是 TagControl 子控件，按"图标、标签、输入框、清空按钮"重排 Controls 的顺序。
