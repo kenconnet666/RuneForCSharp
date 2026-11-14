@@ -1,0 +1,6 @@
+<!-- Drawer 部件的默认外观：面板、遮罩、阴影同 Dialog（DialogParts）；宽度调整手柄的外观在 ResizeHandle 里，部件样式默认是空的 -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <Style x:Key="{x:Static rune:DrawerParts.ResizeHandle}" TargetType="rune:ResizeHandle" />
+</ResourceDictionary>

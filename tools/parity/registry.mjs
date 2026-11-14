@@ -326,7 +326,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
         .map((prop) => [prop, '页码、每页条数、跳页是公开的 PaginationPart、SizeSelectPart、JumpPart（各自有主题样式），直接改它们；结束边那一组是 PaginationBar 代码建的面板']),
     ),
     ScrollArea: { propsViewport: '视口就是 ScrollArea 自己：读屏名称、焦点都在它身上；滚动呈现器没有部件样式' },
-    ...Object.fromEntries(['Dialog', 'AlertDialog'].map((name) => [name, Object.fromEntries(['propsHeader', 'propsTitle', 'propsClose', 'propsDescription', 'propsBody', 'propsFooter', 'propsCancel', 'propsConfirm']
+    ...Object.fromEntries(['Dialog', 'AlertDialog', 'Drawer'].map((name) => [name, Object.fromEntries(['propsHeader', 'propsTitle', 'propsClose', 'propsDescription', 'propsBody', 'propsFooter', 'propsCancel', 'propsConfirm']
       .map((prop) => [prop, '标题行、标题、关闭按钮、说明、正文、页脚、按钮是 Dialog 代码组合的子元素，部件样式键只有面板、遮罩与阴影；外观跟着各自组件的主题样式']))])),
     Select: Object.fromEntries(['propsListbox', 'propsSearch'].map((prop) => [prop, '弹出层里的列表、搜索框是 Select 建的，外观跟着 Listbox、TextField 的主题样式'])),
     TagsInput: { propsListbox: '弹出层里的列表是 TagsInput 建的 Listbox，外观跟着 Listbox 的主题样式（同 Select）' },
@@ -382,7 +382,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
       ...Object.fromEntries(['propsRoot', 'propsTag', 'propsClear', 'propsPopover', 'propsListbox', 'propsIcon']
         .map((prop) => [prop, '外壳是 TagsInputControl 自己，标签、图标、清空按钮是子控件，弹出层是两层窗口：没有部件属性记录（同 SelectControl）'])),
     },
-    ...Object.fromEntries(['Dialog', 'AlertDialog'].map((name) => [name, Object.fromEntries(['propsHeader', 'propsTitle', 'propsClose', 'propsDescription', 'propsBody', 'propsFooter', 'propsCancel', 'propsConfirm']
+    ...Object.fromEntries(['Dialog', 'AlertDialog', 'Drawer'].map((name) => [name, Object.fromEntries(['propsHeader', 'propsTitle', 'propsClose', 'propsDescription', 'propsBody', 'propsFooter', 'propsCancel', 'propsConfirm']
       .map((prop) => [prop, '标题行、正文、页脚是 DialogControl 组合的子控件，面板与遮罩是两层窗口画的，没有部件属性记录']))])),
     CommandPalette: {
       renderOption: 'WinForms 的选项是 ListboxControl 画出来的，没有自定义内容',
