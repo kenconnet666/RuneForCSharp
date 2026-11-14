@@ -1,0 +1,19 @@
+<!-- Figure 的主题样式（vue-tsx-pro 的 figureStyles）：说明次要色、sm；停靠、间距、对齐在代码里按属性算 -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <Style TargetType="rune:Figure">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="rune:Figure">
+          <DockPanel>
+            <ContentPresenter x:Name="PART_Caption" DockPanel.Dock="Bottom" Content="{TemplateBinding Caption}"
+                              TextElement.Foreground="{DynamicResource Rune.Brush.TextMuted}" TextElement.FontSize="{DynamicResource Rune.FontSize.Sm}"
+                              Style="{DynamicResource {x:Static rune:FigureParts.Caption}}" />
+            <ContentPresenter x:Name="PART_Content" />
+          </DockPanel>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+</ResourceDictionary>

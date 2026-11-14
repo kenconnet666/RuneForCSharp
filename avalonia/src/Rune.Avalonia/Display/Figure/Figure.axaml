@@ -1,0 +1,23 @@
+<!-- Figure 的主题（vue-tsx-pro 的 figureStyles）：说明次要色、sm，和内容隔 space.sm；对齐时内容与说明一起挪 -->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:Figure}" TargetType="rune:Figure">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <DockPanel>
+          <ContentPresenter Name="PART_Caption" DockPanel.Dock="Bottom" Content="{TemplateBinding Caption}"
+                            IsVisible="{TemplateBinding Caption, Converter={x:Static ObjectConverters.IsNotNull}}"
+                            Foreground="{DynamicResource Rune.Brush.TextMuted}" FontSize="{DynamicResource Rune.FontSize.Sm}" TextWrapping="Wrap" />
+          <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" />
+        </DockPanel>
+      </ControlTemplate>
+    </Setter>
+    <!-- 间距放在内容上（按 Figure 的字号算 em），说明是 sm -->
+    <Style Selector="^:captioned /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Margin" Value="{rune:Em 0, 0, 0, 0.5}" /></Style>
+    <Style Selector="^:captioned:top /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Margin" Value="{rune:Em 0, 0.5, 0, 0}" /></Style>
+    <Style Selector="^:top /template/ ContentPresenter#PART_Caption"><Setter Property="DockPanel.Dock" Value="Top" /></Style>
+    <Style Selector="^:center /template/ ContentPresenter"><Setter Property="HorizontalAlignment" Value="Center" /></Style>
+    <Style Selector="^:end /template/ ContentPresenter"><Setter Property="HorizontalAlignment" Value="Right" /></Style>
+  </ControlTheme>
+</ResourceDictionary>
