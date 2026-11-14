@@ -71,6 +71,8 @@ export const COMPONENT_PROP_RENAMES = {
   SelectedTags: { onRemove: 'RemoveRequested' },
   // 数据是平台的 ItemsSource；自定义选项内容是数据模板；新建是事件（Control 自己有 Created）
   Select: { items: 'ItemsSource', children: 'ItemTemplate', onCreate: 'OptionCreated' },
+  // 输入框就是平台 TextBox：没确认的文字是 Text；已选的值是 Values（同多选 Select）
+  TagsInput: { _value: 'Values', items: 'ItemsSource', _inputValue: 'Text', children: 'ItemTemplate' },
   // 平台的 ComboBox 自己有 Items / ItemsSource（选项行由 Options 生成）与 PlaceholderText
   NativeSelect: { items: 'Options', placeholder: 'PlaceholderText' },
   // C# 的事件用过去式（同 Canceled、Closed），不和取消按钮的部件名 Cancel 重名
@@ -290,6 +292,10 @@ export const PROPS_NOT_PORTED = {
     propsTag: '标签是 SelectedTags 建的 sm、soft 的 Tag：样式写在 Tag 的主题或部件上',
   },
   SelectedTags: { propsTag: '标签固定是 sm、soft 的 Tag：样式写在 Tag 的主题或部件上' },
+  TagsInput: {
+    placement: '弹出层固定贴着外壳下方、至少与它同宽（放不下时翻到上方），同 Select',
+    name: FORM_NAME,
+  },
   // 上游没声明的属性落到对话框上：桌面上命令面板的对话框是固定的一种
   CommandPalette: Object.fromEntries(['closable', 'dismissible', 'beforeClose', 'onConfirm', 'confirmText', 'cancelText', 'tone', 'lazy', 'size',
     'propsConfirm', 'propsCancel', 'propsHeader', 'propsTitle', 'propsDescription', 'propsClose', 'propsBody', 'propsFooter']

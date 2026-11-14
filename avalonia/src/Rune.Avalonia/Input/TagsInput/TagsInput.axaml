@@ -1,0 +1,45 @@
+<!--
+  TagsInput 的主题（vue-tsx-pro 的 controlParts、tagsInputStyles）：外壳同输入框（Rune.TextInput），上下留 space.xs；
+  标签、输入框排成会换行的一行（列间 space.sm、行间 space.xs），输入框至少 6em，放不下时换到下一行；清空按钮靠结束边。
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:TagsInput}" TargetType="rune:TagsInput" BasedOn="{StaticResource Rune.TextInput}">
+    <Setter Property="Padding" Value="{rune:Em 0.75, 0.25}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border Name="PART_Root" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
+            <DockPanel>
+              <rune:ClearButton Name="PART_Clear" DockPanel.Dock="Right" Radius="full" IsVisible="False" Cursor="Hand" VerticalAlignment="Center" />
+              <rune:Flex Name="PART_Flow" Wrap="True" Align="center" ColumnGap="sm" RowGap="xs" VerticalAlignment="Center">
+                <rune:Icon Name="PART_Icon" Data="{TemplateBinding Icon}" IsVisible="{TemplateBinding Icon, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                <Panel Name="PART_Input" rune:Flex.Grow="True" MinWidth="{rune:Em 6}" ClipToBounds="True" VerticalAlignment="Center">
+                  <TextBlock Name="PART_Placeholder" Text="{TemplateBinding PlaceholderText}" Foreground="{TemplateBinding PlaceholderForeground}"
+                             IsVisible="False" IsHitTestVisible="False" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                  <TextPresenter Name="PART_TextPresenter"
+                                 Text="{TemplateBinding Text, Mode=TwoWay}"
+                                 CaretBlinkInterval="{TemplateBinding CaretBlinkInterval}"
+                                 CaretIndex="{TemplateBinding CaretIndex}"
+                                 SelectionStart="{TemplateBinding SelectionStart}"
+                                 SelectionEnd="{TemplateBinding SelectionEnd}"
+                                 TextWrapping="NoWrap"
+                                 LineHeight="{TemplateBinding LineHeight}"
+                                 SelectionBrush="{TemplateBinding SelectionBrush}"
+                                 SelectionForegroundBrush="{TemplateBinding SelectionForegroundBrush}"
+                                 CaretBrush="{TemplateBinding CaretBrush}"
+                                 VerticalAlignment="Center" />
+                </Panel>
+              </rune:Flex>
+            </DockPanel>
+          </Border>
+          <Border Name="PART_FocusRing" IsVisible="False" IsHitTestVisible="False" Margin="-1" BorderThickness="2"
+                  BorderBrush="{DynamicResource Rune.Brush.FocusRing}" CornerRadius="{TemplateBinding CornerRadius}" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^ /template/ rune|Icon#PART_Icon"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" /></Style>
+  </ControlTheme>
+</ResourceDictionary>
