@@ -176,6 +176,10 @@ const BUTTON_TYPE = '表单提交是浏览器的概念；对话框的默认、�
 
 /** 某个组件不移植的 prop 与原因（平台上没有对应的概念）：parity 不报缺 */
 export const PROPS_NOT_PORTED = {
+  Rating: {
+    name: FORM_NAME,
+    propsStar: '星是 Rating 自己画的（空心描线打底、按比例裁出的实色），没有每颗星的元素；分数的单选项是透明的点击区域（Avalonia、WPF 的 RatingOption，WinForms 的读屏子节点）',
+  },
   NativeSelect: {
     propsRoot: '外壳就是 NativeSelect 自己（平台 ComboBox 的模板）：样式直接写在它上面',
     ...Object.fromEntries(['propsChevron', 'propsIcon'].map((prop) => [prop, 'Avalonia、WPF 的下拉箭头、前置图标是模板部件（PART_Chevron、PART_Icon），在主题里选中它们；WinForms 的箭头是系统画的'])),
