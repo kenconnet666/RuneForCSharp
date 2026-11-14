@@ -26,6 +26,8 @@ public class CodePreviewTests
         var toggle = (IExpandCollapseProvider)preview.Toggle.Peer();
         Assert.Equal(("显示代码", global::Avalonia.Automation.ExpandCollapseState.Collapsed), (preview.Toggle.Content, toggle.ExpandCollapseState));
         Assert.Equal("<Button>保存</Button>", preview.CodeBlock.Code);
+        var layout = preview.GetVisualDescendants().OfType<Flex>().First(flex => flex.Name == CodePreviewParts.Layout);
+        Assert.Equal(new Thickness(1.5 * preview.GetValue(global::Avalonia.Controls.Documents.TextElement.FontSizeProperty)), layout.Margin); // 效果的排布四周 space.xl
 
         ((IInvokeProvider)preview.Toggle.Peer()).Invoke();
         Assert.True(preview.IsCodeShown);

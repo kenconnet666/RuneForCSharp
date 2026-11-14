@@ -2,6 +2,7 @@ using System.ComponentModel;
 using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Controls;
+using Avalonia.Controls.Documents;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Metadata;
@@ -86,6 +87,7 @@ public class CodePreview : Control
         UpdateAlign();
         UpdateTexts();
         UpdateCode();
+        UpdateMetrics();
     }
 
     /// <summary>源码。</summary>
@@ -127,6 +129,7 @@ public class CodePreview : Control
     {
         base.OnPropertyChanged(change);
         if (change.Property == ContentProperty) content.Content = Content;
+        else if (change.Property == TextElement.FontSizeProperty) UpdateMetrics();
         else if (change.Property == ActionsProperty) actions.Content = Actions;
         else if (change.Property == AlignProperty) UpdateAlign();
         else if (change.Property == IsCodeShownProperty) UpdateTexts();
@@ -153,6 +156,14 @@ public class CodePreview : Control
     {
         card.Arrange(new Rect(finalSize));
         return finalSize;
+    }
+
+    /// <summary>效果的排布：外边距 xl（上游的内边距）；工具栏内边距 xs。随字号，按模板优先级（使用方的样式盖得过）。</summary>
+    void UpdateMetrics()
+    {
+        var em = GetValue(TextElement.FontSizeProperty);
+        layout.SetValue(MarginProperty, new Thickness(this.Resource<double>(ThemeKeys.Space.Xl) * em), BindingPriority.Template);
+        toolbar.SetValue(Border.PaddingProperty, new Thickness(this.Resource<double>(ThemeKeys.Space.Xs) * em), BindingPriority.Template);
     }
 
     /// <summary>靠起始边时效果占满宽度（里面的网格、卡片按整块宽度排）；居中时按内容宽度居中。</summary>

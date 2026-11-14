@@ -2,7 +2,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 
-namespace Rune.Avalonia.Gallery;
+namespace Rune.Avalonia.Docs;
 
 /// <summary>示例应用。</summary>
 public partial class App : Application

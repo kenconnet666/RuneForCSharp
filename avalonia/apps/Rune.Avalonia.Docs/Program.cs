@@ -1,6 +1,6 @@
 using Avalonia;
 
-namespace Rune.Avalonia.Gallery;
+namespace Rune.Avalonia.Docs;
 
 static class Program
 {

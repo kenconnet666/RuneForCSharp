@@ -1,12 +1,11 @@
-<!-- CodePreview 部件的默认外观（vue-tsx-pro 的 codePreviewStyles）：效果的排布内边距 xl，工具栏与源码上边各一道 borderMuted 的分隔线（DESIGN §7 代码组合的控件） -->
+<!--
+  CodePreview 部件的默认外观（vue-tsx-pro 的 codePreviewStyles）：工具栏与源码上边各一道 borderMuted 的分隔线（DESIGN §7 代码组合的控件）。
+  排布的外边距、工具栏的内边距随字号，在 CodePreview.cs 里（{rune:Em} 绑定目标自己的 FontSize 属性，Border、Flex 没有）
+-->
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:rune="clr-namespace:Rune.Avalonia">
-  <Style Selector="rune|CodePreview rune|Flex#PART_Layout">
-    <Setter Property="Margin" Value="{rune:Em 1.5}" />
-  </Style>
   <Style Selector="rune|CodePreview Border#PART_Toolbar">
-    <Setter Property="Padding" Value="{rune:Em 0.25}" />
     <Setter Property="BorderThickness" Value="0,1,0,0" />
     <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
   </Style>

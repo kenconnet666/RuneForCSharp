@@ -30,7 +30,8 @@ public class DocArticle : Control
     readonly Flex root = new() { Direction = FlexDirection.Column };
     readonly Flex header = new() { Name = DocArticleParts.Header, Direction = FlexDirection.Column, Gap = Space.Lg };
     readonly H1 title = new() { Name = DocArticleParts.Title };
-    readonly Paragraph description = new() { Name = DocArticleParts.Description, Size = TextSize.Lg, Tone = TextTone.Muted, MaxWidth = 48 * 16 };
+    // 靠起始边：设了 MaxWidth 时拉伸的元素会被居中
+    readonly Paragraph description = new() { Name = DocArticleParts.Description, Size = TextSize.Lg, Tone = TextTone.Muted, MaxWidth = 48 * 16, HorizontalAlignment = global::Avalonia.Layout.HorizontalAlignment.Left };
     readonly ContentControl lead = new() { Focusable = false };
 
     /// <summary>新建：没有内容。</summary>
