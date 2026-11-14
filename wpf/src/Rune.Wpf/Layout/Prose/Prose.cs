@@ -27,6 +27,8 @@ public class Prose : Flex
     {
         DefaultStyleKeyProperty.OverrideMetadata(typeof(Prose), new FrameworkPropertyMetadata(typeof(Prose)));
         MaxWidthProperty.OverrideMetadata(typeof(Prose), new FrameworkPropertyMetadata(double.PositiveInfinity, null, CoerceMaxWidth));
+        // 限了最大宽度的块靠起始边（同 CSS 的 max-width 块）：平台默认的 Stretch 遇到最大宽度会居中；宽度见 MeasureOverride
+        HorizontalAlignmentProperty.OverrideMetadata(typeof(Prose), new FrameworkPropertyMetadata(HorizontalAlignment.Left));
         TextElement.FontSizeProperty.OverrideMetadata(typeof(Prose), new FrameworkPropertyMetadata(
             SystemFonts.MessageFontSize, FrameworkPropertyMetadataOptions.Inherits | FrameworkPropertyMetadataOptions.AffectsMeasure, (d, _) => d.CoerceValue(MaxWidthProperty)));
         TextElement.FontFamilyProperty.OverrideMetadata(typeof(Prose), new FrameworkPropertyMetadata(
@@ -47,6 +49,13 @@ public class Prose : Flex
         var typeface = new Typeface(TextElement.GetFontFamily(prose), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
         var zero = new FormattedText("0", CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, TextElement.GetFontSize(prose), Brushes.Black, 1);
         return 70 * zero.WidthIncludingTrailingWhitespace;
+    }
+
+    /// <summary>同 CSS 的块：占满给的宽度（已经夹在 MaxWidth 里），不随内容收窄（靠起始边之后平台会按内容宽度排）。</summary>
+    protected override Size MeasureOverride(Size availableSize)
+    {
+        var size = base.MeasureOverride(availableSize);
+        return double.IsInfinity(availableSize.Width) ? size : new Size(Math.Max(size.Width, availableSize.Width), size.Height);
     }
 
     /// <inheritdoc />

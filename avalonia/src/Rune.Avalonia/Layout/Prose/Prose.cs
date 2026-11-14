@@ -27,7 +27,12 @@ public class Prose : Flex
 
     IDisposable? maxWidth;
 
-    static Prose() => AffectsMeasure<Prose>(LimitLineLengthProperty, TextElement.FontFamilyProperty);
+    static Prose()
+    {
+        AffectsMeasure<Prose>(LimitLineLengthProperty, TextElement.FontFamilyProperty);
+        // 限了最大宽度的块靠起始边（同 CSS 的 max-width 块）：平台默认的 Stretch 遇到最大宽度会居中；宽度见 MeasureOverride
+        HorizontalAlignmentProperty.OverrideDefaultValue<Prose>(global::Avalonia.Layout.HorizontalAlignment.Left);
+    }
 
     /// <summary>新建：先按默认字体算一次行长（字号、字体一直没变时没有变化通知）。</summary>
     public Prose() => UpdateMaxWidth();
@@ -51,6 +56,13 @@ public class Prose : Flex
         var typeface = new Typeface(GetValue(TextElement.FontFamilyProperty));
         using var zero = new TextLayout("0", typeface, GetValue(TextElement.FontSizeProperty), null);
         maxWidth = SetValue(MaxWidthProperty, 70 * zero.WidthIncludingTrailingWhitespace, BindingPriority.Template);
+    }
+
+    /// <summary>同 CSS 的块：占满给的宽度（已经夹在 MaxWidth 里），不随内容收窄（靠起始边之后平台会按内容宽度排）。</summary>
+    protected override global::Avalonia.Size MeasureOverride(global::Avalonia.Size availableSize)
+    {
+        var size = base.MeasureOverride(availableSize);
+        return double.IsInfinity(availableSize.Width) ? size : new global::Avalonia.Size(Math.Max(size.Width, availableSize.Width), size.Height);
     }
 
     /// <inheritdoc />
