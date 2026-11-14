@@ -1364,3 +1364,11 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游把内容复制一份接在后面、纯 CSS 平移；桌面上控件不能出现在两处：Avalonia、WPF 的复制是 VisualBrush 画出来的那一份（点不到、读屏里没有，正好是上游的 inert + aria-hidden），WinForms 是内容的位图快照，画在自己的背景上（内容变了大小时重拍，内容自己的动画不会跟着动）。
 - 逐帧推进（Avalonia 的 RequestAnimationFrame、WPF 的 CompositionTarget.Rendering、WinForms 15ms 的计时器），位移 = 走过的距离对一份长度取余（孪生文件 MarqueeVariants 的 MarqueeMotion）；暂停、悬停、焦点在里面时不累加，接着走不跳。WinForms 的指针停在子控件上时自己收不到鼠标事件，每帧看指针的位置。
 - 系统关闭动画时不复制、不走，改成能聚焦、能手动滚动的区域（Avalonia、WPF 套 ScrollArea，WinForms 用 AutoScroll）。WinForms 盖不了子控件，没有两端渐隐。
+
+### HoverCard（2026-11-14）
+
+- 开关时机是孪生文件 HoverIntent / HoverGroup（上游的 useHoverIntent、createHoverGroup）：停留 delay 后开、离开 closeDelay 后关、移到卡片上不关、同组只开一个、刚关掉一个（300 毫秒内）时下一个直接开；计时用 TimeProvider，测试里快进。
+- 三个平台都是 Popover 的子类：Popover 留了扩展点（点触发器、打开后聚焦与否、按字号的尺寸、WinForms 的面板最宽与开关回调）。卡片打开时焦点不动、点外面不关。
+- 焦点离开才关：Avalonia 在 headless 里弹出层的窗口会清掉主窗口的焦点，焦点"没有了"不算移走，落到别的元素上才关。
+- WinForms：卡片窗口不激活（不抢宿主窗体的激活），所以键盘不能 Tab 进卡片；子控件吞掉鼠标进出事件，指针在触发器、卡片、外面每 50 毫秒看一次，变了再告诉 HoverIntent。
+- 顺手：Avalonia 的 Link 量完写上文字第一行的基线（放进 InlineUIContainer 时和正文对齐），Popover 把触发器的基线转给自己。

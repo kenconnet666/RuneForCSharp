@@ -26,4 +26,7 @@ public enum OpenChangeReason
 
     /// <summary>代码调用：快捷键打开（命令面板）、命令式打开的对话框。</summary>
     Imperative,
+
+    /// <summary>指针在触发器上停够了、或移走了（悬停卡片）。</summary>
+    Hover,
 }

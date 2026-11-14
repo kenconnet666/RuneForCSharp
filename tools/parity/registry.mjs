@@ -192,6 +192,7 @@ export const PROPS_NOT_PORTED = {
   },
   Marquee: Object.fromEntries(['propsTrack', 'propsGroup']
     .map((prop) => [prop, '做动画的那一层、每一份内容是内部的面板（复制的那份是画出来的），没有部件属性：间距用 Gap'])),
+  HoverCard: { lazy: '内容是传进来的控件实例：关着时在弹出层里不显示、不排版，本来就是打开时才有代价（同 Popover）' },
   Watermark: { propsLayer: '水印层是内部画出来的一层（Avalonia 的子元素或窗口浮层里的元素、WPF 的子元素或装饰、WinForms 的分层窗口），只画不交互，外观由 Color、FontSize 等属性决定' },
   Video: {
     propsRoot: '外层就是 Video 自己（定比例的黑底框）：样式直接写在 Video 上',
@@ -328,6 +329,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
       ...Object.fromEntries(['propsAdd', 'propsScrollButton'].map((prop) => [prop, '新建、滚动按钮是 TabListControl 建的 IconButtonControl 子控件，外观走 ProviderControl 的组件定制，没有部件属性记录'])),
     },
     Popover: { propsArrow: '面板、阴影与箭头是组件库画在分层窗口上的位图，箭头没有可改样式的部件' },
+    HoverCard: { propsArrow: '同 PopoverControl：面板、阴影与箭头是组件库画在分层窗口上的位图，箭头没有可改样式的部件' },
     Listbox: Object.fromEntries(
       ['empty', 'propsOption', 'propsGroupLabel', 'propsCheck', 'propsEmpty', 'propsSkeleton']
         .map((prop) => [prop, '选项、组名、已选标记是 ListboxControl 画出来的，空状态与骨架是固定的子控件，没有部件属性与自定义内容']),

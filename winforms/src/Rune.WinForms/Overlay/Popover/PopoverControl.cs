@@ -118,6 +118,19 @@ public class PopoverControl : Control, IBaseline, IScopeAware
     /// <summary>放内容的窗口（测试用）。</summary>
     internal Form Surface => surface.Form;
 
+    /// <summary>两层窗口：悬停卡片改成不激活（焦点留在触发器上）。</summary>
+    private protected FloatingSurface FloatingHost => surface;
+
+    /// <summary>开、关了（用户操作或代码里改）：悬停卡片告诉同组的时机。</summary>
+    /// <param name="open">现在开着。</param>
+    private protected virtual void OnOpenChanged(bool open)
+    {
+    }
+
+    /// <summary>面板最宽多少（设备像素）；null 时不限（悬停卡片 22em）。</summary>
+    /// <param name="em">字号（像素）。</param>
+    private protected virtual int? MaxPanelWidth(float em) => null;
+
     /// <summary>画面板的窗口（测试用）；没打开过时为 null。</summary>
     internal LayeredWindow? Backdrop => surface.Backdrop;
 
@@ -146,18 +159,23 @@ public class PopoverControl : Control, IBaseline, IScopeAware
     /// <summary>
     /// 点了触发器：开关。浮层开着时点触发器，内容窗口先因为失去激活（点了外面）关了，紧接着这次点击又会把它打开：刚这样关掉的那一下不再打开。
     /// </summary>
-    void OnTriggerClick(object? sender, EventArgs e)
+    void OnTriggerClick(object? sender, EventArgs e) => OnTriggerClick();
+
+    /// <summary>点了触发器：开关（悬停卡片不开关，按下时已经关了）。</summary>
+    private protected virtual void OnTriggerClick()
     {
         if (!IsOpen && Environment.TickCount64 - closedAt < 300) return;
         SetOpen(!IsOpen, OpenChangeReason.Trigger);
     }
 
-    void SetOpen(bool next, OpenChangeReason? reason)
+    /// <summary>改开关并带上原因（代码里改 IsOpen 时为 null，不报告）。</summary>
+    private protected void SetOpen(bool next, OpenChangeReason? reason)
     {
         if (next == open) return;
         open = next;
         if (next) Present();
         else Dismiss();
+        OnOpenChanged(next);
         if (reason is { } known) OpenChanged?.Invoke(this, new OpenChangedEventArgs(next, known));
     }
 
@@ -168,7 +186,8 @@ public class PopoverControl : Control, IBaseline, IScopeAware
         var context = ElementContext.Of(this);
         var em = context.Em;
         var inset = (int)MathF.Round(Tokens.Space.Md * em) + FloatingSurface.Border(context);
-        var content = Content is { } control ? Measure(control) : Size.Empty;
+        var limit = MaxPanelWidth(em) is { } max ? Math.Max(0, max - 2 * inset) : (int?)null;
+        var content = Content is { } control ? Measure(control, limit) : Size.Empty;
         var panelSize = new Size(content.Width + 2 * inset, content.Height + 2 * inset);
         var arrow = Arrow ? 0.625f * em : 0;
         var gap = context.Scale(Offset) + 0.7f * arrow;
@@ -178,10 +197,11 @@ public class PopoverControl : Control, IBaseline, IScopeAware
         surface.Show(panel, inset, context, Arrow ? (side, target, arrow) : null);
     }
 
-    static Size Measure(Control content)
+    static Size Measure(Control content, int? maxWidth)
     {
-        var size = content.GetPreferredSize(Size.Empty);
-        return new Size(Math.Max(size.Width, content.MinimumSize.Width), Math.Max(size.Height, content.MinimumSize.Height));
+        var size = content.GetPreferredSize(maxWidth is { } width ? new Size(width, 0) : Size.Empty);
+        var fitted = new Size(Math.Max(size.Width, content.MinimumSize.Width), Math.Max(size.Height, content.MinimumSize.Height));
+        return maxWidth is { } limit ? fitted with { Width = Math.Min(fitted.Width, limit) } : fitted;
     }
 
     /// <summary>藏起两层窗口；焦点在里面（Esc、代码里关）时回到触发器。</summary>

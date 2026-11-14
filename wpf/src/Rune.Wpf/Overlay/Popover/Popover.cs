@@ -140,8 +140,23 @@ public class Popover : FrameworkElement
     /// <summary><see cref="OpenChanged"/> 的路由事件（直接：不往上传，嵌套的浮层发的同名事件不会串到外层）。</summary>
     public static readonly RoutedEvent OpenChangedEvent = EventManager.RegisterRoutedEvent(nameof(OpenChanged), RoutingStrategy.Direct, typeof(EventHandler<OpenChangedEventArgs>), typeof(Popover));
 
-    /// <summary>浮层的面板（测试用）。</summary>
+    /// <summary>浮层的面板。</summary>
     internal Border Panel => panel;
+
+    /// <summary>放触发器的那一层：派生类在它上面接指针、焦点事件。</summary>
+    private protected FrameworkElement TriggerHost => trigger;
+
+    /// <summary>平台的弹出层：悬停卡片不点外面关闭。</summary>
+    private protected Popup PopupHost => popup;
+
+    /// <summary>打开后把焦点移进去；悬停卡片只是预览，不抢焦点。</summary>
+    private protected virtual bool FocusOnOpen => true;
+
+    /// <summary>按字号算的尺寸更新了：派生类跟着改自己的（悬停卡片的最大宽度）。</summary>
+    /// <param name="em">字号。</param>
+    private protected virtual void OnMetrics(double em)
+    {
+    }
 
     double ArrowSize => 0.625 * TextElement.GetFontSize(this);
 
@@ -185,7 +200,7 @@ public class Popover : FrameworkElement
     /// <summary>
     /// 点了触发器：开关。浮层开着时点触发器，平台先因为"点了外面"把它关了，紧接着这次点击又会把它打开：刚被点外面关掉的那一下不再打开。
     /// </summary>
-    void OnTriggerClick()
+    private protected virtual void OnTriggerClick()
     {
         if (!IsOpen && Environment.TickCount64 - closedAt < 300) return;
         SetOpen(!IsOpen, OpenChangeReason.Trigger);
@@ -199,6 +214,7 @@ public class Popover : FrameworkElement
         panel.CornerRadius = shadow.CornerRadius = radius;
         panel.Padding = PanelPadding(em);
         arrow.Width = arrow.Height = ArrowSize;
+        OnMetrics(em);
     }
 
     /// <summary>面板的内边距：space.md。菜单的面板不留（内边距在里面的内容层上，滚动条贴着边缘）。</summary>
@@ -288,7 +304,7 @@ public class Popover : FrameworkElement
         Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () =>
         {
             PlaceArrow();
-            (FocusTarget() ?? panel).Focus();
+            if (FocusOnOpen) (FocusTarget() ?? panel).Focus();
         });
     }
 

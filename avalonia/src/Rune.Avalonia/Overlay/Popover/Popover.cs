@@ -89,7 +89,7 @@ public class Popover : Control
         popup.PlacementTarget = trigger;
         LogicalChildren.AddRange([trigger, popup]);
         VisualChildren.AddRange([trigger, popup]);
-        trigger.AddHandler(Button.ClickEvent, (_, _) => SetOpen(!IsOpen, OpenChangeReason.Trigger));
+        trigger.AddHandler(Button.ClickEvent, (_, _) => OnTriggerClick());
         trigger.AddHandler(KeyDownEvent, (_, e) => OnTriggerKeyDown(e));
         popup.Opened += (_, _) => OnOpened();
         popup.Closed += (_, _) => OnClosed();
@@ -126,8 +126,26 @@ public class Popover : Control
     /// <summary><see cref="OpenChanged"/> 的路由事件（直接：不往上传，嵌套的浮层发的同名事件不会串到外层）。</summary>
     public static readonly RoutedEvent<OpenChangedEventArgs> OpenChangedEvent = RoutedEvent.Register<Popover, OpenChangedEventArgs>(nameof(OpenChanged), RoutingStrategies.Direct);
 
-    /// <summary>浮层的面板（测试用）。</summary>
+    /// <summary>浮层的面板。</summary>
     internal Border Panel => panel;
+
+    /// <summary>放触发器的那一层：派生类在它上面接指针、焦点事件。</summary>
+    private protected Control TriggerHost => trigger;
+
+    /// <summary>平台的弹出层：悬停卡片不点外面关闭。</summary>
+    private protected Popup PopupHost => popup;
+
+    /// <summary>打开后把焦点移进去；悬停卡片只是预览，不抢焦点。</summary>
+    private protected virtual bool FocusOnOpen => true;
+
+    /// <summary>点了触发器（里面按钮的 Click）：开关。</summary>
+    private protected virtual void OnTriggerClick() => SetOpen(!IsOpen, OpenChangeReason.Trigger);
+
+    /// <summary>按字号算的尺寸更新了：派生类跟着改自己的（悬停卡片的最大宽度）。</summary>
+    /// <param name="em">字号。</param>
+    private protected virtual void OnMetrics(double em)
+    {
+    }
 
     /// <summary>箭头的边长（0.625em，按面板的字号）。</summary>
     internal double ArrowSize => 0.625 * TextElement.GetFontSize(this);
@@ -167,6 +185,7 @@ public class Popover : Control
         panel.CornerRadius = new CornerRadius(this.Resource<double>(ThemeKeys.Radius.Lg) * em);
         panel.Padding = PanelPadding(em);
         arrow.Width = arrow.Height = ArrowSize;
+        OnMetrics(em);
     }
 
     /// <summary>面板的内边距：space.md。菜单的面板不留（内边距在里面的内容层上，滚动条贴着边缘）。</summary>
@@ -228,7 +247,7 @@ public class Popover : Control
         {
             arrow.IsVisible = Arrow;
             if (Arrow) FloatingPopup.PlaceArrow(arrow, arrowLayer, trigger);
-            (FocusTarget() ?? panel).Focus(NavigationMethod.Tab);
+            if (FocusOnOpen) (FocusTarget() ?? panel).Focus(NavigationMethod.Tab);
         }, DispatcherPriority.Loaded);
     }
 
@@ -261,6 +280,9 @@ public class Popover : Control
     {
         trigger.Measure(availableSize);
         popup.Measure(availableSize);
+        // 触发器放在段落里（悬停卡片的链接）：基线转给自己，InlineUIContainer 按它对齐
+        if (Trigger is { } control && control.IsSet(TextBlock.BaselineOffsetProperty))
+            SetCurrentValue(TextBlock.BaselineOffsetProperty, control.GetValue(TextBlock.BaselineOffsetProperty));
         return trigger.DesiredSize;
     }
 

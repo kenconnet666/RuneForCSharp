@@ -6,8 +6,7 @@ using PlatformGrid = System.Windows.Controls.Grid;
 namespace Rune.Wpf.Examples;
 
 /// <summary>
-/// Popover 页的示例（vue-tsx-pro 文档站 overlay/Popover）：先有 Tooltip 的两节。hover-card 要等 HoverCard；
-/// tooltip 里"更多格式"按钮的菜单要等 Menu；timing 要等 HoverCard。
+/// Popover 页的示例（vue-tsx-pro 文档站 overlay/Popover）。tooltip 里"更多格式"按钮的菜单要等 Menu；compute 是网页的定位函数，桌面上交给平台的弹出层。
 /// </summary>
 static class PopoverExamples
 {
@@ -15,7 +14,9 @@ static class PopoverExamples
     [
         new("Popover", "popover", "Popover", "点触发器在旁边弹出一块内容：放筛选条件、简短表单、分享面板。点外面或 Esc 关闭，打开时焦点进到第一个能聚焦的元素，关上后回到触发器；IsOpen 可以双向绑定。浮层以触发器为名称。", Share),
         new("Popover", "tooltip", "Tooltip", "给图标按钮补一句用途和快捷键：写平台的 ToolTip。指针停一会儿显示，在一排按钮上移动时不用每次都等；键盘聚焦时显示，Esc 隐藏。提示是触发器的帮助文字，触发器自己要有名称，提示里不放可交互的内容。", Toolbar),
+        new("Popover", "hover-card", "HoverCard", "悬停或键盘聚焦链接时弹出一张富内容卡片：可以移到卡片上，卡片里能放按钮（键盘 Tab 进入）。打开时焦点不动，点外面不关，Esc 关闭。卡片只是预览，里面的信息在别处也要能拿到——触屏没有悬停。", Profile),
         new("Popover", "placement", "位置与箭头", "rune:Tooltip.Placement 是边加对齐，共 12 种；空间不够时自动翻到另一边。rune:Tooltip.Arrow 显示指向触发器的小箭头。", Placements),
+        new("Popover", "timing", "显示的时机", "提示停多久才显示是 ToolTipService.InitialShowDelay（有提示的元素默认 500 毫秒），工具栏这类连续的按钮可以设成 0；ToolTipService.IsEnabled=False 时不显示。HoverCard 的 Delay / CloseDelay 分别控制打开与离开后关闭的等待，Offset 是与触发器的距离（像素）。都可以用 IsOpen 受控。", Timing),
     ];
 
     static FrameworkElement Share()
@@ -86,6 +87,115 @@ static class PopoverExamples
         [(Lucide.List, "无序列表", null), (Lucide.ListOrdered, "有序列表", null), (Lucide.Quote, "引用", null)],
         [(Lucide.Link2, "插入链接", "Ctrl K")],
     ];
+
+    static readonly (string Key, string Name, string Handle, string Bio, string City, string Joined, string Followers)[] People =
+    [
+        ("yihang", "周一航", "@yihang", "交互设计师，做了八年工具类产品。喜欢把复杂的事讲简单。", "上海", "2019 年加入", "1,284"),
+        ("xiaoman", "林小满", "@xiaoman", "前端工程师，vue-tsx-pro 的维护者之一。", "杭州", "2021 年加入", "3,096"),
+    ];
+
+    /// <summary>触发器：一个链接（WPF 的 Link 是行内文字，外面包一层 TextBlock）。</summary>
+    static TextBlock LinkTrigger(string href, string text)
+    {
+        var link = new Link { Href = new Uri(href) };
+        link.Inlines.Add(text);
+        return new TextBlock(link);
+    }
+
+    /// <summary>悬停卡片放进一段文字：按文字的底边对齐。</summary>
+    static System.Windows.Documents.InlineUIContainer Inline(HoverCard card) => new(card) { BaselineAlignment = BaselineAlignment.TextBottom };
+
+    /// <summary>一个人的悬停卡片：触发器是 @名字 的链接。</summary>
+    static HoverCard Mention(int index)
+    {
+        var person = People[index];
+        var meta = new Flex
+        {
+            Gap = Space.Md, Wrap = FlexWrap.Wrap,
+            Children =
+            {
+                new Flex { Align = FlexAlign.Center, Gap = Space.Xs, Children = { new Icon { Data = Lucide.MapPin, Tone = TextTone.Muted }, new Small { Tone = TextTone.Muted, Text = person.City } } },
+                new Flex { Align = FlexAlign.Center, Gap = Space.Xs, Children = { new Icon { Data = Lucide.CalendarDays, Tone = TextTone.Muted }, new Small { Tone = TextTone.Muted, Text = person.Joined } } },
+                new Small { Tone = TextTone.Muted, Text = $"{person.Followers} 关注者" },
+            },
+        };
+        return new HoverCard
+        {
+            Trigger = LinkTrigger($"https://example.com/u/{person.Key}", person.Handle),
+            Content = new Flex
+            {
+                Direction = FlexDirection.Column, Gap = Space.Sm,
+                Children =
+                {
+                    new Flex
+                    {
+                        Align = FlexAlign.Center, Justify = FlexJustify.Between, Gap = Space.Md,
+                        Children = { new Avatar { DisplayName = person.Name }, new Button { Size = TextSize.Sm, Variant = ButtonVariant.Soft, Content = "关注" } },
+                    },
+                    new Flex { Direction = FlexDirection.Column, Children = { new Strong { Text = person.Name }, new Small { Tone = TextTone.Muted, Text = person.Handle } } },
+                    new Paragraph { Size = TextSize.Sm, Text = person.Bio },
+                    meta,
+                },
+            },
+        };
+    }
+
+    static FrameworkElement Profile()
+    {
+        var text = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        text.Inlines.Add("这一版的设计由 ");
+        text.Inlines.Add(Inline(Mention(0)));
+        text.Inlines.Add(" 负责，组件实现与文档是 ");
+        text.Inlines.Add(Inline(Mention(1)));
+        text.Inlines.Add(" 做的。把指针停在名字上，或用 Tab 聚焦它，就能看到资料卡。");
+        return text;
+    }
+
+    static FrameworkElement Timing()
+    {
+        (IconData Icon, string Label, string Keys)[] marks = [(Lucide.LetterB, "加粗", "Ctrl B"), (Lucide.Italic, "斜体", "Ctrl I"), (Lucide.Underline, "下划线", "Ctrl U")];
+        var buttons = new Flex { Gap = Space.Xs };
+        foreach (var (icon, label, keys) in marks)
+        {
+            var button = WithTip(new IconButton { Icon = icon, Variant = ButtonVariant.Ghost }, label, Tip(label, keys));
+            ToolTipService.SetInitialShowDelay(button, 0);
+            buttons.Children.Add(button);
+        }
+        var hints = new Switch { Content = "显示按钮提示", IsChecked = true };
+        System.ComponentModel.DependencyPropertyDescriptor.FromProperty(ChoiceBase.IsCheckedProperty, typeof(Switch)).AddValueChanged(hints, (_, _) =>
+        {
+            foreach (UIElement button in buttons.Children) ToolTipService.SetIsEnabled(button, hints.IsChecked == true);
+        });
+        var slow = WithTip(new Button { Variant = ButtonVariant.Outline, Content = "停一秒才提示" }, "停一秒才提示", "不常用的说明可以等久一点，免得指针划过时到处弹出");
+        ToolTipService.SetInitialShowDelay(slow, 1000);
+        var author = new HoverCard
+        {
+            Delay = TimeSpan.FromMilliseconds(200), CloseDelay = TimeSpan.FromMilliseconds(600), Offset = 12,
+            Trigger = LinkTrigger("https://example.com/components/avatar", "@周一航"),
+            Content = new Flex
+            {
+                Align = FlexAlign.Center, Gap = Space.Sm,
+                Children =
+                {
+                    new Avatar { DisplayName = "周一航" },
+                    new Flex { Direction = FlexDirection.Column, Children = { new Strong { Text = "周一航" }, new Small { Tone = TextTone.Muted, Text = "设计中心 · 高级交互设计师" } } },
+                },
+            },
+        };
+        var byline = new Small { Tone = TextTone.Muted };
+        byline.Inlines.Add("作者 ");
+        byline.Inlines.Add(Inline(author));
+        byline.Inlines.Add(" 发布于 3 天前");
+        return new Flex
+        {
+            Direction = FlexDirection.Column, Gap = Space.Lg, Align = FlexAlign.Start,
+            Children =
+            {
+                new Flex { Gap = Space.Md, Align = FlexAlign.Center, Wrap = FlexWrap.Wrap, Children = { buttons, hints } },
+                new Flex { Gap = Space.Lg, Align = FlexAlign.Center, Wrap = FlexWrap.Wrap, Children = { slow, byline } },
+            },
+        };
+    }
 
     static FrameworkElement Toolbar()
     {

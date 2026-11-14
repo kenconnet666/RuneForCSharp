@@ -3,6 +3,7 @@ using global::Avalonia;
 using global::Avalonia.Automation.Peers;
 using global::Avalonia.Controls;
 using global::Avalonia.Media;
+using global::Avalonia.VisualTree;
 
 namespace Rune.Avalonia;
 
@@ -142,6 +143,18 @@ public class Link : ButtonBase
     /// <summary>用系统打开链接（浏览器、邮件……）。</summary>
     /// <param name="href">绝对地址。</param>
     protected virtual void Navigate(Uri href) => LinkLauncher.Open(this, href);
+
+    /// <summary>
+    /// 放进 InlineUIContainer 时按文字的基线对齐（段落里的链接、悬停卡片的触发器）：平台只看 BaselineOffset，
+    /// 量完写上里面文字第一行的基线到顶边的距离。
+    /// </summary>
+    protected override global::Avalonia.Size MeasureOverride(global::Avalonia.Size availableSize)
+    {
+        var size = base.MeasureOverride(availableSize);
+        if (this.GetVisualDescendants().OfType<TextBlock>().FirstOrDefault() is { TextLayout.TextLines: [var first, ..] } text)
+            SetCurrentValue(TextBlock.BaselineOffsetProperty, Padding.Top + BorderThickness.Top + text.Padding.Top + first.Baseline);
+        return size;
+    }
 
     /// <inheritdoc />
     protected override AutomationPeer OnCreateAutomationPeer() => new LinkAutomationPeer(this, () => External);
