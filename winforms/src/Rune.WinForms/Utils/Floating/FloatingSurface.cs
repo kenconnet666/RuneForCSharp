@@ -47,14 +47,15 @@ sealed class FloatingSurface : IDisposable
     /// <param name="context">弹出它的控件的环境（主题、字号、DPI、书写方向）。</param>
     /// <param name="arrow">箭头：所在的边（top 是面板在触发器上方）、触发器在屏幕上的矩形、边长；null 时没有。</param>
     /// <param name="elevation">面板的圆角与阴影档位；默认 lg（弹出框、下拉），对话框是 xl。</param>
-    public void Show(Rectangle panel, int inset, ElementContext context, (string Side, Rectangle Target, float Size)? arrow, Elevation elevation = Elevation.Lg)
+    /// <param name="square">直角（贴着窗口边的抽屉）：不按档位画圆角。</param>
+    public void Show(Rectangle panel, int inset, ElementContext context, (string Side, Rectangle Target, float Size)? arrow, Elevation elevation = Elevation.Lg, bool square = false)
     {
         var origin = Form.Origin;
         if (origin.FindForm() is not { } host) return;
         var theme = context.Theme;
         var em = context.Em;
         var border = Border(context);
-        var radius = (elevation == Elevation.Xl ? theme.Radii.Xl : theme.Radii.Lg) * em;
+        var radius = square ? 0 : (elevation == Elevation.Xl ? theme.Radii.Xl : theme.Radii.Lg) * em;
         var shadow = elevation == Elevation.Xl ? theme.Shadows.Xl : theme.Shadows.Lg;
         var overhang = (int)MathF.Ceiling(Math.Max(arrow is { } a ? 0.71f * a.Size : 0,
             shadow.Where(layer => !layer.Inset).Select(layer => context.Scale(Math.Max(Math.Abs(layer.X), Math.Abs(layer.Y)) + layer.Spread + layer.Blur)).DefaultIfEmpty(0).Max()));

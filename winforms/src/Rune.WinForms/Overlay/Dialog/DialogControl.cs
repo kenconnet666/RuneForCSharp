@@ -359,33 +359,58 @@ public class DialogControl : Control, IAnchored
         PresentPanel();
     }
 
-    /// <summary>面板宽度按档位、不超出（四周至少 1em），高度按内容、不超出；居中（或停在 <see cref="TopFraction"/>）。</summary>
-    void PresentPanel()
+    /// <summary>摆面板：位置与尺寸按 <see cref="PanelBounds"/>，显示后交给 <see cref="ArrangeExtras"/>（Drawer 摆宽度调整手柄）。</summary>
+    private protected void PresentPanel()
     {
         if (host is null || !host.IsHandleCreated) return;
         var context = ElementContext.Of(this);
         var area = host.RectangleToScreen(host.ClientRectangle);
-        var em = context.Em;
         var border = FloatingSurface.Border(context);
-        var margin = (int)MathF.Ceiling(em);
-        var room = Math.Max(0, area.Width - 2 * margin);
-        var width = DialogSize == DialogSize.Full ? room : Math.Min(room, (int)MathF.Round(context.Scale(DialogSize.Pixels)));
-        var maxHeight = Math.Max(0, area.Height - 2 * margin);
         surface.Form.Font = Font;
         // 窗口显示之前里面的控件还没建句柄，量出的高度偏小：显示之后再量一次，变了就重新摆
         for (var pass = 0; pass < 2; pass++)
         {
-            var height = DialogSize == DialogSize.Full ? maxHeight : Math.Min(maxHeight, layout.PreferredHeight(width - 2 * border) + 2 * border);
-            var top = TopFraction is { } fraction ? Math.Min((int)(area.Height * fraction), (area.Height - height) / 2) : (area.Height - height) / 2;
-            var panel = new Rectangle(area.X + (area.Width - width) / 2, area.Y + top, width, height);
-            // 拖出来的位移：整块不超出宿主窗体
-            Offset = new Point(
-                Math.Clamp(Offset.X, area.Left - panel.Left, Math.Max(area.Left - panel.Left, area.Right - panel.Right)),
-                Math.Clamp(Offset.Y, area.Top - panel.Top, Math.Max(area.Top - panel.Top, area.Bottom - panel.Bottom)));
-            panel.Offset(Offset);
+            var panel = PanelBounds(area, context, border);
             if (pass > 0 && surface.Backdrop?.Panel == panel) break;
-            surface.Show(panel, border, context, null, FloatingSurface.Elevation.Xl);
+            surface.Show(panel, border, context, null, FloatingSurface.Elevation.Xl, square: SquarePanel);
         }
+        ArrangeExtras();
+    }
+
+    /// <summary>面板里内容的高度（给定内容宽度，含标题行、正文、页脚）。</summary>
+    private protected int ContentHeight(int width) => layout.PreferredHeight(width);
+
+    /// <summary>面板的内容窗口（Drawer 往里放宽度调整手柄）。</summary>
+    private protected Form PanelForm => surface.Form;
+
+    /// <summary>直角面板（Drawer）。</summary>
+    private protected virtual bool SquarePanel => false;
+
+    /// <summary>
+    /// 面板在屏幕上的矩形：宽度按档位、不超出（四周至少 1em），高度按内容、不超出；居中（或停在 <see cref="TopFraction"/>），加上拖出来的位移，整块不超出宿主窗体。
+    /// </summary>
+    /// <param name="area">宿主窗体的客户区（屏幕坐标）。</param>
+    /// <param name="context">环境（字号、DPI）。</param>
+    /// <param name="border">描边宽度。</param>
+    private protected virtual Rectangle PanelBounds(Rectangle area, ElementContext context, int border)
+    {
+        var margin = (int)MathF.Ceiling(context.Em);
+        var room = Math.Max(0, area.Width - 2 * margin);
+        var width = DialogSize == DialogSize.Full ? room : Math.Min(room, (int)MathF.Round(context.Scale(DialogSize.Pixels)));
+        var maxHeight = Math.Max(0, area.Height - 2 * margin);
+        var height = DialogSize == DialogSize.Full ? maxHeight : Math.Min(maxHeight, ContentHeight(width - 2 * border) + 2 * border);
+        var top = TopFraction is { } fraction ? Math.Min((int)(area.Height * fraction), (area.Height - height) / 2) : (area.Height - height) / 2;
+        var panel = new Rectangle(area.X + (area.Width - width) / 2, area.Y + top, width, height);
+        Offset = new Point(
+            Math.Clamp(Offset.X, area.Left - panel.Left, Math.Max(area.Left - panel.Left, area.Right - panel.Right)),
+            Math.Clamp(Offset.Y, area.Top - panel.Top, Math.Max(area.Top - panel.Top, area.Bottom - panel.Bottom)));
+        panel.Offset(Offset);
+        return panel;
+    }
+
+    /// <summary>面板显示之后（Drawer 摆宽度调整手柄）。</summary>
+    private protected virtual void ArrangeExtras()
+    {
     }
 
     /// <summary>用户要关闭：确认进行中不关；问过 BeforeClose 同意了才关。</summary>
