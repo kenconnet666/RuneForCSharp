@@ -420,6 +420,16 @@ defineTheme / defineLang 忽略 undefined——网页专用或 C# 没有 undefin
 
 锁定跟到 0.24.0（6e7b07b7）：页面组合文案表多了 notificationsNoMatch，docs-gen 的页面清单更新；token、图标、配方、语言包没变。
 
+### 第三十五批（2026-11-14，0.25.0 fffc0c7f：服务端渲染的时区与"今天"）
+
+| 上游的变化 | 对我们 | 做法 |
+|---|---|---|
+| 语言没配 timeZone 时，服务端按 UTC 渲染时刻、挂载后换成浏览器的时区（useFormat 的 date / relative、Countdown、TimelineChart） | 桌面端没有"服务端先渲染、浏览器再接管" | 不用改：一直按本机时区格式化；语言配了 timeZone 的行为本来就一致 |
+| 日历的"今天"按服务端记下的时刻水合、挂载后换成真实的今天（Calendar、RangeCalendar、QuarterCalendar、CalendarBoard） | 日历类还没做 | 做时"今天"直接取本机当前日期，没有水合这一步 |
+| 新增 useTimeZone()、isServerRendering()、useDateLocale().rootAttrs() | 网页专用 | 不涉及 |
+
+锁定跟到 0.25.0（fffc0c7f）：token、语言包、图标、配方、文档页面清单都没变（生成器 --check 通过）。
+
 ## 样式体系联合改造（2026-11-06 收到计划草案；同日获批，上游开始执行）
 
 计划：vue-tsx-pro 的 `.claude/reports/style-overhaul-plan.md`（阶段 0 护栏 → 1 引擎 → 2 架构与 API → 3 整理 → 4 美学 → 5 文档）。
