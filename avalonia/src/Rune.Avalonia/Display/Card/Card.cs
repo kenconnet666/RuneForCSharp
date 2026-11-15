@@ -4,6 +4,7 @@ using Avalonia.Animation;
 using Avalonia.Animation.Easings;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Controls.Documents;
 using Avalonia.Controls.Presenters;
 using Avalonia.Media;
@@ -189,6 +190,10 @@ public class Card : Control
             ? new Thickness(this.Resource<double>(ThemeKeys.Space.Md) * FontSize, this.Resource<double>(ThemeKeys.Space.Sm) * FontSize)
             : padding;
         surface.CornerRadius = new CornerRadius(Radius.Value == "full" ? 9999 : GetValue(RadiusFactorProperty) * FontSize);
+        // 页头、页脚写成文字时是 ContentPresenter 生成的 TextBlock：行高照正文（Leading，默认 normal），不用字体自己的行距（约 1.33，页头矮 2 像素）
+        var line = Leading.GetFactor(this) * FontSize;
+        foreach (var presenter in new[] { headerContent, extraContent, footerContent })
+            presenter.SetValue(ContentPresenter.LineHeightProperty, line, BindingPriority.Template);
     }
 
     /// <summary>骨架与正文互换：出现过骨架之后都淡入（一开始就有正文的卡片不播）。</summary>
