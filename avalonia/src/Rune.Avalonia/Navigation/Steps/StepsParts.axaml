@@ -33,6 +33,11 @@
     <Setter Property="Background" Value="{DynamicResource Rune.Brush.DangerSoft}" />
     <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.DangerText}" />
   </Style>
+  <!-- 标题、说明的行高 normal（同上游继承正文的 1.5）：TextBlock 默认是字体自己的行距（约 1.33），标题一行矮了，说明跟着往上挪 -->
+  <Style Selector="rune|Steps TextBlock#PART_Title, rune|Steps TextBlock#PART_Description">
+    <Setter Property="LineHeight" Value="{rune:Em Resource=Rune.LineHeight.Normal}" />
+    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Normal}" />
+  </Style>
   <Style Selector="rune|Steps TextBlock#PART_Title">
     <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
   </Style>
