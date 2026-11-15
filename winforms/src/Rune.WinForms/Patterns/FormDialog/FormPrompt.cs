@@ -1,0 +1,148 @@
+namespace Rune.WinForms;
+
+/// <summary>小表单对话框里一个字段的控件（上游 FormDialogField 的 type）。</summary>
+public enum FormPromptFieldType
+{
+    /// <summary>单行文字（默认）。</summary>
+    Text,
+
+    /// <summary>多行文字（3 行）。</summary>
+    Textarea,
+
+    /// <summary>下拉选择（Options；Multiple 时多选）。</summary>
+    Select,
+}
+
+/// <summary>小表单对话框里的一个字段（vue-tsx-pro 的 FormDialogField）。</summary>
+/// <param name="Name">字段名：结果里的 key。</param>
+/// <param name="Label">标签。</param>
+public sealed record FormPromptField(string Name, string Label)
+{
+    /// <summary>控件，默认单行文字。</summary>
+    public FormPromptFieldType Type { get; init; }
+
+    /// <summary>必填。</summary>
+    public bool Required { get; init; }
+
+    /// <summary>下拉的选项（Type 为 Select）；Description 是选项的第二行，Group 相同的归在一组标题下。</summary>
+    public IReadOnlyList<ListboxOption> Options { get; init; } = [];
+
+    /// <summary>多选（Type 为 Select）：值是选中的值的列表，不经过 Validate。</summary>
+    public bool Multiple { get; init; }
+
+    /// <summary>初始值：单值字段是字符串，多选是字符串列表。</summary>
+    public object? DefaultValue { get; init; }
+
+    /// <summary>占位文字。</summary>
+    public string? Placeholder { get; init; }
+
+    /// <summary>标签下面的说明。</summary>
+    public string? Description { get; init; }
+
+    /// <summary>最多几个字（单行、多行文字）。</summary>
+    public int? MaxLength { get; init; }
+
+    /// <summary>校验：返回错误说明时不提交；第二个参数是全部单值字段的值。</summary>
+    public Func<string, IReadOnlyDictionary<string, string>, string?>? Validate { get; init; }
+}
+
+/// <summary>小表单对话框的选项（vue-tsx-pro 的 FormDialogOptions）。</summary>
+/// <param name="Title">标题。</param>
+/// <param name="Fields">字段。</param>
+public sealed record FormPromptOptions(string Title, IReadOnlyList<FormPromptField> Fields)
+{
+    /// <summary>标题下面的说明。</summary>
+    public string? Description { get; init; }
+
+    /// <summary>确认按钮的文字；不写时取语言包（确定）。</summary>
+    public string? ConfirmText { get; init; }
+
+    /// <summary>确认按钮的色调，默认 accent；驳回、终止用 danger。</summary>
+    public StatusTone Tone { get; init; } = StatusTone.Accent;
+
+    /// <summary>对话框的宽度档位，默认 sm。</summary>
+    public DialogSize Size { get; init; } = DialogSize.Sm;
+
+    /// <summary>提交：等它完成再关；抛异常时对话框留着（调用方提示原因）。值同 PromptAsync 的结果。</summary>
+    public Func<IReadOnlyDictionary<string, object>, Task>? OnSubmit { get; init; }
+}
+
+/// <summary>
+/// 命令式的小表单对话框（vue-tsx-pro 的 useFormDialog）：一个操作前要填一两个字段（退回的原因、改派给谁），不值得为它单独写一个对话框。
+/// 必填的没填、Validate 返回说明时错误落在字段下面、不提交；值是去掉首尾空白的字符串，多选的是字符串列表。在单行输入框里按回车也是确认。
+/// 上游的日期字段（type: 'date'）等日期组件做了再加。
+/// </summary>
+static class FormPrompt
+{
+    public static async Task<IReadOnlyDictionary<string, object>?> ShowAsync(Control owner, FormPromptOptions options)
+    {
+        var lang = ProviderControl.LangOf(owner);
+        IReadOnlyDictionary<string, object>? result = null;
+        var rows = options.Fields.Select(field => (Spec: field, Field: new FieldControl { Label = field.Label, Description = field.Description, IsRequired = field.Required, Content = Editor(field) })).ToList();
+        var dialog = new DialogControl
+        {
+            Title = options.Title,
+            Description = options.Description,
+            ConfirmText = options.ConfirmText,
+            Tone = options.Tone,
+            DialogSize = options.Size,
+        };
+        var column = new PromptBody(dialog) { Direction = FlexDirection.Column, Align = FlexAlign.Stretch, Gap = Space.Md, AutoSize = true, Dock = DockStyle.Top };
+        column.Controls.AddRange([.. rows.Select(row => row.Field)]);
+        dialog.Content = column;
+        dialog.Confirm = async () =>
+        {
+            var values = rows.ToDictionary(row => row.Spec.Name, row => Read(row.Field.Content!));
+            var strings = values.Where(entry => entry.Value is string).ToDictionary(entry => entry.Key, entry => (string)entry.Value);
+            var valid = true;
+            foreach (var (spec, field) in rows)
+            {
+                var value = values[spec.Name];
+                field.Error = spec.Required && (value is string text ? text.Length == 0 : ((IReadOnlyList<string>)value).Count == 0)
+                    ? lang.FormRequired
+                    : value is string single ? spec.Validate?.Invoke(single, strings) : null;
+                valid &= field.Error is null;
+            }
+            if (!valid) return false;
+            if (options.OnSubmit is { } submit) await submit(values);
+            result = values;
+            return true;
+        };
+        await dialog.ShowAsync(owner);
+        return result;
+    }
+
+    static Control Editor(FormPromptField field) => field.Type switch
+    {
+        FormPromptFieldType.Textarea => new TextareaControl { Rows = 3, Text = field.DefaultValue as string ?? "", PlaceholderText = field.Placeholder ?? "", MaxLength = field.MaxLength ?? 32767 },
+        FormPromptFieldType.Select when field.Multiple => new SelectControl
+        {
+            ItemsSource = field.Options,
+            SelectionMode = SelectionMode.Multiple,
+            Values = field.DefaultValue as IReadOnlyList<string> ?? [],
+            PlaceholderText = field.Placeholder,
+        },
+        FormPromptFieldType.Select => new SelectControl { ItemsSource = field.Options, Value = field.DefaultValue as string, PlaceholderText = field.Placeholder },
+        _ => new TextFieldControl { Value = field.DefaultValue as string ?? "", PlaceholderText = field.Placeholder ?? "", MaxLength = field.MaxLength ?? 32767 },
+    };
+
+    /// <summary>控件的值：文字去掉首尾空白，单选没选是空字符串，多选是选中的值的列表。</summary>
+    static object Read(Control control) => control switch
+    {
+        SelectControl select when select.SelectionMode == SelectionMode.Multiple => select.Values,
+        SelectControl select => select.Value ?? "",
+        TextFieldControl text => text.Value.Trim(),
+        _ => control.Text.Trim(),
+    };
+
+    /// <summary>字段的容器：同上游的隐式提交，单行输入框里按回车就是点确认（ProcessCmdKey 沿父链上来）。</summary>
+    sealed class PromptBody(DialogControl dialog) : FlexControl
+    {
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData != Keys.Enter || FromHandle(msg.HWnd) is not TextBoxBase { Multiline: false }) return base.ProcessCmdKey(ref msg, keyData);
+            _ = dialog.RunConfirm();
+            return true;
+        }
+    }
+}

@@ -1,0 +1,84 @@
+using System.ComponentModel;
+
+namespace Rune.WinForms;
+
+/// <summary>
+/// 表单对话框（vue-tsx-pro 的 FormDialog）：DialogControl 加 FormControl 加错误汇总，确认按钮就是提交——校验没通过时留在对话框里（焦点到错误汇总），
+/// 提交（FormController 的 OnSubmit）进行时确认按钮显示加载中，成功后关闭，OnSubmit 抛 FormSubmitException 或别的异常时留着。
+/// <code>
+/// var dialog = new FormDialogControl { Controller = menu, Title = "新建菜单", DialogSize = DialogSize.Md, Content = fields };
+/// </code>
+/// 提交被后端拒绝（抛 FormSubmitException 带整份表单的错误，如"名称已存在"）时，说明显示在表单顶上的提示条里，对话框留着。
+/// 打开前由调用方 Reset(初始值)：新建是空白的初始值，修改是当前记录。在单行输入框里按回车也是提交，所以 OnSubmit 成功后要自己关（IsOpen = false）；
+/// 只点确认按钮时对话框会在提交成功后自己关。字段写在 Content 里；表单（标签布局等）是 <see cref="Form"/>，错误汇总是 <see cref="Summary"/>。
+/// </summary>
+[ToolboxItem(true)]
+[Description("表单对话框：确认就是提交，没通过校验或提交失败时留着。")]
+public class FormDialogControl : DialogControl
+{
+    readonly AlertControl formError = new() { Tone = StatusTone.Danger, Visible = false };
+    readonly FlexControl column = new() { Direction = FlexDirection.Column, Align = FlexAlign.Stretch, Gap = Space.Md, AutoSize = true, Dock = DockStyle.Top };
+    IFormController? subscribed;
+
+    /// <summary>新建：确认就是提交。</summary>
+    public FormDialogControl()
+    {
+        Form.Dock = DockStyle.Top;
+        Form.Controls.Add(column);
+        column.Controls.AddRange([formError, Summary]);
+        Confirm = () => Form.SubmitAsync();
+        Content = null;
+    }
+
+    /// <summary>
+    /// 命令式的小表单对话框（TS 的 useFormDialog）：在 owner 所在的窗体打开，沿用那里的主题、语言；确认（OnSubmit 完成）后得到填好的值，取消、Esc 时得到 null。
+    /// <code>
+    /// var values = await FormDialogControl.PromptAsync(this, new("退回收件箱", [new("Reason", "原因") { Type = FormPromptFieldType.Textarea, Required = true }]) { ConfirmText = "退回" });
+    /// </code>
+    /// 字段多、有联动、要自己排版的表单用 FormDialogControl。
+    /// </summary>
+    /// <param name="owner">在它所在的窗体打开。</param>
+    /// <param name="options">标题、字段、提交。</param>
+    public static Task<IReadOnlyDictionary<string, object>?> PromptAsync(Control owner, FormPromptOptions options) => FormPrompt.ShowAsync(owner, options);
+
+    /// <summary>表单控制器；确认按钮调它的 SubmitAsync。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public IFormController? Controller
+    {
+        get => Form.Controller;
+        set
+        {
+            Form.Controller = value;
+            if (subscribed is not null) subscribed.Changed -= OnFormChanged;
+            subscribed = value;
+            if (subscribed is not null) subscribed.Changed += OnFormChanged;
+            OnFormChanged(null, EventArgs.Empty);
+        }
+    }
+
+    /// <summary>里面的表单（TS 的 propsForm）：标签的布局（LabelPlacement、LabelWidth）等写在它上面。</summary>
+    [Browsable(false)]
+    public FormControl Form { get; } = new();
+
+    /// <summary>错误汇总（TS 的 propsSummary）。</summary>
+    [Browsable(false)]
+    public FormErrorSummaryControl Summary { get; } = new();
+
+    /// <summary>整份表单的错误提示条（测试用）。</summary>
+    internal AlertControl FormErrorAlert => formError;
+
+    /// <summary>表单里依次是：整份表单的错误、错误汇总、字段。</summary>
+    private protected override Control? Body(Control? content)
+    {
+        foreach (var old in column.Controls.Cast<Control>().Where(control => control != formError && control != Summary).ToList()) column.Controls.Remove(old);
+        if (content is not null) column.Controls.Add(content);
+        return Form;
+    }
+
+    void OnFormChanged(object? sender, EventArgs e)
+    {
+        formError.Description = subscribed?.FormError ?? "";
+        formError.Visible = subscribed?.FormError is not null;
+    }
+}

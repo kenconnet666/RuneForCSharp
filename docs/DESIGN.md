@@ -1410,6 +1410,12 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 读屏：有标题时是一组（group），名称是标题、帮助文字是说明；没有标题时只是一层栅格，不进读屏的控件树。WinForms 的读屏没有标题级别，HeadingLevel 选标题用哪一级的 H 控件。
 - 上游 id 当锚点、配 TableOfContents 的分节导航，以及 scroll-margin 让开粘性顶栏，是网页的；sections 示例要用 TableOfContents，还没做。
 
+### FormDialog 与 PromptAsync（2026-11-15）
+
+- FormDialog 是 Dialog 的子类（WinForms 是 FormDialogControl : DialogControl）：Dialog 加了一个内部的正文钩子（Avalonia、WPF 的 Body，WinForms 的 Body(content)），FormDialog 把使用方的 Content 放进 Form，前面依次是整份表单错误的提示条（Alert danger）与错误汇总。确认就是 Form.SubmitAsync：没通过校验返回 false（对话框留着，焦点到错误汇总），OnSubmit 抛 FormSubmitException 时 SubmitAsync 返回 false、提示条显示 FormError，别的异常由 Dialog 的确认兜住（留着）。上游的 propsForm、propsSummary 是 Form、Summary 两个部件实例。
+- 命令式的小表单（上游 useFormDialog）是静态的 PromptAsync(owner, FormPromptOptions)，结果是字段名到值的字典（单值是去掉首尾空白的字符串，多选是字符串列表），取消是 null；字段是 FormPromptField 记录（Text、Textarea、Select，Multiple 时多选）。必填没填时错误是语言包的 FormRequired，Validate 只看单值字段。单行输入框里按回车就是确认（同浏览器的隐式提交：Avalonia、WPF 接冒泡的 KeyDown，WinForms 在 ProcessCmdKey 里），为此 Dialog 的确认流程改成 internal。上游的 date 字段等日期组件做了再加。
+- 看板的 confirm 示例用它：放下时先问意见，确认了才改数据。上游卡片模板拿到的 dragging（拖动中换一种写法）这里没有，卡片模板只拿到数据。
+
 ### Tour 与 FloatingGeometry（2026-11-15）
 
 - 浮层贴着目标的定位做成孪生文件 FloatingGeometry（上游 floating 的 computePlacement：想要的一侧放不下换对侧，crossAxisFallback 时再试垂直的两侧，都放不下选溢出最少的；只沿对齐方向挪回、离边 8）。WinForms 原来的 FloatingLayout.Position 就是这套逻辑的平台版，改成换算矩形后调它（提示、弹出框、菜单、下拉照旧），整理在同一个提交里。Avalonia、WPF 的浮层仍用平台 Popup 的定位，Tour 的卡片用它。

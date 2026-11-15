@@ -5,12 +5,13 @@ using System.Windows.Controls;
 
 namespace Rune.Wpf.Examples;
 
-/// <summary>KanbanBoard 的示例（vue-tsx-pro 文档站 patterns/KanbanBoard）。上游的“放下后先确认”要用 FormDialog，还没做。</summary>
+/// <summary>KanbanBoard 的示例（vue-tsx-pro 文档站 patterns/KanbanBoard）。</summary>
 static class KanbanBoardExamples
 {
     public static Example[] All =>
     [
         new("KanbanBoard", "flow", "只能挪到相邻的列，列内排序", "看板不自己挪卡片：放下时报告 Moved（带上在目标列里的位置，落点处有一条插入线），使用方改了数据卡片才换列。订阅了 Reordered 时列内也能拖动排序，数据立即重排。CanMove 写出不能移动的原因：拖动时那一列标红并写出原因，放下时弹回、报告 Rejected。", Flow),
+        new("KanbanBoard", "confirm", "放下后先确认", "招聘看板：放下时先弹出小表单对话框填意见（FormDialog.PromptAsync），确认了才改数据，取消就什么都不变。上游拖动中卡片换一种写法（模板拿到 dragging）这里没有：卡片模板只拿到数据。", Confirm),
     ];
 
     sealed record Ticket(string Id, string Title, string Stage, string Owner, string Priority, DateOnly Due);
@@ -110,5 +111,92 @@ static class KanbanBoardExamples
         board.Reordered += (_, _) => { };
         board.Rejected += (_, e) => message.Text = $"{((Ticket)e.Item).Id} 没有移动：{e.Reason}";
         return new Flex { Direction = FlexDirection.Column, Gap = Space.Sm, Children = { board, message } };
+    }
+
+    sealed record Candidate(string Id, string Name, string Role, int Years, string Source, string Stage, string? Next = null);
+
+    static readonly KanbanColumn[] Stages =
+    [
+        new("screen", "简历筛选"),
+        new("interview", "面试"),
+        new("offer", "录用", StatusTone.Success),
+        new("rejected", "未通过", StatusTone.Danger),
+    ];
+
+    static string StageLabel(string key) => Stages.First(column => column.Key == key).Label;
+
+    // 招聘看板：放下后先确认（小表单对话框填意见），确认了才改数据，取消就什么都不变
+    static FrameworkElement Confirm()
+    {
+        var candidates = new ObservableCollection<Candidate>
+        {
+            new("c1", "韩亦舟", "前端工程师", 5, "内推", "screen"),
+            new("c2", "唐可", "测试工程师", 3, "招聘网站", "screen"),
+            new("c3", "白露", "数据分析师", 2, "校招", "screen"),
+            new("c4", "顾北辰", "产品经理", 7, "猎头", "interview", "10-22 14:00 二面"),
+            new("c5", "江屿", "后端工程师", 6, "内推", "interview", "10-23 10:00 终面"),
+            new("c6", "沈念", "交互设计师", 4, "招聘网站", "offer", "11-01 入职"),
+            new("c7", "叶舒", "前端工程师", 1, "校招", "rejected"),
+        };
+        var message = new Small { Tone = TextTone.Muted, Text = "拖一张卡片到别的阶段，确认后才移动" };
+        AutomationProperties.SetLiveSetting(message, AutomationLiveSetting.Polite);
+        var board = new KanbanBoard
+        {
+            Columns = Stages,
+            ItemsSource = candidates,
+            GetKey = candidate => ((Candidate)candidate).Id,
+            GetColumn = candidate => ((Candidate)candidate).Stage,
+            GetLabel = candidate => ((Candidate)candidate).Name,
+            ColumnWidth = 14 * 16,
+            ColumnMaxHeight = 24 * 16,
+            Empty = "还没有人",
+            ItemTemplate = new DataTemplate { VisualTree = new FrameworkElementFactory(typeof(CandidateCell)) },
+        };
+        AutomationProperties.SetName(board, "招聘进度");
+        board.Moved += async (_, e) =>
+        {
+            var candidate = (Candidate)e.Item;
+            var values = await FormDialog.PromptAsync(board, new($"{candidate.Name}：{StageLabel(candidate.Stage)} → {StageLabel(e.To)}",
+                [new("Note", "意见") { Type = FormPromptFieldType.Textarea, Required = true }])
+            {
+                Description = $"{candidate.Role} · {candidate.Years} 年经验",
+                ConfirmText = "确认移动",
+                Tone = e.To == "rejected" ? StatusTone.Danger : StatusTone.Accent,
+            });
+            if (values is null)
+            {
+                message.Text = $"{candidate.Name} 没有移动";
+                return;
+            }
+            candidates[candidates.IndexOf(candidate)] = candidate with { Stage = e.To, Next = null };
+            message.Text = $"{candidate.Name} 移到了“{StageLabel(e.To)}”：{values["Note"]}";
+        };
+        return new Flex { Direction = FlexDirection.Column, Gap = Space.Sm, Children = { board, message } };
+    }
+
+    sealed class CandidateCell() : Decorator
+    {
+        protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
+        {
+            base.OnPropertyChanged(e);
+            if (e.Property != DataContextProperty || DataContext is not Candidate candidate) return;
+            var details = new Flex
+            {
+                Direction = FlexDirection.Column,
+                Gap = Space.Xs,
+                Grow = true,
+                Children =
+                {
+                    new Flex
+                    {
+                        Align = FlexAlign.Center, Justify = FlexJustify.Between, Gap = Space.Sm,
+                        Children = { new Text { Size = TextSize.Sm, Weight = TextWeight.Medium, Text = candidate.Name }, new Badge { Size = TextSize.Xs, Variant = StatusVariant.Soft, Tone = StatusTone.Neutral, Content = candidate.Source } },
+                    },
+                    new Small { Tone = TextTone.Muted, Text = $"{candidate.Role} · {candidate.Years} 年" },
+                },
+            };
+            if (candidate.Next is not null) details.Children.Add(new Small { Tone = TextTone.Info, Text = candidate.Next });
+            Child = new Flex { Align = FlexAlign.Start, Gap = Space.Sm, Children = { new Avatar { Size = TextSize.Sm, DisplayName = candidate.Name }, details } };
+        }
     }
 }

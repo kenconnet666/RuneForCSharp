@@ -89,7 +89,11 @@ public class DialogControl : Control, IAnchored
     /// <summary>正文（在可滚动的区域里，宽度随对话框）。</summary>
     [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public Control? Content { get => content.Child; set => content.Child = value; }
+    public Control? Content { get; set { field = value; content.Child = Body(value); } }
+
+    /// <summary>正文里放什么：默认就是 Content；表单对话框在外面包一层表单与错误汇总。</summary>
+    /// <param name="content">使用方给的正文。</param>
+    private protected virtual Control? Body(Control? content) => content;
 
     /// <summary>页脚的操作（靠结束边排列，确认按钮之前）；是布局面板时占满一行。</summary>
     [Browsable(false)]
@@ -428,7 +432,7 @@ public class DialogControl : Control, IAnchored
     }
 
     /// <summary>确认：进行中按钮加载、关不掉；结果为 false 或失败时保持打开（调用方负责提示原因），否则关闭。</summary>
-    async Task RunConfirm()
+    internal async Task RunConfirm()
     {
         if (confirming || Confirm is not { } action) return;
         confirming = true;

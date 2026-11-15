@@ -154,6 +154,9 @@ public class Dialog : Control
     [Content]
     public object? Content { get => GetValue(ContentProperty); set => SetValue(ContentProperty, value); }
 
+    /// <summary>正文里放什么：默认就是 Content；表单对话框在外面包一层表单与错误汇总。</summary>
+    private protected virtual object? Body => Content;
+
     /// <summary>页脚的操作。</summary>
     public object? Footer { get => GetValue(FooterProperty); set => SetValue(FooterProperty, value); }
 
@@ -322,7 +325,7 @@ public class Dialog : Control
         header.IsVisible = !HeaderHidden;
         if (HeaderHidden) AutomationProperties.SetName(panel, Title);
         else panel.ClearValue(AutomationProperties.NameProperty);
-        content.Content = Content;
+        content.Content = Body;
         footerContent.Content = Footer;
         footerContent.IsVisible = Footer is not null;
         // 页脚内容是布局面板（一行两端分开的 Flex）时占满剩下的宽度；单个按钮照常靠结束边
@@ -422,7 +425,7 @@ public class Dialog : Control
     }
 
     /// <summary>确认：进行中按钮加载、关不掉；结果为 false 或失败时保持打开（调用方负责提示原因），否则关闭。</summary>
-    async Task RunConfirm()
+    internal async Task RunConfirm()
     {
         if (confirming || Confirm is not { } action) return;
         confirming = true;

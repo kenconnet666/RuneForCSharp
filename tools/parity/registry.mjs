@@ -36,6 +36,8 @@ export const COMPONENT_PROP_RENAMES = {
   // 控件都有 Name（元素名）：字段路径叫 Path；valueProp 是要绑定的控件属性名
   Field: { name: 'Path', valueProp: 'BoundProperty' },
   FormSection: { collapsible: 'IsCollapsible' },
+  // 表单与错误汇总是对话框里的部件实例：直接改它们的属性
+  FormDialog: { propsForm: 'Form', propsSummary: 'Summary' },
   // 多行文本框的值是平台 TextBox 的 Text（TextField 有 format，值另是 Value：有格式时是去掉分隔的原文）
   Textarea: { _value: 'Text' },
   // 数据是平台的 ItemsSource；点选是事件
@@ -215,6 +217,7 @@ export const PLATFORM_COMPONENT_PROP_RENAMES = {
     Select: { placeholder: 'PlaceholderText' },
     // 控件自己有 Size
     Dialog: { size: 'DialogSize' },
+    FormDialog: { size: 'DialogSize' },
     // 同上；面板宽度也不能用控件自己的 Width、MinWidth（抽屉不参与排版，但 WinForms 的控件尺寸照样存在、会被设计器序列化）
     Drawer: { size: 'DialogSize', _width: 'PanelWidth', minWidth: 'MinPanelWidth' },
     // 选项是画出来的，没有匹配时只能换说明文字（同 CommandPalette）
@@ -238,11 +241,11 @@ export const TYPE_RENAMES = {
   // 三个平台都自带 Label：表单标签叫 FieldLabel
   // 三个平台都有 System.DateTime：日期时间的文字叫 DateTimeText
   // Toast.tsx 的单元测试（文件名 Toast）测的是控制器 createToaster：桌面上是 ToasterController
-  Avalonia: { Label: 'FieldLabel', DateTime: 'DateTimeText', Toast: 'ToasterController' },
-  WPF: { Label: 'FieldLabel', DateTime: 'DateTimeText', Toast: 'ToasterController' },
+  Avalonia: { 'form-dialog': 'FormDialog', 'form-binding': 'Field', Label: 'FieldLabel', DateTime: 'DateTimeText', Toast: 'ToasterController' },
+  WPF: { 'form-dialog': 'FormDialog', 'form-binding': 'Field', Label: 'FieldLabel', DateTime: 'DateTimeText', Toast: 'ToasterController' },
   // WinForms 自己有 ListControl（ListBox、ComboBox 的基类）
   // WinForms 的提示是扩展组件（同平台的 ToolTip 组件），不是控件；平台自带 TabControl、TabPage：标签叫 TabItemControl
-  WinForms: { List: 'UnorderedList', Container: 'ContainerPanel', Label: 'FieldLabel', Tooltip: 'TooltipProvider', Tab: 'TabItem', DateTime: 'DateTimeText', Toast: 'ToasterController' },
+  WinForms: { 'form-dialog': 'FormDialog', 'form-binding': 'Field', List: 'UnorderedList', Container: 'ContainerPanel', Label: 'FieldLabel', Tooltip: 'TooltipProvider', Tab: 'TabItem', DateTime: 'DateTimeText', Toast: 'ToasterController' },
 };
 
 const FORM_NAME = '表单提交的字段名是浏览器的概念；值经 Value 绑定，单选组的互斥由组自己管';
@@ -395,7 +398,7 @@ export const PROPS_NOT_PORTED = {
   CommandPalette: Object.fromEntries(['closable', 'dismissible', 'beforeClose', 'onConfirm', 'confirmText', 'cancelText', 'tone', 'lazy', 'size',
     'propsConfirm', 'propsCancel', 'propsHeader', 'propsTitle', 'propsDescription', 'propsClose', 'propsBody', 'propsFooter']
     .map((prop) => [prop, '面板里的对话框是 CommandPalette 建的固定一种（sm 宽、停在上部、没有标题行与页脚，Esc 与点遮罩关闭），不转交对话框的属性'])),
-  ...Object.fromEntries(['Dialog', 'AlertDialog', 'Drawer'].map((name) => [name, { lazy: '正文是传进来的控件实例，对话框关着时不在可视树里（不排版、不绘制），本来就是打开时才有代价' }])),
+  ...Object.fromEntries(['Dialog', 'AlertDialog', 'Drawer', 'FormDialog'].map((name) => [name, { lazy: '正文是传进来的控件实例，对话框关着时不在可视树里（不排版、不绘制），本来就是打开时才有代价' }])),
   Popover: {
     lazy: '内容是传进来的控件实例，浮层关着时不在可视树里（不排版、不绘制），本来就是打开时才有代价',
     role: '浮层固定是对话框（Avalonia、WPF 的读屏节点、WinForms 的 AccessibleRole.Dialog）；需要打断操作的确认用对话框组件',
@@ -445,7 +448,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
         .map((prop) => [prop, '页码、每页条数、跳页是公开的 PaginationPart、SizeSelectPart、JumpPart（各自有主题样式），直接改它们；结束边那一组是 PaginationBar 代码建的面板']),
     ),
     ScrollArea: { propsViewport: '视口就是 ScrollArea 自己：读屏名称、焦点都在它身上；滚动呈现器没有部件样式' },
-    ...Object.fromEntries(['Dialog', 'AlertDialog', 'Drawer'].map((name) => [name, Object.fromEntries(['propsHeader', 'propsTitle', 'propsClose', 'propsDescription', 'propsBody', 'propsFooter', 'propsCancel', 'propsConfirm']
+    ...Object.fromEntries(['Dialog', 'AlertDialog', 'Drawer', 'FormDialog'].map((name) => [name, Object.fromEntries(['propsHeader', 'propsTitle', 'propsClose', 'propsDescription', 'propsBody', 'propsFooter', 'propsCancel', 'propsConfirm']
       .map((prop) => [prop, '标题行、标题、关闭按钮、说明、正文、页脚、按钮是 Dialog 代码组合的子元素，部件样式键只有面板、遮罩与阴影；外观跟着各自组件的主题样式']))])),
     Select: Object.fromEntries(['propsListbox', 'propsSearch'].map((prop) => [prop, '弹出层里的列表、搜索框是 Select 建的，外观跟着 Listbox、TextField 的主题样式'])),
     TagsInput: { propsListbox: '弹出层里的列表是 TagsInput 建的 Listbox，外观跟着 Listbox 的主题样式（同 Select）' },
@@ -534,7 +537,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
       ...Object.fromEntries(['propsRoot', 'propsTag', 'propsClear', 'propsPopover', 'propsListbox', 'propsIcon']
         .map((prop) => [prop, '外壳是 TagsInputControl 自己，标签、图标、清空按钮是子控件，弹出层是两层窗口：没有部件属性记录（同 SelectControl）'])),
     },
-    ...Object.fromEntries(['Dialog', 'AlertDialog'].map((name) => [name, Object.fromEntries(['propsHeader', 'propsTitle', 'propsClose', 'propsDescription', 'propsBody', 'propsFooter', 'propsCancel', 'propsConfirm']
+    ...Object.fromEntries(['Dialog', 'AlertDialog', 'FormDialog'].map((name) => [name, Object.fromEntries(['propsHeader', 'propsTitle', 'propsClose', 'propsDescription', 'propsBody', 'propsFooter', 'propsCancel', 'propsConfirm']
       .map((prop) => [prop, '标题行、正文、页脚是 DialogControl 组合的子控件，面板与遮罩是两层窗口画的，没有部件属性记录']))])),
     Drawer: {
       ...Object.fromEntries(['propsHeader', 'propsTitle', 'propsClose', 'propsDescription', 'propsBody', 'propsFooter', 'propsCancel', 'propsConfirm']
@@ -666,6 +669,7 @@ export const EXCLUDED = {
   VisuallyHidden: '桌面上用 AutomationProperties.Name / HelpText',
   SkipLink: '浏览器专用（跳到主内容的链接）',
   ClientOnly: '浏览器专用（服务端渲染时不输出）',
+  FormValue: '浏览器原生表单提交专用（隐藏的 input 让 FormData 读到）；桌面上值经绑定或 FormController 交给模型',
 };
 
 /**
@@ -702,6 +706,7 @@ export const PLATFORM_BEHAVIOR_NOT_APPLICABLE = {
 };
 
 export const BEHAVIOR_NOT_APPLICABLE = {
+  'form-dialog': { '字段的 id 不和页面上已有的撞': 'id 与标签的 for 是网页的：桌面上标签直接指向对话框里自己的控件实例' },
   KanbanBoard: { '部件：列、卡片可以按列、按卡片给部件属性': '没有按列、按卡片的部件属性（PROPS_NOT_PORTED）：卡片的外观在 ItemTemplate / ItemFactory 里，Avalonia 的部件名在 KanbanBoardParts' },
   VirtualList: { 'propsItem 可以按项计算': '没有 propsItem、propsList（PROPS_NOT_PORTED）：每项的外观在 ItemTemplate / ItemFactory 里；序号与总数由组件管（Only_visible_items_are_realized_with_set_positions 覆盖）' },
   TextField: { 'TextField：前后缀是部件，不算在值里；是指向输入框的 label': '桌面的读屏名称不拼前后缀（网页是 label 指向输入框才念进去）：读屏名称取字段的标签，前后缀是显示用的固定文字，不进值里' },
