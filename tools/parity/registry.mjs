@@ -499,8 +499,10 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     CommandPalette: Object.fromEntries(['propsInput', 'propsListbox'].map((prop) => [prop, '面板里的搜索框、列表是 CommandPalette 建的，外观跟着 TextField、Listbox 的主题样式；部件样式键只有搜索行'])),
   },
   WinForms: {
-    ...Object.fromEntries(['SegmentedField', 'DateField', 'TimeField', 'DatePicker', 'DateRangePicker'].map((name) => [name, Object.fromEntries(['propsRoot', 'propsClear', 'propsIcon']
+    ...Object.fromEntries(['SegmentedField', 'DateField', 'TimeField', 'DatePicker'].map((name) => [name, Object.fromEntries(['propsRoot', 'propsClear', 'propsIcon']
       .map((prop) => [prop, '外壳是 SegmentedFieldControl 自己画的（ControlShell，同 SelectControl），图标、清空按钮是组合的子控件：没有部件属性记录']))])),
+    DateRangePicker: Object.fromEntries(['propsRoot', 'propsClear', 'propsIcon', 'propsEnd', 'propsSeparator']
+      .map((prop) => [prop, '外壳是 SegmentedFieldControlBase 自己画的（ControlShell），图标、两组分段、中间的"–"、清空按钮是组合的子控件：没有部件属性记录，外观跟主题'])),
     DateSegmentGroup: Object.fromEntries(['propsSegment', 'propsLiteral'].map((prop) => [prop, '各段与分隔符是 DateSegmentGroupControl 自己画的（同 OtpFieldControl），没有部件属性记录：外观跟主题'])),
     ...Object.fromEntries(['Calendar', 'RangeCalendar'].map((name) => [name, Object.fromEntries(['propsMonths', 'propsHeader', 'propsPrevious', 'propsNext', 'propsHeading', 'propsGrid', 'propsWeekday', 'propsWeekNumber', 'propsCell', 'propsCellButton', 'propsFooter']
       .map((prop) => [prop, '网格是 CalendarGridControl 自己画的（表头、周数、格子、区间那一条），页头是 IconButtonControl、ButtonControl 子控件：没有部件属性记录；格子大小是 CellSizeEm，内容用 CellText、DrawCell']))])),

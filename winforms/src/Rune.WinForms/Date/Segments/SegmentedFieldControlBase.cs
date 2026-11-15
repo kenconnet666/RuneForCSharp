@@ -5,7 +5,7 @@ namespace Rune.WinForms;
 
 /// <summary>
 /// 分段输入框的外壳（vue-tsx-pro 的 controlParts 加 useFieldSegments）：输入框外壳（<see cref="ControlShell"/>，同 TextFieldControl、SelectControl）里放一组或两组日期分段（<see cref="DateSegmentGroupControl"/>）、
-/// 可选的前置图标、清空按钮与尾部内容。<see cref="SegmentedFieldControl"/> 是一组（DateFieldControl、TimeFieldControl、DatePickerControl），<c>DateRangePickerControl</c> 是两组（开始 – 结束）。
+/// 可选的前置图标、清空按钮与尾部内容。<see cref="SegmentedFieldControl"/> 是一组（DateFieldControl、TimeFieldControl、DatePickerControl），<see cref="DateRangePickerControl"/> 是两组（开始 – 结束）。
 /// 这里管与组数无关的部分：外观档位、所在 FieldControl 的标签、说明、出错、只读、必填，表单重置时丢掉打了一半的段，清空，点外壳空白处聚焦；
 /// 值怎样读写由派生类给（<see cref="LaneValue"/>、<see cref="LaneChanged"/>）。
 /// </summary>
@@ -14,8 +14,8 @@ public abstract class SegmentedFieldControlBase : FlexControl, IFieldControl, IF
 {
     readonly IconControl icon = new() { Tone = TextTone.Muted, Visible = false };
     readonly DateSegmentGroupControl[] groups;
-    // 两组之间的"–"：FlexControl 不看外边距，左右的 xs 是外面这层的内边距
-    readonly ContainerPanel separator = new() { AutoSize = true, Visible = false };
+    // 两组之间的"–"：FlexControl 不看外边距，左右的 xs 是它的内边距
+    readonly TextControl separator = new() { Text = "–", Tone = TextTone.Muted, Visible = false };
     readonly ClearButtonControl clear = new() { Radius = Radius.Full, Visible = false, TabStop = false };
     readonly ContainerPanel suffix = new() { AutoSize = true, Visible = false };
     IFormController? form;
@@ -40,7 +40,6 @@ public abstract class SegmentedFieldControlBase : FlexControl, IFieldControl, IF
             ReadOnly = () => !Enabled || ReadOnly,
         })];
         groups = [.. Lanes.Select(lane => new DateSegmentGroupControl { Segments = lane })];
-        separator.Controls.Add(new TextControl { Text = "–", Tone = TextTone.Muted, AutoSize = true });
         Controls.Add(icon);
         Controls.Add(groups[0]);
         if (lanes > 1)
