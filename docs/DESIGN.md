@@ -1464,6 +1464,14 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### NotificationList 与 NotificationCenter（2026-11-16，仅 Avalonia）
+
+- 通知是 NotificationItem 记录（Id、Title、Time 是 DateTimeOffset，另有 Description、Type、IsRead、Href、Tone），类型是 NotificationType(Key, Label)。组件只报告：MarkedRead（读过的 Id，点了一条、全部标为已读）、ItemClicked；读过的状态由应用保存，改了 Items 再给回来。有绝对地址（Href）的那一条点了用系统打开（同 Link），应用内的跳转在 ItemClicked 里做。
+- NotificationList：标题行（Title，默认"通知"，与"全部标为已读" xs ghost；ShowTitle = false 时它挪到筛选行的最后，上游的 title={false}）、筛选行（类型的 ToggleGroup xs，"只看未读" Switch sm 靠结束边）、列表（ScrollArea，ListMaxHeight 限高）、空状态（Empty sm：没有通知时是 Empty 属性或"没有通知"，筛完没有时是"没有符合条件的通知"）、底部（Footer）。每一条是 NotificationRow（ButtonBase：Enter、空格、点击都一样；读屏是按钮，有地址时是链接，名称前加"未读"）：0.5rem 的未读色点（StatusDot，Tone 默认 accent）、标题 sm（未读 semibold，伪类 :unread）与说明 xs muted、RelativeTime xs muted；上边一条 borderMuted，悬停 fillHover。内边距在代码里按字号算（Border 没有字号）。
+- NotificationCenter：Popover（没有内边距的派生类）的触发器是 Indicator（未读数）包住的铃铛 IconButton，读屏名称"通知，未读 N 条"；面板里是 NotificationList，宽 min(26rem, 窗口宽 − 2rem)、列表最高 24rem，默认弹在 bottom-end。列表在弹出层里，事件冒泡不到通知中心（弹出层的根不在它的可视树里）：在列表上接住、从通知中心再发一次；点了一条就收起。IsOpen、Placement、Offset、Arrow、OpenChanged 透传给 Popover。
+- RelativeTime 的样式键是 Text：按部件名选它要写 rune|Text#PART_Time，写 rune|RelativeTime 选不中。
+- 示例：top-bar、inbox、widget（同上游）。
+
 ### ErrorBoundary（2026-11-16，仅 Avalonia）
 
 - 上游靠 Vue 的 onErrorCaught 接住里面组件在 setup、渲染、事件处理里抛的错误。桌面上能可靠接住的是两处：建内容时（ContentTemplate.Build）与排版时（里面的 Measure、Arrange 在 ErrorBoundary 自己的 MeasureOverride、ArrangeOverride 里调用，抛出的异常在这里接住，换上出错提示再排）。事件处理、异步里的错误不经过组件（平台的事件直接调处理函数，同上游接不住定时器、Promise 里的错误），由代码用 ErrorBoundary.Show(控件, 错误) 交给外面最近的边界（同 react-error-boundary 的 showBoundary），不在边界里时返回 false。
