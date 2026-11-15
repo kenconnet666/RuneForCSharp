@@ -1464,6 +1464,12 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### ColorSwatch（2026-11-16，仅 Avalonia）
+
+- 色块、名称、取值竖排（隔 xs）。Color 是画刷：上游的主题 token（colors.accent）在这里是 DynamicResource 绑的画刷资源，换主题时画刷换掉，取值跟着变，不用像上游那样挂载后从元素上读。取值不写时显示颜色本身（#rrggbb，不透明度不满时 #rrggbbaa，按画刷的 Opacity 折算）；上游的 value={false} 是 ShowValue = false。
+- 色块自己画（3rem 高、md 圆角）：surface 底上 8 像素一格的 fill 棋盘格（上游 1rem 一组、四格），上面是颜色，内描边是正文色 14% 的 1 像素线（上游的 color-mix）；换主题时重画。色块是装饰，读屏跳过。
+- 示例：DocsKit 页的 swatches（同上游的十二个 token）。
+
 ### ViewportFill（2026-11-16，仅 Avalonia）
 
 - 竖排的 Flex，高度是所在滚动区域（外层最近的 ScrollViewer，没有时是窗口）的可视区高减去自己的顶边与 Bottom（默认 xl），不小于 MinFillHeight（Length，默认 24rem；平台的 MinHeight 是像素数，所以换了名字）。顶边是在滚动内容里的位置（加回已经滚过的距离），不随滚动变；每次排版后重新量（上面的内容变高、窗口变大小都跟着），值没变时不再触发排版。
