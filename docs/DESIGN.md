@@ -1455,6 +1455,15 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 外观与日历的月份视图一致（上游同一个配方）：Avalonia 抽出 CalendarSurface（字号档位、根、读屏分组），CalendarView 与 QuarterCalendar 都从它派生，默认样式的选择器写 `:is(rune|CalendarSurface)`，部件名用 CalendarViewParts；WPF 直接用 CalendarViewParts 的部件样式键；WinForms 把画一格的代码抽成 CalendarCellPainter，日期网格与季度的四格共用。按季度给的部件属性（propsCell 是函数）没有对应。
 - 上游没有单独的演示页（API 列在 Calendar 页），示例是 Calendar 页的 quarter。
 
+### DatePicker 与 PickerPopover（2026-11-15）
+
+- DatePicker 是 DateField 的派生类（上游是 DateField 加弹层的组合）：后缀里的打开按钮放进 Suffix，日历弹在外壳下方。值、粒度、范围、不可选的日期全沿用 DateField；Granularity 决定弹出的是日历（年、月、日、带时间）、季度面板（Quarter）还是按 ISO 周排的日历（Week：周一开始、显示周数，已选那一周的另外六天浅色底，日历只把周一当作已选）。
+- 打开按钮、弹层、Esc、点外部、Alt + ↓、关上后焦点回到按钮这一套是各平台的 PickerPopover（上游 usePickerPopover，DateRangePicker、TimePicker 以后共用）：Avalonia、WPF 用平台的 Popup（同 Select：以外壳为锚点；WPF 四周留透明边给阴影、自定义定位），WinForms 用两层窗口 FloatingSurface（同 PopoverControl）。弹层的内容只在开着时建（"今天"、快捷选项按打开的那一刻算）。
+- 开关状态是选择器自己的 IsOpen（Avalonia、WPF 双向绑定），用户开关时发 OpenChanged（原因：按钮、选好了、Esc、点外面）。只读、不可用时按钮不可用、不能打开：外壳同步状态后调派生类的 Synced（SegmentedField 新加的钩子），按钮跟着。
+- 一开始就开着（IsOpen 写在初始化里）：等外壳进了窗口再弹出（平台的弹出层要锚点已经在窗口里）。WinForms 的日历要有窗口句柄才建网格，弹层还没显示时 CreateControl 不给看不见的窗口建子控件的句柄，量尺寸前逐个建。
+- 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
+- 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
+
 ### Tour 与 FloatingGeometry（2026-11-15）
 
 - 浮层贴着目标的定位做成孪生文件 FloatingGeometry（上游 floating 的 computePlacement：想要的一侧放不下换对侧，crossAxisFallback 时再试垂直的两侧，都放不下选溢出最少的；只沿对齐方向挪回、离边 8）。WinForms 原来的 FloatingLayout.Position 就是这套逻辑的平台版，改成换算矩形后调它（提示、弹出框、菜单、下拉照旧），整理在同一个提交里。Avalonia、WPF 的浮层仍用平台 Popup 的定位，Tour 的卡片用它。

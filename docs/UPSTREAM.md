@@ -377,7 +377,7 @@ Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_
 | Tabs：值转 id 不撞（dfb688b2）；整组卸载不另选、不写回（fe17e18c）；TabPanel 听 beforematch | Tabs 已做 | 我们按值关联、没有"另选旁边"的逻辑，补了测试对上两条用例；beforematch 是网页的 |
 | Listbox、Tree 的虚拟行改成网格叠放（c11dd9a3）；列表行状态的属性（053d9658、066ad66e、2bdf378e） | 网页结构 | 不涉及 |
 | FilterBar 一排放不下收进"展开"、两排同宽、按钮区窄屏换行（88da2f39、2f27376f、6fad7bfc）；QueryTable 工具栏 | 还没做 | 做时照新的 |
-| 表单模块：SchemaForm 条件与权限、明细表、数据来源、页签、SchemaView、useForm 校验（d815645c 等）；FormDialog 的 group、多选初始值（1fde03ee、88943ae0）；语言包 form* 键 | useForm 校验已做（孪生文件 FormController，2026-11-15），Form、Field 接入控制器已做（2026-11-15，自动绑定、失焦、约束、整组只读），FormErrorSummary 已做（2026-11-15，admission 示例等 DateField）；FormSection 已做（2026-11-15，section-review、section-collapsible 示例；sections 示例等 TableOfContents）；FormDialog 与 PromptAsync（useFormDialog）已做（2026-11-15，date 字段等 DatePicker；DateField、TimeField 已做；KanbanBoard 的 confirm 示例补上了），FormValue 不做（浏览器原生表单提交专用）；SchemaForm、SchemaView 还没做；语言包已重新生成 | 其余做时照新的；“控件里再嵌的控件不接 Field”那条用例等 NumberRangeField 这类区间控件做了再对 |
+| 表单模块：SchemaForm 条件与权限、明细表、数据来源、页签、SchemaView、useForm 校验（d815645c 等）；FormDialog 的 group、多选初始值（1fde03ee、88943ae0）；语言包 form* 键 | useForm 校验已做（孪生文件 FormController，2026-11-15），Form、Field 接入控制器已做（2026-11-15，自动绑定、失焦、约束、整组只读），FormErrorSummary 已做（2026-11-15，admission 示例等 DateField）；FormSection 已做（2026-11-15，section-review、section-collapsible 示例；sections 示例等 TableOfContents）；FormDialog 与 PromptAsync（useFormDialog）已做（2026-11-15，date 字段等接上 DatePicker（DatePicker 已做）；DateField、TimeField 已做；KanbanBoard 的 confirm 示例补上了），FormValue 不做（浏览器原生表单提交专用）；SchemaForm、SchemaView 还没做；语言包已重新生成 | 其余做时照新的；“控件里再嵌的控件不接 Field”那条用例等 NumberRangeField 这类区间控件做了再对 |
 | 触屏输入框字号不小于 16px（touchInputStyles） | 桌面不涉及 | 不涉及 |
 | NavBar 下拉面板（fe3d4607，已被 130a8a74 撤回） | — | 不做 |
 
