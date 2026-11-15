@@ -1416,6 +1416,13 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 命令式的小表单（上游 useFormDialog）是静态的 PromptAsync(owner, FormPromptOptions)，结果是字段名到值的字典（单值是去掉首尾空白的字符串，多选是字符串列表），取消是 null；字段是 FormPromptField 记录（Text、Textarea、Select，Multiple 时多选）。必填没填时错误是语言包的 FormRequired，Validate 只看单值字段。单行输入框里按回车就是确认（同浏览器的隐式提交：Avalonia、WPF 接冒泡的 KeyDown，WinForms 在 ProcessCmdKey 里），为此 Dialog 的确认流程改成 internal。上游的 date 字段等日期组件做了再加。
 - 看板的 confirm 示例用它：放下时先问意见，确认了才改数据。上游卡片模板拿到的 dragging（拖动中换一种写法）这里没有，卡片模板只拿到数据。
 
+### 日期分段：DateSegments 与 DateSegmentGroup（2026-11-15）
+
+- 孪生文件 DateSegments 是上游 useDateSegments 的状态：草稿、正在输入的数字、没打满四位的年份，逐段输入、↑↓ 回绕、Page Up / Down、Home / End、Backspace、12 / 24 小时制、全角与阿拉伯-印度数字、填全才写回、ISO 互转（FieldsOf、ToIso、FromIso）。上游靠 watch 跟外部的值，这里由控件在外部改值后调 Sync；状态不发事件，控件做完一步操作后重画。
+- 段的顺序与分隔符：上游用 Intl.DateTimeFormat 的 formatToParts；.NET 用区域格式的 ShortDatePattern、LongTimePattern 拆成段与分隔符，跳过不要的段时连同它前面的分隔符一起去掉（zh-CN 年/月/日、en-US 月/日/年、de-DE 日.月.年，en-US 的时间 2:05 PM，上游测试的写法都对上）。区域格式是 24 小时制而使用方要 12 小时制时，中日韩上午下午在前紧挨着（上午9:00），其余在后面；日期与时间之间中日韩是空格、其余是", "（同 Intl）。上午下午的文字取 AMDesignator / PMDesignator。
+- 段名上游取自 Intl.DisplayNames，.NET 没有对应：中文、英文内置（年、月、日 / year、month、day），其余语言用英文。数字一律用拉丁数字（上游 zh-CN、en-US 也是）。
+- DateSegmentGroup：Avalonia、WPF 每段是能聚焦的 DateSegmentBox（读屏 Spinner，带 RangeValue 与 Value，名称是"组名 段名"，没填的念语言包 DateFieldEmpty），打字走文字输入事件，按键走 KeyDown；聚焦时 accent 底。WinForms 是一个自己画的控件（同 OtpFieldControl），聚焦的段是 DateSegments.FocusedSegment，Tab / Shift+Tab 先在段之间走、到两端才离开，读屏的每段是子 AccessibleObject（SpinButton）。Enter 写回打了一半的年份再提交所在的表单。上游的 contenteditable、输入法组合、粘贴拦截是网页的。
+
 ### Tour 与 FloatingGeometry（2026-11-15）
 
 - 浮层贴着目标的定位做成孪生文件 FloatingGeometry（上游 floating 的 computePlacement：想要的一侧放不下换对侧，crossAxisFallback 时再试垂直的两侧，都放不下选溢出最少的；只沿对齐方向挪回、离边 8）。WinForms 原来的 FloatingLayout.Position 就是这套逻辑的平台版，改成换算矩形后调它（提示、弹出框、菜单、下拉照旧），整理在同一个提交里。Avalonia、WPF 的浮层仍用平台 Popup 的定位，Tour 的卡片用它。

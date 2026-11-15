@@ -1,0 +1,25 @@
+<!--
+  DateSegmentGroup 的部件样式（vue-tsx-pro 的 dateSegmentStyles）：数字等宽（整组上下 xs、每段左右 0.1em 与 xs 圆角按字号在代码里给），
+  聚焦时 accent 底、accentContrast 字；没填的段（占位文字要满足 4.5:1）与分隔符是 textMuted。使用方同键的样式叠在上面（DESIGN §7）
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <Style x:Key="{x:Static rune:DateSegmentGroupParts.Row}" TargetType="StackPanel">
+    <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
+  </Style>
+
+  <Style x:Key="{x:Static rune:DateSegmentGroupParts.Segment}" TargetType="rune:DateSegmentBox">
+    <Setter Property="Background" Value="Transparent" />
+    <Style.Triggers>
+      <Trigger Property="IsPlaceholder" Value="True"><Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" /></Trigger>
+      <Trigger Property="IsKeyboardFocused" Value="True">
+        <Setter Property="Background" Value="{DynamicResource Rune.Brush.Accent}" />
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.AccentContrast}" />
+      </Trigger>
+      <Trigger Property="IsEnabled" Value="False"><Setter Property="Cursor" Value="No" /></Trigger>
+    </Style.Triggers>
+  </Style>
+
+  <Style x:Key="{x:Static rune:DateSegmentGroupParts.Literal}" TargetType="rune:Text" />
+</ResourceDictionary>

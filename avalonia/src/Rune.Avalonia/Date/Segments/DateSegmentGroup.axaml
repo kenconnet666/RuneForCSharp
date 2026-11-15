@@ -1,0 +1,29 @@
+<!--
+  DateSegmentGroup 的默认外观（vue-tsx-pro 的 dateSegmentStyles）：整组上下 xs、数字等宽；每段左右 0.1em、xs 圆角，
+  聚焦时 accent 底、accentContrast 字；没填的段（占位文字要满足 4.5:1）与分隔符是 textMuted；不可用时鼠标是禁止。
+  写成主题里的样式（DESIGN §7 代码组合的控件），使用方的部件样式盖得过
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|DateSegmentGroup">
+    <Setter Property="Margin" Value="{rune:Em 0, 0.25}" />
+    <Setter Property="TextElement.FontFeatures" Value="tnum" />
+  </Style>
+  <Style Selector="rune|DateSegmentBox">
+    <Setter Property="Padding" Value="{rune:Em 0.1, 0}" />
+    <Setter Property="CornerRadius" Value="{rune:Em Resource=Rune.Radius.Xs}" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="FocusAdorner" Value="{x:Null}" />
+  </Style>
+  <Style Selector="rune|DateSegmentBox:placeholder">
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+  </Style>
+  <Style Selector="rune|DateSegmentBox:focus">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Accent}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.AccentContrast}" />
+  </Style>
+  <Style Selector="rune|DateSegmentBox:disabled">
+    <Setter Property="Cursor" Value="No" />
+  </Style>
+</Styles>

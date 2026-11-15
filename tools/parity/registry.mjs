@@ -254,6 +254,10 @@ const BUTTON_TYPE = '表单提交是浏览器的概念；对话框的默认、�
 
 /** 某个组件不移植的 prop 与原因（平台上没有对应的概念）：parity 不报缺 */
 export const PROPS_NOT_PORTED = {
+  DateSegmentGroup: {
+    labelledBy: '读屏名称不靠 id 关联：每段的名称是这一组的 AutomationProperties.Name（WinForms 的 AccessibleName）加段名，外壳控件（DateField）把标签写在这一组上',
+    describedBy: '说明与错误由外壳控件（DateField）作为这一组的帮助文字给读屏，不靠 id 关联',
+  },
   OtpField: {
     propsRoot: '格子的容器是 OtpField 自己（模板里的格子与透明的输入框）：样式直接写在它上面',
     ...Object.fromEntries(['propsSlot', 'propsSeparator'].map((prop) => [prop, '格子与分隔是画出来的（Avalonia、WPF 的 OtpSlots，WinForms 的 OtpFieldControl），外壳的颜色同输入框的主题；没有每格的元素可加属性'])),
@@ -416,6 +420,7 @@ export const PROPS_NOT_PORTED = {
 /** 某个平台上不移植的 prop 与原因（盖在 PROPS_NOT_PORTED 上）：库 → { 组件: { prop: 原因 } } */
 export const PLATFORM_PROPS_NOT_PORTED = {
   Avalonia: {
+    DateSegmentGroup: { propsSegment: '每段是 DateSegmentBox：用类型选择器 rune|DateSegmentBox（伪类 :placeholder、:focus）写样式' },
     VirtualList: { overscan: '平台的虚拟化面板自己决定多建几项（VirtualizingStackPanel 没有可设的前后余量）' },
     ScrollArea: { propsScrollbar: '两条滚动条是平台 ScrollViewer 认的固定部件名：样式里用 ScrollAreaParts.VerticalScrollbar、HorizontalScrollbar 选中' },
   },
@@ -465,6 +470,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     CommandPalette: Object.fromEntries(['propsInput', 'propsListbox'].map((prop) => [prop, '面板里的搜索框、列表是 CommandPalette 建的，外观跟着 TextField、Listbox 的主题样式；部件样式键只有搜索行'])),
   },
   WinForms: {
+    DateSegmentGroup: Object.fromEntries(['propsSegment', 'propsLiteral'].map((prop) => [prop, '各段与分隔符是 DateSegmentGroupControl 自己画的（同 OtpFieldControl），没有部件属性记录：外观跟主题'])),
     FormSection: Object.fromEntries(['propsHeader', 'propsHeading', 'propsTrigger', 'propsChevron', 'propsDescription', 'propsExtra', 'propsBody', 'propsCollapse']
       .map((prop) => [prop, '标题栏、标题、展开按钮、说明、操作区、栅格与展开收起层是 FormSectionControl 组合的子控件：没有部件属性记录，外观跟主题；栅格是 Grid 属性'])),
     FormErrorSummary: Object.fromEntries(['propsTitle', 'propsList', 'propsLink']
