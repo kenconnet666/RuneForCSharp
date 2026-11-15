@@ -1378,6 +1378,14 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### 表单控制器 FormController（2026-11-15，Form、Field 的接入在后面）
+
+- 上游的 useForm 建在 zod 上（schema 校验、推出约束、onSubmit 拿解析后的值）。C# 里用平台的习惯：模型上的 DataAnnotations 特性（Required、StringLength、MaxLength、MinLength、Range、EmailAddress、Phone、Url……）逐层校验（嵌套的对象、列表项），IValidatableObject 没写成员名的结果是整份表单的错误；再加 Validate 函数与按字段的异步校验 FieldValidators（防抖、只采用最后一次、提交时等它完成）。约束（必填标记、最大长度、范围）从同一批特性推出。
+- 特性没写 ErrorMessage 时文案跟着语言包（必填是 FormRequired，长度、范围、格式按语言写出限制，同上游跟着语言包的 zod 报错）；EmailAddress 这类自带默认英文提示的，和新建的同类特性比，相同就算没写。
+- 字段路径用点连接属性名与列表下标（Address.City、Items.0.Name），读写走反射；写入时按属性的类型转换（文本框写回字符串、数字字段写回 decimal）。Values 是初始值的一份 JSON 往返的深拷贝（模型要能序列化），IsDirty 比较 JSON；经 SetValue 写入时按校验时机重新校验，直接改了 Values 时调 Touch。
+- 显示错误的时机、SetError（值改了就消失）、整份表单的错误、数组字段（key 稳定，错误与失焦记录跟着下标移动）、局部校验、字段联动、连按提交只调用一次，都照上游。上游 onSubmit 抛带业务错误码的错误时按明细标到字段；桌面上没有错误码体系，改成抛 FormSubmitException（按字段的错误、整份表单的错误），别的异常原样抛出。
+- 提交复用还没完成的那一次：没有异步步骤时 Submit 会同步完成，不能在它里面清掉“进行中的提交”（不然之后一直拿到第一次的结果）。
+
 ### Tour 与 FloatingGeometry（2026-11-15）
 
 - 浮层贴着目标的定位做成孪生文件 FloatingGeometry（上游 floating 的 computePlacement：想要的一侧放不下换对侧，crossAxisFallback 时再试垂直的两侧，都放不下选溢出最少的；只沿对齐方向挪回、离边 8）。WinForms 原来的 FloatingLayout.Position 就是这套逻辑的平台版，改成换算矩形后调它（提示、弹出框、菜单、下拉照旧），整理在同一个提交里。Avalonia、WPF 的浮层仍用平台 Popup 的定位，Tour 的卡片用它。
