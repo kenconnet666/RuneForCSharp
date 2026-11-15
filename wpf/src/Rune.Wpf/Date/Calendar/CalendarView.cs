@@ -110,6 +110,17 @@ public class CalendarView : CompositeControl
         set => SetValue(CellContentProperty, value);
     }
 
+    /// <summary>浅色底的日期（格子按钮的 IsHighlighted）：DatePicker 选周时已选那一周的另外六天（日历只把周一当作已选的那一格）。</summary>
+    internal Func<DateOnly, bool>? Highlighted
+    {
+        get;
+        set
+        {
+            field = value;
+            Rebuild();
+        }
+    }
+
     /// <summary>选择无效（多选、区间里有不可选的日期）。</summary>
     public bool IsInvalid => State?.Invalid ?? false;
 
@@ -255,7 +266,8 @@ public class CalendarView : CompositeControl
         {
             var cell = state.Cell(button.Date, month);
             var ends = range && (cell.RangeStart || cell.RangeEnd);
-            button.Apply(cell, marked: range ? ends : cell.Selected, middle: cell.InRange && !ends, off: !IsEnabled || cell.Disabled);
+            button.Apply(cell, marked: range ? ends : cell.Selected, middle: cell.InRange && !ends, off: !IsEnabled || cell.Disabled,
+                highlighted: month is not null && !cell.Selected && Highlighted?.Invoke(button.Date) == true);
             button.IsTabStop = cell.Focused && !cell.Outside;
             var content = month is null ? null : CellContent?.Invoke(button.Date, cell);
             // 不可选的划掉：TextBlock 的 TextDecorations 不继承，样式里设不到内容生成的文字上
@@ -501,6 +513,7 @@ public sealed class CalendarCellButton : ButtonBase
 {
     static readonly DependencyPropertyKey IsMarkedKey = ReadOnly(nameof(IsMarked));
     static readonly DependencyPropertyKey IsMiddleKey = ReadOnly(nameof(IsMiddle));
+    static readonly DependencyPropertyKey IsHighlightedKey = ReadOnly(nameof(IsHighlighted));
     static readonly DependencyPropertyKey IsTodayKey = ReadOnly(nameof(IsToday));
     static readonly DependencyPropertyKey IsOutsideKey = ReadOnly(nameof(IsOutside));
     static readonly DependencyPropertyKey IsUnavailableKey = ReadOnly(nameof(IsUnavailable));
@@ -512,6 +525,9 @@ public sealed class CalendarCellButton : ButtonBase
 
     /// <summary>区间中间的格。</summary>
     public static readonly DependencyProperty IsMiddleProperty = IsMiddleKey.DependencyProperty;
+
+    /// <summary>浅色底（DatePicker 选周时已选那一周的另外六天）。</summary>
+    public static readonly DependencyProperty IsHighlightedProperty = IsHighlightedKey.DependencyProperty;
 
     /// <summary>今天。</summary>
     public static readonly DependencyProperty IsTodayProperty = IsTodayKey.DependencyProperty;
@@ -551,8 +567,9 @@ public sealed class CalendarCellButton : ButtonBase
     internal string Text { get; }
 
     /// <summary>换成新的状态（CalendarView 刷新时）。</summary>
-    internal void Apply(CalendarCellState state, bool marked, bool middle, bool off)
+    internal void Apply(CalendarCellState state, bool marked, bool middle, bool off, bool highlighted = false)
     {
+        SetValue(IsHighlightedKey, highlighted);
         State = state;
         SetValue(IsTodayKey, state.Today);
         SetValue(IsOutsideKey, state.Outside);
@@ -567,6 +584,9 @@ public sealed class CalendarCellButton : ButtonBase
 
     /// <summary>区间中间。</summary>
     public bool IsMiddle => (bool)GetValue(IsMiddleProperty);
+
+    /// <summary>浅色底。</summary>
+    public bool IsHighlighted => (bool)GetValue(IsHighlightedProperty);
 
     /// <summary>今天。</summary>
     public bool IsToday => (bool)GetValue(IsTodayProperty);

@@ -68,6 +68,7 @@
     <ResourceDictionary Source="/Rune.Wpf;component/Form/Section/FormSection.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Date/Segments/DateSegmentGroup.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Date/Calendar/CalendarView.xaml" />
+    <ResourceDictionary Source="/Rune.Wpf;component/Date/Pickers/Pickers.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Input/Listbox/Listbox.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Display/Tree/Tree.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Display/VirtualList/VirtualList.xaml" />
