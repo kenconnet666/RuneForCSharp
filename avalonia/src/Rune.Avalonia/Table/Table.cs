@@ -335,14 +335,19 @@ public class Table : Control
             }
             for (var i = 0; i < count; i++)
                 if (fixedWidths[i] is { } width) max[i] = min[i] = width;
-            // CSS 的 table-layout: auto（表格宽 100%）：放得下时按各列内容的比例分多出来的宽度；放不下时按最小宽度插值；再放不下时最小宽度、横向滚动
+            // CSS 的 table-layout: auto（表格宽 100%）：放得下时按各列内容的比例分多出来的宽度（有不定宽的列时只分给它们，定宽的列不变宽）；
+            // 放不下时按最小宽度插值；再放不下时最小宽度、横向滚动
             var available = !double.IsInfinity(Width_) ? Width_ : double.IsInfinity(availableSize.Width) ? max.Sum() : availableSize.Width;
             var (sumMax, sumMin) = (max.Sum(), min.Sum());
+            var growing = fixedWidths.Any(width => width is null) ? Enumerable.Range(0, count).Where(i => fixedWidths[i] is null).Sum(i => max[i]) : sumMax;
             columns = new double[count];
             for (var i = 0; i < count; i++)
-                columns[i] = sumMax <= available ? max[i] + (sumMax > 0 ? (available - sumMax) * max[i] / sumMax : 0)
+            {
+                var grows = fixedWidths[i] is null || growing == sumMax;
+                columns[i] = sumMax <= available ? max[i] + (grows && growing > 0 ? (available - sumMax) * max[i] / growing : 0)
                     : sumMin <= available ? min[i] + (available - sumMin) * (max[i] - min[i]) / Math.Max(1, sumMax - sumMin)
                     : min[i];
+            }
             // 行高：先按只占一行的格，跨行的格放不下时把差的加到它的最后一行（同浏览器）；加的 1 像素是格的分隔线
             heights = new double[rows.Count];
             foreach (var (cell, slot) in placed.OrderBy(item => item.Slot.RowSpan))
