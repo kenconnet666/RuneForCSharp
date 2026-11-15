@@ -37,7 +37,7 @@ public class FloatButtonControl : Control
         Controls.Add(indicator);
         Tips.SetTooltipPlacement(Button, FloatingPlacement.Left);
         // 摆位置的对象挂在自己的事件上，跟着控件活
-        _ = new FloatCorner(this);
+        _ = new FloatCorner(this, () => Grouped ? null : CornerSpot.BottomEnd(this));
     }
 
     /// <summary>里面的图标按钮（TS 里落到 IconButton 上的属性：样式档位、色调写在它身上）。</summary>
@@ -128,55 +128,6 @@ public class FloatButtonControl : Control
 }
 
 /// <summary>
-/// 单独用的浮动按钮（组）摆在父控件客户区的结束边与底部：外边距 lg（em），跟着父控件变大小、放到最上层（TS 的 position: fixed 加 inset-inline-end、inset-block-end）。
-/// 组里的按钮不摆（父控件是组的那一列）。
-/// </summary>
-sealed class FloatCorner
-{
-    readonly Control owner;
-    Control? parent;
-
-    public FloatCorner(Control owner)
-    {
-        this.owner = owner;
-        owner.ParentChanged += (_, _) => Watch();
-        owner.SizeChanged += (_, _) => Place();
-        owner.RightToLeftChanged += (_, _) => Place();
-    }
-
-    bool Grouped => owner.Parent?.Parent is FloatButtonGroupControl;
-
-    void Watch()
-    {
-        if (parent is not null)
-        {
-            parent.Resize -= OnParentResized;
-            parent.Layout -= OnParentLayout;
-        }
-        parent = Grouped ? null : owner.Parent;
-        if (parent is null) return;
-        parent.Resize += OnParentResized;
-        parent.Layout += OnParentLayout;
-        Place();
-    }
-
-    void OnParentResized(object? sender, EventArgs e) => Place();
-
-    void OnParentLayout(object? sender, LayoutEventArgs e) => Place();
-
-    public void Place()
-    {
-        if (parent is null || owner.Parent != parent) return;
-        var margin = (int)MathF.Round(Tokens.Space.Lg * ElementContext.Of(owner).Em);
-        var area = parent.DisplayRectangle;
-        var x = owner.RightToLeft == RightToLeft.Yes ? area.Left + margin : area.Right - margin - owner.Width;
-        var location = new Point(x, area.Bottom - margin - owner.Height);
-        if (owner.Location != location) owner.Location = location;
-        if (parent.Controls.GetChildIndex(owner) != 0) owner.BringToFront();
-    }
-}
-
-/// <summary>
 /// 一组浮动按钮（vue-tsx-pro 的 FloatButtonGroup）：竖排（间距 sm）摆在父控件的结束边与底部；给了 <see cref="Icon"/> 时是速拨：主按钮（solid、accent，名称默认“更多操作”）
 /// 点一下展开、收起其余按钮；Esc 或点组以外的地方收起，Esc 时焦点回到主按钮。<see cref="BackTopControl"/> 也能放进来。
 /// <code>
@@ -206,7 +157,7 @@ public class FloatButtonGroupControl : FlexControl, IMessageFilter
         Trigger.Button.Tone = StatusTone.Accent;
         Trigger.Click += (_, _) => IsOpen = !IsOpen;
         Controls.AddRange([actions, Trigger]);
-        corner = new FloatCorner(this);
+        corner = new FloatCorner(this, () => CornerSpot.BottomEnd(this));
         Sync();
     }
 
