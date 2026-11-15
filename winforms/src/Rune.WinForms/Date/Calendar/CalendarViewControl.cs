@@ -446,79 +446,24 @@ public sealed class CalendarGridControl : Control
             if (slot.Cell is not { } cell) continue;
             var bounds = (RectangleF)slot.Bounds;
             var ends = range && (cell.RangeStart || cell.RangeEnd);
-            var marked = range ? ends : cell.Selected;
-            var middle = cell.InRange && !ends;
-            var off = Off(cell);
-            if (cell.InRange)
-            {
-                // 区间的底色画在格子上，相邻的格连成一条；两端与每行的首尾是圆的
-                var left = slot.RowStart || (RightToLeft == RightToLeft.Yes ? cell.RangeEnd : cell.RangeStart);
-                var right = slot.RowEnd || (RightToLeft == RightToLeft.Yes ? cell.RangeStart : cell.RangeEnd);
-                using var band = Band(bounds, left ? radius : 0, right ? radius : 0);
-                using var soft = new SolidBrush(colors.AccentSoft);
-                g.FillPath(soft, band);
-            }
-            var hover = hovered == slot.Date && !off;
-            Color? fill = marked ? (hover ? colors.AccentHover : colors.Accent) : middle ? (hover ? colors.AccentSoftHover : null) : hover ? colors.FillHover : null;
-            using var shape = Drawing.RoundedRectangle(bounds, MathF.Min(radius, bounds.Height / 2));
-            if (fill is { } color)
-            {
-                using var brush = new SolidBrush(dim(color));
-                g.FillPath(brush, shape);
-            }
-            if (cell.Today && !marked)
-            {
-                using var ring = Drawing.RoundedRectangle(RectangleF.Inflate(bounds, -0.5f, -0.5f), MathF.Min(radius, bounds.Height / 2));
-                using var pen = new Pen(dim(colors.AccentBorder), 1);
-                g.DrawPath(pen, ring);
-            }
-            var fore = marked ? colors.AccentContrast : middle ? colors.AccentText : cell.Outside || cell.Unavailable ? colors.TextMuted : colors.Text;
-            // 不能选的变淡（opacities.disabled）；整个日历不可用时 dim 已经混过一次
-            if (off && owner.Enabled) fore = Drawing.Mix(BackOf(colors), fore, Tokens.Opacity.Disabled);
-            fore = dim(fore);
+            var rtl = RightToLeft == RightToLeft.Yes;
+            var look = new CalendarCellLook(
+                Marked: range ? ends : cell.Selected,
+                Middle: cell.InRange && !ends,
+                InRange: cell.InRange,
+                BandLeft: slot.RowStart || (rtl ? cell.RangeEnd : cell.RangeStart),
+                BandRight: slot.RowEnd || (rtl ? cell.RangeStart : cell.RangeEnd),
+                Today: cell.Today,
+                Muted: cell.Outside || cell.Unavailable,
+                Unavailable: cell.Unavailable,
+                Off: Off(cell),
+                Hover: hovered == slot.Date);
+            var fore = CalendarCellPainter.PaintBackground(g, this, colors, radius, bounds, look, owner.Enabled);
             var args = new DrawCalendarCellEventArgs(g, slot.Bounds, slot.Date, cell, fore, Font);
             if (!period && owner.OwnerDraws) owner.RaiseDrawCell(args);
-            if (!args.Handled)
-            {
-                var style = (cell.Today ? FontStyle.Bold : FontStyle.Regular) | (cell.Unavailable ? FontStyle.Strikeout : FontStyle.Regular);
-                var font = style == FontStyle.Regular ? Font : Fonts.Get(Font.FamilyName(), Font.SizeInPoints, style);
-                TextRenderer.DrawText(g, TextOf(slot.Date, cell), font, slot.Bounds, fore, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding | TextFormatFlags.WordBreak);
-            }
-            if (Focused && ShowFocusCues && cell.Focused && !cell.Outside)
-            {
-                var width = 2 * DeviceDpi / 96f;
-                using var ring = Drawing.RoundedRectangle(RectangleF.Inflate(bounds, -width / 2, -width / 2), MathF.Min(radius, bounds.Height / 2));
-                using var pen = new Pen(colors.FocusRing, width);
-                g.DrawPath(pen, ring);
-            }
+            if (!args.Handled) CalendarCellPainter.PaintText(g, TextOf(slot.Date, cell), Font, slot.Bounds, fore, look);
+            if (Focused && ShowFocusCues && cell.Focused && !cell.Outside) CalendarCellPainter.PaintFocus(g, this, colors, radius, bounds);
         }
-    }
-
-    Color BackOf(ThemeColors colors)
-    {
-        for (Control? control = this; control is not null; control = control.Parent)
-            if (control.BackColor.A == 255) return control.BackColor;
-        return colors.Background;
-    }
-
-    static GraphicsPath Band(RectangleF bounds, float left, float right)
-    {
-        var path = new GraphicsPath();
-        if (left > 0) path.AddArc(bounds.Left, bounds.Top, 2 * left, 2 * left, 180, 90);
-        else path.AddLine(bounds.Left, bounds.Top, bounds.Left, bounds.Top);
-        if (right > 0)
-        {
-            path.AddArc(bounds.Right - 2 * right, bounds.Top, 2 * right, 2 * right, 270, 90);
-            path.AddArc(bounds.Right - 2 * right, bounds.Bottom - 2 * right, 2 * right, 2 * right, 0, 90);
-        }
-        else
-        {
-            path.AddLine(bounds.Right, bounds.Top, bounds.Right, bounds.Bottom);
-        }
-        if (left > 0) path.AddArc(bounds.Left, bounds.Bottom - 2 * left, 2 * left, 2 * left, 90, 90);
-        else path.AddLine(bounds.Left, bounds.Bottom, bounds.Left, bounds.Bottom);
-        path.CloseFigure();
-        return path;
     }
 
     Slot? HitTest(Point point) => slots.FirstOrDefault(slot => slot.Cell is not null && slot.Bounds.Contains(point));
