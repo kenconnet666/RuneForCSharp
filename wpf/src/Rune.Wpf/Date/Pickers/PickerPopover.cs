@@ -24,7 +24,7 @@ sealed class PickerPopover
     /// <summary>弹出层四周给阴影留的透明边（像素）。</summary>
     const double Overhang = 16;
 
-    readonly SegmentedField owner;
+    readonly SegmentedFieldBase owner;
     readonly Popup popup = new() { StaysOpen = false, AllowsTransparency = true, Placement = PlacementMode.Custom };
     readonly Border shadow = new();
     readonly Action<bool, OpenChangeReason> toggle;
@@ -36,7 +36,7 @@ sealed class PickerPopover
     /// <param name="icon">按钮的图标。</param>
     /// <param name="toggle">想开（true）或想关（false）与原因：写回选择器的 IsOpen 并报告。</param>
     /// <param name="shown">打开、排好版之后：把焦点交给弹层里合适的元素。</param>
-    public PickerPopover(SegmentedField owner, IconData icon, Action<bool, OpenChangeReason> toggle, Action shown)
+    public PickerPopover(SegmentedFieldBase owner, IconData icon, Action<bool, OpenChangeReason> toggle, Action shown)
     {
         this.owner = owner;
         this.toggle = toggle;

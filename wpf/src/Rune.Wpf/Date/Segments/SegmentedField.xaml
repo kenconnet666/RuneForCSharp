@@ -1,7 +1,8 @@
 <!--
   SegmentedField 的主题样式（vue-tsx-pro 的 controlParts）：外壳同输入框（控件高度、左右 space.md、xs 宽的 border 描边、悬停 borderStrong、md 圆角、surface 底；
   soft 时 fill 底、没有描边；只读 borderMuted 描边、fill 底；出错 danger；不可用半透明；焦点在里面时焦点环压住边框）。
-  里面依次是前置图标（textMuted）、这一组分段（占满剩下的宽度）、清空按钮、尾部内容，隔 space.sm。
+  里面依次是前置图标（textMuted）、这一组分段（占满剩下的宽度；区间时是开始那组、"–"、结束那组）、清空按钮、尾部内容，隔 space.sm。
+  一组（SegmentedField 及其派生类）、两组（DateRangePicker）都用这个样式：键是 SegmentedField，目标类型是共同的基类。
 -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -9,7 +10,7 @@
   <ResourceDictionary.MergedDictionaries>
     <ResourceDictionary Source="/Rune.Wpf;component/Base/Button/Button.xaml" />
   </ResourceDictionary.MergedDictionaries>
-  <Style TargetType="rune:SegmentedField">
+  <Style x:Key="{x:Type rune:SegmentedField}" TargetType="rune:SegmentedFieldBase">
     <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
     <Setter Property="Background" Value="{DynamicResource Rune.Brush.Surface}" />
     <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
@@ -24,13 +25,15 @@
     <Setter Property="IsTabStop" Value="False" />
     <Setter Property="Template">
       <Setter.Value>
-        <ControlTemplate TargetType="rune:SegmentedField">
+        <ControlTemplate TargetType="rune:SegmentedFieldBase">
           <Grid>
             <Border x:Name="PART_Root" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
                     BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
               <rune:Flex Align="center" Gap="sm">
                 <rune:Icon x:Name="PART_Icon" Data="{TemplateBinding Icon}" Foreground="{DynamicResource Rune.Brush.TextMuted}" />
                 <rune:DateSegmentGroup x:Name="PART_Input" rune:Flex.Grow="True" />
+                <rune:Text x:Name="PART_Separator" Text="–" Foreground="{DynamicResource Rune.Brush.TextMuted}" Visibility="Collapsed" />
+                <rune:DateSegmentGroup x:Name="PART_End" rune:Flex.Grow="True" Visibility="Collapsed" />
                 <rune:ClearButton x:Name="PART_Clear" Radius="full" Visibility="Collapsed" />
                 <ContentPresenter x:Name="PART_Suffix" Content="{TemplateBinding Suffix}" VerticalAlignment="Center" />
               </rune:Flex>
