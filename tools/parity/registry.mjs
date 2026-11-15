@@ -72,6 +72,9 @@ export const COMPONENT_PROP_RENAMES = {
   VirtualList: { items: 'ItemsSource', children: 'ItemTemplate', horizontal: 'Orientation', onRangeChange: 'RangeChanged' },
   // 完成是事件；镂空的留白叫 SpotlightPadding（控件自己有 Padding）
   Tour: { onFinish: 'Finished', padding: 'SpotlightPadding' },
+  // 通知：读过了、点了一条是路由事件；没有标题行是 ShowTitle = false
+  NotificationList: { onRead: 'MarkedRead', onItemClick: 'ItemClicked', title: 'Title' },
+  NotificationCenter: { onRead: 'MarkedRead', onItemClick: 'ItemClicked', onOpenChange: 'OpenChanged' },
   // 错误边界：接住错误是事件；几个值变了就恢复，在 C# 里是一个值（要几个时给元组）
   ErrorBoundary: { onError: 'ErrorCaught', resetKeys: 'ResetKey', children: 'ContentTemplate' },
   // 主题切换：偏好是当前的主题变体（Value，默认设到应用）；system 与 C# 的 System 命名空间同名
@@ -275,6 +278,12 @@ export const PROPS_NOT_PORTED = {
   Calendar: { valueType: '值是 ISO 字符串的 Value（多选是 Values），另有 DateOnly 的 Date 属性：没有 @internationalized/date 的日期值类型，不按传进来的值推类型' },
   QuarterCalendar: Object.fromEntries(['propsPrevious', 'propsNext', 'propsHeader', 'propsHeading', 'propsGrid', 'propsCell', 'propsCellButton']
     .map((prop) => [prop, '部件同 CalendarView（上游同一个配方）：Avalonia 是 CalendarViewParts 的部件名（样式选择器 :is(rune|CalendarSurface)），WPF 是 CalendarViewParts 的部件样式键，WinForms 的四格是自己画的 QuarterGridControl；按季度给的部件属性没有对应，格子的外观按状态写样式'])),
+  NotificationCenter: {
+    lazy: '内容是传进来的控件实例，浮层关着时不在可视树里（不排版、不绘制），本来就是打开时才有代价',
+    role: '浮层固定是对话框（同 Popover）',
+    propsNotificationList: '面板里的 NotificationList 由通知中心建：内容、筛选、回调都是通知中心自己的属性与事件；外观按 rune|NotificationList 的部件写样式',
+    propsArrow: '箭头是 Popover 的部件（PopoverParts.Arrow），样式写在 rune|NotificationCenter rune|Popover 上',
+  },
   ErrorBoundary: { propsRetry: '默认出错提示里的"重试"是 Result 的 Action 里建的 Button，外观跟主题；要换就用 Fallback 自己画' },
   ModalCore: {
     parts: '内核给 Dialog、Drawer 的配方钩子：各自的外观在主题样式里（部件名在 DialogParts）',

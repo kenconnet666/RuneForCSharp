@@ -1,0 +1,38 @@
+<!--
+  NotificationList 的默认外观（vue-tsx-pro 的 notificationListRecipe）：标题行下边一条 border、标题 medium；
+  每一条上边一条 borderMuted、悬停 fillHover，标题 sm（未读 semibold），说明、相对时间 xs、textMuted；底部上边一条 border。
+  内边距（上下 sm、左右 md）、空状态的上下 lg 按字号在 NotificationCenter.cs 里算
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|NotificationList">
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+  </Style>
+  <Style Selector="rune|NotificationList Border#PART_Head">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+  </Style>
+  <Style Selector="rune|NotificationList rune|Text#PART_Title"><Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" /></Style>
+  <Style Selector="rune|NotificationList rune|ButtonBase#PART_Item">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+    <Setter Property="BorderThickness" Value="0,1,0,0" />
+    <Setter Property="CornerRadius" Value="0" />
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="rune|NotificationList rune|ButtonBase#PART_Item:pointerover"><Setter Property="Background" Value="{DynamicResource Rune.Brush.FillHover}" /></Style>
+  <Style Selector="rune|NotificationList rune|Text#PART_ItemTitle"><Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" /></Style>
+  <Style Selector="rune|NotificationList rune|ButtonBase#PART_Item:unread rune|Text#PART_ItemTitle"><Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Semibold}" /></Style>
+  <Style Selector="rune|NotificationList rune|Text#PART_Description">
+    <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xs}" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+  </Style>
+  <Style Selector="rune|NotificationList rune|Text#PART_Time">
+    <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xs}" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+  </Style>
+  <Style Selector="rune|NotificationList Border#PART_Footer">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+    <Setter Property="BorderThickness" Value="0,1,0,0" />
+  </Style>
+</Styles>
