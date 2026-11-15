@@ -1,0 +1,94 @@
+<!--
+  CalendarBoard 的默认外观（vue-tsx-pro 的 calendarBoardStyles）：
+  标题 lg、semibold；星期表头 sm、textMuted、上下 xs 左右 sm、靠起始边；
+  每天至少 7em 高、四周 xs、borderMuted 表格线（相邻的线收拢成一条），悬停 fillHover；周末 surfaceMuted 底；补齐的上下月 textMuted；
+  选中 accentSoft 底（悬停 accentSoftHover）加 2px accentBorder 内框；不能选的变淡、鼠标是禁止；只读时不像能点。
+  日期数字至少 1.75em 见方、圆形、medium 字重、等宽数字，今天 accent 底、accentContrast 字；日期旁的小字 xs、textMuted；
+  日程上下 xs、隔 xxs，一条是色调的 soft 底与文字色、sm 圆角、左右 xs、xs 字号、行高 1.6；"还有 N 项" xs、textMuted、悬停 fillHover。
+  格子、日程条是 Border（没有字号，em 解析不出来）：高度、内边距、圆角、间距按看板的字号在 CalendarBoard.cs 里算
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|CalendarBoard">
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="MinWidth" Value="0" />
+  </Style>
+  <Style Selector="rune|CalendarBoard rune|Text#PART_Title">
+    <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Lg}" />
+    <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Semibold}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="rune|CalendarBoard rune|IconButton /template/ rune|Icon#PART_Icon">
+    <Setter Property="FlipInRtl" Value="True" />
+  </Style>
+  <Style Selector="rune|CalendarBoard rune|Text#PART_Weekday">
+    <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+    <Setter Property="Padding" Value="{rune:Em 0.5, 0.25}" />
+  </Style>
+
+  <Style Selector="rune|CalendarBoard Border#PART_Cell">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+    <Setter Property="BorderThickness" Value="1,1,0,0" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.15" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="rune|CalendarBoard Border#PART_Cell.last-column"><Setter Property="BorderThickness" Value="1,1,1,0" /></Style>
+  <Style Selector="rune|CalendarBoard Border#PART_Cell.last-row"><Setter Property="BorderThickness" Value="1,1,0,1" /></Style>
+  <Style Selector="rune|CalendarBoard Border#PART_Cell.last-row.last-column"><Setter Property="BorderThickness" Value="1" /></Style>
+  <Style Selector="rune|CalendarBoard Border#PART_Cell.weekend"><Setter Property="Background" Value="{DynamicResource Rune.Brush.SurfaceMuted}" /></Style>
+  <Style Selector="rune|CalendarBoard Border#PART_Cell:pointerover"><Setter Property="Background" Value="{DynamicResource Rune.Brush.FillHover}" /></Style>
+  <Style Selector="rune|CalendarBoard Border#PART_Cell.outside"><Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" /></Style>
+  <Style Selector="rune|CalendarBoard Border#PART_Cell.selected"><Setter Property="Background" Value="{DynamicResource Rune.Brush.AccentSoft}" /></Style>
+  <Style Selector="rune|CalendarBoard Border#PART_Cell.selected:pointerover"><Setter Property="Background" Value="{DynamicResource Rune.Brush.AccentSoftHover}" /></Style>
+  <!-- 选中的内框画在格子里的一层上（格子自己的边框是表格线） -->
+  <Style Selector="rune|CalendarBoard Border#PART_Cell.selected Border.selection">
+    <Setter Property="BorderThickness" Value="2" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.AccentBorder}" />
+  </Style>
+  <Style Selector="rune|CalendarBoard Border#PART_Cell.disabled">
+    <Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" />
+    <Setter Property="Cursor" Value="No" />
+  </Style>
+  <Style Selector="rune|CalendarBoard Border#PART_Cell.disabled:pointerover"><Setter Property="Background" Value="Transparent" /></Style>
+  <Style Selector="rune|CalendarBoard:readonly Border#PART_Cell"><Setter Property="Cursor" Value="Arrow" /></Style>
+
+  <Style Selector="rune|CalendarBoard rune|ButtonBase#PART_DayButton">
+    <Setter Property="MinWidth" Value="{rune:Em 1.75}" />
+    <Setter Property="Height" Value="{rune:Em 1.75}" />
+    <Setter Property="Padding" Value="{rune:Em 0.25, 0}" />
+    <Setter Property="CornerRadius" Value="999" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
+    <Setter Property="TextElement.FontFeatures" Value="tnum" />
+  </Style>
+  <Style Selector="rune|CalendarBoard rune|ButtonBase#PART_DayButton:pointerover"><Setter Property="Background" Value="{DynamicResource Rune.Brush.FillHover}" /></Style>
+  <Style Selector="rune|CalendarBoard rune|ButtonBase#PART_DayButton:today">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Accent}" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.AccentContrast}" />
+  </Style>
+  <Style Selector="rune|CalendarBoard rune|Text#PART_Note">
+    <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xs}" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
+  <Style Selector="rune|CalendarBoard Border#PART_Event">
+    <Setter Property="Background" Value="{Binding $self.(rune:Resolved.Palette).Soft}" />
+    <Setter Property="TextElement.Foreground" Value="{Binding $self.(rune:Resolved.Palette).Text}" />
+    <Setter Property="TextElement.FontSize" Value="{DynamicResource Rune.FontSize.Xs}" />
+  </Style>
+  <Style Selector="rune|CalendarBoard rune|ButtonBase#PART_More">
+    <Setter Property="CornerRadius" Value="{rune:Em Resource=Rune.Radius.Sm}" />
+    <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xs}" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+  </Style>
+  <Style Selector="rune|CalendarBoard rune|ButtonBase#PART_More:pointerover"><Setter Property="Background" Value="{DynamicResource Rune.Brush.FillHover}" /></Style>
+</Styles>

@@ -72,6 +72,8 @@ export const COMPONENT_PROP_RENAMES = {
   VirtualList: { items: 'ItemsSource', children: 'ItemTemplate', horizontal: 'Orientation', onRangeChange: 'RangeChanged' },
   // 完成是事件；镂空的留白叫 SpotlightPadding（控件自己有 Padding）
   Tour: { onFinish: 'Finished', padding: 'SpotlightPadding' },
+  // 月历看板：数据是 ItemsSource；一条的显示是数据模板，格子里加的内容是按日期与状态返回控件的函数
+  CalendarBoard: { events: 'ItemsSource', renderEvent: 'EventTemplate', renderDay: 'DayContent' },
   // 看板：放下、弹回、列内排序都是事件；columnHeight 是最大高度
   KanbanBoard: { items: 'ItemsSource', onMove: 'Moved', onReorder: 'Reordered', onReject: 'Rejected', columnHeight: 'ColumnMaxHeight', children: 'ItemTemplate' },
   // 各项是可改的列表，顺序就地改（ObservableCollection 用 Move）
@@ -262,6 +264,7 @@ export const PROPS_NOT_PORTED = {
   Calendar: { valueType: '值是 ISO 字符串的 Value（多选是 Values），另有 DateOnly 的 Date 属性：没有 @internationalized/date 的日期值类型，不按传进来的值推类型' },
   QuarterCalendar: Object.fromEntries(['propsPrevious', 'propsNext', 'propsHeader', 'propsHeading', 'propsGrid', 'propsCell', 'propsCellButton']
     .map((prop) => [prop, '部件同 CalendarView（上游同一个配方）：Avalonia 是 CalendarViewParts 的部件名（样式选择器 :is(rune|CalendarSurface)），WPF 是 CalendarViewParts 的部件样式键，WinForms 的四格是自己画的 QuarterGridControl；按季度给的部件属性没有对应，格子的外观按状态写样式'])),
+  CalendarBoard: { getEventKey: '格子随月份重建，不按 key 复用元素：数据不需要 key' },
   RangeCalendar: { valueType: '值是 IsoDateRange（两端 ISO 字符串），另有日期的 Range 属性：没有 @internationalized/date 的日期值类型，不按传进来的值推类型' },
   ...Object.fromEntries(['SegmentedField', 'DateField', 'TimeField', 'DatePicker', 'DateRangePicker', 'TimePicker'].map((name) => [name, {
     name: FORM_NAME,
