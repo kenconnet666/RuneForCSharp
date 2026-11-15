@@ -37,6 +37,7 @@ public class OtpFieldControl : Control, IFieldControl, IScopeAware
     bool caretShown = true;
     bool hovered;
     string completed = "";
+    string reported = "";
 
     /// <summary>新建：6 位数字。</summary>
     public OtpFieldControl()
@@ -210,7 +211,12 @@ public class OtpFieldControl : Control, IFieldControl, IScopeAware
         input.ReadOnly = ReadOnly;
         input.AccessibleName = AccessibleName is { Length: > 0 } name ? name : FieldControl.Of(this) is { } scope && scope.Owns(this) ? scope.Label : null;
         input.AccessibleDescription = FieldControl.DescribedBy(this, AccessibleDescription);
-        OnTextChanged(EventArgs.Empty);
+        // 只在值真的变了时报告：字段的状态变了也会走到这里，处理 TextChanged 时改字段（说明跟着输入变）不能又绕回来
+        if (text != reported)
+        {
+            reported = text;
+            OnTextChanged(EventArgs.Empty);
+        }
         if (text.Length == Length && completed != text) Completed?.Invoke(this, text);
         completed = text.Length == Length ? text : "";
         Refresh(caret: true);
