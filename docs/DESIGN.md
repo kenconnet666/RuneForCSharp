@@ -1464,6 +1464,13 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### TimePicker 与 TimeSlots（2026-11-15）
+
+- TimePicker 是 TimeField 的派生类（同 DatePicker 之于 DateField）：后缀里的按钮（Clock）打开 PickerPopover，弹层与外壳同宽（PickerPopover 的 MatchWidth，上游的 matchWidth）、内边距 xs（Inset），里面是时间列表（Listbox，最高 16em，其余滚动；必选，再点已选项不取消）与"此刻"（ghost、sm、占满宽度，上方 xs）。WinForms 同宽时内容层关掉 AutoSize（不再按自己想要的宽度改回去），列表开 AutoSize 才会被 FlexControl 按首选高度摆。
+- 列表的时刻做成孪生文件 TimeSlots：从 Min（默认 00:00）起每 Step（默认 30）分钟一项到 Max（默认 23:59）；文字按小时制（HourCycle，不写时按语言），24 小时制补零（09:00，同浏览器 timeStyle short），12 小时制用语言的短时间格式，语言本身是 24 小时制时上午 / 下午放前面（tth:mm）；值是 HH:mm，选好后精确到秒时补 :00。TimeField 的解析也改用 TimeSlots.Parse（原来三个平台各有一份同样的私有方法）。
+- 不可选的时间（IsTimeUnavailable）在列表里不可用、键入时外壳出错；当前值正好是列表里的一项时选中它（只比时分）。"此刻"精确到分，超出范围、不可选时不可用。选好后关上，焦点回到按钮。上游的 valueType="dateValue" 在 C# 里是 Time 属性（TimeOnly）。
+- 示例：meeting、states（上游两个 demo）。
+
 ### DateRangePicker 与 SegmentedFieldBase（2026-11-15）
 
 - 分段输入框的外壳拆成抽象基类 SegmentedFieldBase（WinForms 是 SegmentedFieldControlBase）：外观档位、所在 Field 的标签与状态、表单重置、清空、点外壳空白处聚焦都在这里，按"几组分段"（1 或 2）建 DateSegments 与 DateSegmentGroup；每组的值怎样读写、出错怎样判断、读屏名称由派生类给。SegmentedField 是一组（Value 字符串，DateField、TimeField、DatePicker 不变），DateRangePicker 是两组。整理与功能分开提交。
