@@ -1423,6 +1423,13 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 段名上游取自 Intl.DisplayNames，.NET 没有对应：中文、英文内置（年、月、日 / year、month、day），其余语言用英文。数字一律用拉丁数字（上游 zh-CN、en-US 也是）。
 - DateSegmentGroup：Avalonia、WPF 每段是能聚焦的 DateSegmentBox（读屏 Spinner，带 RangeValue 与 Value，名称是"组名 段名"，没填的念语言包 DateFieldEmpty），打字走文字输入事件，按键走 KeyDown；聚焦时 accent 底。WinForms 是一个自己画的控件（同 OtpFieldControl），聚焦的段是 DateSegments.FocusedSegment，Tab / Shift+Tab 先在段之间走、到两端才离开，读屏的每段是子 AccessibleObject（SpinButton）。Enter 写回打了一半的年份再提交所在的表单。上游的 contenteditable、输入法组合、粘贴拦截是网页的。
 
+### SegmentedField、DateField、TimeField（2026-11-15）
+
+- SegmentedField 是输入框外壳加一组 DateSegmentGroup：Avalonia、WPF 是带模板的控件（同 Select 的外壳：控件高度、左右 md、soft / 只读 / 出错 / 不可用，焦点在里面时画焦点环），WinForms 是用 ControlShell 自己画外壳的 FlexControl（同 SelectControl，GetPreferredSize 不小于控件高度）。值是 ISO 字符串的 Value（Avalonia、WPF 默认双向绑定，WinForms 发 ValueChanged），段的语言、小时制、占位取所在的语言包；所在表单重置（ResetCount 变了）时丢掉打了一半的段；点外壳空白处聚焦第一个没填的段。读屏的主元素是里面的分段组：组名取控件自己的名称或所在字段的标签，帮助文字取字段的说明与错误。
+- DateField、TimeField 是它的派生类（上游是两个组件包着 SegmentedField）：Granularity 换段，Min / Max 是 ISO 字符串，不可选的日期、时刻是 Func（DateOnly、TimeOnly）。超出范围由 IsOutOfRange 判断（日期的判断是孪生文件 DateFieldRange：一段整段在范围外、按日选时是不可选的日期，带时间的界限同一天里再比时分秒）。上游的值可以是 @internationalized/date 的对象并按传入的类型写回（valueType）；C# 里值统一是 ISO 字符串，另有类型化的属性 DateField.Date / DateTime、TimeField.Time。
+- 年月、只有年的排法：用区域的年月格式（zh-CN 是"2026年10月""2026年"，同 Intl），年月格式写的是月份名（en-US 的 MMMM yyyy）时用短日期格式去掉日（10/2026）。中文的"年""月"作为前一段的单位跟着它，前一段在就留着。
+- 示例：DateField 的 basic、granularity、locales、appearance，TimeField 的 basic、hour-cycle、states；DateField 的 rules（DateValue 值类型、时区）没有对应。
+
 ### Tour 与 FloatingGeometry（2026-11-15）
 
 - 浮层贴着目标的定位做成孪生文件 FloatingGeometry（上游 floating 的 computePlacement：想要的一侧放不下换对侧，crossAxisFallback 时再试垂直的两侧，都放不下选溢出最少的；只沿对齐方向挪回、离边 8）。WinForms 原来的 FloatingLayout.Position 就是这套逻辑的平台版，改成换算矩形后调它（提示、弹出框、菜单、下拉照旧），整理在同一个提交里。Avalonia、WPF 的浮层仍用平台 Popup 的定位，Tour 的卡片用它。

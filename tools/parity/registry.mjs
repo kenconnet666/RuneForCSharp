@@ -254,6 +254,14 @@ const BUTTON_TYPE = '表单提交是浏览器的概念；对话框的默认、�
 
 /** 某个组件不移植的 prop 与原因（平台上没有对应的概念）：parity 不报缺 */
 export const PROPS_NOT_PORTED = {
+  ...Object.fromEntries(['SegmentedField', 'DateField', 'TimeField'].map((name) => [name, {
+    name: FORM_NAME,
+    propsSegment: '分段是里面的 DateSegmentGroup：样式写在每段的 DateSegmentBox 与分隔符 Text#PART_Literal 上',
+    propsLiteral: '分段是里面的 DateSegmentGroup：样式写在每段的 DateSegmentBox 与分隔符 Text#PART_Literal 上',
+    ...(name === 'SegmentedField'
+      ? { outOfRange: '超出范围由派生类覆盖 IsOutOfRange 判断（DateField、TimeField 按 Min、Max 与不可选的日期时间）' }
+      : { valueType: '值是 ISO 字符串的 Value，另有类型化的属性（DateField 的 Date、DateTime，TimeField 的 Time）：不按传进来的值推类型' }),
+  }])),
   DateSegmentGroup: {
     labelledBy: '读屏名称不靠 id 关联：每段的名称是这一组的 AutomationProperties.Name（WinForms 的 AccessibleName）加段名，外壳控件（DateField）把标签写在这一组上',
     describedBy: '说明与错误由外壳控件（DateField）作为这一组的帮助文字给读屏，不靠 id 关联',
@@ -470,6 +478,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     CommandPalette: Object.fromEntries(['propsInput', 'propsListbox'].map((prop) => [prop, '面板里的搜索框、列表是 CommandPalette 建的，外观跟着 TextField、Listbox 的主题样式；部件样式键只有搜索行'])),
   },
   WinForms: {
+    ...Object.fromEntries(['SegmentedField', 'DateField', 'TimeField'].map((name) => [name, Object.fromEntries(['propsRoot', 'propsClear', 'propsIcon']
+      .map((prop) => [prop, '外壳是 SegmentedFieldControl 自己画的（ControlShell，同 SelectControl），图标、清空按钮是组合的子控件：没有部件属性记录']))])),
     DateSegmentGroup: Object.fromEntries(['propsSegment', 'propsLiteral'].map((prop) => [prop, '各段与分隔符是 DateSegmentGroupControl 自己画的（同 OtpFieldControl），没有部件属性记录：外观跟主题'])),
     FormSection: Object.fromEntries(['propsHeader', 'propsHeading', 'propsTrigger', 'propsChevron', 'propsDescription', 'propsExtra', 'propsBody', 'propsCollapse']
       .map((prop) => [prop, '标题栏、标题、展开按钮、说明、操作区、栅格与展开收起层是 FormSectionControl 组合的子控件：没有部件属性记录，外观跟主题；栅格是 Grid 属性'])),
@@ -712,6 +722,10 @@ export const PLATFORM_BEHAVIOR_NOT_APPLICABLE = {
 };
 
 export const BEHAVIOR_NOT_APPLICABLE = {
+  DateField: {
+    '输入法：组合中的文字不进段': '桌面的输入法上屏后才发文字输入事件（Avalonia 的 TextInput、WPF 的 TextComposition、WinForms 的 KeyPress），段里没有可编辑的文字被组合改掉',
+    'DateField：ZonedDateTime 改了月份': '值是 ISO 字符串（另有 DateOnly、DateTime 属性），没有带时区的日期值类型',
+  },
   'form-dialog': { '字段的 id 不和页面上已有的撞': 'id 与标签的 for 是网页的：桌面上标签直接指向对话框里自己的控件实例' },
   KanbanBoard: { '部件：列、卡片可以按列、按卡片给部件属性': '没有按列、按卡片的部件属性（PROPS_NOT_PORTED）：卡片的外观在 ItemTemplate / ItemFactory 里，Avalonia 的部件名在 KanbanBoardParts' },
   VirtualList: { 'propsItem 可以按项计算': '没有 propsItem、propsList（PROPS_NOT_PORTED）：每项的外观在 ItemTemplate / ItemFactory 里；序号与总数由组件管（Only_visible_items_are_realized_with_set_positions 覆盖）' },

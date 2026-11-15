@@ -110,6 +110,13 @@ public class DateSegmentGroupControl : Control
         }
     }
 
+    /// <summary>字号变了（外壳的 TextSize、窗体的字体）：重新量各段。</summary>
+    protected override void OnFontChanged(EventArgs e)
+    {
+        base.OnFontChanged(e);
+        Refresh();
+    }
+
     /// <summary>Tab 进来时聚焦第一段，Shift+Tab 进来时聚焦最后一段。</summary>
     protected override void OnGotFocus(EventArgs e)
     {

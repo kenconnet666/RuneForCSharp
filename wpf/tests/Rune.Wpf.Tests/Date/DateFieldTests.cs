@@ -172,6 +172,7 @@ public class DateFieldTests
 
     [Fact]
     [Upstream("TimeField", "秒、min / max")]
+    [Upstream("TimeField", "TimeField：Time 进、Time 出")]
     public Task Seconds_and_limits() => WpfUi.Run(() =>
     {
         var (time, _) = Show(new TimeField { Granularity = TimeFieldGranularity.Second, Value = "08:30:15", Min = "09:00", Max = "18:00" });
