@@ -22,7 +22,7 @@ public static class FileAccept
 
     /// <summary>按扩展名推的 MIME 类型；推不出时空字符串（同浏览器认不出的文件）。</summary>
     /// <param name="fileName">文件名。</param>
-    public static string TypeOf(string fileName) => Types.GetValueOrDefault(Path.GetExtension(fileName), "");
+    public static string TypeOf(string fileName) => Types.GetValueOrDefault(System.IO.Path.GetExtension(fileName), "");
 
     /// <summary>文件名是否符合 accept。</summary>
     /// <param name="fileName">文件名（带扩展名）。</param>
