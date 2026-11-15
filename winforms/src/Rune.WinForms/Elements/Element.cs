@@ -38,6 +38,9 @@ public abstract class Element
     /// <param name="colors">主题颜色（宿主往上都透明时用页面底色）。</param>
     private protected Func<Color, Color> Dimmer(bool enabled, ThemeColors colors) => Drawing.Dimmer(Host as Control, enabled, colors);
 
+    /// <summary>宿主控件实际可用（跟着父控件）；宿主不是控件时算可用。文字、图标这类没有自己的可用状态的元素按它变淡。</summary>
+    private protected bool HostEnabled => Host is not Control host || host.Enabled;
+
     /// <summary>所在作用域的语言包（没有作用域时应用级的）。</summary>
     protected internal Lang CurrentLang => Scope?.EffectiveLang ?? RuneLang.Current.Value;
 

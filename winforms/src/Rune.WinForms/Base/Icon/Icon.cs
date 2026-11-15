@@ -116,7 +116,8 @@ public class Icon : Element
         }
         var progress = drawn.Value;
         var size = ActualSize(context);
-        var color = Tone.ColorIn(context);
+        // 不可用时变淡（同上游整体半透明）
+        var color = HostEnabled ? Tone.ColorIn(context) : Dimmer(false, context.Theme.Colors)(Tone.ColorIn(context));
         var state = graphics.Save();
         try
         {

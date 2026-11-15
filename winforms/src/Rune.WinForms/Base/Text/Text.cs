@@ -182,8 +182,12 @@ public class Text : Element
     }
 
     /// <inheritdoc />
-    protected internal override void Paint(Graphics graphics, ElementContext context) =>
-        TextRenderer.DrawText(graphics, Content, ResolveFont(context), Bounds, Tone.ColorIn(context), Flags(context));
+    protected internal override void Paint(Graphics graphics, ElementContext context)
+    {
+        // 不可用时变淡（同上游整体半透明）：只在不可用时读主题，可用的文字照旧不追踪主题
+        var color = HostEnabled ? Tone.ColorIn(context) : Dimmer(false, context.Theme.Colors)(Tone.ColorIn(context));
+        TextRenderer.DrawText(graphics, Content, ResolveFont(context), Bounds, color, Flags(context));
+    }
 
     /// <summary>字体的上伸部（GDI 从行顶画起，基线在上伸部的底下）。</summary>
     protected internal override int? Baseline(ElementContext context)

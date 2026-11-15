@@ -105,20 +105,27 @@ public abstract class ElementControl<T> : Control, IElementHost, IBaseline, ISco
     {
         base.OnParentChanged(e);
         OnScopeChanged();
-        OnEffectiveEnabledChanged();
+        EnabledMayHaveChanged();
     }
 
     /// <inheritdoc />
     protected override void OnEnabledChanged(EventArgs e)
     {
         base.OnEnabledChanged(e);
-        OnEffectiveEnabledChanged();
+        EnabledMayHaveChanged();
     }
 
     /// <inheritdoc />
     protected override void OnParentEnabledChanged(EventArgs e)
     {
         base.OnParentEnabledChanged(e);
+        EnabledMayHaveChanged();
+    }
+
+    /// <summary>实际的可用状态可能变了：重画（文字、图标按它变淡），再交给派生类同步元素。</summary>
+    void EnabledMayHaveChanged()
+    {
+        Invalidate();
         OnEffectiveEnabledChanged();
     }
 
