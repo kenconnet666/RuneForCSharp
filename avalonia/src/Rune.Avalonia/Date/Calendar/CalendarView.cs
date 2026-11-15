@@ -82,6 +82,17 @@ public class CalendarView : CalendarSurface
     /// <summary>自定义日期格的内容。</summary>
     public Func<DateOnly, CalendarCellState, object>? CellContent { get => GetValue(CellContentProperty); set => SetValue(CellContentProperty, value); }
 
+    /// <summary>浅色底的日期（伪类 <c>:highlighted</c>）：DatePicker 选周时已选那一周的另外六天（日历只把周一当作已选的那一格）。</summary>
+    internal Func<DateOnly, bool>? Highlighted
+    {
+        get;
+        set
+        {
+            field = value;
+            Rebuild();
+        }
+    }
+
     /// <summary>日历状态（派生类给）。</summary>
     internal CalendarState? State { get; private protected set; }
 
@@ -188,7 +199,8 @@ public class CalendarView : CalendarSurface
         {
             var cell = state.Cell(button.Date, month);
             var ends = range && (cell.RangeStart || cell.RangeEnd);
-            button.Apply(cell, marked: range ? ends : cell.Selected, middle: cell.InRange && !ends, off: !IsEffectivelyEnabled || cell.Disabled);
+            button.Apply(cell, marked: range ? ends : cell.Selected, middle: cell.InRange && !ends, off: !IsEffectivelyEnabled || cell.Disabled,
+                highlighted: month is not null && !cell.Selected && Highlighted?.Invoke(button.Date) == true);
             button.IsTabStop = cell.Focused && !cell.Outside;
             var content = month is null ? null : CellContent?.Invoke(button.Date, cell);
             if (content is not null) button.Content = content;
@@ -385,7 +397,7 @@ sealed class WeekNumberText : Text
 /// 日历的一格（<see cref="CalendarView"/> 建的）：日期、月份或年份按钮。伪类 <c>:selected</c>（已选或区间两端）、<c>:middle</c>（区间中间）、<c>:today</c>、
 /// <c>:outside</c>（补齐的上下月）、<c>:unavailable</c>（划掉）、<c>:off</c>（不能选）、<c>:period</c>（月份、年份格）。
 /// </summary>
-[PseudoClasses(":selected", ":middle", ":today", ":outside", ":unavailable", ":off", ":period")]
+[PseudoClasses(":selected", ":middle", ":highlighted", ":today", ":outside", ":unavailable", ":off", ":period")]
 public sealed class CalendarCellButton : ButtonBase
 {
     internal CalendarCellButton(DateOnly date, bool period)
@@ -401,8 +413,9 @@ public sealed class CalendarCellButton : ButtonBase
     public CalendarCellState State { get; private set; } = null!;
 
     /// <summary>换成新的状态（CalendarView 刷新时）。</summary>
-    internal void Apply(CalendarCellState state, bool marked, bool middle, bool off)
+    internal void Apply(CalendarCellState state, bool marked, bool middle, bool off, bool highlighted = false)
     {
+        PseudoClasses.Set(":highlighted", highlighted);
         State = state;
         PseudoClasses.Set(":today", state.Today);
         PseudoClasses.Set(":outside", state.Outside);

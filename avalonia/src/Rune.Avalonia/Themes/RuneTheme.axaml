@@ -83,6 +83,7 @@
   <StyleInclude Source="avares://Rune.Avalonia/Form/Section/FormSection.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Date/Segments/DateSegmentGroup.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Date/Calendar/CalendarView.axaml" />
+  <StyleInclude Source="avares://Rune.Avalonia/Date/Pickers/Pickers.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Navigation/NavList/NavListParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Navigation/TableOfContents/TableOfContentsParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Navigation/Breadcrumbs/BreadcrumbsParts.axaml" />

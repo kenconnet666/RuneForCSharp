@@ -136,7 +136,8 @@ public class SegmentedField : TemplatedControl, IFieldControl
     /// <summary>出错：自己写了的优先，其次所在字段的；有值且超出范围、不可选时也算。</summary>
     internal bool Invalid => (IsInvalid ?? Field.Of(this)?.Invalid ?? false) || Value is { } iso && IsOutOfRange(iso);
 
-    bool ReadOnly => IsReadOnly ?? Field.ReadOnlyOf(this);
+    /// <summary>只读：自己写了的优先，其次所在字段的。</summary>
+    private protected bool ReadOnly => IsReadOnly ?? Field.ReadOnlyOf(this);
 
     bool Required => IsRequired ?? Field.Of(this)?.Required ?? false;
 
@@ -219,6 +220,7 @@ public class SegmentedField : TemplatedControl, IFieldControl
         PseudoClasses.Set(":invalid", invalid);
         PseudoClasses.Set(":readonly", ReadOnly);
         if (clear is not null) clear.IsVisible = Clearable && (Value is not null || Segments.Partial) && IsEffectivelyEnabled && !ReadOnly;
+        Synced();
         if (group is null) return;
         var field = Field.Of(this) is { } owner && owner.Owns(this) ? owner : null;
         var name = AutomationProperties.GetName(this) is { Length: > 0 } own ? own : field?.LabelText;
@@ -228,6 +230,11 @@ public class SegmentedField : TemplatedControl, IFieldControl
         group.IsRequired = Required;
         group.IsInvalid = invalid;
         group.Refresh();
+    }
+
+    /// <summary>状态（只读、可用、出错、值）同步过了：派生类跟着改自己的部件（选择器的打开按钮）。</summary>
+    private protected virtual void Synced()
+    {
     }
 
     void OnClear(object? sender, RoutedEventArgs e)

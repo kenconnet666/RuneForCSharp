@@ -73,6 +73,14 @@
   <Style Selector=":is(rune|CalendarSurface) rune|ButtonBase#PART_CellButton:middle:pointerover">
     <Setter Property="Background" Value="{DynamicResource Rune.Brush.AccentSoftHover}" />
   </Style>
+  <!-- DatePicker 选周：已选那一周的另外六天 accentSoft 底、accentText 字 -->
+  <Style Selector=":is(rune|CalendarSurface) rune|ButtonBase#PART_CellButton:highlighted">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.AccentSoft}" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.AccentText}" />
+  </Style>
+  <Style Selector=":is(rune|CalendarSurface) rune|ButtonBase#PART_CellButton:highlighted:pointerover">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.AccentSoftHover}" />
+  </Style>
   <Style Selector=":is(rune|CalendarSurface) rune|ButtonBase#PART_CellButton:selected">
     <Setter Property="Background" Value="{DynamicResource Rune.Brush.Accent}" />
     <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.AccentContrast}" />

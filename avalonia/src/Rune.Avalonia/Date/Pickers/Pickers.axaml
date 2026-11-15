@@ -1,0 +1,35 @@
+<!--
+  日期、时间选择器的部件（vue-tsx-pro 的 usePickerPopover、datePickerStyles、pickerPresetStyles）：
+  打开按钮同输入框里的清空按钮（1.5em，不小于 24px，左右各收进 space.xs）；弹层同 Select 的弹层（surfaceRaised、border 描边、lg 阴影，
+  lg 圆角与 space.sm 内边距按外壳的字号在 PickerPopover 里算，Border 上没有字号）；快捷选项一列，靠日历那边一条 borderMuted 分隔线；"今天"居中，上边一条 borderMuted 分隔线（两处的 em 间距在 DatePicker 里算）。
+  选择器的样式键是 SegmentedField（共用外壳的主题），按它选中
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|SegmentedField rune|IconButton#PART_Button">
+    <Setter Property="Width" Value="{rune:Em 1.5, Min=24}" />
+    <Setter Property="MinHeight" Value="{rune:Em 1.5, Min=24}" />
+    <Setter Property="Margin" Value="{rune:Em -0.25, 0}" />
+  </Style>
+  <Style Selector="rune|SegmentedField Border#PART_Popover">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.SurfaceRaised}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BoxShadow" Value="{DynamicResource Rune.Shadow.Lg}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="FocusAdorner" Value="{x:Null}" />
+    <Setter Property="Cursor" Value="Arrow" />
+  </Style>
+  <Style Selector="rune|SegmentedField Border#PART_Presets">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+    <Setter Property="BorderThickness" Value="0,0,1,0" />
+  </Style>
+  <Style Selector="rune|SegmentedField Border#PART_PickerFooter">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+    <Setter Property="BorderThickness" Value="0,1,0,0" />
+  </Style>
+  <Style Selector="rune|SegmentedField Border#PART_PickerFooter > rune|Button">
+    <Setter Property="HorizontalAlignment" Value="Center" />
+  </Style>
+</Styles>
