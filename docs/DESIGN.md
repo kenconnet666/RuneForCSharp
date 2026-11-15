@@ -1469,6 +1469,14 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### Heading 的 Anchor（2026-11-16，仅 Avalonia）
+
+- 原来认为"桌面没有本页地址"不做；桌面文档站有了按 id 定位的章节（DocSection、TableOfContents），补上。Anchor 写了且有 Name（TS 的 id）时文字后面跟一个 # 按钮（行内的 InlineUIContainer，竖直居中），
+  读屏名称取语言包（链接到本节）；点了先发路由事件 AnchorRequested（带 Id，文档站拿去复制本节的链接），没有被处理就 BringIntoView（TS 的 #id 跳转）。
+- Text 改了就重建行内内容（Run 加按钮）；设 Inlines 时 Text 跟着变，用标志挡住重入。关掉 Anchor 或没有 Name 时回到只有文字。
+- 按钮在 InlineUIContainer 里，主题与样式实测都选不中它（类型、类选择器都不行），外观在代码里设：透明底、textMuted（悬停 accentText，按主题资源绑定）、0.75em 字号、与文字隔 xs、xs 圆角；
+  平时透明，悬停标题或用 Tab 聚焦时显示（durations.sm 渐变）。示例：Text 页 headings 的"安全与登录"（Name 写 security：XAML 的名字生成器把 Name 当字段名，不能带连字符）。像素对照 headings 14.96% → 0.32%。
+
 ### StepsForm（2026-11-16，仅 Avalonia）
 
 - 外层就是 Form（部件 PART_Root）：Controller、标签布局（LabelPlacement、LabelWidth、LabelAlign，Field 的同名属性 AddOwner）转给它；IsReadOnly 下发到字段。上游的 disabled 是 IsDisabled：只禁用这一步的内容与提交按钮，
