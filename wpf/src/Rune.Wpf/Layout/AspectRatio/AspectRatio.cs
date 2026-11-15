@@ -32,8 +32,8 @@ public class AspectRatio : Decorator
         {
             base.Child = value;
             // 图片按 cover 裁切：不占本地值，自己写了 Stretch 的不动
-            if (value is Image image && image.ReadLocalValue(Image.StretchProperty) == DependencyProperty.UnsetValue)
-                image.SetCurrentValue(Image.StretchProperty, Stretch.UniformToFill);
+            if (value is System.Windows.Controls.Image image && image.ReadLocalValue(System.Windows.Controls.Image.StretchProperty) == DependencyProperty.UnsetValue)
+                image.SetCurrentValue(System.Windows.Controls.Image.StretchProperty, Stretch.UniformToFill);
         }
     }
 

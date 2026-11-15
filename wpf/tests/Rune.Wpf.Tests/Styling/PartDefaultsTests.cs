@@ -54,11 +54,11 @@ public class PartDefaultsTests
     [Fact]
     public Task Avatar_image_and_fallback() => WpfUi.Run(() =>
     {
-        var (plain, styled) = Show(() => new Avatar { DisplayName = "吴悠" }, AvatarParts.Image, typeof(Image), Image.StretchProperty, Stretch.Uniform);
+        var (plain, styled) = Show(() => new Avatar { DisplayName = "吴悠" }, AvatarParts.Image, typeof(System.Windows.Controls.Image), System.Windows.Controls.Image.StretchProperty, Stretch.Uniform);
 
-        Assert.Equal(Stretch.UniformToFill, Part<Image>(plain).Stretch);
+        Assert.Equal(Stretch.UniformToFill, Part<System.Windows.Controls.Image>(plain).Stretch);
         Assert.Equal(HorizontalAlignment.Center, Part<ContentPresenter>(plain).HorizontalAlignment);
-        Assert.Equal(Stretch.Uniform, Part<Image>(styled).Stretch);
+        Assert.Equal(Stretch.Uniform, Part<System.Windows.Controls.Image>(styled).Stretch);
     });
 
     [Fact]

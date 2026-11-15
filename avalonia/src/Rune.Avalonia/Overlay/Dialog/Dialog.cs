@@ -413,8 +413,8 @@ public class Dialog : Control
         if (e.Property == TopLevel.ClientSizeProperty) layer.InvalidateMeasure();
     }
 
-    /// <summary>用户要关闭：确认进行中不关；问过 BeforeClose 同意了才关。</summary>
-    async Task RequestClose(OpenChangeReason reason)
+    /// <summary>用户要关闭：确认进行中不关；问过 BeforeClose 同意了才关（Lightbox 工具栏的关闭按钮也走这里）。</summary>
+    private protected async Task RequestClose(OpenChangeReason reason)
     {
         if (confirming || !IsOpen) return;
         if (BeforeClose is { } ask && !await ask(reason)) return;

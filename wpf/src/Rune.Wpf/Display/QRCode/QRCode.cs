@@ -185,7 +185,7 @@ public class QRCode : FrameworkElement
     {
         logoHost.Child = Logo switch
         {
-            ImageSource image => new Image { Source = image, Stretch = Stretch.Uniform },
+            ImageSource image => new System.Windows.Controls.Image { Source = image, Stretch = Stretch.Uniform },
             UIElement element => element,
             _ => null,
         };

@@ -38,7 +38,7 @@ public class AspectRatio : Decorator
         if (change.Property != ChildProperty) return;
         cover?.Dispose();
         // 图片按 cover 裁切：写在模板优先级上，使用方在 Image 上写的 Stretch 盖得过
-        cover = Child is Image image ? image.SetValue(Image.StretchProperty, Stretch.UniformToFill, BindingPriority.Template) : null;
+        cover = Child is global::Avalonia.Controls.Image image ? image.SetValue(global::Avalonia.Controls.Image.StretchProperty, Stretch.UniformToFill, BindingPriority.Template) : null;
     }
 
     /// <summary>宽度取给的宽度（不限时取内容的宽度），高度 = 宽度 ÷ 比例；内容按这个大小量。</summary>

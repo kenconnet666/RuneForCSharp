@@ -192,7 +192,7 @@ public class QRCode : Control
     {
         logoHost.Child = Logo switch
         {
-            IImage image => new Image { Source = image, Stretch = Stretch.Uniform },
+            IImage image => new global::Avalonia.Controls.Image { Source = image, Stretch = Stretch.Uniform },
             Control control => control,
             _ => null,
         };

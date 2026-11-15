@@ -58,7 +58,7 @@ public class Avatar : Control
 
     readonly Border root = new() { ClipToBounds = true };
     readonly Panel layers = new();
-    readonly Image image = new() { Name = AvatarParts.Image, IsVisible = false };
+    readonly global::Avalonia.Controls.Image image = new() { Name = AvatarParts.Image, IsVisible = false };
     readonly ContentPresenter fallback = new() { Name = AvatarParts.Fallback };
     readonly TemplateResources resources;
 

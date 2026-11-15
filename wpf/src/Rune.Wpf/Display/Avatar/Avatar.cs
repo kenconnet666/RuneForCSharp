@@ -57,7 +57,7 @@ public class Avatar : CompositeControl
     readonly Border root = new();
     // 写全名：Rune.Wpf.Grid 是 CSS 的网格布局
     readonly System.Windows.Controls.Grid layers = new();
-    readonly Image image = new() { Visibility = Visibility.Collapsed };
+    readonly System.Windows.Controls.Image image = new() { Visibility = Visibility.Collapsed };
     readonly ContentPresenter fallback = new();
     bool failed;
 
@@ -223,7 +223,7 @@ public class Avatar : CompositeControl
 public static class AvatarParts
 {
     /// <summary>图片（TS 的 propsImage）。</summary>
-    public static readonly PartKey Image = new(typeof(Avatar), nameof(Image), typeof(Image));
+    public static readonly PartKey Image = new(typeof(Avatar), nameof(Image), typeof(System.Windows.Controls.Image));
 
     /// <summary>后备内容（TS 的 propsFallback）。</summary>
     public static readonly PartKey Fallback = new(typeof(Avatar), nameof(Fallback), typeof(ContentPresenter));

@@ -4,6 +4,7 @@ using Avalonia.Controls.Presenters;
 using Avalonia.LogicalTree;
 using Avalonia.Media;
 using Avalonia.Styling;
+using AvaloniaImage = Avalonia.Controls.Image;
 
 namespace Rune.Avalonia.Tests;
 
@@ -52,12 +53,12 @@ public class PartDefaultsTests
     public Task Avatar_image_and_fallback() => HeadlessUi.Run(() =>
     {
         var plain = new Avatar { DisplayName = "吴悠" };
-        var styled = Styled<Avatar, Image>(new Avatar { DisplayName = "吴悠" }, AvatarParts.Image, Image.StretchProperty, Stretch.Uniform);
+        var styled = Styled<Avatar, AvaloniaImage>(new Avatar { DisplayName = "吴悠" }, AvatarParts.Image, AvaloniaImage.StretchProperty, Stretch.Uniform);
         HeadlessUi.Show(new StackPanel { Children = { plain, styled } });
 
-        Assert.Equal(Stretch.UniformToFill, plain.Part<Image>(AvatarParts.Image).Stretch);
+        Assert.Equal(Stretch.UniformToFill, plain.Part<AvaloniaImage>(AvatarParts.Image).Stretch);
         Assert.Equal(global::Avalonia.Layout.HorizontalAlignment.Center, plain.Part<ContentPresenter>(AvatarParts.Fallback).HorizontalAlignment);
-        Assert.Equal(Stretch.Uniform, styled.Part<Image>(AvatarParts.Image).Stretch);
+        Assert.Equal(Stretch.Uniform, styled.Part<AvaloniaImage>(AvatarParts.Image).Stretch);
     });
 
     [Fact]

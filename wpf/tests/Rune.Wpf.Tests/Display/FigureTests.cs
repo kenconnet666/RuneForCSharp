@@ -35,7 +35,7 @@ public class FigureTests
     [Fact]
     public Task Aspect_ratio_derives_the_height_and_covers_images() => WpfUi.Run(() =>
     {
-        var image = new Image();
+        var image = new System.Windows.Controls.Image();
         var box = new AspectRatio { Ratio = 4d / 3, Child = image };
         WpfUi.Show(Host(box));
 

@@ -36,7 +36,7 @@ public class FigureTests
         Assert.Equal(300, box.Bounds.Height, 1);
         Assert.Equal(box.Bounds.Size, fill.Bounds.Size);
 
-        var image = new Image();
+        var image = new global::Avalonia.Controls.Image();
         box.Child = image;
         Assert.Equal(global::Avalonia.Media.Stretch.UniformToFill, image.Stretch);
     });
