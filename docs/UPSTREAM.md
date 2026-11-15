@@ -90,7 +90,7 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 |---|---|---|
 | QRCode 与自写的编码器 encodeQr（91903a2b） | 还没做 | 做时编码器做成孪生文件（纯计算），标准附录的向量一起搬进测试 |
 | 子路径 ui/area：全国省市区（ad0a85ea、01a40e80） | 还没做 Cascader、TreeSelect | 做 Cascader 时照新的 |
-| JsonViewer（728b56b4，建在 Tree 上） | Tree 三个平台都做了（2026-11-15），JsonViewer 还没做 | 做 JsonViewer 时建在各平台的 Tree 上 |
+| JsonViewer（728b56b4，建在 Tree 上） | Tree、JsonViewer 三个平台都做了（2026-11-15） | 建在各平台的 Tree 上（DESIGN 的 JsonViewer 一节） |
 | SignaturePad、纸面配色 paper（fd628293）：要拍照、扫描、导出的一律浅底深色 | 三个平台都做了（2026-11-15） | QRCode 与 SignaturePad 共用各平台的 Paper |
 
 ### 第六批（2026-11-08 通知，0.12.0 之后 master 到 96efc7ad；P3 组件补缺完成）

@@ -323,6 +323,12 @@ public class TreeControl : Control
 
     internal IconData? IconOf(FlatTreeNode<object> row, bool expanded) => GetIcon?.Invoke(row.Node, expanded);
 
+    /// <summary>
+    /// 画行里文字那一块（代替 GetLabel 的文字；库里的组合控件用，如 JsonViewerControl 按类型着色的键值）：画布、文字那一块的位置、节点、行的状态。
+    /// 行是画的，没有上游 renderItem 那样的自定义内容；读屏、按字母跳转、过滤仍按 GetLabel。
+    /// </summary>
+    internal Action<Graphics, Rectangle, object, TreeItemState>? PaintContent;
+
     internal int ActiveRow => Active is not null && rowOf.TryGetValue(Active, out var position) ? position : -1;
 
     /// <summary>当前项换了：滚到看得见，重画，告诉读屏焦点到了那一项。</summary>
@@ -862,11 +868,15 @@ sealed class TreeView : Control, IElementHost
                 icon.Paint(graphics, faded);
                 x += size.Width + xs;
             }
-            label.Content = owner.LabelOf(row.Node);
-            label.Weight = state.Matched ? TextWeight.Semibold : default;
-            var labelSize = label.Measure(context, new Size(Math.Max(0, right - x), int.MaxValue));
-            label.Bounds = Mirror(new Rectangle(x, box.Top + (box.Height - labelSize.Height) / 2, Math.Max(0, right - x), labelSize.Height));
-            label.Paint(graphics, faded);
+            if (owner.PaintContent is { } custom) custom(graphics, Mirror(Rectangle.FromLTRB(x, box.Top, Math.Max(x, right), box.Bottom)), row.Node, state);
+            else
+            {
+                label.Content = owner.LabelOf(row.Node);
+                label.Weight = state.Matched ? TextWeight.Semibold : default;
+                var labelSize = label.Measure(context, new Size(Math.Max(0, right - x), int.MaxValue));
+                label.Bounds = Mirror(new Rectangle(x, box.Top + (box.Height - labelSize.Height) / 2, Math.Max(0, right - x), labelSize.Height));
+                label.Paint(graphics, faded);
+            }
             if (state.Drop is { } zone && zone != TreeDropZone.Inside)
             {
                 // 放在前后：一条 accent 的线，从这一层的缩进处开始

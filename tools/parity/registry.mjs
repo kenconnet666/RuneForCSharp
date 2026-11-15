@@ -63,6 +63,8 @@ export const COMPONENT_PROP_RENAMES = {
   // 数据经 ItemsSource 给（平台的叫法），一张的模板是 ItemTemplate
   Carousel: { items: 'ItemsSource' },
   // 展开、选中、勾选的是 key 的列表（不是布尔）；isDisabled 是判断节点的函数
+  // 控件自己的 MaxHeight 包括工具条与路径栏：上游的 maxHeight 只管树
+  JsonViewer: { maxHeight: 'TreeMaxHeight', toolbar: 'ShowToolbar' },
   Tree: { items: 'ItemsSource', isDisabled: 'IsItemDisabled', _expanded: 'Expanded', _selected: 'Selected', _checked: 'Checked', onMove: 'Moved', renderItem: 'ItemTemplate' },
   FloatButtonGroup: { propsTrigger: 'Trigger' },
   UserButton: { name: 'DisplayName', src: 'Source' },
@@ -391,6 +393,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     ScrollArea: { propsScrollbar: '两条滚动条是平台 ScrollViewer 认的固定部件名：样式里用 ScrollAreaParts.VerticalScrollbar、HorizontalScrollbar 选中' },
   },
   WPF: {
+    JsonViewer: Object.fromEntries(['propsSearch', 'propsTree', 'propsPathBar', 'propsExpandAll', 'propsCollapseAll']
+      .map((prop) => [prop, '搜索框、树、路径栏与两个按钮是 JsonViewer 代码组合的子元素，没有部件样式键：外观跟着 SearchField、Tree、Button、CopyButton 的主题样式'])),
     Tree: Object.fromEntries(['propsItem', 'propsToggle', 'propsCheckbox', 'propsLabel', 'propsSkeleton']
       .map((prop) => [prop, '每一行是 TreeItem 代码组合的（缩进、展开箭头、勾选框、图标、文字），骨架是 Skeleton，外观跟着 token 与各自组件的主题样式；部件样式键只有行列表（TreeParts.Rows）'])),
     SignaturePad: { propsCanvas: '画布是 SignaturePad 组合的子元素，没有部件样式键：底色与墨色是纸面，墨色用 PenColor' },
@@ -423,6 +427,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     CommandPalette: Object.fromEntries(['propsInput', 'propsListbox'].map((prop) => [prop, '面板里的搜索框、列表是 CommandPalette 建的，外观跟着 TextField、Listbox 的主题样式；部件样式键只有搜索行'])),
   },
   WinForms: {
+    JsonViewer: Object.fromEntries(['propsSearch', 'propsTree', 'propsPathBar', 'propsExpandAll', 'propsCollapseAll']
+      .map((prop) => [prop, '搜索框、树、路径栏与两个按钮是 JsonViewerControl 组合的子控件，没有部件属性记录：外观跟主题，按钮走 ProviderControl 的组件定制'])),
     Tree: Object.fromEntries(['renderItem', 'propsItem', 'propsToggle', 'propsCheckbox', 'propsLabel', 'propsEmpty', 'propsSkeleton']
       .map((prop) => [prop, '行（箭头、勾选框、图标、文字）是 TreeControl 画出来的，空状态与骨架是固定的子控件，没有部件属性与自定义内容：要多显示的文字写进 GetLabel'])),
     SignaturePad: { propsCanvas: '墨迹画在 SignaturePadControl 自己身上（没有单独的画布控件）：底色与墨色是纸面，墨色用 PenColor' },

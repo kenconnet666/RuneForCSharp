@@ -1378,6 +1378,15 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### JsonViewer（2026-11-15）
+
+- 纯计算是孪生文件 JsonViewerNodes（上游的 kindOf、childrenOf、sizeOf、display、copyText）：值可以是 System.Text.Json 的 JsonElement、JsonNode，也可以是任意 .NET 值。上游的普通对象在 C# 里是键为字符串的字典、没有自己写 ToString 的类与结构、记录、匿名类型（公开属性）；Map 是键不是字符串的字典，Set 是 ISet / IReadOnlySet，其他可枚举的集合是数组；Decimal、bigint 对应 decimal、BigInteger（按固定区域照实显示），Date 对应 DateTime、DateTimeOffset、DateOnly（同 toISOString：UTC、毫秒、Z；不知道时区的 DateTime 不加 Z）；自己写了 ToString 的（Uri、Guid、TimeSpan、枚举）是 other；没有 undefined。循环引用按引用比较经过的对象。
+- 字符串的写法同 JSON.stringify（只转义引号、反斜杠与控制字符，中文原样），路径同上游（标识符用点，别的写成 ["…"]，Map 是 .get(键)，Set 是 [...路径][序号]）。复制的值：容器用 Utf8JsonWriter 按节点写成缩进两格的 JSON（数字照实写成原文，Map 写成对象、Set 写成数组，循环引用写成 "[Circular]"，不转义中文）。
+- 控件建在各平台的 Tree 上：GetKey 是路径、GetLabel 是“键名: 值”（读屏、按字母跳转、过滤按它），选择方式单选、缩进 1em，树最高 TreeMaxHeight（上游的 maxHeight，默认 24em；控件自己的 MaxHeight 包括工具条与路径栏），toolbar 叫 ShowToolbar。见过的节点在取子节点时按路径记下，路径栏按选中的路径找回节点。
+- 一行：Avalonia、WPF 是树的 ItemTemplate（WPF 的 JsonViewerRow 按数据上下文建），键名（序号是注释色）、值（按类型着色、放不下省略）、容器后面的项数；WinForms 的行是画的，给 TreeControl 加了内部的 PaintContent（画文字那一块），三段按同样的颜色用 TextRenderer 画，匹配的加粗。
+- 等宽字体关掉连字（上游 fontVariantLigatures: none，免得 >= 画成 ≥）：Avalonia 是 FontFeatures 的 -calt、-liga，WPF 是 Typography 的 StandardLigatures、ContextualAlternates；WinForms 的 GDI 关不掉 OpenType 特性，用 Cascadia Mono（从 CodeBlockControl 挪进 Fonts.CodeMono，整理成单独的提交）。
+- 路径栏：sm 字号、至少 2.25em 高、textMuted；选中前是提示，选中后是路径（等宽、放不下省略、悬停看全文）与“复制路径”“复制值”两个 CopyButton（图标一样，提示与读屏名称说明各复制什么）。
+
 ### Tree（2026-11-15）
 
 - 纯计算是孪生文件 TreeData（上游 utils/data/tree 的 flattenTree、buildTreeIndex、toggleChecked、checkedByStrategy、filterTree、buildTree、moveTreeNode，加上 useTreeExpansion 的 TreeExpansion）：节点是任意对象，经 TreeAccessors（GetKey、GetChildren、HasChildren）读取；勾选状态是 CheckState（未勾、勾上、半选），按 CheckStrategy 收起；Build 遇到重复的 key、环时抛 ArgumentException。三个平台的控件只管展示与输入。
