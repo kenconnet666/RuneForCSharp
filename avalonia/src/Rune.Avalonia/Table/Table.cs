@@ -92,8 +92,11 @@ public class Table : Control
     /// <summary>固定的格、表头变了：重新排版（单元格的 Sticky 变了时调用）。</summary>
     internal void InvalidateGrid() => grid.InvalidateMeasure();
 
+    /// <summary>格的底色变了：重画行与格的底色。</summary>
+    internal void InvalidateGridVisual() => grid.InvalidateRows();
+
     /// <summary>所有行，按表头、表体、表尾的顺序（测试用）。</summary>
-    internal IReadOnlyList<(TableSection Section, TableRow Row)> Rows =>
+    internal IReadOnlyList<(TableSection Section, TableRow Row)> SectionRows =>
         [.. Sections.OfType<TableSection>().OrderBy(section => section.Order).SelectMany(section => section.Rows.OfType<TableRow>().Select(row => (section, row)))];
 
     /// <inheritdoc />
@@ -229,7 +232,7 @@ public class Table : Control
             foreach (var cell in rows.SelectMany(row => row.Cells)) VisualChildren.Remove(cell);
             rows.Clear();
             var bodyIndex = 0;
-            foreach (var (section, row) in owner.Rows)
+            foreach (var (section, row) in owner.SectionRows)
             {
                 var cells = row.Cells.OfType<TableCell>().ToArray();
                 rows.Add((section, row, cells));
@@ -410,7 +413,7 @@ public class Table : Control
                 visual.RenderTransform = x == 0 && y == 0 ? null : new TranslateTransform(x, y);
         }
 
-        void InvalidateRows()
+        public void InvalidateRows()
         {
             InvalidateVisual();
             foreach (var backdrop in new[] { headBackdrop, sideBackdrop, cornerBackdrop }) backdrop.InvalidateVisual();
@@ -420,7 +423,7 @@ public class Table : Control
 
         /// <summary>
         /// 行底色（表头 fill；表体 surface 或页面底色，斑马纹 fill，指针下的行 fillHover）与各格的分隔线（同 CSS 画在格上：表头格下 border，表体格下 borderMuted，
-        /// 表尾格上 border；跨行的格用自己那一行的底色，跨过的行线在它那段断开），只画 <paramref name="area"/>（网格的坐标）里 <paramref name="include"/> 的行；
+        /// 表尾格上 border；跨行的格用自己那一行的底色，跨过的行线在它那段断开；格写了 Background 时盖在行的底色上、画满整格），只画 <paramref name="area"/>（网格的坐标）里 <paramref name="include"/> 的行；
         /// <paramref name="edge"/> 时在结束边画固定列的竖线。
         /// </summary>
         void DrawRows(DrawingContext context, Rect area, Func<TableSection, bool> include, bool edge)
@@ -449,12 +452,13 @@ public class Table : Control
                 }
                 y = bottom;
             }
-            foreach (var (_, slot) in placed)
+            foreach (var (cell, slot) in placed)
             {
                 var section = rows[slot.Row].Section;
                 if (!include(section) || slot.Row + slot.RowSpan > heights.Length || slot.Column + slot.ColumnSpan > columns.Length) continue;
                 var rect = SlotRect(slot);
                 if (slot.RowSpan > 1 && Background(slot.Row) is { } background) context.FillRectangle(background, Band(rect.X, rect.Width, rect.Y, rect.Bottom));
+                if (cell.Background is { } own) context.FillRectangle(own, Band(rect.X, rect.Width, rect.Y, rect.Bottom));
                 if (section is TableFoot)
                 {
                     if (Brush(ThemeKeys.Brush.Border) is { } line) context.FillRectangle(line, Band(rect.X, rect.Width, rect.Y, rect.Y + 1));
@@ -608,7 +612,7 @@ public class TableRow : Control
     internal bool IsStriped { get; set; }
 }
 
-/// <summary>单元格（td）：左右 space.md、上下按密度；对齐按 <see cref="Align"/>；默认可以换行，<see cref="Nowrap"/> 时一行（放不下省略号）。</summary>
+/// <summary>单元格（td）：左右 space.md、上下按密度；对齐按 <see cref="Align"/>；默认可以换行，<see cref="Nowrap"/> 时一行（放不下省略号）。Background 由表格画满整格（含内边距），盖在行的底色上。</summary>
 public class TableCell : ContentControl
 {
     /// <summary>对齐，默认 start；数字、金额用 end。</summary>
@@ -656,6 +660,7 @@ public class TableCell : ContentControl
         else if (change.Property == NowrapProperty) TextBlock.SetTextWrapping(this, Nowrap ? TextWrapping.NoWrap : TextWrapping.Wrap);
         else if (change.Property == StickyProperty || change.Property == RowSpanProperty || change.Property == ColumnSpanProperty)
             this.FindLogicalAncestorOfType<Table>()?.InvalidateGrid();
+        else if (change.Property == BackgroundProperty) this.FindLogicalAncestorOfType<Table>()?.InvalidateGridVisual();
     }
 
     /// <summary>按所在的部分设外观（伪类 :head、:foot、:row-header）。</summary>

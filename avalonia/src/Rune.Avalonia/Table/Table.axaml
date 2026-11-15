@@ -1,5 +1,5 @@
 <!--
-  Table 单元格与标题的主题（vue-tsx-pro 的 tableRecipe、tablePartStyles）：单元格 text 颜色、行高 normal；表头 textMuted、sm、中等字重；
+  Table 单元格与标题的主题（vue-tsx-pro 的 tableRecipe、tablePartStyles）：单元格 text 颜色、行高 normal、数字等宽；表头 textMuted、sm、中等字重；
   表体、表尾里的行标题中等字重；表尾加粗。标题 textMuted、sm，上下 space.sm、左右 space.md。
   内边距（左右 space.md、上下按密度）、裁剪框、行底色与分隔线、外框在 Table.cs 里；格自己不裁（裁剪框含内边距，由网格设）。
 -->
@@ -10,6 +10,8 @@
     <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="ClipToBounds" Value="False" />
+    <!-- 数字等宽：金额、数量、日期上下对齐（同上游 td 的 tabular-nums；表头格没有） -->
+    <Setter Property="TextElement.FontFeatures" Value="tnum" />
     <Setter Property="TextBlock.LineHeight" Value="{rune:Em Resource=Rune.LineHeight.Normal}" />
     <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Normal}" />
     <Setter Property="Template">
@@ -30,7 +32,9 @@
       <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Semibold}" />
     </Style>
   </ControlTheme>
-  <ControlTheme x:Key="{x:Type rune:TableHeaderCell}" TargetType="rune:TableHeaderCell" BasedOn="{StaticResource {x:Type rune:TableCell}}" />
+  <ControlTheme x:Key="{x:Type rune:TableHeaderCell}" TargetType="rune:TableHeaderCell" BasedOn="{StaticResource {x:Type rune:TableCell}}">
+    <Setter Property="TextElement.FontFeatures" Value="{x:Null}" />
+  </ControlTheme>
 
   <ControlTheme x:Key="{x:Type rune:TableCaption}" TargetType="rune:TableCaption">
     <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />

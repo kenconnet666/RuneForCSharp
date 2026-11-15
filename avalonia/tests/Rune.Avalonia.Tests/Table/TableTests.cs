@@ -31,7 +31,7 @@ public class TableTests
         },
     };
 
-    static TableCell Cell(Table table, int row, int column) => (TableCell)table.Rows[row].Row.Cells[column];
+    static TableCell Cell(Table table, int row, int column) => (TableCell)table.SectionRows[row].Row.Cells[column];
 
     /// <summary>限高、两个方向都能滚的明细表（同文档站 ScrollArea 页的 both 示例）：表头吸顶，行号那一列固定。</summary>
     static Table Sheet()
@@ -82,7 +82,7 @@ public class TableTests
         var table = Build();
         HeadlessUi.Show(table);
 
-        Assert.Equal(["head", "body", "body", "foot"], table.Rows.Select(row => row.Section.GetType().Name[5..].ToLowerInvariant()));
+        Assert.Equal(["head", "body", "body", "foot"], table.SectionRows.Select(row => row.Section.GetType().Name[5..].ToLowerInvariant()));
         Assert.Equal(AutomationControlType.Table, table.Peer().GetAutomationControlType());
         Assert.Equal("属性", table.Peer().GetName());
         Assert.Equal(AutomationControlType.HeaderItem, Cell(table, 0, 0).Peer().GetAutomationControlType());
@@ -119,6 +119,6 @@ public class TableTests
         // 每格左右各 space.md（按格自己的字号）
         Assert.Equal(398, name.Bounds.Width + value.Bounds.Width + 1.5 * name.FontSize + 1.5 * value.FontSize, 1.0);
         Assert.Equal(global::Avalonia.Layout.HorizontalAlignment.Right, value.HorizontalContentAlignment);
-        Assert.Equal([false, true], table.Rows.Where(row => row.Section is TableBody).Select(row => row.Row.IsStriped));
+        Assert.Equal([false, true], table.SectionRows.Where(row => row.Section is TableBody).Select(row => row.Row.IsStriped));
     });
 }
