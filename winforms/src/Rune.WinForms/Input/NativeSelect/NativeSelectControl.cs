@@ -102,7 +102,7 @@ public class NativeSelectControl : ComboBox, IFieldControl, IScopeAware
 
     bool Invalid => IsInvalid ?? FieldControl.Of(this)?.Invalid ?? false;
 
-    bool ReadOnly => IsReadOnly ?? FieldControl.Of(this)?.IsReadOnly ?? false;
+    bool ReadOnly => IsReadOnly ?? FieldControl.ReadOnlyOf(this);
 
     float Em => this.EmPixels();
 

@@ -47,7 +47,7 @@ public abstract class ChoiceGroup : ItemsControl, IFieldControl
     }
 
     /// <summary>整组只读：自己写了的优先，其次所在字段的。</summary>
-    internal bool ReadOnly => Field.IsSet(this, IsReadOnlyProperty) ? IsReadOnly : Field.Of(this)?.IsReadOnly ?? false;
+    internal bool ReadOnly => Field.IsSet(this, IsReadOnlyProperty) ? IsReadOnly : Field.ReadOnlyOf(this);
 
     /// <summary>整组出错：自己写了的优先，其次所在字段的。</summary>
     internal bool Invalid => Field.IsSet(this, IsInvalidProperty) ? IsInvalid : Field.Of(this)?.Invalid ?? false;

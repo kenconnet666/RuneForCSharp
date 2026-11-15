@@ -33,6 +33,8 @@ export const PROP_RENAMES = {
 /** 只对某个组件的改名（C# 的成员不能与类同名：Icon 的 icon 叫 Data） */
 export const COMPONENT_PROP_RENAMES = {
   Icon: { icon: 'Data' },
+  // 控件都有 Name（元素名）：字段路径叫 Path；valueProp 是要绑定的控件属性名
+  Field: { name: 'Path', valueProp: 'BoundProperty' },
   // 多行文本框的值是平台 TextBox 的 Text（TextField 有 format，值另是 Value：有格式时是去掉分隔的原文）
   Textarea: { _value: 'Text' },
   // 数据是平台的 ItemsSource；点选是事件
@@ -459,6 +461,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     CommandPalette: Object.fromEntries(['propsInput', 'propsListbox'].map((prop) => [prop, '面板里的搜索框、列表是 CommandPalette 建的，外观跟着 TextField、Listbox 的主题样式；部件样式键只有搜索行'])),
   },
   WinForms: {
+    Field: Object.fromEntries(['propsLabel', 'propsControl']
+      .map((prop) => [prop, '标签是 FieldLabelControl、控件列是 FieldControl 自己排的：没有部件属性记录，标签外观跟主题（说明、错误有 PropsDescription、PropsError）'])),
     Tour: Object.fromEntries(['propsSpotlight', 'propsPanel', 'propsCover', 'propsTitle', 'propsContent', 'propsFooter', 'propsProgress', 'propsSkip', 'propsPrevious', 'propsNext']
       .map((prop) => [prop, '遮罩是分层窗口、卡片是 FloatingSurface，标题、说明、步数与按钮是组合的子控件：没有部件属性记录；下一步先不可用用 CanGoNext'])),
     KanbanBoard: Object.fromEntries(['propsBoard', 'propsColumn', 'propsHeader', 'propsCount', 'propsReason', 'propsList', 'propsEmpty', 'propsCard', 'propsHandle']

@@ -103,7 +103,7 @@ public class Rating : Control, IFieldControl
     /// <summary>第 <paramref name="index"/> 颗星（从 1 开始）按分数填了多少：0、50、100（测试用，悬停预览不算）。</summary>
     internal int Filled(int index) => RatingScale.Filled(Value, index);
 
-    internal bool ReadOnly => IsReadOnly ?? Field.Of(this)?.IsReadOnly ?? false;
+    internal bool ReadOnly => IsReadOnly ?? Field.ReadOnlyOf(this);
 
     double Em => FontSize;
 

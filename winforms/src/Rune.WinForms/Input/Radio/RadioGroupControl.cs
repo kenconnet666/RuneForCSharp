@@ -50,7 +50,7 @@ public class RadioGroupControl : ChoiceGroupControl
     bool? required;
 
     /// <summary>必填：自己写了的优先，其次所在字段的。</summary>
-    internal bool Required => required ?? FieldControl.Of(this)?.IsRequired ?? false;
+    internal bool Required => required ?? FieldControl.Of(this)?.Required ?? false;
 
     /// <summary>选中时的色调；不写时取作用域的默认值（<see cref="ChoiceDefaults"/>），再没有时 accent。</summary>
     [Category("Appearance")]

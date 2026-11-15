@@ -56,7 +56,7 @@ public abstract class ChoiceGroupControl : FlexControl, IFieldControl
     bool columnsApplied;
 
     /// <summary>整组只读：自己写了的优先，其次所在字段的。</summary>
-    internal bool ReadOnly => readOnly ?? FieldControl.Of(this)?.IsReadOnly ?? false;
+    internal bool ReadOnly => readOnly ?? FieldControl.ReadOnlyOf(this);
 
     /// <summary>整组出错：自己写了的优先，其次所在字段的。</summary>
     internal bool Invalid => invalid ?? FieldControl.Of(this)?.Invalid ?? false;

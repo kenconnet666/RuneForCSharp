@@ -123,7 +123,7 @@ public class NativeSelect : ComboBox, IFieldControl
     /// <summary>显示占位文字。</summary>
     public bool ShowsPlaceholder => (bool)GetValue(ShowsPlaceholderProperty);
 
-    bool ReadOnly => IsReadOnly || (Field.Of(this)?.IsReadOnly ?? false);
+    bool ReadOnly => IsReadOnly || Field.ReadOnlyOf(this);
 
     void IFieldControl.FieldChanged() => Sync();
 

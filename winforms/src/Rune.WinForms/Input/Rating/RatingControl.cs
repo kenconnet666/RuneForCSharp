@@ -109,7 +109,7 @@ public class RatingControl : Control, IFieldControl, IScopeAware
     /// <summary>分数变了（点选、方向键、清空）。</summary>
     public event EventHandler? ValueChanged;
 
-    internal bool ReadOnly => IsReadOnly ?? FieldControl.Of(this)?.IsReadOnly ?? false;
+    internal bool ReadOnly => IsReadOnly ?? FieldControl.ReadOnlyOf(this);
 
     /// <summary>能选的分数；只读时没有。</summary>
     internal double[] Scores => ReadOnly ? [] : RatingScale.Scores(Count, AllowHalf);

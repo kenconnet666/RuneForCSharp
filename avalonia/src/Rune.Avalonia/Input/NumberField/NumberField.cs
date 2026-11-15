@@ -305,6 +305,14 @@ public class NumberField : TextInputBase
     protected override AutomationPeer OnCreateAutomationPeer() => new NumberFieldPeer(this);
 
     /// <summary>读屏：spinbutton（数值、最小、最大、步长），值的文字是格式化后的。</summary>
+    /// <inheritdoc />
+    private protected override void ApplyConstraints(FieldConstraints constraints)
+    {
+        base.ApplyConstraints(constraints);
+        SetValue(MinProperty, (decimal?)constraints.Min, global::Avalonia.Data.BindingPriority.Style);
+        SetValue(MaxProperty, (decimal?)constraints.Max, global::Avalonia.Data.BindingPriority.Style);
+    }
+
     sealed class NumberFieldPeer(NumberField owner) : TextInputPeer(owner), IRangeValueProvider
     {
         protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Spinner;

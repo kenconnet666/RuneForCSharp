@@ -45,7 +45,7 @@ public class RadioGroup : ChoiceGroup
     public TextSize Size { get => GetValue(SizeProperty); set => SetValue(SizeProperty, value); }
 
     /// <summary>必填：自己写了的优先，其次所在字段的。</summary>
-    internal bool Required => IsSet(IsRequiredProperty) ? IsRequired : Field.Of(this)?.IsRequired ?? false;
+    internal bool Required => IsSet(IsRequiredProperty) ? IsRequired : Field.Of(this)?.Required ?? false;
 
     /// <inheritdoc />
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)

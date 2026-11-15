@@ -121,7 +121,7 @@ public class SignaturePad : CompositeControl, IFieldControl
     /// <summary>提示文字（测试用）。</summary>
     internal TextBlock PlaceholderPart => placeholder;
 
-    bool ReadOnly => IsReadOnly ?? Field.Of(this)?.IsReadOnly ?? false;
+    bool ReadOnly => IsReadOnly ?? Field.ReadOnlyOf(this);
 
     bool Invalid => IsInvalid ?? Field.Of(this)?.Invalid ?? false;
 

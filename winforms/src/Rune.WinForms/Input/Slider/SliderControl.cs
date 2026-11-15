@@ -150,7 +150,7 @@ public class SliderControl : Control, IFieldControl, IScopeAware
 
     internal bool IsRange => Range is not null;
 
-    internal bool ReadOnly => IsReadOnly ?? FieldControl.Of(this)?.IsReadOnly ?? false;
+    internal bool ReadOnly => IsReadOnly ?? FieldControl.ReadOnlyOf(this);
 
     internal bool Vertical => Orientation.Value == "vertical";
 

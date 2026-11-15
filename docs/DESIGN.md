@@ -1378,13 +1378,22 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
-### 表单控制器 FormController（2026-11-15，Form、Field 的接入在后面）
+### 表单控制器 FormController（2026-11-15）
 
 - 上游的 useForm 建在 zod 上（schema 校验、推出约束、onSubmit 拿解析后的值）。C# 里用平台的习惯：模型上的 DataAnnotations 特性（Required、StringLength、MaxLength、MinLength、Range、EmailAddress、Phone、Url……）逐层校验（嵌套的对象、列表项），IValidatableObject 没写成员名的结果是整份表单的错误；再加 Validate 函数与按字段的异步校验 FieldValidators（防抖、只采用最后一次、提交时等它完成）。约束（必填标记、最大长度、范围）从同一批特性推出。
 - 特性没写 ErrorMessage 时文案跟着语言包（必填是 FormRequired，长度、范围、格式按语言写出限制，同上游跟着语言包的 zod 报错）；EmailAddress 这类自带默认英文提示的，和新建的同类特性比，相同就算没写。
 - 字段路径用点连接属性名与列表下标（Address.City、Items.0.Name），读写走反射；写入时按属性的类型转换（文本框写回字符串、数字字段写回 decimal）。Values 是初始值的一份 JSON 往返的深拷贝（模型要能序列化），IsDirty 比较 JSON；经 SetValue 写入时按校验时机重新校验，直接改了 Values 时调 Touch。
 - 显示错误的时机、SetError（值改了就消失）、整份表单的错误、数组字段（key 稳定，错误与失焦记录跟着下标移动）、局部校验、字段联动、连按提交只调用一次，都照上游。上游 onSubmit 抛带业务错误码的错误时按明细标到字段；桌面上没有错误码体系，改成抛 FormSubmitException（按字段的错误、整份表单的错误），别的异常原样抛出。
 - 提交复用还没完成的那一次：没有异步步骤时 Submit 会同步完成，不能在它里面清掉“进行中的提交”（不然之后一直拿到第一次的结果）。
+
+### Form 与 Field 接入控制器（2026-11-15）
+
+- Form 把控制器交给里面的 Field（上游的 FormContext）：Avalonia、WPF 是继承的附加属性 Form.Controller，Form 自己是 Decorator；WinForms 没有属性继承，FormControl（WinForms 的 Form 是窗口）是 Panel，字段沿 Parent 链找它，FormControl 换控制器、改布局时通知里面的字段，后加进来的子树在 ControlAdded 里接上，外层面板晚于字段进表单时在字段建句柄时补接。
+- 标签布局（LabelPlacement、LabelWidth、LabelAlign）与 IsReadOnly 在表单上统一设置（上游 field-layout）：Avalonia、WPF 把 Field 的这几个属性改成继承的（WPF 注册成附加属性，继承才穿得过中间的面板），Form 用 AddOwner，字段上写了的优先；控件的只读改成读继承的 Field.IsReadOnly，不在字段里的控件也跟着表单只读。WinForms 的字段属性没写（null、Value 为 null 的档位）时用表单的，不在字段里的控件找所在的表单。不可用用平台的 IsEnabled / Enabled，本来就往里传。
+- Field 的 Path 是上游的 name（各平台的控件已有 Name）：错误不写时取 VisibleError(Path)，必填不写时取 Constraints(Path).Required（Field.IsRequired 改成 bool?），焦点离开整个字段时 Blur（Avalonia、WPF 的 IsKeyboardFocusWithin 变 false，WinForms 的 Leave），登记标签与聚焦给错误汇总（挂在树上、加载着时才登记）。
+- 自动绑定（上游 valueProp，这里 BoundProperty）：里面只有一个接入字段的控件、控件上没写值时，表单的值写到控件、控件的值写回表单。不写 BoundProperty 时取 Value、IsChecked、Values、Text 里第一个"默认双向绑定"的（Avalonia、WPF 看属性元数据；WinForms 看有没有同名的 XxxChanged 事件）——勾选框的 Value 是项的值、不是双向的，于是落到 IsChecked，同上游"声明了 _checked 而没有 _value 时写 _checked"。"控件上没写值"：Avalonia、WPF 看属性有没有本地值、样式或绑定，写入用 SetCurrentValue（不顶掉使用方的样式、绑定）；WinForms 看不出来源，和新建的同类控件比，不同就算写了。值的类型不同时按目标类型转换（数字之间、集合转成 List 或数组），比较时集合按元素逐个比。
+- 约束落到控件（上游 schema 推出的 maxlength、min / max）：输入框的 MaxLength，NumberField 的 Min、Max。Avalonia 用样式优先级写（控件上写的本地值照样优先），WPF 在没写时 SetCurrentValue，WinForms 记着使用方写的、没写时用约束。
+- 提交：SubmitAsync（以及给按钮 Command 的 SubmitCommand，WinForms 的 ButtonControl 没有 Command 就在 Click 里调），单行输入框里按回车也提交（Avalonia、WPF 接冒泡的 KeyDown，WinForms 在 ProcessCmdKey 里，它沿父链往上走）；没通过时聚焦第一个出错字段的控件（错误汇总做了以后先聚焦汇总）。ResetCommand / Reset 回到初始值，绑定的控件跟着变。
 
 ### Tour 与 FloatingGeometry（2026-11-15）
 

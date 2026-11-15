@@ -345,7 +345,7 @@ public class Select : Control, IFieldControl
 
     bool Multiple => SelectionMode == SelectionMode.Multiple;
 
-    bool ReadOnly => IsReadOnly ?? Field.Of(this)?.IsReadOnly ?? false;
+    bool ReadOnly => IsReadOnly ?? Field.ReadOnlyOf(this);
 
     /// <summary>不能打开、不能改：不可用或只读。</summary>
     bool Locked => !IsEnabled || ReadOnly;

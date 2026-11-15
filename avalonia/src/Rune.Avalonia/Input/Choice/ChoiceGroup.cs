@@ -54,7 +54,7 @@ public abstract class ChoiceGroup : ItemsControl, IFieldControl
     public Func<object?, ListboxOption>? ToOption { get => GetValue(ToOptionProperty); set => SetValue(ToOptionProperty, value); }
 
     /// <summary>整组只读：自己写了的优先，其次所在字段的。</summary>
-    internal bool ReadOnly => IsSet(IsReadOnlyProperty) ? IsReadOnly : Field.Of(this)?.IsReadOnly ?? false;
+    internal bool ReadOnly => IsSet(IsReadOnlyProperty) ? IsReadOnly : Field.ReadOnlyOf(this);
 
     /// <summary>整组出错：自己写了的优先，其次所在字段的。</summary>
     internal bool Invalid => IsSet(IsInvalidProperty) ? IsInvalid : Field.Of(this)?.Invalid ?? false;

@@ -101,10 +101,10 @@ public class ToggleGroup : Flex, IFieldControl
     internal bool Sliding => !Multiple;
 
     /// <summary>必选：自己写了的优先，其次所在字段的。</summary>
-    internal bool Required => IsSet(IsRequiredProperty) ? IsRequired : Field.Of(this)?.IsRequired ?? false;
+    internal bool Required => IsSet(IsRequiredProperty) ? IsRequired : Field.Of(this)?.Required ?? false;
 
     /// <summary>只读：自己写了的优先，其次所在字段的。</summary>
-    internal bool ReadOnly => IsSet(IsReadOnlyProperty) ? IsReadOnly : Field.Of(this)?.IsReadOnly ?? false;
+    internal bool ReadOnly => IsSet(IsReadOnlyProperty) ? IsReadOnly : Field.ReadOnlyOf(this);
 
     /// <summary>选中的值（单选时最多一个；单选的空字符串算没有选中）。</summary>
     public IReadOnlyList<string> SelectedValues => Multiple ? Values ?? [] : string.IsNullOrEmpty(Value) ? [] : [Value];

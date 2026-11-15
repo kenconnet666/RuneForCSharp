@@ -188,13 +188,13 @@ public abstract class ChoiceBase : Control, IFieldControl
     private protected virtual bool InGroup => false;
 
     /// <summary>只读：能聚焦，不能切换；外观照常。自己写了的优先，其次所在字段的。</summary>
-    protected internal virtual bool ReadOnly => Field.IsSet(this, IsReadOnlyCoreProperty) ? (bool)GetValue(IsReadOnlyCoreProperty) : FieldOwner?.IsReadOnly ?? false;
+    protected internal virtual bool ReadOnly => Field.IsSet(this, IsReadOnlyCoreProperty) ? (bool)GetValue(IsReadOnlyCoreProperty) : !InGroup && Field.ReadOnlyOf(this);
 
     /// <summary>校验未通过：自己写了的优先，其次所在字段的。</summary>
     protected internal virtual bool Invalid => Field.IsSet(this, IsInvalidCoreProperty) ? (bool)GetValue(IsInvalidCoreProperty) : FieldOwner?.Invalid ?? false;
 
     /// <summary>必填：自己写了的优先，其次所在字段的。</summary>
-    protected internal virtual bool Required => Field.IsSet(this, IsRequiredCoreProperty) ? (bool)GetValue(IsRequiredCoreProperty) : FieldOwner?.IsRequired ?? false;
+    protected internal virtual bool Required => Field.IsSet(this, IsRequiredCoreProperty) ? (bool)GetValue(IsRequiredCoreProperty) : FieldOwner?.Required ?? false;
 
     /// <summary>所在的复选组、单选组（卡片外观跟随它）。</summary>
     private protected virtual ChoiceGroup? OwnerGroup => null;

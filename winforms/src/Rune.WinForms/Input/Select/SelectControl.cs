@@ -274,7 +274,7 @@ public class SelectControl : FlexControl, IFieldControl
 
     bool Invalid => IsInvalid ?? FieldControl.Of(this)?.Invalid ?? false;
 
-    bool ReadOnly => IsReadOnly ?? FieldControl.Of(this)?.IsReadOnly ?? false;
+    bool ReadOnly => IsReadOnly ?? FieldControl.ReadOnlyOf(this);
 
     /// <summary>不能打开、不能改：不可用或只读。</summary>
     bool Locked => !Enabled || ReadOnly;

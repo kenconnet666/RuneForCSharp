@@ -80,7 +80,7 @@ public abstract class TextInputBase : TextBox, IFieldControl
     internal bool Invalid => IsInvalid ?? Field.Of(this)?.Invalid ?? false;
 
     /// <summary>只读：自己写了的优先，其次所在字段的。</summary>
-    internal bool ReadOnly => IsSet(IsReadOnlyProperty) ? IsReadOnly : Field.Of(this)?.IsReadOnly ?? false;
+    internal bool ReadOnly => IsSet(IsReadOnlyProperty) ? IsReadOnly : Field.ReadOnlyOf(this);
 
     /// <summary>可以编辑（可用、不只读）：清空按钮只在这时出现。</summary>
     protected bool Editable => IsEffectivelyEnabled && !ReadOnly;
@@ -88,7 +88,18 @@ public abstract class TextInputBase : TextBox, IFieldControl
     /// <inheritdoc />
     protected override Type StyleKeyOverride => GetType();
 
-    void IFieldControl.FieldChanged() => Sync();
+    void IFieldControl.FieldChanged()
+    {
+        ApplyConstraints(Field.ConstraintsOf(this));
+        Sync();
+    }
+
+    /// <summary>
+    /// 表单模型的约束落到控件上（上游 schema 推出的 maxlength、min / max）：用样式优先级写，控件上自己写了的照样优先。
+    /// </summary>
+    /// <param name="constraints">所在字段的约束。</param>
+    private protected virtual void ApplyConstraints(FieldConstraints constraints) =>
+        SetValue(MaxLengthProperty, constraints.MaxLength ?? 0, global::Avalonia.Data.BindingPriority.Style);
 
     /// <inheritdoc />
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)

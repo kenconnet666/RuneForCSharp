@@ -143,7 +143,7 @@ public class Slider : FrameworkElement, IFieldControl
 
     internal bool IsRange => Range is not null;
 
-    internal bool ReadOnly => IsReadOnly ?? Field.Of(this)?.IsReadOnly ?? false;
+    internal bool ReadOnly => IsReadOnly ?? Field.ReadOnlyOf(this);
 
     internal bool Vertical => Orientation.Value == "vertical";
 

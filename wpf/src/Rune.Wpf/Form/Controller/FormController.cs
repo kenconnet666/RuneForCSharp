@@ -237,13 +237,39 @@ public static class FormController
         property.SetValue(parent, Convert(value, property.PropertyType));
     }
 
-    static object? Convert(object? value, Type type)
+    /// <summary>
+    /// 把值转成 type：数字之间、文字与数字、枚举按值转；集合转成 List&lt;元素&gt; 或数组（复选组给的是只读列表，模型是 List）；
+    /// null 给不可空的值类型时是它的默认值（勾选框的 IsChecked）。
+    /// </summary>
+    internal static object? Convert(object? value, Type type)
     {
-        if (value is null || type.IsInstanceOfType(value)) return value;
+        if (value is null) return type.IsValueType && Nullable.GetUnderlyingType(type) is null ? Activator.CreateInstance(type) : null;
+        if (type.IsInstanceOfType(value)) return value;
         var target = Nullable.GetUnderlyingType(type) ?? type;
         if (value is string text && text.Length == 0 && target != typeof(string)) return null;
+        if (value is IEnumerable items and not string && ElementType(target) is { } element)
+        {
+            var list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(element))!;
+            foreach (var item in items) list.Add(Convert(item, element));
+            if (!target.IsArray) return list;
+            var array = System.Array.CreateInstance(element, list.Count);
+            list.CopyTo(array, 0);
+            return array;
+        }
         return target.IsEnum ? Enum.Parse(target, value.ToString()!) : System.Convert.ChangeType(value, target, CultureInfo.InvariantCulture);
     }
+
+    /// <summary>List&lt;T&gt; 能赋给的集合类型（数组、List、IList、IReadOnlyList、IEnumerable…）的元素类型。</summary>
+    static Type? ElementType(Type type)
+    {
+        if (type.IsArray) return type.GetElementType();
+        if (!type.IsGenericType || type.GetGenericArguments() is not [var element]) return null;
+        return type.IsAssignableFrom(typeof(List<>).MakeGenericType(element)) ? element : null;
+    }
+
+    /// <summary>两个值相同：Equals，或者是元素逐个相同的集合（控件与模型的列表常是不同的实例）。</summary>
+    internal static bool SameValue(object? a, object? b) =>
+        Equals(a, b) || a is IEnumerable left and not string && b is IEnumerable right and not string && left.Cast<object?>().SequenceEqual(right.Cast<object?>());
 
     /// <summary>空值：null、空字符串、空集合（必填的判断）。</summary>
     /// <param name="value">值。</param>

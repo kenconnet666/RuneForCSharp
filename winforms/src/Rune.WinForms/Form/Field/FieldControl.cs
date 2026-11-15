@@ -14,7 +14,10 @@ namespace Rune.WinForms;
 /// 不可用写 Enabled（里面一起不可用，标签变淡）。
 /// 标签默认在上方，竖排间距 space.xs；<see cref="LabelPlacement"/> 为 start 时标签一列（<see cref="LabelWidth"/>，默认 8em；
 /// 文字默认贴着控件右对齐）、控件一列，列距 space.md，标签与控件第一行文字的基线对齐。<see cref="IsLabelHidden"/> 时标签只给读屏、不占位置。
-/// 说明与错误是 sm 字号（muted；错误是 dangerText，前面有警示图标）。说明、错误是文字（上游可以是任意内容）。表单（Form）、字段布局的统一设置以后做。
+/// 说明与错误是 sm 字号（muted；错误是 dangerText，前面有警示图标）。说明、错误是文字（上游可以是任意内容）。
+/// 在 <see cref="FormControl"/> 里写了 <see cref="Path"/> 时（上游的 name）：错误取自表单控制器（何时显示见 FormController）、必填默认按模型的校验特性，
+/// 焦点离开字段时报告失焦，并登记标签给错误汇总；里面只有一个控件、控件上没写值时自动双向绑定这个字段（<see cref="BoundProperty"/>）。
+/// 标签布局与只读没写时用外层 FormControl 的。
 /// </summary>
 [ToolboxItem(true)]
 [DefaultProperty(nameof(Label))]
@@ -27,6 +30,10 @@ public class FieldControl : Panel
     readonly IconControl errorIcon = new() { Data = Lucide.CircleExclamationPoint, IconSize = TextSize.Sm, Tone = TextTone.Danger };
     readonly TextControl errorText = new() { TextSize = TextSize.Sm, Tone = TextTone.Danger };
     readonly FieldEngine engine;
+    FormControl? form;
+    IFormController? controller;
+    IDisposable? registration;
+    FieldBinding? bound;
 
     /// <summary>新建：标签在上方。</summary>
     public FieldControl()
@@ -38,6 +45,21 @@ public class FieldControl : Panel
         Controls.AddRange([label, description, error]);
         Sync();
     }
+
+    /// <summary>表单里的字段路径（点连接：Email、Address.City、Items.0.Name）。</summary>
+    [Category("Data")]
+    [Description("表单里的字段路径（点连接：Email、Address.City）。")]
+    [DefaultValue(null)]
+    public string? Path { get; set { field = value; Connect(); } }
+
+    /// <summary>
+    /// 自动绑定时写控件的哪个属性；不写时取控件有 XxxChanged 事件的 Value、IsChecked、Values、Text 里第一个
+    /// （文字框、选择框是 Value，单个勾选框、开关是 IsChecked）。
+    /// </summary>
+    [Category("Data")]
+    [Description("自动绑定时写控件的哪个属性；空着时取 Value、IsChecked、Values、Text 里第一个有变化事件的。")]
+    [DefaultValue(null)]
+    public string? BoundProperty { get; set { field = value; Connect(); } }
 
     /// <summary>标签。</summary>
     [Category("Appearance")]
@@ -63,19 +85,19 @@ public class FieldControl : Panel
     [DefaultValue(null)]
     public bool? IsInvalid { get; set { field = value; Sync(); } }
 
-    /// <summary>必填：标签后加星号。</summary>
+    /// <summary>必填：标签后加星号；不写时在表单里按模型的校验特性（[Required]）。</summary>
     [Category("Behavior")]
-    [Description("必填：标签后加星号。")]
-    [DefaultValue(false)]
-    public bool IsRequired { get; set { field = value; Sync(); } }
+    [Description("必填：标签后加星号；空着时在表单里按模型的校验特性。")]
+    [DefaultValue(null)]
+    public bool? IsRequired { get; set { field = value; Sync(); } }
 
-    /// <summary>只读：交给里面的控件。</summary>
+    /// <summary>只读：交给里面的控件；不写时用所在表单的。</summary>
     [Category("Behavior")]
-    [Description("只读：交给里面的控件。")]
-    [DefaultValue(false)]
-    public bool IsReadOnly { get; set { field = value; Sync(); } }
+    [Description("只读：交给里面的控件；空着时用所在表单的。")]
+    [DefaultValue(null)]
+    public bool? IsReadOnly { get; set { field = value; Sync(); } }
 
-    /// <summary>标签放在哪；默认上方。</summary>
+    /// <summary>标签放在哪；不写时用所在表单的，默认上方。</summary>
     [Category("Layout")]
     [Description("标签放在哪：top（默认）、start。")]
     public FieldLabelPlacement LabelPlacement { get; set { field = value; Sync(); } }
@@ -132,14 +154,34 @@ public class FieldControl : Panel
     public override LayoutEngine LayoutEngine => engine;
 
     /// <summary>出错：写了 IsInvalid 按它，否则有错误就算。</summary>
-    internal bool Invalid => IsInvalid ?? HasText(Error);
+    internal bool Invalid => IsInvalid ?? HasText(Message);
 
-    bool ShowsError => HasText(Error) && IsInvalid != false;
+    /// <summary>必填：写了 IsRequired 按它，否则按表单的约束。</summary>
+    internal bool Required => IsRequired ?? Constraints.Required;
 
-    bool Start => LabelPlacement == FieldLabelPlacement.Start && !IsLabelHidden;
+    /// <summary>只读：写了 IsReadOnly 按它，否则按所在的表单。</summary>
+    internal bool ReadOnly => IsReadOnly ?? form?.IsReadOnly ?? false;
+
+    /// <summary>表单从模型的校验特性推出的约束；不在表单里或没写 Path 时为空。</summary>
+    internal FieldConstraints Constraints => Path is { } path && controller is not null ? controller.Constraints(path) : NoConstraints;
+
+    static readonly FieldConstraints NoConstraints = new();
+
+    /// <summary>显示的错误：写了 Error 用它，否则是表单里这个字段该显示的错误。</summary>
+    string? Message => HasText(Error) ? Error : Path is { } path ? controller?.VisibleError(path) : null;
+
+    bool ShowsError => HasText(Message) && IsInvalid != false;
+
+    FieldLabelPlacement Placement => LabelPlacement.Value is not null ? LabelPlacement : form?.LabelPlacement ?? default;
+
+    FieldLabelAlign Align => LabelAlign.Value is not null ? LabelAlign : form?.LabelAlign ?? default;
+
+    int? ColumnWidth => LabelWidth ?? form?.LabelWidth;
+
+    bool Start => Placement == FieldLabelPlacement.Start && !IsLabelHidden;
 
     /// <summary>读屏的帮助文字：说明与（显示着的）错误。</summary>
-    internal string? HelpText => string.Join(" ", new[] { Description, ShowsError ? Error : null }.Where(HasText)) is { Length: > 0 } text ? text : null;
+    internal string? HelpText => string.Join(" ", new[] { Description, ShowsError ? Message : null }.Where(HasText)) is { Length: > 0 } text ? text : null;
 
     /// <summary>标签、说明、错误部件（测试用）。</summary>
     internal (FieldLabelControl Label, TextControl Description, FlexControl Error) Parts => (label, description, error);
@@ -187,15 +229,72 @@ public class FieldControl : Panel
         return null;
     }
 
+    /// <summary>控件的只读：所在字段的，不在字段里时所在表单的。</summary>
+    internal static bool ReadOnlyOf(Control control) => Of(control)?.ReadOnly ?? FormControl.Of(control)?.IsReadOnly ?? false;
+
+    /// <summary>控件所在字段的约束（输入框的最大长度、数字字段的范围）；不在字段里时为空。</summary>
+    internal static FieldConstraints ConstraintsOf(Control control) => Of(control)?.Constraints ?? NoConstraints;
+
+    /// <summary>
+    /// 接上（或断开）所在的表单：订阅控制器的变化、登记标签与聚焦、绑定唯一的控件。
+    /// 表单、路径、控件、标签变了，或字段换了位置时调用（FormControl 加进子控件、换控制器时也会调）。
+    /// </summary>
+    internal void Connect()
+    {
+        form = FormControl.Of(this);
+        var next = Path is not null ? form?.Controller : null;
+        if (next != controller)
+        {
+            if (controller is not null) controller.Changed -= OnFormChanged;
+            controller = next;
+            if (controller is not null) controller.Changed += OnFormChanged;
+        }
+        registration?.Dispose();
+        registration = controller is not null && Path is { } path
+            ? controller.Register(path, new FormFieldInfo(Label ?? path, () => { if (Content is { } content) FocusControl(content); }))
+            : null;
+        var previous = bound;
+        bound?.Dispose();
+        bound = controller is not null && Path is { } bindPath && FieldControls() is [Control sole] ? FieldBinding.Create(sole, BoundProperty, controller, bindPath, previous) : null;
+        Sync();
+    }
+
+    void OnFormChanged(object? sender, EventArgs e)
+    {
+        bound?.Pull();
+        Sync();
+    }
+
+    /// <inheritdoc />
+    protected override void OnParentChanged(EventArgs e)
+    {
+        base.OnParentChanged(e);
+        Connect();
+    }
+
+    /// <summary>外层的面板后来才放进表单时，ParentChanged 不会到这里：建句柄（显示出来）时再接一次。</summary>
+    protected override void OnHandleCreated(EventArgs e)
+    {
+        base.OnHandleCreated(e);
+        if (FormControl.Of(this) != form) Connect();
+    }
+
+    /// <summary>焦点离开整个字段（不是在字段内部移动）时报告失焦。</summary>
+    protected override void OnLeave(EventArgs e)
+    {
+        base.OnLeave(e);
+        if (Path is { } path) controller?.Blur(path);
+    }
+
     /// <summary>各部分的内容与显示，再让里面的控件跟上（出错、必填、只读、名称、帮助文字）。</summary>
-    void Sync()
+    internal void Sync()
     {
         label.Text = Label ?? "";
-        label.IsRequired = IsRequired;
+        label.IsRequired = Required;
         label.Visible = HasText(Label) && !IsLabelHidden;
         description.Text = Description ?? "";
         description.Visible = HasText(Description);
-        errorText.Text = Error ?? "";
+        errorText.Text = Message ?? "";
         error.Visible = ShowsError;
         var controls = FieldControls();
         label.Target = controls.FirstOrDefault() as Control;
@@ -208,14 +307,14 @@ public class FieldControl : Panel
     protected override void OnControlAdded(ControlEventArgs e)
     {
         base.OnControlAdded(e);
-        if (e.Control != label && e.Control != description && e.Control != error) Sync();
+        if (e.Control != label && e.Control != description && e.Control != error) Connect();
     }
 
     /// <inheritdoc />
     protected override void OnControlRemoved(ControlEventArgs e)
     {
         base.OnControlRemoved(e);
-        Sync();
+        Connect();
     }
 
     /// <inheritdoc />
@@ -254,7 +353,7 @@ public class FieldControl : Panel
 
         int Gap => (int)MathF.Round(Tokens.Space.Xs * Em);
 
-        int LabelColumn => owner.LabelWidth is { } width ? owner.LogicalToDeviceUnits(width) : (int)MathF.Round(8 * Em);
+        int LabelColumn => owner.ColumnWidth is { } width ? owner.LogicalToDeviceUnits(width) : (int)MathF.Round(8 * Em);
 
         int Column => owner.Start ? LabelColumn + (int)MathF.Round(Tokens.Space.Md * Em) : 0;
 
@@ -310,7 +409,7 @@ public class FieldControl : Panel
             {
                 var size = owner.label.GetPreferredSize(new Size(LabelColumn, 0));
                 var labelWidth = Math.Min(LabelColumn, size.Width);
-                var labelX = owner.LabelAlign == FieldLabelAlign.Start ? 0 : LabelColumn - labelWidth;
+                var labelX = owner.Align == FieldLabelAlign.Start ? 0 : LabelColumn - labelWidth;
                 var top = owner.Content is { } content && FirstBaseline(content) is { } target && ((IBaseline)owner.label).Baseline is { } own ? Math.Max(0, content.Top - area.Y + target - own) : 0;
                 owner.label.Bounds = Place(labelX, top, labelWidth, size.Height);
             }
@@ -319,6 +418,80 @@ public class FieldControl : Panel
             Rectangle Place(int left, int top, int w, int h) => new(rtl ? area.Right - left - w : area.X + left, area.Y + top, w, h);
         }
     }
+}
+
+/// <summary>
+/// 字段与唯一控件的双向绑定（反射：属性 X 加事件 XChanged）：表单的值变了写到控件，控件的值变了写回表单。
+/// WinForms 看不出控件上的值是不是使用方写的：和新建的同类控件比，不同就算写了、不接管（同上游"控件上没写值时"）。
+/// </summary>
+sealed class FieldBinding : IDisposable
+{
+    static readonly string[] Candidates = ["Value", "IsChecked", "Values", "Text"];
+    static readonly Dictionary<(Type, string), object?> Defaults = [];
+
+    readonly Control control;
+    readonly System.Reflection.PropertyInfo property;
+    readonly System.Reflection.EventInfo changed;
+    readonly IFormController form;
+    readonly string path;
+    readonly EventHandler handler;
+    bool pulling;
+
+    FieldBinding(Control control, System.Reflection.PropertyInfo property, System.Reflection.EventInfo changed, IFormController form, string path)
+    {
+        this.control = control;
+        this.property = property;
+        this.changed = changed;
+        this.form = form;
+        this.path = path;
+        handler = OnControlChanged;
+        changed.AddEventHandler(control, handler);
+        Pull();
+    }
+
+    /// <summary>找到要绑定的属性并接上；previous 是上一次的绑定（同一个控件、同一个属性时，控件上的值是自己写的，照样接管）。</summary>
+    internal static FieldBinding? Create(Control control, string? name, IFormController form, string path, FieldBinding? previous)
+    {
+        var type = control.GetType();
+        foreach (var candidate in name is not null ? [name] : Candidates)
+        {
+            if (type.GetProperty(candidate) is not { CanRead: true, CanWrite: true } property || type.GetEvent(candidate + "Changed") is not { } changed) continue;
+            var ours = previous is not null && previous.control == control && previous.property == property;
+            return ours || FormController.SameValue(property.GetValue(control), DefaultOf(type, property)) ? new FieldBinding(control, property, changed, form, path) : null;
+        }
+        return null;
+    }
+
+    static object? DefaultOf(Type type, System.Reflection.PropertyInfo property)
+    {
+        if (Defaults.TryGetValue((type, property.Name), out var value)) return value;
+        using var fresh = (Control)Activator.CreateInstance(type)!;
+        return Defaults[(type, property.Name)] = property.GetValue(fresh);
+    }
+
+    /// <summary>表单的值写到控件（类型不同时按控件属性的类型转换，值相同时不写）。</summary>
+    internal void Pull()
+    {
+        var type = property.PropertyType;
+        var value = FormController.Convert(form.GetValue(path), type) ?? (type == typeof(string) ? "" : null);
+        if (FormController.SameValue(value, property.GetValue(control))) return;
+        pulling = true;
+        try
+        {
+            property.SetValue(control, value);
+        }
+        finally
+        {
+            pulling = false;
+        }
+    }
+
+    void OnControlChanged(object? sender, EventArgs e)
+    {
+        if (!pulling) form.SetValue(path, property.GetValue(control));
+    }
+
+    public void Dispose() => changed.RemoveEventHandler(control, handler);
 }
 
 /// <summary>接入 <see cref="FieldControl"/> 的控件：字段的状态变了时跟上。</summary>

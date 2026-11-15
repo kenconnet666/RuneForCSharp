@@ -84,12 +84,24 @@ public class NumberFieldControl : TextInputControl
     /// <summary>最小值。</summary>
     [Category("Behavior")]
     [DefaultValue(null)]
-    public decimal? Min { get; set { field = value; Sync(); } }
+    public decimal? Min { get => min ?? constraints.Min; set { min = value; Sync(); } }
 
     /// <summary>最大值。</summary>
     [Category("Behavior")]
     [DefaultValue(null)]
-    public decimal? Max { get; set { field = value; Sync(); } }
+    public decimal? Max { get => max ?? constraints.Max; set { max = value; Sync(); } }
+
+    // 使用方写的范围；没写时用所在字段的约束（模型上的 [Range]）
+    decimal? min;
+    decimal? max;
+    (decimal? Min, decimal? Max) constraints;
+
+    /// <inheritdoc />
+    private protected override void ApplyConstraints(FieldConstraints constraints)
+    {
+        base.ApplyConstraints(constraints);
+        this.constraints = ((decimal?)constraints.Min, (decimal?)constraints.Max);
+    }
 
     /// <summary>步长，默认 1；写回时对齐到 Min + n × Step。</summary>
     [Category("Behavior")]

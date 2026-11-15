@@ -146,10 +146,10 @@ public class Listbox : Control, IFieldControl
 
     bool Multiple => SelectionMode == SelectionMode.Multiple;
 
-    bool Required => IsRequired ?? Field.Of(this)?.IsRequired ?? false;
+    bool Required => IsRequired ?? Field.Of(this)?.Required ?? false;
 
     // 只读时键盘、点选都不响应（上游 keydown 里同不可用一起返回），只看
-    bool ReadOnly => IsReadOnly ?? Field.Of(this)?.IsReadOnly ?? false;
+    bool ReadOnly => IsReadOnly ?? Field.ReadOnlyOf(this);
 
     void IFieldControl.FieldChanged()
     {

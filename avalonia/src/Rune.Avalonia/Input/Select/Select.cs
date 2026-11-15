@@ -263,9 +263,9 @@ public class Select : TemplatedControl, IFieldControl
 
     bool Invalid => IsInvalid ?? Field.Of(this)?.Invalid ?? false;
 
-    bool Required => IsRequired ?? Field.Of(this)?.IsRequired ?? false;
+    bool Required => IsRequired ?? Field.Of(this)?.Required ?? false;
 
-    bool ReadOnly => IsReadOnly ?? Field.Of(this)?.IsReadOnly ?? false;
+    bool ReadOnly => IsReadOnly ?? Field.ReadOnlyOf(this);
 
     /// <summary>不能打开、不能改：不可用或只读。</summary>
     bool Locked => !IsEffectivelyEnabled || ReadOnly;

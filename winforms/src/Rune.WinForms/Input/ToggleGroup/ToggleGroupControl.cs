@@ -155,10 +155,10 @@ public class ToggleGroupControl : FlexControl, IFieldControl
     internal bool Sliding => !Multiple;
 
     /// <summary>必选：自己写了的优先，其次所在字段的。</summary>
-    internal bool Required => IsRequired ?? FieldControl.Of(this)?.IsRequired ?? false;
+    internal bool Required => IsRequired ?? FieldControl.Of(this)?.Required ?? false;
 
     /// <summary>只读：自己写了的优先，其次所在字段的。</summary>
-    internal bool ReadOnly => IsReadOnly ?? FieldControl.Of(this)?.IsReadOnly ?? false;
+    internal bool ReadOnly => IsReadOnly ?? FieldControl.ReadOnlyOf(this);
 
     /// <summary>选中的值（单选时最多一个；单选的空字符串算没有选中）。</summary>
     [Browsable(false)]

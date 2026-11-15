@@ -304,6 +304,14 @@ public class NumberField : TextInputBase
     protected override AutomationPeer OnCreateAutomationPeer() => new NumberFieldPeer(this);
 
     /// <summary>读屏：spinbutton（数值、最小、最大、步长）。</summary>
+    /// <inheritdoc />
+    private protected override void ApplyConstraints(FieldConstraints constraints)
+    {
+        base.ApplyConstraints(constraints);
+        Constrain(MinProperty, (decimal?)constraints.Min);
+        Constrain(MaxProperty, (decimal?)constraints.Max);
+    }
+
     sealed class NumberFieldPeer(NumberField owner) : TextInputPeer(owner), IRangeValueProvider
     {
         protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Spinner;

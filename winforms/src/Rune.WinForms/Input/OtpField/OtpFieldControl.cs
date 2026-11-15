@@ -149,7 +149,7 @@ public class OtpFieldControl : Control, IFieldControl, IScopeAware
 
     internal bool Invalid => IsInvalid ?? FieldControl.Of(this)?.Invalid ?? false;
 
-    internal bool ReadOnly => IsReadOnly ?? FieldControl.Of(this)?.IsReadOnly ?? false;
+    internal bool ReadOnly => IsReadOnly ?? FieldControl.ReadOnlyOf(this);
 
     /// <summary>真正的输入框（测试用）。</summary>
     internal TextBox Input => input;

@@ -101,7 +101,7 @@ public class NativeSelect : ComboBox, IFieldControl
 
     bool Invalid => IsInvalid ?? Field.Of(this)?.Invalid ?? false;
 
-    bool ReadOnly => IsReadOnly ?? Field.Of(this)?.IsReadOnly ?? false;
+    bool ReadOnly => IsReadOnly ?? Field.ReadOnlyOf(this);
 
     void IFieldControl.FieldChanged() => Sync();
 

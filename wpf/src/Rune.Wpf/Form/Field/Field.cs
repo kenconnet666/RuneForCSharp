@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
@@ -20,7 +21,9 @@ namespace Rune.Wpf;
 /// 标签默认在上方，竖排间距 space.xs；<see cref="LabelPlacement"/> 为 start 时标签一列（<see cref="LabelWidth"/>，默认 8em；
 /// 文字默认贴着控件右对齐）、控件一列，列距 space.md，标签与控件第一行文字的基线对齐。<see cref="IsLabelHidden"/> 时标签只给读屏、不占位置。
 /// 说明与错误是 sm 字号、行高 normal（muted；错误是 dangerText，前面有警示图标）。说明、错误是文字（上游可以是任意内容）。
-/// 部件样式键见 <see cref="FieldParts"/>，默认外观在 Field.xaml。表单（Form）、字段布局的统一设置以后做。
+/// 在 <see cref="Form"/> 里写了 <see cref="Path"/> 时（上游的 name）：错误取自表单控制器（何时显示见 FormController）、必填默认按模型的校验特性，
+/// 焦点离开字段时报告失焦，并登记标签给错误汇总；里面只有一个控件、控件上没写值时自动双向绑定这个字段（<see cref="BoundProperty"/>）。
+/// 标签布局与只读从外层的 Form 继承，字段上写了的优先。部件样式键见 <see cref="FieldParts"/>，默认外观在 Field.xaml。
 /// </summary>
 [ContentProperty(nameof(Content))]
 public class Field : Control
@@ -28,6 +31,17 @@ public class Field : Control
     /// <summary>所在的字段（继承给里面的元素，控件从它读字段的状态；变了时通知接入的控件）。</summary>
     internal static readonly DependencyProperty OwnerProperty = DependencyProperty.RegisterAttached(
         "Owner", typeof(Field), typeof(Field), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits, (d, _) => (d as IFieldControl)?.FieldChanged()));
+
+    /// <summary>表单里的字段路径（点连接：Email、Address.City、Items.0.Name）。</summary>
+    public static readonly DependencyProperty PathProperty = DependencyProperty.Register(
+        nameof(Path), typeof(string), typeof(Field), new PropertyMetadata(null, (d, _) => ((Field)d).Connect()));
+
+    /// <summary>
+    /// 自动绑定时写控件的哪个属性；不写时取控件默认双向绑定的 Value、IsChecked、Values、Text 里第一个
+    /// （TextField、Select 是 Value，单个 Checkbox、Switch 是 IsChecked，TagsInput 是 Values）。
+    /// </summary>
+    public static readonly DependencyProperty BoundPropertyProperty = DependencyProperty.Register(
+        nameof(BoundProperty), typeof(string), typeof(Field), new PropertyMetadata(null, (d, _) => ((Field)d).Connect()));
 
     /// <summary>标签。</summary>
     public static readonly DependencyProperty LabelProperty = Register(nameof(Label), typeof(object), null);
@@ -41,20 +55,20 @@ public class Field : Control
     /// <summary>校验未通过；不写时有错误就算出错，写 false 时不显示错误。</summary>
     public static readonly DependencyProperty IsInvalidProperty = Register(nameof(IsInvalid), typeof(bool?), null);
 
-    /// <summary>必填：标签后加星号，控件读屏念"必填"。</summary>
-    public static readonly DependencyProperty IsRequiredProperty = Register(nameof(IsRequired), typeof(bool), false);
+    /// <summary>必填：标签后加星号，控件读屏念"必填"；不写时在表单里按模型的校验特性（[Required]）。</summary>
+    public static readonly DependencyProperty IsRequiredProperty = Register(nameof(IsRequired), typeof(bool?), null);
 
-    /// <summary>只读：交给里面的控件。</summary>
-    public static readonly DependencyProperty IsReadOnlyProperty = Register(nameof(IsReadOnly), typeof(bool), false);
+    /// <summary>只读：交给里面的控件；从外层的 Form、Field 继承（不在字段里的控件也跟着表单只读）。</summary>
+    public static readonly DependencyProperty IsReadOnlyProperty = Inherited("IsReadOnly", typeof(bool), false);
 
-    /// <summary>标签放在哪；默认上方。</summary>
-    public static readonly DependencyProperty LabelPlacementProperty = Register(nameof(LabelPlacement), typeof(FieldLabelPlacement), default(FieldLabelPlacement));
+    /// <summary>标签放在哪；默认上方。从外层的 Form 继承。</summary>
+    public static readonly DependencyProperty LabelPlacementProperty = Inherited("LabelPlacement", typeof(FieldLabelPlacement), default(FieldLabelPlacement));
 
-    /// <summary>标签在起始边时标签列的宽度（设备无关像素）；不写（NaN）时 8em。</summary>
-    public static readonly DependencyProperty LabelWidthProperty = Register(nameof(LabelWidth), typeof(double), double.NaN);
+    /// <summary>标签在起始边时标签列的宽度（设备无关像素）；不写（NaN）时 8em。从外层的 Form 继承。</summary>
+    public static readonly DependencyProperty LabelWidthProperty = Inherited("LabelWidth", typeof(double), double.NaN);
 
-    /// <summary>标签在起始边时文字的对齐；默认 end（贴着控件）。</summary>
-    public static readonly DependencyProperty LabelAlignProperty = Register(nameof(LabelAlign), typeof(FieldLabelAlign), default(FieldLabelAlign));
+    /// <summary>标签在起始边时文字的对齐；默认 end（贴着控件）。从外层的 Form 继承。</summary>
+    public static readonly DependencyProperty LabelAlignProperty = Inherited("LabelAlign", typeof(FieldLabelAlign), default(FieldLabelAlign));
 
     /// <summary>标签只给读屏：视觉上隐藏，仍是控件的名称；不占标签列。</summary>
     public static readonly DependencyProperty IsLabelHiddenProperty = Register(nameof(IsLabelHidden), typeof(bool), false);
@@ -75,8 +89,22 @@ public class Field : Control
     readonly Flex error = new() { Name = "PART_Error" };
     readonly Icon errorIcon = new() { Data = Lucide.CircleExclamationPoint };
 
+    IFormController? form;
+    IDisposable? registration;
+    Bound? bound;
+
     static DependencyProperty Register(string name, Type type, object? fallback) => DependencyProperty.Register(
         name, type, typeof(Field), new FrameworkPropertyMetadata(fallback, FrameworkPropertyMetadataOptions.AffectsMeasure, (d, _) => ((Field)d).Update()));
+
+    /// <summary>
+    /// 继承的属性（注册成附加属性：继承才穿得过中间不认识它的面板）。值传下来时字段更新自己，接入的控件跟上（只读）。
+    /// </summary>
+    static DependencyProperty Inherited(string name, Type type, object? fallback) => DependencyProperty.RegisterAttached(
+        name, type, typeof(Field), new FrameworkPropertyMetadata(fallback, FrameworkPropertyMetadataOptions.Inherits | FrameworkPropertyMetadataOptions.AffectsMeasure, (d, _) =>
+        {
+            if (d is Field field) field.Update();
+            else (d as IFieldControl)?.FieldChanged();
+        }));
 
     static Field()
     {
@@ -102,9 +130,20 @@ public class Field : Control
             AddVisualChild(child);
             AddLogicalChild(child);
         }
-        Loaded += (_, _) => Update();
+        Loaded += (_, _) => Connect();
+        Unloaded += (_, _) => Connect();
+        IsKeyboardFocusWithinChanged += (_, e) =>
+        {
+            if (e.NewValue is false && Path is { } path) form?.Blur(path);
+        };
         Update();
     }
+
+    /// <summary>表单里的字段路径。</summary>
+    public string? Path { get => (string?)GetValue(PathProperty); set => SetValue(PathProperty, value); }
+
+    /// <summary>自动绑定时写控件的哪个属性。</summary>
+    public string? BoundProperty { get => (string?)GetValue(BoundPropertyProperty); set => SetValue(BoundPropertyProperty, value); }
 
     /// <summary>标签。</summary>
     public object? Label { get => GetValue(LabelProperty); set => SetValue(LabelProperty, value); }
@@ -119,7 +158,7 @@ public class Field : Control
     public bool? IsInvalid { get => (bool?)GetValue(IsInvalidProperty); set => SetValue(IsInvalidProperty, value); }
 
     /// <summary>必填。</summary>
-    public bool IsRequired { get => (bool)GetValue(IsRequiredProperty); set => SetValue(IsRequiredProperty, value); }
+    public bool? IsRequired { get => (bool?)GetValue(IsRequiredProperty); set => SetValue(IsRequiredProperty, value); }
 
     /// <summary>只读。</summary>
     public bool IsReadOnly { get => (bool)GetValue(IsReadOnlyProperty); set => SetValue(IsReadOnlyProperty, value); }
@@ -140,9 +179,20 @@ public class Field : Control
     public UIElement? Content { get => (UIElement?)GetValue(ContentProperty); set => SetValue(ContentProperty, value); }
 
     /// <summary>出错：写了 IsInvalid 按它，否则有错误就算。</summary>
-    internal bool Invalid => IsInvalid ?? HasText(Error);
+    internal bool Invalid => IsInvalid ?? HasText(Message);
 
-    bool ShowsError => HasText(Error) && IsInvalid != false;
+    /// <summary>必填：写了 IsRequired 按它，否则按表单的约束。</summary>
+    internal bool Required => IsRequired ?? Constraints.Required;
+
+    /// <summary>表单从模型的校验特性推出的约束；不在表单里或没写 Path 时为空。</summary>
+    internal FieldConstraints Constraints => Path is { } path && form is not null ? form.Constraints(path) : NoConstraints;
+
+    static readonly FieldConstraints NoConstraints = new();
+
+    /// <summary>显示的错误：写了 Error 用它，否则是表单里这个字段该显示的错误。</summary>
+    string? Message => HasText(Error) ? Error : Path is { } path ? form?.VisibleError(path) : null;
+
+    bool ShowsError => HasText(Message) && IsInvalid != false;
 
     bool HasLabel => Label is not null and not "";
 
@@ -152,7 +202,7 @@ public class Field : Control
     internal string? LabelText => PlainText(Label);
 
     /// <summary>读屏的帮助文字：说明与（显示着的）错误。</summary>
-    internal string? HelpText => string.Join(" ", new[] { Description, ShowsError ? Error : null }.Where(HasText)) is { Length: > 0 } text ? text : null;
+    internal string? HelpText => string.Join(" ", new[] { Description, ShowsError ? Message : null }.Where(HasText)) is { Length: > 0 } text ? text : null;
 
     /// <inheritdoc />
     protected override int VisualChildrenCount => Content is null ? 3 : 4;
@@ -178,7 +228,7 @@ public class Field : Control
             field.AddVisualChild(added);
             field.AddLogicalChild(added);
         }
-        field.Update();
+        field.Connect();
     }
 
     /// <summary>里面接入字段的控件（逻辑树深度优先、不进到控件里面）：第一个认领标签。</summary>
@@ -218,6 +268,12 @@ public class Field : Control
     /// <summary>元素所在的字段；不在字段里时为 null。</summary>
     internal static Field? Of(DependencyObject element) => element.GetValue(OwnerProperty) is Field field && field != element ? field : null;
 
+    /// <summary>元素所在字段或表单的只读（IsReadOnly 是继承的：不在字段里的控件也跟着表单只读）。</summary>
+    internal static bool ReadOnlyOf(DependencyObject element) => (bool)element.GetValue(IsReadOnlyProperty);
+
+    /// <summary>控件所在字段的约束（输入框的最大长度、数字字段的范围）；不在字段里时为空。</summary>
+    internal static FieldConstraints ConstraintsOf(DependencyObject element) => Of(element)?.Constraints ?? NoConstraints;
+
     /// <summary>值来自使用方（本地值、样式、绑定），不是属性的默认值：控件上写了的状态优先于字段。</summary>
     internal static bool IsSet(DependencyObject element, DependencyProperty property) =>
         DependencyPropertyHelper.GetValueSource(element, property).BaseValueSource != BaseValueSource.Default;
@@ -226,15 +282,106 @@ public class Field : Control
     void Update()
     {
         label.Content = Label;
-        label.IsRequired = IsRequired;
+        label.IsRequired = Required;
         label.Visibility = HasLabel && !IsLabelHidden ? Visibility.Visible : Visibility.Collapsed;
         description.Text = Description ?? "";
         description.Visibility = HasText(Description) ? Visibility.Visible : Visibility.Collapsed;
-        errorText.Text = Error ?? "";
+        errorText.Text = Message ?? "";
         error.Visibility = ShowsError ? Visibility.Visible : Visibility.Collapsed;
         var controls = Controls();
         label.Target = controls.FirstOrDefault() as UIElement;
         foreach (var control in controls) control.FieldChanged();
+    }
+
+    /// <summary>
+    /// 接上（或断开）所在的表单：订阅控制器的变化、登记标签与聚焦、绑定唯一的控件。
+    /// 只在加载着的时候接：卸下来的字段不再登记，错误汇总里不会留着它。
+    /// </summary>
+    internal void Connect()
+    {
+        var next = IsLoaded && Path is not null ? Form.GetController(this) : null;
+        if (next != form)
+        {
+            if (form is not null) form.Changed -= OnFormChanged;
+            form = next;
+            if (form is not null) form.Changed += OnFormChanged;
+        }
+        registration?.Dispose();
+        registration = form is not null && Path is { } path
+            ? form.Register(path, new FormFieldInfo(LabelText ?? path, () => { if (Content is { } content) FocusControl(content); }))
+            : null;
+        var previous = bound;
+        bound?.Dispose();
+        bound = form is not null && Path is { } bindPath && Controls() is [DependencyObject sole] ? Bound.Create(sole, BoundProperty, form, bindPath, previous) : null;
+        Update();
+    }
+
+    void OnFormChanged(object? sender, EventArgs e)
+    {
+        bound?.Pull();
+        Update();
+    }
+
+    /// <summary>
+    /// 字段与唯一控件的双向绑定：表单的值变了写到控件（SetCurrentValue，不顶掉控件上的样式与绑定），控件的值变了写回表单。
+    /// 控件上已经写了值（本地值、样式或绑定）时不接管，同上游"控件上没写值时"。
+    /// </summary>
+    sealed class Bound : IDisposable
+    {
+        static readonly string[] Candidates = ["Value", "IsChecked", "Values", "Text"];
+
+        readonly DependencyObject control;
+        readonly DependencyPropertyDescriptor property;
+        readonly IFormController form;
+        readonly string path;
+        bool pulling;
+
+        Bound(DependencyObject control, DependencyPropertyDescriptor property, IFormController form, string path)
+        {
+            this.control = control;
+            this.property = property;
+            this.form = form;
+            this.path = path;
+            property.AddValueChanged(control, OnControlChanged);
+            Pull();
+        }
+
+        /// <summary>找到要绑定的属性并接上；previous 是上一次的绑定（同一个控件、同一个属性时，控件上的值是自己写的，照样接管）。</summary>
+        internal static Bound? Create(DependencyObject control, string? name, IFormController form, string path, Bound? previous)
+        {
+            var type = control.GetType();
+            var property = name is not null
+                ? DependencyPropertyDescriptor.FromName(name, type, type)
+                : Candidates.Select(candidate => DependencyPropertyDescriptor.FromName(candidate, type, type))
+                    .FirstOrDefault(found => found?.Metadata is FrameworkPropertyMetadata { BindsTwoWayByDefault: true });
+            if (property is not { IsReadOnly: false }) return null;
+            var ours = previous is not null && previous.control == control && previous.property.DependencyProperty == property.DependencyProperty;
+            return ours || !IsSet(control, property.DependencyProperty) ? new Bound(control, property, form, path) : null;
+        }
+
+        /// <summary>表单的值写到控件（类型不同时按控件属性的类型转换，值相同时不写）。</summary>
+        internal void Pull()
+        {
+            var type = property.PropertyType;
+            var value = FormController.Convert(form.GetValue(path), type) ?? (type == typeof(string) ? "" : null);
+            if (FormController.SameValue(value, control.GetValue(property.DependencyProperty))) return;
+            pulling = true;
+            try
+            {
+                control.SetCurrentValue(property.DependencyProperty, value);
+            }
+            finally
+            {
+                pulling = false;
+            }
+        }
+
+        void OnControlChanged(object? sender, EventArgs e)
+        {
+            if (!pulling) form.SetValue(path, control.GetValue(property.DependencyProperty));
+        }
+
+        public void Dispose() => property.RemoveValueChanged(control, OnControlChanged);
     }
 
     double Em => FontSize;

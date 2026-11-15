@@ -24,13 +24,24 @@ namespace Rune.Avalonia;
 /// 标签默认在上方，竖排间距 space.xs；<see cref="LabelPlacement"/> 为 start 时标签一列（<see cref="LabelWidth"/>，默认 8em；
 /// 文字默认贴着控件右对齐）、控件一列，列距 space.md，标签与控件第一行文字的基线对齐。<see cref="IsLabelHidden"/> 时标签只给读屏、不占位置。
 /// 说明与错误是 sm 字号、行高 normal（muted；错误是 dangerText，前面有警示图标）。说明、错误是文字（上游可以是任意内容）。
-/// 部件：<see cref="FieldParts"/>，默认外观在 FieldParts.axaml。表单（Form）、字段布局的统一设置以后做。
+/// 在 <see cref="Form"/> 里写了 <see cref="Path"/> 时（上游的 name）：错误取自表单控制器（何时显示见 FormController）、必填默认按模型的校验特性，
+/// 焦点离开字段时报告失焦，并登记标签给错误汇总；里面只有一个控件、控件上没写值时自动双向绑定这个字段（<see cref="BoundProperty"/>）。
+/// 标签布局与只读从外层的 Form 继承，字段上写了的优先。部件：<see cref="FieldParts"/>，默认外观在 FieldParts.axaml。
 /// </summary>
 [PseudoClasses(":invalid", ":start", ":label-hidden")]
 public class Field : Control
 {
     /// <summary>所在的字段（继承给里面的元素，控件从它读字段的状态）。</summary>
     internal static readonly AttachedProperty<Field?> OwnerProperty = AvaloniaProperty.RegisterAttached<Field, Control, Field?>("Owner", inherits: true);
+
+    /// <summary>表单里的字段路径（点连接：Email、Address.City、Items.0.Name）。</summary>
+    public static readonly StyledProperty<string?> PathProperty = AvaloniaProperty.Register<Field, string?>(nameof(Path));
+
+    /// <summary>
+    /// 自动绑定时写控件的哪个属性；不写时取控件默认双向绑定的 Value、IsChecked、Values、Text 里第一个
+    /// （TextField、Select 是 Value，单个 Checkbox、Switch 是 IsChecked，TagsInput 是 Values）。
+    /// </summary>
+    public static readonly StyledProperty<string?> BoundPropertyProperty = AvaloniaProperty.Register<Field, string?>(nameof(BoundProperty));
 
     /// <summary>标签。</summary>
     public static readonly StyledProperty<object?> LabelProperty = AvaloniaProperty.Register<Field, object?>(nameof(Label));
@@ -44,20 +55,20 @@ public class Field : Control
     /// <summary>校验未通过；不写时有错误就算出错，写 false 时不显示错误。</summary>
     public static readonly StyledProperty<bool?> IsInvalidProperty = AvaloniaProperty.Register<Field, bool?>(nameof(IsInvalid));
 
-    /// <summary>必填：标签后加星号，控件读屏念"必填"。</summary>
-    public static readonly StyledProperty<bool> IsRequiredProperty = AvaloniaProperty.Register<Field, bool>(nameof(IsRequired));
+    /// <summary>必填：标签后加星号，控件读屏念"必填"；不写时在表单里按模型的校验特性（[Required]）。</summary>
+    public static readonly StyledProperty<bool?> IsRequiredProperty = AvaloniaProperty.Register<Field, bool?>(nameof(IsRequired));
 
     /// <summary>只读：交给里面的控件。</summary>
-    public static readonly StyledProperty<bool> IsReadOnlyProperty = AvaloniaProperty.Register<Field, bool>(nameof(IsReadOnly));
+    public static readonly StyledProperty<bool> IsReadOnlyProperty = AvaloniaProperty.Register<Field, bool>(nameof(IsReadOnly), inherits: true);
 
     /// <summary>标签放在哪；默认上方。</summary>
-    public static readonly StyledProperty<FieldLabelPlacement> LabelPlacementProperty = AvaloniaProperty.Register<Field, FieldLabelPlacement>(nameof(LabelPlacement));
+    public static readonly StyledProperty<FieldLabelPlacement> LabelPlacementProperty = AvaloniaProperty.Register<Field, FieldLabelPlacement>(nameof(LabelPlacement), inherits: true);
 
     /// <summary>标签在起始边时标签列的宽度（设备无关像素）；不写（NaN）时 8em。</summary>
-    public static readonly StyledProperty<double> LabelWidthProperty = AvaloniaProperty.Register<Field, double>(nameof(LabelWidth), double.NaN);
+    public static readonly StyledProperty<double> LabelWidthProperty = AvaloniaProperty.Register<Field, double>(nameof(LabelWidth), double.NaN, inherits: true);
 
     /// <summary>标签在起始边时文字的对齐；默认 end（贴着控件）。</summary>
-    public static readonly StyledProperty<FieldLabelAlign> LabelAlignProperty = AvaloniaProperty.Register<Field, FieldLabelAlign>(nameof(LabelAlign));
+    public static readonly StyledProperty<FieldLabelAlign> LabelAlignProperty = AvaloniaProperty.Register<Field, FieldLabelAlign>(nameof(LabelAlign), inherits: true);
 
     /// <summary>标签只给读屏：视觉上隐藏，仍是控件的名称；不占标签列。</summary>
     public static readonly StyledProperty<bool> IsLabelHiddenProperty = AvaloniaProperty.Register<Field, bool>(nameof(IsLabelHidden));
@@ -74,6 +85,10 @@ public class Field : Control
     readonly Flex error = new() { Name = FieldParts.Error, Gap = Space.Xs, Align = FlexAlign.Start };
     readonly Icon errorIcon = new() { Data = Lucide.CircleExclamationPoint, Tone = TextTone.Danger };
 
+    IFormController? form;
+    IDisposable? registration;
+    Bound? bound;
+
     static Field() => AffectsMeasure<Field>(LabelProperty, DescriptionProperty, ErrorProperty, IsInvalidProperty, LabelPlacementProperty, LabelWidthProperty, IsLabelHiddenProperty, ContentProperty, FontSizeProperty);
 
     /// <summary>新建：标签在上方。</summary>
@@ -85,6 +100,12 @@ public class Field : Control
         VisualChildren.AddRange([label, description, error]);
         Update();
     }
+
+    /// <summary>表单里的字段路径。</summary>
+    public string? Path { get => GetValue(PathProperty); set => SetValue(PathProperty, value); }
+
+    /// <summary>自动绑定时写控件的哪个属性。</summary>
+    public string? BoundProperty { get => GetValue(BoundPropertyProperty); set => SetValue(BoundPropertyProperty, value); }
 
     /// <summary>标签。</summary>
     public object? Label { get => GetValue(LabelProperty); set => SetValue(LabelProperty, value); }
@@ -99,7 +120,7 @@ public class Field : Control
     public bool? IsInvalid { get => GetValue(IsInvalidProperty); set => SetValue(IsInvalidProperty, value); }
 
     /// <summary>必填。</summary>
-    public bool IsRequired { get => GetValue(IsRequiredProperty); set => SetValue(IsRequiredProperty, value); }
+    public bool? IsRequired { get => GetValue(IsRequiredProperty); set => SetValue(IsRequiredProperty, value); }
 
     /// <summary>只读。</summary>
     public bool IsReadOnly { get => GetValue(IsReadOnlyProperty); set => SetValue(IsReadOnlyProperty, value); }
@@ -124,9 +145,20 @@ public class Field : Control
     public double FontSize { get => GetValue(FontSizeProperty); set => SetValue(FontSizeProperty, value); }
 
     /// <summary>出错：写了 IsInvalid 按它，否则有错误就算。</summary>
-    internal bool Invalid => IsInvalid ?? HasText(Error);
+    internal bool Invalid => IsInvalid ?? HasText(Message);
 
-    bool ShowsError => HasText(Error) && IsInvalid != false;
+    /// <summary>必填：写了 IsRequired 按它，否则按表单的约束。</summary>
+    internal bool Required => IsRequired ?? Constraints.Required;
+
+    /// <summary>表单从模型的校验特性推出的约束；不在表单里或没写 Path 时为空。</summary>
+    internal FieldConstraints Constraints => Path is { } path && form is not null ? form.Constraints(path) : NoConstraints;
+
+    static readonly FieldConstraints NoConstraints = new();
+
+    /// <summary>显示的错误：写了 Error 用它，否则是表单里这个字段该显示的错误。</summary>
+    string? Message => HasText(Error) ? Error : Path is { } path ? form?.VisibleError(path) : null;
+
+    bool ShowsError => HasText(Message) && IsInvalid != false;
 
     bool HasLabel => Label is not null and not "";
 
@@ -136,7 +168,7 @@ public class Field : Control
     internal string? LabelText => PlainText(Label);
 
     /// <summary>读屏的帮助文字：说明与（显示着的）错误。</summary>
-    internal string? HelpText => string.Join(" ", new[] { Description, ShowsError ? Error : null }.Where(HasText)) is { Length: > 0 } text ? text : null;
+    internal string? HelpText => string.Join(" ", new[] { Description, ShowsError ? Message : null }.Where(HasText)) is { Length: > 0 } text ? text : null;
 
     /// <summary>里面接入字段的控件（深度优先、不进到控件里面）：第一个认领标签。</summary>
     List<IFieldControl> Controls()
@@ -176,6 +208,12 @@ public class Field : Control
 
     internal static Field? Of(AvaloniaObject element) => element.GetValue(OwnerProperty) is { } field && field != element ? field : null;
 
+    /// <summary>元素所在字段或表单的只读（IsReadOnly 是继承的：不在字段里的控件也跟着表单只读）。</summary>
+    internal static bool ReadOnlyOf(AvaloniaObject element) => element.GetValue(IsReadOnlyProperty);
+
+    /// <summary>控件所在字段的约束（输入框的最大长度、数字字段的范围）；不在字段里时为空。</summary>
+    internal static FieldConstraints ConstraintsOf(AvaloniaObject element) => Of(element)?.Constraints ?? NoConstraints;
+
     /// <inheritdoc />
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
@@ -193,6 +231,11 @@ public class Field : Control
                 VisualChildren.Insert(1, added);
             }
         }
+        if (change.Property == Form.ControllerProperty || change.Property == PathProperty || change.Property == LabelProperty || change.Property == ContentProperty
+            || change.Property == BoundPropertyProperty)
+            Connect();
+        else if (change.Property == IsKeyboardFocusWithinProperty && change.GetNewValue<bool>() is false && Path is { } path)
+            form?.Blur(path);
         if (change.Property == ContentProperty || change.Property == LabelProperty || change.Property == DescriptionProperty || change.Property == ErrorProperty
             || change.Property == IsInvalidProperty || change.Property == IsRequiredProperty || change.Property == IsReadOnlyProperty
             || change.Property == LabelPlacementProperty || change.Property == IsLabelHiddenProperty)
@@ -203,11 +246,11 @@ public class Field : Control
     void Update()
     {
         label.Content = Label;
-        label.IsRequired = IsRequired;
+        label.IsRequired = Required;
         label.IsVisible = HasLabel && !IsLabelHidden;
         description.Text = Description;
         description.IsVisible = HasText(Description);
-        errorText.Text = Error;
+        errorText.Text = Message;
         error.IsVisible = ShowsError;
         PseudoClasses.Set(":invalid", Invalid);
         PseudoClasses.Set(":start", Start);
@@ -217,11 +260,109 @@ public class Field : Control
         foreach (var control in controls) control.FieldChanged();
     }
 
-    /// <summary>子元素加进逻辑树时（项、内容换了）：让控件跟上。</summary>
+    /// <summary>子元素加进逻辑树时（项、内容换了）：让控件跟上；自己加进来时接上表单。</summary>
     protected override void OnAttachedToLogicalTree(LogicalTreeAttachmentEventArgs e)
     {
         base.OnAttachedToLogicalTree(e);
+        Connect();
         Update();
+    }
+
+    /// <inheritdoc />
+    protected override void OnDetachedFromLogicalTree(LogicalTreeAttachmentEventArgs e)
+    {
+        base.OnDetachedFromLogicalTree(e);
+        Connect();
+    }
+
+    /// <summary>
+    /// 接上（或断开）所在的表单：订阅控制器的变化、登记标签与聚焦、绑定唯一的控件。
+    /// 只在挂在逻辑树上时接：从树上拿下来的字段不再登记，错误汇总里不会留着它。
+    /// </summary>
+    void Connect()
+    {
+        var next = ((ILogical)this).IsAttachedToLogicalTree && Path is not null ? Form.GetController(this) : null;
+        if (next != form)
+        {
+            if (form is not null) form.Changed -= OnFormChanged;
+            form = next;
+            if (form is not null) form.Changed += OnFormChanged;
+        }
+        registration?.Dispose();
+        registration = form is not null && Path is { } path
+            ? form.Register(path, new FormFieldInfo(LabelText ?? path, () => { if (Content is { } content) FocusControl(content); }))
+            : null;
+        var previous = bound;
+        bound?.Dispose();
+        bound = form is not null && Path is { } bindPath && Controls() is [Control sole] ? Bound.Create(sole, BoundProperty, form, bindPath, previous) : null;
+        Update();
+    }
+
+    void OnFormChanged(object? sender, EventArgs e)
+    {
+        bound?.Pull();
+        Update();
+    }
+
+    /// <summary>
+    /// 字段与唯一控件的双向绑定：表单的值变了写到控件（SetCurrentValue，不顶掉控件上的样式与绑定），控件的值变了写回表单。
+    /// 控件上已经写了值（本地值或绑定）时不接管，同上游"控件上没写值时"。
+    /// </summary>
+    sealed class Bound : IDisposable
+    {
+        static readonly string[] Candidates = ["Value", "IsChecked", "Values", "Text"];
+
+        readonly Control control;
+        readonly AvaloniaProperty property;
+        readonly IFormController form;
+        readonly string path;
+        bool pulling;
+
+        Bound(Control control, AvaloniaProperty property, IFormController form, string path)
+        {
+            this.control = control;
+            this.property = property;
+            this.form = form;
+            this.path = path;
+            control.PropertyChanged += OnControlChanged;
+            Pull();
+        }
+
+        /// <summary>找到要绑定的属性并接上；previous 是上一次的绑定（同一个控件、同一个属性时，控件上的值是自己写的，照样接管）。</summary>
+        internal static Bound? Create(Control control, string? name, IFormController form, string path, Bound? previous)
+        {
+            var registry = AvaloniaPropertyRegistry.Instance;
+            var property = name is not null
+                ? registry.FindRegistered(control, name)
+                : Candidates.Select(candidate => registry.FindRegistered(control, candidate))
+                    .FirstOrDefault(found => found is not null && found.GetMetadata(control.GetType()).DefaultBindingMode == global::Avalonia.Data.BindingMode.TwoWay);
+            if (property is not { IsReadOnly: false }) return null;
+            var ours = previous is not null && previous.control == control && previous.property == property;
+            return ours || !control.IsSet(property) ? new Bound(control, property, form, path) : null;
+        }
+
+        /// <summary>表单的值写到控件（类型不同时按控件属性的类型转换，值相同时不写）。</summary>
+        internal void Pull()
+        {
+            var value = FormController.Convert(form.GetValue(path), property.PropertyType) ?? (property.PropertyType == typeof(string) ? "" : null);
+            if (FormController.SameValue(value, control.GetValue(property))) return;
+            pulling = true;
+            try
+            {
+                control.SetCurrentValue(property, value);
+            }
+            finally
+            {
+                pulling = false;
+            }
+        }
+
+        void OnControlChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+        {
+            if (e.Property == property && !pulling) form.SetValue(path, e.NewValue);
+        }
+
+        public void Dispose() => control.PropertyChanged -= OnControlChanged;
     }
 
     double Em => FontSize;

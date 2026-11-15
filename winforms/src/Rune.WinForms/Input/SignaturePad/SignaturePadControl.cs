@@ -104,7 +104,7 @@ public class SignaturePadControl : Control, IFieldControl
     /// <summary>提示文字（测试用）；签了时 null。</summary>
     internal string? PlaceholderText => Signed ? null : Writable ? ProviderControl.LangOf(this).SignaturePlaceholder : ProviderControl.LangOf(this).SignatureEmpty;
 
-    bool ReadOnly => IsReadOnly ?? FieldControl.Of(this)?.IsReadOnly ?? false;
+    bool ReadOnly => IsReadOnly ?? FieldControl.ReadOnlyOf(this);
 
     bool Invalid => IsInvalid ?? FieldControl.Of(this)?.Invalid ?? false;
 

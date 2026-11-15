@@ -71,10 +71,14 @@ public abstract class TextInputControl : FlexControl, IFieldControl
         get => input.MaxLength;
         set
         {
+            ownMaxLength = value;
             input.MaxLength = value;
             Sync();
         }
     }
+
+    /// <summary>使用方写的 MaxLength（没写时按所在字段的约束）。</summary>
+    int? ownMaxLength;
 
     /// <summary>只读：可以选中、复制，不能修改；不写时跟着所在的字段。</summary>
     [Category("Behavior")]
@@ -193,12 +197,23 @@ public abstract class TextInputControl : FlexControl, IFieldControl
     internal bool Invalid => IsInvalid ?? FieldControl.Of(this)?.Invalid ?? false;
 
     /// <summary>只读：自己写了的优先，其次所在字段的。</summary>
-    protected bool ReadOnly => IsReadOnly ?? FieldControl.Of(this)?.IsReadOnly ?? false;
+    protected bool ReadOnly => IsReadOnly ?? FieldControl.ReadOnlyOf(this);
 
     /// <summary>1em 是多少设备像素。</summary>
     protected float Em => this.EmPixels();
 
-    void IFieldControl.FieldChanged() => Sync();
+    void IFieldControl.FieldChanged()
+    {
+        ApplyConstraints(FieldControl.ConstraintsOf(this));
+        Sync();
+    }
+
+    /// <summary>表单模型的约束落到控件上（上游 schema 推出的 maxlength、min / max）：控件上自己写了的优先。</summary>
+    /// <param name="constraints">所在字段的约束。</param>
+    private protected virtual void ApplyConstraints(FieldConstraints constraints)
+    {
+        if (ownMaxLength is null) input.MaxLength = constraints.MaxLength ?? 32767;
+    }
 
     /// <summary>清空按钮：清空文字，焦点回到输入框。派生类先清自己的值（NumberField 的值置空）再调它。</summary>
     protected virtual void ClearText()

@@ -90,13 +90,13 @@ public abstract class ChoiceBase : Element
     private protected virtual bool InGroup => false;
 
     /// <summary>只读：能聚焦，不能切换。自己写了的优先，其次所在字段的。</summary>
-    internal virtual bool ReadOnly => readOnly ?? Field?.IsReadOnly ?? false;
+    internal virtual bool ReadOnly => readOnly ?? (!InGroup && Host is Control host && FieldControl.ReadOnlyOf(host));
 
     /// <summary>校验未通过：自己写了的优先，其次所在字段的。</summary>
     internal virtual bool Invalid => invalid ?? Field?.Invalid ?? false;
 
     /// <summary>必填：自己写了的优先，其次所在字段的。</summary>
-    internal virtual bool Required => required ?? Field?.IsRequired ?? false;
+    internal virtual bool Required => required ?? Field?.Required ?? false;
 
     /// <summary>色调：实例上写的，其次作用域的 <see cref="ChoiceDefaults"/>，最后 accent。</summary>
     internal virtual StatusTone ResolvedTone => tone.Or(ScopeDefaults?.Tone, StatusTone.Accent);

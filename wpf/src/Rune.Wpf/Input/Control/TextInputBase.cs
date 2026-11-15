@@ -132,12 +132,29 @@ public abstract class TextInputBase : TextBox, IFieldControl
     /// <summary>只读（自己的或所在字段的）。</summary>
     public bool ShowsReadOnly => (bool)GetValue(ShowsReadOnlyProperty);
 
-    bool ReadOnly => Field.IsSet(this, IsReadOnlyProperty) ? IsReadOnly : Field.Of(this)?.IsReadOnly ?? false;
+    bool ReadOnly => Field.IsSet(this, IsReadOnlyProperty) ? IsReadOnly : Field.ReadOnlyOf(this);
 
     /// <summary>可以编辑（可用、不只读）：清空按钮只在这时出现。</summary>
     protected bool Editable => IsEnabled && !ReadOnly;
 
-    void IFieldControl.FieldChanged() => Sync();
+    void IFieldControl.FieldChanged()
+    {
+        ApplyConstraints(Field.ConstraintsOf(this));
+        Sync();
+    }
+
+    /// <summary>
+    /// 表单模型的约束落到控件上（上游 schema 推出的 maxlength、min / max）：控件上自己写了的优先；
+    /// 用 SetCurrentValue 写，值的来源仍是默认值，约束变了还能再写。
+    /// </summary>
+    /// <param name="constraints">所在字段的约束。</param>
+    private protected virtual void ApplyConstraints(FieldConstraints constraints) => Constrain(MaxLengthProperty, constraints.MaxLength ?? 0);
+
+    /// <summary>控件上没写这个属性时写成约束给的值。</summary>
+    private protected void Constrain(DependencyProperty property, object? value)
+    {
+        if (!Field.IsSet(this, property) && !Equals(GetValue(property), value)) SetCurrentValue(property, value);
+    }
 
     /// <inheritdoc />
     public override void OnApplyTemplate()

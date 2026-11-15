@@ -42,7 +42,7 @@ public class RadioGroup : ChoiceGroup
     public bool IsRequired { get => (bool)GetValue(IsRequiredProperty); set => SetValue(IsRequiredProperty, value); }
 
     /// <summary>必填：自己写了的优先，其次所在字段的。</summary>
-    internal bool Required => Field.IsSet(this, IsRequiredProperty) ? IsRequired : Field.Of(this)?.IsRequired ?? false;
+    internal bool Required => Field.IsSet(this, IsRequiredProperty) ? IsRequired : Field.Of(this)?.Required ?? false;
 
     /// <summary>色调。</summary>
     public StatusTone Tone { get => (StatusTone)GetValue(ToneProperty); set => SetValue(ToneProperty, value); }
