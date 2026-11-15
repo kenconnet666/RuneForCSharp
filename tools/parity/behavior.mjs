@@ -42,6 +42,8 @@ function upstreamTests(src, docs) {
   const tests = new Map();
   const add = (component, name) => tests.set(component, [...(tests.get(component) ?? []), name]);
   const unit = files(src, /\.test\.tsx?$/).filter((file) => file.includes('.test'));
+  // 组件名：源码里导出的大写开头的名字（export const Radio = …）。用例名开头的大写词不是组件时（'Backspace 删一位'）不算
+  const known = new Set(files(src, /\.tsx?$/).flatMap((file) => [...readFileSync(file, 'utf8').matchAll(/^export (?:const|function|class) ([A-Z]\w*)/gm)].map((m) => m[1])));
   for (const file of [...unit, ...files(docs, /\.browser\.test\.tsx?$/)]) {
     const fileComponent = basename(file).replace(/(\.browser)?\.test\.tsx?$/, '');
     const describes = [];
@@ -61,7 +63,8 @@ function upstreamTests(src, docs) {
       if (!test) continue;
       const names = describes.findLast((d) => d.names.length)?.names ?? [];
       // describe 不是组件名（'受控：…'）时，用例名以组件名开头的归到那个组件（'Radio：整组…'）
-      add(names.find((name) => test[2].startsWith(name)) ?? names[0] ?? /^[A-Z]\w*/.exec(test[2])?.[0] ?? describes.findLast((d) => d.lead)?.lead ?? fileComponent, test[2]);
+      const leading = /^[A-Z]\w*/.exec(test[2])?.[0];
+      add(names.find((name) => test[2].startsWith(name)) ?? names[0] ?? (leading && known.has(leading) ? leading : undefined) ?? describes.findLast((d) => d.lead)?.lead ?? fileComponent, test[2]);
     }
   }
   return tests;
