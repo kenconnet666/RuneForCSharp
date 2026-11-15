@@ -450,6 +450,7 @@ export const PROPS_NOT_PORTED = {
   ScrollArea: { propsContent: '内容就是 Content 本身，平台的滚动呈现器直接排它，中间没有包一层' },
   Table: { propsRoot: '外层的外框与滚动区域由 Table 管：滚动方向是 ScrollAxis（WinForms 外面套 ScrollAreaControl），外观按密度、样式、斑马纹与主题 token' },
   TextTable: { propsRoot: 'TextTable 本身就是 Table：同 Table 的 propsRoot' },
+  PropsTable: { propsRoot: 'PropsTable 本身就是 Table：同 Table 的 propsRoot' },
   ...Object.fromEntries(['TableHead', 'TableBody', 'TableFoot', 'TableRow', 'TableCaption', 'TableCell', 'TableHeaderCell'].map((name) => [name, { propsRoot: '行、单元格、各部分本身就是元素：样式直接写在它们身上' }])),
   Select: {
     placement: '弹出层固定贴着外壳下方、至少与它同宽（放不下时翻到上方），同平台的下拉框',
