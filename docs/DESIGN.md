@@ -1413,7 +1413,7 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 ### FormDialog 与 PromptAsync（2026-11-15）
 
 - FormDialog 是 Dialog 的子类（WinForms 是 FormDialogControl : DialogControl）：Dialog 加了一个内部的正文钩子（Avalonia、WPF 的 Body，WinForms 的 Body(content)），FormDialog 把使用方的 Content 放进 Form，前面依次是整份表单错误的提示条（Alert danger）与错误汇总。确认就是 Form.SubmitAsync：没通过校验返回 false（对话框留着，焦点到错误汇总），OnSubmit 抛 FormSubmitException 时 SubmitAsync 返回 false、提示条显示 FormError，别的异常由 Dialog 的确认兜住（留着）。上游的 propsForm、propsSummary 是 Form、Summary 两个部件实例。
-- 命令式的小表单（上游 useFormDialog）是静态的 PromptAsync(owner, FormPromptOptions)，结果是字段名到值的字典（单值是去掉首尾空白的字符串，多选是字符串列表），取消是 null；字段是 FormPromptField 记录（Text、Textarea、Select，Multiple 时多选）。必填没填时错误是语言包的 FormRequired，Validate 只看单值字段。单行输入框里按回车就是确认（同浏览器的隐式提交：Avalonia、WPF 接冒泡的 KeyDown，WinForms 在 ProcessCmdKey 里），为此 Dialog 的确认流程改成 internal。上游的 date 字段等日期组件做了再加。
+- 命令式的小表单（上游 useFormDialog）是静态的 PromptAsync(owner, FormPromptOptions)，结果是字段名到值的字典（单值是去掉首尾空白的字符串，多选是字符串列表），取消是 null；字段是 FormPromptField 记录（Text、Textarea、Select，Multiple 时多选；Date 是 DatePicker，范围是 Min、Max，值是 ISO 日期）。必填没填时错误是语言包的 FormRequired，Validate 只看单值字段。单行输入框里按回车就是确认（同浏览器的隐式提交：Avalonia、WPF 接冒泡的 KeyDown，WinForms 在 ProcessCmdKey 里），为此 Dialog 的确认流程改成 internal。
 - 看板的 confirm 示例用它：放下时先问意见，确认了才改数据。上游卡片模板拿到的 dragging（拖动中换一种写法）这里没有，卡片模板只拿到数据。
 
 ### 日期分段：DateSegments 与 DateSegmentGroup（2026-11-15）
