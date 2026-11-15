@@ -1,0 +1,9 @@
+<!-- SelectionBar 部件的默认外观（vue-tsx-pro 的 selectionBarStyles）：accentSoft 底、正文色（圆角、内边距、字号按 em 在代码里算） -->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|SelectionBar > Border#PART_Root">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.AccentSoft}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+  </Style>
+</Styles>

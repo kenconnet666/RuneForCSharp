@@ -54,6 +54,8 @@ export const COMPONENT_PROP_RENAMES = {
   FloatButton: { tooltip: 'Tip' },
   // onChange 报告贴住与否：事件叫 StuckChanged，看 IsStuck
   Affix: { onChange: 'StuckChanged' },
+  // 点“取消选择”只报告，清空选择由使用方做
+  SelectionBar: { onClear: 'ClearRequested' },
   FloatButtonGroup: { propsTrigger: 'Trigger' },
   UserButton: { name: 'DisplayName', src: 'Source' },
   // 地址给 Uri；加载完的事件不叫 Loaded（那是控件放进界面的事件）
@@ -353,6 +355,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     ScrollArea: { propsScrollbar: '两条滚动条是平台 ScrollViewer 认的固定部件名：样式里用 ScrollAreaParts.VerticalScrollbar、HorizontalScrollbar 选中' },
   },
   WPF: {
+    SelectionBar: Object.fromEntries(['propsCount', 'propsClear', 'propsActions']
+      .map((prop) => [prop, '数目、取消选择、批量操作区是 SelectionBar 组合的子元素，没有部件样式键：外观跟主题，批量操作的按钮放在 Actions 里'])),
     PaginationBar: Object.fromEntries(
       ['propsControls', 'propsPagination', 'propsSizeSelect', 'propsJump']
         .map((prop) => [prop, '页码、每页条数、跳页是公开的 PaginationPart、SizeSelectPart、JumpPart（各自有主题样式），直接改它们；结束边那一组是 PaginationBar 代码建的面板']),
@@ -375,6 +379,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     CommandPalette: Object.fromEntries(['propsInput', 'propsListbox'].map((prop) => [prop, '面板里的搜索框、列表是 CommandPalette 建的，外观跟着 TextField、Listbox 的主题样式；部件样式键只有搜索行'])),
   },
   WinForms: {
+    SelectionBar: Object.fromEntries(['propsCount', 'propsClear', 'propsActions']
+      .map((prop) => [prop, '数目、取消选择、批量操作区是 SelectionBarControl 组合的子元素，没有部件属性记录：外观跟主题，批量操作的按钮放在 Actions 里'])),
     NativeSelect: Object.fromEntries(['variant', 'radius', 'icon']
       .map((prop) => [prop, '就是 Win32 的下拉框：外框、下拉按钮是系统画的，没有外观档位、圆角与前置图标（出错时在系统外框上描一圈 danger）'])),
     Marquee: { fade: '子控件各有窗口，盖不了它们：没有两端渐隐' },

@@ -1378,6 +1378,13 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### SelectionBar（2026-11-15）
+
+- 上游只在 DataTable 的“台账”示例里用到；数据表格还没做，示例挂在 DataTable 页下（selection-bar），配静态的 Table 与每行的勾选框。
+- 上游的 onClear 叫 ClearRequested（只报告，清空选择由使用方做）；批量操作的按钮放在 Actions。数目变成 0 时淡出后不占位，淡出期间数目停在最后一次（Avalonia、WPF 用 Task.Delay 等淡出结束：headless 测试里计时器不走）；WinForms 不能半透明，直接藏起来。
+- 上游经全局的播报区念数目（栏随第一次选择出现，挂在里面的 aria-live 第一句念不出来）；桌面的读屏通知不受这个限制：Avalonia、WPF 用栏里的 LiveRegion，WinForms 用 RaiseAutomationNotification。
+- 字号 sm，内边距、圆角、最小高度（控件高度）都按 sm 的 em 算。WinForms 的 Control 的 DisplayRectangle 不扣 Padding，内容在 OnLayout 里摆进内边距。
+
 ### FieldCompare（2026-11-15）
 
 - 上游的字段沿用表格的列定义（key、header、type、format、statuses、empty、value、cell）并用 ColumnTable 排表格；我们还没有数据表格的列定义，字段是独立的 CompareField 记录：Key（取同名属性，或字典的键）、Header、Value 取值函数、Format（孪生的 NumericFormat，同 Intl：金额、百分比、缩放）、Statuses（StatusMap）、Empty、Cell（记录与哪一份，返回显示的内容）、Better。上游的 type 由 Format 表达：金额是 Currency、百分比是 Percent（百分比字段的变化量就是百分点，不给变化率）；日期按短日期显示。
