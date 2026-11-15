@@ -1,7 +1,7 @@
 <!--
   Table 单元格与标题的主题（vue-tsx-pro 的 tableRecipe、tablePartStyles）：单元格 text 颜色、行高 normal；表头 textMuted、sm、中等字重；
   表体、表尾里的行标题中等字重；表尾加粗。标题 textMuted、sm，上下 space.sm、左右 space.md。
-  内边距（左右 space.md、上下按密度）、行底色与分隔线、外框在 Table.cs 里。
+  内边距（左右 space.md、上下按密度）、裁剪框、行底色与分隔线、外框在 Table.cs 里；格自己不裁（裁剪框含内边距，由网格设）。
 -->
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -9,6 +9,7 @@
   <ControlTheme x:Key="{x:Type rune:TableCell}" TargetType="rune:TableCell">
     <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="ClipToBounds" Value="False" />
     <Setter Property="TextBlock.LineHeight" Value="{rune:Em Resource=Rune.LineHeight.Normal}" />
     <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Normal}" />
     <Setter Property="Template">

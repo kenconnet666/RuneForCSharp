@@ -180,6 +180,8 @@ public class Table : Control
     {
         readonly Table owner;
         readonly List<(TableSection Section, TableRow Row, TableCell[] Cells)> rows = [];
+        // 各格占的位置（同 HTML 表格：跨行的格占住下面几行的那几列，后面的格往后排）
+        readonly List<(TableCell Cell, Slot Slot)> placed = [];
         // 固定的表头、固定的列、两者相交的角各一层，画行的底色盖住滚到下面的格（CSS 里 position: sticky 的格继承行的底色）
         readonly Backdrop headBackdrop, sideBackdrop, cornerBackdrop;
         double[] columns = [];
@@ -243,6 +245,7 @@ public class Table : Control
             InvalidateRows();
         }
 
+        /// <summary>单元格的内边距：左右 space.md、上下按密度，按格自己的字号。</summary>
         Thickness Padding(TableCell cell)
         {
             var em = TextElement.GetFontSize(cell);
@@ -250,29 +253,83 @@ public class Table : Control
             return new Thickness(0.75 * em, block * em);
         }
 
+        /// <summary>一格占的位置：第几行、第几列起，跨几行、几列。</summary>
+        readonly record struct Slot(int Row, int Column, int RowSpan, int ColumnSpan);
+
+        /// <summary>按 HTML 表格的规则排各格：每格放在本行第一个没被上面跨行的格占住的列；跨行不超出所在的部分（表头、表体、表尾）。</summary>
+        void Place()
+        {
+            placed.Clear();
+            var sectionEnd = new int[rows.Count];
+            for (var r = rows.Count - 1; r >= 0; r--)
+                sectionEnd[r] = r + 1 < rows.Count && rows[r + 1].Section == rows[r].Section ? sectionEnd[r + 1] : r;
+            var occupied = new HashSet<(int Row, int Column)>();
+            for (var r = 0; r < rows.Count; r++)
+            {
+                var column = 0;
+                foreach (var cell in rows[r].Cells)
+                {
+                    while (occupied.Contains((r, column))) column++;
+                    var slot = new Slot(r, column, Math.Clamp(cell.RowSpan, 1, sectionEnd[r] - r + 1), Math.Max(1, cell.ColumnSpan));
+                    for (var dr = 0; dr < slot.RowSpan; dr++)
+                        for (var dc = 0; dc < slot.ColumnSpan; dc++) occupied.Add((r + dr, column + dc));
+                    placed.Add((cell, slot));
+                    column += slot.ColumnSpan;
+                }
+            }
+        }
+
+        /// <summary>跨几列（或几行）的格要的尺寸比那几列（行）合起来的大时，差的平分给它们（HTML 表格分得更细，静态表格够用）。</summary>
+        static void Spread(double[] sizes, int from, int span, double need)
+        {
+            var have = Sum(sizes, from, span);
+            if (need <= have) return;
+            for (var i = from; i < from + span; i++) sizes[i] += (need - have) / span;
+        }
+
+        /// <summary>从 from 起 span 个尺寸的和（列宽、行高）。</summary>
+        static double Sum(double[] sizes, int from, int span)
+        {
+            var total = 0d;
+            for (var i = from; i < from + span && i < sizes.Length; i++) total += sizes[i];
+            return total;
+        }
+
         protected override Size MeasureOverride(Size availableSize)
         {
-            var count = rows.Count == 0 ? 0 : rows.Max(row => row.Cells.Length);
+            Place();
+            var count = placed.Count == 0 ? 0 : placed.Max(item => item.Slot.Column + item.Slot.ColumnSpan);
             var max = new double[count];
             var min = new double[count];
             var fixedWidths = new double?[count];
             stickyColumns = new bool[count];
-            foreach (var (_, _, cells) in rows)
-                for (var i = 0; i < cells.Length; i++)
+            var spanning = new List<(Slot Slot, double Min, double Max)>();
+            foreach (var (cell, slot) in placed)
+            {
+                var padding = Padding(cell).Left * 2;
+                cell.Measure(Size.Infinity);
+                var cellMax = cell.DesiredSize.Width + padding;
+                var cellMin = cellMax;
+                if (!cell.Nowrap && cell is not TableHeaderCell { Section: TableHead })
                 {
-                    var cell = cells[i];
-                    var padding = Padding(cell).Left * 2;
-                    cell.Measure(Size.Infinity);
-                    max[i] = Math.Max(max[i], cell.DesiredSize.Width + padding);
-                    if (cell.Nowrap || cell is TableHeaderCell { Section: TableHead }) min[i] = Math.Max(min[i], cell.DesiredSize.Width + padding);
-                    else
-                    {
-                        cell.Measure(new Size(0, double.PositiveInfinity));
-                        min[i] = Math.Max(min[i], cell.DesiredSize.Width + padding);
-                    }
-                    if (cell is TableHeaderCell { ColumnWidth: { } width }) fixedWidths[i] = width;
-                    stickyColumns[i] |= cell.Sticky;
+                    cell.Measure(new Size(0, double.PositiveInfinity));
+                    cellMin = cell.DesiredSize.Width + padding;
                 }
+                for (var i = slot.Column; i < slot.Column + slot.ColumnSpan; i++) stickyColumns[i] |= cell.Sticky;
+                if (slot.ColumnSpan > 1)
+                {
+                    spanning.Add((slot, cellMin, cellMax));
+                    continue;
+                }
+                max[slot.Column] = Math.Max(max[slot.Column], cellMax);
+                min[slot.Column] = Math.Max(min[slot.Column], cellMin);
+                if (cell is TableHeaderCell { ColumnWidth: { } width }) fixedWidths[slot.Column] = width;
+            }
+            foreach (var (slot, cellMin, cellMax) in spanning)
+            {
+                Spread(max, slot.Column, slot.ColumnSpan, cellMax);
+                Spread(min, slot.Column, slot.ColumnSpan, cellMin);
+            }
             for (var i = 0; i < count; i++)
                 if (fixedWidths[i] is { } width) max[i] = min[i] = width;
             // CSS 的 table-layout: auto（表格宽 100%）：放得下时按各列内容的比例分多出来的宽度；放不下时按最小宽度插值；再放不下时最小宽度、横向滚动
@@ -283,37 +340,37 @@ public class Table : Control
                 columns[i] = sumMax <= available ? max[i] + (sumMax > 0 ? (available - sumMax) * max[i] / sumMax : 0)
                     : sumMin <= available ? min[i] + (available - sumMin) * (max[i] - min[i]) / Math.Max(1, sumMax - sumMin)
                     : min[i];
+            // 行高：先按只占一行的格，跨行的格放不下时把差的加到它的最后一行（同浏览器）；加的 1 像素是格的分隔线
             heights = new double[rows.Count];
-            for (var r = 0; r < rows.Count; r++)
+            foreach (var (cell, slot) in placed.OrderBy(item => item.Slot.RowSpan))
             {
-                var cells = rows[r].Cells;
-                for (var i = 0; i < cells.Length; i++)
-                {
-                    var padding = Padding(cells[i]);
-                    cells[i].Measure(new Size(Math.Max(0, columns[i] - padding.Left - padding.Right), double.PositiveInfinity));
-                    heights[r] = Math.Max(heights[r], cells[i].DesiredSize.Height + padding.Top + padding.Bottom + 1);
-                }
+                // 内边距不交给格自己：布局取整会把 6.125 的内边距取成 6，行高就比上游（内容加精确的内边距）矮
+                var padding = Padding(cell);
+                cell.Measure(new Size(Math.Max(0, Sum(columns, slot.Column, slot.ColumnSpan) - padding.Left - padding.Right), double.PositiveInfinity));
+                var need = cell.DesiredSize.Height + padding.Top + padding.Bottom + 1;
+                var have = Sum(heights, slot.Row, slot.RowSpan);
+                if (need > have) heights[slot.Row + slot.RowSpan - 1] += need - have;
             }
             foreach (var backdrop in new[] { headBackdrop, sideBackdrop, cornerBackdrop }) backdrop.Measure(Size.Infinity);
             return new Size(columns.Sum(), heights.Sum());
         }
 
+        /// <summary>一格占的矩形（含内边距，网格的坐标）。</summary>
+        Rect SlotRect(Slot slot) =>
+            new(Sum(columns, 0, slot.Column), Sum(heights, 0, slot.Row), Sum(columns, slot.Column, slot.ColumnSpan), Sum(heights, slot.Row, slot.RowSpan));
+
         protected override Size ArrangeOverride(Size finalSize)
         {
-            var y = 0d;
-            for (var r = 0; r < rows.Count; r++)
+            foreach (var (cell, slot) in placed)
             {
-                var x = 0d;
-                var cells = rows[r].Cells;
-                var top = rows[r].Section is TableFoot ? 1 : 0;
-                for (var i = 0; i < cells.Length; i++)
-                {
-                    var padding = Padding(cells[i]);
-                    cells[i].Arrange(new Rect(x + padding.Left, y + padding.Top + top, Math.Max(0, columns[i] - padding.Left - padding.Right),
-                        Math.Max(0, heights[r] - padding.Top - padding.Bottom - 1)));
-                    x += columns[i];
-                }
-                y += heights[r];
+                // 格排在内边距里；分隔线占格的下边 1 像素（表尾是上边）。裁剪框是含内边距的整格（同 CSS 的 td）：内容能伸进内边距（迷你图最后的点），不伸进旁边的格
+                var padding = Padding(cell);
+                var rect = SlotRect(slot);
+                var top = rows[slot.Row].Section is TableFoot ? 1 : 0;
+                var content = new Rect(rect.X + padding.Left, rect.Y + padding.Top + top, Math.Max(0, rect.Width - padding.Left - padding.Right),
+                    Math.Max(0, rect.Height - padding.Top - padding.Bottom - 1));
+                cell.Arrange(content);
+                cell.Clip = new RectangleGeometry(new Rect(-padding.Left, -padding.Top, rect.Width, Math.Max(0, rect.Height - 1)));
             }
             var head = HeadHeight;
             var (left, width) = StickySpan;
@@ -342,13 +399,12 @@ public class Table : Control
             Shift(headBackdrop, 0, dy);
             Shift(sideBackdrop, dx, 0);
             Shift(cornerBackdrop, dx, dy);
-            foreach (var (section, _, cells) in rows)
-                for (var i = 0; i < cells.Length; i++)
-                {
-                    var (isHead, isSticky) = (section is TableHead, i < stickyColumns.Length && stickyColumns[i]);
-                    cells[i].ZIndex = (isHead ? 4 : 0) + (isSticky ? 2 : 0);
-                    Shift(cells[i], isSticky ? dx : 0, isHead ? dy : 0);
-                }
+            foreach (var (cell, slot) in placed)
+            {
+                var (isHead, isSticky) = (rows[slot.Row].Section is TableHead, slot.Column < stickyColumns.Length && stickyColumns[slot.Column]);
+                cell.ZIndex = (isHead ? 4 : 0) + (isSticky ? 2 : 0);
+                Shift(cell, isSticky ? dx : 0, isHead ? dy : 0);
+            }
 
             static void Shift(Visual visual, double x, double y) =>
                 visual.RenderTransform = x == 0 && y == 0 ? null : new TranslateTransform(x, y);
@@ -363,39 +419,48 @@ public class Table : Control
         public override void Render(DrawingContext context) => DrawRows(context, new Rect(Bounds.Size), _ => true, edge: false);
 
         /// <summary>
-        /// 行底色（表头 fill；表体 surface 或页面底色，斑马纹 fill，指针下的行 fillHover）与分隔线（表头下 border，表体行下 borderMuted，表尾上 border），
-        /// 只画 <paramref name="area"/>（网格的坐标）里 <paramref name="include"/> 的行；<paramref name="edge"/> 时在结束边画固定列的竖线。
+        /// 行底色（表头 fill；表体 surface 或页面底色，斑马纹 fill，指针下的行 fillHover）与各格的分隔线（同 CSS 画在格上：表头格下 border，表体格下 borderMuted，
+        /// 表尾格上 border；跨行的格用自己那一行的底色，跨过的行线在它那段断开），只画 <paramref name="area"/>（网格的坐标）里 <paramref name="include"/> 的行；
+        /// <paramref name="edge"/> 时在结束边画固定列的竖线。
         /// </summary>
         void DrawRows(DrawingContext context, Rect area, Func<TableSection, bool> include, bool edge)
         {
             IBrush? Brush(string key) => owner.Resource<IBrush?>(key);
             var rowBrush = Brush(owner.Variant == TableVariant.Ghost ? ThemeKeys.Brush.Background : ThemeKeys.Brush.Surface);
+            IBrush? Background(int r) => rows[r].Section is TableHead ? Brush(ThemeKeys.Brush.Fill)
+                : r == hovered && rows[r].Section is TableBody ? Brush(ThemeKeys.Brush.FillHover)
+                : rows[r].Row.IsStriped ? Brush(ThemeKeys.Brush.Fill) : rowBrush;
             // 行的上下边吸附到设备像素（同浏览器画表格）：行高带小数时分隔线不发虚。网格自己可能不在整像素上，按到根的偏移算
             var scale = TopLevel.GetTopLevel(this)?.RenderScaling ?? 1;
             var offset = VisualRoot is Visual root ? this.TranslatePoint(default, root)?.Y ?? 0 : 0;
             double Snap(double value) => Math.Floor((value + offset) * scale + 0.5) / scale - offset; // 不用 Math.Round：.5 时银行家舍入让一条线的两边差出 2 像素
-            Rect Band(double top, double bottom) => new(area.X, Snap(top), area.Width, Snap(bottom) - Snap(top));
+            Rect Band(double left, double width, double top, double bottom) => new(left, Snap(top), width, Snap(bottom) - Snap(top));
+            // 固定的那几层只画自己的区域（格线按格的位置画，不能画到层外面）；网格本身不裁：高度带小数时会裁掉吸附到整像素的最后一条线
+            using var clip = area == new Rect(Bounds.Size) ? default : context.PushClip(new Rect(area.Size));
             using var shift = context.PushTransform(Matrix.CreateTranslation(-area.X, -area.Y));
             var y = 0d;
             for (var r = 0; r < rows.Count && r < heights.Length; r++)
             {
-                var (section, row, _) = rows[r];
                 var bottom = y + heights[r];
-                if (include(section))
+                if (include(rows[r].Section))
                 {
-                    var background = section is TableHead ? Brush(ThemeKeys.Brush.Fill)
-                        : r == hovered && section is TableBody ? Brush(ThemeKeys.Brush.FillHover)
-                        : row.IsStriped ? Brush(ThemeKeys.Brush.Fill) : rowBrush;
-                    if (background is not null) context.FillRectangle(background, Band(y, bottom));
-                    if (section is TableFoot)
-                    {
-                        if (Brush(ThemeKeys.Brush.Border) is { } line) context.FillRectangle(line, Band(y, y + 1));
-                    }
-                    else if (Brush(section is TableHead ? ThemeKeys.Brush.Border : ThemeKeys.Brush.BorderMuted) is { } line)
-                        context.FillRectangle(line, Band(bottom - 1, bottom));
+                    if (Background(r) is { } background) context.FillRectangle(background, Band(area.X, area.Width, y, bottom));
                     if (edge && Brush(ThemeKeys.Brush.BorderMuted) is { } side) context.FillRectangle(side, new Rect(area.Right - 1, Snap(y), 1, Snap(bottom) - Snap(y)));
                 }
                 y = bottom;
+            }
+            foreach (var (_, slot) in placed)
+            {
+                var section = rows[slot.Row].Section;
+                if (!include(section) || slot.Row + slot.RowSpan > heights.Length || slot.Column + slot.ColumnSpan > columns.Length) continue;
+                var rect = SlotRect(slot);
+                if (slot.RowSpan > 1 && Background(slot.Row) is { } background) context.FillRectangle(background, Band(rect.X, rect.Width, rect.Y, rect.Bottom));
+                if (section is TableFoot)
+                {
+                    if (Brush(ThemeKeys.Brush.Border) is { } line) context.FillRectangle(line, Band(rect.X, rect.Width, rect.Y, rect.Y + 1));
+                }
+                else if (Brush(section is TableHead ? ThemeKeys.Brush.Border : ThemeKeys.Brush.BorderMuted) is { } line)
+                    context.FillRectangle(line, Band(rect.X, rect.Width, rect.Bottom - 1, rect.Bottom));
             }
         }
 
@@ -555,6 +620,12 @@ public class TableCell : ContentControl
     /// <summary>固定在起始边（第一列，常是行标题）：表格横向滚动时一直看得到；一列里有格写了就整列固定。</summary>
     public static readonly StyledProperty<bool> StickyProperty = AvaloniaProperty.Register<TableCell, bool>(nameof(Sticky));
 
+    /// <summary>往下合并几行（TS 的 rowspan），默认 1；不超出所在的部分（表头、表体、表尾）。</summary>
+    public static readonly StyledProperty<int> RowSpanProperty = AvaloniaProperty.Register<TableCell, int>(nameof(RowSpan), 1);
+
+    /// <summary>往后合并几列（TS 的 colspan），默认 1。</summary>
+    public static readonly StyledProperty<int> ColumnSpanProperty = AvaloniaProperty.Register<TableCell, int>(nameof(ColumnSpan), 1);
+
     /// <summary>对齐。</summary>
     public TableAlign Align { get => GetValue(AlignProperty); set => SetValue(AlignProperty, value); }
 
@@ -563,6 +634,12 @@ public class TableCell : ContentControl
 
     /// <summary>固定在起始边。</summary>
     public bool Sticky { get => GetValue(StickyProperty); set => SetValue(StickyProperty, value); }
+
+    /// <summary>往下合并几行。</summary>
+    public int RowSpan { get => GetValue(RowSpanProperty); set => SetValue(RowSpanProperty, value); }
+
+    /// <summary>往后合并几列。</summary>
+    public int ColumnSpan { get => GetValue(ColumnSpanProperty); set => SetValue(ColumnSpanProperty, value); }
 
     /// <summary>所在的部分（表头、表体、表尾）。</summary>
     internal TableSection? Section { get; private set; }
@@ -577,7 +654,8 @@ public class TableCell : ContentControl
         if (change.Property == AlignProperty)
             HorizontalContentAlignment = Align == TableAlign.Center ? HorizontalAlignment.Center : Align == TableAlign.End ? HorizontalAlignment.Right : HorizontalAlignment.Left;
         else if (change.Property == NowrapProperty) TextBlock.SetTextWrapping(this, Nowrap ? TextWrapping.NoWrap : TextWrapping.Wrap);
-        else if (change.Property == StickyProperty) this.FindLogicalAncestorOfType<Table>()?.InvalidateGrid();
+        else if (change.Property == StickyProperty || change.Property == RowSpanProperty || change.Property == ColumnSpanProperty)
+            this.FindLogicalAncestorOfType<Table>()?.InvalidateGrid();
     }
 
     /// <summary>按所在的部分设外观（伪类 :head、:foot、:row-header）。</summary>
