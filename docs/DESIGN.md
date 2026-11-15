@@ -1464,6 +1464,13 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### ErrorBoundary（2026-11-16，仅 Avalonia）
+
+- 上游靠 Vue 的 onErrorCaught 接住里面组件在 setup、渲染、事件处理里抛的错误。桌面上能可靠接住的是两处：建内容时（ContentTemplate.Build）与排版时（里面的 Measure、Arrange 在 ErrorBoundary 自己的 MeasureOverride、ArrangeOverride 里调用，抛出的异常在这里接住，换上出错提示再排）。事件处理、异步里的错误不经过组件（平台的事件直接调处理函数，同上游接不住定时器、Promise 里的错误），由代码用 ErrorBoundary.Show(控件, 错误) 交给外面最近的边界（同 react-error-boundary 的 showBoundary），不在边界里时返回 false。
+- 内容是模板（ContentTemplate，XAML 里直接写 DataTemplate）：重试、ResetKey 变了时整个重建（出错时的状态不可信）；进了界面才建（属性初始化的先后不定，ErrorCaught 也要先订阅上）。上游的 resetKeys 数组在这里是一个值，要几个时给元组。
+- 接住时发 ErrorCaught（错误与位置：create、layout、report），不再往上传。默认出错提示是 danger、sm 的 Result（部件 PART_Fallback）：标题（语言包 ErrorTitle）、错误信息与"重试"（sm、soft、中性、RotateCcw），读屏立即播报（Assertive，上游的 role="alert"）；Fallback 拿到错误与重试的方法自己画。
+- 示例：dashboard、fallback（同上游；出错放在建内容时）。
+
 ### ThemeSwitcher 与 ThemeThumbnail（2026-11-16，仅 Avalonia）
 
 - 上游的主题偏好（createThemePreference：选择存在 localStorage、按系统切换、把主题交给 createUi）在桌面上就是 Avalonia 的主题变体：Value 是当前的选择（ThemeVariant，Default 是跟随系统），选中时写回，AppliesToApplication（默认 true）时设到 Application.Current.RequestedThemeVariant；只改一块时关掉它，把 Value 交给 ThemeVariantScope。记住选择由应用自己存 Value。列出的主题是 Themes（默认亮色、暗色，全部内置的是 RuneThemeVariants.All），IncludeSystem 列"跟随系统"（上游的 system，与 System 命名空间同名）。上游选中后从按钮处圆形展开（View Transitions），桌面上直接切换。
