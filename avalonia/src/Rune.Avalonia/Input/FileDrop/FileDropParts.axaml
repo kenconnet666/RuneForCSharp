@@ -1,0 +1,33 @@
+<!--
+  FileDrop 的默认外观（vue-tsx-pro 的 fileDropStyles）：surface 底、2px 虚线 borderStrong 边框（悬停 accent），md 圆角、四周 lg、至少 8em 高；
+  拖着文件经过时 accent 边框、accentSoft 底；出错 danger 边框；只读、不可用变淡、鼠标是禁止；键盘聚焦时外面一圈 focusRing。
+  图标 textMuted（1.5em 的大小按字号在代码里设）；提示文字 medium；说明 sm、textMuted。边框、焦点环是 FileDrop 自己画的（虚线），尺寸按字号在 FileDrop.cs 里算
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|FileDrop">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Surface}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderStrong}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+  <Style Selector="rune|FileDrop:pointerover"><Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Accent}" /></Style>
+  <Style Selector="rune|FileDrop:dragging">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Accent}" />
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.AccentSoft}" />
+  </Style>
+  <Style Selector="rune|FileDrop:invalid"><Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Danger}" /></Style>
+  <Style Selector="rune|FileDrop:locked">
+    <Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" />
+    <Setter Property="Cursor" Value="No" />
+  </Style>
+  <Style Selector="rune|FileDrop rune|Icon#PART_Icon">
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+  </Style>
+  <Style Selector="rune|FileDrop rune|Text#PART_Hint"><Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" /></Style>
+  <Style Selector="rune|FileDrop rune|Text#PART_Description">
+    <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+  </Style>
+</Styles>

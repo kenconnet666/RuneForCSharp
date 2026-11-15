@@ -94,6 +94,7 @@
   <StyleInclude Source="avares://Rune.Avalonia/Patterns/AppShell/AppShellParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Patterns/AuthLayout/AuthLayoutParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Input/Listbox/ListboxParts.axaml" />
+  <StyleInclude Source="avares://Rune.Avalonia/Input/FileDrop/FileDropParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Overlay/Popover/PopoverParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Input/Select/SelectParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Overlay/Dialog/DialogParts.axaml" />
