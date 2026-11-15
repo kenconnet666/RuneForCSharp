@@ -1464,6 +1464,12 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### AsideLayout（2026-11-16，仅 Avalonia）
+
+- 主栏 + 侧栏：Children 是主栏的块、Aside 是侧栏的块，各是一个竖排、隔 Gap（默认 md）的 Flex（部件 AsideLayoutParts.Main、Aside，侧栏的读屏名称是 AsideLabel）。按自己的宽度决定叠不叠（上游的容器查询）：不到 56rem 时叠成一列、侧栏在后；够宽时侧栏 AsideWidth（Length，默认 26rem）、主栏占满剩下的，顶端对齐；从右往左时平台整体镜像，侧栏到左边。
+- 侧栏贴住（Sticky，默认 true）复用 Affix：并排时侧栏外层换成不加阴影、离顶 md 的 Affix，它只在父元素（这个布局）的范围里贴住，同 CSS 的 position: sticky；叠成一列或关掉 Sticky 时换成不动的 Decorator（Affix 的 OffsetTop 为空也按 0 贴住，不能靠它关）。上游离顶还加 AppShell 的 stickyOffset：桌面的 AppShell 顶栏不在滚动区域里，不用加。
+- 示例：detail（同上游，侧栏 18rem、不贴住）。
+
 ### Can 与 Provider.Permissions（2026-11-16，仅 Avalonia）
 
 - 权限判断是 Provider 的可继承附加属性 Permissions（`Func<string, bool>`，上游 createUi / Provider 的 permissions），哪里都没写时一律放行；`Provider.Can(控件, 权限点…)` 是上游的 useCan（几个时任一满足即可），用来禁用按钮、过滤菜单项。
