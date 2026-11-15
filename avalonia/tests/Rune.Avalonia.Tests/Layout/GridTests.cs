@@ -109,6 +109,7 @@ public class GridTests
 
     [Upstream("Grid", "balancedColumns：")]
     [Fact]
+    [Upstream("Grid", "balanced：放得下 3 列时 4 项排成 2 + 2，放得下 4 列时一行，窄到 1 列时一列")]
     public Task Balanced_never_leaves_one_item_alone_on_the_last_row() => HeadlessUi.Run(() =>
     {
         Assert.Equal([2, 4, 1, 3, 1], new[] { (4, 3), (4, 4), (4, 1), (6, 4), (1, 3) }.Select(pair => GridLayout.BalancedColumns(pair.Item1, pair.Item2)));

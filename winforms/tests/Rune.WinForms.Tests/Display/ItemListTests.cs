@@ -60,6 +60,7 @@ public class ItemListTests
 
     [Fact]
     // 上游是浏览器测试（ItemList.browser.test.tsx）：点说明选中这一条；点结束边的按钮只触发按钮
+    [Upstream("ItemList", "点说明选中这一条；点结束边的按钮只触发按钮")]
     public Task Clicking_anywhere_selects_but_end_buttons_only_act_themselves() => WinFormsUi.Run(() =>
     {
         var log = new List<string>();

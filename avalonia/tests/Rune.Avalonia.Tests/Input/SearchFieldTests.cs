@@ -7,6 +7,10 @@ namespace Rune.Avalonia.Tests;
 public class SearchFieldTests
 {
     [Fact]
+    [Upstream("SearchField", "打字过滤列表；回车立即触发 onSearch；清空按钮清掉并触发")]
+    [Upstream("SearchField", "type=")]
+    [Upstream("SearchField", "onSearch：打字等停手，回车立即，清空立即；同一个词不重复")]
+    [Upstream("SearchField", "父级从外面改了值（重置）：不触发 onSearch，之后再输入同样的词照常触发")]
     public Task Searches_when_typing_pausing_enter_and_clearing() => HeadlessUi.Run(() =>
     {
         var field = new SearchField();
@@ -36,5 +40,15 @@ public class SearchFieldTests
         Assert.Equal("盖板", searched[^1]);
         field.Text = ""; // 清空立即发
         Assert.Equal("", searched[^1]);
+
+        // 搜过“盖板”后父级从外面重置：不发；之后再输入“盖板”照常发
+        field.Text = "盖板";
+        var count = searched.Count;
+        other.Focus();
+        field.Text = "";
+        Assert.Equal(count, searched.Count);
+        field.Focus();
+        field.Text = "盖板";
+        Assert.Equal((count + 1, "盖板"), (searched.Count, searched[^1]));
     });
 }

@@ -77,4 +77,22 @@ public class CodePreviewTests
         Assert.Same(edit, buttons[0]);
         Assert.Same(preview.Toggle, buttons[1]);
     });
+
+    /// <summary>有一行很长的源码（上游测试里的那段）。</summary>
+    static readonly string WideCode = string.Join(Environment.NewLine, "export default _component(() => () => (", "  <Flex direction='column' align='start' gap='xs' wrap justify='between'>" + string.Concat(Enumerable.Repeat("很长的一行", 12)) + "</Flex>", "));");
+
+    [Fact]
+    [Upstream("CodePreview", "CodePreview：展开源码后代码块不比卡片宽，长行可以横向滚动")]
+    public Task Shown_code_is_no_wider_than_the_card_and_scrolls() => HeadlessUi.Run(() =>
+    {
+        var preview = new CodePreview { Code = WideCode, IsCodeShown = true, Content = new Button { Content = "保存" } };
+        var window = HeadlessUi.Show(new StackPanel { Width = 320, Children = { preview } });
+        HeadlessUi.Flush(window);
+
+        var scroll = preview.CodeBlock.GetVisualDescendants().OfType<ScrollArea>().Single();
+        Assert.True(scroll.Viewport.Width <= 320);
+        Assert.True(scroll.Extent.Width > scroll.Viewport.Width, $"extent {scroll.Extent} viewport {scroll.Viewport}");
+        scroll.Offset = new Vector(200, 0);
+        Assert.Equal(200, scroll.Offset.X);
+    });
 }

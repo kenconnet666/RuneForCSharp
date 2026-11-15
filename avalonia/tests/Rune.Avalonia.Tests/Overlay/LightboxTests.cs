@@ -14,6 +14,7 @@ public class LightboxTests
     static LightboxItem[] Items(int count) => [.. Enumerable.Range(1, count).Select(i => new LightboxItem(ImageTests.Picture($"l{i}"), $"图纸 {i}"))];
 
     [Fact]
+    [Upstream("Lightbox", "←→ 切换，Esc 关闭并把焦点还回去")]
     public Task Arrows_switch_and_escape_closes_returning_focus() => HeadlessUi.Run(() =>
     {
         var opener = new global::Avalonia.Controls.Button { Content = "预览" };

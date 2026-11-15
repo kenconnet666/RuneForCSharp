@@ -1,3 +1,4 @@
+using Avalonia.Headless;
 using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Automation.Peers;
@@ -103,5 +104,28 @@ public class CarouselTests
         carousel.ItemsSource = slides;
         HeadlessUi.Flush(window);
         Assert.Same(slides[1], ((global::Avalonia.Controls.Presenters.ContentPresenter)carousel.Slides[1]).Content);
+    });
+
+    [Fact]
+    [Upstream("Carousel", "手动滚动停下后序号跟着变；不循环时到头那侧的按钮不可用")]
+    public Task Dragging_snaps_and_writes_the_index() => HeadlessUi.Run(() =>
+    {
+        var carousel = new Carousel { ItemsSource = new[] { "1", "2", "3", "4" }, Loop = false, Width = 300, Height = 120 };
+        var window = HeadlessUi.Show(carousel);
+        Assert.False(carousel.Buttons.Previous.IsEnabled);
+
+        Point At(double x) => carousel.Viewport.TranslatePoint(new Point(x, 60), window)!.Value;
+        // 从中间（两侧按钮之外）往回拖两张多一点：松开时吸附到最近的一张
+        window.MouseDown(At(200), MouseButton.Left);
+        window.MouseMove(At(190));
+        window.MouseMove(At(200 - 620));
+        window.MouseUp(At(200 - 620), MouseButton.Left);
+        Assert.Equal(2, carousel.Index);
+        window.MouseDown(At(200), MouseButton.Left);
+        window.MouseMove(At(190));
+        window.MouseMove(At(-900));
+        window.MouseUp(At(-900), MouseButton.Left);
+        Assert.Equal(3, carousel.Index);
+        Assert.False(carousel.Buttons.Next.IsEnabled);
     });
 }

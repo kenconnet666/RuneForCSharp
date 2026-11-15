@@ -120,4 +120,20 @@ public class CarouselTests
         WpfUi.Flush();
         Assert.Same(slides[1], ((ContentPresenter)carousel.Slides[1]).Content);
     });
+
+    [Fact]
+    [Upstream("Carousel", "手动滚动停下后序号跟着变；不循环时到头那侧的按钮不可用")]
+    public Task Dragging_snaps_and_writes_the_index() => WpfUi.Run(() =>
+    {
+        var carousel = new Carousel { ItemsSource = new[] { "1", "2", "3", "4" }, Loop = false, Width = 300, Height = 120 };
+        WpfUi.Show(Host(carousel));
+        Assert.False(carousel.Buttons.Previous.IsEnabled);
+
+        // WPF 的鼠标位置模拟不了：直接喂张片区里的坐标。往回拖两张多一点，松开时吸附到最近的一张
+        carousel.Drag(new Point(200, 60), new Point(200 - 620, 60));
+        Assert.Equal(2, carousel.Index);
+        carousel.Drag(new Point(200, 60), new Point(-900, 60));
+        Assert.Equal(3, carousel.Index);
+        Assert.False(carousel.Buttons.Next.IsEnabled);
+    });
 }

@@ -14,6 +14,7 @@ public class LightboxTests
         lightbox.Viewport.RaiseEvent(new KeyEventArgs(Keyboard.PrimaryDevice, PresentationSource.FromVisual(lightbox.Viewport)!, 0, Key.Escape) { RoutedEvent = Keyboard.PreviewKeyDownEvent });
 
     [Fact]
+    [Upstream("Lightbox", "←→ 切换，Esc 关闭并把焦点还回去")]
     public Task Arrows_switch_and_escape_closes_returning_focus() => WpfUi.Run(() =>
     {
         var opener = new System.Windows.Controls.Button { Content = "预览" };

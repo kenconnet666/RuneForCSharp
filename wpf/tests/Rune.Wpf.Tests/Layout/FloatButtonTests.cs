@@ -32,6 +32,7 @@ public class FloatButtonTests
 
     [Fact]
     [Upstream("FloatButton", "单个与组里的按钮外观不同（单个自己固定在角落）；组是带名称的 group")]
+    [Upstream("FloatButton", "组停在示例框的右下角；滚下去后多出回到顶部")]
     public Task Alone_it_sits_in_the_corner_and_in_a_group_it_follows_the_group() => WpfUi.Run(() =>
     {
         var alone = Named(new FloatButton { Icon = Lucide.MessageCircle }, "联系客服");
@@ -76,6 +77,7 @@ public class FloatButtonTests
 
     [Fact]
     [Upstream("FloatButton", "速拨：主按钮 aria-expanded 跟着切换、关联展开的那一列；Esc 收起")]
+    [Upstream("FloatButton", "速拨：点主按钮展开，选一项后收起")]
     public Task Speed_dial_expands_collapses_and_escape_closes() => WpfUi.Run(() =>
     {
         var action = Named(new FloatButton { Icon = Lucide.FileText }, "新建文档");
@@ -114,6 +116,7 @@ public class FloatButtonTests
 
     [Fact]
     [Upstream("BackTop", "滚过阈值才出现；点了容器回到顶部、焦点移到容器")]
+    [Upstream("FloatButton", "组停在示例框的右下角；滚下去后多出回到顶部")]
     public Task Back_top_appears_past_the_threshold_and_scrolls_back() => WpfUi.Run(() =>
     {
         var first = new System.Windows.Controls.Button { Content = "第一个" };

@@ -247,10 +247,12 @@ NavBar（root、list、item）补了部件标记。这些组件都还没做，�
 ### 行为对照纳入文档站的浏览器测试（2026-11-15）
 
 tools/parity/behavior.mjs 原来只扫 packages/ui 的单元测试；ImageCropper 等组件的用例只在文档站真实浏览器里跑的
-apps/docs/src/components/**/test/<组件>.browser.test.tsx 里，现在一起扫。已做的组件因此多出 18 条没对上的用例（Carousel 的“下一张”已标上）：
-Affix（贴底、贴顶）、Carousel（手动滚动停下后序号跟着变）、CodePreview、Collapse（宽内容自己滚动）、Dialog（拖动标题栏）、FloatButton（停在右下角、速拨）、
-Grid（balanced）、ItemList（点说明选中、点按钮只触发按钮）、Lightbox（←→、Esc 还焦点）、Listbox（高度、部件标记）、SearchField、Select（滚到末尾取下一页）、
-Table（stickyHeader、sticky）、Tabs（拖动换位、全部标签页菜单）、Video。多数行为已有测试只是没标、或是网页排版专属，逐个核对补标记或登记不适用（下一次整理时做）。
+apps/docs/src/components/**/test/<组件>.browser.test.tsx 里，现在一起扫。已做的组件因此多出 18 条没对上的用例，当天都处理了：
+多数已有测试覆盖，补上标记（Affix、Dialog 拖动、FloatButton、Grid 的 balanced、ItemList、Lightbox——WinForms 补了焦点还回去的断言、SearchField、Select 分页、Table 吸附、Tabs）；
+新写了 Carousel 的手动滚动（Avalonia 拖动；WPF 的鼠标位置模拟不了，拖动拆成接收坐标的内部方法，TabList 的拖动换位同样处理并补了测试；WinForms 用触摸板横向滑动的消息）、
+Collapse 与 CodePreview 的“宽内容在容器宽度里自己滚动”；Listbox 的 16rem 高度与部件标记、Video 不用播起来的那部分（页面脚本）登记为不适用。
+顺带对上了几条以前没对上的：SearchField 的三条单元用例（测试补了“外面重置后再输入同样的词照常触发”）、WinForms 的 Collapse 内容层、Video 的两条。
+全库还有 123 条旧的没对上，下次整理时逐个核对。
 
 ### 第二十批（2026-11-08 通知，master cfccec47..c5bafc10：P12 第二批）
 

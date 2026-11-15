@@ -171,6 +171,9 @@ public class TabList : FrameworkElement
     /// <summary>标签排开的方向（测试用）。</summary>
     internal FlexDirection Direction => strip.Direction;
 
+    /// <summary>标签条（测试用：拖动的坐标相对它）。</summary>
+    internal FrameworkElement StripPart => strip;
+
     /// <summary>元素所在的标签列表（逻辑树上最近的一个）。</summary>
     internal static TabList? Of(DependencyObject element)
     {
@@ -384,15 +387,26 @@ public class TabList : FrameworkElement
     void OnStripPressed(object sender, MouseButtonEventArgs e)
     {
         if (Reordered is null || e.StylusDevice is not null) return;
-        pressed = Ancestor<Tab>(e.OriginalSource as DependencyObject);
-        pressedAt = e.GetPosition(strip);
+        PressTab(Ancestor<Tab>(e.OriginalSource as DependencyObject), e.GetPosition(strip));
     }
 
-    /// <summary>拖过门槛后跟着指针：越过别的标签的中线就换位（同 Sortable）。拖动时列表接管指针（标签被拿下放回时不丢）。</summary>
+    /// <summary>按下了标签（坐标相对标签条；测试里直接喂坐标）。</summary>
+    internal void PressTab(Tab? tab, Point at)
+    {
+        pressed = tab;
+        pressedAt = at;
+    }
+
     void OnStripMoved(object sender, MouseEventArgs e)
     {
         if (pressed is null || e.LeftButton != MouseButtonState.Pressed) return;
-        var at = e.GetPosition(strip);
+        DragTo(e.GetPosition(strip));
+    }
+
+    /// <summary>拖过门槛后跟着指针：越过别的标签的中线就换位（同 Sortable）。拖动时列表接管指针（标签被拿下放回时不丢）。</summary>
+    internal void DragTo(Point at)
+    {
+        if (pressed is null) return;
         if (!dragging)
         {
             if ((at - pressedAt).Length < DragThreshold) return;
@@ -409,7 +423,8 @@ public class TabList : FrameworkElement
         if (to > from == at.X > over.TranslatePoint(default, strip).X + over.ActualWidth / 2) MoveTab(pressed, to, announce: false);
     }
 
-    void EndDrag()
+    /// <summary>松开：结束拖动。</summary>
+    internal void EndDrag()
     {
         if (pressed is not null) pressed.IsDragging = false;
         pressed = null;

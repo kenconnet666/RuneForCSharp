@@ -132,6 +132,7 @@ public class TabsTests
 
     [Fact]
     [Upstream("Tabs", "可关闭：Delete 或关闭按钮关闭；关掉当前标签时选它后面的一个，焦点跟过去")]
+    [Upstream("Tabs", "新建的标签在“全部标签页”菜单里；关掉当前标签后焦点在旁边的标签上")]
     public Task Closing_selects_the_next_tab_and_moves_focus_there() => HeadlessUi.Run(() =>
     {
         var list = new TabList { [AutomationProperties.NameProperty] = "页面" };
@@ -213,6 +214,7 @@ public class TabsTests
     });
 
     [Fact]
+    [Upstream("Tabs", "拖动标签越过旁边标签的中线就换位")]
     public Task Dragging_a_tab_past_the_next_ones_center_swaps_them() => HeadlessUi.Run(() =>
     {
         var (tabs, items, _) = Build();
@@ -233,6 +235,7 @@ public class TabsTests
     });
 
     [Fact]
+    [Upstream("Tabs", "新建的标签在“全部标签页”菜单里；关掉当前标签后焦点在旁边的标签上")]
     public Task Overflowing_tabs_scroll_with_buttons_and_the_all_tabs_menu_switches() => HeadlessUi.Run(() =>
     {
         var list = new TabList { ShowAllMenu = true };

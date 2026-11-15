@@ -8,6 +8,7 @@ public class AffixTests
 {
     [Fact]
     [Upstream("Affix", "哨兵滚到 offsetTop 之上就是贴住：data-stuck、阴影、onChange；滚回来取消")]
+    [Upstream("Affix", "贴顶：滚下去后贴在面板顶部")]
     public Task Scrolling_past_the_offset_pins_it_to_the_top() => HeadlessUi.Run(() =>
     {
         var affix = new Affix { OffsetTop = 8, Content = new Border { Height = 40 } };
@@ -51,6 +52,7 @@ public class AffixTests
     });
 
     [Fact]
+    [Upstream("Affix", "贴底：压着内容时停在面板底边并标记贴住；滚到末尾回到原位")]
     public Task Offset_bottom_pins_it_to_the_bottom_until_its_place_scrolls_in() => HeadlessUi.Run(() =>
     {
         var affix = new Affix { OffsetBottom = 0, Shadow = false, Content = new Border { Height = 40 } };

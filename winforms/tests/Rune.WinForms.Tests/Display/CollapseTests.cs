@@ -57,4 +57,25 @@ public class CollapseTests
         WinFormsUi.Wait(TimeSpan.FromMilliseconds(400));
         Assert.True(content.IsHandleCreated);
     });
+
+    /// <summary>有一行很长的源码（上游测试里的那段）。</summary>
+    static readonly string WideCode = string.Join(Environment.NewLine, "export default _component(() => () => (", "  <Flex direction='column' align='start' gap='xs' wrap justify='between'>" + string.Concat(Enumerable.Repeat("很长的一行", 12)) + "</Flex>", "));");
+
+    [Fact]
+    [Upstream("Collapse", "Collapse：展开后内容区和容器一样宽，里面的宽内容自己滚动")]
+    public Task Wide_content_scrolls_inside_the_container_width() => WinFormsUi.Run(() =>
+    {
+        var code = new CodeBlockControl { Code = WideCode, Dock = DockStyle.Top };
+        var collapse = new CollapseControl { Dock = DockStyle.Top, IsOpen = true };
+        collapse.Controls.Add(code);
+        var box = new Panel { Width = 320, Height = 400 };
+        box.Controls.Add(collapse);
+        using var form = WinFormsUi.Show(box);
+
+        Assert.Equal(320, collapse.Width);
+        Assert.Equal(320, code.Width);
+        var scroll = code.Parts.Scroll;
+        Assert.True(scroll.Width <= 320);
+        Assert.True(scroll.IsOverflowing);
+    });
 }

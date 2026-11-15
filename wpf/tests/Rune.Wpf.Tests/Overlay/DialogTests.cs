@@ -33,6 +33,7 @@ public class DialogTests
     }
 
     [Fact]
+    [Upstream("Dialog", "按住标题栏拖动；拖出窗口时停在边上")]
     public Task Draggable_stays_in_the_window_and_recenters_on_open() => WpfUi.Run(() =>
     {
         var dialog = new Dialog { Title = "付款信息", Draggable = true, Content = new TextBlock { Text = "核对" } };

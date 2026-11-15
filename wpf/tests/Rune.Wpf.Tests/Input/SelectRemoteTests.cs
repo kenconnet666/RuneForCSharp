@@ -91,6 +91,7 @@ public class SelectRemoteTests
     });
 
     [Fact]
+    [Upstream("Select", "滚到末尾取下一页")]
     public Task Scrolling_near_the_end_loads_the_next_page() => WpfUi.Run(() =>
     {
         var pages = new List<int>();

@@ -610,6 +610,7 @@ export const PLATFORM_BEHAVIOR_NOT_APPLICABLE = {
       '操作人头像、进行中的加载指示也转发部件属性': '同上：头像、加载指示是 TimelineRowControl 组合的子控件，没有部件属性记录',
     },
     ItemList: { 'ItemList：列表是 root，条目是 item': '标题、说明是 ItemListItemControl 里的子控件，没有部件标记（PLATFORM_PROPS_NOT_PORTED）' },
+    Collapse: { '属性落到外层，propsContent 落到内容层': 'CollapseControl 的子控件直接放在它里面，没有单独的内容层（WinForms 的控件就是一层窗口）' },
     ScrollArea: { '内容层、滚动条、滑块都能加属性': '滚动条是组件库画的滑块子控件，没有部件属性可加（PLATFORM_PROPS_NOT_PORTED）' },
     CodeBlock: {
       '部件属性': '代码块是 CodeBlockControl 自己画的，没有部件属性可加（PLATFORM_PROPS_NOT_PORTED）',
@@ -636,7 +637,13 @@ export const BEHAVIOR_NOT_APPLICABLE = {
   Grid: { createGrid: '桌面没有语义标签：别的语义容器从 Grid 派生、改读屏角色（GridList 就是这样，测试覆盖）' },
   Stat: { '部件带标记；按色调档位追加样式': 'TS 的 components.Stat 配方定制是网页的样式系统；桌面改部件样式（Avalonia 的 rune|Stat #PART_Number 选择器、WPF 的 StatParts 样式键），数值的色调是 Tone' },
   Embed: { 'iframe 带 title、src': 'loading="lazy"、referrerpolicy 是 iframe 的属性：桌面的网页内核放进界面就加载，没有懒加载；title 是读屏名称（测试覆盖）' },
-  Video: { '自绘控制条跟着 video 的事件走': '控制条的脚本在网页内核的页面里跑，测试里没有内核：页面的元素与文案由 Custom_bar 的测试核对，事件与键盘在真实窗口里核对' },
+  Video: {
+    '自绘控制条跟着 video 的事件走': '控制条的脚本在网页内核的页面里跑，测试里没有内核：页面的元素与文案由 Custom_bar 的测试核对，事件与键盘在真实窗口里核对',
+    '不用真的播起来的部分': '同上：没有原生控制条、M 静音、字幕与倍速菜单都是网页内核里页面脚本的事，测试里没有内核',
+    '挂载时按 video 现在的状态显示': '同上：接管时读 video 的状态是页面脚本的事，测试里没有内核',
+    '不知道时长（直播）': '同上：时长、进度条与方向键都在页面脚本里，测试里没有内核',
+  },
+  Listbox: { '写 16rem 高就是 16rem 高': '网页的回归（高度写在 sx 上落到哪一层、border-box 算不算内边距）与部件标记 data-scope：桌面控件的 Height 就是整个控件的高度' },
   Collapse: { '页内搜索命中': '页内搜索命中收起的内容时展开（hidden="until-found"、beforematch）是浏览器的能力，桌面没有页内搜索' },
   Slider: { '轨道与已选范围都能加属性': '轨道与已选范围是 Slider 自己画的，没有元素可加属性（PROPS_NOT_PORTED）' },
   FieldCompare: { 'FieldCompare：根元素也带标记': '部件标记（data-scope、data-part）是网页给样式与测试找元素用的；桌面的部件是控件本身' },

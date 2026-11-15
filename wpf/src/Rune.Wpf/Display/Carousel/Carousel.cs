@@ -181,6 +181,14 @@ public class Carousel : CompositeControl
     /// <summary>张片区（测试用）。</summary>
     internal Panel Viewport => track;
 
+    /// <summary>在张片区上拖动（测试用：WPF 的鼠标位置模拟不了，直接喂坐标）。</summary>
+    internal void Drag(Point from, Point to)
+    {
+        track.Press(from);
+        track.DragTo(to);
+        track.Release();
+    }
+
     void OnIndexChanged()
     {
         track.ScrollTo(Index, animate: true);
@@ -442,15 +450,33 @@ public class Carousel : CompositeControl
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
         {
             base.OnMouseLeftButtonDown(e);
-            pressedAt = e.GetPosition(this);
-            pressedOffset = Offset;
+            Press(e.GetPosition(this));
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
-            if (pressedAt is not { } from || e.LeftButton != MouseButtonState.Pressed) return;
-            var dx = e.GetPosition(this).X - from.X;
+            if (e.LeftButton == MouseButtonState.Pressed) DragTo(e.GetPosition(this));
+        }
+
+        protected override void OnMouseLeftButtonUp(MouseButtonEventArgs e)
+        {
+            base.OnMouseLeftButtonUp(e);
+            if (Release()) e.Handled = true;
+        }
+
+        /// <summary>按下（坐标相对张片区；测试里直接喂坐标）。</summary>
+        public void Press(Point at)
+        {
+            pressedAt = at;
+            pressedOffset = Offset;
+        }
+
+        /// <summary>挪开 3 以上开始拖，跟着指针移。</summary>
+        public void DragTo(Point at)
+        {
+            if (pressedAt is not { } from) return;
+            var dx = at.X - from.X;
             if (!dragging)
             {
                 if (Math.Abs(dx) < 3) return;
@@ -460,17 +486,17 @@ public class Carousel : CompositeControl
             MoveTo(Math.Clamp(pressedOffset - dx, 0, MaxOffset), TimeSpan.Zero);
         }
 
-        protected override void OnMouseLeftButtonUp(MouseButtonEventArgs e)
+        /// <summary>松开：吸附到最近的一张（序号跟着变）；返回刚才是不是在拖。</summary>
+        public bool Release()
         {
-            base.OnMouseLeftButtonUp(e);
             pressedAt = null;
-            if (!dragging) return;
+            if (!dragging) return false;
             dragging = false;
             ReleaseMouseCapture();
             var target = Nearest();
             if (target == owner.Index) ScrollTo(target, animate: true);
             else owner.SetCurrentValue(IndexProperty, target);
-            e.Handled = true;
+            return true;
         }
 
         /// <summary>WPF 的滚轮事件只有竖向：Shift + 滚轮换张（触摸板横向滑动收不到）。</summary>

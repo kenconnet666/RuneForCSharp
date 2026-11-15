@@ -107,4 +107,25 @@ public class CarouselTests
         Assert.False(carousel.Playing);
         Assert.Equal("开始自动播放", carousel.Buttons.Pause.AccessibleName);
     });
+
+    [Fact]
+    [Upstream("Carousel", "手动滚动停下后序号跟着变；不循环时到头那侧的按钮不可用")]
+    public Task Horizontal_wheel_moves_and_the_end_disables_next() => WinFormsUi.Run(() =>
+    {
+        var carousel = Seasons();
+        carousel.Slides.Add(new Label { Text = "冬", Height = 40 });
+        carousel.Loop = false;
+        using var form = Show(carousel);
+        Assert.False(carousel.Buttons.Previous.Enabled);
+
+        // 触摸板横向滑动（WM_MOUSEHWHEEL，往右为正）：子控件不处理时转到轮播上
+        var wndProc = typeof(Control).GetMethod("WndProc", BindingFlags.NonPublic | BindingFlags.Instance)!;
+        void Swipe() => wndProc.Invoke(carousel, [Message.Create(carousel.Handle, 0x020E, 120 << 16, 0)]);
+        Swipe();
+        Swipe();
+        Assert.Equal(2, carousel.Index);
+        for (var i = 0; i < 4; i++) Swipe();
+        Assert.Equal(3, carousel.Index);
+        Assert.False(carousel.Buttons.Next.Enabled);
+    });
 }

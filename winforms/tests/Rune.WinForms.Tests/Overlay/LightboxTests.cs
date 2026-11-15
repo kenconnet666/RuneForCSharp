@@ -11,6 +11,7 @@ public class LightboxTests
         dialog.Surface.Form.GetType().GetMethod("ProcessDialogKey", BindingFlags.NonPublic | BindingFlags.Instance, [typeof(Keys)])!.Invoke(dialog.Surface.Form, [Keys.Escape]);
 
     [Fact]
+    [Upstream("Lightbox", "←→ 切换，Esc 关闭并把焦点还回去")]
     public Task Arrows_switch_and_escape_closes() => WinFormsUi.Run(() =>
     {
         var opener = new ButtonControl { Text = "预览" };
@@ -39,6 +40,8 @@ public class LightboxTests
         Escape(lightbox);
         WinFormsUi.Until(() => !lightbox.IsOpen);
         Assert.Equal([OpenChangeReason.Escape], reasons);
+        // 焦点回到打开它的按钮
+        WinFormsUi.Until(() => opener.Focused);
     });
 
     [Fact]

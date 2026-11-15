@@ -83,4 +83,25 @@ public class CollapseTests
         collapse.IsOpen = false;
         Assert.Same(content, Holder(collapse).Child);
     });
+
+    /// <summary>有一行很长的源码（上游测试里的那段）。</summary>
+    static readonly string WideCode = string.Join(Environment.NewLine, "export default _component(() => () => (", "  <Flex direction='column' align='start' gap='xs' wrap justify='between'>" + string.Concat(Enumerable.Repeat("很长的一行", 12)) + "</Flex>", "));");
+
+    [Fact]
+    [Upstream("Collapse", "Collapse：展开后内容区和容器一样宽，里面的宽内容自己滚动")]
+    public Task Wide_content_scrolls_inside_the_container_width() => WpfUi.Run(() =>
+    {
+        var code = new CodeBlock { Code = WideCode };
+        var collapse = new Collapse { IsOpen = true, Content = code };
+        var host = new StackPanel { Width = 320, Children = { collapse } };
+        host.Resources.MergedDictionaries.Add(new RuneTheme());
+        WpfUi.Show(host);
+        WpfUi.Flush();
+
+        Assert.Equal(320, collapse.ActualWidth);
+        Assert.Equal(320, code.ActualWidth);
+        var scroll = WpfUi.Descendants(code).OfType<ScrollArea>().Single();
+        Assert.True(scroll.ViewportWidth <= 320);
+        Assert.True(scroll.ExtentWidth > scroll.ViewportWidth, $"extent {scroll.ExtentWidth} viewport {scroll.ViewportWidth}");
+    });
 }

@@ -148,6 +148,7 @@ public class TabsTests
 
     [Fact]
     [Upstream("Tabs", "可关闭：Delete 或关闭按钮关闭；关掉当前标签时选它后面的一个，焦点跟过去")]
+    [Upstream("Tabs", "新建的标签在“全部标签页”菜单里；关掉当前标签后焦点在旁边的标签上")]
     public Task Closing_selects_the_next_tab_and_moves_focus_there() => WpfUi.Run(() =>
     {
         var list = new TabList();
@@ -219,6 +220,7 @@ public class TabsTests
     });
 
     [Fact]
+    [Upstream("Tabs", "新建的标签在“全部标签页”菜单里；关掉当前标签后焦点在旁边的标签上")]
     public Task Overflowing_tabs_scroll_with_buttons_and_the_all_tabs_menu_switches() => WpfUi.Run(() =>
     {
         var list = new TabList { ShowAllMenu = true };
@@ -261,5 +263,27 @@ public class TabsTests
         allowed = true;
         tab.RequestClose();
         Assert.Equal(["a"], command.Executed);
+    });
+
+    [Fact]
+    [Upstream("Tabs", "拖动标签越过旁边标签的中线就换位")]
+    public Task Dragging_a_tab_past_the_next_ones_center_swaps_them() => WpfUi.Run(() =>
+    {
+        var (tabs, items, _, host) = Build();
+        var list = (TabList)tabs.Children[0];
+        IReadOnlyList<string>? order = null;
+        list.Reordered += (_, e) => order = e.Values;
+        WpfUi.Show(host);
+
+        // WPF 的鼠标位置模拟不了：直接喂标签条里的坐标
+        Point At(Tab tab, double x) => tab.TranslatePoint(new Point(x, tab.ActualHeight / 2), list.StripPart);
+        list.PressTab(items[0], At(items[0], 4));
+        list.DragTo(At(items[1], 2)); // 还没过中线
+        Assert.Null(order);
+        Assert.True(items[0].IsDragging);
+        list.DragTo(At(items[1], items[1].ActualWidth - 2));
+        Assert.Equal(["paid", "all", "done"], order);
+        list.EndDrag();
+        Assert.False(items[0].IsDragging);
     });
 }
