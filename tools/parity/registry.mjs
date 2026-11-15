@@ -165,6 +165,8 @@ export const COMPONENT_PROP_RENAMES = {
   CodePreview: { lang: 'Language', _showCode: 'IsCodeShown' },
   // Table 自己有 Rows（表体的行）；DocSection 的 id 是锚点，控件自己有 Name
   TextTable: { rows: 'TextRows' },
+  // 数据是 ItemsSource（Table 自己有 Rows，同 ItemsControl 的叫法）；合并单元格的函数加 Get 前缀（CellSpan 是它返回的类型）
+  ColumnTable: { rows: 'ItemsSource', cellSpan: 'GetCellSpan' },
   DocSection: { id: 'SectionId' },
   // 控件自己有 Width
   TableHeaderCell: { width: 'ColumnWidth' },
@@ -451,6 +453,10 @@ export const PROPS_NOT_PORTED = {
   Table: { propsRoot: '外层的外框与滚动区域由 Table 管：滚动方向是 ScrollAxis（WinForms 外面套 ScrollAreaControl），外观按密度、样式、斑马纹与主题 token' },
   TextTable: { propsRoot: 'TextTable 本身就是 Table：同 Table 的 propsRoot' },
   PropsTable: { propsRoot: 'PropsTable 本身就是 Table：同 Table 的 propsRoot' },
+  ColumnTable: {
+    propsRoot: 'ColumnTable 本身就是 Table：同 Table 的 propsRoot',
+    getKey: '行是重建的控件，没有虚拟 DOM 的 key 要对；每行的 DataContext 就是那一行的数据',
+  },
   ...Object.fromEntries(['TableHead', 'TableBody', 'TableFoot', 'TableRow', 'TableCaption', 'TableCell', 'TableHeaderCell'].map((name) => [name, { propsRoot: '行、单元格、各部分本身就是元素：样式直接写在它们身上' }])),
   Select: {
     placement: '弹出层固定贴着外壳下方、至少与它同宽（放不下时翻到上方），同平台的下拉框',
