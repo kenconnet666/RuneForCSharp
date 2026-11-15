@@ -15,8 +15,8 @@ public class PanZoomTests
     [Fact]
     public void Clamp_pan_hides_the_gaps_and_centers_small_content()
     {
-        Assert.Equal(new PanZoomState(-100, 0, 1), PanZoom.ClampPan(new PanZoomState(-500, 50, 1), (200, 200), (300, 300)));
-        Assert.Equal(new PanZoomState(50, 50, 1), PanZoom.ClampPan(new PanZoomState(0, 0, 1), (200, 200), (100, 100)));
+        Assert.Equal(new PanZoomState(-100, 0, 1), PanZoom.ClampPan(new PanZoomState(-500, 50, 1), new PanZoomRegion(0, 0, 200, 200), (300, 300)));
+        Assert.Equal(new PanZoomState(50, 50, 1), PanZoom.ClampPan(new PanZoomState(0, 0, 1), new PanZoomRegion(0, 0, 200, 200), (100, 100)));
     }
 
     [Fact]
@@ -70,5 +70,22 @@ public class PanZoomTests
         Assert.Equal(200 - 400 * view.State.Scale, view.State.X, 6);
         view.Wheel(1, (100, 100));
         Assert.True(view.State.Scale < 1.3);
+    }
+
+    [Fact]
+    public void Cover_keeps_the_frame_filled()
+    {
+        // 视口 300×200，裁剪框在中间 100×100，内容 400×200：盖满框至少要 0.5
+        var view = new PanZoom(() => (300, 200)) { Bounds = () => (400, 200), Frame = () => new PanZoomRegion(100, 50, 100, 100), Cover = true, Min = 0.1 };
+        Assert.Equal(0.5, view.MinScale);
+        view.Apply(new PanZoomState(0, 0, 0.2));
+        Assert.Equal(0.5, view.State.Scale);
+        // 框的左上角不露出空白：内容的左边、上边不进到框里
+        view.PanBy(500, 500);
+        Assert.Equal((100d, 50d), (view.State.X, view.State.Y));
+        view.PanBy(-1000, -1000);
+        Assert.Equal((200 - 400 * 0.5, 150 - 200 * 0.5), (view.State.X, view.State.Y));
+        view.Wheel(5, (150, 100));
+        Assert.Equal(0.5, view.State.Scale);
     }
 }

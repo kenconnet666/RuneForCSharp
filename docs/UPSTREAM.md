@@ -102,7 +102,7 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 |---|---|---|
 | Carousel（8b909944、c09d837b）：原生横向滚动加吸附、autoplay、页点、APG 轮播语义 | 三个平台都做了（2026-11-15） | 位移切换加拖动吸附（DESIGN 的 Carousel 一节） |
 | 语言包破坏性合并：zoomIn、zoomOut、slideCounter、resetView 代替 lightbox*、chart* 的同义键 | Lightbox 已做（2026-11-15），用的是合并后的键 | 锁定时重新生成语言包即可 |
-| ImageCropper，usePanZoom 加 frame、cover，Upload 的 transform（88671dd1） | PanZoom 已做（2026-11-15，Lightbox 用的部分），ImageCropper、Upload 还没做 | 做 ImageCropper 时给孪生文件 PanZoom 加 frame、cover |
+| ImageCropper，usePanZoom 加 frame、cover，Upload 的 transform（88671dd1） | PanZoom 的 frame、cover 与 ImageCropper 三个平台都做了（2026-11-15），Upload 还没做 | 做 Upload 时加 transform，头像示例换成上游的“选好图片先弹出裁剪” |
 | ColorPicker 与颜色工具；ColorField 的色块改成按钮弹出 ColorPicker（613b93bb，破坏性） | 还没做 ColorField | 做 ColorField 时直接照新的 |
 | DataTable、TreeDataTable 的 virtualColumns（96efc7ad） | 还没做 DataTable | 做时照新的 |
 | 下一步上游做 P2 文档站整改、P2.5 逐个组件精修，做完请我们整体跟进一遍 | | 到时按页重截、逐页对照 |
@@ -244,6 +244,14 @@ NavBar（root、list、item）补了部件标记。这些组件都还没做，�
 | 日历成为配方组件 Calendar（CalendarView、RangeCalendar、日期选择的弹出层、QuarterCalendar 共用）：部件 root、months、month、header、heading、grid、weekday、weekNumber、cell、cellButton、footer；data-scope 统一为 calendar；CalendarOptions（size、showWeekNumbers、fixedWeeks）可按组件设默认值 | 日历还没做 | 做时照新的 |
 | P12 复合组件转发里面基础组件的部件属性：Timeline（propsAvatar、propsPending）、PeoplePickerPanel（propsAvatar、propsCheckbox、propsSelectAll、propsDrill、propsClear、propsRemove）、DataImport（propsTemplate、propsPrevious、propsNext、propsAgain、propsOnlyErrors）；合并顺序 默认 < 使用方 < 组件管的 | 这些组件还没做；合并顺序我们本来如此（DESIGN §7） | 做时照新的；上游的候选清单在 .claude/reports/p12-candidates.md，已做的组件出现在里面时跟进 |
 
+### 行为对照纳入文档站的浏览器测试（2026-11-15）
+
+tools/parity/behavior.mjs 原来只扫 packages/ui 的单元测试；ImageCropper 等组件的用例只在文档站真实浏览器里跑的
+apps/docs/src/components/**/test/<组件>.browser.test.tsx 里，现在一起扫。已做的组件因此多出 18 条没对上的用例（Carousel 的“下一张”已标上）：
+Affix（贴底、贴顶）、Carousel（手动滚动停下后序号跟着变）、CodePreview、Collapse（宽内容自己滚动）、Dialog（拖动标题栏）、FloatButton（停在右下角、速拨）、
+Grid（balanced）、ItemList（点说明选中、点按钮只触发按钮）、Lightbox（←→、Esc 还焦点）、Listbox（高度、部件标记）、SearchField、Select（滚到末尾取下一页）、
+Table（stickyHeader、sticky）、Tabs（拖动换位、全部标签页菜单）、Video。多数行为已有测试只是没标、或是网页排版专属，逐个核对补标记或登记不适用（下一次整理时做）。
+
 ### 第二十批（2026-11-08 通知，master cfccec47..c5bafc10：P12 第二批）
 
 复合组件转发里面的按钮、复选框、链接的部件属性（SchemaFields、SchemaForm、Upload、ConditionBuilder、Breadcrumbs、CommentThread、FilterBar、SlideCaptcha、
@@ -381,7 +389,7 @@ Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_
 |---|---|---|
 | 部件属性合并：undefined 不表态、null 才清掉；aria-describedby 拼接去重；嵌套 propsXxx 递归合并；同名事件合成 | WinForms 的部件属性记录本来就是 null = 不改、逐字段合并；Avalonia、WPF 用样式 | 已跟：读屏的帮助文字（aria-describedby）三个平台都改成字段的说明、错误与控件自己的拼在一起去重——原来 TextField、Select、Listbox、ToggleGroup 根本没念字段的说明，勾选项只在自己没写时才念 |
 | Listbox disabled 时点选项不改值、不触发 onPick；Link external 的 target、rel 是默认层；Popconfirm、TagsInput、日期、Pagination、Rating、Splitter 等一批行为修正；输入法组合中 DataTable、Cascader 等不处理按键 | Listbox、Popconfirm、Rating、Splitter、TagsInput 已做，其余还没做 | Listbox 本来就拦下（补了测试）；Popconfirm 照新的做（确认进行中被关掉、结果出来没确认成才算取消）；Rating 照新的做（只读时名称里总有分数）；Splitter 照新的做（只认主键拖动，拖动中离开分隔条也保持"拖动中"的样子）；TagsInput 照新的做（输入法组合中的 Enter 是平台的 ImeProcessed / ProcessKey，不加标签）；其余做时照新的 |
-| 新部件属性：NavBar、QuarterCalendar、DataTable 表头按钮、ImageCropper、QueryTable | 还没做 | 做时照新的 |
+| 新部件属性：NavBar、QuarterCalendar、DataTable 表头按钮、ImageCropper、QueryTable | ImageCropper 已做（Avalonia 的 PART_Viewport、PART_Toolbar；图片与裁剪框是画出来的），其余还没做 | 做时照新的 |
 
 锁定跟到 0.22.0（6e6f831d）：生成文件没变；行为对照新增的 Field 两条、Listbox 一条都对上了。
 

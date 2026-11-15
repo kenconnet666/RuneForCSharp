@@ -1378,6 +1378,15 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### ImageCropper（2026-11-15）
+
+- 裁剪框按宽高比放在区域中间、四周至少留 FrameInset，图片在底下平移、缩放，框里永远是图：建在孪生文件 PanZoom 上，给它加了上游的 frame（PanZoomRegion，平移限制按框算）与 cover（缩放下限是盖满框所需的比例）。框、盖满的缩放、初始状态、框里是图片的哪一块、输出的像素大小是孪生文件 ImageCropGeometry（连同 ImageCropShape、ImageCropFileType、ImageCropOutput、ImageCropFormat）。
+- 上游的 handle（toCanvas、toBlob、toFile、reset）换成控件上的方法：ToBitmap（平台的位图：Avalonia 的 RenderTargetBitmap、WPF 的 BitmapSource、WinForms 的 Bitmap）、Encode（PNG 或 JPEG 的字节；Avalonia 12 的 Bitmap.Save 有 JpegBitmapEncoderOptions，WPF 用 Png/JpegBitmapEncoder，WinForms 用 GDI+ 的编码器）、Reset。webp 三个平台都没有现成的编码器，不做；存文件、交给上传由调用方做。
+- 区域是自绘的：surfaceMuted 底、md 圆角，图片按状态画，框外压暗（黑 50%），框留一条白 80% 的细边（圆形是椭圆），键盘聚焦时一圈焦点环（WinForms 画在框里面一圈）。上游的 height（默认 18rem）叫 ViewportHeight（默认 18em；控件自己的 Height 包括工具条），padding 叫 FrameInset（WinForms 是逻辑像素，按 DPI 放大）。
+- 圆形导出：Avalonia、WPF 推一个椭圆裁剪再画；WinForms 的裁剪区域没有抗锯齿，先裁成矩形、再用它当画刷填抗锯齿的椭圆。GDI+ 的高质量插值在边上会取到图片外面的透明像素（矩形四角半透明），画的时候用镜像平铺（ImageAttributes 的 TileFlipXY）。
+- 图片原本的大小：Avalonia 用 Bitmap.Size，WPF、WinForms 按像素（不按图片里记的 DPI）。Avalonia 的 headless 测试不真解码、不真编码，像素与编码的字节在 WPF、WinForms 的测试里核对。
+- 上游的头像示例配 Upload 的 transform（选好图片先弹出裁剪），Upload 还没做，示例改成直接裁一张图纸、点按钮出头像。
+
 ### Carousel（2026-11-15）
 
 - 上游是浏览器的横向滚动加 scroll-snap：桌面上张片排成一条（每张宽 =（宽 − (SlidesPerView − 1) × Gap）÷ SlidesPerView），按位移切换，过渡 lg、系统关闭动画时直接到位。拖动（挪开 3 以内不算）跟着指针，松开吸附到最近的一张；滚到底算最后一张。Index 是最前面那张的序号，一次看几张时最大是 ceil(张数 − SlidesPerView)，页点也只有这么多。
@@ -1416,7 +1425,7 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 ### Image、ImageGroup、Lightbox（2026-11-15）
 
 - 地址是 Uri（上游的 src 叫 Source，同 Avatar）：要有读的状态（扫光的占位、读完淡入）与读不了的占位，所以不收已经解码的图片。读图集中在各库的 ImageLoader：avares:// 或 pack://、file://、http(s)://、base64 的 data:，相对地址按程序所在目录；后台解码，最近 32 张留在内存里（缩略图点开大图、Lightbox 预先读的前后两张不再读一遍）。sources（picture 的备选源）是浏览器的响应式图片，不移植。
-- 平移与缩放是孪生文件 PanZoom（上游的 usePanZoom：zoomAround、clampPan、fitTransform 与控制器），平台控件只把指针、滚轮、双击、按键换成它的调用；滚轮按一格的 delta 取 e 的指数（同上游按 deltaY 连续缩放）。上游的 frame、cover、wheel: 'pan'、filter 是 ImageCropper 用的，做 ImageCropper 时再加。
+- 平移与缩放是孪生文件 PanZoom（上游的 usePanZoom：zoomAround、clampPan、fitTransform 与控制器），平台控件只把指针、滚轮、双击、按键换成它的调用；滚轮按一格的 delta 取 e 的指数（同上游按 deltaY 连续缩放）。上游的 wheel: 'pan'、filter 是画布、流程图用的，做到时再加（frame、cover 随 ImageCropper 加了）。
 - Lightbox 从 Dialog（WinForms 是 DialogControl）派生：模态、焦点、Esc、还回焦点、BeforeClose、命令式 ShowAsync 都是对话框的。面板换成自己的内容、铺满窗口，背景 scrimStrong、文字 onScrim。Dialog 的 RequestClose 改成给子类用（工具栏的关闭按钮问 BeforeClose）；WinForms 的 DialogControl 加了 Flat 钩子（FloatingSurface 的 Elevation.None：没有阴影、描边、圆角），面板是不透明的窗口，scrimStrong 叠在主题背景上画。
 - 打开、换一张、旋转、还原之后整张放进视口：等图片区排好版再做（Avalonia、WPF 在 LayoutUpdated 里；排版途中改比例文字会让工具栏按旧的测量排）。原大按图片的像素算（WPF 不按图片里记的 DPI，WinForms 的一个像素是 1/96 英寸跟着 DPI 放大）。Avalonia 的 TransformOperations 按追加的顺序作用在点上，与 CSS 的 transform 列表相反：先追加缩放、再追加平移。
 - ← / → 在面板里哪里按都算（WinForms 在 ProcessCmdKey 里，不让窗体拿去移动焦点），+ / − / 0 / ↑ / ↓ 只在图片区；上游视口里的 ← / → 会同时平移和切换，我们只切换。下载按钮弹出平台的保存对话框，存原始字节。

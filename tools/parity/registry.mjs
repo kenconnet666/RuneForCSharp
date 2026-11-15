@@ -49,6 +49,8 @@ export const COMPONENT_PROP_RENAMES = {
   Avatar: { name: 'DisplayName', src: 'Source' },
   // 地址是 Uri（同 Avatar 的 Source）；组共用的预览直接是 Lightbox 实例（改它的属性、听它的事件）
   Image: { src: 'Source' },
+  // 区域的高度（控件自己的 Height 包括工具条）、裁剪框离边的距离（Padding 是平台的内边距）
+  ImageCropper: { src: 'Source', height: 'ViewportHeight', padding: 'FrameInset' },
   ImageGroup: { propsLightbox: 'Lightbox' },
   // tooltip 的 false 是 ShowTip = false；速拨的主按钮直接是 FloatButton 实例
   FloatButton: { tooltip: 'Tip' },
@@ -284,6 +286,11 @@ export const PROPS_NOT_PORTED = {
       .map((prop) => [prop, '表格、列表与里面的格子是 FieldCompare 按行生成的（表格是紧凑的 Table）：外观跟主题，要别的样子用字段的 Cell 换显示的内容'])),
   },
   Carousel: { getKey: '给 Vue 对比列表用的键：桌面上按 ItemsSource 的顺序重建每一张，没有按键复用' },
+  ImageCropper: {
+    handle: '方法直接在控件上：ToBitmap（TS 的 toCanvas）、Encode（toBlob、toFile：PNG 或 JPEG 的字节，存文件、交给上传由调用方做）、Reset',
+    propsImage: '图片、遮罩与裁剪框是区域自己画的（不是元素）：没有 img 的跨域属性，外观跟主题',
+    propsButton: '工具条的按钮是 ImageCropper 建的 IconButton（sm、ghost、中性色），没有部件属性：外观跟主题',
+  },
   Lightbox: { propsButton: '工具栏与两侧的按钮是 Lightbox 建的 IconButton（深色底上用 onScrim 的颜色），没有部件属性：外观跟主题' },
   Abbr: { propsTooltip: '提示就是平台的 ToolTip：位置、箭头写在 Abbr 自己身上（Avalonia、WPF 的 Tooltip.Placement、Tooltip.Arrow 附加属性）；WinForms 自带的提示用默认的位置' },
   Pagination: { propsItem: '外层的 li 是 HTML 列表的结构：桌面上页码按钮、省略号直接排在列表里' },
@@ -360,6 +367,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     ScrollArea: { propsScrollbar: '两条滚动条是平台 ScrollViewer 认的固定部件名：样式里用 ScrollAreaParts.VerticalScrollbar、HorizontalScrollbar 选中' },
   },
   WPF: {
+    ImageCropper: Object.fromEntries(['propsViewport', 'propsToolbar']
+      .map((prop) => [prop, '区域与工具条是 ImageCropper 组合的子元素，没有部件样式键：外观跟主题'])),
     Carousel: Object.fromEntries(['propsViewport', 'propsSlide', 'propsPrevious', 'propsNext', 'propsControls', 'propsPause', 'propsDot']
       .map((prop) => [prop, '张片区、每一张、两侧按钮、控制条与页点是 Carousel 组合的子元素，没有部件样式键：外观跟主题，张片的样子由 ItemTemplate 给'])),
     SelectionBar: Object.fromEntries(['propsCount', 'propsClear', 'propsActions']
@@ -386,6 +395,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     CommandPalette: Object.fromEntries(['propsInput', 'propsListbox'].map((prop) => [prop, '面板里的搜索框、列表是 CommandPalette 建的，外观跟着 TextField、Listbox 的主题样式；部件样式键只有搜索行'])),
   },
   WinForms: {
+    ImageCropper: Object.fromEntries(['propsViewport', 'propsToolbar']
+      .map((prop) => [prop, '区域与工具条是 ImageCropperControl 组合的子控件，没有部件属性记录：外观跟主题'])),
     Carousel: Object.fromEntries(['propsViewport', 'propsSlide', 'propsPrevious', 'propsNext', 'propsControls', 'propsPause', 'propsDot']
       .map((prop) => [prop, '张片区、每一张、两侧按钮、控制条与页点是 CarouselControl 组合的子元素，没有部件属性记录：外观跟主题，张片的样子由放进 Slides 的控件自己定'])),
     SelectionBar: Object.fromEntries(['propsCount', 'propsClear', 'propsActions']

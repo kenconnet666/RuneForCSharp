@@ -10,6 +10,13 @@ public readonly record struct PanZoomState(double X, double Y, double Scale)
     public static PanZoomState Identity { get; } = new(0, 0, 1);
 }
 
+/// <summary>视口里的一块（vue-tsx-pro 的 PanZoomRegion，视口内坐标，像素）：裁剪框。</summary>
+/// <param name="X">左边。</param>
+/// <param name="Y">上边。</param>
+/// <param name="Width">宽。</param>
+/// <param name="Height">高。</param>
+public readonly record struct PanZoomRegion(double X, double Y, double Width, double Height);
+
 /// <summary>平移、缩放能识别的按键（平台的键换成它）。</summary>
 public enum PanZoomKey
 {
@@ -38,7 +45,8 @@ public enum PanZoomKey
 /// <summary>
 /// 平移与缩放（vue-tsx-pro 的 usePanZoom，三个库共用一份）：状态只有平移 X、Y 与缩放 Scale，内容自己按它变换。
 /// 拖动平移、滚轮以指针为中心缩放、双击放大一档（已放大时回到初始）、键盘 + / − / 0 / 方向键；给了内容大小（<see cref="Bounds"/>）时限制平移：
-/// 内容比视口大就不露出边外的空白，比视口小就居中。平台的控件把事件换成这里的调用，坐标都是视口内的（像素）。
+/// 内容比视口（或 <see cref="Frame"/>，裁剪框）大就不露出边外的空白，比它小就居中；<see cref="Cover"/> 时缩放下限是内容盖满 Frame 所需的比例（裁剪图片：框里永远是图）。
+/// 平台的控件把事件换成这里的调用，坐标都是视口内的（像素）。
 /// </summary>
 /// <param name="viewport">视口的大小（像素）。</param>
 public sealed class PanZoom(Func<(double Width, double Height)> viewport)
@@ -64,6 +72,37 @@ public sealed class PanZoom(Func<(double Width, double Height)> viewport)
     /// <summary>内容的大小（缩放前）：给了就限制平移；null 时不限制。</summary>
     public Func<(double Width, double Height)?>? Bounds { get; set; }
 
+    /// <summary>平移限制按视口里的这一块算（裁剪框）；null 时是整个视口。</summary>
+    public Func<PanZoomRegion?>? Frame { get; set; }
+
+    /// <summary>内容至少盖满 <see cref="Frame"/>（配合 <see cref="Bounds"/>）：缩放下限取盖满所需的比例与 <see cref="Min"/> 里大的那个。</summary>
+    public bool Cover { get; set; }
+
+    /// <summary>平移限制的区域：<see cref="Frame"/>，没有时是整个视口。</summary>
+    PanZoomRegion Region
+    {
+        get
+        {
+            if (Frame?.Invoke() is { } frame) return frame;
+            var (width, height) = viewport();
+            return new PanZoomRegion(0, 0, width, height);
+        }
+    }
+
+    /// <summary>实际的缩放下限：<see cref="Cover"/> 时还要盖满 Frame。</summary>
+    public double MinScale
+    {
+        get
+        {
+            if (!Cover || Bounds?.Invoke() is not { Width: > 0, Height: > 0 } content) return Min;
+            var region = Region;
+            return Math.Max(Min, Math.Max(region.Width / content.Width, region.Height / content.Height));
+        }
+    }
+
+    /// <summary>实际的缩放上限（不小于下限）。</summary>
+    public double MaxScale => Math.Max(Max, MinScale);
+
     /// <summary>状态变了：控件重新排内容、更新缩放的百分比。</summary>
     public event Action? Changed;
 
@@ -84,11 +123,15 @@ public sealed class PanZoom(Func<(double Width, double Height)> viewport)
         return new PanZoomState(origin.X - (origin.X - state.X) * ratio, origin.Y - (origin.Y - state.Y) * ratio, next);
     }
 
-    /// <summary>平移的限制：内容比视口大时边缘不进到视口里，比视口小时在视口里居中。</summary>
-    public static PanZoomState ClampPan(PanZoomState state, (double Width, double Height) region, (double Width, double Height) content)
+    /// <summary>平移的限制：内容比区域（视口或裁剪框）大时边缘不进到区域里，比区域小时在区域里居中。</summary>
+    public static PanZoomState ClampPan(PanZoomState state, PanZoomRegion region, (double Width, double Height) content)
     {
-        static double Axis(double offset, double room, double size) => size <= room ? (room - size) / 2 : Math.Clamp(offset, room - size, 0);
-        return state with { X = Axis(state.X, region.Width, content.Width * state.Scale), Y = Axis(state.Y, region.Height, content.Height * state.Scale) };
+        static double Axis(double offset, double start, double room, double size) => size <= room ? start + (room - size) / 2 : Math.Clamp(offset, start + room - size, start);
+        return state with
+        {
+            X = Axis(state.X, region.X, region.Width, content.Width * state.Scale),
+            Y = Axis(state.Y, region.Y, region.Height, content.Height * state.Scale),
+        };
     }
 
     /// <summary>
@@ -106,7 +149,7 @@ public sealed class PanZoom(Func<(double Width, double Height)> viewport)
     public void Apply(PanZoomState next)
     {
         if (Bounds?.Invoke() is { } content)
-            next = ClampPan(next with { Scale = Math.Clamp(next.Scale, Min, Math.Max(Min, Max)) }, viewport(), content);
+            next = ClampPan(next with { Scale = Math.Clamp(next.Scale, MinScale, MaxScale) }, Region, content);
         if (next == State) return;
         State = next;
         Changed?.Invoke();
@@ -115,7 +158,7 @@ public sealed class PanZoom(Func<(double Width, double Height)> viewport)
     /// <summary>缩放到 <paramref name="scale"/>（夹在 min–max）；origin 是缩放中心（视口内坐标），默认视口中心。</summary>
     public void ZoomTo(double scale, (double X, double Y)? origin = null)
     {
-        var next = Math.Clamp(scale, Min, Math.Max(Min, Max));
+        var next = Math.Clamp(scale, MinScale, MaxScale);
         if (next == State.Scale) return;
         Apply(ZoomAround(State, next, origin ?? Center));
     }
