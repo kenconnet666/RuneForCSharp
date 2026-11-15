@@ -11,7 +11,7 @@ sealed class PickerPopover : IDisposable
     /// <summary>与外壳的距离（逻辑像素）：同 Select。</summary>
     const float Offset = 6;
 
-    readonly SegmentedFieldControl owner;
+    readonly SegmentedFieldControlBase owner;
     readonly FloatingSurface surface;
     long closedAt = long.MinValue / 2;
 
@@ -19,7 +19,7 @@ sealed class PickerPopover : IDisposable
     /// <param name="owner">选择器（输入框外壳就是它，弹层的定位锚点）。</param>
     /// <param name="icon">按钮的图标。</param>
     /// <param name="toggle">想开（true）或想关（false）与原因：选择器据此改开关并报告。</param>
-    public PickerPopover(SegmentedFieldControl owner, IconData icon, Action<bool, OpenChangeReason> toggle)
+    public PickerPopover(SegmentedFieldControlBase owner, IconData icon, Action<bool, OpenChangeReason> toggle)
     {
         this.owner = owner;
         surface = new FloatingSurface(owner);
@@ -33,13 +33,14 @@ sealed class PickerPopover : IDisposable
         surface.Form.AccessibleRole = AccessibleRole.Dialog;
         surface.Outside += (_, _) => toggle(false, OpenChangeReason.Outside);
         surface.Form.Escape += (_, _) => toggle(false, OpenChangeReason.Escape);
-        owner.Group.KeyDown += (_, e) =>
-        {
-            // 分段里按 Alt + ↓：打开
-            if (e.KeyCode != Keys.Down || !e.Alt || !Button.Enabled) return;
-            toggle(true, OpenChangeReason.Trigger);
-            e.Handled = e.SuppressKeyPress = true;
-        };
+        foreach (var group in owner.Groups)
+            group.KeyDown += (_, e) =>
+            {
+                // 分段里按 Alt + ↓：打开
+                if (e.KeyCode != Keys.Down || !e.Alt || !Button.Enabled) return;
+                toggle(true, OpenChangeReason.Trigger);
+                e.Handled = e.SuppressKeyPress = true;
+            };
     }
 
     /// <summary>后缀里的打开按钮（选择器把它放进 Suffix）。</summary>
