@@ -88,6 +88,9 @@ listbox 页（remote 等远程选项）：single Avalonia 0.08%、WPF 0.07%、Wi
 
 form 页（2026-11-16 补出上游截图后才比，仅 Avalonia）：admission 0.76% / 1.07%、layout 1.05% / 1.72%、signup 3.47% / 3.53%、section-review 8.09% / 10.05%、section-collapsible 8.17% / 9.23%
 （后两个我们矮 14 像素）。字段一行比上游矮 2 像素是共同的原因之一，steps-form 的 onboarding（5.37%）也是它；待收敛。steps-form 的 review 0.48% / 0.49%。
+Steps 的标题、说明补上行高 normal（TextBlock 默认是字体的行距，约 1.33）后 steps-form 的 onboarding 降到 0.16%（暗色 0.59%）；"每行字段矮 1 像素"也是它。
+signup 示例去掉了 480 的限宽（上游铺满），降到 1.85%：剩下的是 `--exact` 不取整排版时，说明文字 18.375 高让下面的框落在小数位置、边线抗锯齿成两行浅色
+（浏览器画边框时贴到整像素），以及图标。
 同日修了 `{rune:Em}` 在 Border 上不生效（FormSection 标题栏没有下边距）：section-review 降到 0.10%，section-collapsible 降到 1.74% / 2.79%。
 
 app-shell 页（2026-11-16 重出上游截图：fullscreen 的效果区改成了 24rem、正文是合同台账）：fullscreen 0.06% / 0.07%；admin 4.23% / 4.47%、mixed 2.04% / 1.89%（Stat 卡片高 4 像素、
