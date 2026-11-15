@@ -1464,6 +1464,13 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### SlideCaptcha（2026-11-16，仅 Avalonia）
+
+- 组件只负责交互、不判对错：SlideChallenge 的背景与拼图是 IImage（服务端给的图由应用解码成位图），拼图和背景一样高、左边缘对着缺口的左边缘，位置换算成像素就是答案。松手发 Released（SlideResult：位置、最多 240 点的轨迹、时长），"换一张"发 RefreshRequested；Status（Idle、Verifying、Success、Error）由父级按判定结果设，Verifying、Success 时锁定，换了图或设回 Idle 时滑块回到起点。
+- 画面按图的宽高比、宽度占满；拼图按位置放（宽按比例，带投影），右上角"换一张"，通过、没对准时底部一条状态色的结果条。滑块条 2.75rem 高，滑过的一段从左边起（缺口在图上的位置是物理的，从右往左时也一样），中间是提示（读屏跳过，状态由实时区域播报）。滑块是可聚焦的 SlideHandle，读屏是滑杆（IRangeValueProvider：0 到能走的距离，值是像素位置）；键盘 ←/→ 2 像素（从右往左时反过来）、Home / End、Enter 或空格松手，没动过不松手；指针拖动时捕获指针，丢了捕获算取消、回到起点。
+- 上游松手回到起点的回弹、没对准时滑块晃一下是过渡动画，这里直接到位。画面与滑块条是 Border 的派生类，样式选择器写 :is(Border)；Border 没有字号，md 圆角在代码里按字号算。
+- 示例：basic（同上游：本地画渐变与圆、挖一个缺口，判定差 4 像素以内、用时不少于 280ms）。
+
 ### NotificationList 与 NotificationCenter（2026-11-16，仅 Avalonia）
 
 - 通知是 NotificationItem 记录（Id、Title、Time 是 DateTimeOffset，另有 Description、Type、IsRead、Href、Tone），类型是 NotificationType(Key, Label)。组件只报告：MarkedRead（读过的 Id，点了一条、全部标为已读）、ItemClicked；读过的状态由应用保存，改了 Items 再给回来。有绝对地址（Href）的那一条点了用系统打开（同 Link），应用内的跳转在 ItemClicked 里做。
