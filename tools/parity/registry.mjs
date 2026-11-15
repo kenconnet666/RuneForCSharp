@@ -263,7 +263,7 @@ export const PROPS_NOT_PORTED = {
   QuarterCalendar: Object.fromEntries(['propsPrevious', 'propsNext', 'propsHeader', 'propsHeading', 'propsGrid', 'propsCell', 'propsCellButton']
     .map((prop) => [prop, '部件同 CalendarView（上游同一个配方）：Avalonia 是 CalendarViewParts 的部件名（样式选择器 :is(rune|CalendarSurface)），WPF 是 CalendarViewParts 的部件样式键，WinForms 的四格是自己画的 QuarterGridControl；按季度给的部件属性没有对应，格子的外观按状态写样式'])),
   RangeCalendar: { valueType: '值是 IsoDateRange（两端 ISO 字符串），另有日期的 Range 属性：没有 @internationalized/date 的日期值类型，不按传进来的值推类型' },
-  ...Object.fromEntries(['SegmentedField', 'DateField', 'TimeField', 'DatePicker', 'DateRangePicker'].map((name) => [name, {
+  ...Object.fromEntries(['SegmentedField', 'DateField', 'TimeField', 'DatePicker', 'DateRangePicker', 'TimePicker'].map((name) => [name, {
     name: FORM_NAME,
     propsSegment: '分段是里面的 DateSegmentGroup：样式写在每段的 DateSegmentBox 与分隔符 Text#PART_Literal 上',
     propsLiteral: '分段是里面的 DateSegmentGroup：样式写在每段的 DateSegmentBox 与分隔符 Text#PART_Literal 上',
@@ -278,9 +278,9 @@ export const PROPS_NOT_PORTED = {
         propsStart: '开始那组是 SegmentedFieldParts.Input（同单个分段输入框的主元素），结束那组是 SegmentedFieldParts.End',
       }
       : {}),
-    ...(name === 'DatePicker' || name === 'DateRangePicker'
-      ? Object.fromEntries(['propsButton', 'propsPopover', 'propsPresets', 'propsPreset', 'propsToday', 'propsCalendar']
-        .map((prop) => [prop, '弹层里的元素是打开时建的：Avalonia 的部件名在 PickerParts（样式选择器 rune|SegmentedField，选择器的样式键是外壳的），WPF 是 PickerParts 的部件样式键，WinForms 的按钮与弹层内容是组合的子控件，没有部件属性记录；日历的选项由选择器给（粒度、范围、并排月数）']))
+    ...(name === 'DatePicker' || name === 'DateRangePicker' || name === 'TimePicker'
+      ? Object.fromEntries(['propsButton', 'propsPopover', 'propsPresets', 'propsPreset', 'propsToday', 'propsCalendar', 'propsList', 'propsNow']
+        .map((prop) => [prop, '弹层里的元素是打开时建的：Avalonia 的部件名在 PickerParts（样式选择器 rune|SegmentedField，选择器的样式键是外壳的），WPF 是 PickerParts 的部件样式键，WinForms 的按钮与弹层内容是组合的子控件，没有部件属性记录；日历、时间列表的选项由选择器给（粒度、范围、并排月数、步长）']))
       : {}),
   }])),
   DateSegmentGroup: {
@@ -499,7 +499,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     CommandPalette: Object.fromEntries(['propsInput', 'propsListbox'].map((prop) => [prop, '面板里的搜索框、列表是 CommandPalette 建的，外观跟着 TextField、Listbox 的主题样式；部件样式键只有搜索行'])),
   },
   WinForms: {
-    ...Object.fromEntries(['SegmentedField', 'DateField', 'TimeField', 'DatePicker'].map((name) => [name, Object.fromEntries(['propsRoot', 'propsClear', 'propsIcon']
+    ...Object.fromEntries(['SegmentedField', 'DateField', 'TimeField', 'DatePicker', 'TimePicker'].map((name) => [name, Object.fromEntries(['propsRoot', 'propsClear', 'propsIcon']
       .map((prop) => [prop, '外壳是 SegmentedFieldControl 自己画的（ControlShell，同 SelectControl），图标、清空按钮是组合的子控件：没有部件属性记录']))])),
     DateRangePicker: Object.fromEntries(['propsRoot', 'propsClear', 'propsIcon', 'propsEnd', 'propsSeparator']
       .map((prop) => [prop, '外壳是 SegmentedFieldControlBase 自己画的（ControlShell），图标、两组分段、中间的"–"、清空按钮是组合的子控件：没有部件属性记录，外观跟主题'])),

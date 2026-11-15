@@ -70,6 +70,12 @@ sealed class PickerPopover
     /// <summary>平台的弹出层（选择器把它加进逻辑树，样式才选得中面板）。</summary>
     public Popup Popup => popup;
 
+    /// <summary>弹层与外壳同宽（时间列表）；默认按内容宽。</summary>
+    public bool MatchWidth { get; init; }
+
+    /// <summary>弹层的内边距，默认 sm（时间列表是 xs）。</summary>
+    public Space Inset { get; init; } = Space.Sm;
+
     /// <summary>选择器的状态变了：开关、位置、按钮的名称与能不能点、弹层的字号。</summary>
     /// <param name="open">开着。</param>
     /// <param name="placement">弹出位置。</param>
@@ -86,7 +92,8 @@ sealed class PickerPopover
         var em = owner.FontSize;
         Panel.SetValue(global::Avalonia.Controls.Documents.TextElement.FontSizeProperty, em);
         Panel.CornerRadius = new CornerRadius(owner.Resource<double>(ThemeKeys.Radius.Lg) * em);
-        Panel.Padding = new Thickness(owner.Resource<double>(ThemeKeys.Space.Sm) * em);
+        Panel.Padding = new Thickness(owner.Resource<double>(Inset.ResourceKey!) * em);
+        Panel.Width = MatchWidth ? owner.Bounds.Width : double.NaN;
         // 平台的弹出层要锚点已经在窗口里：没进界面前不开（进了界面后选择器再同步一次）
         if (popup.IsOpen == open || open && !owner.IsAttachedToVisualTree()) return;
         popup.IsOpen = open;
@@ -181,4 +188,10 @@ public static class PickerParts
 
     /// <summary>弹层里的日历（TS 的 propsCalendar）：Calendar 或 QuarterCalendar。</summary>
     public const string Calendar = "PART_Calendar";
+
+    /// <summary>时间选择器的时间列表（TS 的 propsList）：Listbox，最高 16em，其余滚动。</summary>
+    public const string List = "PART_List";
+
+    /// <summary>时间选择器的"此刻"按钮（TS 的 propsNow）：Button，ghost、sm、占满宽度，上方 xs。</summary>
+    public const string Now = "PART_Now";
 }
