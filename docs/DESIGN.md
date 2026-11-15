@@ -1464,6 +1464,17 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### NavBar 与 NavMenu（2026-11-16，仅 Avalonia）
+
+- 菜单数据是一个记录 NavMenuItem(Label)：Href、Icon、Children、Badge、Disabled、Active（上游的 NavBarItem 与 NavMenuItem 合成一个：同一份菜单数据同时给顶栏与侧栏），HasPages 判断有没有能显示的页面。
+- NavMenu 本身就是 NavList（StyleKeyOverride 用 NavList 的主题；CurrentHref、Navigate、紧凑照旧），Items 变了重建子元素：叶子是 NavItem，顶层的目录是 NavSection（TopLevel = Group 时是 NavGroup），更深的目录是 NavGroup，没有页面的目录不画。
+- NavBar 的当前页、跳转同 NavList：CurrentHref（默认双向绑定）、先发 Navigate（标记 Handled 不跳）、再调 NavigateCommand、改 CurrentHref；当前页的项、子项是当前页的菜单按钮、收起来的项里有当前页时的"更多"都是 :current。
+  链接、菜单按钮、"更多"都是 NavBarButton（ButtonBase 派生，主题在 NavBar.axaml：控件高度、左右 md、md 圆角、中等字重、textMuted，悬停 fillHover 底与 text，当前页 accentText 与底边 2 像素强调色线、下面两个角不圆在代码里设）。
+  有子项的是 Menu（菜单项是 MenuItem，点了走同一套跳转；当前页的读屏状态是"当前页"，有计数时文字后面跟角标）；桌面没有站内地址，菜单里不用 MenuLinkItem（它用系统打开绝对地址）。
+- 放不下：一行（列间距 xs）从前往后排到留出"更多"的位置，其余 IsVisible = false（不占位、读屏与 Tab 跳过）；藏起来的项量不出宽度，用它上次显示时的宽度。"更多"的菜单在打开时按收起来的项建（有子项的按 MenuGroup 列出）；
+  Popover 的 OpenChanged 不报告代码里改的 IsOpen，所以看 IsOpen 属性本身。图标、角标、箭头要显式竖向居中（Flex 的 Align 管不到写了对齐的子元素），行高照 NavRow 设成 normal。
+- 像素对照：NavList 页 menu 0.24% / 0.23%；nav-bar 3.30%，差在上面的 Field 与 Slider（整体低 2 像素、滑块圆钮），顶栏本身对得上。示例：NavList 页的 menu、nav-bar（同上游；上游的地址不匹配锚点，没有当前页，这里不设 CurrentHref）。
+
 ### PivotTable 与透视计算（2026-11-16，仅 Avalonia）
 
 - 透视计算是孪生文件 Pivot.cs（上游 pivot.ts）：Pivot.Of(明细, PivotOptions) 返回 PivotResult（RowKeys、ColumnKeys、Cell、RowTotal、ColumnTotal、GrandTotal、Extent）。数值全是 decimal：

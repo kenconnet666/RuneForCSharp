@@ -55,7 +55,7 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 | ProportionBar 图例从起始边排、列间距 lg；CommentThread、NotificationCenter 用 RelativeTime | 还没做 | 做时照新的 |
 | Listbox 根元素补上部件标记，border-box 罩得到（ff185e89） | 修了我们报的高度问题 | 下次锁定时重截 listbox multiple |
 | FilterBar / QueryTable 重做（cad81082，作废 a6ffbb54 那版）：标题单独一列，第一排条件 auto-fit 加按钮区（展开、高级筛选、actions、重置、查询、竖线、end），其余条件从第二排 auto-fill；minFieldWidth 默认 14em，加 propsBody、propsRow | 还没做 | 做时照 cad81082 |
-| 文档站合页：NavMenu、NavBar 并进 NavList 页等 | NavList 页现有的示例 id 不变 | 新的 menu、nav-bar 示例等 NavMenu、NavBar |
+| 文档站合页：NavMenu、NavBar 并进 NavList 页等 | NavList 页现有的示例 id 不变 | menu、nav-bar 已做（2026-11-16，仅 Avalonia，随 NavMenu、NavBar） |
 
 ### 第三批（2026-11-07 通知，master 到 ff221742）
 
@@ -319,7 +319,7 @@ Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
 | 样式合并时后写的简写重设前面片段的长属性（84e6cde2，修 #5）：UserButton 的 compact 四边 xs、整行左右 sm 生效 | 我们本来就按本意做 | 066ad66e 的 CI 绿后锁定，重截 avatar user-button 核对 |
-| ItemList 的已选、不可用按 data-selected / data-disabled，NavBar 的当前页按 aria-current（066ad66e） | ItemList 已做；NavBar 还没做 | ItemList 照新的（已选对所有条目，不可用只对可点的条目）；NavBar 做时照新的 |
+| ItemList 的已选、不可用按 data-selected / data-disabled，NavBar 的当前页按 aria-current（066ad66e） | ItemList 已做；NavBar 已做（2026-11-16，仅 Avalonia） | ItemList 照新的（已选对所有条目，不可用只对可点的条目）；NavBar 照新的（当前页是 :current 伪类、读屏的项状态） |
 
 ### 第二十六批（2026-11-08 通知，master 2bdf378e：24.2 收尾）
 
@@ -393,7 +393,7 @@ Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_
 |---|---|---|
 | 部件属性合并：undefined 不表态、null 才清掉；aria-describedby 拼接去重；嵌套 propsXxx 递归合并；同名事件合成 | WinForms 的部件属性记录本来就是 null = 不改、逐字段合并；Avalonia、WPF 用样式 | 已跟：读屏的帮助文字（aria-describedby）三个平台都改成字段的说明、错误与控件自己的拼在一起去重——原来 TextField、Select、Listbox、ToggleGroup 根本没念字段的说明，勾选项只在自己没写时才念 |
 | Listbox disabled 时点选项不改值、不触发 onPick；Link external 的 target、rel 是默认层；Popconfirm、TagsInput、日期、Pagination、Rating、Splitter 等一批行为修正；输入法组合中 DataTable、Cascader 等不处理按键 | Listbox、Popconfirm、Rating、Splitter、TagsInput 已做，其余还没做 | Listbox 本来就拦下（补了测试）；Popconfirm 照新的做（确认进行中被关掉、结果出来没确认成才算取消）；Rating 照新的做（只读时名称里总有分数）；Splitter 照新的做（只认主键拖动，拖动中离开分隔条也保持"拖动中"的样子）；TagsInput 照新的做（输入法组合中的 Enter 是平台的 ImeProcessed / ProcessKey，不加标签）；其余做时照新的 |
-| 新部件属性：NavBar、QuarterCalendar、DataTable 表头按钮、ImageCropper、QueryTable | ImageCropper 已做（Avalonia 的 PART_Viewport、PART_Toolbar；图片与裁剪框是画出来的）；QuarterCalendar 已做（2026-11-15，部件同 CalendarView：Avalonia 的 CalendarViewParts、WPF 的部件样式键，按季度给的部件属性没有对应），其余还没做 | 做时照新的 |
+| 新部件属性：NavBar、QuarterCalendar、DataTable 表头按钮、ImageCropper、QueryTable | ImageCropper 已做（Avalonia 的 PART_Viewport、PART_Toolbar；图片与裁剪框是画出来的）；QuarterCalendar 已做（2026-11-15，部件同 CalendarView：Avalonia 的 CalendarViewParts、WPF 的部件样式键，按季度给的部件属性没有对应）；NavBar 已做（2026-11-16，仅 Avalonia，NavBarParts），其余还没做 | 做时照新的 |
 
 锁定跟到 0.22.0（6e6f831d）：生成文件没变；行为对照新增的 Field 两条、Listbox 一条都对上了。
 
@@ -427,7 +427,7 @@ defineTheme / defineLang 忽略 undefined——网页专用或 C# 没有 undefin
 | ContextMenu 触屏、触控笔按住 700ms 打开 | 已做 | 不用改：Avalonia 的长按手势会发 ContextRequested；WPF、WinForms 由 Windows 的按住相当于右键发右键菜单 |
 | NavList 紧凑分组触屏点图标弹出子项 | 紧凑时的弹出还没做（等 HoverCard） | 做时照新的：悬停、聚焦、点按都弹出，点外面、点了链接收起 |
 | 页面组合文案 notificationsNoMatch | 生成文件 | 重新生成 PatternsMessages |
-| ColumnTable empty；TagsInput 回车加打的字；Splitter、ResizeHandle 粗指针的命中区；ConditionBuilder、CodeEditor、Autocomplete 在只读 / 不可用表单里；NavBar 下拉里的徽标；Diagram fitView | Splitter、ResizeHandle、TagsInput、Autocomplete 已做；ColumnTable 已做（2026-11-16，仅 Avalonia，Empty 照新的），其余还没做 | 粗指针（触屏）扩命中区是网页的 pointer: coarse，桌面上不涉及（分隔条本来整条 space.md 都能按）；TagsInput 照新的做（允许自定义值时打字不自动高亮建议，回车加的是打的字，要选建议按 ↓）；Autocomplete 的只读、不可用跟着所在的 Field（TextBox 的只读与平台的 IsEnabled），列表不弹出；其余做时照新的 |
+| ColumnTable empty；TagsInput 回车加打的字；Splitter、ResizeHandle 粗指针的命中区；ConditionBuilder、CodeEditor、Autocomplete 在只读 / 不可用表单里；NavBar 下拉里的徽标；Diagram fitView | Splitter、ResizeHandle、TagsInput、Autocomplete 已做；ColumnTable 已做（2026-11-16，仅 Avalonia，Empty 照新的）；NavBar 已做（2026-11-16，仅 Avalonia，下拉里的子项带计数角标），其余还没做 | 粗指针（触屏）扩命中区是网页的 pointer: coarse，桌面上不涉及（分隔条本来整条 space.md 都能按）；TagsInput 照新的做（允许自定义值时打字不自动高亮建议，回车加的是打的字，要选建议按 ↓）；Autocomplete 的只读、不可用跟着所在的 Field（TextBox 的只读与平台的 IsEnabled），列表不弹出；其余做时照新的 |
 | usePersistentState、useMediaQuery 水合；sameValue 比 Map / Set；tableToXlsx 的时区 | 网页专用或还没做 | 不涉及 |
 
 锁定跟到 0.24.0（6e7b07b7）：页面组合文案表多了 notificationsNoMatch，docs-gen 的页面清单更新；token、图标、配方、语言包没变。
