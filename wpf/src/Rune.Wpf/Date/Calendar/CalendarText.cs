@@ -49,6 +49,13 @@ public static class CalendarText
     /// <summary>日期格里的数字。</summary>
     public static string DayNumber(DateOnly date) => date.Day.ToString(CultureInfo.InvariantCulture);
 
+    /// <summary>快捷区间的名字（语言包的 DateRangePreset，键是上游的 camelCase 名：last7Days）。</summary>
+    public static string PresetName(DateRangePreset preset, Lang lang)
+    {
+        var name = preset.ToString();
+        return lang.DateRangePreset[char.ToLowerInvariant(name[0]) + name[1..]];
+    }
+
     /// <summary>语言包的代码对应的区域（读不出时用当前界面文化）。</summary>
     public static CultureInfo CultureOf(Lang lang)
     {

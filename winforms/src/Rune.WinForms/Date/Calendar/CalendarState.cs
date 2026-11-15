@@ -33,6 +33,50 @@ public enum DateUnit
 /// <param name="End">结束。</param>
 public readonly record struct DateRange(DateOnly Start, DateOnly End);
 
+/// <summary>ISO 字符串的区间（vue-tsx-pro 的 DateRange&lt;string&gt;）：RangeCalendar、DateRangePicker 的值，两端都包含。</summary>
+/// <param name="Start">开始（ISO：2026-10-12）。</param>
+/// <param name="End">结束（ISO）。</param>
+public sealed record IsoDateRange(string Start, string End)
+{
+    /// <summary>日期区间；两端写得不对时 null。</summary>
+    public DateRange? Dates =>
+        DateOnly.TryParseExact(Start.Length >= 10 ? Start[..10] : Start, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var start)
+        && DateOnly.TryParseExact(End.Length >= 10 ? End[..10] : End, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var end)
+            ? new DateRange(start, end)
+            : null;
+
+    /// <summary>日期区间写成 ISO。</summary>
+    public static IsoDateRange From(DateRange range) => new(range.Start.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), range.End.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+}
+
+/// <summary>快捷区间（vue-tsx-pro 的 DateRangePreset）：名字取语言包的 DateRangePreset，区间按今天与一周的第一天算（<see cref="CalendarState.PresetRange"/>）。</summary>
+public enum DateRangePreset
+{
+    /// <summary>今天。</summary>
+    Today,
+
+    /// <summary>昨天。</summary>
+    Yesterday,
+
+    /// <summary>最近 7 天（含今天）。</summary>
+    Last7Days,
+
+    /// <summary>最近 30 天（含今天）。</summary>
+    Last30Days,
+
+    /// <summary>本周（按一周的第一天）。</summary>
+    ThisWeek,
+
+    /// <summary>本月。</summary>
+    ThisMonth,
+
+    /// <summary>上月。</summary>
+    LastMonth,
+
+    /// <summary>今年。</summary>
+    ThisYear,
+}
+
 /// <summary>可选范围与不可选的日期（vue-tsx-pro 的 DateLimits）：Calendar、DatePicker 共用。</summary>
 /// <param name="Min">最早可选的日期。</param>
 /// <param name="Max">最晚可选的日期。</param>
@@ -475,6 +519,27 @@ public sealed class CalendarState
         for (var date = range.Start; date <= range.End; date = date.AddDays(1))
             if (isUnavailable(date)) return true;
         return false;
+    }
+
+    /// <summary>按今天算出快捷区间（vue-tsx-pro 的 presetRange）。</summary>
+    /// <param name="preset">快捷区间。</param>
+    /// <param name="today">今天。</param>
+    /// <param name="first">一周的第一天（本周用）。</param>
+    public static DateRange PresetRange(DateRangePreset preset, DateOnly today, DayOfWeek first)
+    {
+        var month = new DateOnly(today.Year, today.Month, 1);
+        return preset switch
+        {
+            DateRangePreset.Today => new(today, today),
+            DateRangePreset.Yesterday => new(today.AddDays(-1), today.AddDays(-1)),
+            DateRangePreset.Last7Days => new(today.AddDays(-6), today),
+            DateRangePreset.Last30Days => new(today.AddDays(-29), today),
+            DateRangePreset.ThisWeek => new(StartOfWeek(today, first), StartOfWeek(today, first).AddDays(6)),
+            DateRangePreset.ThisMonth => new(month, month.AddMonths(1).AddDays(-1)),
+            DateRangePreset.LastMonth => new(month.AddMonths(-1), month.AddDays(-1)),
+            DateRangePreset.ThisYear => new(new DateOnly(today.Year, 1, 1), new DateOnly(today.Year, 12, 31)),
+            _ => throw new ArgumentOutOfRangeException(nameof(preset), preset, null),
+        };
     }
 
     /// <summary>这一天所在的周的第一天。</summary>
