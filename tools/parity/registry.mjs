@@ -63,6 +63,10 @@ export const COMPONENT_PROP_RENAMES = {
   // 数据经 ItemsSource 给（平台的叫法），一张的模板是 ItemTemplate
   Carousel: { items: 'ItemsSource' },
   // 展开、选中、勾选的是 key 的列表（不是布尔）；isDisabled 是判断节点的函数
+  // 数据模板是 ItemTemplate（WinForms 是建控件的 ItemFactory）；方向用平台的 Orientation；可见范围变了是事件
+  VirtualList: { items: 'ItemsSource', children: 'ItemTemplate', horizontal: 'Orientation', onRangeChange: 'RangeChanged' },
+  // noMore 是文字（false 不显示是 ShowNoMore）
+  InfiniteListStatus: { noMore: 'NoMoreText' },
   // 控件自己的 MaxHeight 包括工具条与路径栏：上游的 maxHeight 只管树
   JsonViewer: { maxHeight: 'TreeMaxHeight', toolbar: 'ShowToolbar' },
   Tree: { items: 'ItemsSource', isDisabled: 'IsItemDisabled', _expanded: 'Expanded', _selected: 'Selected', _checked: 'Checked', onMove: 'Moved', renderItem: 'ItemTemplate' },
@@ -177,6 +181,8 @@ export const PLATFORM_COMPONENT_PROP_RENAMES = {
     FieldCompare: { layout: 'CompareLayout' },
     // 张片是控件，直接放进 Slides
     Carousel: { items: 'Slides' },
+    // 每一项是控件，由函数建（没有数据模板）
+    VirtualList: { children: 'ItemFactory' },
     // 控件自己有 HasChildren；节点是画出来的，没有匹配时只能换说明文字
     Tree: { hasChildren: 'HasChildNodes', empty: 'EmptyText' },
     // 控件自己有 Size：起始一栏的百分比叫 Ratio，范围跟着叫 MinRatio、MaxRatio
@@ -294,6 +300,11 @@ export const PROPS_NOT_PORTED = {
     ...Object.fromEntries(['propsTable', 'propsList', 'propsItem', 'propsLabel', 'propsValue']
       .map((prop) => [prop, '表格、列表与里面的格子是 FieldCompare 按行生成的（表格是紧凑的 Table）：外观跟主题，要别的样子用字段的 Cell 换显示的内容'])),
   },
+  VirtualList: {
+    getKey: '给 Vue 对比列表、按 key 缓存测量结果用：Avalonia、WPF 的虚拟化面板按容器回收；WinForms 换数据时重建、按序号量',
+    handle: '滚动方法直接是控件上的 ScrollToIndex、ScrollToOffset（ScrollAlign 对齐）',
+    propsItem: '每一项的外层是组件管的读屏列表项（同级位置与总数），外观由 ItemTemplate / ItemFactory 给',
+  },
   Tree: {
     estimateSize: '虚拟化按实际的行高排（Avalonia、WPF 的虚拟化面板；WinForms 每行一样高），不用估计值',
     propsRow: '行就是 TreeItem 自己（Avalonia 的 TreeParts.Item 选中它，WPF 在主题里写 TreeItem 的样式）；WinForms 的行是画出来的',
@@ -390,9 +401,15 @@ export const PROPS_NOT_PORTED = {
 /** 某个平台上不移植的 prop 与原因（盖在 PROPS_NOT_PORTED 上）：库 → { 组件: { prop: 原因 } } */
 export const PLATFORM_PROPS_NOT_PORTED = {
   Avalonia: {
+    VirtualList: { overscan: '平台的虚拟化面板自己决定多建几项（VirtualizingStackPanel 没有可设的前后余量）' },
     ScrollArea: { propsScrollbar: '两条滚动条是平台 ScrollViewer 认的固定部件名：样式里用 ScrollAreaParts.VerticalScrollbar、HorizontalScrollbar 选中' },
   },
   WPF: {
+    VirtualList: {
+      overscan: '平台的虚拟化面板自己决定多建几项（VirtualizingStackPanel 按 CacheLength，组件不另设）',
+      propsSkeleton: '骨架行是 VirtualList 代码组合的 Skeleton，外观跟 Skeleton 的主题样式：没有部件样式键',
+    },
+    InfiniteListStatus: { propsRetry: '重试按钮是 InfiniteListStatus 组合的 Button（sm、ghost），外观跟 Button 的主题样式：没有部件样式键' },
     JsonViewer: Object.fromEntries(['propsSearch', 'propsTree', 'propsPathBar', 'propsExpandAll', 'propsCollapseAll']
       .map((prop) => [prop, '搜索框、树、路径栏与两个按钮是 JsonViewer 代码组合的子元素，没有部件样式键：外观跟着 SearchField、Tree、Button、CopyButton 的主题样式'])),
     Tree: Object.fromEntries(['propsItem', 'propsToggle', 'propsCheckbox', 'propsLabel', 'propsSkeleton']
@@ -427,6 +444,9 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     CommandPalette: Object.fromEntries(['propsInput', 'propsListbox'].map((prop) => [prop, '面板里的搜索框、列表是 CommandPalette 建的，外观跟着 TextField、Listbox 的主题样式；部件样式键只有搜索行'])),
   },
   WinForms: {
+    VirtualList: Object.fromEntries(['propsSkeleton', 'propsList']
+      .map((prop) => [prop, '骨架行与放项的那一层是 VirtualListControl 组合的子控件，没有部件属性记录：外观跟主题'])),
+    InfiniteListStatus: { propsRetry: '重试按钮是 InfiniteListStatusControl 组合的 ButtonControl（sm、ghost），走 ProviderControl 的组件定制' },
     JsonViewer: Object.fromEntries(['propsSearch', 'propsTree', 'propsPathBar', 'propsExpandAll', 'propsCollapseAll']
       .map((prop) => [prop, '搜索框、树、路径栏与两个按钮是 JsonViewerControl 组合的子控件，没有部件属性记录：外观跟主题，按钮走 ProviderControl 的组件定制'])),
     Tree: Object.fromEntries(['renderItem', 'propsItem', 'propsToggle', 'propsCheckbox', 'propsLabel', 'propsEmpty', 'propsSkeleton']
@@ -652,6 +672,7 @@ export const PLATFORM_BEHAVIOR_NOT_APPLICABLE = {
 };
 
 export const BEHAVIOR_NOT_APPLICABLE = {
+  VirtualList: { 'propsItem 可以按项计算': '没有 propsItem、propsList（PROPS_NOT_PORTED）：每项的外观在 ItemTemplate / ItemFactory 里；序号与总数由组件管（Only_visible_items_are_realized_with_set_positions 覆盖）' },
   TextField: { 'TextField：前后缀是部件，不算在值里；是指向输入框的 label': '桌面的读屏名称不拼前后缀（网页是 label 指向输入框才念进去）：读屏名称取字段的标签，前后缀是显示用的固定文字，不进值里' },
   CharacterCount: { 'CharacterCount 的部件属性': '看得见的字数就是控件自己的文字，读屏读的是控件的名称（完整的句子），不另分部件（PROPS_NOT_PORTED）' },
   Tabs: {

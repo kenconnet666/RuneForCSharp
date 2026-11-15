@@ -1378,6 +1378,15 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### VirtualList、InfiniteListStatus 与 InfiniteList（2026-11-15）
+
+- 孪生文件两个：VirtualScroll（VisibleRange、ScrollAlign，按对齐方式算滚动位置、二分查找可见范围：上游 virtualizer 里与平台无关的部分），InfiniteList<T>（上游的 useInfiniteList）。InfiniteList 没有上游的响应式 params：游标与参数由取页函数自己捕获，参数变了调 Restart(防抖) 或 Refresh；immediate 换成新建后调一次 Refresh；enabled 是 IsEnabled；状态变了发 PropertyChanged（Avalonia、WPF 可以直接绑定），Items 每次换新的列表。不管项类型的 IInfiniteList 给 InfiniteListStatus 读。
+- Avalonia、WPF 用平台的虚拟化面板（VirtualizingStackPanel，按实际大小排，不需要 estimateSize 与 getKey；overscan 由面板决定）：Avalonia 的项列表是自己的 ItemsControl（主题里没有它的外观，模板在代码里只放 ItemsPresenter），WPF 的模板与面板也在代码里按方向、滚动方式换。每项的外层是读屏的列表项，带 PositionInSet / SizeOfSet（Avalonia 12、WPF 都有），列表层不进控件视图（上游的 role="presentation"）；没有数据时是组。可见范围按建出来的项与视口的相交算。ScrollToIndex 先让面板把它建出来（ScrollIntoView / BringIndexIntoViewPublic），再按它的实际位置用 VirtualScroll.OffsetFor 对齐。
+- WPF 的虚拟化面板只在自己是滚动的那一层时虚拟化：Window 模式（随外层 ScrollViewer 滚动）会建出全部项，文档里写明。WPF 里 `Grid` 解析成 Rune 的 Grid（自动分栏、按无限高量子元素，滚动区域拿不到视口），这里写全名 System.Windows.Controls.Grid。
+- WinForms 没有平台的虚拟化：VirtualListControl 自己按 EstimateSize 排、只为可见范围（前后多 Overscan 项）调 ItemFactory 建控件，建出来后按 GetPreferredSize 量，可视区上方的项大小变了时把滚动位置挪同样多（上游 virtualizer 的做法），滚出范围的项释放。窗口坐标有上限（约 3.2 万像素），上万项不能做成按总高度撑开的控件：给 ScrollAreaControl 加了内部接口 IVirtualScrollContent，实现它的内容只占视口大，总大小与滚动位置由滚动区域交给它（Listbox、Tree 的画行视图以后也该接上）；Window 模式要撑开，受这个上限限制。读屏的列表项没有同级位置的属性，说明里写“第几项，共几项”。
+- InfiniteListStatus：失败时是 danger 的“加载失败，请重试”与重试按钮（sm、ghost、RotateCw），取完了（有项、不在加载）是“没有更多了”（NoMoreText 换文字，ShowNoMore = false 不显示），其余时候不占位；有内容时至少 2.75em 高、上下 xs、左右 md、sm 字号。上游按错误码取文案（errorCodeText），桌面上没有错误码的语言包，一律用笼统的提示。读屏：Avalonia 是礼貌的实时区域，WPF 发 LiveRegionChanged，WinForms 发通知。
+- WPF 顺手修了一个初始化顺序的问题：ButtonBase、Rating、Slider、SignaturePad 用 UIPropertyMetadata 替代 IsEnabled 的元数据，平台的 Primitives.ButtonBase（滚动条里的 RepeatButton）先初始化时会抛异常；改成 FrameworkPropertyMetadata（单独的提交）。
+
 ### JsonViewer（2026-11-15）
 
 - 纯计算是孪生文件 JsonViewerNodes（上游的 kindOf、childrenOf、sizeOf、display、copyText）：值可以是 System.Text.Json 的 JsonElement、JsonNode，也可以是任意 .NET 值。上游的普通对象在 C# 里是键为字符串的字典、没有自己写 ToString 的类与结构、记录、匿名类型（公开属性）；Map 是键不是字符串的字典，Set 是 ISet / IReadOnlySet，其他可枚举的集合是数组；Decimal、bigint 对应 decimal、BigInteger（按固定区域照实显示），Date 对应 DateTime、DateTimeOffset、DateOnly（同 toISOString：UTC、毫秒、Z；不知道时区的 DateTime 不加 Z）；自己写了 ToString 的（Uri、Guid、TimeSpan、枚举）是 other；没有 undefined。循环引用按引用比较经过的对象。

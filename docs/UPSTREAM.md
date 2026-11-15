@@ -79,7 +79,7 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 | Dialog 的 draggable（237f97d2）：按住标题栏拖，不超出窗口，每次打开回到正中 | 已做 Dialog | 这次做 |
 | FileDrop、Upload 选文件夹（directory，f5d31cdd） | 还没做 | 做时照新的（桌面上是选文件夹的对话框、拖进来的文件夹递归读出文件） |
 | FloatButton、FloatButtonGroup（速拨），BackTop 基于它（77cffad3） | 已做（2026-11-15） | 三个平台照新的做：桌面没有视口固定定位，单独用时靠所在面板（WinForms 是父控件）的结束边与底部；见 DESIGN 的 FloatButton 一节 |
-| useInfiniteList、InfiniteListStatus，语言包 listNoMore；Select、Combobox、Mentions 的 load 分页（page、{ items, next }），ListboxView 的 onRangeChange 与 loading: 'more'（cffe9ad9） | Select 的远程选项已做 | 2026-11-14 做了：Select.Load（OptionsLoader，分页返回 OptionsPage 的 Next），状态是孪生文件 RemoteOptions；Listbox 内部的 Reached、IsLoadingMore 代替 onRangeChange 与 loading: 'more'。测试对上 remote-items 的三条 Select 用例；Combobox、Autocomplete 2026-11-15 做了（同一个 RemoteOptions）；Mentions、TreeSelect 还没做 |
+| useInfiniteList、InfiniteListStatus，语言包 listNoMore；Select、Combobox、Mentions 的 load 分页（page、{ items, next }），ListboxView 的 onRangeChange 与 loading: 'more'（cffe9ad9） | Select 的远程选项已做 | 2026-11-14 做了：Select.Load（OptionsLoader，分页返回 OptionsPage 的 Next），状态是孪生文件 RemoteOptions；Listbox 内部的 Reached、IsLoadingMore 代替 onRangeChange 与 loading: 'more'。测试对上 remote-items 的三条 Select 用例；Combobox、Autocomplete 2026-11-15 做了（同一个 RemoteOptions）；useInfiniteList、InfiniteListStatus 2026-11-15 做了（孪生文件 InfiniteList，配 VirtualList）；Mentions、TreeSelect 还没做 |
 
 ### 第五批（2026-11-08 通知，master 到 fd628293）
 
@@ -184,7 +184,7 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
 | Collapse 完全展开（过渡结束）后内容层不再裁剪，过渡中、收起时照旧 | Avalonia、WPF 的 Collapse 一直 ClipToBounds，贴边的勾选项、按钮外面一圈的焦点环会被切 | 已改：过渡开始时裁、结束时按开合定（展开不裁）；WinForms 的子控件本来就裁在自己的边里、焦点环画在控件的 Padding 里，不涉及 |
-| NavList 的行与分组触发器、Accordion 标题、Tree、VirtualList、NotificationCenter 的整行焦点环画在里面 | NavList 的行焦点环本来就在里面；Tree 已做（2026-11-15，焦点环画在树的边上往里收），Accordion 等照新的 | 做时照新的 |
+| NavList 的行与分组触发器、Accordion 标题、Tree、VirtualList、NotificationCenter 的整行焦点环画在里面 | NavList 的行焦点环本来就在里面；Tree、VirtualList 已做（2026-11-15，焦点环画在滚动区域里侧），Accordion 等照新的 | 做时照新的 |
 | CodeBlock 复制按钮（标题栏里也是）、SlideCaptcha 刷新、Upload 图片墙缩略图画在里面 | 复制按钮同 IconButton，本来就在里面 | 不涉及 |
 | DataTable 单元格、StatGroup 根 overflow: hidden → overflowX: clip | 还没做 | 做时照新的 |
 | Upload 的文件名链接自己省略；ItemList、PeoplePickerPanel 的内边距调整 | ItemList 已做 | ItemList 照新的（inset，悬停着底色、整条可点时默认 sm）；Upload、PeoplePickerPanel 做时照新的 |

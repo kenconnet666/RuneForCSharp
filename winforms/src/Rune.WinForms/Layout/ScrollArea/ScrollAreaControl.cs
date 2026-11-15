@@ -188,7 +188,7 @@ public class ScrollAreaControl : Control
         base.OnLayout(levent);
         if (Content is not { } content) return;
         var view = ClientSize;
-        var wanted = content.GetPreferredSize(ScrollsX ? Size.Empty : new Size(view.Width, 0));
+        var wanted = content is IVirtualScrollContent virtualContent ? virtualContent.Extent(view) : content.GetPreferredSize(ScrollsX ? Size.Empty : new Size(view.Width, 0));
         extent = new Size(ScrollsX ? Math.Max(view.Width, wanted.Width) : view.Width, ScrollsY ? Math.Max(view.Height, wanted.Height) : view.Height);
         IsOverflowing = (ScrollsX && extent.Width > view.Width) || (ScrollsY && extent.Height > view.Height);
         TabStop = IsViewportFocusable && IsOverflowing;
@@ -200,7 +200,12 @@ public class ScrollAreaControl : Control
     /// <summary>内容按滚动位置挪开；滑块按"视口 / 内容"的比例与位置摆到轨道上（至少 20 像素长）。</summary>
     void Arrange()
     {
-        if (Content is { } content) content.Bounds = new Rectangle(-offset.X, -offset.Y, extent.Width, extent.Height);
+        if (Content is IVirtualScrollContent virtualContent)
+        {
+            ((Control)virtualContent).Bounds = new Rectangle(Point.Empty, ClientSize);
+            virtualContent.ScrollTo(offset);
+        }
+        else if (Content is { } content) content.Bounds = new Rectangle(-offset.X, -offset.Y, extent.Width, extent.Height);
         var both = Axis.Value == "both";
         var thickness = Thickness;
         var view = ClientSize;
@@ -445,4 +450,19 @@ public class ScrollAreaControl : Control
             owner.Reveal();
         }
     }
+}
+
+/// <summary>
+/// 自己按滚动位置摆子控件的内容（虚拟滚动）：只占视口那么大，总大小与滚动位置由 <see cref="ScrollAreaControl"/> 交给它。
+/// 窗口的坐标有上限（约 3.2 万像素），上万项的列表不能做成一个按总高度撑开的控件。
+/// </summary>
+interface IVirtualScrollContent
+{
+    /// <summary>内容的总大小：纵向滚动时按视口的宽度量高度，横向时反过来。</summary>
+    /// <param name="view">视口大小。</param>
+    Size Extent(Size view);
+
+    /// <summary>滚动位置变了（含排版后）：按它摆子控件。</summary>
+    /// <param name="offset">滚动位置（设备像素）。</param>
+    void ScrollTo(Point offset);
 }
