@@ -240,8 +240,8 @@ public class AccordionItemControl : FlexControl
     }
 }
 
-/// <summary>手风琴的标题按钮：悬停 fill 底（PressableFlex 默认是 fillHover）；↑ ↓ Home End 交给手风琴；读屏带展开、收起的状态。</summary>
-sealed class AccordionTrigger : PressableFlex
+/// <summary>手风琴的标题按钮：↑ ↓ Home End 交给手风琴。</summary>
+sealed class AccordionTrigger : DisclosureTrigger
 {
     public AccordionTrigger()
     {
@@ -250,33 +250,11 @@ sealed class AccordionTrigger : PressableFlex
         Cursor = Cursors.Default;
     }
 
-    /// <summary>展开着（读屏的状态）。</summary>
-    [Browsable(false)]
-    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public bool Expanded
-    {
-        get;
-        set
-        {
-            if (field == value) return;
-            field = value;
-            AccessibilityNotifyClients(AccessibleEvents.StateChange, -1);
-        }
-    }
-
     /// <summary>按了 ↑ ↓ Home End。</summary>
     public event Action<Keys>? Navigate;
 
     /// <summary>代码里点击（测试用）。</summary>
     internal void PerformClickForTest() => OnClick(EventArgs.Empty);
-
-    protected override void PaintSurface(Graphics graphics, ThemeTokens theme, float radius)
-    {
-        if (!Hovered) return;
-        using var path = Drawing.RoundedRectangle(new RectangleF(0, 0, Width, Height), radius);
-        using var brush = new SolidBrush(theme.Colors.Fill);
-        graphics.FillPath(brush, path);
-    }
 
     protected override bool IsInputKey(Keys keyData) => keyData is Keys.Up or Keys.Down or Keys.Home or Keys.End || base.IsInputKey(keyData);
 
@@ -286,19 +264,6 @@ sealed class AccordionTrigger : PressableFlex
         if (e.KeyCode is not (Keys.Up or Keys.Down or Keys.Home or Keys.End)) return;
         e.Handled = true;
         Navigate?.Invoke(e.KeyCode);
-    }
-
-    protected override AccessibleObject CreateAccessibilityInstance() => new TriggerAccessibleObject(this);
-
-    sealed class TriggerAccessibleObject(AccordionTrigger owner) : ControlAccessibleObject(owner)
-    {
-        public override AccessibleRole Role => AccessibleRole.PushButton;
-
-        public override AccessibleStates State => base.State | (owner.Expanded ? AccessibleStates.Expanded : AccessibleStates.Collapsed);
-
-        public override string DefaultAction => owner.Expanded ? "收起" : "展开";
-
-        public override void DoDefaultAction() => owner.InvokeOnClick(owner, EventArgs.Empty);
     }
 }
 
