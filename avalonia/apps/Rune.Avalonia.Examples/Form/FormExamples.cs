@@ -181,7 +181,7 @@ static class FormExamples
             Gap = Space.Md,
             Children = { result, new Flex { Gap = Space.Sm, Children = { reset, submit } } },
         });
-        return new Card { MaxWidth = 480, HorizontalAlignment = HorizontalAlignment.Left, Content = form };
+        return new Card { Content = form };
     }
 
     public sealed class Project
