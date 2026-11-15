@@ -1378,6 +1378,13 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### FloatButton、FloatButtonGroup、BackTop（2026-11-15）
+
+- 桌面上没有 position: fixed：单独用的浮动按钮（组）靠所在面板的结束边与底部、外边距 lg。Avalonia 是默认样式的对齐与外边距（em），WPF 在没写对齐、外边距时代码里设，WinForms 的 FloatCorner 跟着父控件变大小摆到客户区角落并放到最上层；放在盖住页面的 Panel / Grid（WinForms 的父控件）里就浮在内容上。组里的按钮跟着组排。
+- FloatButton 是组合：IconButton（surface、中性色、圆形、lg）包在圆形重叠的 Indicator 里。上游落到 IconButton 上的属性写在 Button 上（FloatButton.Button，同 TS 的 rest）；badge 拆成数字的 Badge 与小圆点的 BadgeDot；tooltip 叫 Tip，false 是 ShowTip = false。名称写在 FloatButton 上，转给里面的按钮；FloatButton 自己不进读屏的树。阴影 md：Avalonia 是按钮的 BoxShadow，WPF 是按钮的 Effect，WinForms 的控件画不出阴影。
+- 速拨：主按钮是组的 Trigger（TS 的 propsTrigger），读屏报展开、收起（Avalonia 是主按钮自己的 ExpandCollapse 对等体，WPF 用按钮家族已有的展开状态，WinForms 是 ButtonControl.Expanded）；展开的那一列淡入（WinForms 直接显示），收起时不占位、不能聚焦；Esc 收起并聚焦主按钮，点组外面收起（Avalonia、WPF 盯窗口的按下，WinForms 用消息过滤器）。WinForms 的组里的按钮放在 Buttons，主按钮总在最下面。
+- BackTop 从 FloatButton 派生：滚动容器是 Target（Avalonia、WPF 的 ScrollViewer，WinForms 的 ScrollAreaControl），不写时找外层最近的，再没有时是窗口里的第一个（TS 的整页）。平滑滚回顶部用动画驱动的进度（lg），动画结束时进度回到基础值，所以只在播放期间跟着滚、结束时直接到顶；滚到顶之后再聚焦开头第一个能聚焦的元素（先聚焦的话平台把它滚进视野，就跳过了平滑滚动）。WinForms 的控件不能半透明，直接出现；Threshold 按 96 DPI 算。
+
 ### Image、ImageGroup、Lightbox（2026-11-15）
 
 - 地址是 Uri（上游的 src 叫 Source，同 Avatar）：要有读的状态（扫光的占位、读完淡入）与读不了的占位，所以不收已经解码的图片。读图集中在各库的 ImageLoader：avares:// 或 pack://、file://、http(s)://、base64 的 data:，相对地址按程序所在目录；后台解码，最近 32 张留在内存里（缩略图点开大图、Lightbox 预先读的前后两张不再读一遍）。sources（picture 的备选源）是浏览器的响应式图片，不移植。

@@ -50,6 +50,9 @@ export const COMPONENT_PROP_RENAMES = {
   // 地址是 Uri（同 Avatar 的 Source）；组共用的预览直接是 Lightbox 实例（改它的属性、听它的事件）
   Image: { src: 'Source' },
   ImageGroup: { propsLightbox: 'Lightbox' },
+  // tooltip 的 false 是 ShowTip = false；速拨的主按钮直接是 FloatButton 实例
+  FloatButton: { tooltip: 'Tip' },
+  FloatButtonGroup: { propsTrigger: 'Trigger' },
   UserButton: { name: 'DisplayName', src: 'Source' },
   // 地址给 Uri；加载完的事件不叫 Loaded（那是控件放进界面的事件）
   Embed: { src: 'Source', onLoad: 'PageLoaded' },
@@ -265,6 +268,7 @@ export const PROPS_NOT_PORTED = {
     sources: 'picture 的备选源（按格式回退、按媒体条件换图）是浏览器的响应式图片：桌面上一个地址就是一张图，按尺寸换图由调用方换 Source',
     propsRoot: '外层就是 Image 自己（能预览时它就是按钮）：样式直接写在 Image 上',
   },
+  FloatButtonGroup: { propsActions: '速拨展开的那一列是组内部的 Flex（Avalonia 的部件名 PART_Actions），按钮直接放进组里：间距、对齐跟组' },
   Lightbox: { propsButton: '工具栏与两侧的按钮是 Lightbox 建的 IconButton（深色底上用 onScrim 的颜色），没有部件属性：外观跟主题' },
   Abbr: { propsTooltip: '提示就是平台的 ToolTip：位置、箭头写在 Abbr 自己身上（Avalonia、WPF 的 Tooltip.Placement、Tooltip.Arrow 附加属性）；WinForms 自带的提示用默认的位置' },
   Pagination: { propsItem: '外层的 li 是 HTML 列表的结构：桌面上页码按钮、省略号直接排在列表里' },

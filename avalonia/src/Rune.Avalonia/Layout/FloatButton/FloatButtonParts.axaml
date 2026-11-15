@@ -1,0 +1,21 @@
+<!--
+  FloatButton、FloatButtonGroup、BackTop 的默认外观（vue-tsx-pro 的 floatButtonStyles）：单独用时靠所在面板的结束边与底部、外边距 lg
+  （TS 固定在视口角落）；组里的按钮跟着组排。按钮 md 阴影
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector=":is(rune|FloatButton), rune|FloatButtonGroup">
+    <Setter Property="HorizontalAlignment" Value="Right" />
+    <Setter Property="VerticalAlignment" Value="Bottom" />
+    <Setter Property="Margin" Value="{rune:Em 1}" />
+  </Style>
+  <Style Selector="rune|FloatButtonGroup :is(rune|FloatButton)">
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Margin" Value="0" />
+  </Style>
+  <Style Selector=":is(rune|FloatButton) > rune|Indicator > :is(rune|IconButton)#PART_Button /template/ Border#PART_Root">
+    <Setter Property="BoxShadow" Value="{DynamicResource Rune.Shadow.Md}" />
+  </Style>
+</Styles>
