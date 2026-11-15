@@ -1,12 +1,13 @@
 <!--
   SegmentedField 的主题（vue-tsx-pro 的 controlParts）：外壳同输入框（控件高度、左右 space.md、xs 宽的 border 描边、悬停 borderStrong、md 圆角、surface 底；
   soft 时 fill 底、没有描边；只读 borderMuted 描边、fill 底；出错 danger；不可用半透明；焦点在里面时焦点环压住边框）。
-  里面依次是前置图标（textMuted）、这一组分段（占满剩下的宽度）、清空按钮、尾部内容，隔 space.sm。
+  里面依次是前置图标（textMuted）、这一组分段（占满剩下的宽度；两组时是开始那组、"–"、结束那组，结束那组占满）、清空按钮、尾部内容，隔 space.sm。
 -->
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:rune="clr-namespace:Rune.Avalonia">
-  <ControlTheme x:Key="{x:Type rune:SegmentedField}" TargetType="rune:SegmentedField">
+  <!-- 键是 SegmentedField（SegmentedFieldBase 的样式键），目标是基类：一组的输入框与两组的 DateRangePicker 共用 -->
+  <ControlTheme x:Key="{x:Type rune:SegmentedField}" TargetType="rune:SegmentedFieldBase">
     <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
     <Setter Property="Background" Value="{DynamicResource Rune.Brush.Surface}" />
     <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
@@ -16,13 +17,16 @@
     <Setter Property="MinHeight" Value="{rune:ControlHeight}" />
     <Setter Property="Cursor" Value="Ibeam" />
     <Setter Property="Template">
-      <ControlTemplate>
+      <ControlTemplate TargetType="rune:SegmentedFieldBase">
         <Panel>
           <Border Name="PART_Root" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
                   BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
             <rune:Flex Align="center" Gap="sm">
               <rune:Icon Name="PART_Icon" Data="{TemplateBinding Icon}" IsVisible="{TemplateBinding Icon, Converter={x:Static ObjectConverters.IsNotNull}}" />
               <rune:DateSegmentGroup Name="PART_Input" rune:Flex.Grow="True" />
+              <!-- 两组（DateRangePicker）时才显示：开始 – 结束 -->
+              <rune:Text Name="PART_Separator" Text="–" Tone="Muted" IsVisible="False" />
+              <rune:DateSegmentGroup Name="PART_End" rune:Flex.Grow="True" IsVisible="False" />
               <rune:ClearButton Name="PART_Clear" Radius="full" IsVisible="False" />
               <ContentPresenter Name="PART_Suffix" Content="{TemplateBinding Suffix}" VerticalAlignment="Center"
                                 IsVisible="{TemplateBinding Suffix, Converter={x:Static ObjectConverters.IsNotNull}}" />
@@ -34,6 +38,7 @@
       </ControlTemplate>
     </Setter>
     <Style Selector="^ /template/ rune|Icon#PART_Icon"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" /></Style>
+    <Style Selector="^ /template/ rune|Text#PART_Separator"><Setter Property="Margin" Value="{rune:Em 0.25, 0}" /></Style>
     <!-- 框里的小按钮：同输入框的清空按钮（1.5em，不小于 24px），左右各收进 space.xs -->
     <Style Selector="^ /template/ rune|ClearButton#PART_Clear">
       <Setter Property="Width" Value="{rune:Em 1.5, Min=24}" />
