@@ -155,12 +155,12 @@ public class Calendar : CalendarView
         base.OnPropertyChanged(change);
         if (change.Property == ValueProperty || change.Property == ValuesProperty)
         {
-            // 点格子写回的值由 CalendarView 重画；外面改的值（快捷按钮、重置）翻到它那里
-            if (writing) return;
+            // 点格子写回的值由 CalendarView 重画；外面改的值（快捷按钮、重置）翻到它那里。没进界面前不碰状态（见 Rebuild）
+            if (writing || VisualRoot is null) return;
             State!.SelectionChanged();
             Rebuild();
         }
-        else if (change.Property == GranularityProperty)
+        else if (change.Property == GranularityProperty && VisualRoot is not null)
         {
             State!.UnitChanged();
             Rebuild();

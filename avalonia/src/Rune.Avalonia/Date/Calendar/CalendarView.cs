@@ -253,6 +253,7 @@ public class CalendarView : Control
         {
             hovered = null;
             state.Hover(null);
+            if (state.Anchor is not null) Rebuild();
         };
         return grid;
     }
