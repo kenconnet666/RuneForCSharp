@@ -1439,6 +1439,14 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - WinForms 每个月是一张自己画的 CalendarGridControl（只有焦点日期所在的那张在 Tab 顺序里，格子是读屏的子对象，周数是行表头），页头是 IconButtonControl、ButtonControl 子控件；页面没换时只重画格子，换页、换视图才重建。自定义格子是 CellText（文字，也是读屏接在日期后面念的）加 DrawCell 事件（同 ListBox 的 DrawItem），格子大小是 CellSizeEm。
 - 从右往左：Avalonia 整棵子树镜像，翻页箭头的图标设 FlipInRtl；WPF、WinForms 的图标不镜像，箭头按方向换（WinForms 的位置自己镜像）。语言包的 Direction 不会自动换成平台的方向，示例里自己设（Avalonia、WPF 的 FlowDirection，WinForms 的 RightToLeft）。
 - 示例：basic、footer、locales、multiple、multiple-months、prices、sizes、unavailable、views。上游的 components.Calendar 定制（应用里统一显示周数）与 DateValue 值类型没有对应。
+- 结构与状态分开：页头与网格只在换页、换视图、换选项（周数、一周的第一天、语言、字号、可用、自定义格子）时重建，选中、焦点、悬停预览只按状态原地刷新格子。悬停预览时重建会换掉指针下的元素，Avalonia 随即发离开、进入事件，来回重建停不下来。
+- Calendar、RangeCalendar 共有的选项（Min、Max、不可选的日期、并排月数、粒度、DefaultFocused、只读）在 CalendarBase（WinForms 的 CalendarControlBase），状态也在那里接好；派生类只给选择方式、已选的日期与写回。
+
+### RangeCalendar（2026-11-15）
+
+- 值是孪生文件里的 IsoDateRange（两端 ISO 字符串，上游的 `DateRange<string>`），另有日期的 Range；Picked 在选完一个区间时发。按月、按年选时写回整月、整年。上游的值可以是 DateValue 并按传入的类型写回（valueType、ZonedDateTime 保留时区与时间），这里没有对应。
+- 快捷区间（上游 presetRange / presetIsoRange）是孪生文件里的 DateRangePreset 与 CalendarState.PresetRange（按今天与一周的第一天算），名字是 CalendarText.PresetName（语言包 DateRangePreset 的键是上游的 camelCase 名）。
+- 示例：display、hotel、leave、report。
 
 ### Tour 与 FloatingGeometry（2026-11-15）
 
