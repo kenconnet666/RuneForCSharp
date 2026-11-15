@@ -11,6 +11,9 @@ public enum FormPromptFieldType
 
     /// <summary>下拉选择（Options；Multiple 时多选）。</summary>
     Select,
+
+    /// <summary>日期（日期选择器；值是 ISO 日期 2026-10-20，范围是 Min、Max）。</summary>
+    Date,
 }
 
 /// <summary>小表单对话框里的一个字段（vue-tsx-pro 的 FormDialogField）。</summary>
@@ -42,6 +45,12 @@ public sealed record FormPromptField(string Name, string Label)
     /// <summary>最多几个字（单行、多行文字）。</summary>
     public int? MaxLength { get; init; }
 
+    /// <summary>最早可选的日期（Type 为 Date，ISO 日期）。</summary>
+    public string? Min { get; init; }
+
+    /// <summary>最晚可选的日期（Type 为 Date，ISO 日期）。</summary>
+    public string? Max { get; init; }
+
     /// <summary>校验：返回错误说明时不提交；第二个参数是全部单值字段的值。</summary>
     public Func<string, IReadOnlyDictionary<string, string>, string?>? Validate { get; init; }
 }
@@ -70,7 +79,6 @@ public sealed record FormPromptOptions(string Title, IReadOnlyList<FormPromptFie
 /// <summary>
 /// 命令式的小表单对话框（vue-tsx-pro 的 useFormDialog）：一个操作前要填一两个字段（退回的原因、改派给谁），不值得为它单独写一个对话框。
 /// 必填的没填、Validate 返回说明时错误落在字段下面、不提交；值是去掉首尾空白的字符串，多选的是字符串列表。在单行输入框里按回车也是确认。
-/// 上游的日期字段（type: 'date'）等日期组件做了再加。
 /// </summary>
 static class FormPrompt
 {
@@ -114,6 +122,7 @@ static class FormPrompt
 
     static Control Editor(FormPromptField field) => field.Type switch
     {
+        FormPromptFieldType.Date => new DatePickerControl { Value = field.DefaultValue as string, Min = field.Min, Max = field.Max },
         FormPromptFieldType.Textarea => new TextareaControl { Rows = 3, Text = field.DefaultValue as string ?? "", PlaceholderText = field.Placeholder ?? "", MaxLength = field.MaxLength ?? 32767 },
         FormPromptFieldType.Select when field.Multiple => new SelectControl
         {
@@ -131,6 +140,7 @@ static class FormPrompt
     {
         SelectControl select when select.SelectionMode == SelectionMode.Multiple => select.Values,
         SelectControl select => select.Value ?? "",
+        DatePickerControl date => date.Value ?? "",
         TextFieldControl text => text.Value.Trim(),
         _ => control.Text.Trim(),
     };

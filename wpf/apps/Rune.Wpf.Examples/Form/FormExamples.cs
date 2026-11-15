@@ -4,16 +4,101 @@ using System.Windows.Controls;
 
 namespace Rune.Wpf.Examples;
 
-/// <summary>Form 的示例（vue-tsx-pro 文档站 form/Form）。数组字段、按模型生成的表单、分节目录还没做；错误汇总的 admission 要用日期字段。</summary>
+/// <summary>Form 的示例（vue-tsx-pro 文档站 form/Form）。数组字段、按模型生成的表单、分节目录还没做。</summary>
 static class FormExamples
 {
     public static Example[] All =>
     [
+        new("Form", "admission", "供应商准入：自动绑定与错误汇总", "Field 写 Path、里面只放控件：值自动绑定模型的这个字段（开关写回 IsChecked）。FormErrorSummary 放在表单顶上：提交没通过时列出显示着的错误（按字段在表单里的顺序、带字段名），焦点先到它上面，点哪一项跳到那个字段，改对一项就少一项。跨字段的规则写在模型的 IValidatableObject 里，成员名指到要标错的字段；Dependencies 让开始日期改了之后结束日期跟着重新校验。", Admission),
         new("Form", "signup", "注册：校验与异步校验", "Field 写 Path、里面只放控件：值自动双向绑定，错误取自 FormController，失焦或提交过之后才显示；必填星号、最大长度、年龄的范围来自模型上的特性。用户名另有异步校验（防抖、只采用最后一次结果，提交时等它完成）。单行输入框里按回车提交，没通过时焦点移到第一个出错的字段。", Signup),
         new("Form", "layout", "标签在左侧、整组只读", "标签放在起始边在 Form 上统一设置：标签一列右对齐、控件一列，按第一行文字的基线对齐。IsReadOnly、IsEnabled 写在 Form 上，所有字段与控件（含勾选、开关、分段）一起只读或不可用。", Layout),
         new("Form", "section-review", "审批时整组只读", "申请内容整组只读（IsReadOnly 写在 FormSection 上），只有最后一组“审批意见”能填；标签放在起始边，两组用同一个宽度。分组有标题栏与细线，读屏是以标题为名称的一组。", SectionReview),
         new("Form", "section-collapsible", "可收起的分组、标题栏的操作", "不常填的“高级选项”默认收起（IsCollapsible，标题是按钮，IsOpen 双向绑定），两列、每列至少 14em；标题栏结束边放这一组的操作（添加一行）。重复的行只在第一行显示列名，其余行 IsLabelHidden（读屏照样念）。", SectionCollapsible),
     ];
+
+    public sealed class Supplier : IValidatableObject
+    {
+        [Required(ErrorMessage = "请填写公司全称"), MinLength(2, ErrorMessage = "请填写公司全称")]
+        public string Company { get; set; } = "";
+
+        [Required(ErrorMessage = "统一社会信用代码是 18 位数字或大写字母"), RegularExpression("^[0-9A-Z]{18}$", ErrorMessage = "统一社会信用代码是 18 位数字或大写字母")]
+        public string CreditCode { get; set; } = "";
+
+        [Required(ErrorMessage = "请选择供货品类")]
+        public string? Category { get; set; }
+
+        [Required(ErrorMessage = "请填写联系人")]
+        public string Contact { get; set; } = "";
+
+        [Required(ErrorMessage = "手机号是 11 位数字"), RegularExpression(@"^1\d{10}$", ErrorMessage = "手机号是 11 位数字")]
+        public string Phone { get; set; } = "";
+
+        [Required(ErrorMessage = "请选择开始日期")]
+        public string? ValidFrom { get; set; }
+
+        [Required(ErrorMessage = "请选择结束日期")]
+        public string? ValidTo { get; set; }
+
+        [StringLength(200)]
+        public string Note { get; set; } = "";
+
+        [Range(typeof(bool), "true", "true", ErrorMessage = "请确认已阅读准入须知")]
+        public bool Agreed { get; set; }
+
+        // 跨字段：结束日期要晚于开始日期，错误标在结束日期上（ISO 日期按字符串比较就是先后）
+        public IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (ValidFrom is { } from && ValidTo is { } to && string.CompareOrdinal(to, from) <= 0)
+                yield return new System.ComponentModel.DataAnnotations.ValidationResult("结束日期要晚于开始日期", [nameof(ValidTo)]);
+        }
+    }
+
+    static FrameworkElement Admission()
+    {
+        var result = new Small { Tone = TextTone.Muted };
+        FormController<Supplier>? controller = null;
+        controller = new FormController<Supplier>(new Supplier())
+        {
+            // 开始日期改了，结束日期（填过的话）跟着重新校验
+            Dependencies = new Dictionary<string, IReadOnlyList<string>> { ["ValidTo"] = ["ValidFrom"] },
+            OnSubmit = async values =>
+            {
+                await Task.Delay(600);
+                result.Text = $"{values.Company} 的准入申请已提交";
+                controller!.Reset(new Supplier());
+            },
+        };
+        var grid = new Grid { MinItemWidth = new Length("20em"), Gap = Space.Md };
+        foreach (var field in new[]
+        {
+            new Field { Path = "Company", Label = "公司全称", Content = new TextField() },
+            new Field { Path = "CreditCode", Label = "信用代码", Content = new TextField { PlaceholderText = "18 位" } },
+            new Field { Path = "Category", Label = "供货品类", Content = new Select { ItemsSource = new[] { "机械件", "塑料件", "钣金件", "标准件", "线缆" }, Placeholder = "请选择" } },
+            new Field { Path = "Contact", Label = "联系人", Content = new TextField() },
+            new Field { Path = "Phone", Label = "手机号", Content = new TextField() },
+            new Field { Path = "ValidFrom", Label = "有效期起", Content = new DateField() },
+            new Field { Path = "ValidTo", Label = "有效期止", Content = new DateField() },
+        })
+            grid.Children.Add(field);
+        var form = new Form { Controller = controller, LabelPlacement = FieldLabelPlacement.Start, LabelWidth = 7 * 14 };
+        var reset = new Button { Variant = ButtonVariant.Soft, Tone = StatusTone.Neutral, Content = "重置", Command = form.ResetCommand };
+        var submit = new Button { Content = "提交申请", Command = form.SubmitCommand };
+        form.Child = new Flex
+        {
+            Direction = FlexDirection.Column,
+            Gap = Space.Md,
+            Children =
+            {
+                new FormErrorSummary(),
+                grid,
+                new Field { Path = "Note", Label = "补充说明", Content = new Textarea { Rows = 2, ShowCount = true, MaxLength = 200 } },
+                new Field { Path = "Agreed", Label = "准入须知", Content = new Switch { Content = "已阅读并同意准入须知" } },
+                new Flex { Gap = Space.Sm, Justify = FlexJustify.End, Align = FlexAlign.Center, Children = { result, reset, submit } },
+            },
+        };
+        controller.Changed += (_, _) => submit.IsLoading = controller.IsSubmitting;
+        return form;
+    }
 
     public sealed class Account
     {

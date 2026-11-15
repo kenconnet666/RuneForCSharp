@@ -59,6 +59,18 @@ public class FormPromptTests
     });
 
     [Fact]
+    [Upstream("form-dialog", "date 字段：日期选择（分段输入），初始值原样提交")]
+    public Task Date_fields_submit_iso_dates() => HeadlessUi.Run(() =>
+    {
+        var (result, dialog, fields) = Open(new("调整计划", [new("Due", "计划完成") { Type = FormPromptFieldType.Date, DefaultValue = "2026-12-31", Min = "2026-11-01" }]));
+        var picker = Assert.IsType<DatePicker>(fields[0].Content);
+        Assert.Equal(("2026-11-01", 3), (picker.Min, picker.Group!.Boxes.Count));
+        Confirm(dialog);
+        HeadlessUi.Until(() => result.IsCompleted);
+        Assert.Equal("2026-12-31", result.Result!["Due"]);
+    });
+
+    [Fact]
     [Upstream("form-dialog", "多选的初始值是数组，原样提交")]
     public Task Multiple_selection_defaults_are_submitted_as_is() => HeadlessUi.Run(() =>
     {
