@@ -241,7 +241,7 @@ NavBar（root、list、item）补了部件标记。这些组件都还没做，�
 
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
-| 日历成为配方组件 Calendar（CalendarView、RangeCalendar、日期选择的弹出层、QuarterCalendar 共用）：部件 root、months、month、header、heading、grid、weekday、weekNumber、cell、cellButton、footer；data-scope 统一为 calendar；CalendarOptions（size、showWeekNumbers、fixedWeeks）可按组件设默认值 | Calendar 已做（2026-11-15：Avalonia 的部件名在 CalendarViewParts，WPF 是部件样式键 CalendarViewParts，WinForms 是自己画的网格，没有部件属性；默认值用各平台的样式或属性设，没有 components.Calendar 配方）；RangeCalendar 已做（2026-11-15）；日期选择的弹出层、QuarterCalendar 还没做 | 做时照新的 |
+| 日历成为配方组件 Calendar（CalendarView、RangeCalendar、日期选择的弹出层、QuarterCalendar 共用）：部件 root、months、month、header、heading、grid、weekday、weekNumber、cell、cellButton、footer；data-scope 统一为 calendar；CalendarOptions（size、showWeekNumbers、fixedWeeks）可按组件设默认值 | Calendar 已做（2026-11-15：Avalonia 的部件名在 CalendarViewParts，WPF 是部件样式键 CalendarViewParts，WinForms 是自己画的网格，没有部件属性；默认值用各平台的样式或属性设，没有 components.Calendar 配方）；RangeCalendar、QuarterCalendar 已做（2026-11-15）；日期选择的弹出层还没做 | 做时照新的 |
 | P12 复合组件转发里面基础组件的部件属性：Timeline（propsAvatar、propsPending）、PeoplePickerPanel（propsAvatar、propsCheckbox、propsSelectAll、propsDrill、propsClear、propsRemove）、DataImport（propsTemplate、propsPrevious、propsNext、propsAgain、propsOnlyErrors）；合并顺序 默认 < 使用方 < 组件管的 | 这些组件还没做；合并顺序我们本来如此（DESIGN §7） | 做时照新的；上游的候选清单在 .claude/reports/p12-candidates.md，已做的组件出现在里面时跟进 |
 
 ### 行为对照纳入文档站的浏览器测试（2026-11-15）
@@ -391,7 +391,7 @@ Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_
 |---|---|---|
 | 部件属性合并：undefined 不表态、null 才清掉；aria-describedby 拼接去重；嵌套 propsXxx 递归合并；同名事件合成 | WinForms 的部件属性记录本来就是 null = 不改、逐字段合并；Avalonia、WPF 用样式 | 已跟：读屏的帮助文字（aria-describedby）三个平台都改成字段的说明、错误与控件自己的拼在一起去重——原来 TextField、Select、Listbox、ToggleGroup 根本没念字段的说明，勾选项只在自己没写时才念 |
 | Listbox disabled 时点选项不改值、不触发 onPick；Link external 的 target、rel 是默认层；Popconfirm、TagsInput、日期、Pagination、Rating、Splitter 等一批行为修正；输入法组合中 DataTable、Cascader 等不处理按键 | Listbox、Popconfirm、Rating、Splitter、TagsInput 已做，其余还没做 | Listbox 本来就拦下（补了测试）；Popconfirm 照新的做（确认进行中被关掉、结果出来没确认成才算取消）；Rating 照新的做（只读时名称里总有分数）；Splitter 照新的做（只认主键拖动，拖动中离开分隔条也保持"拖动中"的样子）；TagsInput 照新的做（输入法组合中的 Enter 是平台的 ImeProcessed / ProcessKey，不加标签）；其余做时照新的 |
-| 新部件属性：NavBar、QuarterCalendar、DataTable 表头按钮、ImageCropper、QueryTable | ImageCropper 已做（Avalonia 的 PART_Viewport、PART_Toolbar；图片与裁剪框是画出来的），其余还没做 | 做时照新的 |
+| 新部件属性：NavBar、QuarterCalendar、DataTable 表头按钮、ImageCropper、QueryTable | ImageCropper 已做（Avalonia 的 PART_Viewport、PART_Toolbar；图片与裁剪框是画出来的）；QuarterCalendar 已做（2026-11-15，部件同 CalendarView：Avalonia 的 CalendarViewParts、WPF 的部件样式键，按季度给的部件属性没有对应），其余还没做 | 做时照新的 |
 
 锁定跟到 0.22.0（6e6f831d）：生成文件没变；行为对照新增的 Field 两条、Listbox 一条都对上了。
 
@@ -435,7 +435,7 @@ defineTheme / defineLang 忽略 undefined——网页专用或 C# 没有 undefin
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
 | 语言没配 timeZone 时，服务端按 UTC 渲染时刻、挂载后换成浏览器的时区（useFormat 的 date / relative、Countdown、TimelineChart） | 桌面端没有"服务端先渲染、浏览器再接管" | 不用改：一直按本机时区格式化；语言配了 timeZone 的行为本来就一致 |
-| 日历的"今天"按服务端记下的时刻水合、挂载后换成真实的今天（Calendar、RangeCalendar、QuarterCalendar、CalendarBoard） | Calendar、RangeCalendar 已做（2026-11-15，"今天"取本机当前日期）；QuarterCalendar、CalendarBoard 还没做 | 做时"今天"直接取本机当前日期，没有水合这一步 |
+| 日历的"今天"按服务端记下的时刻水合、挂载后换成真实的今天（Calendar、RangeCalendar、QuarterCalendar、CalendarBoard） | Calendar、RangeCalendar、QuarterCalendar 已做（2026-11-15，"今天"取本机当前日期）；CalendarBoard 还没做 | 做时"今天"直接取本机当前日期，没有水合这一步 |
 | 新增 useTimeZone()、isServerRendering()、useDateLocale().rootAttrs() | 网页专用 | 不涉及 |
 
 锁定跟到 0.25.0（fffc0c7f）：token、语言包、图标、配方、文档页面清单都没变（生成器 --check 通过）。

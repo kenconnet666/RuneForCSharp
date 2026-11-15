@@ -1448,6 +1448,13 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷区间（上游 presetRange / presetIsoRange）是孪生文件里的 DateRangePreset 与 CalendarState.PresetRange（按今天与一周的第一天算），名字是 CalendarText.PresetName（语言包 DateRangePreset 的键是上游的 camelCase 名）。
 - 示例：display、hotel、leave、report。
 
+### QuarterCalendar（2026-11-15）
+
+- 状态是孪生文件 QuarterState（上游 QuarterCalendar 组件里的那一套：焦点与年份、←→ 到头换年、Page Up / Down、单选与区间、悬停预览、Esc），不借 CalendarState：季度面板没有日、月视图，也不往更粗的视图切。整段在 Min–Max 之外的季度不可用，判断用 DateFieldRange（同上游 isPeriodDisabled）。
+- 值分成 Value（单选，2026-Q4）与 RangeValue（区间，IsoDateRange 的两端是季度）；SelectionMode 只接受 Single、Range。选好了发 Picked（上游 onPick）。
+- 外观与日历的月份视图一致（上游同一个配方）：Avalonia 抽出 CalendarSurface（字号档位、根、读屏分组），CalendarView 与 QuarterCalendar 都从它派生，默认样式的选择器写 `:is(rune|CalendarSurface)`，部件名用 CalendarViewParts；WPF 直接用 CalendarViewParts 的部件样式键；WinForms 把画一格的代码抽成 CalendarCellPainter，日期网格与季度的四格共用。按季度给的部件属性（propsCell 是函数）没有对应。
+- 上游没有单独的演示页（API 列在 Calendar 页），示例是 Calendar 页的 quarter。
+
 ### Tour 与 FloatingGeometry（2026-11-15）
 
 - 浮层贴着目标的定位做成孪生文件 FloatingGeometry（上游 floating 的 computePlacement：想要的一侧放不下换对侧，crossAxisFallback 时再试垂直的两侧，都放不下选溢出最少的；只沿对齐方向挪回、离边 8）。WinForms 原来的 FloatingLayout.Position 就是这套逻辑的平台版，改成换算矩形后调它（提示、弹出框、菜单、下拉照旧），整理在同一个提交里。Avalonia、WPF 的浮层仍用平台 Popup 的定位，Tour 的卡片用它。
