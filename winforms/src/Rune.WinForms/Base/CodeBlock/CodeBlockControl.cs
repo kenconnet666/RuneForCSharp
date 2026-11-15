@@ -179,20 +179,8 @@ public class CodeBlockControl : Control, IScopeAware
 
     int Border => Flush ? 0 : LogicalToDeviceUnits(1);
 
-    /// <summary>
-    /// 代码的字体：主题的等宽字体。代码字体的连字（Cascadia Code 把 => 画成 ⇒）会让照着抄的人看错，上游一律关掉；
-    /// GDI 关不掉 OpenType 特性，装了 Cascadia Mono（同一套字形、不带连字）时换成它。
-    /// </summary>
-    string MonoFamily
-    {
-        get
-        {
-            var family = Fonts.Installed(ProviderControl.ThemeOf(this).Fonts.Mono);
-            return family == "Cascadia Code" && Fonts.Installed(NoLigatures) == "Cascadia Mono" ? "Cascadia Mono" : family;
-        }
-    }
-
-    static readonly string[] NoLigatures = ["Cascadia Mono"];
+    /// <summary>代码的字体：主题的等宽字体，不带连字。</summary>
+    string MonoFamily => Fonts.CodeMono(ProviderControl.ThemeOf(this));
 
     /// <summary>代码、语言、高亮器变了：先回到纯文本，再交给高亮器（同一批变化合并成一次）；先发出的慢结果晚到时不覆盖新结果，高亮失败时保留纯文本。</summary>
     void Rehighlight()

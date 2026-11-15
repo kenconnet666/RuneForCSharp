@@ -25,6 +25,18 @@ public static class Fonts
         return list.FirstOrDefault(names.Contains) ?? SystemFonts.MessageBoxFont!.FontFamily.Name;
     });
 
+    static readonly string[] noLigatures = ["Cascadia Mono"];
+
+    /// <summary>
+    /// 看代码、原始数据用的等宽字体：主题的等宽字体。代码字体的连字（Cascadia Code 把 =&gt; 画成 ⇒、&gt;= 画成 ≥）会让照着抄的人看错，上游一律关掉；
+    /// GDI 关不掉 OpenType 特性，装了 Cascadia Mono（同一套字形、不带连字）时换成它。
+    /// </summary>
+    internal static string CodeMono(ThemeTokens theme)
+    {
+        var family = Installed(theme.Fonts.Mono);
+        return family == "Cascadia Code" && Installed(noLigatures) == "Cascadia Mono" ? "Cascadia Mono" : family;
+    }
+
     /// <summary>共用的字体（不要 Dispose）。</summary>
     internal static Font Get(string family, float points, FontStyle style) =>
         fonts.GetOrAdd((family, points, style), key => new Font(key.Family, key.Points, key.Style));
