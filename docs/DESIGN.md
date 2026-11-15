@@ -1378,6 +1378,17 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### Image、ImageGroup、Lightbox（2026-11-15）
+
+- 地址是 Uri（上游的 src 叫 Source，同 Avatar）：要有读的状态（扫光的占位、读完淡入）与读不了的占位，所以不收已经解码的图片。读图集中在各库的 ImageLoader：avares:// 或 pack://、file://、http(s)://、base64 的 data:，相对地址按程序所在目录；后台解码，最近 32 张留在内存里（缩略图点开大图、Lightbox 预先读的前后两张不再读一遍）。sources（picture 的备选源）是浏览器的响应式图片，不移植。
+- 平移与缩放是孪生文件 PanZoom（上游的 usePanZoom：zoomAround、clampPan、fitTransform 与控制器），平台控件只把指针、滚轮、双击、按键换成它的调用；滚轮按一格的 delta 取 e 的指数（同上游按 deltaY 连续缩放）。上游的 frame、cover、wheel: 'pan'、filter 是 ImageCropper 用的，做 ImageCropper 时再加。
+- Lightbox 从 Dialog（WinForms 是 DialogControl）派生：模态、焦点、Esc、还回焦点、BeforeClose、命令式 ShowAsync 都是对话框的。面板换成自己的内容、铺满窗口，背景 scrimStrong、文字 onScrim。Dialog 的 RequestClose 改成给子类用（工具栏的关闭按钮问 BeforeClose）；WinForms 的 DialogControl 加了 Flat 钩子（FloatingSurface 的 Elevation.None：没有阴影、描边、圆角），面板是不透明的窗口，scrimStrong 叠在主题背景上画。
+- 打开、换一张、旋转、还原之后整张放进视口：等图片区排好版再做（Avalonia、WPF 在 LayoutUpdated 里；排版途中改比例文字会让工具栏按旧的测量排）。原大按图片的像素算（WPF 不按图片里记的 DPI，WinForms 的一个像素是 1/96 英寸跟着 DPI 放大）。Avalonia 的 TransformOperations 按追加的顺序作用在点上，与 CSS 的 transform 列表相反：先追加缩放、再追加平移。
+- ← / → 在面板里哪里按都算（WinForms 在 ProcessCmdKey 里，不让窗体拿去移动焦点），+ / − / 0 / ↑ / ↓ 只在图片区；上游视口里的 ← / → 会同时平移和切换，我们只切换。下载按钮弹出平台的保存对话框，存原始字节。
+- Image 能预览时是按钮（Invoke / 默认动作打开），不在 ImageGroup 里时有自己的 Lightbox，用 ShowAsync 挂在图片下面打开；ImageGroup 从 Flex 派生（换行、间距 sm），打开时按界面里的先后顺序收集组里写了 Preview 的图，共用的预览就是 ImageGroup.Lightbox（上游的 propsLightbox）。WPF 的 Image 比格子大时默认从左上角排，图片居中对齐才同 object-position 的默认。
+- 示例的图纸是上游示例的 SVG（tools/example-assets/drawings.mjs 用 Playwright 截成 PNG，放在 docs/site/drawings），三个示例项目复制到输出目录。inspect 截图前同 ts-shots 把时长 token 设为 0（减少动态效果），淡入不会截到一半。
+- 顺带修了 WinForms 的两个老问题：不在界面里的命令式对话框（ShowAsync、ConfirmAsync）找不到宿主窗体、面板没有显示（FloatingSurface 现在顺着 IAnchored 借的 owner 找）；ConfirmAsync 在释放对话框之后才读理由，读到空字符串。
+
 ### Combobox、Autocomplete（2026-11-15）
 
 - 同 TagsInput：输入框就是控件自己（Avalonia、WPF 从 TextInputBase 派生，WinForms 从 TextInputControl），上游的 inputValue 是平台的 Text，选中项的值是 Value；filter={false} 叫 LocalFilter=false，load 是 Load（同 Select 的 OptionsLoader 与 RemoteOptions，打开时与输入停下 300 毫秒后请求、只采用最后一次、可分页）。

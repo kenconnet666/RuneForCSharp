@@ -15,6 +15,8 @@
     <EmbeddedResource Include="**\*.cs;**\*.xaml" Exclude="bin\**;obj\**" LogicalName="Source/%(RecursiveDir)%(Filename)%(Extension)" WithCulture="false" />
     <!-- 文档站的页面与示例清单（tools/docs-gen 生成，DocSite 读它） -->
     <EmbeddedResource Include="..\..\..\docs\site\pages.g.json" LogicalName="pages.g.json" WithCulture="false" />
+    <!-- Image、Lightbox 示例用的图纸（tools/example-assets 从上游的 SVG 截成 PNG）：复制到输出目录，示例按相对地址 drawings/… 读 -->
+    <Content Include="..\..\..\docs\site\drawings\*.png" Link="drawings\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

@@ -47,6 +47,9 @@ export const COMPONENT_PROP_RENAMES = {
   SearchField: { onSearch: 'SearchRequested' },
   // Name 是控件名；图片给平台的图片对象
   Avatar: { name: 'DisplayName', src: 'Source' },
+  // 地址是 Uri（同 Avatar 的 Source）；组共用的预览直接是 Lightbox 实例（改它的属性、听它的事件）
+  Image: { src: 'Source' },
+  ImageGroup: { propsLightbox: 'Lightbox' },
   UserButton: { name: 'DisplayName', src: 'Source' },
   // 地址给 Uri；加载完的事件不叫 Loaded（那是控件放进界面的事件）
   Embed: { src: 'Source', onLoad: 'PageLoaded' },
@@ -258,6 +261,11 @@ export const PROPS_NOT_PORTED = {
     propsRoot: '外层就是 Video 自己（定比例的黑底框）：样式直接写在 Video 上',
     ...Object.fromEntries(['propsControls', 'propsButton', 'propsSeek', 'propsVolume'].map((prop) => [prop, '自绘控制条画在网页内核的页面里（HTML 元素），外观跟主题的颜色与字号，没有部件属性'])),
   },
+  Image: {
+    sources: 'picture 的备选源（按格式回退、按媒体条件换图）是浏览器的响应式图片：桌面上一个地址就是一张图，按尺寸换图由调用方换 Source',
+    propsRoot: '外层就是 Image 自己（能预览时它就是按钮）：样式直接写在 Image 上',
+  },
+  Lightbox: { propsButton: '工具栏与两侧的按钮是 Lightbox 建的 IconButton（深色底上用 onScrim 的颜色），没有部件属性：外观跟主题' },
   Abbr: { propsTooltip: '提示就是平台的 ToolTip：位置、箭头写在 Abbr 自己身上（Avalonia、WPF 的 Tooltip.Placement、Tooltip.Arrow 附加属性）；WinForms 自带的提示用默认的位置' },
   Pagination: { propsItem: '外层的 li 是 HTML 列表的结构：桌面上页码按钮、省略号直接排在列表里' },
   NumberField: {
@@ -407,6 +415,9 @@ export const PLATFORM_PROPS_NOT_PORTED = {
         .map((prop) => [prop, '标题行、正文、页脚是 DialogControl 组合的子控件，面板与遮罩是两层窗口画的，没有部件属性记录'])),
       propsResizeHandle: '宽度调整手柄是 DrawerControl 放在面板窗口里的 ResizeHandleControl 子控件，没有部件属性记录',
     },
+    Image: { propsFallback: '读不了时的占位是 ImageControl 自己画的图标与文字：文字用 Fallback 换，颜色跟主题' },
+    Lightbox: Object.fromEntries(['propsViewport', 'propsCaption']
+      .map((prop) => [prop, '图片区、说明是 LightboxControl 放在面板窗口里的子控件（图片区自绘），没有部件属性记录'])),
     CommandPalette: {
       renderOption: 'WinForms 的选项是 ListboxControl 画出来的，没有自定义内容',
       ...Object.fromEntries(['propsTrigger', 'propsInput', 'propsListbox'].map((prop) => [prop, '默认触发按钮、搜索框、列表是 CommandPaletteControl 组合的子控件，没有部件属性记录'])),
@@ -580,6 +591,8 @@ export const BEHAVIOR_NOT_APPLICABLE = {
   Video: { '自绘控制条跟着 video 的事件走': '控制条的脚本在网页内核的页面里跑，测试里没有内核：页面的元素与文案由 Custom_bar 的测试核对，事件与键盘在真实窗口里核对' },
   Collapse: { '页内搜索命中': '页内搜索命中收起的内容时展开（hidden="until-found"、beforematch）是浏览器的能力，桌面没有页内搜索' },
   Slider: { '轨道与已选范围都能加属性': '轨道与已选范围是 Slider 自己画的，没有元素可加属性（PROPS_NOT_PORTED）' },
+  Image: { 'sources：渲染成 picture': '桌面没有 picture 与 srcset（PROPS_NOT_PORTED）：一个地址就是一张图' },
+  ImageGroup: { '组里的图片 preview 是每次新建的对象': 'Vue 的响应式重渲染问题：桌面的组打开时按界面收集图片，平时不读它们的属性，没有重渲染' },
   RelativeTime: { '服务端渲染记下': '桌面没有服务端渲染与水合：控件在界面线程上直接按此刻渲染；要固定"现在"（截图、测试）写 Now' },
 };
 

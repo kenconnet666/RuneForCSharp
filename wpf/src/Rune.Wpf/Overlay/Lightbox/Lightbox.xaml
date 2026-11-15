@@ -1,0 +1,15 @@
+<!--
+  Lightbox 部件的默认外观（vue-tsx-pro 的 lightboxStyles）：面板铺满窗口、没有描边与阴影，背景总是 scrimStrong、文字 onScrim
+  （看图片本身的颜色，不跟主题变）；图片区与说明的部件样式默认是空的
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <Style x:Key="{x:Static rune:LightboxParts.Panel}" TargetType="Border">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.ScrimStrong}" />
+    <Setter Property="ClipToBounds" Value="True" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.OnScrim}" />
+  </Style>
+  <Style x:Key="{x:Static rune:LightboxParts.Viewport}" TargetType="Panel" />
+  <Style x:Key="{x:Static rune:LightboxParts.Caption}" TargetType="ContentPresenter" />
+</ResourceDictionary>

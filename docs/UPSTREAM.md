@@ -101,8 +101,8 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
 | Carousel（8b909944、c09d837b）：原生横向滚动加吸附、autoplay、页点、APG 轮播语义 | 还没做 | 做时照新的；桌面上滚动吸附要自己做 |
-| 语言包破坏性合并：zoomIn、zoomOut、slideCounter、resetView 代替 lightbox*、chart* 的同义键 | 我们没用这些键（Lightbox、图表没做） | 锁定时重新生成语言包即可 |
-| ImageCropper，usePanZoom 加 frame、cover，Upload 的 transform（88671dd1） | 还没做 | 做时照新的 |
+| 语言包破坏性合并：zoomIn、zoomOut、slideCounter、resetView 代替 lightbox*、chart* 的同义键 | Lightbox 已做（2026-11-15），用的是合并后的键 | 锁定时重新生成语言包即可 |
+| ImageCropper，usePanZoom 加 frame、cover，Upload 的 transform（88671dd1） | PanZoom 已做（2026-11-15，Lightbox 用的部分），ImageCropper、Upload 还没做 | 做 ImageCropper 时给孪生文件 PanZoom 加 frame、cover |
 | ColorPicker 与颜色工具；ColorField 的色块改成按钮弹出 ColorPicker（613b93bb，破坏性） | 还没做 ColorField | 做 ColorField 时直接照新的 |
 | DataTable、TreeDataTable 的 virtualColumns（96efc7ad） | 还没做 DataTable | 做时照新的 |
 | 下一步上游做 P2 文档站整改、P2.5 逐个组件精修，做完请我们整体跟进一遍 | | 到时按页重截、逐页对照 |
@@ -205,7 +205,7 @@ CI 还在排队，锁定停在 a189e71b。
 
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
-| NotificationList、Upload、ConditionBuilder、ColorPicker、JsonViewer、Lightbox、Timeline、ProportionBar 的内部节点补部件标记（部件名见通知） | Timeline 已做（2026-11-15，Avalonia 的部件名照上游），其余还没做 | 做时部件名照上游 |
+| NotificationList、Upload、ConditionBuilder、ColorPicker、JsonViewer、Lightbox、Timeline、ProportionBar 的内部节点补部件标记（部件名见通知） | Timeline、Lightbox 已做（2026-11-15，Avalonia 的部件名照上游，WPF 是 LightboxParts 的样式键），其余还没做 | 做时部件名照上游 |
 | TreemapChart 读屏数据表的单元格只写数字（表头已有单位），三个图表共用 useChartValueText | 还没做图表 | 做时照新的 |
 
 ### 第十六批（2026-11-08 通知，master 7437db27：部件名统一成 camelCase）
@@ -358,7 +358,7 @@ Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_
 | 状态层 stateLayerStyles：ghost（悬停 14%、按下 22% 文字色）给 Alert、Banner、Tag 的关闭按钮；overlay（悬停叠 8%）给可选中的 Tag（f5e4c5a6、e48a7c38） | Tag 已做；Alert、Banner 还没做 | 已跟：Tag 三个平台。按下沿用按钮本来的波纹（文字色的 22%）。Alert、Banner 做时照新的 |
 | Link：下划线平时 50% 文字色、悬停实色；tone=muted 悬停换正文色（d8e0429f、f5e4c5a6） | Link 已做 | 已跟：三个平台（WinForms 的下划线改成自己画） |
 | Switch 轨道悬停混进正文色（关 15%、开 12%，oklab）；输入外壳 soft 悬停 fillHover（bbdf86c9） | 已做 | 已跟：Switch 的 TrackHover（sRGB 里混，差不到一个色阶），TextField、Select 的 soft 悬停 |
-| Checklist、KanbanBoard、Upload、色块、Image、Carousel、Splitter 的悬停（bbdf86c9），Splitter / ResizeHandle 的悬停聚焦拖动（1046ed37） | Checklist、Splitter、ResizeHandle 已做，其余还没做 | Splitter、ResizeHandle 照新的做（2026-11-15）：悬停、拖动 borderStrong，键盘聚焦强调色，分隔线加粗到 md；收起按钮不透明的 surface 底、悬停 fillHover；其余做时照新的 |
+| Checklist、KanbanBoard、Upload、色块、Image、Carousel、Splitter 的悬停（bbdf86c9），Splitter / ResizeHandle 的悬停聚焦拖动（1046ed37） | Checklist、Splitter、ResizeHandle、Image 已做（Image 能预览时悬停压暗 10%），其余还没做 | Splitter、ResizeHandle 照新的做（2026-11-15）：悬停、拖动 borderStrong，键盘聚焦强调色，分隔线加粗到 md；收起按钮不透明的 surface 底、悬停 fillHover；其余做时照新的 |
 | TabList 横排可滚时可滚的一头渐隐（604d1334） | TabList 已做滚动 | 2026-11-14 做了：Avalonia、WPF 是滚动区域的 OpacityMask；WinForms 的标签是各自的窗口，没有渐隐 |
 | Steps 横排连接线对齐圆圈中线（4a257b71） | 已做（2026-11-14 移植时照新的） | 连接线按圆圈的中线画 |
 | AppShell：收起按钮从侧栏底部挪到品牌格结束边，收起后品牌格只放居中的展开按钮，AppShellBrand 不再按收起隐藏产品名（cb28b280） | 已做 | 已跟：三个平台，去掉 CollapseBar 部件、WPF 的 AppShellBrand.IsCompact 附加属性、WinForms 的 IsCompact |

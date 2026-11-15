@@ -1,0 +1,17 @@
+<!--
+  Lightbox 部件的默认外观（vue-tsx-pro 的 lightboxStyles）：面板铺满窗口、没有描边与阴影，背景总是 scrimStrong、文字 onScrim
+  （看图片本身的颜色，不跟主题变）。写在 DialogParts 之后，盖过对话框面板的外观
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|Lightbox Border#PART_Panel">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.ScrimStrong}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="BoxShadow" Value="0 0 0 0 Transparent" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.OnScrim}" />
+  </Style>
+  <Style Selector="rune|Lightbox Panel#PART_Viewport">
+    <Setter Property="FocusAdorner" Value="{x:Null}" />
+  </Style>
+</Styles>

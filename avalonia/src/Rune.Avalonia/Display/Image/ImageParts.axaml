@@ -1,0 +1,30 @@
+<!--
+  Image 部件的默认外观（vue-tsx-pro 的 imageStyles）：框的底色 fill、文字与图标 textMuted（读不了时的占位）；
+  能预览时键盘聚焦显示焦点环（focusRingStyles.visible）
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|Image > Border">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Fill}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+  </Style>
+  <Style Selector="rune|Image">
+    <Setter Property="FocusAdorner" Value="{x:Null}" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Top" />
+  </Style>
+  <Style Selector="rune|Image ContentPresenter#PART_Fallback">
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Padding" Value="{rune:Em 0.5}" />
+  </Style>
+  <Style Selector="rune|Image Border#PART_FocusRing">
+    <Setter Property="IsVisible" Value="False" />
+    <Setter Property="BorderThickness" Value="2" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.FocusRing}" />
+  </Style>
+  <Style Selector="rune|Image:focus-visible Border#PART_FocusRing">
+    <Setter Property="IsVisible" Value="True" />
+  </Style>
+</Styles>
