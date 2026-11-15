@@ -215,7 +215,9 @@ public class FormControllerTests
         };
         form.SetValue("Email", "t@b.cn");
         form.SetValue("Email", "taken@b.cn");
-        await Task.Delay(150, TestContext.Current.CancellationToken);
+        // 防抖 30ms 加校验 20ms：等到校验完成为止（CI 的机器忙时会晚一些），最多 3 秒
+        for (var waited = System.Diagnostics.Stopwatch.StartNew(); (calls.Count == 0 || form.IsValidating()) && waited.Elapsed < TimeSpan.FromSeconds(3);)
+            await Task.Delay(10, TestContext.Current.CancellationToken);
         Assert.Equal(["taken@b.cn"], calls);
         form.Blur("Email");
         Assert.Equal("邮箱已注册", form.Errors["Email"]);
