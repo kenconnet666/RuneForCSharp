@@ -10,7 +10,31 @@ static class TableExamples
     [
         new("Table", "plans", "套餐对比", "TableHead、TableBody 里放 TableRow，行里放 TableHeaderCell 与 TableCell；表体里的 TableHeaderCell 是行标题。TableCaption 是表格的标题，也是读屏名称。勾与叉是图标，旁边放一份给读屏的名称。", Plans),
         new("Table", "column-table", "列定义与合并单元格：询价比价单", "ColumnTable 按列定义渲染静态表格：列定义与 DataTable 相同（金额按语言、状态、空值）。供应商与品类上下相同的格合并（MergeRepeated，层层分组）；没报价的行用 GetCellSpan 把“单价”“小计”合成一格写原因；底部合计（ColumnSummary.Sum 精确相加）。", Quotes),
+        new("Table", "column-settings", "列设置：显示哪些列、什么顺序", "ColumnSettings 弹出全部的列：勾选显示哪些、拖动把手（或聚焦后用键盘）调整顺序，“重置”回到列定义。Hidden、Order 写回新的列表；表格用 TableColumns.Arrange 按顺序排列、去掉隐藏的列。上游只在 QueryTable 里用它，这个示例配的是 ColumnTable。", Settings),
     ];
+
+    // 列设置配静态表格：两边看同一份 Hidden、Order
+    static Control Settings()
+    {
+        DataTableColumn[] columns =
+        [
+            new("Part", "零件"),
+            new("Supplier", "供应商"),
+            new("Quantity", "数量") { Type = ColumnType.Number },
+            new("Price", "单价") { Type = ColumnType.Currency },
+            new("Status", "状态") { Statuses = QuoteStatuses },
+        ];
+        var table = new ColumnTable { ItemsSource = QuoteLines, Columns = columns, Density = TableDensity.Compact };
+        AutomationProperties.SetName(table, "报价");
+        var settings = new ColumnSettings { Columns = columns };
+        settings.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == ColumnSettings.HiddenProperty || e.Property == ColumnSettings.OrderProperty)
+                table.Columns = [.. TableColumns.Arrange(columns, settings.Order).Where(column => !settings.Hidden.Contains(column.Key))];
+        };
+        var bar = new Flex { Justify = FlexJustify.End, Children = { settings } };
+        return new Flex { Direction = FlexDirection.Column, Gap = Space.Sm, Align = FlexAlign.Stretch, Children = { bar, table } };
+    }
 
     sealed record QuoteLine(string Supplier, string Category, string Part, int Quantity, decimal? Price, string Status, string? Note = null);
 

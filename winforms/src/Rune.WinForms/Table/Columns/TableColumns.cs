@@ -109,6 +109,20 @@ public static class TableColumns
         _ => row.GetType().GetProperty(column.Key)?.GetValue(row),
     };
 
+    /// <summary>列的名称（列设置、读屏用）：表头是文字时就是它，否则是 Key。</summary>
+    public static string Label(DataTableColumn column) => column.Header as string ?? column.Key;
+
+    /// <summary>
+    /// 列的顺序调整（列设置）：order 是列的 Key 的顺序，没列到的按定义的顺序排在后面；记下的顺序里已经删掉的列不算。
+    /// 上游还把固定的列排到两头，列定义有了固定（DataTable）时再加。
+    /// </summary>
+    public static IReadOnlyList<DataTableColumn> Arrange(IReadOnlyList<DataTableColumn> columns, IReadOnlyList<string>? order)
+    {
+        var rank = new Dictionary<string, int>();
+        foreach (var key in order ?? []) rank.TryAdd(key, rank.Count);
+        return [.. columns.Select((column, index) => (column, position: rank.TryGetValue(column.Key, out var at) ? at : rank.Count + index)).OrderBy(item => item.position).Select(item => item.column)];
+    }
+
     /// <summary>空值：null 或空字符串。</summary>
     public static bool IsEmpty(object? value) => value is null or string { Length: 0 };
 
