@@ -4,7 +4,7 @@ namespace Rune.Avalonia.Examples;
 
 /// <summary>
 /// NumberField 的示例（vue-tsx-pro 文档站 input/NumberField）。值是 decimal：上游 number、bigint、Decimal 三种的示例在这里都是它；
-/// submit（原生表单提交）是网页的，range 要等 NumberRangeField。各框的值各自独立（上游几个框共用一个值）。
+/// submit（原生表单提交）是网页的；range 是 NumberRangeField。各框的值各自独立（上游几个框共用一个值）。
 /// </summary>
 static class NumberFieldExamples
 {
@@ -13,6 +13,7 @@ static class NumberFieldExamples
         new("NumberField", "basic", "基础用法", "输入时是普通文字，失焦或回车时解析、夹到 Min–Max、对齐到 Step；解析不了时恢复原值，清空写回 null。Format 是数字格式（NumericFormat），认当前语言的小数点与千分位，也认中文输入法打出的全角数字。", Basic),
         new("NumberField", "precise", "精确数值", "值是 decimal：十进制精确，加减与对齐步长都不经过浮点数，金额、超过 2⁵³ 的整数、长小数都不丢位。一开始为空时就是 null。", Precise),
         new("NumberField", "units", "单位与缩放", "Suffix、Prefix 把单位放进输入框。值以元保存、按万元输入时写 Format 的 Scale = 10000：显示与编辑都是万元，写回时换回元；Min、Max、Step 仍按值本身的单位。只读时不显示加减按钮。", Units),
+        new("NumberField", "range", "数值区间", "NumberRangeField：两个框，最小到最大，一端可以空着（\"20 家以上\"）；填 50 和 10 试试，失焦后自动对调。Format、Suffix、Prefix 与外观两端共用。", Range),
         new("NumberField", "appearance", "外观与状态", "外观同 TextField：Variant、Size、Radius；减少、增加按钮不在 Tab 顺序里，按住时连续加减。", Appearance),
     ];
 
@@ -88,4 +89,28 @@ static class NumberFieldExamples
         ]);
         return Fields("13em", [.. fields]);
     }
+
+    /// <summary>区间与它的值：空着的一端写成"不限"。</summary>
+    static Control RangeCase(string label, string description, NumberRangeField range, Func<decimal, string> show)
+    {
+        var value = new Small { Tone = TextTone.Muted };
+        void Sync() => value.Text = "值：" + string.Join(" ～ ", new[] { range.Value.Start, range.Value.End }.Select(end => end is { } number ? show(number) : "不限"));
+        range.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == NumberRangeField.ValueProperty) Sync();
+        };
+        Sync();
+        return new Flex { Direction = FlexDirection.Column, Gap = Space.Xs, Children = { new Field { Label = label, Description = description, Content = range }, value } };
+    }
+
+    static Control Range() => Fields("16em",
+        RangeCase("预期收益量级", "填 50 和 10 试试：失焦后自动对调", new NumberRangeField
+        {
+            Value = new NumberRange(100000, 500000),
+            Format = new NumericFormat { Scale = 10000, MaximumFractionDigits = 2 },
+            Suffix = "万元",
+            Min = 0,
+        }, number => $"{number} 元"),
+        RangeCase("门店数量", "只填起：20 家以上", new NumberRangeField { Value = new NumberRange(20, null), Min = 0, Suffix = "家", Separator = "至" }, number => $"{number} 家"),
+        RangeCase("单价", "筛选栏里常用：浅底、小号、胶囊形", new NumberRangeField { Value = new NumberRange(null, 1200), Min = 0, Prefix = "$", Variant = ControlVariant.Soft, Size = TextSize.Sm, Radius = Radius.Full }, number => $"${number}"));
 }

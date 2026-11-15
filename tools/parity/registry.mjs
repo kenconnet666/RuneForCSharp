@@ -388,6 +388,11 @@ export const PROPS_NOT_PORTED = {
     valueType: '值固定是 decimal?：十进制精确，金额、大整数不经过浮点数，不必按场景选 number 或 bigint；要别的类型时调用方转换',
     name: FORM_NAME,
   },
+  NumberRangeField: {
+    valueType: '两端固定是 decimal?（同 NumberField）：值是 NumberRange(Start, End)',
+    name: FORM_NAME,
+    placeholder: '两个框的占位文字分开写：StartPlaceholder、EndPlaceholder（上游是一个二元数组）',
+  },
   Steps: { propsConnector: '连接线由 Steps 按圆圈的位置自己画（横竖两种画法统一；WinForms 的子控件是各自的窗口，会盖住父级画的东西），不是一个元素' },
   NavItem: { propsItem: '外层的 li 是 HTML 列表的结构：桌面上导航项本身就是列表里的一行' },
   ItemListItem: Object.fromEntries(['propsLink', 'propsButton'].map((prop) => [prop, '标题里伸展的链接、按钮是网页让整条可点的写法：桌面上整条就是一个可点的控件（Href、Invoked），没有里面那一层'])),
