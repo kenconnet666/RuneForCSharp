@@ -285,7 +285,7 @@ QueryTable、ErrorBoundary、JsonViewer、ImageCropper、QuarterCalendar、Carou
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
 | Countdown 成为配方组件，variant: 'text'（默认）或 'blocks'（天数单独一格、时分秒各一格、格间“:”；部件 root、segment、separator，segment 最小 2em、accent 底、accentContrast 字、semibold） | 2026-11-15 做了 Countdown | 已照新的：Variant=Blocks（DESIGN"DateTimeText、RelativeTime、Countdown"） |
-| AppShell、NotificationCenter 的示例改用 UserButton 做账号菜单（f98eb920） | 我们的 AppShell 页只有 fullscreen（admin 等 Stat，mixed 等 NavBar） | 已跟：fullscreen 的效果区 28rem → 24rem；admin、mixed 做时照新的（顶栏用 UserButton，菜单等 Menu） |
+| AppShell、NotificationCenter 的示例改用 UserButton 做账号菜单（f98eb920） | AppShell 页 admin、fullscreen、mixed 都有了（admin、mixed 2026-11-16，仅 Avalonia） | 已跟：fullscreen 的效果区 28rem → 24rem、正文换成合同台账（ColumnTable）；admin、mixed 照新的（顶栏用 UserButton，账号菜单是 Menu） |
 
 ### 第二十三批（2026-11-08 通知，master f4065afc..68ef26a9：NavList、Menu、Toaster、AppShell、Transfer 改成配方组件）
 

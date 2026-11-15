@@ -398,6 +398,8 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 
 - **Avalonia：每个实例的带伪类嵌套样式都要建激活器**，取值到颜色的映射不写成 N 条伪类样式，在代码里按 `BindingPriority.Template` 绑定主题资源：盖过继承与普通样式，使用方带伪类的样式（StyleTrigger）仍然盖得过，与原来主题里伪类样式的先后一致。Icon 的 7 条色调样式、按钮家族的 6 条色调 → 调色板样式都改成这样（Icon 每个省 3 KB）。样式档位（6 条加 5 条悬停）还是样式，它们要按调色板字段换值、带悬停。
 - **Avalonia：模板里取组件根的属性用 TemplateBinding**，不用 `$parent[...]`（每个实例沿树往上找）；`{rune:Em}` 只有系数来自资源时才用多重绑定，取模板父级字号时是 TemplateBinding，取自己的字号时是单个绑定。
+  自己的字号绑的是可继承的附加属性 `TextElement.FontSize`（TemplatedControl、TextBlock 的 FontSize 就是它）：原来绑 CLR 的 FontSize 属性，Border、Panel、Flex 没有它，绑定失败、值设不上
+  （2026-11-16 修：FormSection 标题栏的下边距、Blockquote 的出处、NativeSelect 的圆角与列表边距、TagsInput 的最小宽度、TextField 的内层边距、AppShell 抽屉的标题栏都因此一直是 0）。
 - **Avalonia：Transitions 可以共用**（过渡不存每个控件的状态，Fluent 也是一份给所有按钮），按（时长、缓动）缓存一份，不每个按钮各建三个。
 - **无限动画只在可见时跑**：Avalonia 样式里的动画、WPF 的动画时钟都不管元素看不看得见，每帧照走。Avalonia 写成 `^[IsVisible=True]` 的样式；WPF 在 IsVisibleChanged 里开停。隐藏的控件不测量、不套模板，所以按钮里收起的加载指示本来就不会建出图标。
 - **WPF：设 Content 时元素就初始化**（`AddLogicalChild` 里 TryFireInitialized），主题样式在这时套上，所以"创建"里包含了主题样式的开销，和"布局"要加在一起看。
@@ -991,7 +993,7 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   种类到颜色的映射照上游的 Shiki 主题（标点用注释色）。`CodeHighlighting`（分行、行号写法 `ParseLines`、内置高亮器）是孪生文件。异步：先纯文本，
   同一批属性变化合并成一次（投递到界面线程之后再取），慢结果不覆盖新结果，失败时保留纯文本。
 - **Avalonia**：代码组合控件（同 Card），部件是子元素（`CodeBlockParts` 名字），颜色在 CodeBlockParts.axaml；em 尺寸在代码里按各层的字号算——Border 没有字号属性，
-  主题里的 `{rune:Em}` 在它上面不起作用（踩过：内边距、行高全是 0）。代码用 SelectableTextBlock（可选中）。
+  主题里的 `{rune:Em}` 当时在它上面不起作用（踩过：内边距、行高全是 0；2026-11-16 起 Em 绑继承的字号，Border 上也能用）。代码用 SelectableTextBlock（可选中）。
 - **WPF**：同样组合，部件样式键（`CodeBlockParts`）；FrameworkElement 自己有 Language（界面文字的语言），代码的语言叫 `CodeLanguage`。部件样式 BasedOn 别的组件的
   主题样式时要把那个字典合并进来（StaticResource 只认本字典与合并进来的）。行号的读屏节点自己说不是控件、不是内容（WPF 没有 AccessibilityView）。
   踩过：`Grid` 在 Rune.Wpf 里是组件库的流式网格，平台的要写全名。

@@ -88,6 +88,10 @@ listbox 页（remote 等远程选项）：single Avalonia 0.08%、WPF 0.07%、Wi
 
 form 页（2026-11-16 补出上游截图后才比，仅 Avalonia）：admission 0.76% / 1.07%、layout 1.05% / 1.72%、signup 3.47% / 3.53%、section-review 8.09% / 10.05%、section-collapsible 8.17% / 9.23%
 （后两个我们矮 14 像素）。字段一行比上游矮 2 像素是共同的原因之一，steps-form 的 onboarding（5.37%）也是它；待收敛。steps-form 的 review 0.48% / 0.49%。
+同日修了 `{rune:Em}` 在 Border 上不生效（FormSection 标题栏没有下边距）：section-review 降到 0.10%，section-collapsible 降到 1.74% / 2.79%。
+
+app-shell 页（2026-11-16 重出上游截图：fullscreen 的效果区改成了 24rem、正文是合同台账）：fullscreen 0.06% / 0.07%；admin 4.23% / 4.47%、mixed 2.04% / 1.89%（Stat 卡片高 4 像素、
+表格几列错开 4 像素，待收敛）。
 
 pivot-table 页（2026-11-16，仅 Avalonia）：count 0.43% / 0.43%；heatmap 1.47% / 1.51%（亮 / 暗）。数字列的宽度按内容比例分，上游的 system-ui 在 Windows 11 上是
 Segoe UI Variable，数字比我们的 Segoe UI 宽约 9%（14px 的"128.4"上游 36.2、我们 33.2），数字列分得宽一点、维度列窄 10 像素，热力底色的列边界跟着错开；字体是全局的取舍（DESIGN §6 的"字体"），不在透视表里改。
