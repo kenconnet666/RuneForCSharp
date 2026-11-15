@@ -1464,6 +1464,14 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### CodeGroup（2026-11-16，仅 Avalonia）
+
+- 上游的 items 是 CodeBlock 的属性加 label、value 的对象；这里各段直接是 CodeBlock（Items 是内容），一段的选项就是 CodeBlock 的属性，标签文字、值是附加属性 CodeGroup.Label、CodeGroup.ItemValue（默认等于标签）。各段的 Flush 设成 true（同上游强制 flush）。Items、标签、值变了都重建标签与面板，先把代码块从旧面板里取出来。
+- 由 Tabs（sm）与 TabList 组合，Value 与 Tabs.Value 双向绑定（默认 TwoWay），不写时 Tabs 显示第一段，点了才写回；几组绑同一个值一起切换。
+- 外框 1 像素 borderMuted、md 圆角、surface 底、裁剪；颜色是模板优先级的资源绑定（样式盖得过），圆角与标签栏左右 space.sm 按字号在 Measure 里算。标签栏的 surfaceMuted 底与内边距用 TabList 新加的 Background、Padding（转给标签栏外框，分隔线仍横贯整行；套一层 Border 的话分隔线会缩进来）。标签栏的读屏名称默认是各段标签用" / "连起来，模板优先级，使用方写的盖得过（上游 propsList 的 aria-label）。
+- 面板的焦点环画在里侧（外框裁剪，同上游 focusRingStyles.inset）：CodeGroupParts.axaml 把 TabPanel 焦点环的 -4 外扩改成 0。
+- 示例：DocsKit 页的 group（同上游两组绑同一个值；命令换成 dotnet CLI、Package Manager、Paket 的安装与移除）。
+
 ### PropsTable（2026-11-16，仅 Avalonia）
 
 - 同 TextTable，本身就是 Table（StyleKeyOverride 用 Table 的主题），按 Props（ApiProp 的列表）与 Caption 生成表头、各行；Density 的默认值改成 compact（上游 mergePartProps 给的默认），外观属性照 Table 能改。列标题、"必填"（warning）、"可绑定"（accent）取 DocsKitMessages，跟着语言包变。
