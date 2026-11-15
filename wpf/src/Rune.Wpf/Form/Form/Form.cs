@@ -15,7 +15,7 @@ namespace Rune.Wpf;
 ///   &lt;/StackPanel&gt;
 /// &lt;/rune:Form&gt;
 /// </code>
-/// 提交（<see cref="SubmitAsync"/>、<see cref="SubmitCommand"/>、单行输入框里按回车）先校验，没通过就把焦点移到第一个出错的字段；
+/// 提交（<see cref="SubmitAsync"/>、<see cref="SubmitCommand"/>、单行输入框里按回车）先校验，没通过就把焦点移到错误汇总（有 <see cref="FormErrorSummary"/> 时）或第一个出错的字段；
 /// <see cref="ResetCommand"/> 回到初始值。标签布局（<see cref="LabelPlacement"/>、<see cref="LabelWidth"/>、<see cref="LabelAlign"/>）与
 /// <see cref="IsReadOnly"/> 在这里统一设置，字段上写了的优先；不可用写 IsEnabled。
 /// </summary>
@@ -88,17 +88,19 @@ public class Form : Decorator
     /// <summary>回到初始值。</summary>
     public void Reset() => Controller?.Reset();
 
-    /// <summary>聚焦第一个出错字段的控件（逻辑树里的顺序）。</summary>
+    /// <summary>有错误汇总时聚焦它（读屏念出有几项），否则聚焦第一个出错字段的控件（逻辑树里的顺序）。</summary>
     internal void FocusFirstError()
     {
-        if (Fields(this).FirstOrDefault(field => field is { Invalid: true, IsVisible: true }) is { Content: { } control }) Field.FocusControl(control);
+        var elements = Descendants(this).ToList();
+        if (elements.OfType<FormErrorSummary>().FirstOrDefault(summary => summary.IsVisible) is { } summary) summary.Focus();
+        else if (elements.OfType<Field>().FirstOrDefault(field => field is { Invalid: true, IsVisible: true }) is { Content: { } control }) Field.FocusControl(control);
 
-        static IEnumerable<Field> Fields(DependencyObject node)
+        static IEnumerable<DependencyObject> Descendants(DependencyObject node)
         {
             foreach (var child in LogicalTreeHelper.GetChildren(node).OfType<DependencyObject>())
             {
-                if (child is Field field) yield return field;
-                foreach (var inner in Fields(child)) yield return inner;
+                yield return child;
+                foreach (var inner in Descendants(child)) yield return inner;
             }
         }
     }

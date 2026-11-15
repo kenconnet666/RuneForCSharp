@@ -10,7 +10,7 @@ namespace Rune.WinForms;
 /// form.Controls.Add(new FlexControl { Direction = FlexDirection.Column, Controls = { new FieldControl { Path = "Email", Label = "邮箱", Content = new TextFieldControl() } } });
 /// save.Command = form.SubmitCommand;
 /// </code>
-/// 提交（<see cref="SubmitAsync"/>、<see cref="SubmitCommand"/>、单行输入框里按回车）先校验，没通过就把焦点移到第一个出错的字段；
+/// 提交（<see cref="SubmitAsync"/>、<see cref="SubmitCommand"/>、单行输入框里按回车）先校验，没通过就把焦点移到错误汇总（有 <see cref="FormErrorSummaryControl"/> 时）或第一个出错的字段；
 /// <see cref="ResetCommand"/> 回到初始值。标签布局（<see cref="LabelPlacement"/>、<see cref="LabelWidth"/>、<see cref="LabelAlign"/>）与
 /// <see cref="IsReadOnly"/> 在这里统一设置，字段上写了的优先；不可用写 Enabled。
 /// WinForms 的 Form 是窗口，这里叫 FormControl。
@@ -92,9 +92,14 @@ public class FormControl : Panel
     /// <summary>回到初始值。</summary>
     public void Reset() => Controller?.Reset();
 
-    /// <summary>聚焦第一个出错字段的控件（按 Tab 顺序）。</summary>
+    /// <summary>有错误汇总时聚焦它（读屏念出有几项），否则聚焦第一个出错字段的控件（按 Tab 顺序）。</summary>
     internal void FocusFirstError()
     {
+        if (Descendants(this).OfType<FormErrorSummaryControl>().FirstOrDefault(summary => summary.Visible) is { } summary)
+        {
+            summary.Focus();
+            return;
+        }
         if (Descendants(this).OfType<FieldControl>().FirstOrDefault(field => field.Invalid && field.Visible) is { Content: { } control }) FieldControl.FocusControl(control);
     }
 
@@ -114,19 +119,16 @@ public class FormControl : Panel
     {
         base.OnControlAdded(e);
         if (e.Control is { } added)
-            foreach (var field in Descendants(added).OfType<FieldControl>()) field.Connect();
+            foreach (var part in Descendants(added).OfType<IFormPart>()) part.Connect();
     }
 
-    /// <summary>设置变了：字段重新接上（控制器、布局）或只同步状态；不在字段里的控件跟上只读。</summary>
+    /// <summary>设置变了：字段与错误汇总重新接上（控制器、布局），或字段只同步状态；不在字段里的控件跟上只读。</summary>
     void Propagate(bool fields)
     {
         foreach (var control in Descendants(this).Skip(1))
         {
-            if (control is FieldControl field)
-            {
-                if (fields) field.Connect();
-                else field.Sync();
-            }
+            if (fields && control is IFormPart part) part.Connect();
+            else if (control is FieldControl field) field.Sync();
             else if (control is IFieldControl own && FieldControl.Of(control) is null) own.FieldChanged();
         }
     }

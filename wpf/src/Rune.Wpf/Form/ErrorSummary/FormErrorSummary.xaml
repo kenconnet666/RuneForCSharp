@@ -1,0 +1,29 @@
+<!--
+  FormErrorSummary 的主题样式与部件样式（vue-tsx-pro 的 formErrorSummaryStyles）：dangerSoft 底、xs 宽的 dangerBorder 描边、正文色，
+  圆角 md、四周 md 在代码里按字号给；标题 medium 字重、dangerText；聚焦时描边换成焦点环色。使用方同键的样式叠在上面（DESIGN §7）
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <Style TargetType="rune:FormErrorSummary">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.DangerSoft}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.DangerBorder}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+    <Style.Triggers>
+      <Trigger Property="IsKeyboardFocused" Value="True"><Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.FocusRing}" /></Trigger>
+    </Style.Triggers>
+  </Style>
+
+  <Style x:Key="{x:Static rune:FormErrorSummaryParts.Title}" TargetType="rune:Flex">
+    <Setter Property="Gap" Value="xs" />
+    <Setter Property="Align" Value="center" />
+    <Setter Property="TextElement.FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.DangerText}" />
+  </Style>
+
+  <Style x:Key="{x:Static rune:FormErrorSummaryParts.List}" TargetType="rune:List" />
+
+  <Style x:Key="{x:Static rune:FormErrorSummaryParts.Link}" TargetType="rune:Link" />
+</ResourceDictionary>

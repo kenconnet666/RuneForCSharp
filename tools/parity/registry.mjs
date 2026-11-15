@@ -461,6 +461,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     CommandPalette: Object.fromEntries(['propsInput', 'propsListbox'].map((prop) => [prop, '面板里的搜索框、列表是 CommandPalette 建的，外观跟着 TextField、Listbox 的主题样式；部件样式键只有搜索行'])),
   },
   WinForms: {
+    FormErrorSummary: Object.fromEntries(['propsTitle', 'propsList', 'propsLink']
+      .map((prop) => [prop, '标题、列表与每项的链接是 FormErrorSummaryControl 组合的 FlexControl、UnorderedListControl、LinkControl：没有部件属性记录，外观跟主题'])),
     Field: Object.fromEntries(['propsLabel', 'propsControl']
       .map((prop) => [prop, '标签是 FieldLabelControl、控件列是 FieldControl 自己排的：没有部件属性记录，标签外观跟主题（说明、错误有 PropsDescription、PropsError）'])),
     Tour: Object.fromEntries(['propsSpotlight', 'propsPanel', 'propsCover', 'propsTitle', 'propsContent', 'propsFooter', 'propsProgress', 'propsSkip', 'propsPrevious', 'propsNext']

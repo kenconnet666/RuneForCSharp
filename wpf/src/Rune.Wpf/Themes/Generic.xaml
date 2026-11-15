@@ -64,6 +64,7 @@
     <ResourceDictionary Source="/Rune.Wpf;component/Input/Combobox/Combobox.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Input/Radio/Radio.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Form/Field/Field.xaml" />
+    <ResourceDictionary Source="/Rune.Wpf;component/Form/ErrorSummary/FormErrorSummary.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Input/Listbox/Listbox.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Display/Tree/Tree.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Display/VirtualList/VirtualList.xaml" />

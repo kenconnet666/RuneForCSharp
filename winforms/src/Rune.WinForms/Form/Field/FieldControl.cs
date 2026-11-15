@@ -22,7 +22,7 @@ namespace Rune.WinForms;
 [ToolboxItem(true)]
 [DefaultProperty(nameof(Label))]
 [Description("表单字段：标签、控件、说明、错误信息，并把出错、必填、只读交给里面的控件。")]
-public class FieldControl : Panel
+public class FieldControl : Panel, IFormPart
 {
     readonly FieldLabelControl label = new();
     readonly TextControl description = new() { TextSize = TextSize.Sm, Tone = TextTone.Muted };
@@ -258,6 +258,8 @@ public class FieldControl : Panel
         bound = controller is not null && Path is { } bindPath && FieldControls() is [Control sole] ? FieldBinding.Create(sole, BoundProperty, controller, bindPath, previous) : null;
         Sync();
     }
+
+    void IFormPart.Connect() => Connect();
 
     void OnFormChanged(object? sender, EventArgs e)
     {

@@ -1395,6 +1395,13 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 约束落到控件（上游 schema 推出的 maxlength、min / max）：输入框的 MaxLength，NumberField 的 Min、Max。Avalonia 用样式优先级写（控件上写的本地值照样优先），WPF 在没写时 SetCurrentValue，WinForms 记着使用方写的、没写时用约束。
 - 提交：SubmitAsync（以及给按钮 Command 的 SubmitCommand，WinForms 的 ButtonControl 没有 Command 就在 Click 里调），单行输入框里按回车也提交（Avalonia、WPF 接冒泡的 KeyDown，WinForms 在 ProcessCmdKey 里，它沿父链往上走）；没通过时聚焦第一个出错字段的控件（错误汇总做了以后先聚焦汇总）。ResetCommand / Reset 回到初始值，绑定的控件跟着变。
 
+### FormErrorSummary（2026-11-15）
+
+- 从所在表单的控制器取：提交过之后，整份表单的错误（没有链接）在前，其余是登记过的字段里显示着的错误，按登记的顺序（上游按字段在表单里出现的顺序；字段按显示顺序登记，结果相同）；没有就收起。每项是 danger 色调的链接，点了调登记时给的 Focus（聚焦字段的控件，同上游跳到 controlId）。标题、每项的文字取语言包的 FormErrorSummary、FormErrorItem，Title 可以换。
+- 自己能聚焦但不在 Tab 顺序里（上游 tabindex -1）；Form 提交失败时先聚焦显示着的汇总，没有汇总才聚焦第一个出错的控件。读屏名称是标题。上游的焦点环在外圈：这里聚焦时把描边换成焦点环色（WinForms 加粗到 2）。
+- 外观：dangerSoft 底、dangerBorder 细边、md 圆角、四周 md、行距 sm；标题是警示图标加文字（medium、dangerText），列表是 List。Avalonia 是 Border（样式在 FormErrorSummary.axaml），WPF 是 Border（圆角、内边距按字号在代码里算，样式在 FormErrorSummary.xaml），WinForms 是自己画底与边的 FlexControl。WinForms 的字段与汇总都实现 IFormPart，FormControl 换控制器、加进子控件时一起接上。
+- 上游的 admission 示例要用日期字段（DateField 还没做），示例等日期组件做了再补。
+
 ### Tour 与 FloatingGeometry（2026-11-15）
 
 - 浮层贴着目标的定位做成孪生文件 FloatingGeometry（上游 floating 的 computePlacement：想要的一侧放不下换对侧，crossAxisFallback 时再试垂直的两侧，都放不下选溢出最少的；只沿对齐方向挪回、离边 8）。WinForms 原来的 FloatingLayout.Position 就是这套逻辑的平台版，改成换算矩形后调它（提示、弹出框、菜单、下拉照旧），整理在同一个提交里。Avalonia、WPF 的浮层仍用平台 Popup 的定位，Tour 的卡片用它。

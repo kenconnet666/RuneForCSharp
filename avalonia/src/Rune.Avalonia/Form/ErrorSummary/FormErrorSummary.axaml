@@ -1,0 +1,24 @@
+<!--
+  FormErrorSummary 的默认外观（vue-tsx-pro 的 formErrorSummaryStyles）：dangerSoft 底、xs 宽的 dangerBorder 描边、md 圆角、四周 md、正文色；
+  标题 medium 字重、dangerText；列表项之间 xs。写成主题里的样式（DESIGN §7 代码组合的控件），使用方的部件样式盖得过
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|FormErrorSummary">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.DangerSoft}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.DangerBorder}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{rune:Em Resource=Rune.Radius.Md}" />
+    <Setter Property="Padding" Value="{rune:Em Resource=Rune.Space.Md}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="FocusAdorner" Value="{x:Null}" />
+  </Style>
+  <Style Selector="rune|FormErrorSummary:focus-visible">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.FocusRing}" />
+  </Style>
+  <Style Selector="rune|FormErrorSummary rune|Flex#PART_Title">
+    <Setter Property="TextElement.FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.DangerText}" />
+  </Style>
+</Styles>

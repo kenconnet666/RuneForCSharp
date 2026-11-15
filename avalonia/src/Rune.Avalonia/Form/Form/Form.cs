@@ -17,7 +17,7 @@ namespace Rune.Avalonia;
 ///   &lt;rune:Button Command="{Binding #form.SubmitCommand}" IsLoading="{Binding Signup.IsSubmitting}"&gt;保存&lt;/rune:Button&gt;
 /// &lt;/rune:Form&gt;
 /// </code>
-/// 提交（<see cref="SubmitAsync"/>、<see cref="SubmitCommand"/>、单行输入框里按回车）先校验，没通过就把焦点移到第一个出错的字段；
+/// 提交（<see cref="SubmitAsync"/>、<see cref="SubmitCommand"/>、单行输入框里按回车）先校验，没通过就把焦点移到错误汇总（有 <see cref="FormErrorSummary"/> 时）或第一个出错的字段；
 /// <see cref="ResetCommand"/> 回到初始值。标签布局（<see cref="LabelPlacement"/>、<see cref="LabelWidth"/>、<see cref="LabelAlign"/>）与
 /// <see cref="IsReadOnly"/> 在这里统一设置，字段上写了的优先；不可用写 IsEnabled。
 /// </summary>
@@ -96,6 +96,11 @@ public class Form : Decorator
     /// <summary>有错误汇总时聚焦它（读屏念出有几项），否则聚焦第一个出错字段的控件。</summary>
     internal void FocusFirstError()
     {
+        if (this.GetLogicalDescendants().OfType<FormErrorSummary>().FirstOrDefault(summary => summary.IsEffectivelyVisible) is { } summary)
+        {
+            summary.Focus();
+            return;
+        }
         var invalid = this.GetLogicalDescendants().OfType<Field>().FirstOrDefault(field => field.Invalid && field.IsEffectivelyVisible);
         if (invalid?.Content is { } control) Field.FocusControl(control);
     }

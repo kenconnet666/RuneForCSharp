@@ -577,9 +577,13 @@ public sealed class FormController<T> : IFormController where T : class
             attributes.OfType<RequiredAttribute>().Any(),
             length?.MinimumLength is > 0 ? length.MinimumLength : attributes.OfType<MinLengthAttribute>().FirstOrDefault()?.Length,
             length?.MaximumLength ?? attributes.OfType<MaxLengthAttribute>().FirstOrDefault()?.Length,
-            range is null ? null : System.Convert.ToDouble(range.Minimum, CultureInfo.InvariantCulture),
-            range is null ? null : System.Convert.ToDouble(range.Maximum, CultureInfo.InvariantCulture));
+            Number(range?.Minimum),
+            Number(range?.Maximum));
     }
+
+    /// <summary>Range 的界限是数字时取它；Range(typeof(bool), "true", "true") 这类非数字的界限不是范围约束。</summary>
+    static double? Number(object? bound) =>
+        double.TryParse(System.Convert.ToString(bound, CultureInfo.InvariantCulture), NumberStyles.Float, CultureInfo.InvariantCulture, out var number) ? number : null;
 
     /// <inheritdoc />
     public IDisposable Register(string path, FormFieldInfo field)
