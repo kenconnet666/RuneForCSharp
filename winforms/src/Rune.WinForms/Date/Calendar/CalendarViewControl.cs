@@ -527,7 +527,12 @@ public sealed class CalendarGridControl : Control
     protected override void OnMouseMove(MouseEventArgs e)
     {
         base.OnMouseMove(e);
-        var date = HitTest(e.Location)?.Date;
+        PointAt(HitTest(e.Location)?.Date);
+    }
+
+    /// <summary>指针移到了这一格（null 是格子以外）：画悬停的底色；区间选到一半时预览。</summary>
+    internal void PointAt(DateOnly? date)
+    {
         if (date == hovered) return;
         hovered = date;
         if (date is { } target && State.Anchor is not null)
