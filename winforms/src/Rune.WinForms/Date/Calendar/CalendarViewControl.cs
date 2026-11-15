@@ -86,6 +86,11 @@ public class CalendarViewControl : Control, IScopeAware
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public Func<DateOnly, CalendarCellState, string?>? CellText { get; set { field = value; Rebuild(); } }
 
+    /// <summary>浅色底的日期：DatePicker 选周时已选那一周的另外六天（日历只把周一当作已选的那一格）。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    internal Func<DateOnly, bool>? Highlighted { get; set { field = value; Rebuild(); } }
+
     /// <summary>画日期格（底色、今天的细圈已经画好）：设 <see cref="DrawCalendarCellEventArgs.Handled"/> 后不再画默认的文字。</summary>
     public event EventHandler<DrawCalendarCellEventArgs>? DrawCell;
 
@@ -457,7 +462,8 @@ public sealed class CalendarGridControl : Control
                 Muted: cell.Outside || cell.Unavailable,
                 Unavailable: cell.Unavailable,
                 Off: Off(cell),
-                Hover: hovered == slot.Date);
+                Hover: hovered == slot.Date,
+                Highlighted: !period && !cell.Selected && owner.Highlighted?.Invoke(slot.Date) == true);
             var fore = CalendarCellPainter.PaintBackground(g, this, colors, radius, bounds, look, owner.Enabled);
             var args = new DrawCalendarCellEventArgs(g, slot.Bounds, slot.Date, cell, fore, Font);
             if (!period && owner.OwnerDraws) owner.RaiseDrawCell(args);

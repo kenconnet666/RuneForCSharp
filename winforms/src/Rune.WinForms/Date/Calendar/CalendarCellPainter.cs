@@ -13,7 +13,8 @@ namespace Rune.WinForms;
 /// <param name="Unavailable">不可选的日期：划掉。</param>
 /// <param name="Off">不能选：变淡。</param>
 /// <param name="Hover">指针在上面。</param>
-readonly record struct CalendarCellLook(bool Marked, bool Middle, bool InRange, bool BandLeft, bool BandRight, bool Today, bool Muted, bool Unavailable, bool Off, bool Hover);
+/// <param name="Highlighted">浅色底（DatePicker 选周时已选那一周的另外六天）：accentSoft 底、accentText 字。</param>
+readonly record struct CalendarCellLook(bool Marked, bool Middle, bool InRange, bool BandLeft, bool BandRight, bool Today, bool Muted, bool Unavailable, bool Off, bool Hover, bool Highlighted = false);
 
 /// <summary>画日历的格子（CalendarGridControl 的日期、月份、年份格与 QuarterCalendarControl 的季度格共用，同上游一个配方）。</summary>
 static class CalendarCellPainter
@@ -38,7 +39,10 @@ static class CalendarCellPainter
             g.FillPath(soft, band);
         }
         var hover = look.Hover && !look.Off;
-        Color? fill = look.Marked ? (hover ? colors.AccentHover : colors.Accent) : look.Middle ? (hover ? colors.AccentSoftHover : null) : hover ? colors.FillHover : null;
+        Color? fill = look.Marked ? (hover ? colors.AccentHover : colors.Accent)
+            : look.Middle ? (hover ? colors.AccentSoftHover : null)
+            : look.Highlighted ? (hover ? colors.AccentSoftHover : colors.AccentSoft)
+            : hover ? colors.FillHover : null;
         if (fill is { } color)
         {
             using var shape = Drawing.RoundedRectangle(bounds, corner);
@@ -51,7 +55,7 @@ static class CalendarCellPainter
             using var pen = new Pen(dim(colors.AccentBorder), 1);
             g.DrawPath(pen, ring);
         }
-        var fore = look.Marked ? colors.AccentContrast : look.Middle ? colors.AccentText : look.Muted ? colors.TextMuted : colors.Text;
+        var fore = look.Marked ? colors.AccentContrast : look.Middle || look.Highlighted ? colors.AccentText : look.Muted ? colors.TextMuted : colors.Text;
         // 不能选的变淡（opacities.disabled）；整个日历不可用时 dim 已经混过一次
         if (look.Off && enabled) fore = Drawing.Mix(BackOf(host, colors), fore, Tokens.Opacity.Disabled);
         return dim(fore);

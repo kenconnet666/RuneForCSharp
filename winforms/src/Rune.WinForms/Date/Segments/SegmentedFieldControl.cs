@@ -149,7 +149,8 @@ public class SegmentedFieldControl : FlexControl, IFieldControl, IFormPart
     /// <summary>出错：自己写了的优先，其次所在字段的；有值且超出范围、不可选时也算。</summary>
     internal bool Invalid => (IsInvalid ?? FieldControl.Of(this)?.Invalid ?? false) || Value is { } iso && IsOutOfRange(iso);
 
-    bool ReadOnly => IsReadOnly ?? FieldControl.ReadOnlyOf(this);
+    /// <summary>只读：自己写了的优先，其次所在字段的。</summary>
+    private protected bool ReadOnly => IsReadOnly ?? FieldControl.ReadOnlyOf(this);
 
     bool Required => IsRequired ?? FieldControl.Of(this)?.Required ?? false;
 
@@ -214,10 +215,16 @@ public class SegmentedFieldControl : FlexControl, IFieldControl, IFormPart
         group.IsInvalid = Invalid;
         group.Enabled = Enabled;
         clear.Visible = Clearable && (Value is not null || Segments.Partial) && Enabled && !ReadOnly;
+        Synced();
         group.Refresh();
         ControlShell.Layout(this, Em);
         ControlShell.FitInnerButton(clear, Em);
         Invalidate();
+    }
+
+    /// <summary>状态（只读、可用、出错、值）同步过了：派生类跟着改自己的部件（选择器的打开按钮）。</summary>
+    private protected virtual void Synced()
+    {
     }
 
     void Clear()
