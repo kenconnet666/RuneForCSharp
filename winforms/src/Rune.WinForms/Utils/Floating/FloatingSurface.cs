@@ -51,12 +51,13 @@ sealed class FloatingSurface : IDisposable
     public void Show(Rectangle panel, int inset, ElementContext context, (string Side, Rectangle Target, float Size)? arrow, Elevation elevation = Elevation.Lg, bool square = false)
     {
         var origin = Form.Origin;
-        if (origin.FindForm() is not { } host) return;
+        if (HostOf(origin) is not { } host) return;
         var theme = context.Theme;
         var em = context.Em;
         var border = Border(context);
-        var radius = square ? 0 : (elevation == Elevation.Xl ? theme.Radii.Xl : theme.Radii.Lg) * em;
-        var shadow = elevation == Elevation.Xl ? theme.Shadows.Xl : theme.Shadows.Lg;
+        var flat = elevation == Elevation.None;
+        var radius = square || flat ? 0 : (elevation == Elevation.Xl ? theme.Radii.Xl : theme.Radii.Lg) * em;
+        IReadOnlyList<ShadowLayer> shadow = flat ? [] : elevation == Elevation.Xl ? theme.Shadows.Xl : theme.Shadows.Lg;
         var overhang = (int)MathF.Ceiling(Math.Max(arrow is { } a ? 0.71f * a.Size : 0,
             shadow.Where(layer => !layer.Inset).Select(layer => context.Scale(Math.Max(Math.Abs(layer.X), Math.Abs(layer.Y)) + layer.Spread + layer.Blur)).DefaultIfEmpty(0).Max()));
         var bitmap = LayeredWindow.Canvas(new Size(panel.Width + 2 * overhang, panel.Height + 2 * overhang));
@@ -69,7 +70,8 @@ sealed class FloatingSurface : IDisposable
             using var pen = new Pen(theme.Colors.Border, border);
             using (var path = Drawing.RoundedRectangle(inner, radius)) graphics.FillPath(fill, path);
             var half = border / 2f;
-            using (var path = Drawing.RoundedRectangle(RectangleF.Inflate(inner, -half, -half), Math.Max(0, radius - half))) graphics.DrawPath(pen, path);
+            if (!flat)
+                using (var path = Drawing.RoundedRectangle(RectangleF.Inflate(inner, -half, -half), Math.Max(0, radius - half))) graphics.DrawPath(pen, path);
             if (arrow is { } spec) PaintArrow(graphics, fill, pen, inner, spec.Side, spec.Target, panel.Location, spec.Size);
         }
 
@@ -87,6 +89,14 @@ sealed class FloatingSurface : IDisposable
         if (!Form.Activates) return;
         Form.Activate();
         if (!Form.SelectNextControl(null, true, true, true, false)) Form.Focus();
+    }
+
+    /// <summary>浮层挂在哪个窗体上：弹出它的控件所在的窗体；不在界面里的命令式对话框（<see cref="IAnchored"/>）借 owner 所在的。</summary>
+    static Form? HostOf(Control origin)
+    {
+        for (var node = origin; node is not null; node = node.Parent ?? (node as IAnchored)?.Anchor)
+            if (node is Form form) return form;
+        return null;
     }
 
     /// <summary>藏起两层窗口；返回焦点原来是否在里面（关上后要不要还给触发控件）。</summary>
@@ -193,6 +203,9 @@ sealed class FloatingSurface : IDisposable
 
         /// <summary>xl：对话框。</summary>
         Xl,
+
+        /// <summary>平的：没有阴影、描边、圆角（铺满窗口的 Lightbox）。</summary>
+        None,
     }
 
     /// <summary>按下鼠标的位置不在浮层、也不在弹出它的控件上：点了外面。</summary>

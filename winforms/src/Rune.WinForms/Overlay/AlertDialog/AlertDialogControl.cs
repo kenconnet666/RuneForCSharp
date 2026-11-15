@@ -96,8 +96,10 @@ public class AlertDialogControl : DialogControl
             return true;
         };
         await dialog.ShowAsync(owner);
+        // 先取理由再释放：输入框销毁后读不到文字
+        var answer = confirmed ? text() : null;
         dialog.Dispose();
-        return confirmed ? text() : null;
+        return answer;
     }
 
     static FlexControl Column(Control content, Control field)

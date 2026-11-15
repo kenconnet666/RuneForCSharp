@@ -365,14 +365,14 @@ public class DialogControl : Control, IAnchored
         if (host is null || !host.IsHandleCreated) return;
         var context = ElementContext.Of(this);
         var area = host.RectangleToScreen(host.ClientRectangle);
-        var border = FloatingSurface.Border(context);
+        var border = Flat ? 0 : FloatingSurface.Border(context);
         surface.Form.Font = Font;
         // 窗口显示之前里面的控件还没建句柄，量出的高度偏小：显示之后再量一次，变了就重新摆
         for (var pass = 0; pass < 2; pass++)
         {
             var panel = PanelBounds(area, context, border);
             if (pass > 0 && surface.Backdrop?.Panel == panel) break;
-            surface.Show(panel, border, context, null, FloatingSurface.Elevation.Xl, square: SquarePanel);
+            surface.Show(panel, border, context, null, Flat ? FloatingSurface.Elevation.None : FloatingSurface.Elevation.Xl, square: SquarePanel);
         }
         ArrangeExtras();
     }
@@ -388,6 +388,9 @@ public class DialogControl : Control, IAnchored
 
     /// <summary>直角面板（Drawer）。</summary>
     private protected virtual bool SquarePanel => false;
+
+    /// <summary>平的面板（Lightbox 铺满窗口）：没有描边、阴影、圆角，内容贴着面板的边。</summary>
+    private protected virtual bool Flat => false;
 
     /// <summary>
     /// 面板在屏幕上的矩形：宽度按档位、不超出（四周至少 1em），高度按内容、不超出；居中（或停在 <see cref="TopFraction"/>），加上拖出来的位移，整块不超出宿主窗体。
@@ -416,8 +419,8 @@ public class DialogControl : Control, IAnchored
     {
     }
 
-    /// <summary>用户要关闭：确认进行中不关；问过 BeforeClose 同意了才关。</summary>
-    async Task RequestClose(OpenChangeReason reason)
+    /// <summary>用户要关闭：确认进行中不关；问过 BeforeClose 同意了才关（Lightbox 工具栏的关闭按钮也走这里）。</summary>
+    private protected async Task RequestClose(OpenChangeReason reason)
     {
         if (confirming || !open) return;
         if (BeforeClose is { } ask && !await ask(reason)) return;
