@@ -1464,6 +1464,16 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### StepsForm（2026-11-16，仅 Avalonia）
+
+- 外层就是 Form（部件 PART_Root）：Controller、标签布局（LabelPlacement、LabelWidth、LabelAlign，Field 的同名属性 AddOwner）转给它；IsReadOnly 下发到字段。上游的 disabled 是 IsDisabled：只禁用这一步的内容与提交按钮，
+  步骤条、上一步、下一步照常（IsEnabled 会把整棵子树禁用）。各步是 FormStep(Title, Fields, Content) 记录，Content 是函数：换到这一步才建（字段重新登记），建的是哪一步按 FormStep 对象记（属性初始化时 Steps 可能晚于 Controller 到）。
+- 下一步：ValidateAsync(这一步的字段)，通过才走；没通过时等错误显示出来（Loaded 优先级）把焦点给这一步第一个出错的 Field 的控件。提交是 Form.SubmitAsync（失败时 Form 自己聚焦第一个错误），再跳到第一个有错的步骤（当前步骤自己没错时）；
+  上游用 effect 看 submitCount，这里在提交之后直接判断。单行输入框里按回车：在 Form 的回车提交之前用隧道事件接住，不在最后一步时是下一步，最后一步是提交，只读、不可用时什么也不做。
+- 换步写 Current（默认双向绑定），焦点移到这一步的内容上（可聚焦、不画焦点环，读屏名称"第 2 步，共 2 步"）；步骤条 Navigable，只能点回走过的步骤，只读、不可用时哪一步都能点；有显示着的错误的步骤标成 Error。
+  控制器的 Changed 里刷新步骤状态、按钮（下一步在单字段校验时 IsLoading，提交在 IsSubmitting 时 IsLoading）。
+- 像素对照：review 0.48% / 0.49%；onboarding 5.37%（我们矮 4 像素：每行字段矮 2 像素，同 Form 页的差异，见 DOCSITE 差异基线）。示例：StepsForm 页的 onboarding、review（同上游；确认密码用模型的 IValidatableObject，Dependencies 让改了密码重新校验确认）。
+
 ### NavBar 与 NavMenu（2026-11-16，仅 Avalonia）
 
 - 菜单数据是一个记录 NavMenuItem(Label)：Href、Icon、Children、Badge、Disabled、Active（上游的 NavBarItem 与 NavMenuItem 合成一个：同一份菜单数据同时给顶栏与侧栏），HasPages 判断有没有能显示的页面。
