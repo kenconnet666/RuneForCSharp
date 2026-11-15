@@ -12,8 +12,10 @@ static class NavListExamples
     [
         new("NavList", "groups", "后台导航", "当前页按 NavList 的 CurrentHref 判断（也可以用 Active 指定），读屏的项状态是\"当前页\"，并且高亮；含当前页的 NavGroup 自动展开。End 放计数之类的尾部内容。", Groups),
         new("NavList", "compact", "窄侧栏：只显示图标", "Compact 时各项只剩图标，名称留给读屏、悬停或聚焦时用提示显示；NavSection 的 Icon 是小节标题前的标记（不能点），紧凑时代替标题。NavItem 的 Badge 是计数角标，展开时在文字后面，紧凑时是图标上的小圆点。", Compact),
+        new("NavList", "menu", "按菜单数据渲染：NavMenu", "菜单是一棵树（后端按角色返回、或配置里写的）时交给 NavMenu：Items 是 NavMenuItem（Label、Href、Icon、Badge、Disabled、Children），同一份数据可以同时给顶栏的 NavBar 和侧栏的 NavMenu。有 Children 的项是一组：顶层默认是一直展开的小节，TopLevel = Group 改成可收起的分组；没有 Href 又没有可显示子项的目录不画，用户没有能看的页面时目录自然消失。", MenuTree),
         new("NavList", "sections", "文档站导航", "NavSection 是带小标题、不能收起的一组：链接多、按主题分组的侧栏。不可用的项不能点、不能聚焦，End 放在项的末尾（计数、标记）。", Sections),
         new("NavList", "toc", "本页目录", "TableOfContents 列出各节标题，滚动时高亮正在读的一节，指示条滑过去；当前节的读屏项状态是\"当前位置\"。目录项的 Id 是标题控件的 Name；正文所在的滚动区域给 ScrollRoot。", Contents),
+        new("NavList", "nav-bar", "顶栏一行：NavBar", "NavBar 是顶栏的一行链接与下拉菜单：Items 里有 Href 的是链接，有 Children 的是下拉菜单。当前页同样按 CurrentHref 判断，子项是当前页时它的下拉按钮也高亮；放不下时后面的项收进“更多”菜单，藏起来的项不占位、读屏与 Tab 都跳过。拖动滑块把顶栏变窄看看。", TopBar),
     ];
 
     /// <summary>15rem（根字号 16）宽的卡片：侧栏的宽度。</summary>
@@ -137,5 +139,81 @@ static class NavListExamples
         var layout = new DockPanel { Children = { toc, scroll } };
         DockPanel.SetDock(toc, Dock.Right);
         return new Card { Content = layout };
+    }
+
+    static readonly NavMenuItem[] Menu =
+    [
+        new("首页") { Href = "/", Icon = Lucide.House },
+        new("降本管理")
+        {
+            Icon = Lucide.Boxes,
+            Children = [new("降本项目") { Href = "/projects", Badge = 3 }, new("台账") { Href = "/ledger", Icon = Lucide.ClipboardList }, new("已停用的入口") { Href = "/legacy", Disabled = true }],
+        },
+        new("系统") { Icon = Lucide.Settings, Children = [new("用户与角色") { Href = "/system/users" }, new("数据字典") { Children = [new("字典类型") { Href = "/system/dict" }] }] },
+        // 后端返回的目录下没有该用户能看的页面：不显示
+        new("审批") { Children = [] },
+    ];
+
+    // 数据驱动的侧栏菜单：示例里不真的换页，CurrentHref 就是“当前路由”
+    static Control MenuTree()
+    {
+        var menu = new NavMenu { Items = Menu, CurrentHref = "/projects" };
+        AutomationProperties.SetName(menu, "主菜单");
+        var topLevel = new ToggleGroup
+        {
+            IsRequired = true,
+            Value = "section",
+            Size = TextSize.Sm,
+            Children = { new ToggleItem { Value = "section", Content = "小节" }, new ToggleItem { Value = "group", Content = "分组" } },
+        };
+        AutomationProperties.SetName(topLevel, "顶层目录");
+        var path = new Small { Tone = TextTone.Muted };
+        void Sync() => path.Text = $"当前页：{menu.CurrentHref}";
+        menu.PropertyChanged += (_, e) => { if (e.Property == NavList.CurrentHrefProperty) Sync(); };
+        topLevel.PropertyChanged += (_, e) => { if (e.Property == ToggleGroup.ValueProperty) menu.TopLevel = topLevel.Value == "group" ? NavMenuTopLevel.Group : NavMenuTopLevel.Section; };
+        Sync();
+        return new Flex
+        {
+            Gap = Space.Lg, Align = FlexAlign.Start, Wrap = true,
+            Children =
+            {
+                new Card { Width = 16 * 16, Padding = Space.Sm, Content = menu },
+                new Flex { Direction = FlexDirection.Column, Gap = Space.Sm, Children = { topLevel, path } },
+            },
+        };
+    }
+
+    static readonly NavMenuItem[] TopItems =
+    [
+        new("工作台") { Href = "#home", Icon = Lucide.House },
+        new("采购") { Icon = Lucide.ShoppingCart, Children = [new("采购单") { Href = "#po" }, new("询价比价") { Href = "#quote" }, new("合同") { Href = "#contract" }] },
+        new("供应商") { Href = "#suppliers", Icon = Lucide.Users },
+        new("库存") { Href = "#stock", Icon = Lucide.Boxes },
+        new("物流") { Href = "#logistics", Icon = Lucide.Truck, Badge = 3 },
+        new("报表") { Icon = Lucide.ChartColumn, Children = [new("销售月报") { Href = "#monthly" }, new("季度复盘") { Href = "#quarterly" }] },
+        new("设置") { Href = "#settings", Icon = Lucide.Wrench },
+    ];
+
+    // 后台的顶栏导航：拖动滑块把顶栏变窄，放不下的项收进“更多”
+    static Control TopBar()
+    {
+        var bar = new NavBar { Items = TopItems };
+        AutomationProperties.SetName(bar, "主导航");
+        var card = new Card { Padding = Space.Xs, Content = bar };
+        var columns = new global::Avalonia.Controls.Grid { Children = { card } };
+        var width = new Slider { Value = 100, Min = 30, Max = 100 };
+        var field = new Field { Content = width };
+        void Sync()
+        {
+            field.Label = $"顶栏宽度：{width.Value:0}%";
+            columns.ColumnDefinitions = new ColumnDefinitions($"{width.Value}*,{100 - width.Value}*");
+        }
+        width.PropertyChanged += (_, e) => { if (e.Property == Slider.ValueProperty) Sync(); };
+        Sync();
+        return new Flex
+        {
+            Direction = FlexDirection.Column, Gap = Space.Md, Align = FlexAlign.Stretch,
+            Children = { field, columns, new Small { Tone = TextTone.Muted, Text = "当前页按 CurrentHref 判断；点了链接，CurrentHref 跟着变" } },
+        };
     }
 }

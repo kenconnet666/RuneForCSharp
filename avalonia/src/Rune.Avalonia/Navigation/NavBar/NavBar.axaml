@@ -1,0 +1,59 @@
+<!--
+  NavBarButton 的主题（vue-tsx-pro 的 navBarStyles.link）：图标、文字、角标、箭头横排隔 xs，控件高度、左右 space.md、md 圆角、中等字重、不换行；
+  平时 textMuted，悬停 text 与 fillHover 底（durations.sm 过渡）；当前页 accentText（悬停也不变），底边 borderWidths.sm 的强调色线（下面两个角不圆在 NavBar.cs 里）；
+  不可用时半透明。
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Avalonia">
+  <ControlTheme x:Key="{x:Type rune:NavBarButton}" TargetType="rune:NavBarButton" BasedOn="{StaticResource {x:Type rune:ButtonBase}}">
+    <Setter Property="MinHeight" Value="{rune:ControlHeight}" />
+    <Setter Property="Padding" Value="{rune:Em 0.75, 0}" />
+    <Setter Property="CornerRadius" Value="{rune:Em Resource=Rune.Radius.Md}" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+    <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="TextBlock.LineHeight" Value="{rune:Em Resource=Rune.LineHeight.Normal}" />
+    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Normal}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border Name="PART_Root" Background="{TemplateBinding Background}" ClipToBounds="True">
+            <Panel>
+              <Canvas Name="PART_Ripples" IsHitTestVisible="False" />
+              <rune:Flex Align="Center" Gap="xs" Margin="{TemplateBinding Padding}">
+                <rune:Icon Name="PART_Icon" Data="{TemplateBinding Icon}" VerticalAlignment="Center" IsVisible="{Binding Icon, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}" VerticalAlignment="Center" TextWrapping="NoWrap"
+                                  IsVisible="{Binding Content, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                <rune:Badge Name="PART_Badge" VerticalAlignment="Center" Size="xs" Variant="solid" Tone="danger" Radius="full" IsVisible="False" />
+                <rune:Icon Name="PART_Chevron" Data="{x:Static rune:Lucide.ChevronDown}" VerticalAlignment="Center" IsVisible="{TemplateBinding ShowChevron}" />
+              </rune:Flex>
+              <Border Name="PART_Underline" VerticalAlignment="Bottom" Height="{DynamicResource Rune.BorderWidth.Sm}" Background="{DynamicResource Rune.Brush.Accent}" IsVisible="False" />
+            </Panel>
+          </Border>
+          <Border Name="PART_FocusRing" IsVisible="False" IsHitTestVisible="False" CornerRadius="{TemplateBinding CornerRadius}"
+                  BorderThickness="2" BorderBrush="{DynamicResource Rune.Brush.FocusRing}" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.12" Easing="0.2,0,0,1" />
+        <BrushTransition Property="Foreground" Duration="0:0:0.12" Easing="0.2,0,0,1" />
+      </Transitions>
+    </Setter>
+    <Style Selector="^:focus-visible /template/ Border#PART_FocusRing"><Setter Property="IsVisible" Value="True" /></Style>
+    <Style Selector="^:pointerover">
+      <Setter Property="Background" Value="{DynamicResource Rune.Brush.FillHover}" />
+      <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    </Style>
+    <Style Selector="^:current">
+      <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.AccentText}" />
+    </Style>
+    <Style Selector="^:current /template/ Border#PART_Underline"><Setter Property="IsVisible" Value="True" /></Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" />
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

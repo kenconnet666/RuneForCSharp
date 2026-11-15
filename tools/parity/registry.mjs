@@ -360,6 +360,7 @@ export const PROPS_NOT_PORTED = {
     pageScrollbar: '整页的浮层滚动条是网页的：桌面上正文那一列本身是 ScrollArea（AppShell.MainScroll）',
   },
   NavList: { propsList: 'nav > ul 是 HTML 的结构：NavList 本身就是那一列' },
+  NavMenu: { propsList: 'NavMenu 本身就是 NavList：同 NavList 的 propsList' },
   Collapsible: {
     lazy: '内容是传进来的控件实例：收起后隐藏、不在 Tab 顺序与读屏里，本来就是展开时才有代价（同 Collapse）',
     propsContent: '内容区就是里面的 Collapse，没有另包一层：要改样式写在内容控件上',
