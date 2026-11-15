@@ -79,6 +79,8 @@ static class Inspector
         var theme = RuneThemeVariants.All.FirstOrDefault(variant => string.Equals(variant.Key.ToString(), options.Theme, StringComparison.OrdinalIgnoreCase))
             ?? throw new UsageException($"没有主题 {options.Theme}；可选：{string.Join("、", RuneThemeVariants.All.Select(variant => variant.Key))}");
         Application.Current!.RequestedThemeVariant = theme;
+        // 同 ts-shots 截上游前的“减少动态效果”：时长 token 为 0，淡入、滑入、扫光直接到终值，截到的是静止的样子
+        foreach (var key in new[] { ThemeKeys.Duration.Xs, ThemeKeys.Duration.Sm, ThemeKeys.Duration.Md, ThemeKeys.Duration.Lg, ThemeKeys.Duration.Xl }) Application.Current.Resources[key] = TimeSpan.Zero;
         var content = example.Create();
         var window = Show(content, example.Framed ? options with { Padding = 0, MinHeight = 0 } : options);
         try

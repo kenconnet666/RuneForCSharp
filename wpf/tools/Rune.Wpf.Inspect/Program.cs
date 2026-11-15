@@ -68,6 +68,8 @@ static class Inspector
             throw new UsageException($"没有主题 {options.Theme}；可选：{string.Join("、", RuneTheme.BuiltinThemes.Select(theme => theme.Name))}");
         var app = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
         app.Resources.MergedDictionaries.Add(new RuneTheme { Theme = options.Theme });
+        // 同 ts-shots 截上游前的“减少动态效果”：时长 token 为 0，淡入、滑入、扫光直接到终值，截到的是静止的样子
+        foreach (var key in new[] { ThemeKeys.Duration.Xs, ThemeKeys.Duration.Sm, ThemeKeys.Duration.Md, ThemeKeys.Duration.Lg, ThemeKeys.Duration.Xl }) app.Resources[key] = TimeSpan.Zero;
         var content = example.Create();
         var (window, root) = Show(content, example.Framed ? options with { Padding = 0, MinHeight = 0 } : options);
         try
