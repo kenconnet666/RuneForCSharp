@@ -1464,6 +1464,13 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### FileDrop 与 FileAccept（2026-11-16，仅 Avalonia）
+
+- 选文件的区域：点击、Enter / 空格打开系统的文件对话框（TopLevel.StorageProvider，按 Accept 换成扩展名筛选；Directory 时是文件夹对话框），也接平台的拖放（DragDrop，Avalonia 12 的 DataTransfer.TryGetFiles）。交出的是 PickedFile（IStorageFile 与相对路径：选文件夹时"文件夹/子文件夹/文件名"，同上游的 webkitRelativePath），经路由事件 FilesPicked、Rejected（上游的 onFiles、onReject）；不是多选也不是选文件夹时只取第一个。文件夹递归用 IStorageFolder.GetItemsAsync。
+- accept 的匹配是孪生文件 FileAccept（上游 matchesAccept）：浏览器的文件带 MIME 类型，桌面上的只有名字，类型按扩展名推（常见的图片、音视频、文档、压缩包），推不出时只能靠扩展名规则；同时给对话框算出扩展名筛选。
+- 外观：底色与 2px 虚线边框自己画（Avalonia 的 Border 画不了虚线），状态是伪类 :pointerover、:dragging、:invalid、:locked（只读或不可用，样式在 FileDropParts.axaml）；键盘聚焦时外面一圈焦点环。图标按字号画（Icon 的大小是它的字号），1.5em 在代码里设；上游 propsIcon 换图标在这里是 Icon 属性。读屏是按钮，名称是字段的标签、否则是提示文字，按下打开对话框。
+- 示例：Upload 页的 import（同上游；Upload 还没做）。测试里的文件、文件夹是 DispatchProxy 做的假 IStorageFile、IStorageFolder。
+
 ### NumberRangeField（2026-11-16，仅 Avalonia）
 
 - 两个不带加减按钮的 NumberField 中间一个"–"（Separator，textMuted，读屏跳过），两个框平分宽度。值是 NumberRange(Start, End)（两端 decimal?，默认双向绑定）；改一端时两端都有值且起比止大就对调（NumberRange.With），不报错。Min、Max、Step、Format、Prefix、Suffix 与外观（Variant、Size、Radius）在两个框上同步；上游的 placeholder 二元数组拆成 StartPlaceholder、EndPlaceholder，不写时是语言包的"最小值""最大值"。
