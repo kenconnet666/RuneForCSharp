@@ -36,8 +36,6 @@ public enum QRCodeStatus
 [Description("二维码：把文字画成二维码，可以放 logo、显示扫码登录的状态。")]
 public class QRCodeControl : Control, IScopeAware
 {
-    /// <summary>纸面在深色主题下的墨色（底色是白色）。</summary>
-    static readonly Color DarkInk = Color.FromArgb(0x1c, 0x20, 0x24);
 
     readonly FlexControl overlay = new() { Direction = FlexDirection.Column, Align = FlexAlign.Center, Gap = Space.Xs, AutoSize = true, BackColor = Color.Transparent, Visible = false };
     QrMatrix? matrix;
@@ -223,11 +221,10 @@ public class QRCodeControl : Control, IScopeAware
         Invalidate(true);
     }
 
-    bool DarkTheme => ProviderControl.ThemeOf(this).IsDark;
+    /// <summary>纸面的颜色（<see cref="Rune.WinForms.Paper"/>）；写了 Background、Foreground 时用写的。</summary>
+    Color PaperColor => Background ?? Paper.Background(this);
 
-    Color Paper => Background ?? (DarkTheme ? Color.White : ProviderControl.ThemeOf(this).Colors.Surface);
-
-    Color Ink => Foreground ?? (DarkTheme ? DarkInk : ProviderControl.ThemeOf(this).Colors.Text);
+    Color Ink => Foreground ?? Paper.Ink(this);
 
     /// <inheritdoc />
     public override Size GetPreferredSize(Size proposedSize)
@@ -275,7 +272,7 @@ public class QRCodeControl : Control, IScopeAware
         var theme = ProviderControl.ThemeOf(this);
         var radius = (Radius.Md.In(theme.Radii) ?? 0) * Em;
         var box = new RectangleF(0, 0, Side, Side);
-        using (var paper = new SolidBrush(Paper))
+        using (var paper = new SolidBrush(PaperColor))
         using (var path = Drawing.RoundedRectangle(box, radius))
             graphics.FillPath(paper, path);
         if (modules is not null && Extent > 0)
@@ -292,13 +289,13 @@ public class QRCodeControl : Control, IScopeAware
         if (Logo is not null)
         {
             var logo = LogoBox();
-            using (var plate = new SolidBrush(Paper))
+            using (var plate = new SolidBrush(PaperColor))
             using (var path = Drawing.RoundedRectangle(logo, (Radius.Sm.In(theme.Radii) ?? 0) * Em))
                 graphics.FillPath(plate, path);
             if (Logo is Image image) graphics.DrawImage(image, RectangleF.Inflate(logo, -logo.Width * 0.03f, -logo.Height * 0.03f));
         }
         if (Status == QRCodeStatus.Active) return;
-        using (var veil = new SolidBrush(Color.FromArgb((int)(255 * 0.9), Paper)))
+        using (var veil = new SolidBrush(Color.FromArgb((int)(255 * 0.9), PaperColor)))
         using (var path = Drawing.RoundedRectangle(box, radius))
             graphics.FillPath(veil, path);
     }

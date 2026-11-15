@@ -73,10 +73,7 @@ public class QRCode : FrameworkElement
     public static readonly DependencyProperty FontSizeProperty = TextElement.FontSizeProperty.AddOwner(typeof(QRCode),
         new FrameworkPropertyMetadata(SystemFonts.MessageFontSize, FrameworkPropertyMetadataOptions.Inherits | FrameworkPropertyMetadataOptions.AffectsMeasure));
 
-    /// <summary>纸面在深色主题下的底色与墨色（固定，不跟着反色）。</summary>
-    static readonly Brush DarkPaper = Freeze(new SolidColorBrush(Colors.White));
 
-    static readonly Brush DarkInk = Freeze(new SolidColorBrush(Color.FromRgb(0x1c, 0x20, 0x24)));
 
     readonly VisualCollection children;
     readonly Border logoHost = new() { Visibility = Visibility.Collapsed };
@@ -228,15 +225,8 @@ public class QRCode : FrameworkElement
         UpdatePaper();
     }
 
-    /// <summary>纸面的颜色：深色主题下固定白底深色；浅色主题下跟着主题的 surface 与文字色。深浅按主题的 surface 亮不亮判断。</summary>
-    (Brush Paper, Brush Ink) PaperColors()
-    {
-        var surface = TryFindResource(ThemeKeys.Brush.Surface) as SolidColorBrush;
-        var dark = surface is { Color: var color } && (0.2126 * color.R + 0.7152 * color.G + 0.0722 * color.B) / 255 < 0.5;
-        var paper = Background ?? (dark ? DarkPaper : surface ?? DarkPaper);
-        var ink = Foreground ?? (dark ? DarkInk : TryFindResource(ThemeKeys.Brush.Text) as Brush ?? DarkInk);
-        return (paper, ink);
-    }
+    /// <summary>纸面的颜色（<see cref="Paper"/>）；写了 Background、Foreground 时用写的。</summary>
+    (Brush Paper, Brush Ink) PaperColors() => (Background ?? Paper.Background(this), Foreground ?? Paper.Ink(this));
 
     void UpdatePaper()
     {

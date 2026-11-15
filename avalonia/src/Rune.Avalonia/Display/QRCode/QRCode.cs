@@ -68,10 +68,7 @@ public class QRCode : Control
     /// <summary>字号（默认边长 10em 按它算）：同 TextElement.FontSize，继承外面的。</summary>
     public static readonly StyledProperty<double> FontSizeProperty = TextElement.FontSizeProperty.AddOwner<QRCode>();
 
-    /// <summary>纸面在深色主题下的底色与墨色（固定，不跟着反色）。</summary>
-    static readonly IBrush DarkPaper = new ImmutableSolidColorBrush(Colors.White);
 
-    static readonly IBrush DarkInk = new ImmutableSolidColorBrush(Color.Parse("#1c2024"));
 
     readonly Border logoHost = new() { IsVisible = false, Name = QRCodeParts.Logo };
     readonly Flex overlay = new() { Direction = FlexDirection.Column, Align = FlexAlign.Center, Justify = FlexJustify.Center, Gap = Space.Xs };
@@ -239,22 +236,8 @@ public class QRCode : Control
         };
     }
 
-    /// <summary>纸面的颜色：深色主题下固定白底深色；浅色主题下跟着主题的 surface 与文字色。</summary>
-    (IBrush Paper, IBrush Ink) PaperColors()
-    {
-        var dark = IsDarkTheme();
-        var paper = Background ?? (dark ? DarkPaper : this.Resource<IBrush>(ThemeKeys.Brush.Surface));
-        var ink = Foreground ?? (dark ? DarkInk : this.Resource<IBrush>(ThemeKeys.Brush.Text));
-        return (paper, ink);
-    }
-
-    bool IsDarkTheme()
-    {
-        // 还没放进窗口时没有主题变体：按浅色
-        ThemeVariant? variant = ActualThemeVariant;
-        while (variant?.InheritVariant is ThemeVariant parent) variant = parent;
-        return variant == ThemeVariant.Dark;
-    }
+    /// <summary>纸面的颜色（<see cref="Paper"/>）；写了 Background、Foreground 时用写的。</summary>
+    (IBrush Paper, IBrush Ink) PaperColors() => (Background ?? Paper.Background(this), Foreground ?? Paper.Ink(this));
 
     void UpdatePaper()
     {
