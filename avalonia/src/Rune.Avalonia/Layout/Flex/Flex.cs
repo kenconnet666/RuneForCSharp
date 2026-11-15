@@ -4,8 +4,10 @@ using Avalonia;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
+using Avalonia.Controls.Presenters;
 using Avalonia.Data;
 using Avalonia.Layout;
+using Avalonia.VisualTree;
 
 namespace Rune.Avalonia;
 
@@ -63,6 +65,8 @@ public class Flex : Panel
     IDisposable? alignment;
     List<FlexLayout.Line> lines = [];
     double[] ascents = [];
+    // 量出的第一基线（外面的 Flex 按基线对齐时取）
+    double? firstBaseline;
     Size measured;
     double contentMain;
 
@@ -207,9 +211,27 @@ public class Flex : Panel
         ? double.IsNaN(child.Width) ? child.MinWidth : child.Width
         : double.IsNaN(child.Height) ? child.MinHeight : child.Height;
 
-    /// <summary>第一行文字的基线离上边多远：直接的 TextBlock 才有，其余按底边（CSS 给没有基线的项合成的基线）。</summary>
-    static double? Baseline(Control child) =>
-        child is TextBlock { TextLayout.TextLines: [var first, ..] } text ? text.Padding.Top + first.Baseline : null;
+    /// <summary>
+    /// 第一行文字的基线离上边多远（CSS 的第一基线）：TextBlock 是第一行的基线，Flex 是它量出的第一基线；只包着一个可见子元素的
+    /// （AnimatedNumber、Border、ContentPresenter、模板的根）往里找，加上内边距与边框。都没有时 null，按底边（CSS 给没有基线的项合成的基线）。
+    /// </summary>
+    static double? Baseline(Control child) => child switch
+    {
+        TextBlock { TextLayout.TextLines: [var first, ..] } text => text.Padding.Top + first.Baseline,
+        Flex flex => flex.firstBaseline,
+        _ => child.GetVisualChildren().OfType<Control>().Where(inner => inner.IsVisible).ToList() is [var only] && Baseline(only) is { } inner
+            ? Inset(child) + only.Margin.Top + inner
+            : null,
+    };
+
+    /// <summary>包装的上边到内容的距离：边框与内边距。</summary>
+    static double Inset(Control wrapper) => wrapper switch
+    {
+        Border border => border.BorderThickness.Top + border.Padding.Top,
+        Decorator decorator => decorator.Padding.Top,
+        ContentPresenter presenter => presenter.BorderThickness.Top + presenter.Padding.Top,
+        _ => 0,
+    };
 
     /// <inheritdoc />
     protected override Size MeasureOverride(Size availableSize)
@@ -221,6 +243,8 @@ public class Flex : Panel
         var gaps = Gaps;
         var main = contentMain = lines.Select(line => line.Main.Sum() + gaps.Main * (line.Count - 1)).DefaultIfEmpty().Max();
         var cross = lines.Sum(line => line.Cross) + gaps.Cross * Math.Max(0, lines.Count - 1);
+        // 横排：第一行第一项的基线（同 CSS 的 flex 容器）；竖排：第一项的基线。外面按基线对齐时用它
+        firstBaseline = row ? lines is [{ Count: > 0 }, ..] ? FirstBaseline(children, row) : null : children is [var top, ..] ? Baseline(top) : null;
         // 行内的 Flex 放进 InlineUIContainer：平台只认 BaselineOffset，不写时底边落在基线上、比旁边的文字高出一截。
         // 同 CSS 的 inline-flex：基线取第一行第一项的基线
         if (Inline) SetCurrentValue(TextBlock.BaselineOffsetProperty, FirstBaseline(children, row));
