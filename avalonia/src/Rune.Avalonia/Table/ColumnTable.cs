@@ -82,13 +82,20 @@ public class ColumnTable : Table
 
     void OnItemsChanged(object? sender, NotifyCollectionChangedEventArgs e) => Rebuild();
 
-    void Rebuild()
+    void Rebuild() => Fill(this, new ColumnTableSource(ItemsSource?.Cast<object>().ToList() ?? [], Columns, Provider.GetLang(this))
     {
-        var lang = Provider.GetLang(this);
-        var rows = ItemsSource?.Cast<object>().ToList() ?? [];
-        var columns = Columns;
+        MergeRepeated = MergeRepeated,
+        GetCellSpan = GetCellSpan,
+        SummaryLabel = SummaryLabel,
+        Empty = Empty,
+    });
+
+    /// <summary>按列定义生成表头、表体（没有行时一格跨满的 Empty）与合计行，换掉表格原来的各部分（ColumnTable、PivotTable 共用）。</summary>
+    internal static void Fill(Table table, ColumnTableSource source)
+    {
+        var (rows, columns, lang) = (source.Rows, source.Columns, source.Lang);
         var types = columns.Select(column => TableColumns.TypeOf(column, rows)).ToArray();
-        var merged = MergeRepeated is { Count: > 0 } keys ? TableColumns.RepeatedRowSpans(rows, columns, keys) : null;
+        var merged = source.MergeRepeated is { Count: > 0 } keys ? TableColumns.RepeatedRowSpans(rows, columns, keys) : null;
 
         var head = new TableRow();
         for (var position = 0; position < columns.Count; position++)
@@ -96,7 +103,7 @@ public class ColumnTable : Table
         var body = new TableBody();
         if (rows.Count == 0)
         {
-            var empty = new TableCell { Name = ColumnTableParts.Cell, ColumnSpan = Math.Max(1, columns.Count), Align = TableAlign.Center, Content = Empty ?? lang.TableEmpty };
+            var empty = new TableCell { Name = ColumnTableParts.Cell, ColumnSpan = Math.Max(1, columns.Count), Align = TableAlign.Center, Content = source.Empty ?? lang.TableEmpty };
             empty.Bind(TemplatedControl.ForegroundProperty, empty.GetResourceObservable(ThemeKeys.Brush.TextMuted), BindingPriority.Template);
             body.Rows.Add(new TableRow { Name = ColumnTableParts.Row, Cells = { empty } });
         }
@@ -106,9 +113,9 @@ public class ColumnTable : Table
             for (var position = 0; position < columns.Count; position++)
             {
                 var column = columns[position];
-                var span = SpanOf(rows[index], column, index, merged);
+                var span = SpanOf(source, rows[index], column, index, merged);
                 if (span is { RowSpan: 0 } or { ColumnSpan: 0 }) continue;
-                row.Cells.Add(new TableCell
+                var cell = new TableCell
                 {
                     Name = ColumnTableParts.Cell,
                     Align = AlignOf(column, types, position),
@@ -116,25 +123,28 @@ public class ColumnTable : Table
                     RowSpan = span?.RowSpan ?? 1,
                     ColumnSpan = span?.ColumnSpan ?? 1,
                     Content = column.Cell?.Invoke(rows[index], index) ?? Display(column, types[position], TableColumns.ValueOf(column, rows[index]), lang),
-                });
+                };
+                source.PrepareCell?.Invoke(cell, rows[index], column);
+                row.Cells.Add(cell);
             }
             body.Rows.Add(row);
         }
-        Sections.Clear();
-        Sections.Add(new TableHead { Rows = { head } });
-        Sections.Add(body);
-        if (columns.Any(column => column.Summary is not null)) Sections.Add(new TableFoot { Rows = { SummaryRow(rows, columns, types, lang) } });
+        table.Sections.Clear();
+        table.Sections.Add(new TableHead { Rows = { head } });
+        table.Sections.Add(body);
+        if (columns.Any(column => column.Summary is not null)) table.Sections.Add(new TableFoot { Rows = { SummaryRow(source, types) } });
     }
 
     /// <summary>一格的合并：GetCellSpan 优先，其次 MergeRepeated。</summary>
-    CellSpan? SpanOf(object row, DataTableColumn column, int index, IReadOnlyDictionary<string, int[]>? merged)
+    static CellSpan? SpanOf(ColumnTableSource source, object row, DataTableColumn column, int index, IReadOnlyDictionary<string, int[]>? merged)
     {
-        if (GetCellSpan?.Invoke(row, column, index) is { } own) return own;
+        if (source.GetCellSpan?.Invoke(row, column, index) is { } own) return own;
         return merged?.TryGetValue(column.Key, out var spans) == true && spans[index] != 1 ? new CellSpan(spans[index]) : null;
     }
 
-    TableRow SummaryRow(IReadOnlyList<object> rows, IReadOnlyList<DataTableColumn> columns, ColumnType[] types, Lang lang)
+    static TableRow SummaryRow(ColumnTableSource source, ColumnType[] types)
     {
+        var (rows, columns, lang) = (source.Rows, source.Columns, source.Lang);
         var row = new TableRow();
         for (var position = 0; position < columns.Count; position++)
         {
@@ -143,7 +153,7 @@ public class ColumnTable : Table
             {
                 { Compute: { } compute } => compute(rows),
                 { } => TableColumns.Sum(column, rows) is { } total ? Display(column, types[position], total, lang) : column.Empty ?? lang.EmptyValue,
-                null when position == 0 => SummaryLabel ?? lang.TableSummary,
+                null when position == 0 => source.SummaryLabel ?? lang.TableSummary,
                 _ => null,
             };
             row.Cells.Add(new TableCell { Name = ColumnTableParts.SummaryCell, Align = AlignOf(column, types, position), Content = content });
@@ -162,6 +172,28 @@ public class ColumnTable : Table
         if (column.Statuses is { } statuses) return new StatusBadge { Statuses = statuses, Value = Convert.ToString(value, System.Globalization.CultureInfo.InvariantCulture) };
         return TableColumns.FormatCell(value, type, column.Format, lang.Code, lang.Currency, TimeText.Zone(lang.TimeZone));
     }
+}
+
+/// <summary>按列定义建表需要的东西（ColumnTable、PivotTable 共用）。</summary>
+/// <param name="Rows">数据。</param>
+/// <param name="Columns">列定义。</param>
+/// <param name="Lang">语言包：格式化、空值与合计的文字。</param>
+sealed record ColumnTableSource(IReadOnlyList<object> Rows, IReadOnlyList<DataTableColumn> Columns, Lang Lang)
+{
+    /// <summary>相同值合并的列。</summary>
+    public IReadOnlyList<string>? MergeRepeated { get; init; }
+
+    /// <summary>合并单元格。</summary>
+    public Func<object, DataTableColumn, int, CellSpan?>? GetCellSpan { get; init; }
+
+    /// <summary>合计行第一列的内容。</summary>
+    public object? SummaryLabel { get; init; }
+
+    /// <summary>没有行时的内容。</summary>
+    public object? Empty { get; init; }
+
+    /// <summary>按行与列定制表体的格（TS 的 propsCell 函数）：PivotTable 的热力底色。</summary>
+    public Action<TableCell, object, DataTableColumn>? PrepareCell { get; init; }
 }
 
 /// <summary>ColumnTable 的部件名（TS 的 propsHeaderCell、propsRow、propsCell、propsSummaryCell）：样式写 <c>rune|TableCell#PART_Cell</c>，按行的数据写样式用行的 DataContext。</summary>

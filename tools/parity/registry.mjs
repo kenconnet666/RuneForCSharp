@@ -167,6 +167,7 @@ export const COMPONENT_PROP_RENAMES = {
   TextTable: { rows: 'TextRows' },
   // 数据是 ItemsSource（Table 自己有 Rows，同 ItemsControl 的叫法）；合并单元格的函数加 Get 前缀（CellSpan 是它返回的类型）
   ColumnTable: { rows: 'ItemsSource', cellSpan: 'GetCellSpan' },
+  PivotTable: { cellSpan: 'GetCellSpan' },
   DocSection: { id: 'SectionId' },
   // 控件自己有 Width
   TableHeaderCell: { width: 'ColumnWidth' },
@@ -456,6 +457,13 @@ export const PROPS_NOT_PORTED = {
   ColumnTable: {
     propsRoot: 'ColumnTable 本身就是 Table：同 Table 的 propsRoot',
     getKey: '行是重建的控件，没有虚拟 DOM 的 key 要对；每行的 DataContext 就是那一行的数据',
+  },
+  PivotTable: {
+    propsRoot: 'PivotTable 本身就是 Table：同 Table 的 propsRoot',
+    propsHeaderCell: '部件同 ColumnTable：样式写 ColumnTableParts 的名字（PART_HeaderCell）',
+    propsRow: '部件同 ColumnTable：每行的 DataContext 是 PivotRow，按行写样式或绑定',
+    propsCell: '部件同 ColumnTable（PART_Cell）；热力底色是格的 Background（模板优先级），样式盖得过',
+    propsSummaryCell: '部件同 ColumnTable（PART_SummaryCell）',
   },
   ...Object.fromEntries(['TableHead', 'TableBody', 'TableFoot', 'TableRow', 'TableCaption', 'TableCell', 'TableHeaderCell'].map((name) => [name, { propsRoot: '行、单元格、各部分本身就是元素：样式直接写在它们身上' }])),
   Select: {
