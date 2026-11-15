@@ -1464,6 +1464,13 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### ViewportFill（2026-11-16，仅 Avalonia）
+
+- 竖排的 Flex，高度是所在滚动区域（外层最近的 ScrollViewer，没有时是窗口）的可视区高减去自己的顶边与 Bottom（默认 xl），不小于 MinFillHeight（Length，默认 24rem；平台的 MinHeight 是像素数，所以换了名字）。顶边是在滚动内容里的位置（加回已经滚过的距离），不随滚动变；每次排版后重新量（上面的内容变高、窗口变大小都跟着），值没变时不再触发排版。
+- 撑满剩下高度的子元素写 Flex.Grow；内容超高时 Flex 会让所有子元素一起收缩，只想让列表收缩时给其他子元素关掉 Shrink（上游的 DataTable flexible 只让表格收缩）。
+- 测试窗口只装了组件库的主题，平台的 ScrollViewer 没有模板（可视区是 0），测试里用 ScrollArea。
+- 示例在 AsideLayout 页（viewport-fill，同上游；上游的 DataTable 还没做，用滚动的行代替，外框是 32rem 高的滚动区域代替窗口）。
+
 ### AuthLayout（2026-11-16，仅 Avalonia）
 
 - 认证页版式：Hero（品牌区）、Content（表单）、Tools（结束边上角的工具）三块自己排版。有 Hero 且自己够 64rem 宽时左右分栏 1.15 : 1（上游 minmax(0, 1.15fr) minmax(0, 1fr)），品牌区铺满整高、表单区内容垂直居中；窄了品牌区按内容高放在顶部、表单区顶部 xl 内边距、内容贴近顶部；没有 Hero 时只有居中的表单区。工具区按整页定位在结束边上角（离两边 md），在最上层；从右往左时平台整体镜像。
