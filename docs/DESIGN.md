@@ -1464,6 +1464,13 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### ThemeSwitcher 与 ThemeThumbnail（2026-11-16，仅 Avalonia）
+
+- 上游的主题偏好（createThemePreference：选择存在 localStorage、按系统切换、把主题交给 createUi）在桌面上就是 Avalonia 的主题变体：Value 是当前的选择（ThemeVariant，Default 是跟随系统），选中时写回，AppliesToApplication（默认 true）时设到 Application.Current.RequestedThemeVariant；只改一块时关掉它，把 Value 交给 ThemeVariantScope。记住选择由应用自己存 Value。列出的主题是 Themes（默认亮色、暗色，全部内置的是 RuneThemeVariants.All），IncludeSystem 列"跟随系统"（上游的 system，与 System 命名空间同名）。上游选中后从按钮处圆形展开（View Transitions），桌面上直接切换。
+- 菜单是 Menu 加一个 MenuRadioGroup（读屏名称"主题"，不显示组标题），触发器是 IconButton（图标表示当前的选择）。内置主题与跟随系统有默认文字（语言包 Theme*，公开为 ThemeSwitcher.BuiltinLabel，上游的 builtinThemeLabel）和默认图标（同上游 DEFAULT_ICONS），自己的主题用 Labels、Icons（按主题变体的 Key）。上游透传给菜单的属性：IsOpen、Placement、Size、Ripple、OpenChanged 接到里面的菜单。
+- ThemeThumbnail（上游在 theme-customize，这里放 ThemeCustomize 文件夹）：自己画的页面一角，颜色用 TryFindResource(键, 主题变体) 取那套主题的资源，不用套 ThemeVariantScope；属性叫 ThemeVariant（Theme 是 Avalonia 控件主题）。6em × 3.75em 定宽，默认靠左、顶端对齐（上游 inline-flex，放在竖排里不被拉宽），读屏跳过。
+- 示例：ThemeSwitcher 页的 scoped（亮色、暗色、纸张，只作用于下面一块）与 gallery（全部内置主题的单选卡片）。
+
 ### FileDrop 与 FileAccept（2026-11-16，仅 Avalonia）
 
 - 选文件的区域：点击、Enter / 空格打开系统的文件对话框（TopLevel.StorageProvider，按 Accept 换成扩展名筛选；Directory 时是文件夹对话框），也接平台的拖放（DragDrop，Avalonia 12 的 DataTransfer.TryGetFiles）。交出的是 PickedFile（IStorageFile 与相对路径：选文件夹时"文件夹/子文件夹/文件名"，同上游的 webkitRelativePath），经路由事件 FilesPicked、Rejected（上游的 onFiles、onReject）；不是多选也不是选文件夹时只取第一个。文件夹递归用 IStorageFolder.GetItemsAsync。
