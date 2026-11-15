@@ -72,6 +72,8 @@ export const COMPONENT_PROP_RENAMES = {
   VirtualList: { items: 'ItemsSource', children: 'ItemTemplate', horizontal: 'Orientation', onRangeChange: 'RangeChanged' },
   // 完成是事件；镂空的留白叫 SpotlightPadding（控件自己有 Padding）
   Tour: { onFinish: 'Finished', padding: 'SpotlightPadding' },
+  // 滑块验证：松手、换一张是路由事件
+  SlideCaptcha: { onRelease: 'Released', onRefresh: 'RefreshRequested' },
   // 通知：读过了、点了一条是路由事件；没有标题行是 ShowTitle = false
   NotificationList: { onRead: 'MarkedRead', onItemClick: 'ItemClicked', title: 'Title' },
   NotificationCenter: { onRead: 'MarkedRead', onItemClick: 'ItemClicked', onOpenChange: 'OpenChanged' },

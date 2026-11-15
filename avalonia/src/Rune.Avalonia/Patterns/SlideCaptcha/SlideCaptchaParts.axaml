@@ -1,0 +1,51 @@
+<!--
+  SlideCaptcha 的默认外观（vue-tsx-pro 的 slideCaptchaStyles）：画面与滑块条都是 md 圆角、border 描边、fill 底；
+  结果条是状态的实色 88% 不透明、字用它的对比色（任何背景图上都读得清），上下 xs、左右 md、sm 字号；
+  滑过的一段 accentSoft（通过 successSoft、没对准 dangerSoft）；提示 sm、textMuted；
+  滑块 surface 底、sm 阴影（拖动时 md）、md 圆角，图标 accentText（通过 successText、没对准 dangerText），不能拖时鼠标是默认的。
+  画面与滑块条是 Border 的派生类：类型选择器写 :is(Border)；Border 没有字号，md 圆角在 SlideCaptcha.cs 里按字号算
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|SlideCaptcha :is(Border)#PART_Picture, rune|SlideCaptcha :is(Border)#PART_Track">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Fill}" />
+  </Style>
+  <Style Selector="rune|SlideCaptcha Border#PART_Banner">
+    <Setter Property="Padding" Value="12,4" />
+    <Setter Property="TextElement.FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
+  </Style>
+  <Style Selector="rune|SlideCaptcha Border#PART_Banner.success">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Success}" />
+    <Setter Property="Opacity" Value="0.88" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.SuccessContrast}" />
+  </Style>
+  <Style Selector="rune|SlideCaptcha Border#PART_Banner.error">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Danger}" />
+    <Setter Property="Opacity" Value="0.88" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.DangerContrast}" />
+  </Style>
+  <Style Selector="rune|SlideCaptcha Border#PART_Fill"><Setter Property="Background" Value="{DynamicResource Rune.Brush.AccentSoft}" /></Style>
+  <Style Selector="rune|SlideCaptcha Border#PART_Fill.success"><Setter Property="Background" Value="{DynamicResource Rune.Brush.SuccessSoft}" /></Style>
+  <Style Selector="rune|SlideCaptcha Border#PART_Fill.error"><Setter Property="Background" Value="{DynamicResource Rune.Brush.DangerSoft}" /></Style>
+  <Style Selector="rune|SlideCaptcha rune|Text#PART_Hint">
+    <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+  </Style>
+  <Style Selector="rune|SlideCaptcha rune|SlideHandle">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Surface}" />
+    <Setter Property="BoxShadow" Value="{DynamicResource Rune.Shadow.Sm}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.AccentText}" />
+    <Setter Property="Cursor" Value="SizeWestEast" />
+  </Style>
+  <Style Selector="rune|SlideCaptcha:dragging rune|SlideHandle"><Setter Property="BoxShadow" Value="{DynamicResource Rune.Shadow.Md}" /></Style>
+  <Style Selector="rune|SlideCaptcha:success rune|SlideHandle"><Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.SuccessText}" /></Style>
+  <Style Selector="rune|SlideCaptcha:error rune|SlideHandle"><Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.DangerText}" /></Style>
+  <Style Selector="rune|SlideCaptcha rune|SlideHandle:locked"><Setter Property="Cursor" Value="Arrow" /></Style>
+  <Style Selector="rune|SlideCaptcha rune|SlideHandle:focus-visible">
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.FocusRing}" />
+    <Setter Property="BorderThickness" Value="2" />
+  </Style>
+</Styles>
