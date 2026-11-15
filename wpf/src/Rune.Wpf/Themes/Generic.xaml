@@ -71,6 +71,7 @@
     <ResourceDictionary Source="/Rune.Wpf;component/Display/Tree/Tree.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Display/VirtualList/VirtualList.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Input/Select/Select.xaml" />
+    <ResourceDictionary Source="/Rune.Wpf;component/Date/Segments/SegmentedField.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Input/NativeSelect/NativeSelect.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Overlay/Dialog/Dialog.xaml" />
     <ResourceDictionary Source="/Rune.Wpf;component/Overlay/Drawer/Drawer.xaml" />
