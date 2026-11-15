@@ -57,8 +57,13 @@ public class CalendarView : Control
     readonly LiveRegion hint = new() { Height = 0 };
     readonly ContentControl footer = new() { Name = CalendarViewParts.Footer, IsVisible = false };
     readonly TemplateResources resources;
+    readonly List<CellEntry> entries = [];
+    string? structure;
     string? announced;
     DateOnly? hovered;
+
+    /// <summary>建好的一格：重画时按状态原地刷新（不重建，悬停预览时指针下的元素不换）。</summary>
+    sealed record CellEntry(Border Holder, CalendarCellButton Button, DateOnly? Month, string Label, bool RowStart, bool RowEnd);
 
     /// <summary>新建：没有状态时什么都不画（派生类在构造时给）。</summary>
     public CalendarView()
@@ -121,18 +126,33 @@ public class CalendarView : Control
         }
     }
 
-    /// <summary>状态变了（选了、翻页、换视图、外面改值）：重画；focus 时把焦点交给新的焦点格（键盘移动后）。</summary>
+    /// <summary>
+    /// 状态变了（选了、翻页、换视图、外面改值、悬停预览）：页面没换时只按状态刷新格子，换了页、视图或选项时重建页头与网格；
+    /// focus 时把焦点交给新的焦点格（键盘移动后）。
+    /// </summary>
     /// <param name="focus">把焦点移到焦点格。</param>
     internal void Rebuild(bool focus = false)
     {
         // 没进界面前不画：属性初始化的先后不定，状态要等各项（DefaultFocused、今天）都给了才开始
         if (State is not { } state || VisualRoot is null) return;
         var lang = Lang;
-        var culture = Culture;
-        PseudoClasses.Set(":invalid", state.Invalid);
-        months.Children.Clear();
         var shown = state.Months;
         var view = state.View;
+        var key = string.Join("|", view, string.Join(",", shown), ShowWeekNumbers, FixedWeeks, FirstDay, lang.Code, IsEffectivelyEnabled, Em, CellContent?.GetHashCode());
+        if (key != structure)
+        {
+            structure = key;
+            Build(state, lang, view, shown);
+        }
+        Sync(state, lang);
+        if (focus) Cells.FirstOrDefault(cell => cell.IsTabStop)?.Focus(NavigationMethod.Directional);
+    }
+
+    void Build(CalendarState state, Lang lang, DateUnit view, IReadOnlyList<DateOnly> shown)
+    {
+        var culture = Culture;
+        months.Children.Clear();
+        entries.Clear();
         var coarser = view == DateUnit.Day ? DateUnit.Month : view == DateUnit.Month ? DateUnit.Year : (DateUnit?)null;
         var (previousLabel, nextLabel) = view switch
         {
@@ -175,8 +195,32 @@ public class CalendarView : Control
             if (announced is not null) live.Announce(titles);
             announced = titles;
         }
+    }
+
+    /// <summary>按状态刷新每一格：选中、焦点、区间与预览、不能选（读屏名称里的"今天"、自定义内容也跟着状态）。</summary>
+    void Sync(CalendarState state, Lang lang)
+    {
+        PseudoClasses.Set(":invalid", state.Invalid);
         hint.Text = state.Anchor is null ? "" : lang.CalendarPickEnd;
-        if (focus) Cells.FirstOrDefault(cell => cell.IsTabStop)?.Focus(NavigationMethod.Directional);
+        var range = state.Mode() == CalendarSelectionMode.Range;
+        var radius = this.Resource<double>(ThemeKeys.Radius.Md) * Em;
+        foreach (var (holder, button, month, label, rowStart, rowEnd) in entries)
+        {
+            var cell = state.Cell(button.Date, month);
+            var ends = range && (cell.RangeStart || cell.RangeEnd);
+            button.Apply(cell, marked: range ? ends : cell.Selected, middle: cell.InRange && !ends, off: !IsEffectivelyEnabled || cell.Disabled);
+            button.IsTabStop = cell.Focused && !cell.Outside;
+            var content = month is null ? null : CellContent?.Invoke(button.Date, cell);
+            if (content is not null) button.Content = content;
+            var spoken = cell.Today ? lang.CalendarToday(label) : label;
+            AutomationProperties.SetName(button, content is null ? spoken : spoken + SpokenText(content));
+            AutomationProperties.SetHelpText(button, state.Anchor is null ? null : lang.CalendarPickEnd);
+            holder.Classes.Set("in-range", cell.InRange);
+            // 区间的底色画在格子上，相邻的格连成一条；两端与每行的首尾是圆的
+            var left = rowStart || cell.RangeStart;
+            var right = rowEnd || cell.RangeEnd;
+            holder.CornerRadius = cell.InRange ? new CornerRadius(left ? radius : 0, right ? radius : 0, right ? radius : 0, left ? radius : 0) : default;
+        }
     }
 
     Control PageButton(IconData icon, string label, int direction, string name)
@@ -244,9 +288,7 @@ public class CalendarView : Control
                     Add(new Border { Width = CellSide, Height = CellSide });
                     continue;
                 }
-                var cell = state.Cell(date, month);
-                var content = CellContent?.Invoke(date, cell);
-                Add(Cell(state, date, month, cell, CalendarText.FullDate(date, culture), content ?? CalendarText.DayNumber(date), content is not null, i == 0, i == 6));
+                Add(Cell(state, date, month, CalendarText.FullDate(date, culture), CalendarText.DayNumber(date), i == 0, i == 6));
             }
         }
         grid.PointerExited += (_, _) =>
@@ -268,36 +310,26 @@ public class CalendarView : Control
         for (var i = 0; i < items.Count; i++)
         {
             var date = items[i];
-            var cell = state.Cell(date);
             var label = month ? CalendarText.YearMonth(date, culture) : CalendarText.Year(date.Year, culture, Lang);
             var text = month ? CalendarText.MonthShort(date, culture) : CalendarText.Year(date.Year, culture, Lang);
-            grid.Children.Add(Cell(state, date, null, cell, label, text, false, i % 3 == 0, i % 3 == 2, period: true));
+            grid.Children.Add(Cell(state, date, null, label, text, i % 3 == 0, i % 3 == 2));
         }
         return grid;
     }
 
-    /// <summary>一格：外层是画区间那一条的 Border，里面是按钮（读屏念完整日期，今天加"今天"；自定义内容跟在后面）。</summary>
-    Control Cell(CalendarState state, DateOnly date, DateOnly? month, CalendarCellState cell, string label, object content, bool custom, bool rowStart, bool rowEnd, bool period = false)
+    /// <summary>一格：外层是画区间那一条的 Border，里面是按钮；状态由 Sync 给。month 为 null 时是月份、年份格。</summary>
+    Control Cell(CalendarState state, DateOnly date, DateOnly? month, string label, string text, bool rowStart, bool rowEnd)
     {
-        var off = !IsEffectivelyEnabled || cell.Disabled;
-        var range = state.Mode() == CalendarSelectionMode.Range;
-        var ends = range && (cell.RangeStart || cell.RangeEnd);
-        var button = new CalendarCellButton(date, cell, period)
+        var period = month is null;
+        var button = new CalendarCellButton(date, period)
         {
             Name = CalendarViewParts.CellButton,
-            Content = content,
+            Content = text,
             HorizontalAlignment = period ? HorizontalAlignment.Stretch : HorizontalAlignment.Center,
-            IsTabStop = cell.Focused && !cell.Outside,
-            Marked = range ? ends : cell.Selected,
-            Middle = cell.InRange && !ends,
-            Off = off,
         };
-        var spoken = cell.Today ? Lang.CalendarToday(label) : label;
-        AutomationProperties.SetName(button, custom ? spoken + SpokenText(content) : spoken);
-        AutomationProperties.SetHelpText(button, state.Anchor is null ? null : Lang.CalendarPickEnd);
         button.Click += (_, _) =>
         {
-            if (off) return;
+            if (!IsEffectivelyEnabled || state.Cell(date, month).Disabled) return;
             state.Activate(date);
             Rebuild(focus: true);
         };
@@ -309,22 +341,13 @@ public class CalendarView : Control
         };
         button.PointerEntered += (_, _) =>
         {
-            // 重画后指针下的新格子会再进一次：同一格不再重画
             if (state.Anchor is null || hovered == date) return;
             hovered = date;
             state.Hover(date);
             Rebuild();
         };
-        var radius = this.Resource<double>(ThemeKeys.Radius.Md) * Em;
         var holder = new Border { Name = CalendarViewParts.Cell, Child = button };
-        if (cell.InRange)
-        {
-            holder.Classes.Add("in-range");
-            // 区间的底色画在格子上，相邻的格连成一条；两端与每行的首尾是圆的
-            var left = rowStart || cell.RangeStart;
-            var right = rowEnd || cell.RangeEnd;
-            holder.CornerRadius = new CornerRadius(left ? radius : 0, right ? radius : 0, right ? radius : 0, left ? radius : 0);
-        }
+        entries.Add(new CellEntry(holder, button, month, label, rowStart, rowEnd));
         return holder;
     }
 
@@ -409,13 +432,9 @@ sealed class WeekNumberText : Text
 [PseudoClasses(":selected", ":middle", ":today", ":outside", ":unavailable", ":off", ":period")]
 public sealed class CalendarCellButton : ButtonBase
 {
-    internal CalendarCellButton(DateOnly date, CalendarCellState state, bool period)
+    internal CalendarCellButton(DateOnly date, bool period)
     {
         Date = date;
-        State = state;
-        PseudoClasses.Set(":today", state.Today);
-        PseudoClasses.Set(":outside", state.Outside);
-        PseudoClasses.Set(":unavailable", state.Unavailable);
         PseudoClasses.Set(":period", period);
     }
 
@@ -423,13 +442,19 @@ public sealed class CalendarCellButton : ButtonBase
     public DateOnly Date { get; }
 
     /// <summary>这一格的状态。</summary>
-    public CalendarCellState State { get; }
+    public CalendarCellState State { get; private set; } = null!;
 
-    internal bool Marked { init => PseudoClasses.Set(":selected", value); }
-
-    internal bool Middle { init => PseudoClasses.Set(":middle", value); }
-
-    internal bool Off { init => PseudoClasses.Set(":off", value); }
+    /// <summary>换成新的状态（CalendarView 刷新时）。</summary>
+    internal void Apply(CalendarCellState state, bool marked, bool middle, bool off)
+    {
+        State = state;
+        PseudoClasses.Set(":today", state.Today);
+        PseudoClasses.Set(":outside", state.Outside);
+        PseudoClasses.Set(":unavailable", state.Unavailable);
+        PseudoClasses.Set(":selected", marked);
+        PseudoClasses.Set(":middle", middle);
+        PseudoClasses.Set(":off", off);
+    }
 
     /// <inheritdoc />
     protected override Type StyleKeyOverride => typeof(ButtonBase);

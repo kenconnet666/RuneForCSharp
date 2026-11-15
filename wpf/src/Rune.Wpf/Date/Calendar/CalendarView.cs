@@ -53,8 +53,13 @@ public class CalendarView : CompositeControl
     readonly LiveRegion live = new() { Height = 0 };
     readonly LiveRegion hint = new() { Height = 0 };
     readonly ContentControl footer = new() { Visibility = Visibility.Collapsed, Focusable = false };
+    readonly List<CellEntry> entries = [];
+    string? structure;
     string? announced;
     DateOnly? hovered;
+
+    /// <summary>建好的一格：重画时按状态原地刷新（不重建，悬停预览时指针下的元素不换）。</summary>
+    sealed record CellEntry(CalendarCell Holder, CalendarCellButton Button, DateOnly? Month, string Label, bool RowStart, bool RowEnd);
 
     static DependencyProperty Register(string name, Type type, object? fallback) =>
         DependencyProperty.Register(name, type, typeof(CalendarView), new PropertyMetadata(fallback, (d, _) => ((CalendarView)d).Rebuild()));
@@ -160,17 +165,33 @@ public class CalendarView : CompositeControl
         footer.Visibility = Footer is null ? Visibility.Collapsed : Visibility.Visible;
     }
 
-    /// <summary>状态变了（选了、翻页、换视图、外面改值）：重画；focus 时把焦点交给新的焦点格（键盘移动后）。</summary>
+    /// <summary>
+    /// 状态变了（选了、翻页、换视图、外面改值、悬停预览）：页面没换时只按状态刷新格子，换了页、视图或选项时重建页头与网格；
+    /// focus 时把焦点交给新的焦点格（键盘移动后）。
+    /// </summary>
     /// <param name="focus">把焦点移到焦点格。</param>
     internal void Rebuild(bool focus = false)
     {
         // 没进界面前不画：属性初始化的先后不定，状态要等各项（DefaultFocused、今天）都给了才开始
         if (State is not { } state || !IsLoaded) return;
         var lang = Lang;
-        var culture = Culture;
-        months.Children.Clear();
         var shown = state.Months;
         var view = state.View;
+        var key = string.Join("|", view, string.Join(",", shown), ShowWeekNumbers, FixedWeeks, FirstDay, lang.Code, IsEnabled, Em, FlowDirection, CellContent?.GetHashCode());
+        if (key != structure)
+        {
+            structure = key;
+            Build(state, lang, view, shown);
+        }
+        Sync(state, lang);
+        if (focus) Cells.FirstOrDefault(cell => cell.IsTabStop)?.Focus();
+    }
+
+    void Build(CalendarState state, Lang lang, DateUnit view, IReadOnlyList<DateOnly> shown)
+    {
+        var culture = Culture;
+        months.Children.Clear();
+        entries.Clear();
         var rtl = FlowDirection == FlowDirection.RightToLeft;
         var coarser = view == DateUnit.Day ? DateUnit.Month : view == DateUnit.Month ? DateUnit.Year : (DateUnit?)null;
         var (previousLabel, nextLabel) = view switch
@@ -222,8 +243,32 @@ public class CalendarView : CompositeControl
             if (announced is not null) live.Announce(titles);
             announced = titles;
         }
+    }
+
+    /// <summary>按状态刷新每一格：选中、焦点、区间与预览、不能选（读屏名称里的"今天"、自定义内容也跟着状态）。</summary>
+    void Sync(CalendarState state, Lang lang)
+    {
         hint.Text = state.Anchor is null ? "" : lang.CalendarPickEnd;
-        if (focus) Cells.FirstOrDefault(cell => cell.IsTabStop)?.Focus();
+        var range = state.Mode() == CalendarSelectionMode.Range;
+        var radius = this.Resource<double>(ThemeKeys.Radius.Md) * Em;
+        foreach (var (holder, button, month, label, rowStart, rowEnd) in entries)
+        {
+            var cell = state.Cell(button.Date, month);
+            var ends = range && (cell.RangeStart || cell.RangeEnd);
+            button.Apply(cell, marked: range ? ends : cell.Selected, middle: cell.InRange && !ends, off: !IsEnabled || cell.Disabled);
+            button.IsTabStop = cell.Focused && !cell.Outside;
+            var content = month is null ? null : CellContent?.Invoke(button.Date, cell);
+            // 不可选的划掉：TextBlock 的 TextDecorations 不继承，样式里设不到内容生成的文字上
+            button.Content = content ?? (cell.Unavailable ? new TextBlock { Text = button.Text, TextDecorations = TextDecorations.Strikethrough } : button.Text);
+            var spoken = cell.Today ? lang.CalendarToday(label) : label;
+            AutomationProperties.SetName(button, content is null ? spoken : spoken + SpokenText(content));
+            AutomationProperties.SetHelpText(button, state.Anchor is null ? "" : lang.CalendarPickEnd);
+            holder.IsInRange = cell.InRange;
+            // 区间的底色画在格子上，相邻的格连成一条；两端与每行的首尾是圆的
+            var left = rowStart || cell.RangeStart;
+            var right = rowEnd || cell.RangeEnd;
+            holder.CornerRadius = cell.InRange ? new CornerRadius(left ? radius : 0, right ? radius : 0, right ? radius : 0, left ? radius : 0) : default;
+        }
     }
 
     FrameworkElement PageButton(IconData icon, string label, int direction, string name, PartKey key)
@@ -287,9 +332,7 @@ public class CalendarView : CompositeControl
                     Add(new Border { Width = CellSide, Height = CellSide });
                     continue;
                 }
-                var cell = state.Cell(date, month);
-                var content = CellContent?.Invoke(date, cell);
-                Add(Cell(state, date, month, cell, CalendarText.FullDate(date, culture), content ?? CalendarText.DayNumber(date), content is not null, i == 0, i == 6));
+                Add(Cell(state, date, month, CalendarText.FullDate(date, culture), CalendarText.DayNumber(date), i == 0, i == 6));
             }
         }
         grid.MouseLeave += (_, _) =>
@@ -318,35 +361,26 @@ public class CalendarView : CompositeControl
         for (var i = 0; i < items.Count; i++)
         {
             var date = items[i];
-            var cell = state.Cell(date);
             var label = month ? CalendarText.YearMonth(date, culture) : CalendarText.Year(date.Year, culture, Lang);
             var text = month ? CalendarText.MonthShort(date, culture) : CalendarText.Year(date.Year, culture, Lang);
-            grid.Children.Add(Cell(state, date, null, cell, label, text, false, i % 3 == 0, i % 3 == 2, period: true));
+            grid.Children.Add(Cell(state, date, null, label, text, i % 3 == 0, i % 3 == 2));
         }
         return grid;
     }
 
-    /// <summary>一格：外层是画区间那一条的 <see cref="CalendarCell"/>，里面是按钮（读屏念完整日期，今天加"今天"；自定义内容跟在后面）。</summary>
-    CalendarCell Cell(CalendarState state, DateOnly date, DateOnly? month, CalendarCellState cell, string label, object content, bool custom, bool rowStart, bool rowEnd, bool period = false)
+    /// <summary>一格：外层是画区间那一条的 <see cref="CalendarCell"/>，里面是按钮；状态由 Sync 给。month 为 null 时是月份、年份格。</summary>
+    CalendarCell Cell(CalendarState state, DateOnly date, DateOnly? month, string label, string text, bool rowStart, bool rowEnd)
     {
-        var off = !IsEnabled || cell.Disabled;
-        var range = state.Mode() == CalendarSelectionMode.Range;
-        var ends = range && (cell.RangeStart || cell.RangeEnd);
-        var button = new CalendarCellButton(date, cell, period, marked: range ? ends : cell.Selected, middle: cell.InRange && !ends, off: off)
+        var period = month is null;
+        var button = new CalendarCellButton(date, period, text)
         {
             Name = "PART_CellButton",
-            // 不可选的划掉：TextBlock 的 TextDecorations 不继承，样式里设不到内容生成的文字上
-            Content = cell.Unavailable && content is string text ? new TextBlock { Text = text, TextDecorations = TextDecorations.Strikethrough } : content,
             HorizontalAlignment = period ? HorizontalAlignment.Stretch : HorizontalAlignment.Center,
-            IsTabStop = cell.Focused && !cell.Outside,
         };
         button.SetResourceReference(StyleProperty, CalendarViewParts.CellButton);
-        var spoken = cell.Today ? Lang.CalendarToday(label) : label;
-        AutomationProperties.SetName(button, custom ? spoken + SpokenText(content) : spoken);
-        AutomationProperties.SetHelpText(button, state.Anchor is null ? "" : Lang.CalendarPickEnd);
         button.Click += (_, _) =>
         {
-            if (off) return;
+            if (!IsEnabled || state.Cell(date, month).Disabled) return;
             state.Activate(date);
             Rebuild(focus: true);
         };
@@ -358,22 +392,14 @@ public class CalendarView : CompositeControl
         };
         button.MouseEnter += (_, _) =>
         {
-            // 重画后指针下的新格子会再进一次：同一格不再重画
             if (state.Anchor is null || hovered == date) return;
             hovered = date;
             state.Hover(date);
             Rebuild();
         };
-        var holder = new CalendarCell(cell.InRange) { Child = button };
+        var holder = new CalendarCell { Child = button };
         holder.SetResourceReference(StyleProperty, CalendarViewParts.Cell);
-        if (cell.InRange)
-        {
-            // 区间的底色画在格子上，相邻的格连成一条；两端与每行的首尾是圆的
-            var radius = this.Resource<double>(ThemeKeys.Radius.Md) * Em;
-            var left = rowStart || cell.RangeStart;
-            var right = rowEnd || cell.RangeEnd;
-            holder.CornerRadius = new CornerRadius(left ? radius : 0, right ? radius : 0, right ? radius : 0, left ? radius : 0);
-        }
+        entries.Add(new CellEntry(holder, button, month, label, rowStart, rowEnd));
         return holder;
     }
 
@@ -462,10 +488,8 @@ public sealed class CalendarCell : Border
     /// <summary>在选中的区间里（含两端）。</summary>
     public static readonly DependencyProperty IsInRangeProperty = IsInRangeKey.DependencyProperty;
 
-    internal CalendarCell(bool inRange) => SetValue(IsInRangeKey, inRange);
-
     /// <summary>在选中的区间里。</summary>
-    public bool IsInRange => (bool)GetValue(IsInRangeProperty);
+    public bool IsInRange { get => (bool)GetValue(IsInRangeProperty); internal set => SetValue(IsInRangeKey, value); }
 }
 
 /// <summary>
@@ -510,24 +534,33 @@ public sealed class CalendarCellButton : ButtonBase
 
     static DependencyPropertyKey ReadOnly(string name) => DependencyProperty.RegisterReadOnly(name, typeof(bool), typeof(CalendarCellButton), new PropertyMetadata(false));
 
-    internal CalendarCellButton(DateOnly date, CalendarCellState state, bool period, bool marked, bool middle, bool off)
+    internal CalendarCellButton(DateOnly date, bool period, string text)
     {
         Date = date;
-        State = state;
-        SetValue(IsTodayKey, state.Today);
-        SetValue(IsOutsideKey, state.Outside);
-        SetValue(IsUnavailableKey, state.Unavailable);
+        Text = text;
         SetValue(IsPeriodKey, period);
-        SetValue(IsMarkedKey, marked);
-        SetValue(IsMiddleKey, middle);
-        SetValue(IsOffKey, off);
     }
 
     /// <summary>这一格的日期（月份、年份格是那个月、那年的第一天）。</summary>
     public DateOnly Date { get; }
 
     /// <summary>这一格的状态。</summary>
-    public CalendarCellState State { get; }
+    public CalendarCellState State { get; private set; } = null!;
+
+    /// <summary>格子里默认的文字（日期数字、月份名、年份）。</summary>
+    internal string Text { get; }
+
+    /// <summary>换成新的状态（CalendarView 刷新时）。</summary>
+    internal void Apply(CalendarCellState state, bool marked, bool middle, bool off)
+    {
+        State = state;
+        SetValue(IsTodayKey, state.Today);
+        SetValue(IsOutsideKey, state.Outside);
+        SetValue(IsUnavailableKey, state.Unavailable);
+        SetValue(IsMarkedKey, marked);
+        SetValue(IsMiddleKey, middle);
+        SetValue(IsOffKey, off);
+    }
 
     /// <summary>已选。</summary>
     public bool IsMarked => (bool)GetValue(IsMarkedProperty);
