@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Windows;
 
 namespace Rune.Wpf;
@@ -58,7 +57,7 @@ public class TimeField : SegmentedField
     /// <summary>值是 TimeOnly；没填全时 null。</summary>
     public TimeOnly? Time
     {
-        get => Parse(Value);
+        get => TimeSlots.Parse(Value);
         set => Value = value is { } time ? DateSegments.ToIso(new DateFieldValues { Hour = time.Hour, Minute = time.Minute, Second = time.Second }, Fields) : null;
     }
 
@@ -69,12 +68,9 @@ public class TimeField : SegmentedField
         _ => DateFieldGranularity.Minute,
     }, time: true);
 
-    static TimeOnly? Parse(string? iso) =>
-        iso is not null && TimeOnly.TryParseExact(iso, ["HH:mm", "HH:mm:ss"], CultureInfo.InvariantCulture, DateTimeStyles.None, out var time) ? time : null;
-
     /// <inheritdoc />
     protected override bool IsOutOfRange(string iso) =>
-        Parse(iso) is { } time && (Parse(Min) is { } low && time < low || Parse(Max) is { } high && time > high || IsTimeUnavailable?.Invoke(time) == true);
+        TimeSlots.Parse(iso) is { } time && (TimeSlots.Parse(Min) is { } low && time < low || TimeSlots.Parse(Max) is { } high && time > high || IsTimeUnavailable?.Invoke(time) == true);
 
     void ChangedGranularity() => Fields = FieldsOf(Granularity);
 

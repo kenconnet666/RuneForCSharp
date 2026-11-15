@@ -83,6 +83,12 @@ sealed class PickerPopover
     /// <summary>平台的弹出层（选择器把它加进逻辑树）。</summary>
     public Popup Popup => popup;
 
+    /// <summary>弹层与外壳同宽（时间列表）；默认按内容宽。</summary>
+    public bool MatchWidth { get; init; }
+
+    /// <summary>弹层的内边距，默认 sm（时间列表是 xs）。</summary>
+    public Space Inset { get; init; } = Space.Sm;
+
     /// <summary>选择器的状态变了：开关、位置、按钮的名称与能不能点、弹层的字号与 em 尺寸。</summary>
     /// <param name="open">开着。</param>
     /// <param name="where">弹出位置。</param>
@@ -99,7 +105,8 @@ sealed class PickerPopover
         // 弹层不在外壳里：字号、圆角、内边距按外壳的算
         Panel.SetValue(TextElement.FontSizeProperty, em);
         Panel.CornerRadius = shadow.CornerRadius = new CornerRadius(owner.Resource<double>(ThemeKeys.Radius.Lg) * em);
-        Panel.Padding = new Thickness(owner.Resource<double>(ThemeKeys.Space.Sm) * em);
+        Panel.Padding = new Thickness(owner.Resource<double>(Inset.ResourceKey!) * em);
+        Panel.Width = MatchWidth ? owner.ActualWidth : double.NaN;
         if (popup.IsOpen == open || open && !owner.IsLoaded) return;
         popup.IsOpen = open;
         if (!open) ReturnFocus();
@@ -215,4 +222,10 @@ public static class PickerParts
 
     /// <summary>"今天"所在的页脚：Border，上边一条 borderMuted 分隔线。</summary>
     public static readonly PartKey Footer = new(typeof(DatePicker), nameof(Footer), typeof(Border));
+
+    /// <summary>时间选择器的时间列表（TS 的 propsList）：Listbox，最高 16em，其余滚动。</summary>
+    public static readonly PartKey List = new(typeof(TimePicker), nameof(List), typeof(Listbox));
+
+    /// <summary>时间选择器的"此刻"按钮（TS 的 propsNow）：Button，ghost、sm、占满宽度，上方 xs。</summary>
+    public static readonly PartKey Now = new(typeof(TimePicker), nameof(Now), typeof(Button));
 }

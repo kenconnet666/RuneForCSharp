@@ -1,7 +1,7 @@
 <!--
   日期、时间选择器的部件样式（vue-tsx-pro 的 usePickerPopover、datePickerStyles、pickerPresetStyles）：
   打开按钮同输入框里的清空按钮（大小在 PickerPopover 里按字号给）；弹层同 Select 的弹层（surfaceRaised、border 描边，阴影画在后面的一层上；
-  lg 圆角与 space.sm 内边距按外壳的字号在代码里算）；快捷选项一列，靠日历那边一条 borderMuted 分隔线；"今天"居中，上边一条 borderMuted 分隔线。
+  lg 圆角与 space.sm 内边距按外壳的字号在代码里算）；快捷选项一列，靠日历那边一条 borderMuted 分隔线；"今天"居中，上边一条 borderMuted 分隔线；时间选择器的弹层与外壳同宽、space.xs 内边距，时间列表下方是"此刻"。
   使用方同键的样式叠在上面（DESIGN §7）
 -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -31,4 +31,6 @@
     <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
     <Setter Property="BorderThickness" Value="0,1,0,0" />
   </Style>
+  <Style x:Key="{x:Static rune:PickerParts.List}" TargetType="rune:Listbox" />
+  <Style x:Key="{x:Static rune:PickerParts.Now}" TargetType="rune:Button" BasedOn="{StaticResource {x:Type rune:Button}}" />
 </ResourceDictionary>
