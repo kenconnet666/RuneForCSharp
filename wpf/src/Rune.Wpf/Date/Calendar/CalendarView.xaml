@@ -1,0 +1,108 @@
+<!--
+  CalendarView 的部件样式（vue-tsx-pro 的 calendarRecipe 与 calendarStateStyles）：
+  标题按钮 medium 字重、md 圆角、左右 sm、悬停 fillHover；星期表头 textMuted（上下 xs 在代码里按字号给）；周数 textMuted、右边 xs；
+  日期格 md 圆角、数字等宽、悬停 fillHover；补齐的上下月 textMuted；今天 semibold 加 accentBorder 细圈（TS 是内阴影，这里是 1px 描边）；
+  区间中间的格透明、accentText 字、悬停 accentSoftHover，底色是格子那一层（CalendarCell.IsInRange）的 accentSoft；
+  已选 accent 底、accentContrast 字、悬停 accentHover；不可选的划掉（删除线在代码里加：TextBlock 的 TextDecorations 不继承）；不能选的变淡、鼠标是禁止。使用方同键的样式叠在上面（DESIGN §7）
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rune="clr-namespace:Rune.Wpf">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Rune.Wpf;component/Base/Button/Button.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <Style TargetType="rune:CalendarView">
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Top" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+  </Style>
+  <Style TargetType="rune:Calendar" BasedOn="{StaticResource {x:Type rune:CalendarView}}" />
+
+  <Style x:Key="{x:Static rune:CalendarViewParts.Months}" TargetType="rune:Flex" />
+  <Style x:Key="{x:Static rune:CalendarViewParts.Header}" TargetType="Grid" />
+  <Style x:Key="{x:Static rune:CalendarViewParts.Previous}" TargetType="rune:IconButton" BasedOn="{StaticResource {x:Type rune:IconButton}}" />
+  <Style x:Key="{x:Static rune:CalendarViewParts.Next}" TargetType="rune:IconButton" BasedOn="{StaticResource {x:Type rune:IconButton}}" />
+  <Style x:Key="{x:Static rune:CalendarViewParts.Heading}" TargetType="rune:ButtonBase" BasedOn="{StaticResource {x:Type rune:ButtonBase}}">
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="rune:ControlHeight.MinHeight" Value="True" />
+    <Setter Property="rune:EmSize.Padding" Value="0.5,0" />
+    <Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.Md}" />
+    <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
+    <Style.Triggers>
+      <Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="{DynamicResource Rune.Brush.FillHover}" /></Trigger>
+    </Style.Triggers>
+  </Style>
+  <Style x:Key="{x:Static rune:CalendarViewParts.Grid}" TargetType="Grid" />
+  <Style x:Key="{x:Static rune:CalendarViewParts.PeriodGrid}" TargetType="UniformGrid" />
+  <Style x:Key="{x:Static rune:CalendarViewParts.Weekday}" TargetType="rune:Text">
+    <Setter Property="Tone" Value="Muted" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+  </Style>
+  <Style x:Key="{x:Static rune:CalendarViewParts.WeekNumber}" TargetType="rune:Text">
+    <Setter Property="Tone" Value="Muted" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+  </Style>
+
+  <Style x:Key="{x:Static rune:CalendarViewParts.Cell}" TargetType="rune:CalendarCell">
+    <Style.Triggers>
+      <Trigger Property="IsInRange" Value="True"><Setter Property="Background" Value="{DynamicResource Rune.Brush.AccentSoft}" /></Trigger>
+    </Style.Triggers>
+  </Style>
+  <Style x:Key="{x:Static rune:CalendarViewParts.CellButton}" TargetType="rune:CalendarCellButton" BasedOn="{StaticResource {x:Type rune:ButtonBase}}">
+    <Setter Property="rune:EmSize.CornerRadius" Value="{DynamicResource Rune.Radius.Md}" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Style.Triggers>
+      <Trigger Property="IsPeriod" Value="True"><Setter Property="SizeEm" Value="3" /></Trigger>
+      <Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="{DynamicResource Rune.Brush.FillHover}" /></Trigger>
+      <Trigger Property="IsOutside" Value="True"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" /></Trigger>
+      <Trigger Property="IsToday" Value="True">
+        <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Semibold}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.AccentBorder}" />
+      </Trigger>
+      <Trigger Property="IsUnavailable" Value="True">
+        <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+      </Trigger>
+      <Trigger Property="IsMiddle" Value="True">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.AccentText}" />
+      </Trigger>
+      <MultiTrigger>
+        <MultiTrigger.Conditions>
+          <Condition Property="IsMiddle" Value="True" />
+          <Condition Property="IsMouseOver" Value="True" />
+        </MultiTrigger.Conditions>
+        <Setter Property="Background" Value="{DynamicResource Rune.Brush.AccentSoftHover}" />
+      </MultiTrigger>
+      <Trigger Property="IsMarked" Value="True">
+        <Setter Property="Background" Value="{DynamicResource Rune.Brush.Accent}" />
+        <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.AccentContrast}" />
+        <Setter Property="BorderThickness" Value="0" />
+      </Trigger>
+      <MultiTrigger>
+        <MultiTrigger.Conditions>
+          <Condition Property="IsMarked" Value="True" />
+          <Condition Property="IsMouseOver" Value="True" />
+        </MultiTrigger.Conditions>
+        <Setter Property="Background" Value="{DynamicResource Rune.Brush.AccentHover}" />
+      </MultiTrigger>
+      <Trigger Property="IsOff" Value="True">
+        <Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" />
+        <Setter Property="Cursor" Value="No" />
+      </Trigger>
+      <MultiTrigger>
+        <MultiTrigger.Conditions>
+          <Condition Property="IsOff" Value="True" />
+          <Condition Property="IsMouseOver" Value="True" />
+        </MultiTrigger.Conditions>
+        <Setter Property="Background" Value="Transparent" />
+      </MultiTrigger>
+    </Style.Triggers>
+  </Style>
+  <Style x:Key="{x:Static rune:CalendarViewParts.Footer}" TargetType="ContentControl" />
+</ResourceDictionary>
