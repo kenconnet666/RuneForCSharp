@@ -96,6 +96,10 @@ signup 示例去掉了 480 的限宽（上游铺满），降到 1.85%：剩下�
 app-shell 页（2026-11-16 重出上游截图：fullscreen 的效果区改成了 24rem、正文是合同台账）：fullscreen 0.06% / 0.07%；admin 4.23% / 4.47%、mixed 2.04% / 1.89%（Stat 卡片高 4 像素、
 表格几列错开 4 像素，待收敛）。
 
+stat 页（2026-11-16 第一次出上游截图）：basic 7.42%、change 5.18%、group 3.24%、loading 2.83%、live 10.45%、animated-number 35.68%（亮色）。
+animated-number 是上游示例的问题（#8，Descriptions 的容器查询在 align=start 里排成一列）；change 第一张卡上游把变化量换到了第二行，我们放得下（Segoe UI Variable 的数字宽 6.7 像素，同 pivot-table）；
+单位比数字的基线低约 3 像素（数值一行的基线对齐）、卡片高几像素，待收敛。
+
 pivot-table 页（2026-11-16，仅 Avalonia）：count 0.43% / 0.43%；heatmap 1.47% / 1.51%（亮 / 暗）。数字列的宽度按内容比例分，上游的 system-ui 在 Windows 11 上是
 Segoe UI Variable，数字比我们的 Segoe UI 宽约 9%（14px 的"128.4"上游 36.2、我们 33.2），数字列分得宽一点、维度列窄 10 像素，热力底色的列边界跟着错开；字体是全局的取舍（DESIGN §6 的"字体"），不在透视表里改。
 table 页加了 column-table（0.07% / 0.08%），plans 不变。
