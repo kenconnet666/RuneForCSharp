@@ -1500,7 +1500,8 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   跨行的格高出来的加到它的最后一行。分隔线改成画在格上（同 CSS 的 td 下边线）：跨过的行线在合并格那段断开；跨行的格用它所在那一行的底色（指针下的行、斑马纹不染到它）。
 - 单元格的裁剪框是含内边距的整格（同 CSS 的 td）：格排在内边距里、自己不裁（主题里 ClipToBounds 关掉），网格给它设 Clip 几何。原来格自己裁在内容区，表格里迷你图最后的点被切掉一半。
   内边距不交给格自己的 ContentPresenter：布局取整会把 6.125 的内边距取成 6，行高比上游（内容加精确的内边距）矮，plans 暗色多出一整行的差异。网格本身画行时也不裁（固定的那几层才裁到自己的区域），不然高度带小数时裁掉吸附到整像素的最后一条线。
-- 像素对照：Table 页 column-table 0.07% / 0.08%，plans 不变（0.08% / 0.12%）。示例：Table 页的 column-table（询价比价单，同上游）、Sparkline 页的 in-table（同上游；迷你图高 1.5em 写成 21 像素，表格正文 md 字号）。
+- 定宽的列（TableHeaderCell.ColumnWidth，列定义的 Width）不分多出来的宽度：有不定宽的列时只分给它们（同 CSS 的自动表格布局；全是定宽的列时照旧按比例分给所有列）。原来定宽的列也跟着变宽，in-table 的件号列宽了 60 像素。
+- 像素对照：Table 页 column-table 0.07% / 0.08%，plans 不变（0.08% / 0.12%）；Sparkline 页 in-table 0.63% / 0.61%（剩迷你图折线差一个像素的位置）。示例：Table 页的 column-table（询价比价单，同上游）、Sparkline 页的 in-table（同上游；迷你图高 1.5em 写成 21 像素，表格正文 md 字号）。
 - FieldCompare 的 CompareField 是这套列定义之前的独立记录；上游的字段就是 DataTableColumn。改成共用要动 WPF、WinForms 的 FieldCompare，等那两个平台恢复时一起改。
 
 ### CodeGroup（2026-11-16，仅 Avalonia）
