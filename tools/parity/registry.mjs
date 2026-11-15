@@ -62,6 +62,8 @@ export const COMPONENT_PROP_RENAMES = {
   SelectionBar: { onClear: 'ClearRequested' },
   // 数据经 ItemsSource 给（平台的叫法），一张的模板是 ItemTemplate
   Carousel: { items: 'ItemsSource' },
+  // 展开、选中、勾选的是 key 的列表（不是布尔）；isDisabled 是判断节点的函数
+  Tree: { items: 'ItemsSource', isDisabled: 'IsItemDisabled', _expanded: 'Expanded', _selected: 'Selected', _checked: 'Checked', onMove: 'Moved', renderItem: 'ItemTemplate' },
   FloatButtonGroup: { propsTrigger: 'Trigger' },
   UserButton: { name: 'DisplayName', src: 'Source' },
   // 地址给 Uri；加载完的事件不叫 Loaded（那是控件放进界面的事件）
@@ -173,6 +175,8 @@ export const PLATFORM_COMPONENT_PROP_RENAMES = {
     FieldCompare: { layout: 'CompareLayout' },
     // 张片是控件，直接放进 Slides
     Carousel: { items: 'Slides' },
+    // 控件自己有 HasChildren；节点是画出来的，没有匹配时只能换说明文字
+    Tree: { hasChildren: 'HasChildNodes', empty: 'EmptyText' },
     // 控件自己有 Size：起始一栏的百分比叫 Ratio，范围跟着叫 MinRatio、MaxRatio
     Splitter: { _size: 'Ratio', minSize: 'MinRatio', maxSize: 'MaxRatio' },
     // 组自己生成控件：生成一项时的事件，处理完之后值由组写回
@@ -288,6 +292,11 @@ export const PROPS_NOT_PORTED = {
     ...Object.fromEntries(['propsTable', 'propsList', 'propsItem', 'propsLabel', 'propsValue']
       .map((prop) => [prop, '表格、列表与里面的格子是 FieldCompare 按行生成的（表格是紧凑的 Table）：外观跟主题，要别的样子用字段的 Cell 换显示的内容'])),
   },
+  Tree: {
+    estimateSize: '虚拟化按实际的行高排（Avalonia、WPF 的虚拟化面板；WinForms 每行一样高），不用估计值',
+    propsRow: '行就是 TreeItem 自己（Avalonia 的 TreeParts.Item 选中它，WPF 在主题里写 TreeItem 的样式）；WinForms 的行是画出来的',
+    propsScrollArea: '滚动区域是树自己的（Avalonia、WPF 是列表模板里的 ScrollViewer，WinForms 是 ScrollAreaControl），外观跟主题',
+  },
   Carousel: { getKey: '给 Vue 对比列表用的键：桌面上按 ItemsSource 的顺序重建每一张，没有按键复用' },
   SignaturePad: {
     name: FORM_NAME,
@@ -382,6 +391,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     ScrollArea: { propsScrollbar: '两条滚动条是平台 ScrollViewer 认的固定部件名：样式里用 ScrollAreaParts.VerticalScrollbar、HorizontalScrollbar 选中' },
   },
   WPF: {
+    Tree: Object.fromEntries(['propsItem', 'propsToggle', 'propsCheckbox', 'propsLabel', 'propsSkeleton']
+      .map((prop) => [prop, '每一行是 TreeItem 代码组合的（缩进、展开箭头、勾选框、图标、文字），骨架是 Skeleton，外观跟着 token 与各自组件的主题样式；部件样式键只有行列表（TreeParts.Rows）'])),
     SignaturePad: { propsCanvas: '画布是 SignaturePad 组合的子元素，没有部件样式键：底色与墨色是纸面，墨色用 PenColor' },
     Toaster: { propsProgress: '剩余时间条是每一项里的 Border，没有部件样式键：圆角 full、textMuted 50%' },
     ImageCropper: Object.fromEntries(['propsViewport', 'propsToolbar']
@@ -412,6 +423,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     CommandPalette: Object.fromEntries(['propsInput', 'propsListbox'].map((prop) => [prop, '面板里的搜索框、列表是 CommandPalette 建的，外观跟着 TextField、Listbox 的主题样式；部件样式键只有搜索行'])),
   },
   WinForms: {
+    Tree: Object.fromEntries(['renderItem', 'propsItem', 'propsToggle', 'propsCheckbox', 'propsLabel', 'propsEmpty', 'propsSkeleton']
+      .map((prop) => [prop, '行（箭头、勾选框、图标、文字）是 TreeControl 画出来的，空状态与骨架是固定的子控件，没有部件属性与自定义内容：要多显示的文字写进 GetLabel'])),
     SignaturePad: { propsCanvas: '墨迹画在 SignaturePadControl 自己身上（没有单独的画布控件）：底色与墨色是纸面，墨色用 PenColor' },
     Toaster: { propsProgress: '剩余时间条是每一项里画出来的细条，没有部件属性：圆角 full、textMuted 与表面色各半（控件不能半透明）' },
     ImageCropper: Object.fromEntries(['propsViewport', 'propsToolbar']

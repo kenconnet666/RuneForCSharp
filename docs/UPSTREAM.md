@@ -90,7 +90,7 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 |---|---|---|
 | QRCode 与自写的编码器 encodeQr（91903a2b） | 还没做 | 做时编码器做成孪生文件（纯计算），标准附录的向量一起搬进测试 |
 | 子路径 ui/area：全国省市区（ad0a85ea、01a40e80） | 还没做 Cascader、TreeSelect | 做 Cascader 时照新的 |
-| JsonViewer（728b56b4，建在 Tree 上） | 还没做 Tree | CI 绿后锁定，做时照新的 |
+| JsonViewer（728b56b4，建在 Tree 上） | Tree 三个平台都做了（2026-11-15），JsonViewer 还没做 | 做 JsonViewer 时建在各平台的 Tree 上 |
 | SignaturePad、纸面配色 paper（fd628293）：要拍照、扫描、导出的一律浅底深色 | 三个平台都做了（2026-11-15） | QRCode 与 SignaturePad 共用各平台的 Paper |
 
 ### 第六批（2026-11-08 通知，0.12.0 之后 master 到 96efc7ad；P3 组件补缺完成）
@@ -184,7 +184,7 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
 | Collapse 完全展开（过渡结束）后内容层不再裁剪，过渡中、收起时照旧 | Avalonia、WPF 的 Collapse 一直 ClipToBounds，贴边的勾选项、按钮外面一圈的焦点环会被切 | 已改：过渡开始时裁、结束时按开合定（展开不裁）；WinForms 的子控件本来就裁在自己的边里、焦点环画在控件的 Padding 里，不涉及 |
-| NavList 的行与分组触发器、Accordion 标题、Tree、VirtualList、NotificationCenter 的整行焦点环画在里面 | NavList 的行焦点环本来就在里面；Accordion、Tree 等还没做 | 做时照新的 |
+| NavList 的行与分组触发器、Accordion 标题、Tree、VirtualList、NotificationCenter 的整行焦点环画在里面 | NavList 的行焦点环本来就在里面；Tree 已做（2026-11-15，焦点环画在树的边上往里收），Accordion 等照新的 | 做时照新的 |
 | CodeBlock 复制按钮（标题栏里也是）、SlideCaptcha 刷新、Upload 图片墙缩略图画在里面 | 复制按钮同 IconButton，本来就在里面 | 不涉及 |
 | DataTable 单元格、StatGroup 根 overflow: hidden → overflowX: clip | 还没做 | 做时照新的 |
 | Upload 的文件名链接自己省略；ItemList、PeoplePickerPanel 的内边距调整 | ItemList 已做 | ItemList 照新的（inset，悬停着底色、整条可点时默认 sm）；Upload、PeoplePickerPanel 做时照新的 |
@@ -592,7 +592,7 @@ defineTheme / defineLang 忽略 undefined——网页专用或 C# 没有 undefin
 | 每层定制、使用方的 sx 各进一层 | 见"阶段 1" | 同上 |
 | 阶段 3：条件一律写别名（`_hover`……） | 浏览器专用的写法 | 不涉及 |
 | 阶段 3：焦点环新增 inset（画在里面）、virtual（aria-activedescendant 的当前项常亮） | 我们的焦点环在 ButtonBase 里，只有外扩一种 | 做 Listbox、Menu 时照做（桌面上"当前项"对应 UIA 的选中项 / 焦点项，不是真焦点）；ButtonBase 加 inset 变体 |
-| 阶段 3：展开箭头 flip（朝上）、turn（朝行尾，RTL 下反向转），修了 RTL 下箭头朝上 | Icon 有 FlipInRtl | 做 Accordion、Select、Tree 时照做 |
+| 阶段 3：展开箭头 flip（朝上）、turn（朝行尾，RTL 下反向转），修了 RTL 下箭头朝上 | Icon 有 FlipInRtl | 做 Accordion、Select、Tree 时照做（Tree 已做：箭头 FlipInRtl） |
 | 阶段 3：`statusToneCompound` 让 Badge、Alert 的组合档位直接引用共用色表 | 我们也是两张表：Button 用调色板表（`palette.mjs` 生成），Badge 用手写的 `StatusColors` | 合成一张：Badge（以后的 Alert）的颜色也从调色板表生成 |
 | 阶段 3：OtpField 用输入框配方；Popover、HoverCard、Menu 面板统一 `anchoredPanelSx` | Popover、Menu 已做 | Menu 的面板就是 Popover 的面板（Avalonia、WPF 组合 Popover，WinForms 共用 FloatingSurface）；HoverCard 做时照做 |
 

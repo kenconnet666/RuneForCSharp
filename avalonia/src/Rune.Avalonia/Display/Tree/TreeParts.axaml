@@ -1,0 +1,21 @@
+<!--
+  Tree 部件的默认外观：行的容器只要一个 ItemsPresenter（同 Listbox）；键盘聚焦时整棵树一圈焦点环，借滚动区域里侧的那圈
+  （树自己滚动，它就是视口，外面一圈会被裁掉；同上游 focusRingStyles.inset）。
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|Tree ItemsControl#PART_Rows">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="rune|Tree">
+    <Setter Property="FocusAdorner" Value="{x:Null}" />
+  </Style>
+  <Style Selector="rune|Tree:focus-visible > rune|ScrollArea#PART_Scroll /template/ Border#PART_FocusRing">
+    <Setter Property="IsVisible" Value="True" />
+  </Style>
+</Styles>

@@ -1378,6 +1378,17 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### Tree（2026-11-15）
+
+- 纯计算是孪生文件 TreeData（上游 utils/data/tree 的 flattenTree、buildTreeIndex、toggleChecked、checkedByStrategy、filterTree、buildTree、moveTreeNode，加上 useTreeExpansion 的 TreeExpansion）：节点是任意对象，经 TreeAccessors（GetKey、GetChildren、HasChildren）读取；勾选状态是 CheckState（未勾、勾上、半选），按 CheckStrategy 收起；Build 遇到重复的 key、环时抛 ArgumentException。三个平台的控件只管展示与输入。
+- 数据：上游的 getKey、getLabel、getChildren、hasChildren、loadChildren、isDisabled 在 C# 里是委托属性（isDisabled 叫 IsItemDisabled，判断节点；WinForms 的 hasChildren 叫 HasChildNodes：控件自己有 HasChildren）。Expanded、Selected、Checked 是 key 的列表（Avalonia、WPF 默认双向绑定；WinForms 报告各自的 Changed）。懒加载：LoadChildren 返回任务，结束前那一行显示加载图标；子节点放进数据后调 Refresh（WinForms 是覆盖的 Control.Refresh）；失败时收回去并报告 LoadError（没有订阅时写进跟踪日志）。
+- 行是平铺的（上游虚拟滚动不能嵌套 role="group"），层级与同级位置给读屏：Avalonia、WPF 是虚拟化列表（ItemsControl 加虚拟化面板）里的 TreeItem，自动化对等体实现 ExpandCollapse、SelectionItem、Toggle；WinForms 的行是画出来的（每行一样高、只画看得见的），读屏是大纲（Outline），子项是看得见的每一行。上游的 renderItem 在 Avalonia、WPF 是 ItemTemplate，WinForms 没有自定义内容（要多显示的写进 GetLabel）。
+- 行高：控件高度与最小点击区（minTarget）取大，上下各留 1；缩进每层 Indent（默认 1.25em），展开箭头 1.5em 见方（展开时转 90°，从右到左时镜像），勾选框 1em、右边多留 xs。状态同列表行：悬停、键盘高亮 fillHover，选中 accentSoft 底、accentText 字，不可用变淡；过滤匹配的加粗。焦点环画在树的边上往里收（上游 focusRingStyles.inset）。
+- 高度：按内容高，写了 MaxHeight（WinForms 是 MaximumSize 的高，不写时最高 20em）时节点多了在树里滚动。没有节点时：IsLoading 显示四条骨架（宽度依次递减），否则是空状态（文字取语言包，过滤时是“没有匹配”，Avalonia、WPF 的 Empty 可以换内容，WinForms 是 EmptyText）。
+- 键盘同 APG 的树：↑↓、Home、End，→ 展开 / 进入第一个子节点，← 收起 / 回到父节点（从右到左时对调），Enter 选中（没有选择方式时展开或收起），空格勾选或选中，按字母跳转（同 Listbox 的 Typeahead）。
+- 移动：订阅了 Moved 才能拖动（挪开 4 以上），落在一项的上四分之一放在前面、下四分之一放在后面、中间放进里面（accentSoft 底加 accent 框；前后是一条从那一层缩进处开始的线），拖到上下边缘时滚动；Alt + 方向键同上游。目标按移走之后的同级算，CanDrop 限制落点，放进自己的子孙里不行；移动后读屏念“移到哪里第几位”。新数据由使用方用 TreeData.Move 生成、交回 ItemsSource。
+- WPF 的测试里模拟不了修饰键，Alt + 方向键留了内部方法 MoveByKey；WinForms 的 Click 与 Layout 与 Control 的成员重名，内部方法叫 ClickItem、Parts。
+
 ### SignaturePad（2026-11-15）
 
 - 笔画的计算是孪生文件 SignatureStrokes（上游 SignaturePad 里的 signature_pad 式算法）：按速度定笔宽（写得快变细，速度加权平滑），近于 1.5 的点不记，一笔拆成穿过相邻两点中点的二次贝塞尔段，导出 SVG（读回的旧签名嵌成图片）。平台控件只把指针换成 Begin、Extend、End，每次整笔重画（笔画不多，不用像上游那样只画新多出来的一段）；不取合并掉的中间点：它们没有各自的时刻，速度会算错。
