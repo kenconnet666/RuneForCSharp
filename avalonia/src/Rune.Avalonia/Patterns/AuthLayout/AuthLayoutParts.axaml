@@ -1,0 +1,12 @@
+<!--
+  AuthLayout 的默认外观（vue-tsx-pro 的 authLayoutStyles）：整页 background 底、text 字；
+  表单区的内边距（四周 lg，窄时顶部 xl）、工具区的位置随宽度变，在 AuthLayout.cs 里算。品牌区默认没有外观，使用方按 Border#PART_Hero 写底色与内边距
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|AuthLayout">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Background}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+  </Style>
+</Styles>
