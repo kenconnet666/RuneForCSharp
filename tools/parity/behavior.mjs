@@ -76,9 +76,10 @@ function platform({ src, tests }) {
   for (const file of files(join(repoRoot, tests), /\.cs$/)) {
     const text = readFileSync(file, 'utf8');
     // 每个标记归到它后面最近的测试方法（一个方法可以标几条）
-    for (const m of text.matchAll(/\[Upstream\("([\w-]+)",\s*"([^"]*)"\)\]/g)) {
+    // 开头是 C# 的字符串字面量：里面的引号写成 \"（上游用例名里的 granularity="quarter"）
+    for (const m of text.matchAll(/\[Upstream\("([\w-]+)",\s*"((?:[^"\\]|\\.)*)"\)\]/g)) {
       const method = /public\s+(?:async\s+)?\w+\s+(\w+)\s*\(/.exec(text.slice(m.index))?.[1];
-      marks.push({ component: m[1], prefix: m[2], method, file: relative(repoRoot, file) });
+      marks.push({ component: m[1], prefix: m[2].replace(/\\(.)/g, '$1'), method, file: relative(repoRoot, file) });
     }
   }
   const types = new Set();
