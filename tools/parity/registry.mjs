@@ -256,11 +256,12 @@ export const TYPE_RENAMES = {
   // 三个平台都自带 Label：表单标签叫 FieldLabel
   // 三个平台都有 System.DateTime：日期时间的文字叫 DateTimeText
   // Toast.tsx 的单元测试（文件名 Toast）测的是控制器 createToaster：桌面上是 ToasterController
-  Avalonia: { 'form-dialog': 'FormDialog', 'form-binding': 'Field', 'date-segments': 'DateSegments', 'calendar-state': 'CalendarState', Label: 'FieldLabel', DateTime: 'DateTimeText', Toast: 'ToasterController' },
-  WPF: { 'form-dialog': 'FormDialog', 'form-binding': 'Field', 'date-segments': 'DateSegments', 'calendar-state': 'CalendarState', Label: 'FieldLabel', DateTime: 'DateTimeText', Toast: 'ToasterController' },
+  // 模态内核 ModalCore 就是 Dialog（Drawer、AlertDialog 派生自它）
+  Avalonia: { ModalCore: 'Dialog', 'form-dialog': 'FormDialog', 'form-binding': 'Field', 'date-segments': 'DateSegments', 'calendar-state': 'CalendarState', Label: 'FieldLabel', DateTime: 'DateTimeText', Toast: 'ToasterController' },
+  WPF: { ModalCore: 'Dialog', 'form-dialog': 'FormDialog', 'form-binding': 'Field', 'date-segments': 'DateSegments', 'calendar-state': 'CalendarState', Label: 'FieldLabel', DateTime: 'DateTimeText', Toast: 'ToasterController' },
   // WinForms 自己有 ListControl（ListBox、ComboBox 的基类）
   // WinForms 的提示是扩展组件（同平台的 ToolTip 组件），不是控件；平台自带 TabControl、TabPage：标签叫 TabItemControl
-  WinForms: { 'form-dialog': 'FormDialog', 'form-binding': 'Field', 'date-segments': 'DateSegments', 'calendar-state': 'CalendarState', List: 'UnorderedList', Container: 'ContainerPanel', Label: 'FieldLabel', Tooltip: 'TooltipProvider', Tab: 'TabItem', DateTime: 'DateTimeText', Toast: 'ToasterController' },
+  WinForms: { ModalCore: 'DialogControl', 'form-dialog': 'FormDialog', 'form-binding': 'Field', 'date-segments': 'DateSegments', 'calendar-state': 'CalendarState', List: 'UnorderedList', Container: 'ContainerPanel', Label: 'FieldLabel', Tooltip: 'TooltipProvider', Tab: 'TabItem', DateTime: 'DateTimeText', Toast: 'ToasterController' },
 };
 
 const FORM_NAME = '表单提交的字段名是浏览器的概念；值经 Value 绑定，单选组的互斥由组自己管';
@@ -272,6 +273,13 @@ export const PROPS_NOT_PORTED = {
   Calendar: { valueType: '值是 ISO 字符串的 Value（多选是 Values），另有 DateOnly 的 Date 属性：没有 @internationalized/date 的日期值类型，不按传进来的值推类型' },
   QuarterCalendar: Object.fromEntries(['propsPrevious', 'propsNext', 'propsHeader', 'propsHeading', 'propsGrid', 'propsCell', 'propsCellButton']
     .map((prop) => [prop, '部件同 CalendarView（上游同一个配方）：Avalonia 是 CalendarViewParts 的部件名（样式选择器 :is(rune|CalendarSurface)），WPF 是 CalendarViewParts 的部件样式键，WinForms 的四格是自己画的 QuarterGridControl；按季度给的部件属性没有对应，格子的外观按状态写样式'])),
+  ModalCore: {
+    parts: '内核给 Dialog、Drawer 的配方钩子：各自的外观在主题样式里（部件名在 DialogParts）',
+    panelSx: '内核给 Dialog、Drawer 的配方钩子：各自的外观在主题样式里',
+    role: '读屏角色由派生类型给：Dialog 是对话框，AlertDialog 是警告对话框',
+    edge: '抽屉贴哪一边是 Drawer 的 Placement',
+    lazy: '正文是传进来的控件实例，对话框关着时不在可视树里（不排版、不绘制），本来就是打开时才有代价',
+  },
   ThemeSwitcher: Object.fromEntries(['point', 'offset', 'lazy'].map((prop) => [prop, '透传给里面的 Menu 的属性：同 Menu 不移植的原因（右键菜单才从某一点弹出、距离同 Popover、菜单项一直在）'])),
   ThemeThumbnail: { propsCard: '缩略图是自己画的（底色、卡片、三条与按钮），没有元素可加属性' },
   FileDrop: { propsRoot: '外层就是 FileDrop 自己（虚线边框、底色自己画）：样式直接写在它上面；原生的 input 在桌面上是系统的文件对话框' },
@@ -501,7 +509,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
         .map((prop) => [prop, '页码、每页条数、跳页是公开的 PaginationPart、SizeSelectPart、JumpPart（各自有主题样式），直接改它们；结束边那一组是 PaginationBar 代码建的面板']),
     ),
     ScrollArea: { propsViewport: '视口就是 ScrollArea 自己：读屏名称、焦点都在它身上；滚动呈现器没有部件样式' },
-    ...Object.fromEntries(['Dialog', 'AlertDialog', 'Drawer', 'FormDialog'].map((name) => [name, Object.fromEntries(['propsHeader', 'propsTitle', 'propsClose', 'propsDescription', 'propsBody', 'propsFooter', 'propsCancel', 'propsConfirm']
+    ...Object.fromEntries(['Dialog', 'AlertDialog', 'Drawer', 'FormDialog', 'ModalCore'].map((name) => [name, Object.fromEntries(['propsHeader', 'propsTitle', 'propsClose', 'propsDescription', 'propsBody', 'propsFooter', 'propsCancel', 'propsConfirm']
       .map((prop) => [prop, '标题行、标题、关闭按钮、说明、正文、页脚、按钮是 Dialog 代码组合的子元素，部件样式键只有面板、遮罩与阴影；外观跟着各自组件的主题样式']))])),
     Select: Object.fromEntries(['propsListbox', 'propsSearch'].map((prop) => [prop, '弹出层里的列表、搜索框是 Select 建的，外观跟着 Listbox、TextField 的主题样式'])),
     TagsInput: { propsListbox: '弹出层里的列表是 TagsInput 建的 Listbox，外观跟着 Listbox 的主题样式（同 Select）' },
@@ -597,7 +605,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
       ...Object.fromEntries(['propsRoot', 'propsTag', 'propsClear', 'propsPopover', 'propsListbox', 'propsIcon']
         .map((prop) => [prop, '外壳是 TagsInputControl 自己，标签、图标、清空按钮是子控件，弹出层是两层窗口：没有部件属性记录（同 SelectControl）'])),
     },
-    ...Object.fromEntries(['Dialog', 'AlertDialog', 'FormDialog'].map((name) => [name, Object.fromEntries(['propsHeader', 'propsTitle', 'propsClose', 'propsDescription', 'propsBody', 'propsFooter', 'propsCancel', 'propsConfirm']
+    ...Object.fromEntries(['Dialog', 'AlertDialog', 'FormDialog', 'ModalCore'].map((name) => [name, Object.fromEntries(['propsHeader', 'propsTitle', 'propsClose', 'propsDescription', 'propsBody', 'propsFooter', 'propsCancel', 'propsConfirm']
       .map((prop) => [prop, '标题行、正文、页脚是 DialogControl 组合的子控件，面板与遮罩是两层窗口画的，没有部件属性记录']))])),
     Drawer: {
       ...Object.fromEntries(['propsHeader', 'propsTitle', 'propsClose', 'propsDescription', 'propsBody', 'propsFooter', 'propsCancel', 'propsConfirm']
@@ -730,6 +738,11 @@ export const EXCLUDED = {
   SkipLink: '浏览器专用（跳到主内容的链接）',
   ClientOnly: '浏览器专用（服务端渲染时不输出）',
   FormValue: '浏览器原生表单提交专用（隐藏的 input 让 FormData 读到）；桌面上值经绑定或 FormController 交给模型',
+  LinkUnderlineScope: '不单独成组件：三个库都是 Link 的继承附加属性 UnderlineScope（Card 页头、Checklist、Descriptions 等容器设它）',
+  ListPopover: '不单独成组件：三个库都有内部的 ListPopover（Select、Combobox、TagsInput 共用的选项弹出层）',
+  ListboxView: '不单独成组件：Listbox 自己就是渲染层（虚拟滚动的选项、分组标题、空状态与加载中）',
+  OverlayScrollbar: '不单独成组件：ScrollArea 的滚动条是平台 ScrollViewer 的 ScrollBar，主题里画成浮层样式（滚动时出现、停下淡出、不占宽度）',
+  PageScrollbar: '浏览器专用（换掉窗口自己的页面滚动条）：桌面窗口没有页面滚动条，AppShell 的正文就是 ScrollArea',
 };
 
 /**
