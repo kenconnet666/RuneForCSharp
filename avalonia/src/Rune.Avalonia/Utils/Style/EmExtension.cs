@@ -1,5 +1,6 @@
 using System.Globalization;
 using Avalonia;
+using Avalonia.Controls.Documents;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
@@ -64,12 +65,21 @@ public sealed class EmExtension
             return new MultiBinding { Bindings = { FontSize(), Rune.Avalonia.Resolved.SelfBinding(Resolved) }, Converter = converter };
         if (Resource is not null)
             return new MultiBinding { Bindings = { FontSize(), new DynamicResourceExtension(Resource) }, Converter = converter };
-        return Of == RelativeSourceMode.TemplatedParent
-            ? new TemplateBinding(TemplatedControl.FontSizeProperty) { Converter = converter }
-            : new ReflectionBinding("FontSize") { RelativeSource = new RelativeSource(Of), Converter = converter };
+        if (Of == RelativeSourceMode.TemplatedParent) return new TemplateBinding(TemplatedControl.FontSizeProperty) { Converter = converter };
+        var binding = FontSize();
+        binding.Converter = converter;
+        return binding;
     }
 
-    ReflectionBinding FontSize() => new("FontSize") { RelativeSource = new RelativeSource(Of) };
+    /// <summary>
+    /// 字号：可继承的附加属性 TextElement.FontSize（TemplatedControl、TextBlock 的 FontSize 就是它）。
+    /// 不绑 CLR 的 FontSize 属性：Border、Panel、Flex 没有它，绑定失败、值设不上。
+    /// </summary>
+    ReflectionBinding FontSize() => new("(TextElement.FontSize)")
+    {
+        RelativeSource = new RelativeSource(Of),
+        TypeResolver = (_, name) => name == nameof(TextElement) ? typeof(TextElement) : throw new InvalidOperationException($"认不出类型 {name}"),
+    };
 }
 
 /// <summary>字号（与资源里的系数）× 系数，按目标属性的类型产出 double、Thickness 或 CornerRadius，不低于下限。</summary>

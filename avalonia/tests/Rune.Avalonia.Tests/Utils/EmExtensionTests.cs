@@ -42,6 +42,25 @@ public class EmExtensionTests
     });
 
     [Fact]
+    public Task Elements_without_a_font_size_property_use_the_inherited_one() => HeadlessUi.Run(() =>
+    {
+        // Border、Panel、Flex 没有 CLR 的 FontSize：取继承下来的 TextElement.FontSize
+        var border = new Border();
+        border.Bind(Decorator.PaddingProperty, (BindingBase)new EmExtension(0, 0, 0, 0.5).ProvideValue(null!));
+        var panel = new Panel();
+        panel.Bind(Layoutable.MarginProperty, (BindingBase)new EmExtension { Resource = "Rune.Radius.Md" }.ProvideValue(null!));
+        var host = new StackPanel { Children = { border, panel } };
+        host.SetValue(TextElement.FontSizeProperty, 16d);
+        var window = HeadlessUi.Show(host);
+
+        Assert.Equal(new Thickness(0, 0, 0, 8), border.Padding);
+        Assert.Equal(new Thickness(0.4 * 16), panel.Margin);
+        host.SetValue(TextElement.FontSizeProperty, 20d);
+        HeadlessUi.Flush(window);
+        Assert.Equal(new Thickness(0, 0, 0, 10), border.Padding);
+    });
+
+    [Fact]
     public Task Minimum_and_theme_resource_coefficients() => HeadlessUi.Run(() =>
     {
         var border = new ContentControl();
