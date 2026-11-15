@@ -51,6 +51,8 @@ export const COMPONENT_PROP_RENAMES = {
   Image: { src: 'Source' },
   // 区域的高度（控件自己的 Height 包括工具条）、裁剪框离边的距离（Padding 是平台的内边距）
   ImageCropper: { src: 'Source', height: 'ViewportHeight', padding: 'FrameInset' },
+  // 控件自己有 MinWidth、MaxWidth（排版的宽度范围）：笔宽的范围加 Pen
+  SignaturePad: { minWidth: 'PenMinWidth', maxWidth: 'PenMaxWidth' },
   ImageGroup: { propsLightbox: 'Lightbox' },
   // tooltip 的 false 是 ShowTip = false；速拨的主按钮直接是 FloatButton 实例
   FloatButton: { tooltip: 'Tip' },
@@ -287,6 +289,11 @@ export const PROPS_NOT_PORTED = {
       .map((prop) => [prop, '表格、列表与里面的格子是 FieldCompare 按行生成的（表格是紧凑的 Table）：外观跟主题，要别的样子用字段的 Cell 换显示的内容'])),
   },
   Carousel: { getKey: '给 Vue 对比列表用的键：桌面上按 ItemsSource 的顺序重建每一张，没有按键复用' },
+  SignaturePad: {
+    name: FORM_NAME,
+    handle: '方法直接在控件上：ToPng（PNG 字节）、ToSvg、Undo、Clear',
+    ...Object.fromEntries(['propsUndo', 'propsClear'].map((prop) => [prop, '撤销、清空是 SignaturePad 建的 IconButton（sm、ghost、中性色），没有部件属性：外观跟主题'])),
+  },
   Toaster: {
     ...Object.fromEntries(['propsList', 'propsItem', 'propsToast']
       .map((prop) => [prop, '列表、每一项与每条通知（Alert）是 Toaster 按控制器生成的：外观跟主题，按通知不同的内容由 ToastOptions 给（色调、图标、操作）'])),
@@ -375,6 +382,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     ScrollArea: { propsScrollbar: '两条滚动条是平台 ScrollViewer 认的固定部件名：样式里用 ScrollAreaParts.VerticalScrollbar、HorizontalScrollbar 选中' },
   },
   WPF: {
+    SignaturePad: { propsCanvas: '画布是 SignaturePad 组合的子元素，没有部件样式键：底色与墨色是纸面，墨色用 PenColor' },
     Toaster: { propsProgress: '剩余时间条是每一项里的 Border，没有部件样式键：圆角 full、textMuted 50%' },
     ImageCropper: Object.fromEntries(['propsViewport', 'propsToolbar']
       .map((prop) => [prop, '区域与工具条是 ImageCropper 组合的子元素，没有部件样式键：外观跟主题'])),
@@ -404,6 +412,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     CommandPalette: Object.fromEntries(['propsInput', 'propsListbox'].map((prop) => [prop, '面板里的搜索框、列表是 CommandPalette 建的，外观跟着 TextField、Listbox 的主题样式；部件样式键只有搜索行'])),
   },
   WinForms: {
+    SignaturePad: { propsCanvas: '墨迹画在 SignaturePadControl 自己身上（没有单独的画布控件）：底色与墨色是纸面，墨色用 PenColor' },
     Toaster: { propsProgress: '剩余时间条是每一项里画出来的细条，没有部件属性：圆角 full、textMuted 与表面色各半（控件不能半透明）' },
     ImageCropper: Object.fromEntries(['propsViewport', 'propsToolbar']
       .map((prop) => [prop, '区域与工具条是 ImageCropperControl 组合的子控件，没有部件属性记录：外观跟主题'])),

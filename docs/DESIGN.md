@@ -1378,6 +1378,13 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### SignaturePad（2026-11-15）
+
+- 笔画的计算是孪生文件 SignatureStrokes（上游 SignaturePad 里的 signature_pad 式算法）：按速度定笔宽（写得快变细，速度加权平滑），近于 1.5 的点不记，一笔拆成穿过相邻两点中点的二次贝塞尔段，导出 SVG（读回的旧签名嵌成图片）。平台控件只把指针换成 Begin、Extend、End，每次整笔重画（笔画不多，不用像上游那样只画新多出来的一段）；不取合并掉的中间点：它们没有各自的时刻，速度会算错。
+- 值是透明底的 PNG 字节（上游是 data URL，桌面上存文件、进数据库都用字节），Avalonia、WPF 默认双向绑定，WinForms 报告 ValueChanged；自己交出的值回来时不当成“换了签名”，别的值（编辑页读回的旧签名）画在底下，可以接着写或清空。handle 换成控件上的 ToPng、ToSvg、Undo、Clear；name（表单提交）不移植。
+- 上游的 minWidth、maxWidth 与控件自己的排版属性重名，叫 PenMinWidth、PenMaxWidth；height 就是控件的 Height（不写时 10em）。外框同输入框（描边随出错、只读、悬停，跟所在 Field），底色与墨色是纸面：从 QRCode 里抽出各平台的 Paper（深色主题下仍白底近黑），整理成单独的提交。
+- WPF 的测试里模拟不了鼠标位置，写字的入口留了接收坐标的内部方法 Write；WinForms 的笔画按逻辑像素记、画时按 DPI 放大（SVG 与另两个平台一致），GDI+ 只有三次贝塞尔，二次的控制点换成两端到它的 2/3；控件不能半透明，不可用时颜色减半。
+
 ### Toast：ToasterController、Toaster（2026-11-15）
 
 - 控制器是孪生文件 ToasterController（上游的 createToaster）：TimeProvider 计时（测试里换成 FakeTimeProvider），计时器的回调回到建它的线程上执行（同 LoadingBarController）；列表与每条的变化经 Changed 通知。上游的 options 是对象展开、update 用 Object.assign 合并：桌面上 ToastOptions 是记录，不写（null）就是没给；Update 只换写了的，要去掉某一项时用同一个编号 Show 换掉整条。标题是文字（三个平台的 Alert 标题都是字符串），正文、操作同 Alert（WinForms 的正文是文字、操作是控件）；icon: false 是 ShowIcon = false；duration: Infinity 是 Timeout.InfiniteTimeSpan；setLimit 是 Limit 属性；promise 收 Task 与三个阶段（成功、失败由结果或异常算出）。上游 Toast.tsx 的单元测试测的就是控制器，parity 里把 Toast 对到 ToasterController。
