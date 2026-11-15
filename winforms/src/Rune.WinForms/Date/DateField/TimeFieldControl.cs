@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.ComponentModel;
 
 namespace Rune.WinForms;
@@ -54,7 +53,7 @@ public class TimeFieldControl : SegmentedFieldControl
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public TimeOnly? Time
     {
-        get => Parse(Value);
+        get => TimeSlots.Parse(Value);
         set => Value = value is { } time ? DateSegments.ToIso(new DateFieldValues { Hour = time.Hour, Minute = time.Minute, Second = time.Second }, Fields) : null;
     }
 
@@ -65,10 +64,7 @@ public class TimeFieldControl : SegmentedFieldControl
         _ => DateFieldGranularity.Minute,
     }, time: true);
 
-    static TimeOnly? Parse(string? iso) =>
-        iso is not null && TimeOnly.TryParseExact(iso, ["HH:mm", "HH:mm:ss"], CultureInfo.InvariantCulture, DateTimeStyles.None, out var time) ? time : null;
-
     /// <inheritdoc />
     protected override bool IsOutOfRange(string iso) =>
-        Parse(iso) is { } time && (Parse(Min) is { } low && time < low || Parse(Max) is { } high && time > high || IsTimeUnavailable?.Invoke(time) == true);
+        TimeSlots.Parse(iso) is { } time && (TimeSlots.Parse(Min) is { } low && time < low || TimeSlots.Parse(Max) is { } high && time > high || IsTimeUnavailable?.Invoke(time) == true);
 }

@@ -49,6 +49,12 @@ sealed class PickerPopover : IDisposable
     /// <summary>弹层的内容窗口（测试用）。</summary>
     public Form Surface => surface.Form;
 
+    /// <summary>弹层与外壳同宽（时间列表）；默认按内容宽。</summary>
+    public bool MatchWidth { get; init; }
+
+    /// <summary>弹层的内边距，默认 sm（时间列表是 xs）。</summary>
+    public Space Inset { get; init; } = Space.Sm;
+
     /// <summary>按钮的名称与能不能点（不可用、只读时按钮也不可用）。</summary>
     public void Sync(string label, bool editable)
     {
@@ -58,7 +64,7 @@ sealed class PickerPopover : IDisposable
     }
 
     /// <summary>
-    /// 显示弹层：内容（选择器建好的）+ 内边距 space.sm + 描边，贴着外壳（<paramref name="placement"/>，放不下时翻到另一边）；
+    /// 显示弹层：内容（选择器建好的）+ 内边距（<see cref="Inset"/>）+ 描边，贴着外壳（<paramref name="placement"/>，放不下时翻到另一边）；
     /// 显示后焦点交给 <paramref name="focus"/> 给出的控件（日历当前的那一格所在的网格：网格要等显示、建好窗口句柄后才有）。
     /// </summary>
     public void Show(Control content, FloatingPlacement placement, string label, Func<Control?> focus)
@@ -73,10 +79,13 @@ sealed class PickerPopover : IDisposable
         // 内容窗口还没显示，CreateControl 不给看不见的窗口建子控件的句柄，逐个建
         CreateHandles(content);
         var context = ElementContext.Of(owner);
-        var inset = (int)MathF.Round(Tokens.Space.Sm * context.Em) + FloatingSurface.Border(context);
-        var size = content.GetPreferredSize(Size.Empty);
-        content.Bounds = new Rectangle(Point.Empty, size);
+        var inset = (int)MathF.Round((Inset.Factor ?? 0) * context.Em) + FloatingSurface.Border(context);
         var target = owner.RectangleToScreen(owner.ClientRectangle);
+        var width = Math.Max(0, target.Width - 2 * inset);
+        var size = MatchWidth ? content.GetPreferredSize(new Size(width, 0)) with { Width = width } : content.GetPreferredSize(Size.Empty);
+        // 同宽时宽度由外壳定：内容不再按自己想要的大小改回去
+        if (MatchWidth) content.AutoSize = false;
+        content.Bounds = new Rectangle(Point.Empty, size);
         var (_, panel) = FloatingLayout.Position(placement, context.RightToLeft, target, new Size(size.Width + 2 * inset, size.Height + 2 * inset), context.Scale(Offset), Screen.FromControl(owner).WorkingArea);
         surface.Form.AccessibleName = label;
         surface.Show(panel, inset, context, null);
