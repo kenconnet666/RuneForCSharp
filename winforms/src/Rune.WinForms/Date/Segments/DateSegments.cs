@@ -571,7 +571,7 @@ public sealed class DateSegments
         var format = Culture.DateTimeFormat;
         var dates = Fields.Where(field => field is DateSegmentType.Year or DateSegmentType.Month or DateSegmentType.Day).ToHashSet();
         var times = AllFields.Where(field => field is DateSegmentType.Hour or DateSegmentType.Minute or DateSegmentType.Second or DateSegmentType.DayPeriod).ToHashSet();
-        var parts = Pick(Tokens(format.ShortDatePattern), dates);
+        var parts = Pick(Tokens(DatePattern(format, dates)), dates);
         if (times.Count > 0)
         {
             var time = Tokens(format.LongTimePattern);
@@ -587,11 +587,22 @@ public sealed class DateSegments
         return parts;
     }
 
-    /// <summary>只留下要的段与它们之间的分隔符：跳过的段连同它前面的分隔符一起去掉；结尾不是空白的分隔符（"2026年10月"的"月"）留着。</summary>
+    /// <summary>
+    /// 只有年、年月时用区域的年月格式（zh-CN 是 yyyy年M月：显示成"2026年10月""2026年"，同 Intl）；年月格式写的是月份名（en-US 的 MMMM yyyy）时
+    /// 用短日期格式去掉日（10/2026）。有日时用短日期格式。
+    /// </summary>
+    static string DatePattern(DateTimeFormatInfo format, HashSet<DateSegmentType> dates) =>
+        dates.Contains(DateSegmentType.Day) || format.YearMonthPattern.Contains("MMM", StringComparison.Ordinal) ? format.ShortDatePattern : format.YearMonthPattern;
+
+    /// <summary>
+    /// 只留下要的段与它们之间的分隔符：跳过的段连同它前面的分隔符一起去掉；分隔符是文字（中文的"年""月"）时它是前一段的单位，前一段留着它就留着；
+    /// 结尾的分隔符跟着最后一段（"2026年10月"的"月"）。
+    /// </summary>
     static List<(DateSegmentType? Type, string Literal)> Pick(List<(DateSegmentType? Type, string Literal)> tokens, HashSet<DateSegmentType> wanted)
     {
         var result = new List<(DateSegmentType? Type, string Literal)>();
         string? pending = null;
+        var lastKept = false;
         foreach (var token in tokens)
         {
             if (token.Type is not { } type)
@@ -601,15 +612,18 @@ public sealed class DateSegments
             }
             if (!wanted.Contains(type))
             {
+                if (lastKept && pending is { } unit && unit.Trim() is { Length: > 0 } word && char.IsLetter(word[0])) result.Add((null, unit));
                 pending = null;
+                lastKept = false;
                 continue;
             }
             if (result.Count > 0 && pending is not null) result.Add((null, pending));
             else if (result.Count == 0 && pending is { } leading && leading.Trim().Length > 0) result.Add((null, leading));
             result.Add((type, ""));
             pending = null;
+            lastKept = true;
         }
-        if (result.Count > 0 && pending is { } trailing && trailing.Trim().Length > 0) result.Add((null, trailing));
+        if (lastKept && pending is { } trailing && trailing.Trim().Length > 0) result.Add((null, trailing));
         return result;
     }
 

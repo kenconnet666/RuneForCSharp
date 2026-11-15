@@ -270,6 +270,20 @@ public class DateSegmentsTests
     }
 
     [Fact]
+    [Upstream("DateField", "zh-CN 的年月：结尾的“月”也是分隔符，要留着")]
+    [Upstream("DateField", "zh-CN 空的年、年月：后面已经跟着“年”“月”时占位是横线，不显示成“年年”")]
+    public void Year_and_month_use_the_year_month_pattern()
+    {
+        DateSegmentType[] month = [DateSegmentType.Year, DateSegmentType.Month];
+        Assert.Equal("2026年10月", new Setup(month, value: new() { Year = 2026, Month = 10 }).Texts);
+        Assert.Equal("––年––月", new Setup(month).Texts);
+        Assert.Equal("––年", new Setup([DateSegmentType.Year]).Texts);
+        Assert.Equal("年/月/日", new Setup().Texts);
+        Assert.Equal("10/2026", new Setup(month, "en-US", value: new() { Year = 2026, Month = 10 }).Texts);
+        Assert.Equal("10/20/2026, 2:30 PM", new Setup([.. Ymd, .. Hm], "en-US", value: new() { Year = 2026, Month = 10, Day = 20, Hour = 14, Minute = 30 }).Texts);
+    }
+
+    [Fact]
     public void Quarter_and_week_follow_the_language_pattern()
     {
         var setup = new Setup([DateSegmentType.Year, DateSegmentType.Quarter], value: new() { Year = 2026, Quarter = 4 });
