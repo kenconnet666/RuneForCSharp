@@ -65,6 +65,8 @@ export const COMPONENT_PROP_RENAMES = {
   // 展开、选中、勾选的是 key 的列表（不是布尔）；isDisabled 是判断节点的函数
   // 数据模板是 ItemTemplate（WinForms 是建控件的 ItemFactory）；方向用平台的 Orientation；可见范围变了是事件
   VirtualList: { items: 'ItemsSource', children: 'ItemTemplate', horizontal: 'Orientation', onRangeChange: 'RangeChanged' },
+  // 完成是事件；镂空的留白叫 SpotlightPadding（控件自己有 Padding）
+  Tour: { onFinish: 'Finished', padding: 'SpotlightPadding' },
   // 看板：放下、弹回、列内排序都是事件；columnHeight 是最大高度
   KanbanBoard: { items: 'ItemsSource', onMove: 'Moved', onReorder: 'Reordered', onReject: 'Rejected', columnHeight: 'ColumnMaxHeight', children: 'ItemTemplate' },
   // 各项是可改的列表，顺序就地改（ObservableCollection 用 Move）
@@ -412,6 +414,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     ScrollArea: { propsScrollbar: '两条滚动条是平台 ScrollViewer 认的固定部件名：样式里用 ScrollAreaParts.VerticalScrollbar、HorizontalScrollbar 选中' },
   },
   WPF: {
+    Tour: Object.fromEntries(['propsSpotlight', 'propsPanel', 'propsCover', 'propsTitle', 'propsContent', 'propsFooter', 'propsProgress', 'propsSkip', 'propsPrevious', 'propsNext']
+      .map((prop) => [prop, '遮罩、卡片、标题、说明、步数与按钮是 Tour 代码组合的，外观跟 token 与 H2、Text、Button 的主题样式：没有部件样式键；下一步先不可用用 CanGoNext'])),
     KanbanBoard: Object.fromEntries(['propsBoard', 'propsColumn', 'propsHeader', 'propsCount', 'propsReason', 'propsList', 'propsEmpty', 'propsCard', 'propsHandle']
       .map((prop) => [prop, '各列（KanbanColumnView）、列头、卡片（KanbanCard）与把手是 KanbanBoard 代码组合的，外观跟 token 与 Badge、ButtonBase 的主题样式：没有部件样式键'])),
     Sortable: Object.fromEntries(['propsItem', 'propsHandle', 'propsContent']
@@ -455,6 +459,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     CommandPalette: Object.fromEntries(['propsInput', 'propsListbox'].map((prop) => [prop, '面板里的搜索框、列表是 CommandPalette 建的，外观跟着 TextField、Listbox 的主题样式；部件样式键只有搜索行'])),
   },
   WinForms: {
+    Tour: Object.fromEntries(['propsSpotlight', 'propsPanel', 'propsCover', 'propsTitle', 'propsContent', 'propsFooter', 'propsProgress', 'propsSkip', 'propsPrevious', 'propsNext']
+      .map((prop) => [prop, '遮罩是分层窗口、卡片是 FloatingSurface，标题、说明、步数与按钮是组合的子控件：没有部件属性记录；下一步先不可用用 CanGoNext'])),
     KanbanBoard: Object.fromEntries(['propsBoard', 'propsColumn', 'propsHeader', 'propsCount', 'propsReason', 'propsList', 'propsEmpty', 'propsCard', 'propsHandle']
       .map((prop) => [prop, '各列、卡片是 KanbanBoardControl 画出来的子控件，列头是 TextControl 与 BadgeControl，把手是 IconButtonControl：没有部件属性记录'])),
     Sortable: Object.fromEntries(['propsItem', 'propsHandle', 'propsContent']

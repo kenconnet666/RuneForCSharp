@@ -1378,6 +1378,13 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### Tour 与 FloatingGeometry（2026-11-15）
+
+- 浮层贴着目标的定位做成孪生文件 FloatingGeometry（上游 floating 的 computePlacement：想要的一侧放不下换对侧，crossAxisFallback 时再试垂直的两侧，都放不下选溢出最少的；只沿对齐方向挪回、离边 8）。WinForms 原来的 FloatingLayout.Position 就是这套逻辑的平台版，改成换算矩形后调它（提示、弹出框、菜单、下拉照旧），整理在同一个提交里。Avalonia、WPF 的浮层仍用平台 Popup 的定位，Tour 的卡片用它。
+- Tour：模态，同各平台的 Dialog（Avalonia、WPF 是盖住窗口客户区的 Popup，WinForms 是半透明的分层窗口加 FloatingSurface，宿主窗体在 Win32 层禁用）。遮罩铺满、目标处挖掉一个 md 圆角的矩形（上游用镂空盒子外一圈巨大的阴影；这里 Avalonia、WPF 用 CombinedGeometry 的 Exclude，WinForms 在位图上用透明色 SourceCopy 填），镂空比目标大 SpotlightPadding（默认 6，上游的 padding）。卡片：surfaceRaised、border 细边、lg 圆角、lg 阴影，宽 min(22em, 窗口宽 − 2em)，四周 lg，封面贴着上、左、右边，标题 H2 md，说明 muted，底栏是步数（sm muted，占满剩下的宽度）与跳过（ghost 中性）、上一步（outline）、下一步 / 完成；卡片在目标的 Placement 一侧（默认下方，离镂空 8，放不下时翻转、再试左右），没有目标时居中。
+- 目标是控件（上游的选择器、元素、函数）：Target 或按需取的 TargetFactory；换步骤时 BringIntoView，窗口排版变化时（Avalonia、WPF 的 LayoutUpdated，WinForms 宿主窗体移动、变大小）镂空与卡片跟着动。IsOpen、Current 在 Avalonia、WPF 默认双向绑定；完成发 Finished，OpenChanged 报告原因（跳过 close、完成 confirm、Esc escape）；上游 propsNext 的 disabled 是 CanGoNext。
+- 打开后的画面（独立的弹出窗口）截图工具截不到，位置与行为由测试核对。
+
 ### KanbanBoard（2026-11-15）
 
 - 建在孪生文件 SortableModel 的分组上（同上游建在 useSortable 上）：列是组，卡片在哪一列由 GetColumn 给；拿起、← / → 换列、↑ / ↓ 调整落点、放下、取消与播报都在模型里，控件只把按键、指针换成模型的调用，按 Active、Target 画。

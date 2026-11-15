@@ -233,7 +233,7 @@ NavBar（root、list、item）补了部件标记。这些组件都还没做，�
 | 0.14.0：焦点环不被裁、space.xxs、部件名 camelCase、图表数据表等 | 已在前几批跟进 | 不涉及 |
 | 新的单元测试（ac894f2c 等）：ButtonBase 的 type、不可用、加载中；Label 的星号与 data-disabled、for 指向一组时聚焦第一个控件；SelectedTags 单独用时对读屏隐藏、移除按钮不进 Tab、数字的 maxTagCount；Tooltip 的描述、延时、Esc、触屏不显示 | 行为对照多了 10 条没对上（203 条、65 条），多数是我们已有的行为没标记，Label 的“一组”与 SelectedTags 单独使用要先核对 | 并进行为对照的整理：逐条对上已有测试、补测试或登记不适用 |
 | Timeline、Stat、CodeBlock、Tour 成为配方组件（components.Xxx 设默认值、按部件追加样式）；CodeBlock 部件标记 header、title、body、pre、code、line、lineNumber；CodeBlockOptions：wrap、copyable、lineNumbers、maxLines、flush | 我们 CodeBlock 的部件名本来就是这些；Avalonia、WPF 的默认值用平台样式就能设 | 已做（锁定跟到 56e28b39）：WinForms 加 CodeBlockDefaults（Wrap、Copyable、LineNumbers、MaxLines、Flush），CodeBlockControl 跟着作用域变 |
-| Stat 的部件标记、TimelineOptions、StatOptions、TourOptions | Timeline 已做，其余还没做 | TimelineOptions 在 Avalonia、WPF 是平台样式的 Setter，WinForms 是 TimelineDefaults；其余做时照新的 |
+| Stat 的部件标记、TimelineOptions、StatOptions、TourOptions | Timeline、Tour 已做（Tour 2026-11-15：TourOptions 的 padding 是 SpotlightPadding，Avalonia、WPF 用平台样式的 Setter 设默认值），其余还没做 | TimelineOptions 在 Avalonia、WPF 是平台样式的 Setter，WinForms 是 TimelineDefaults；其余做时照新的 |
 
 ### 第十九批（2026-11-08 通知，master 5cbdd9cd..ffc6d190，0.14.0 之后）
 
@@ -475,7 +475,7 @@ defineTheme / defineLang 忽略 undefined——网页专用或 C# 没有 undefin
 
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
-| 浮层定位改成自己的纯函数 computePlacement（去掉 @floating-ui/dom）：想要的一侧放不下换对侧，都放不下选空间大的一侧，再沿对齐方向挪回视口；坐标对齐设备像素；箭头对准锚点中心 | WinForms 已改；Avalonia、WPF 交给平台弹出层 | WinForms 的 FloatingLayout 原来两侧都放不下时留在原侧，改成选溢出少的一侧；上游 floating.test.ts 的位置、镜像、翻转、挪回、可见区域几条移植成 FloatingLayoutTests（坐标本来就是整像素，箭头本来就对准触发器中心）。Avalonia 的弹出层按平台的约束调整（翻转不行时回到原侧再缩小），WPF 的自定义位置给两个候选由平台挑；两侧都放不下的少见情形与上游不同，等做 Tour（crossAxisFallback）时一起换成自己算 |
+| 浮层定位改成自己的纯函数 computePlacement（去掉 @floating-ui/dom）：想要的一侧放不下换对侧，都放不下选空间大的一侧，再沿对齐方向挪回视口；坐标对齐设备像素；箭头对准锚点中心 | WinForms 已改；Avalonia、WPF 交给平台弹出层 | WinForms 的 FloatingLayout 原来两侧都放不下时留在原侧，改成选溢出少的一侧；上游 floating.test.ts 的位置、镜像、翻转、挪回、可见区域几条移植成 FloatingLayoutTests（坐标本来就是整像素，箭头本来就对准触发器中心）。Avalonia 的弹出层按平台的约束调整（翻转不行时回到原侧再缩小），WPF 的自定义位置给两个候选由平台挑；两侧都放不下的少见情形与上游不同。2026-11-15 做 Tour 时把这套计算做成孪生文件 FloatingGeometry（加上 crossAxisFallback），WinForms 的 FloatingLayout 改成调它，三个平台的 Tour 卡片都用它；Avalonia、WPF 的其他浮层仍交给平台 |
 | autoUpdate：滚动、视口、锚点与浮层的尺寸、锚点位移都重新定位 | 平台的弹出层各自跟随 | 不涉及：Avalonia、WPF 的 Popup 跟着目标；WinForms 的浮层监听宿主窗体的移动、缩放 |
 | 新增 NativeSelect（原生 select 套输入框外壳：items 同 Select 的选项，group → optgroup，placeholder 是第一条占位项，readonly 时其余选项不可选） | 已做 | ROADMAP 决定 28：Avalonia、WPF 继承平台的 ComboBox、换上我们的外壳；WinForms 继承 Win32 ComboBox（系统画的列表与外框）。items 是 Options，_value 是 Value（双向绑定），分组插不能选的组标题 |
 | Video 的 controls="custom"：播放/暂停、时间与进度、静音与音量、字幕菜单、倍速菜单（speeds，默认 0.5–2）、全屏；播放中鼠标离开或 2.5 秒不动收起，键盘 Space/K、←→、↑↓、M、F；语言包 12 条 video* | 已做 | 我们的 Video 是网页内核里的页面（孪生文件 VideoPage），自绘控制条也画在页面里（HTML、CSS、脚本）：ShowControls 换成 ControlBar（Native、Custom、None），Speeds 是倍速选项；颜色取主题（onScrim、scrimStrong、surfaceRaised……）、文案取语言包、图标取 Lucide 的路径，页面加载时定下来。脚本挂上就按 video 的现状同步一次（上游 be10b748 修的预渲染页面时长显示 0:00，同一个坑）。滑块是页面里的 range（控制条在网页内核里，用不上 2026-11-15 做的 Slider），菜单是页面里的列表（键盘 ↑↓、Home / End、Enter、Esc）；全屏是页面元素的全屏，只铺满网页内核。Figure 页加了 player 示例；部件属性（propsControls 等）不移植 |
