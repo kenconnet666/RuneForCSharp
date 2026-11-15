@@ -2,13 +2,15 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Rune.WinForms.Examples;
 
-/// <summary>Form 的示例（vue-tsx-pro 文档站 form/Form）。WinForms 里是 FormControl、FieldControl。错误汇总、分组、数组字段、按模型生成的表单还没做。</summary>
+/// <summary>Form 的示例（vue-tsx-pro 文档站 form/Form）。WinForms 里是 FormControl、FieldControl。数组字段、按模型生成的表单、分节目录还没做；错误汇总的 admission 要用日期字段。</summary>
 static class FormExamples
 {
     public static Example[] All =>
     [
         new("Form", "signup", "注册：校验与异步校验", "FieldControl 写 Path、里面只放控件：值自动双向绑定，错误取自 FormController，失焦或提交过之后才显示；必填星号、最大长度、年龄的范围来自模型上的特性。用户名另有异步校验（防抖、只采用最后一次结果，提交时等它完成）。单行输入框里按回车提交，没通过时焦点移到第一个出错的字段。", Signup),
         new("Form", "layout", "标签在左侧、整组只读", "标签放在起始边在 FormControl 上统一设置：标签一列右对齐、控件一列，按第一行文字的基线对齐。IsReadOnly、Enabled 写在 FormControl 上，所有字段与控件（含勾选、开关、分段）一起只读或不可用。", Layout),
+        new("Form", "section-review", "审批时整组只读", "申请内容整组只读（IsReadOnly 写在 FormSectionControl 上），只有最后一组“审批意见”能填；标签放在起始边，两组用同一个宽度。分组有标题栏与细线，读屏是以标题为名称的一组。", SectionReview),
+        new("Form", "section-collapsible", "可收起的分组、标题栏的操作", "不常填的“高级选项”默认收起（IsCollapsible，标题是按钮，变了发 OpenChanged），两列、每列至少 14em；标题栏结束边放这一组的操作（添加一行）。重复的行只在第一行显示列名，其余行 IsLabelHidden（读屏照样念）。", SectionCollapsible),
     ];
 
     public sealed class Account
@@ -127,5 +129,93 @@ static class FormExamples
             form.Enabled = mode.Value != "disabled";
         };
         return Build.Card(new CardControl { Width = 640, Header = "项目基本信息", Extra = mode }, form);
+    }
+
+    static Control SectionReview()
+    {
+        const int labelWidth = 91;
+        var decision = new RadioGroupControl { Orientation = Orientation.Horizontal };
+        decision.Controls.AddRange([
+            new RadioControl { Value = "approve", Text = "同意" },
+            new RadioControl { Value = "return", Text = "退回修改" },
+            new RadioControl { Value = "reject", Text = "不同意" },
+        ]);
+        var noteField = new FieldControl { Label = "意见", IsRequired = true, Content = new TextareaControl { Rows = 3, PlaceholderText = "退回、不同意时写明原因" } };
+        var submit = new ButtonControl { Text = "提交", Enabled = false };
+        decision.ValueChanged += (_, _) =>
+        {
+            noteField.IsRequired = decision.Value != "approve";
+            submit.Enabled = decision.Value is not null;
+        };
+        var request = new FormSectionControl { Title = "申请内容", Description = "由申请人填写，审批时只读", IsReadOnly = true, LabelPlacement = FieldLabelPlacement.Start, LabelWidth = labelWidth };
+        request.Fields.AddRange([
+            new FieldControl { Label = "项目", Content = new TextFieldControl { Value = "显示器支架合并为一体成型" } },
+            new FieldControl { Label = "编号", Content = new TextFieldControl { Value = "PO-2026-0187" } },
+            new FieldControl { Label = "预计年节省", Content = new NumberFieldControl { Value = 174752, Suffix = "元" } },
+            new FieldControl { Label = "说明", Content = new TextareaControl { Text = "两件合并为一件，减少紧固件 36 个，单件减重 0.4 kg。", Rows = 2 } },
+        ]);
+        var review = new FormSectionControl { Title = "审批意见", LabelPlacement = FieldLabelPlacement.Start, LabelWidth = labelWidth };
+        review.Fields.AddRange([new FieldControl { Label = "结论", IsRequired = true, Content = decision }, noteField]);
+        return Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Lg, Align = FlexAlign.Stretch },
+            request, review, Build.Flex(new FlexControl { Justify = FlexJustify.End }, submit));
+    }
+
+    sealed record Contact(string Name, string Role, string Phone);
+
+    static Control SectionCollapsible()
+    {
+        var contacts = new List<Contact> { new("周岚", "销售经理", "13800001234"), new("陈默", "质量工程师", "13900005678") };
+        var add = new ButtonControl { TextSize = TextSize.Sm, Variant = ButtonVariant.Soft, Icon = Lucide.Plus, Text = "添加联系人" };
+        var people = new FormSectionControl { Title = "联系人", Extra = add };
+        void Rebuild()
+        {
+            people.Description = $"{contacts.Count} 位，至少保留一位";
+            foreach (var row in people.Fields.Cast<Control>().ToList()) row.Dispose();
+            for (var index = 0; index < contacts.Count; index++)
+            {
+                var at = index;
+                var contact = contacts[index];
+                var remove = new IconButtonControl { Icon = Lucide.Trash, Variant = ButtonVariant.Ghost, Tone = StatusTone.Neutral, Enabled = contacts.Count > 1, AccessibleName = $"删除第 {index + 1} 位联系人" };
+                remove.Click += (_, _) =>
+                {
+                    contacts.RemoveAt(at);
+                    Rebuild();
+                };
+                var row = new FlexControl { Align = FlexAlign.End, Gap = Space.Sm, AutoSize = true };
+                FieldControl Cell(string label, string value)
+                {
+                    var field = new FieldControl { Label = label, IsLabelHidden = at > 0, Content = new TextFieldControl { Value = value } };
+                    row.SetGrow(field, true);
+                    return field;
+                }
+                row.Controls.AddRange([Cell("姓名", contact.Name), Cell("职务", contact.Role), Cell("手机", contact.Phone), remove]);
+                people.Fields.Add(row);
+            }
+        }
+        add.Click += (_, _) =>
+        {
+            contacts.Add(new Contact("", "", ""));
+            Rebuild();
+        };
+        Rebuild();
+
+        var notify = new SwitchControl { Text = "通知联系人", IsChecked = true };
+        var channel = new SelectControl
+        {
+            ItemsSource = new[] { new ListboxOption("email", "邮件"), new ListboxOption("sms", "短信"), new ListboxOption("portal", "供应商门户站内信") },
+            Value = "email",
+        };
+        notify.IsCheckedChanged += (_, _) => channel.Enabled = notify.IsChecked;
+        var advanced = new FormSectionControl
+        {
+            Title = "高级选项",
+            Description = "通知方式、对接系统；不填时按默认",
+            IsCollapsible = true,
+            IsOpen = false,
+            Columns = 2,
+            MinColumnWidth = new Length("14em"),
+        };
+        advanced.Fields.AddRange([new FieldControl { Label = "状态变更时通知", Content = notify }, new FieldControl { Label = "通知方式", Content = channel }]);
+        return Build.Flex(new FlexControl { Direction = FlexDirection.Column, Gap = Space.Lg, Align = FlexAlign.Stretch }, people, advanced);
     }
 }

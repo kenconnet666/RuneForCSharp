@@ -84,6 +84,16 @@ public class GridControl : Panel, IExtenderProvider
     /// <summary>现在实际有几列（排过之后）。</summary>
     internal int ColumnCount { get; private set; } = 1;
 
+    /// <summary>按最小宽度分列时保留空列（auto-fill，项少时不拉宽；表单分组）；默认收起（auto-fit）。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    internal bool AutoFill { get; set { field = value; PerformLayout(); } }
+
+    /// <summary>按最小宽度分列时最多几列（表单分组的 columns：最多几列，窄时减少）。</summary>
+    [Browsable(false)]
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    internal int? MaxColumns { get; set { field = value; PerformLayout(); } }
+
     /// <inheritdoc />
     public override LayoutEngine LayoutEngine => engine;
 
@@ -193,11 +203,12 @@ public class GridControl : Panel, IExtenderProvider
             var scale = owner.DeviceDpi / 96d;
             var min = owner.MinItemWidth?.Pixels(Em / scale) * scale;
             var columns = GridLayout.Columns(width, gaps.Column, owner.Columns, min, items.Count, owner.Balanced);
+            if (owner.MaxColumns is { } most) columns = Math.Min(columns, most);
             var columnFlow = owner.Flow.Value is "column" or "column dense";
             var dense = owner.Flow.Value is "row dense" or "column dense";
             var cells = GridLayout.Place(items, columns, columnFlow, dense);
             // auto-fit：项目比放得下的列数少时，空列收起
-            if (min is not null && !double.IsInfinity(width) && GridLayout.UsedColumns(cells) is var used && used < columns)
+            if (min is not null && !owner.AutoFill && !double.IsInfinity(width) && GridLayout.UsedColumns(cells) is var used && used < columns)
                 cells = GridLayout.Place(items, columns = used, columnFlow, dense);
             owner.ColumnCount = Math.Max(columns, GridLayout.UsedColumns(cells));
             var natural = children.Select((child, i) => ((child.AutoSize ? child.GetPreferredSize(Size.Empty).Width : child.Width) - (cells[i].Span - 1) * gaps.Column) / cells[i].Span).DefaultIfEmpty().Max();

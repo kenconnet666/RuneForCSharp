@@ -1402,6 +1402,14 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 外观：dangerSoft 底、dangerBorder 细边、md 圆角、四周 md、行距 sm；标题是警示图标加文字（medium、dangerText），列表是 List。Avalonia 是 Border（样式在 FormErrorSummary.axaml），WPF 是 Border（圆角、内边距按字号在代码里算，样式在 FormErrorSummary.xaml），WinForms 是自己画底与边的 FlexControl。WinForms 的字段与汇总都实现 IFormPart，FormControl 换控制器、加进子控件时一起接上。
 - 上游的 admission 示例要用日期字段（DateField 还没做），示例等日期组件做了再补。
 
+### FormSection（2026-11-15）
+
+- 标题栏（标题或展开按钮、说明，结束边的操作；下面一条 borderMuted 细线、下边距 sm）加字段的栅格，行距 lg、列距 xl。Columns 是"最多几列"：栅格按 MinColumnWidth（默认 26em）分列、不超过 Columns，并保留空列（auto-fill，只有一个字段时也只占一列宽），同上游的 `repeat(auto-fill, minmax(max(min(最小列宽, 100%), 平分宽), 1fr))`。各平台的 Grid 为此加了内部的 MaxColumns（WinForms 另加 AutoFill），公开的 Grid 仍是"同时给 Columns 与 MinItemWidth 时以 MinItemWidth 为准"。
+- 也是一层字段布局：Avalonia、WPF 用 Field 的继承属性（AddOwner），这一组写了的盖过 Form 的；WinForms 新增 IFieldLayout（FormControl、FormSectionControl 都实现），字段沿父链取：标签的三项里层写了的优先，只读只要有一层是 true 就是 true（同上游 provideFieldLayout）。
+- 可折叠：标题换成按钮（Avalonia、WPF 是 ButtonBase，悬停 fill 底；WinForms 是从 Accordion 抽出来的 DisclosureTrigger），读屏带展开状态与标题级别，栅格放进 Collapse。收起时箭头朝行尾（Avalonia、WPF 转 -90°，WinForms 换成 ChevronRight / ChevronLeft）。IsOpen 在 Avalonia、WPF 默认双向绑定，WinForms 发 OpenChanged。
+- 读屏：有标题时是一组（group），名称是标题、帮助文字是说明；没有标题时只是一层栅格，不进读屏的控件树。WinForms 的读屏没有标题级别，HeadingLevel 选标题用哪一级的 H 控件。
+- 上游 id 当锚点、配 TableOfContents 的分节导航，以及 scroll-margin 让开粘性顶栏，是网页的；sections 示例要用 TableOfContents，还没做。
+
 ### Tour 与 FloatingGeometry（2026-11-15）
 
 - 浮层贴着目标的定位做成孪生文件 FloatingGeometry（上游 floating 的 computePlacement：想要的一侧放不下换对侧，crossAxisFallback 时再试垂直的两侧，都放不下选溢出最少的；只沿对齐方向挪回、离边 8）。WinForms 原来的 FloatingLayout.Position 就是这套逻辑的平台版，改成换算矩形后调它（提示、弹出框、菜单、下拉照旧），整理在同一个提交里。Avalonia、WPF 的浮层仍用平台 Popup 的定位，Tour 的卡片用它。

@@ -36,6 +36,10 @@ public class Grid : Panel
     internal static readonly DependencyProperty AutoFillProperty = DependencyProperty.Register(
         "AutoFill", typeof(bool), typeof(Grid), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsMeasure));
 
+    /// <summary>按最小宽度分列时最多几列（表单分组的 columns：最多几列，窄时减少）。</summary>
+    internal static readonly DependencyProperty MaxColumnsProperty = DependencyProperty.Register(
+        "MaxColumns", typeof(int?), typeof(Grid), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsMeasure));
+
     /// <summary>间距档位，对应主题的 space。</summary>
     public static readonly DependencyProperty GapProperty = DependencyProperty.Register(
         nameof(Gap), typeof(Space), typeof(Grid), new FrameworkPropertyMetadata(default(Space), OnGapChanged));
@@ -134,6 +138,7 @@ public class Grid : Panel
         var gaps = Gaps;
         var items = children.Select(ItemOf).ToList();
         var columns = GridLayout.Columns(width, gaps.Column, Columns, MinItemWidth?.Pixels(Em), items.Count, Balanced);
+        if (GetValue(MaxColumnsProperty) is int most) columns = Math.Min(columns, most);
         var columnFlow = Flow.Value is "column" or "column dense";
         var dense = Flow.Value is "row dense" or "column dense";
         cells = GridLayout.Place(items, columns, columnFlow, dense);

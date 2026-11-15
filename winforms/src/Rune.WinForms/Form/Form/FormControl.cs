@@ -17,7 +17,7 @@ namespace Rune.WinForms;
 /// </summary>
 [ToolboxItem(true)]
 [Description("表单：把表单控制器交给里面的字段，提交时校验并聚焦第一个出错的字段。")]
-public class FormControl : Panel
+public class FormControl : Panel, IFieldLayout
 {
     /// <summary>新建：大小跟着内容。</summary>
     public FormControl()
@@ -31,29 +31,29 @@ public class FormControl : Panel
     /// <summary>表单控制器。</summary>
     [Browsable(false)]
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public IFormController? Controller { get; set { field = value; Propagate(fields: true); } }
+    public IFormController? Controller { get; set { field = value; Reconnect(); } }
 
     /// <summary>里面字段的标签放在哪；默认上方。</summary>
     [Category("Layout")]
     [Description("里面字段的标签放在哪：top（默认）、start。")]
-    public FieldLabelPlacement LabelPlacement { get; set { field = value; Propagate(fields: true); } }
+    public FieldLabelPlacement LabelPlacement { get; set { field = value; FieldControl.LayoutChanged(this); } }
 
     /// <summary>里面字段的标签列宽度（设备无关像素）；null 时 8em。</summary>
     [Category("Layout")]
     [Description("里面字段的标签列宽度（设备无关像素）；空着时 8em。")]
     [DefaultValue(null)]
-    public int? LabelWidth { get; set { field = value; Propagate(fields: true); } }
+    public int? LabelWidth { get; set { field = value; FieldControl.LayoutChanged(this); } }
 
     /// <summary>里面字段的标签文字对齐；默认 end。</summary>
     [Category("Layout")]
     [Description("里面字段的标签文字对齐：start、end（默认）。")]
-    public FieldLabelAlign LabelAlign { get; set { field = value; Propagate(fields: true); } }
+    public FieldLabelAlign LabelAlign { get; set { field = value; FieldControl.LayoutChanged(this); } }
 
     /// <summary>整张表单只读（查看详情、审批时）：字段与不在字段里的控件都只读。</summary>
     [Category("Behavior")]
     [Description("整张表单只读：字段与不在字段里的控件都只读。")]
     [DefaultValue(false)]
-    public bool IsReadOnly { get; set { field = value; Propagate(fields: false); } }
+    public bool IsReadOnly { get; set { field = value; FieldControl.LayoutChanged(this); } }
 
     /// <summary>提交（给提交按钮的 Command）。</summary>
     [Browsable(false)]
@@ -122,15 +122,10 @@ public class FormControl : Panel
             foreach (var part in Descendants(added).OfType<IFormPart>()) part.Connect();
     }
 
-    /// <summary>设置变了：字段与错误汇总重新接上（控制器、布局），或字段只同步状态；不在字段里的控件跟上只读。</summary>
-    void Propagate(bool fields)
+    /// <summary>换了控制器：字段与错误汇总重新接上。</summary>
+    void Reconnect()
     {
-        foreach (var control in Descendants(this).Skip(1))
-        {
-            if (fields && control is IFormPart part) part.Connect();
-            else if (control is FieldControl field) field.Sync();
-            else if (control is IFieldControl own && FieldControl.Of(control) is null) own.FieldChanged();
-        }
+        foreach (var part in Descendants(this).OfType<IFormPart>()) part.Connect();
     }
 
     /// <summary>自己和里面的控件，按 Tab 顺序深度优先。</summary>

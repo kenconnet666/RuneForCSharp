@@ -2,6 +2,22 @@ using System.ComponentModel;
 
 namespace Rune.WinForms;
 
+/// <summary>一层字段布局（上游 field-layout）：表单、表单分组统一给里面的字段设标签位置、宽度、对齐与只读；没写的项（null、档位为空）沿用外层。</summary>
+interface IFieldLayout
+{
+    /// <summary>标签放在哪。</summary>
+    FieldLabelPlacement LabelPlacement { get; }
+
+    /// <summary>标签列的宽度（设备无关像素）。</summary>
+    int? LabelWidth { get; }
+
+    /// <summary>标签文字的对齐。</summary>
+    FieldLabelAlign LabelAlign { get; }
+
+    /// <summary>只读。</summary>
+    bool IsReadOnly { get; }
+}
+
 // 字段布局的档位（上游 form/field-layout.ts）。Form、FormSection 统一设置布局时也用它们
 
 /// <summary>标签放在哪（vue-tsx-pro 的 FieldLabelPlacements）。</summary>

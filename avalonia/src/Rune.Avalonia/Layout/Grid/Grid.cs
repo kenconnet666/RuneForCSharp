@@ -112,6 +112,9 @@ public class Grid : Panel
     /// <summary>按最小宽度分列时保留空列（auto-fill，项少时不拉宽；卡片外观的复选组、单选组）；默认收起（auto-fit）。</summary>
     internal bool AutoFill { get; set { field = value; InvalidateMeasure(); } }
 
+    /// <summary>按最小宽度分列时最多几列（表单分组的 columns：最多几列，窄时减少）。</summary>
+    internal int? MaxColumns { get; set { field = value; InvalidateMeasure(); } }
+
     List<Control> Shown() => [.. Children.Where(child => child.IsVisible)];
 
     static GridLayout.Item ItemOf(Control child) => child is GridItem item
@@ -126,6 +129,7 @@ public class Grid : Panel
         var gaps = Gaps;
         var items = children.Select(ItemOf).ToList();
         var columns = GridLayout.Columns(width, gaps.Column, Columns, MinItemWidth?.Pixels(Em), items.Count, Balanced);
+        if (MaxColumns is { } most) columns = Math.Min(columns, most);
         var columnFlow = Flow.Value is "column" or "column dense";
         var dense = Flow.Value is "row dense" or "column dense";
         cells = GridLayout.Place(items, columns, columnFlow, dense);

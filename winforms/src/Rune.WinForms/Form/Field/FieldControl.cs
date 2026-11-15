@@ -160,7 +160,7 @@ public class FieldControl : Panel, IFormPart
     internal bool Required => IsRequired ?? Constraints.Required;
 
     /// <summary>只读：写了 IsReadOnly 按它，否则按所在的表单。</summary>
-    internal bool ReadOnly => IsReadOnly ?? form?.IsReadOnly ?? false;
+    internal bool ReadOnly => IsReadOnly ?? Layouts(this).Any(layout => layout.IsReadOnly);
 
     /// <summary>表单从模型的校验特性推出的约束；不在表单里或没写 Path 时为空。</summary>
     internal FieldConstraints Constraints => Path is { } path && controller is not null ? controller.Constraints(path) : NoConstraints;
@@ -172,11 +172,11 @@ public class FieldControl : Panel, IFormPart
 
     bool ShowsError => HasText(Message) && IsInvalid != false;
 
-    FieldLabelPlacement Placement => LabelPlacement.Value is not null ? LabelPlacement : form?.LabelPlacement ?? default;
+    FieldLabelPlacement Placement => LabelPlacement.Value is not null ? LabelPlacement : Layouts(this).Select(layout => layout.LabelPlacement).FirstOrDefault(placement => placement.Value is not null);
 
-    FieldLabelAlign Align => LabelAlign.Value is not null ? LabelAlign : form?.LabelAlign ?? default;
+    FieldLabelAlign Align => LabelAlign.Value is not null ? LabelAlign : Layouts(this).Select(layout => layout.LabelAlign).FirstOrDefault(align => align.Value is not null);
 
-    int? ColumnWidth => LabelWidth ?? form?.LabelWidth;
+    int? ColumnWidth => LabelWidth ?? Layouts(this).Select(layout => layout.LabelWidth).FirstOrDefault(width => width is not null);
 
     bool Start => Placement == FieldLabelPlacement.Start && !IsLabelHidden;
 
@@ -230,7 +230,36 @@ public class FieldControl : Panel, IFormPart
     }
 
     /// <summary>控件的只读：所在字段的，不在字段里时所在表单的。</summary>
-    internal static bool ReadOnlyOf(Control control) => Of(control)?.ReadOnly ?? FormControl.Of(control)?.IsReadOnly ?? false;
+    internal static bool ReadOnlyOf(Control control) => Of(control)?.ReadOnly ?? Layouts(control).Any(layout => layout.IsReadOnly);
+
+    /// <summary>
+    /// 控件外面一层层的字段布局（表单分组、表单），由里到外。标签的三项里层写了的优先；只读只要有一层是 true 就是 true（同上游 field-layout）。
+    /// </summary>
+    static IEnumerable<IFieldLayout> Layouts(Control control)
+    {
+        for (var node = control.Parent; node is not null; node = node.Parent)
+            if (node is IFieldLayout layout) yield return layout;
+    }
+
+    /// <summary>一层字段布局（表单、表单分组）改了：里面的字段重新排，不在字段里的控件跟上只读。</summary>
+    /// <param name="root">改了布局的那一层。</param>
+    internal static void LayoutChanged(Control root)
+    {
+        foreach (var control in Descendants(root))
+        {
+            if (control is FieldControl field) field.Sync();
+            else if (control is IFieldControl own && Of(control) is null) own.FieldChanged();
+        }
+
+        static IEnumerable<Control> Descendants(Control node)
+        {
+            foreach (Control child in node.Controls)
+            {
+                yield return child;
+                foreach (var inner in Descendants(child)) yield return inner;
+            }
+        }
+    }
 
     /// <summary>控件所在字段的约束（输入框的最大长度、数字字段的范围）；不在字段里时为空。</summary>
     internal static FieldConstraints ConstraintsOf(Control control) => Of(control)?.Constraints ?? NoConstraints;

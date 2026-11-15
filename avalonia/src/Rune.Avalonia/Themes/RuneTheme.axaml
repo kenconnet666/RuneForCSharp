@@ -79,6 +79,7 @@
   <StyleInclude Source="avares://Rune.Avalonia/Input/Radio/RadioParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Form/Field/FieldParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Form/ErrorSummary/FormErrorSummary.axaml" />
+  <StyleInclude Source="avares://Rune.Avalonia/Form/Section/FormSection.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Navigation/NavList/NavListParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Navigation/TableOfContents/TableOfContentsParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Navigation/Breadcrumbs/BreadcrumbsParts.axaml" />

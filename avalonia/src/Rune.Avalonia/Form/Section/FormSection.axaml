@@ -1,0 +1,30 @@
+<!--
+  FormSection 的默认外观（vue-tsx-pro 的 formSectionStyles）：标题栏下面一条 xs 宽的 borderMuted 细线、下边距 sm；
+  标题 md 字号、medium 字重、行高 tight、正文色；可折叠时标题是按钮：左右 xs（往外让出 xs，文字仍与字段对齐）、sm 圆角、悬停 fill 底。
+  写成主题里的样式（DESIGN §7 代码组合的控件），使用方的部件样式盖得过
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|FormSection > rune|Flex > Border#PART_Header">
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderMuted}" />
+    <Setter Property="Padding" Value="{rune:Em 0, 0, 0, 0.5}" />
+  </Style>
+  <!-- 字号、字重写在 Text 的档位上（Text 按档位设字号，盖过外面继承的） -->
+  <Style Selector="rune|FormSection rune|Text#PART_Heading, rune|FormSection rune|ButtonBase#PART_Trigger rune|Text">
+    <Setter Property="Size" Value="md" />
+    <Setter Property="Weight" Value="medium" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <Setter Property="rune:Leading.Factor" Value="{DynamicResource Rune.LineHeight.Tight}" />
+  </Style>
+  <Style Selector="rune|FormSection rune|ButtonBase#PART_Trigger">
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="Padding" Value="{rune:Em 0.25, 0}" />
+    <Setter Property="Margin" Value="{rune:Em -0.25, 0}" />
+    <Setter Property="CornerRadius" Value="{rune:Em Resource=Rune.Radius.Sm}" />
+  </Style>
+  <Style Selector="rune|FormSection rune|ButtonBase#PART_Trigger:pointerover">
+    <Setter Property="Background" Value="{DynamicResource Rune.Brush.Fill}" />
+  </Style>
+</Styles>

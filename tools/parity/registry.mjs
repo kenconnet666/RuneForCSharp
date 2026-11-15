@@ -35,6 +35,7 @@ export const COMPONENT_PROP_RENAMES = {
   Icon: { icon: 'Data' },
   // 控件都有 Name（元素名）：字段路径叫 Path；valueProp 是要绑定的控件属性名
   Field: { name: 'Path', valueProp: 'BoundProperty' },
+  FormSection: { collapsible: 'IsCollapsible' },
   // 多行文本框的值是平台 TextBox 的 Text（TextField 有 format，值另是 Value：有格式时是去掉分隔的原文）
   Textarea: { _value: 'Text' },
   // 数据是平台的 ItemsSource；点选是事件
@@ -461,6 +462,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     CommandPalette: Object.fromEntries(['propsInput', 'propsListbox'].map((prop) => [prop, '面板里的搜索框、列表是 CommandPalette 建的，外观跟着 TextField、Listbox 的主题样式；部件样式键只有搜索行'])),
   },
   WinForms: {
+    FormSection: Object.fromEntries(['propsHeader', 'propsHeading', 'propsTrigger', 'propsChevron', 'propsDescription', 'propsExtra', 'propsBody', 'propsCollapse']
+      .map((prop) => [prop, '标题栏、标题、展开按钮、说明、操作区、栅格与展开收起层是 FormSectionControl 组合的子控件：没有部件属性记录，外观跟主题；栅格是 Grid 属性'])),
     FormErrorSummary: Object.fromEntries(['propsTitle', 'propsList', 'propsLink']
       .map((prop) => [prop, '标题、列表与每项的链接是 FormErrorSummaryControl 组合的 FlexControl、UnorderedListControl、LinkControl：没有部件属性记录，外观跟主题'])),
     Field: Object.fromEntries(['propsLabel', 'propsControl']

@@ -4,13 +4,15 @@ using System.Windows.Controls;
 
 namespace Rune.Wpf.Examples;
 
-/// <summary>Form 的示例（vue-tsx-pro 文档站 form/Form）。错误汇总、分组、数组字段、按模型生成的表单还没做。</summary>
+/// <summary>Form 的示例（vue-tsx-pro 文档站 form/Form）。数组字段、按模型生成的表单、分节目录还没做；错误汇总的 admission 要用日期字段。</summary>
 static class FormExamples
 {
     public static Example[] All =>
     [
         new("Form", "signup", "注册：校验与异步校验", "Field 写 Path、里面只放控件：值自动双向绑定，错误取自 FormController，失焦或提交过之后才显示；必填星号、最大长度、年龄的范围来自模型上的特性。用户名另有异步校验（防抖、只采用最后一次结果，提交时等它完成）。单行输入框里按回车提交，没通过时焦点移到第一个出错的字段。", Signup),
         new("Form", "layout", "标签在左侧、整组只读", "标签放在起始边在 Form 上统一设置：标签一列右对齐、控件一列，按第一行文字的基线对齐。IsReadOnly、IsEnabled 写在 Form 上，所有字段与控件（含勾选、开关、分段）一起只读或不可用。", Layout),
+        new("Form", "section-review", "审批时整组只读", "申请内容整组只读（IsReadOnly 写在 FormSection 上），只有最后一组“审批意见”能填；标签放在起始边，两组用同一个宽度。分组有标题栏与细线，读屏是以标题为名称的一组。", SectionReview),
+        new("Form", "section-collapsible", "可收起的分组、标题栏的操作", "不常填的“高级选项”默认收起（IsCollapsible，标题是按钮，IsOpen 双向绑定），两列、每列至少 14em；标题栏结束边放这一组的操作（添加一行）。重复的行只在第一行显示列名，其余行 IsLabelHidden（读屏照样念）。", SectionCollapsible),
     ];
 
     public sealed class Account
@@ -156,5 +158,126 @@ static class FormExamples
             Children = { new Strong { Text = "项目基本信息" }, mode },
         };
         return new Card { MaxWidth = 640, HorizontalAlignment = HorizontalAlignment.Left, Header = header, Content = form };
+    }
+
+    static FrameworkElement SectionReview()
+    {
+        const double labelWidth = 6.5 * 14;
+        var decision = new RadioGroup { Orientation = Orientation.Horizontal };
+        decision.Items.Add(new Radio { Value = "approve", Content = "同意" });
+        decision.Items.Add(new Radio { Value = "return", Content = "退回修改" });
+        decision.Items.Add(new Radio { Value = "reject", Content = "不同意" });
+        var noteField = new Field { Label = "意见", IsRequired = true, Content = new Textarea { Rows = 3, PlaceholderText = "退回、不同意时写明原因" } };
+        var submit = new Button { Content = "提交", IsEnabled = false };
+        System.ComponentModel.DependencyPropertyDescriptor.FromProperty(RadioGroup.ValueProperty, typeof(RadioGroup)).AddValueChanged(decision, (_, _) =>
+        {
+            noteField.IsRequired = decision.Value != "approve";
+            submit.IsEnabled = decision.Value is not null;
+        });
+        return new Flex
+        {
+            Direction = FlexDirection.Column,
+            Gap = Space.Lg,
+            Children =
+            {
+                new FormSection
+                {
+                    Title = "申请内容",
+                    Description = "由申请人填写，审批时只读",
+                    IsReadOnly = true,
+                    LabelPlacement = FieldLabelPlacement.Start,
+                    LabelWidth = labelWidth,
+                    Children =
+                    {
+                        new Field { Label = "项目", Content = new TextField { Value = "显示器支架合并为一体成型" } },
+                        new Field { Label = "编号", Content = new TextField { Value = "PO-2026-0187" } },
+                        new Field { Label = "预计年节省", Content = new NumberField { Value = 174752, Suffix = "元" } },
+                        new Field { Label = "说明", Content = new Textarea { Text = "两件合并为一件，减少紧固件 36 个，单件减重 0.4 kg。", Rows = 2 } },
+                    },
+                },
+                new FormSection
+                {
+                    Title = "审批意见",
+                    LabelPlacement = FieldLabelPlacement.Start,
+                    LabelWidth = labelWidth,
+                    Children = { new Field { Label = "结论", IsRequired = true, Content = decision }, noteField },
+                },
+                new Flex { Justify = FlexJustify.End, Children = { submit } },
+            },
+        };
+    }
+
+    sealed record Contact(string Name, string Role, string Phone);
+
+    /// <summary>行里的字段平分剩下的宽度（同上游输入框在一行里的宽度）。</summary>
+    static Field Grown(Field field)
+    {
+        Flex.SetGrow(field, true);
+        return field;
+    }
+
+    static FrameworkElement SectionCollapsible()
+    {
+        var contacts = new List<Contact> { new("周岚", "销售经理", "13800001234"), new("陈默", "质量工程师", "13900005678") };
+        var add = new Button { Size = TextSize.Sm, Variant = ButtonVariant.Soft, Icon = Lucide.Plus, Content = "添加联系人" };
+        var people = new FormSection { Title = "联系人", Extra = add };
+        void Rebuild()
+        {
+            people.Description = $"{contacts.Count} 位，至少保留一位";
+            people.Children.Clear();
+            for (var index = 0; index < contacts.Count; index++)
+            {
+                var at = index;
+                var contact = contacts[index];
+                var remove = new IconButton { Icon = Lucide.Trash, Variant = ButtonVariant.Ghost, Tone = StatusTone.Neutral, IsEnabled = contacts.Count > 1 };
+                System.Windows.Automation.AutomationProperties.SetName(remove, $"删除第 {index + 1} 位联系人");
+                remove.Click += (_, _) =>
+                {
+                    contacts.RemoveAt(at);
+                    Rebuild();
+                };
+                people.Children.Add(new Flex
+                {
+                    Align = FlexAlign.End,
+                    Gap = Space.Sm,
+                    Children =
+                    {
+                        Grown(new Field { Label = "姓名", IsLabelHidden = index > 0, Content = new TextField { Value = contact.Name } }),
+                        Grown(new Field { Label = "职务", IsLabelHidden = index > 0, Content = new TextField { Value = contact.Role } }),
+                        Grown(new Field { Label = "手机", IsLabelHidden = index > 0, Content = new TextField { Value = contact.Phone } }),
+                        remove,
+                    },
+                });
+            }
+        }
+        add.Click += (_, _) =>
+        {
+            contacts.Add(new Contact("", "", ""));
+            Rebuild();
+        };
+        Rebuild();
+
+        var notify = new Switch { Content = "通知联系人", IsChecked = true };
+        var channel = new Select
+        {
+            ItemsSource = new[] { new ListboxOption("email", "邮件"), new ListboxOption("sms", "短信"), new ListboxOption("portal", "供应商门户站内信") },
+            Value = "email",
+        };
+        System.ComponentModel.DependencyPropertyDescriptor.FromProperty(ChoiceBase.IsCheckedProperty, typeof(Switch)).AddValueChanged(notify, (_, _) => channel.IsEnabled = notify.IsChecked);
+        var advanced = new FormSection
+        {
+            Title = "高级选项",
+            Description = "通知方式、对接系统；不填时按默认",
+            IsCollapsible = true,
+            IsOpen = false,
+            Columns = 2,
+            MinColumnWidth = new Length("14em"),
+            Children =
+            {
+                new Field { Label = "状态变更时通知", Content = notify },
+                new Field { Label = "通知方式", Content = channel },
+            },
+        };
+        return new Flex { Direction = FlexDirection.Column, Gap = Space.Lg, Children = { people, advanced } };
     }
 }
