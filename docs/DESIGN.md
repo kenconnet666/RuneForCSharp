@@ -1464,6 +1464,12 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### NumberRangeField（2026-11-16，仅 Avalonia）
+
+- 两个不带加减按钮的 NumberField 中间一个"–"（Separator，textMuted，读屏跳过），两个框平分宽度。值是 NumberRange(Start, End)（两端 decimal?，默认双向绑定）；改一端时两端都有值且起比止大就对调（NumberRange.With），不报错。Min、Max、Step、Format、Prefix、Suffix 与外观（Variant、Size、Radius）在两个框上同步；上游的 placeholder 二元数组拆成 StartPlaceholder、EndPlaceholder，不写时是语言包的"最小值""最大值"。
+- 接 Field：区间自己实现 IFieldControl，Field 认领的是它（标签点击聚焦组里第一个框；Field 往里找控件时遇到它就停，不再往里认领两个框）。这一组是读屏的 Group，名称是字段的标签、帮助文字是字段的说明与错误；只有第一个框跟着必填，两个框各自念"最小值""最大值"，第二个框的帮助文字只有自己的占位（上游"控件里再嵌的控件不接 Field"）。出错、只读两个框各自跟着所在的 Field。
+- 示例：NumberField 页的 range（同上游的三个）。
+
 ### ColorSwatch（2026-11-16，仅 Avalonia）
 
 - 色块、名称、取值竖排（隔 xs）。Color 是画刷：上游的主题 token（colors.accent）在这里是 DynamicResource 绑的画刷资源，换主题时画刷换掉，取值跟着变，不用像上游那样挂载后从元素上读。取值不写时显示颜色本身（#rrggbb，不透明度不满时 #rrggbbaa，按画刷的 Opacity 折算）；上游的 value={false} 是 ShowValue = false。
