@@ -72,6 +72,8 @@ export const COMPONENT_PROP_RENAMES = {
   VirtualList: { items: 'ItemsSource', children: 'ItemTemplate', horizontal: 'Orientation', onRangeChange: 'RangeChanged' },
   // 完成是事件；镂空的留白叫 SpotlightPadding（控件自己有 Padding）
   Tour: { onFinish: 'Finished', padding: 'SpotlightPadding' },
+  // 平台的 MinHeight 是像素数；占满到底边的最小高度是能写 24rem 的 Length
+  ViewportFill: { minHeight: 'MinFillHeight' },
   // 月历看板：数据是 ItemsSource；一条的显示是数据模板，格子里加的内容是按日期与状态返回控件的函数
   CalendarBoard: { events: 'ItemsSource', renderEvent: 'EventTemplate', renderDay: 'DayContent' },
   // 看板：放下、弹回、列内排序都是事件；columnHeight 是最大高度
