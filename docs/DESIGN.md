@@ -1378,6 +1378,12 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### Affix（2026-11-15）
+
+- 桌面没有 CSS 的 position: sticky。Avalonia、WPF 照 sticky 的语义做：不脱离排版，所在的 ScrollViewer（Target，不写时是外层最近的）滚动、排版变了时算原来的位置，滚过 OffsetTop（或贴底时的 OffsetBottom）就用 RenderTransform 的位移钉在滚动区域里，位移不超出父元素的范围（父元素滚出去时跟着走）；钉着时 ZIndex 抬到兄弟元素上面（后面的兄弟会盖住它）。阴影 md 画在包着内容的那一层（Avalonia 的 PART_Root 的 BoxShadow，WPF 的 Effect）。
+- WinForms 的控件不能画到自己外面：贴住时把内容挪到 ScrollAreaControl 上面一层、按同样的规则摆，固钉自己按内容的大小留着空位，离开时内容回到原位（同 Ant Design 的 fixed 加占位）。外层的滚动区域可能后来才套上，建句柄时再找一次；画不出阴影。
+- 上游的 onChange(stuck) 叫 StuckChanged，状态是 IsStuck；没有哨兵：贴住与否就是位移是不是 0。
+
 ### FloatButton、FloatButtonGroup、BackTop（2026-11-15）
 
 - 桌面上没有 position: fixed：单独用的浮动按钮（组）靠所在面板的结束边与底部、外边距 lg。Avalonia 是默认样式的对齐与外边距（em），WPF 在没写对齐、外边距时代码里设，WinForms 的 FloatCorner 跟着父控件变大小摆到客户区角落并放到最上层；放在盖住页面的 Panel / Grid（WinForms 的父控件）里就浮在内容上。组里的按钮跟着组排。

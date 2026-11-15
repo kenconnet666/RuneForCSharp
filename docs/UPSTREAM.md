@@ -444,8 +444,8 @@ defineTheme / defineLang 忽略 undefined——网页专用或 C# 没有 undefin
 |---|---|---|
 | 组件上写错绑定名是类型错误：PartProps 去掉原生元素专用的 _value、_checked、_files、_open（之前 `<Switch _value>` 能过类型检查，开关却不跟状态走） | 不涉及 | C# 的组件只有自己声明的属性，写错名字本来就编译不过；Switch、Checkbox 的值是 IsChecked，没有 Value |
 | Video controls="custom" 认不知道时长的视频（直播、边录边播）：时间只显示已播多久，进度条不可用，方向键不把进度跳回开头；有回看范围时取它的末尾当时长 | 已改 | 孪生文件 VideoPage 的脚本照做（duration() 取 seekable 的末尾，时长为 0 时不跳、只显示已播时间、进度条不可用，播放中每次 timeupdate 重算）；在 WebView2 里把 duration 改成 Infinity 核对过 |
-| Affix 的根元素补上部件标记 | 组件还没做 | 做时照新的 |
-| 文档：Combobox"表单提交与自定义匹配"、Cascader"显示、搜索的匹配与状态"、TagsInput 状态示例补 acceptOnBlur / radius / name、Affix"贴在底部的提交栏" | TagsInput、Combobox 已做（2026-11-15），其余组件还没做 | TagsInput 的状态示例、Combobox 的"表单提交与自定义匹配"照着移植（name 是表单字段名，桌面上不移植：示例改成显示提交的值）；其余做时照着移植 |
+| Affix 的根元素补上部件标记 | 已做（2026-11-15） | Avalonia 的部件名 PART_Root（画阴影的那一层）；WPF、WinForms 没有部件 |
+| 文档：Combobox"表单提交与自定义匹配"、Cascader"显示、搜索的匹配与状态"、TagsInput 状态示例补 acceptOnBlur / radius / name、Affix"贴在底部的提交栏" | TagsInput、Combobox、Affix 已做（2026-11-15），其余组件还没做 | Affix 的两个示例照着移植；TagsInput 的状态示例、Combobox 的"表单提交与自定义匹配"照着移植（name 是表单字段名，桌面上不移植：示例改成显示提交的值）；其余做时照着移植 |
 
 锁定跟到 e380a8e7（CI 绿；0.29.0 的发版提交 0de173eb 只改版本号与变更记录，CI 绿了再跟）：文档页面清单重新生成；token、语言包、图标、配方没变。
 
@@ -457,7 +457,7 @@ defineTheme / defineLang 忽略 undefined——网页专用或 C# 没有 undefin
 | Textarea（连带 Mentions）同时开 clearable 与 showCount 时，清空与计数叠在结束边的同一列（清空在上、计数在下），之前各占一列、清空被挤到计数左边 | 已改 | 三个平台原来也是各占一列：Avalonia、WPF 的模板改成结束边一个三行的 Grid；WinForms 是一个竖排的 FlexControl（中间一段空白撑开，只有一个时清空照样贴顶、字数照样贴底；高度按该显示的部件算，两个都不显示时整列藏起来）。三个平台加了同一列的测试。Mentions 还没做 |
 | StepsForm 的 readonly 是真正的回看（下一步不校验、哪一步都能点、没有提交按钮、回车不提交）；disabled 时各步也能翻看 | 组件还没做 | 做时照新的 |
 | Autocomplete 的类型去掉 empty（没有建议时列表不弹出） | 已做（2026-11-15） | 照新的做：Autocomplete 不用 Empty（空列表不弹出）；WinForms 同样不弹出 |
-| 文档：Autocomplete、Mentions、StepsForm、Affix 的新示例 | Autocomplete 已做（2026-11-15），其余还没做 | Autocomplete 的三个示例照着移植；其余做时照着移植 |
+| 文档：Autocomplete、Mentions、StepsForm、Affix 的新示例 | Autocomplete、Affix 已做（2026-11-15），其余还没做 | Autocomplete 的三个示例、Affix 的两个示例照着移植；其余做时照着移植 |
 
 锁定跟到 0a335a58（0.28.0 之后的 Affix 文档提交，CI 绿）：文档页面清单重新生成；token、语言包、图标、配方没变。
 

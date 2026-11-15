@@ -52,6 +52,8 @@ export const COMPONENT_PROP_RENAMES = {
   ImageGroup: { propsLightbox: 'Lightbox' },
   // tooltip 的 false 是 ShowTip = false；速拨的主按钮直接是 FloatButton 实例
   FloatButton: { tooltip: 'Tip' },
+  // onChange 报告贴住与否：事件叫 StuckChanged，看 IsStuck
+  Affix: { onChange: 'StuckChanged' },
   FloatButtonGroup: { propsTrigger: 'Trigger' },
   UserButton: { name: 'DisplayName', src: 'Source' },
   // 地址给 Uri；加载完的事件不叫 Loaded（那是控件放进界面的事件）
