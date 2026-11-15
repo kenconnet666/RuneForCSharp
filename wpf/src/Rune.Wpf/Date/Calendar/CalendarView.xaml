@@ -1,6 +1,7 @@
 <!--
   CalendarView 的部件样式（vue-tsx-pro 的 calendarRecipe 与 calendarStateStyles）：
-  标题按钮 medium 字重、md 圆角、左右 sm、悬停 fillHover；星期表头 textMuted（上下 xs 在代码里按字号给）；周数 textMuted、右边 xs；
+  标题按钮 medium 字重、md 圆角、左右 sm、悬停 fillHover；星期表头 textMuted（上下 xs 在代码里按字号给）；周数 textMuted（右边 xs 在代码里给）；
+  文字部件直接设前景色：换掉 Text 自己的样式后 Tone 不起作用；
   日期格 md 圆角、数字等宽、悬停 fillHover；补齐的上下月 textMuted；今天 semibold 加 accentBorder 细圈（TS 是内阴影，这里是 1px 描边）；
   区间中间的格透明、accentText 字、悬停 accentSoftHover，底色是格子那一层（CalendarCell.IsInRange）的 accentSoft；
   已选 accent 底、accentContrast 字、悬停 accentHover；不可选的划掉（删除线在代码里加：TextBlock 的 TextDecorations 不继承）；不能选的变淡、鼠标是禁止。使用方同键的样式叠在上面（DESIGN §7）
@@ -17,6 +18,7 @@
     <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
   </Style>
   <Style TargetType="rune:Calendar" BasedOn="{StaticResource {x:Type rune:CalendarView}}" />
+  <Style TargetType="rune:RangeCalendar" BasedOn="{StaticResource {x:Type rune:CalendarView}}" />
 
   <Style x:Key="{x:Static rune:CalendarViewParts.Months}" TargetType="rune:Flex" />
   <Style x:Key="{x:Static rune:CalendarViewParts.Header}" TargetType="Grid" />
@@ -37,11 +39,11 @@
   <Style x:Key="{x:Static rune:CalendarViewParts.Grid}" TargetType="Grid" />
   <Style x:Key="{x:Static rune:CalendarViewParts.PeriodGrid}" TargetType="UniformGrid" />
   <Style x:Key="{x:Static rune:CalendarViewParts.Weekday}" TargetType="rune:Text">
-    <Setter Property="Tone" Value="Muted" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
     <Setter Property="HorizontalAlignment" Value="Center" />
   </Style>
   <Style x:Key="{x:Static rune:CalendarViewParts.WeekNumber}" TargetType="rune:Text">
-    <Setter Property="Tone" Value="Muted" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
     <Setter Property="HorizontalAlignment" Value="Center" />
   </Style>
 

@@ -306,7 +306,7 @@ public class CalendarView : CompositeControl
             grid.Children.Add(child);
         }
         AutomationProperties.SetName(grid, title);
-        if (ShowWeekNumbers) Add(Part(new Text { Name = "PART_WeekNumber", Text = Lang.CalendarWeek, VerticalAlignment = VerticalAlignment.Center }, CalendarViewParts.WeekNumber));
+        if (ShowWeekNumbers) Add(Part(new Text { Name = "PART_WeekNumber", Text = Lang.CalendarWeek, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 0.25 * Em, 0) }, CalendarViewParts.WeekNumber));
         var names = CalendarText.WeekdayNames(culture, first);
         var full = CalendarText.WeekdayNames(culture, first, full: true);
         for (var i = 0; i < 7; i++)
@@ -319,7 +319,7 @@ public class CalendarView : CompositeControl
             if (ShowWeekNumbers)
             {
                 var number = CalendarState.WeekOfYear(week[0], first);
-                var label = Part(new WeekNumberText { Name = "PART_WeekNumber", Text = number.ToString(CultureInfo.InvariantCulture), VerticalAlignment = VerticalAlignment.Center }, CalendarViewParts.WeekNumber);
+                var label = Part(new WeekNumberText { Name = "PART_WeekNumber", Text = number.ToString(CultureInfo.InvariantCulture), VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 0.25 * Em, 0) }, CalendarViewParts.WeekNumber);
                 AutomationProperties.SetName(label, Lang.CalendarWeekNumber(number));
                 Add(label);
             }

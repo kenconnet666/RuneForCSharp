@@ -11,7 +11,7 @@ namespace Rune.Wpf;
 /// </code>
 /// 值是 ISO 日期字符串（2026-10-20，与 DateField、URL 参数一致）；要 DateOnly 时用 <see cref="Date"/>。
 /// 月份名、星期名、读屏念的完整日期按当前语言（<see cref="Provider"/> 的 Lang）生成，一周从哪天开始按语言（可用 FirstDayOfWeek 覆盖）。
-/// 选一个区间用 RangeCalendar；选月份、年份用 Granularity = Month / Year，值是那一段的第一天。
+/// 选一个区间用 <see cref="RangeCalendar"/>；选月份、年份用 Granularity = Month / Year，值是那一段的第一天。
 /// 键盘：←→ 一天、↑↓ 一周，Page Up / Down 一个月、加 Shift 一年，Home / End 到这周两端，Enter / 空格选中。部件见 <see cref="CalendarView"/>。
 /// 与 WPF 自带的 System.Windows.Controls.Calendar 同名：同时引用两个命名空间时写 rune:Calendar。
 /// </summary>
