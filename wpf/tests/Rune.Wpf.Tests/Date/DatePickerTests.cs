@@ -167,7 +167,10 @@ public class DatePickerTests
     {
         var picker = Show(new DatePicker { Granularity = DateFieldGranularity.Minute, Value = "2026-10-01T14:30" });
         Click(picker.Trigger);
-        Click(InPanel<Calendar>(picker).Single().Cells.First(cell => cell.Date == new DateOnly(2026, 10, 9)));
+        // 真实的点击先让格子拿到焦点：关上时焦点在弹层里，推迟的还焦点不能抢回按钮
+        var day = InPanel<Calendar>(picker).Single().Cells.First(cell => cell.Date == new DateOnly(2026, 10, 9));
+        day.Focus();
+        Click(day);
         Assert.Equal("2026-10-09T14:30", picker.Value);
         Assert.False(picker.IsOpen);
         Assert.True(picker.Group!.Boxes.Single(box => box.Type == DateSegmentType.Hour).IsKeyboardFocused);

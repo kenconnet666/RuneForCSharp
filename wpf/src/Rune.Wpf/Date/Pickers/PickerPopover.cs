@@ -30,6 +30,8 @@ sealed class PickerPopover
     readonly Action<bool, OpenChangeReason> toggle;
     FloatingPlacement placement = FloatingPlacement.BottomStart;
     bool focusWasInside;
+    // 选好了时焦点要去的元素（带时间时是"时"那一段）：推迟的还焦点按它，不抢回按钮
+    UIElement? returnTo;
 
     /// <summary>接到选择器上：按钮的点击、弹层的开关与按键、分段里的 Alt + ↓。</summary>
     /// <param name="owner">选择器（输入框外壳就是它，弹层的定位锚点）。</param>
@@ -60,6 +62,7 @@ sealed class PickerPopover
         popup.Opened += (_, _) =>
         {
             focusWasInside = false;
+            returnTo = null;
             owner.Dispatcher.BeginInvoke(shown, DispatcherPriority.Loaded);
         };
         popup.Closed += (_, _) =>
@@ -105,7 +108,7 @@ sealed class PickerPopover
     /// <summary>选好了、关上之后：焦点交给 <paramref name="target"/>（没有时还给按钮）。</summary>
     public void Picked(UIElement? target)
     {
-        focusWasInside = false;
+        returnTo = target;
         (target ?? Button).Focus();
     }
 
@@ -113,8 +116,8 @@ sealed class PickerPopover
     {
         if (!focusWasInside) return;
         focusWasInside = false;
-        // 弹出层关上时 WPF 还要收拾焦点（里面的元素刚被拿掉）：等它收拾完再还给按钮
-        owner.Dispatcher.BeginInvoke(() => Button.Focus(), DispatcherPriority.Input);
+        // 弹出层关上时 WPF 还要收拾焦点（里面的元素刚被拿掉）：等它收拾完再还给按钮（选好了时是选择器指定的元素，Picked 在这之后才调）
+        owner.Dispatcher.BeginInvoke(() => (returnTo ?? Button).Focus(), DispatcherPriority.Input);
     }
 
     /// <summary>贴着外壳的上边或下边，start / end 对齐外壳的两端；放不下时平台换到第二个位置（另一边）。</summary>
