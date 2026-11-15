@@ -1430,6 +1430,16 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 年月、只有年的排法：用区域的年月格式（zh-CN 是"2026年10月""2026年"，同 Intl），年月格式写的是月份名（en-US 的 MMMM yyyy）时用短日期格式去掉日（10/2026）。中文的"年""月"作为前一段的单位跟着它，前一段在就留着。
 - 示例：DateField 的 basic、granularity、locales、appearance，TimeField 的 basic、hour-cycle、states；DateField 的 rules（DateValue 值类型、时区）没有对应。
 
+### Calendar 与 CalendarState（2026-11-15）
+
+- 日期网格的状态是孪生文件 CalendarState（上游 calendar-state）：选项都是 Func（同上游传 getter，状态每次读最新的值），焦点、翻页、视图、区间的锚点与悬停预览、键盘都在里面；三个平台的 Calendar 只负责画与把事件交给它。文字（标题、读屏念的完整日期、星期名）是孪生文件 CalendarText：.NET 的区域格式（ICU）与 Intl 大体一致，最短的星期名就是 Intl 的 narrow，长日期没有星期时补在后面。
+- 状态要等控件进了界面（Avalonia 的 VisualRoot、WPF 的 IsLoaded、WinForms 的窗口句柄）才开始：属性初始化的先后不定，提前开始时焦点会在 DefaultFocused、今天给出之前落到别的日子上。
+- CalendarView 是界面的基类（RangeCalendar、日期选择器的弹层以后共用），Calendar 加单选 / 多选、Min / Max、不可选的日期、Granularity、Picked 事件。值是 ISO 字符串的 Value（多选 Values），另有 DateOnly 的 Date；SelectionMode 不接受 Range（区间用 RangeCalendar）。
+- Avalonia、WPF 每格是一个按钮（CalendarCellButton，只有焦点那一格在 Tab 顺序里，读屏 DataItem，不能选时念不可用），键盘移动、点选后整个网格重建、焦点交给新的焦点格；日期网格是列宽、行高按内容的 Grid（表头行比日期行矮、周数列比日期列窄，同 TS 的 table），月份、年份是三列的 UniformGrid。Avalonia 的状态是伪类（:selected、:middle、:today、:outside、:unavailable、:off、:period），选择器写 `:is(rune|CalendarView)`（类型选择器不匹配派生的 Calendar）；格子大小写在样式里（Width / Height 是 em）。WPF 的状态是只读依赖属性，格子大小是 CalendarCellButton.SizeEm（em 系数，部件样式里改），网格带读屏的表格节点（Panel 本来没有），删除线在代码里加（TextDecorations 不继承）。
+- WinForms 每个月是一张自己画的 CalendarGridControl（只有焦点日期所在的那张在 Tab 顺序里，格子是读屏的子对象，周数是行表头），页头是 IconButtonControl、ButtonControl 子控件；页面没换时只重画格子，换页、换视图才重建。自定义格子是 CellText（文字，也是读屏接在日期后面念的）加 DrawCell 事件（同 ListBox 的 DrawItem），格子大小是 CellSizeEm。
+- 从右往左：Avalonia 整棵子树镜像，翻页箭头的图标设 FlipInRtl；WPF、WinForms 的图标不镜像，箭头按方向换（WinForms 的位置自己镜像）。语言包的 Direction 不会自动换成平台的方向，示例里自己设（Avalonia、WPF 的 FlowDirection，WinForms 的 RightToLeft）。
+- 示例：basic、footer、locales、multiple、multiple-months、prices、sizes、unavailable、views。上游的 components.Calendar 定制（应用里统一显示周数）与 DateValue 值类型没有对应。
+
 ### Tour 与 FloatingGeometry（2026-11-15）
 
 - 浮层贴着目标的定位做成孪生文件 FloatingGeometry（上游 floating 的 computePlacement：想要的一侧放不下换对侧，crossAxisFallback 时再试垂直的两侧，都放不下选溢出最少的；只沿对齐方向挪回、离边 8）。WinForms 原来的 FloatingLayout.Position 就是这套逻辑的平台版，改成换算矩形后调它（提示、弹出框、菜单、下拉照旧），整理在同一个提交里。Avalonia、WPF 的浮层仍用平台 Popup 的定位，Tour 的卡片用它。

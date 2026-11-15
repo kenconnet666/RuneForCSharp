@@ -241,7 +241,7 @@ NavBar（root、list、item）补了部件标记。这些组件都还没做，�
 
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
-| 日历成为配方组件 Calendar（CalendarView、RangeCalendar、日期选择的弹出层、QuarterCalendar 共用）：部件 root、months、month、header、heading、grid、weekday、weekNumber、cell、cellButton、footer；data-scope 统一为 calendar；CalendarOptions（size、showWeekNumbers、fixedWeeks）可按组件设默认值 | 日历还没做 | 做时照新的 |
+| 日历成为配方组件 Calendar（CalendarView、RangeCalendar、日期选择的弹出层、QuarterCalendar 共用）：部件 root、months、month、header、heading、grid、weekday、weekNumber、cell、cellButton、footer；data-scope 统一为 calendar；CalendarOptions（size、showWeekNumbers、fixedWeeks）可按组件设默认值 | Calendar 已做（2026-11-15：Avalonia 的部件名在 CalendarViewParts，WPF 是部件样式键 CalendarViewParts，WinForms 是自己画的网格，没有部件属性；默认值用各平台的样式或属性设，没有 components.Calendar 配方）；RangeCalendar、日期选择的弹出层、QuarterCalendar 还没做 | 做时照新的 |
 | P12 复合组件转发里面基础组件的部件属性：Timeline（propsAvatar、propsPending）、PeoplePickerPanel（propsAvatar、propsCheckbox、propsSelectAll、propsDrill、propsClear、propsRemove）、DataImport（propsTemplate、propsPrevious、propsNext、propsAgain、propsOnlyErrors）；合并顺序 默认 < 使用方 < 组件管的 | 这些组件还没做；合并顺序我们本来如此（DESIGN §7） | 做时照新的；上游的候选清单在 .claude/reports/p12-candidates.md，已做的组件出现在里面时跟进 |
 
 ### 行为对照纳入文档站的浏览器测试（2026-11-15）
@@ -435,7 +435,7 @@ defineTheme / defineLang 忽略 undefined——网页专用或 C# 没有 undefin
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
 | 语言没配 timeZone 时，服务端按 UTC 渲染时刻、挂载后换成浏览器的时区（useFormat 的 date / relative、Countdown、TimelineChart） | 桌面端没有"服务端先渲染、浏览器再接管" | 不用改：一直按本机时区格式化；语言配了 timeZone 的行为本来就一致 |
-| 日历的"今天"按服务端记下的时刻水合、挂载后换成真实的今天（Calendar、RangeCalendar、QuarterCalendar、CalendarBoard） | 日历类还没做 | 做时"今天"直接取本机当前日期，没有水合这一步 |
+| 日历的"今天"按服务端记下的时刻水合、挂载后换成真实的今天（Calendar、RangeCalendar、QuarterCalendar、CalendarBoard） | Calendar 已做（2026-11-15，"今天"取本机当前日期）；RangeCalendar、QuarterCalendar、CalendarBoard 还没做 | 做时"今天"直接取本机当前日期，没有水合这一步 |
 | 新增 useTimeZone()、isServerRendering()、useDateLocale().rootAttrs() | 网页专用 | 不涉及 |
 
 锁定跟到 0.25.0（fffc0c7f）：token、语言包、图标、配方、文档页面清单都没变（生成器 --check 通过）。
@@ -479,7 +479,7 @@ defineTheme / defineLang 忽略 undefined——网页专用或 C# 没有 undefin
 | autoUpdate：滚动、视口、锚点与浮层的尺寸、锚点位移都重新定位 | 平台的弹出层各自跟随 | 不涉及：Avalonia、WPF 的 Popup 跟着目标；WinForms 的浮层监听宿主窗体的移动、缩放 |
 | 新增 NativeSelect（原生 select 套输入框外壳：items 同 Select 的选项，group → optgroup，placeholder 是第一条占位项，readonly 时其余选项不可选） | 已做 | ROADMAP 决定 28：Avalonia、WPF 继承平台的 ComboBox、换上我们的外壳；WinForms 继承 Win32 ComboBox（系统画的列表与外框）。items 是 Options，_value 是 Value（双向绑定），分组插不能选的组标题 |
 | Video 的 controls="custom"：播放/暂停、时间与进度、静音与音量、字幕菜单、倍速菜单（speeds，默认 0.5–2）、全屏；播放中鼠标离开或 2.5 秒不动收起，键盘 Space/K、←→、↑↓、M、F；语言包 12 条 video* | 已做 | 我们的 Video 是网页内核里的页面（孪生文件 VideoPage），自绘控制条也画在页面里（HTML、CSS、脚本）：ShowControls 换成 ControlBar（Native、Custom、None），Speeds 是倍速选项；颜色取主题（onScrim、scrimStrong、surfaceRaised……）、文案取语言包、图标取 Lucide 的路径，页面加载时定下来。脚本挂上就按 video 的现状同步一次（上游 be10b748 修的预渲染页面时长显示 0:00，同一个坑）。滑块是页面里的 range（控制条在网页内核里，用不上 2026-11-15 做的 Slider），菜单是页面里的列表（键盘 ↑↓、Home / End、Enter、Esc）；全屏是页面元素的全屏，只铺满网页内核。Figure 页加了 player 示例；部件属性（propsControls 等）不移植 |
-| FormErrorSummary 的链接换成 Link（tone danger）；CalendarView 的标题按钮换成 ButtonBase | 组件还没做 | 做时照新的 |
+| FormErrorSummary 的链接换成 Link（tone danger）；CalendarView 的标题按钮换成 ButtonBase | 都已做（2026-11-15；WinForms 的标题是 ghost 中性的 ButtonControl） | — |
 
 锁定跟到 0.27.0（b7bbca0a）：语言包多 12 条 video*、文档页面清单重新生成；token、图标、配方没变。之后 master 上的 5d42e704 等还没有 CI 结果，不锁。
 
