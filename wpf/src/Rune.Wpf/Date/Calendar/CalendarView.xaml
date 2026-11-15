@@ -19,6 +19,11 @@
   </Style>
   <Style TargetType="rune:Calendar" BasedOn="{StaticResource {x:Type rune:CalendarView}}" />
   <Style TargetType="rune:RangeCalendar" BasedOn="{StaticResource {x:Type rune:CalendarView}}" />
+  <Style TargetType="rune:QuarterCalendar">
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Top" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+  </Style>
 
   <Style x:Key="{x:Static rune:CalendarViewParts.Months}" TargetType="rune:Flex" />
   <Style x:Key="{x:Static rune:CalendarViewParts.Header}" TargetType="Grid" />
