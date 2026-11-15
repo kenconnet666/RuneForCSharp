@@ -51,6 +51,11 @@ public sealed class StatusMap : IEnumerable<KeyValuePair<string, StatusDefinitio
     /// <param name="key">状态的 key。</param>
     public int Order(string key) => keys.IndexOf(key);
 
+    /// <summary>筛选下拉的选项（Select、Listbox 的 ItemsSource）：值是 key，带名字、说明与图标，按阶段顺序。</summary>
+    /// <param name="subset">只要这几种（按给的顺序）；不写时全部。</param>
+    public IReadOnlyList<ListboxOption> Options(IEnumerable<string>? subset = null) =>
+        [.. (subset ?? keys).Select(key => new ListboxOption(key, Label(key)) { Description = Get(key).Description, Icon = Get(key).Icon })];
+
     /// <inheritdoc />
     public IEnumerator<KeyValuePair<string, StatusDefinition>> GetEnumerator() => keys.Select(key => KeyValuePair.Create(key, definitions[key])).GetEnumerator();
 

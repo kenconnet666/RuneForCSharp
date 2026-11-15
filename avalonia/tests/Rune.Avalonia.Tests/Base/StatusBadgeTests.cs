@@ -10,8 +10,16 @@ public class StatusBadgeTests
     {
         ["draft"] = new("草稿", StatusTone.Neutral),
         ["approved"] = new("已通过", StatusTone.Success),
-        ["shipped"] = new("已发货", StatusTone.Info, Lucide.Truck),
+        ["shipped"] = new("已发货", StatusTone.Info, Lucide.Truck, "物流已揽收"),
     };
+
+    [Fact]
+    public void Options_list_the_statuses_for_a_filter()
+    {
+        Assert.Equal(["draft", "approved", "shipped"], Statuses.Options().Select(option => option.Value));
+        var shipped = Statuses.Options(["shipped"]).Single();
+        Assert.Equal(("已发货", "物流已揽收", Lucide.Truck), (shipped.Label, shipped.Description, shipped.Icon));
+    }
 
     [Upstream("Badge", "StatusBadge：名字与色调取自状态映射")]
     [Fact]
