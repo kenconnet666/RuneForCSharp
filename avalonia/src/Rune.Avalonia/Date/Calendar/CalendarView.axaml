@@ -4,39 +4,39 @@
   日期格 md 圆角、数字等宽、悬停 fillHover；补齐的上下月 textMuted；今天 semibold 加 accentBorder 细圈（TS 是内阴影，这里是 1px 描边）；
   区间中间的格透明、accentText 字、悬停 accentSoftHover，底色是格子那一层（PART_Cell.in-range）的 accentSoft；
   已选 accent 底、accentContrast 字、悬停 accentHover；不可选的划掉；不能选的变淡、鼠标是禁止。
-  格子按钮的样式键是 ButtonBase（共用它的模板），按部件名选中
+  格子按钮的样式键是 ButtonBase（共用它的模板），按部件名选中；选择器写 CalendarSurface，CalendarView 与 QuarterCalendar 都命中
 -->
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:rune="clr-namespace:Rune.Avalonia">
-  <Style Selector=":is(rune|CalendarView)">
+  <Style Selector=":is(rune|CalendarSurface)">
     <Setter Property="HorizontalAlignment" Value="Left" />
     <Setter Property="VerticalAlignment" Value="Top" />
     <Setter Property="TextElement.Foreground" Value="{DynamicResource Rune.Brush.Text}" />
   </Style>
-  <Style Selector=":is(rune|CalendarView) rune|ButtonBase#PART_Heading">
+  <Style Selector=":is(rune|CalendarSurface) rune|ButtonBase#PART_Heading">
     <Setter Property="MinHeight" Value="{rune:ControlHeight}" />
     <Setter Property="Padding" Value="{rune:Em 0.5, 0}" />
     <Setter Property="CornerRadius" Value="{rune:Em Resource=Rune.Radius.Md}" />
     <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
   </Style>
-  <Style Selector=":is(rune|CalendarView) rune|ButtonBase#PART_Heading:pointerover">
+  <Style Selector=":is(rune|CalendarSurface) rune|ButtonBase#PART_Heading:pointerover">
     <Setter Property="Background" Value="{DynamicResource Rune.Brush.FillHover}" />
   </Style>
   <!-- 翻页箭头有方向：从右往左时跟着翻转（图标默认不翻） -->
-  <Style Selector=":is(rune|CalendarView) rune|IconButton /template/ rune|Icon#PART_Icon">
+  <Style Selector=":is(rune|CalendarSurface) rune|IconButton /template/ rune|Icon#PART_Icon">
     <Setter Property="FlipInRtl" Value="True" />
   </Style>
-  <Style Selector=":is(rune|CalendarView) rune|Text#PART_WeekNumber">
+  <Style Selector=":is(rune|CalendarSurface) rune|Text#PART_WeekNumber">
     <Setter Property="Margin" Value="{rune:Em 0, 0, 0.25, 0}" />
   </Style>
 
-  <Style Selector=":is(rune|CalendarView) Border#PART_Cell.in-range">
+  <Style Selector=":is(rune|CalendarSurface) Border#PART_Cell.in-range">
     <Setter Property="Background" Value="{DynamicResource Rune.Brush.AccentSoft}" />
   </Style>
   <!-- 格子 max(2.25em, 24px) 见方；月份、年份格占满一列、高 max(3em, 24px)。写在样式里，使用方能改（价格日历的格子更大） -->
-  <Style Selector=":is(rune|CalendarView) rune|ButtonBase#PART_CellButton">
+  <Style Selector=":is(rune|CalendarSurface) rune|ButtonBase#PART_CellButton">
     <Setter Property="Width" Value="{rune:Em 2.25, Min=24}" />
     <Setter Property="Height" Value="{rune:Em 2.25, Min=24}" />
     <Setter Property="CornerRadius" Value="{rune:Em Resource=Rune.Radius.Md}" />
@@ -45,47 +45,47 @@
     <Setter Property="TextElement.FontFeatures" Value="tnum" />
     <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
   </Style>
-  <Style Selector=":is(rune|CalendarView) rune|ButtonBase#PART_CellButton:period">
+  <Style Selector=":is(rune|CalendarSurface) rune|ButtonBase#PART_CellButton:period">
     <Setter Property="Width" Value="NaN" />
     <Setter Property="Height" Value="{rune:Em 3, Min=24}" />
   </Style>
-  <Style Selector=":is(rune|CalendarView) rune|ButtonBase#PART_CellButton:pointerover">
+  <Style Selector=":is(rune|CalendarSurface) rune|ButtonBase#PART_CellButton:pointerover">
     <Setter Property="Background" Value="{DynamicResource Rune.Brush.FillHover}" />
   </Style>
-  <Style Selector=":is(rune|CalendarView) rune|ButtonBase#PART_CellButton:outside">
+  <Style Selector=":is(rune|CalendarSurface) rune|ButtonBase#PART_CellButton:outside">
     <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
   </Style>
-  <Style Selector=":is(rune|CalendarView) rune|ButtonBase#PART_CellButton:today">
+  <Style Selector=":is(rune|CalendarSurface) rune|ButtonBase#PART_CellButton:today">
     <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Semibold}" />
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.AccentBorder}" />
   </Style>
-  <Style Selector=":is(rune|CalendarView) rune|ButtonBase#PART_CellButton:unavailable">
+  <Style Selector=":is(rune|CalendarSurface) rune|ButtonBase#PART_CellButton:unavailable">
     <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
   </Style>
-  <Style Selector=":is(rune|CalendarView) rune|ButtonBase#PART_CellButton:unavailable TextBlock">
+  <Style Selector=":is(rune|CalendarSurface) rune|ButtonBase#PART_CellButton:unavailable TextBlock">
     <Setter Property="TextDecorations" Value="Strikethrough" />
   </Style>
-  <Style Selector=":is(rune|CalendarView) rune|ButtonBase#PART_CellButton:middle">
+  <Style Selector=":is(rune|CalendarSurface) rune|ButtonBase#PART_CellButton:middle">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.AccentText}" />
   </Style>
-  <Style Selector=":is(rune|CalendarView) rune|ButtonBase#PART_CellButton:middle:pointerover">
+  <Style Selector=":is(rune|CalendarSurface) rune|ButtonBase#PART_CellButton:middle:pointerover">
     <Setter Property="Background" Value="{DynamicResource Rune.Brush.AccentSoftHover}" />
   </Style>
-  <Style Selector=":is(rune|CalendarView) rune|ButtonBase#PART_CellButton:selected">
+  <Style Selector=":is(rune|CalendarSurface) rune|ButtonBase#PART_CellButton:selected">
     <Setter Property="Background" Value="{DynamicResource Rune.Brush.Accent}" />
     <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.AccentContrast}" />
     <Setter Property="BorderThickness" Value="0" />
   </Style>
-  <Style Selector=":is(rune|CalendarView) rune|ButtonBase#PART_CellButton:selected:pointerover">
+  <Style Selector=":is(rune|CalendarSurface) rune|ButtonBase#PART_CellButton:selected:pointerover">
     <Setter Property="Background" Value="{DynamicResource Rune.Brush.AccentHover}" />
   </Style>
-  <Style Selector=":is(rune|CalendarView) rune|ButtonBase#PART_CellButton:off">
+  <Style Selector=":is(rune|CalendarSurface) rune|ButtonBase#PART_CellButton:off">
     <Setter Property="Opacity" Value="{DynamicResource Rune.Opacity.Disabled}" />
     <Setter Property="Cursor" Value="No" />
   </Style>
-  <Style Selector=":is(rune|CalendarView) rune|ButtonBase#PART_CellButton:off:pointerover">
+  <Style Selector=":is(rune|CalendarSurface) rune|ButtonBase#PART_CellButton:off:pointerover">
     <Setter Property="Background" Value="Transparent" />
   </Style>
 </Styles>

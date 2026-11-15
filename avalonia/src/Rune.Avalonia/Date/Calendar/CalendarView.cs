@@ -28,11 +28,8 @@ namespace Rune.Avalonia;
 /// 部件：<see cref="CalendarViewParts"/>，默认外观在 CalendarView.axaml。
 /// </summary>
 [PseudoClasses(":invalid")]
-public class CalendarView : Control
+public class CalendarView : CalendarSurface
 {
-    /// <summary>字号档位，格子随之缩放；不写时继承外面的字号。</summary>
-    public static readonly StyledProperty<TextSize> SizeProperty = AvaloniaProperty.Register<CalendarView, TextSize>(nameof(Size));
-
     /// <summary>在每行前显示一年里的第几周。</summary>
     public static readonly StyledProperty<bool> ShowWeekNumbersProperty = AvaloniaProperty.Register<CalendarView, bool>(nameof(ShowWeekNumbers));
 
@@ -51,12 +48,10 @@ public class CalendarView : Control
     public static readonly StyledProperty<Func<DateOnly, CalendarCellState, object>?> CellContentProperty =
         AvaloniaProperty.Register<CalendarView, Func<DateOnly, CalendarCellState, object>?>(nameof(CellContent));
 
-    readonly Flex root = new() { Direction = FlexDirection.Column, Gap = Space.Sm };
     readonly Flex months = new() { Name = CalendarViewParts.Months, Wrap = true, Gap = Space.Xl, Align = FlexAlign.Start };
     readonly LiveRegion live = new() { Height = 0 };
     readonly LiveRegion hint = new() { Height = 0 };
     readonly ContentControl footer = new() { Name = CalendarViewParts.Footer, IsVisible = false };
-    readonly TemplateResources resources;
     readonly List<CellEntry> entries = [];
     string? structure;
     string? announced;
@@ -68,15 +63,9 @@ public class CalendarView : Control
     /// <summary>新建：没有状态时什么都不画（派生类在构造时给）。</summary>
     public CalendarView()
     {
-        resources = new TemplateResources(this);
-        root.Children.AddRange([months, live, hint, footer]);
-        LogicalChildren.Add(root);
-        VisualChildren.Add(root);
+        Root.Children.AddRange([months, live, hint, footer]);
         AddHandler(KeyDownEvent, OnGridKeyDown);
     }
-
-    /// <summary>字号档位。</summary>
-    public TextSize Size { get => GetValue(SizeProperty); set => SetValue(SizeProperty, value); }
 
     /// <summary>显示周数。</summary>
     public bool ShowWeekNumbers { get => GetValue(ShowWeekNumbersProperty); set => SetValue(ShowWeekNumbersProperty, value); }
@@ -99,10 +88,6 @@ public class CalendarView : Control
     /// <summary>显示着的日期格（测试用）。</summary>
     internal IEnumerable<CalendarCellButton> Cells => months.GetLogicalDescendants().OfType<CalendarCellButton>();
 
-    internal Lang Lang => Provider.GetLang(this);
-
-    internal CultureInfo Culture => CalendarText.CultureOf(Lang);
-
     /// <summary>一周的第一天：自己写的，否则语言包的，否则区域惯例。</summary>
     internal DayOfWeek FirstDay => CalendarText.FirstDayOf(Lang, FirstDayOfWeek);
 
@@ -110,11 +95,6 @@ public class CalendarView : Control
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
-        if (change.Property == SizeProperty)
-        {
-            if (Size.Pixels is { } pixels) resources.Set(global::Avalonia.Controls.Documents.TextElement.FontSizeProperty, pixels);
-            else resources.Bind(global::Avalonia.Controls.Documents.TextElement.FontSizeProperty, Size.ResourceKey);
-        }
         if (change.Property == ShowWeekNumbersProperty || change.Property == FixedWeeksProperty || change.Property == FirstDayOfWeekProperty
             || change.Property == CellContentProperty || change.Property == Provider.LangProperty || change.Property == IsEnabledProperty
             || change.Property == global::Avalonia.Controls.Documents.TextElement.FontSizeProperty)
@@ -237,8 +217,6 @@ public class CalendarView : Control
 
     // 占住按钮的位置：并排几个月时中间的月没有翻页按钮，标题仍居中
     Control Spacer() => new Border { Width = Math.Max(this.Resource<double>(ThemeKeys.Size.Control) * Em, this.Resource<double>(ThemeKeys.Size.MinTarget)) };
-
-    double Em => global::Avalonia.Controls.Documents.TextElement.GetFontSize(this);
 
     double CellSide => Math.Max(2.25 * Em, this.Resource<double>(ThemeKeys.Size.MinTarget));
 
@@ -385,28 +363,6 @@ public class CalendarView : Control
         if (key is not { } pressed || !state.HandleKey(pressed, (e.KeyModifiers & KeyModifiers.Shift) != 0, FlowDirection == FlowDirection.RightToLeft)) return;
         e.Handled = true;
         Rebuild(focus: true);
-    }
-
-    /// <inheritdoc />
-    protected override Size MeasureOverride(Size availableSize)
-    {
-        root.Measure(availableSize);
-        return root.DesiredSize;
-    }
-
-    /// <inheritdoc />
-    protected override Size ArrangeOverride(Size finalSize)
-    {
-        root.Arrange(new Rect(finalSize));
-        return finalSize;
-    }
-
-    /// <inheritdoc />
-    protected override AutomationPeer OnCreateAutomationPeer() => new GroupPeer(this);
-
-    sealed class GroupPeer(CalendarView owner) : ControlAutomationPeer(owner)
-    {
-        protected override AutomationControlType GetAutomationControlTypeCore() => AutomationControlType.Group;
     }
 }
 
