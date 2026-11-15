@@ -65,6 +65,8 @@ export const COMPONENT_PROP_RENAMES = {
   // 展开、选中、勾选的是 key 的列表（不是布尔）；isDisabled 是判断节点的函数
   // 数据模板是 ItemTemplate（WinForms 是建控件的 ItemFactory）；方向用平台的 Orientation；可见范围变了是事件
   VirtualList: { items: 'ItemsSource', children: 'ItemTemplate', horizontal: 'Orientation', onRangeChange: 'RangeChanged' },
+  // 看板：放下、弹回、列内排序都是事件；columnHeight 是最大高度
+  KanbanBoard: { items: 'ItemsSource', onMove: 'Moved', onReorder: 'Reordered', onReject: 'Rejected', columnHeight: 'ColumnMaxHeight', children: 'ItemTemplate' },
   // 各项是可改的列表，顺序就地改（ObservableCollection 用 Move）
   Sortable: { _items: 'ItemsSource', children: 'ItemTemplate' },
   // noMore 是文字（false 不显示是 ShowNoMore）
@@ -186,6 +188,8 @@ export const PLATFORM_COMPONENT_PROP_RENAMES = {
     // 每一项是控件，由函数建（没有数据模板）
     VirtualList: { children: 'ItemFactory' },
     Sortable: { children: 'ItemFactory' },
+    // 卡片内容由函数建；空列只能换文字
+    KanbanBoard: { children: 'ItemFactory', empty: 'EmptyText' },
     // 控件自己有 HasChildren；节点是画出来的，没有匹配时只能换说明文字
     Tree: { hasChildren: 'HasChildNodes', empty: 'EmptyText' },
     // 控件自己有 Size：起始一栏的百分比叫 Ratio，范围跟着叫 MinRatio、MaxRatio
@@ -408,6 +412,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     ScrollArea: { propsScrollbar: '两条滚动条是平台 ScrollViewer 认的固定部件名：样式里用 ScrollAreaParts.VerticalScrollbar、HorizontalScrollbar 选中' },
   },
   WPF: {
+    KanbanBoard: Object.fromEntries(['propsBoard', 'propsColumn', 'propsHeader', 'propsCount', 'propsReason', 'propsList', 'propsEmpty', 'propsCard', 'propsHandle']
+      .map((prop) => [prop, '各列（KanbanColumnView）、列头、卡片（KanbanCard）与把手是 KanbanBoard 代码组合的，外观跟 token 与 Badge、ButtonBase 的主题样式：没有部件样式键'])),
     Sortable: Object.fromEntries(['propsItem', 'propsHandle', 'propsContent']
       .map((prop) => [prop, '每一项（SortableItem）、把手（ButtonBase）与内容是 Sortable 代码组合的，外观跟 token 与 ButtonBase 的主题样式：没有部件样式键'])),
     VirtualList: {
@@ -449,6 +455,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     CommandPalette: Object.fromEntries(['propsInput', 'propsListbox'].map((prop) => [prop, '面板里的搜索框、列表是 CommandPalette 建的，外观跟着 TextField、Listbox 的主题样式；部件样式键只有搜索行'])),
   },
   WinForms: {
+    KanbanBoard: Object.fromEntries(['propsBoard', 'propsColumn', 'propsHeader', 'propsCount', 'propsReason', 'propsList', 'propsEmpty', 'propsCard', 'propsHandle']
+      .map((prop) => [prop, '各列、卡片是 KanbanBoardControl 画出来的子控件，列头是 TextControl 与 BadgeControl，把手是 IconButtonControl：没有部件属性记录'])),
     Sortable: Object.fromEntries(['propsItem', 'propsHandle', 'propsContent']
       .map((prop) => [prop, '每一项是 SortableControl 画边框的子控件，把手是 IconButtonControl，内容由 ItemFactory 建：没有部件属性记录'])),
     VirtualList: Object.fromEntries(['propsSkeleton', 'propsList']
@@ -679,6 +687,7 @@ export const PLATFORM_BEHAVIOR_NOT_APPLICABLE = {
 };
 
 export const BEHAVIOR_NOT_APPLICABLE = {
+  KanbanBoard: { '部件：列、卡片可以按列、按卡片给部件属性': '没有按列、按卡片的部件属性（PROPS_NOT_PORTED）：卡片的外观在 ItemTemplate / ItemFactory 里，Avalonia 的部件名在 KanbanBoardParts' },
   VirtualList: { 'propsItem 可以按项计算': '没有 propsItem、propsList（PROPS_NOT_PORTED）：每项的外观在 ItemTemplate / ItemFactory 里；序号与总数由组件管（Only_visible_items_are_realized_with_set_positions 覆盖）' },
   TextField: { 'TextField：前后缀是部件，不算在值里；是指向输入框的 label': '桌面的读屏名称不拼前后缀（网页是 label 指向输入框才念进去）：读屏名称取字段的标签，前后缀是显示用的固定文字，不进值里' },
   CharacterCount: { 'CharacterCount 的部件属性': '看得见的字数就是控件自己的文字，读屏读的是控件的名称（完整的句子），不另分部件（PROPS_NOT_PORTED）' },

@@ -1378,6 +1378,15 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### KanbanBoard（2026-11-15）
+
+- 建在孪生文件 SortableModel 的分组上（同上游建在 useSortable 上）：列是组，卡片在哪一列由 GetColumn 给；拿起、← / → 换列、↑ / ↓ 调整落点、放下、取消与播报都在模型里，控件只把按键、指针换成模型的调用，按 Active、Target 画。
+- 数据由使用方控制：上游的 onMove、onReject、onReorder 是 Moved、Rejected、Reordered 事件；订阅了 Reordered 才能列内排序（ItemsSource 就地改，同 Sortable）。使用方在 Moved 里改数据（ObservableCollection 的增删自动跟上，原地改了属性时调 Refresh）。CanMove 返回原因，经过的列高亮：能放 accent、不能放 danger 并在列头下写出原因，落点处一条 2 像素的插入线。
+- 每列：surfaceMuted 底、lg 圆角，列头上下 sm、左右 md（名称 sm 字号 medium 字重，卡片数是 Badge，有卡片时按列的色调），卡片列表左右与下方 sm、卡片之间 sm、竖向滚动（ColumnMaxHeight，不写时窗口高度的 70%，上游的 70vh）。各列至少 ColumnWidth（默认 16em），富余的平分，放不下时整块横向滚动。
+- 卡片：surfaceRaised 底、border 细边、md 圆角、四周 sm，内容在左、把手在右上（xxs 内边距的 GripVertical，悬停 fillHover）；键盘拿起时 accent 边框与 md 阴影；指针拖动时原位变淡（0.4），影子卡在覆盖层里跟着指针（lg 阴影、转 1.5°）。卡片按 key 留着，换列、重排时挪动而不是重建，键盘焦点留在把手上（挪动时的失焦不算放下）。
+- WinForms：控件不能半透明、画不出阴影，原位的占位是虚线框（内容藏起来），影子卡是放在最上层的副本；把手按上游的大小（1em 图标加四周 xxs），不按最小点击区放大（卡片本身就能拖）；卡片内容的鼠标事件落在最里面的子控件上，按下、拖动挂在每一层上（按钮、输入框不算）。
+- 上游“放下后先确认”的示例要用 FormDialog，还没做；示例只有工单看板（列宽 14rem、列高 32rem 按 16 像素的 rem 换算）。
+
 ### Sortable 与 SortableModel（2026-11-15）
 
 - 孪生文件 SortableModel（上游 useSortable 里与平台无关的部分，连分组一起：看板 KanbanBoard 要用）：拿起、组内移动、换组、放下、取消、焦点离开，每一步的读屏播报（语言包的 Sortable*），按键换成 SortableKey 交给 Press，指针拖动时按“越过了几个别的项的中线”算位置（IndexAt）后调 DragOver。组内顺序立即写回（Reordered 带上被移动的项：相邻交换时按位移认不出是谁动了），换组只报告 SortableGroups.Moved。
