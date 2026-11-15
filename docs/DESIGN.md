@@ -1464,6 +1464,14 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### PropsTable（2026-11-16，仅 Avalonia）
+
+- 同 TextTable，本身就是 Table（StyleKeyOverride 用 Table 的主题），按 Props（ApiProp 的列表）与 Caption 生成表头、各行；Density 的默认值改成 compact（上游 mergePartProps 给的默认），外观属性照 Table 能改。列标题、"必填"（warning）、"可绑定"（accent）取 DocsKitMessages，跟着语言包变。
+- 数据是 record：ApiProp(Name, Kind, Type, Description)，Required、Default、Bindable、Values 是可选的 init 属性；Kind 是 ApiPropKind 枚举（上游的 keyof ApiPropKinds）。上游的 ComponentApi 是文档站从类型生成数据用的，桌面没有生成器，不做。
+- 名称不折行（行内代码在上游能任意处断开，表格会按它把名称列压到最窄），标记放不下时换行；类型 codeType 色；默认值不折行，没有时 textMuted 的"—"。说明一列的内容至少 18rem 宽：Table 按各格内容的最小宽度分列宽，最小宽度设在内容上就是上游 td 的 min-width。
+- 可选值有任何一个带含义时列在说明下：平台 Grid 两列（Auto、*，即 max-content 1fr），sm 字号、列间距 md、行间距 xs、与说明隔 sm；间距按字号算，字号变了重算。
+- 示例：DocsKit 页的 handwritten（同上游：Rating 的四个属性、斑马纹）。
+
 ### SlideCaptcha（2026-11-16，仅 Avalonia）
 
 - 组件只负责交互、不判对错：SlideChallenge 的背景与拼图是 IImage（服务端给的图由应用解码成位图），拼图和背景一样高、左边缘对着缺口的左边缘，位置换算成像素就是答案。松手发 Released（SlideResult：位置、最多 240 点的轨迹、时长），"换一张"发 RefreshRequested；Status（Idle、Verifying、Success、Error）由父级按判定结果设，Verifying、Success 时锁定，换了图或设回 Idle 时滑块回到起点。
