@@ -56,6 +56,8 @@ export const COMPONENT_PROP_RENAMES = {
   Affix: { onChange: 'StuckChanged' },
   // 点“取消选择”只报告，清空选择由使用方做
   SelectionBar: { onClear: 'ClearRequested' },
+  // 数据经 ItemsSource 给（平台的叫法），一张的模板是 ItemTemplate
+  Carousel: { items: 'ItemsSource' },
   FloatButtonGroup: { propsTrigger: 'Trigger' },
   UserButton: { name: 'DisplayName', src: 'Source' },
   // 地址给 Uri；加载完的事件不叫 Loaded（那是控件放进界面的事件）
@@ -165,6 +167,8 @@ export const PLATFORM_COMPONENT_PROP_RENAMES = {
     QRCode: { size: 'Size', onRefresh: 'RefreshRequested' },
     // 控件自己有 Layout 事件
     FieldCompare: { layout: 'CompareLayout' },
+    // 张片是控件，直接放进 Slides
+    Carousel: { items: 'Slides' },
     // 控件自己有 Size：起始一栏的百分比叫 Ratio，范围跟着叫 MinRatio、MaxRatio
     Splitter: { _size: 'Ratio', minSize: 'MinRatio', maxSize: 'MaxRatio' },
     // 组自己生成控件：生成一项时的事件，处理完之后值由组写回
@@ -279,6 +283,7 @@ export const PROPS_NOT_PORTED = {
     ...Object.fromEntries(['propsTable', 'propsList', 'propsItem', 'propsLabel', 'propsValue']
       .map((prop) => [prop, '表格、列表与里面的格子是 FieldCompare 按行生成的（表格是紧凑的 Table）：外观跟主题，要别的样子用字段的 Cell 换显示的内容'])),
   },
+  Carousel: { getKey: '给 Vue 对比列表用的键：桌面上按 ItemsSource 的顺序重建每一张，没有按键复用' },
   Lightbox: { propsButton: '工具栏与两侧的按钮是 Lightbox 建的 IconButton（深色底上用 onScrim 的颜色），没有部件属性：外观跟主题' },
   Abbr: { propsTooltip: '提示就是平台的 ToolTip：位置、箭头写在 Abbr 自己身上（Avalonia、WPF 的 Tooltip.Placement、Tooltip.Arrow 附加属性）；WinForms 自带的提示用默认的位置' },
   Pagination: { propsItem: '外层的 li 是 HTML 列表的结构：桌面上页码按钮、省略号直接排在列表里' },
@@ -355,6 +360,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     ScrollArea: { propsScrollbar: '两条滚动条是平台 ScrollViewer 认的固定部件名：样式里用 ScrollAreaParts.VerticalScrollbar、HorizontalScrollbar 选中' },
   },
   WPF: {
+    Carousel: Object.fromEntries(['propsViewport', 'propsSlide', 'propsPrevious', 'propsNext', 'propsControls', 'propsPause', 'propsDot']
+      .map((prop) => [prop, '张片区、每一张、两侧按钮、控制条与页点是 Carousel 组合的子元素，没有部件样式键：外观跟主题，张片的样子由 ItemTemplate 给'])),
     SelectionBar: Object.fromEntries(['propsCount', 'propsClear', 'propsActions']
       .map((prop) => [prop, '数目、取消选择、批量操作区是 SelectionBar 组合的子元素，没有部件样式键：外观跟主题，批量操作的按钮放在 Actions 里'])),
     PaginationBar: Object.fromEntries(
@@ -379,6 +386,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     CommandPalette: Object.fromEntries(['propsInput', 'propsListbox'].map((prop) => [prop, '面板里的搜索框、列表是 CommandPalette 建的，外观跟着 TextField、Listbox 的主题样式；部件样式键只有搜索行'])),
   },
   WinForms: {
+    Carousel: Object.fromEntries(['propsViewport', 'propsSlide', 'propsPrevious', 'propsNext', 'propsControls', 'propsPause', 'propsDot']
+      .map((prop) => [prop, '张片区、每一张、两侧按钮、控制条与页点是 CarouselControl 组合的子元素，没有部件属性记录：外观跟主题，张片的样子由放进 Slides 的控件自己定'])),
     SelectionBar: Object.fromEntries(['propsCount', 'propsClear', 'propsActions']
       .map((prop) => [prop, '数目、取消选择、批量操作区是 SelectionBarControl 组合的子元素，没有部件属性记录：外观跟主题，批量操作的按钮放在 Actions 里'])),
     NativeSelect: Object.fromEntries(['variant', 'radius', 'icon']

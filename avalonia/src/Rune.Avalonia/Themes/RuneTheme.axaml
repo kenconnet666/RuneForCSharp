@@ -63,6 +63,7 @@
   <StyleInclude Source="avares://Rune.Avalonia/Display/Avatar/AvatarParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Display/Avatar/AvatarGroupParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Display/Image/ImageParts.axaml" />
+  <StyleInclude Source="avares://Rune.Avalonia/Display/Carousel/CarouselParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Feedback/Empty/EmptyParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Feedback/Result/ResultParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Display/Descriptions/DescriptionsParts.axaml" />

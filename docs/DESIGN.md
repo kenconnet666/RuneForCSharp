@@ -1378,6 +1378,15 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### Carousel（2026-11-15）
+
+- 上游是浏览器的横向滚动加 scroll-snap：桌面上张片排成一条（每张宽 =（宽 − (SlidesPerView − 1) × Gap）÷ SlidesPerView），按位移切换，过渡 lg、系统关闭动画时直接到位。拖动（挪开 3 以内不算）跟着指针，松开吸附到最近的一张；滚到底算最后一张。Index 是最前面那张的序号，一次看几张时最大是 ceil(张数 − SlidesPerView)，页点也只有这么多。
+- 数据：Avalonia、WPF 是 ItemsSource 加 ItemTemplate（上游的 items 与 children 渲染函数；控件原样放进去），Index 默认双向绑定；WinForms 的张片是控件，直接放进 Slides（Collection，增删时重建），Index 变了报告 IndexChanged。getKey 不移植。每张包在一个组里（读屏名称“第 2 张，共 5 张”）：重建时旧的那张先放手，控件才能放进新的。
+- 位移：Avalonia 是 Track 自己的 Offset 属性加 DoubleTransition（RenderTransform 的动画不支持），WPF 是 DoubleAnimation（基础值先写成终点，动画结束后撤掉，拖动时直接改基础值），WinForms 是 Animator 补间的 Signal，每帧重排子控件。滚轮：Avalonia 读横向的 Delta（触摸板横滑）或 Shift + 滚轮；WPF 的滚轮事件只有竖向，只有 Shift + 滚轮；WinForms 在 WndProc 里接 WM_MOUSEHWHEEL（子控件不处理时转给父窗口），另有 Shift + 滚轮。WinForms 的鼠标事件落在张片里的子控件上，拖动挂在每一层子控件上（挂过的不再挂）。
+- 自动播放：Autoplay 是间隔（TimeSpan?，DefaultAutoplay 是 TS 的 true 即 5 秒）；Avalonia、WPF 用 Task.Delay 加版本号（headless 测试里计时器不走），WinForms 用 Forms 的 Timer。指针在上面、键盘焦点进来时暂停：Avalonia 看聚焦的方式（Tab、方向键），WPF 看最近的输入设备是键盘，WinForms 看进来时没按着鼠标且窗口显示焦点提示（窗口刚打开时焦点自动落进来不算）；WinForms 的指针停在子控件上时自己收不到鼠标事件，到点时看指针的位置，在上面就这一轮先不换。
+- 页点：点击区域 1.25em × 1.5em（至少 24），中间的小圆点 0.5em，当前的拉宽到 2em、圆点 1.25em、accent，宽度 md 的过渡；悬停 textMuted。上游的 aria-current 在 Avalonia 是 :current 伪类，WPF、WinForms 是 IsCurrent（内部）。
+- 外观：两侧按钮是 surface、中性色、圆形的 IconButton，md 阴影（Avalonia 的 BoxShadow、WPF 的 Effect；WinForms 画不出阴影）；控制条圆角 full、surface 75% 的底（上游的 4px 背景模糊桌面上没有）。WinForms 的子控件各有窗口，透明时透出的是轮播外面的底，按钮与控制条用 Region 裁成圆角（没有抗锯齿）。
+
 ### SelectionBar（2026-11-15）
 
 - 上游只在 DataTable 的“台账”示例里用到；数据表格还没做，示例挂在 DataTable 页下（selection-bar），配静态的 Table 与每行的勾选框。

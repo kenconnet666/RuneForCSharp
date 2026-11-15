@@ -1,0 +1,20 @@
+<!--
+  Carousel 部件的默认外观（vue-tsx-pro 的 carouselStyles）：两侧按钮 md 阴影；底部控制条圆角 full、surface 75% 的底
+  （上游还有 4px 的背景模糊，桌面上没有）。间距按 em 在代码里算
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|Carousel rune|IconButton#PART_Previous /template/ Border#PART_Root, rune|Carousel rune|IconButton#PART_Next /template/ Border#PART_Root">
+    <Setter Property="BoxShadow" Value="{DynamicResource Rune.Shadow.Md}" />
+  </Style>
+  <Style Selector="rune|Carousel Border#PART_Controls">
+    <Setter Property="CornerRadius" Value="9999" />
+    <Setter Property="Background">
+      <SolidColorBrush Color="{DynamicResource Rune.Color.Surface}" Opacity="0.75" />
+    </Setter>
+  </Style>
+  <Style Selector="rune|Carousel Panel#PART_Viewport">
+    <Setter Property="FocusAdorner" Value="{x:Null}" />
+  </Style>
+</Styles>
