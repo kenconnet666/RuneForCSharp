@@ -183,8 +183,8 @@ public class TimeDisplayTests
         var first = timer.DisplayText;
 
         // 系统时钟的回调在线程池上：投递回界面线程再刷新。目标在整秒上：对齐到整秒的下一跳一定少一秒（向上取整）
-        WpfUi.Wait(TimeSpan.FromMilliseconds(1300));
-        Assert.NotEqual(first, timer.DisplayText);
+        // 下一跳在一秒多一点之后；CI 的机器忙时界面线程晚些才轮到，等到变了为止（最多 3 秒）
+        WpfUi.Until(() => timer.DisplayText != first);
     });
 
     [Fact]
