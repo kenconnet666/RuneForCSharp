@@ -274,8 +274,12 @@ public class ToasterControl : Control, IMessageFilter
         subscribed?.Dismiss(item.Id);
     }
 
-    /// <summary>离场结束：从控制器里移除。</summary>
-    internal void Removed(ToastItemControl item) => subscribed?.Remove(item.Id);
+    /// <summary>离场结束：从控制器里移除。投递到之后再做：关闭动画时离场是同步结束的，不能在 Sync 排列表的中途改列表。</summary>
+    internal void Removed(ToastItemControl item)
+    {
+        if (IsHandleCreated) BeginInvoke(() => subscribed?.Remove(item.Id));
+        else subscribed?.Remove(item.Id);
+    }
 
     /// <summary>
     /// 排版：宽 min(26em, 父控件宽)，四周 lg 的边。通知排成一列（在顶部时最新的在最上面）；叠放且没展开时，最新的一条在原位，

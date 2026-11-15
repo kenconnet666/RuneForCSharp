@@ -261,8 +261,8 @@ public class Toaster : Control
         subscribed?.Dismiss(item.Id);
     }
 
-    /// <summary>离场结束：从控制器里移除。</summary>
-    internal void Removed(ToastItem item) => subscribed?.Remove(item.Id);
+    /// <summary>离场结束：从控制器里移除。投递到之后再做：关闭动画时离场是同步结束的，不能在 Sync 排列表的中途改列表。</summary>
+    internal void Removed(ToastItem item) => global::Avalonia.Threading.Dispatcher.UIThread.Post(() => subscribed?.Remove(item.Id));
 
     internal ToasterController? Subscribed => subscribed;
 

@@ -80,4 +80,22 @@ public class ToasterTests
         view.RegionPart.RaiseEvent(new MouseEventArgs(Mouse.PrimaryDevice, 0) { RoutedEvent = Mouse.MouseLeaveEvent });
         Assert.False(toaster.Paused);
     });
+
+    [Fact]
+    public Task Closing_without_motion_removes_after_the_sync() => WpfUi.Run(() =>
+    {
+        // 系统关闭动画（CI 上就是）：离场同步结束，移除要等这一轮排完
+        var toaster = new ToasterController(TimeSpan.FromMinutes(1));
+        var view = new Toaster { Controller = toaster };
+        var host = new Grid { Width = 800, Height = 600, Children = { view } };
+        host.Resources.MergedDictionaries.Add(new RuneTheme());
+        foreach (var key in new[] { ThemeKeys.Duration.Sm, ThemeKeys.Duration.Md }) host.Resources[key] = TimeSpan.Zero;
+        WpfUi.Show(host);
+        var first = toaster.Info("一");
+        toaster.Info("二");
+        WpfUi.Flush();
+        Escape(Item(view, "一"));
+        Assert.True(toaster.Toasts.Single(toast => toast.Id == first).Closing);
+        WpfUi.Until(() => view.Items.Count == 1);
+    });
 }
