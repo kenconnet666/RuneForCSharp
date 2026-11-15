@@ -4,6 +4,8 @@ vue-tsx-pro 那边的会话改了设计时会发通知过来（每完成一个�
 通知只是同步设计决定，**按各自的技术栈适当跟进**，不逐字照抄；上游没定稿的部分不动代码。
 锁定的上游提交在 `tools/vue-tsx-pro.ref`（ROADMAP 决定 24）。
 
+**2026-11-15 起暂时只做 Avalonia**（用户要求）：新组件与上游改动只落 Avalonia，WPF、WinForms 等通知恢复后再补；下面标"仅 Avalonia"的就是这段时间做的，另两个平台还欠着。
+
 ## 上游问题
 
 移植时发现的 vue-tsx-pro 的问题：记一行，再在 GitHub 的 kenconnet666/vue-tsx-pro 开 issue、打 `parity` 标签（附复现与建议；2026-11-08 起，会话消息只用于通知），
@@ -148,7 +150,7 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
 | 组件内部节点统一带 data-scope / data-part，[data-part] 一律 border-box；部件属性按“默认 < 使用方的 < 组件管的（值、无障碍、事件）”合并 | 网页的标记与盒模型；部件的合并顺序我们本来如此（DESIGN §7） | 不涉及 |
-| 新增部件属性：CommentThread、CommentComposer、Checklist、Cascader、KanbanBoard、CalendarBoard、ColorPicker、DiagramNode | Checklist、KanbanBoard 已做（KanbanBoard 2026-11-15，Avalonia 的部件名在 KanbanBoardParts），其余还没做 | 做时照新的部件 |
+| 新增部件属性：CommentThread、CommentComposer、Checklist、Cascader、KanbanBoard、CalendarBoard、ColorPicker、DiagramNode | Checklist、KanbanBoard 已做（KanbanBoard 2026-11-15，Avalonia 的部件名在 KanbanBoardParts）；CalendarBoard 已做（2026-11-15，仅 Avalonia，部件名在 CalendarBoardParts，按条的日程外观用 EventTemplate 或按 DataContext 写样式），其余还没做 | 做时照新的部件 |
 | AppShell、FilterBar、Timeline、Tree、ItemList 等只补了标记 | AppShell 已做，部件属性不变 | 不涉及 |
 
 锁定跟到 95a6c2ee（这一批全部绿了）：生成文件、对照结果都没变。
@@ -196,7 +198,7 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
 | 主题加 space.xxs（0.125em，vtp-space 组，在 none 与 xs 之间） | token 由 token-gen 从上游生成；`Space` 档位类型是手写的 | 已做：token 重新生成，三个平台的 `Space` 加 Xxs（WinForms 的 Factor 对上 Tokens.Space.Xxs） |
-| 写死的 2px 间距换成 xxs（ItemList、Checklist、NotificationCenter 标题与说明之间、CalendarBoard、DiagramNode、Upload 图片墙等）；Diagram 连线标签、ProportionBar、DiagramNode、ColorPicker、ImageCropper 的宽度换成 token | ItemList 已做 | ItemList 照新的（xxs）；其余做时照新的 |
+| 写死的 2px 间距换成 xxs（ItemList、Checklist、NotificationCenter 标题与说明之间、CalendarBoard、DiagramNode、Upload 图片墙等）；Diagram 连线标签、ProportionBar、DiagramNode、ColorPicker、ImageCropper 的宽度换成 token | ItemList 已做；CalendarBoard 已做（2026-11-15，仅 Avalonia，日程之间 xxs） | ItemList 照新的（xxs）；其余做时照新的 |
 | 组件规格 JSON 不含 token，token 照 tokens.ts 核对 | token-gen 本来就读 tokens.ts | 不涉及 |
 
 ### 第十五批（2026-11-08 通知，master cb4d5941、bcd44fd1：部件补齐第七批，TreemapChart 数据表）
@@ -324,7 +326,7 @@ Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
 | 按钮家族的不可用按 disabled / aria-disabled（buttonSx 去掉 disabled 参数） | 外观不变；我们的不可用是控件状态（IsDisabled，含可聚焦的不可用） | 不涉及 |
-| DataTable 已选、正在看的行按 aria-selected / aria-current（压过行色调）；CalendarBoard 选中、不可用按 aria-selected / aria-disabled，不可用格悬停不再有底色 | 还没做 | 做时照新的（不可用格没有悬停底色） |
+| DataTable 已选、正在看的行按 aria-selected / aria-current（压过行色调）；CalendarBoard 选中、不可用按 aria-selected / aria-disabled，不可用格悬停不再有底色 | CalendarBoard 已做（2026-11-15，仅 Avalonia：选中、不可用是格子的类 selected、disabled，不可用格悬停没有底色）；DataTable 还没做 | DataTable 做时照新的 |
 
 先在 2bdf378e 上预跑：parity、行为对照都没变；CI 绿后连同 066ad66e 一起锁定。
 
@@ -435,7 +437,7 @@ defineTheme / defineLang 忽略 undefined——网页专用或 C# 没有 undefin
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
 | 语言没配 timeZone 时，服务端按 UTC 渲染时刻、挂载后换成浏览器的时区（useFormat 的 date / relative、Countdown、TimelineChart） | 桌面端没有"服务端先渲染、浏览器再接管" | 不用改：一直按本机时区格式化；语言配了 timeZone 的行为本来就一致 |
-| 日历的"今天"按服务端记下的时刻水合、挂载后换成真实的今天（Calendar、RangeCalendar、QuarterCalendar、CalendarBoard） | Calendar、RangeCalendar、QuarterCalendar 已做（2026-11-15，"今天"取本机当前日期）；CalendarBoard 还没做 | 做时"今天"直接取本机当前日期，没有水合这一步 |
+| 日历的"今天"按服务端记下的时刻水合、挂载后换成真实的今天（Calendar、RangeCalendar、QuarterCalendar、CalendarBoard） | Calendar、RangeCalendar、QuarterCalendar 已做（2026-11-15，"今天"取本机当前日期）；CalendarBoard 已做（2026-11-15，仅 Avalonia，同样取本机当前日期） | — |
 | 新增 useTimeZone()、isServerRendering()、useDateLocale().rootAttrs() | 网页专用 | 不涉及 |
 
 锁定跟到 0.25.0（fffc0c7f）：token、语言包、图标、配方、文档页面清单都没变（生成器 --check 通过）。

@@ -1464,6 +1464,14 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### CalendarBoard（2026-11-15，仅 Avalonia）
+
+- 整页的月历（上游 CalendarBoard）建在孪生文件 CalendarState 上（同 Calendar：单选、今天、范围、只读、一周的第一天、键盘），只是界面换成每天一个大格子。Value 是选中那天的 ISO 日期，Month 是 yyyy-MM，都默认双向绑定；翻页写回 Month，父级改 Month 时翻过去。进界面前不碰状态：一开始的页先看选中的那天、再看 Month（同上游 useCalendarState 的 selected 优先于 defaultFocused），Month 写在初始化里也不会抢先定下页面。
+- 数据：ItemsSource（ObservableCollection 增删时重建格子）加 GetEventDate / GetEventEnd（DateOnly，跨天的每一天都有，最多铺 366 天）、GetEventLabel、GetEventTone；每天最多 MaxEvents 条，其余收成"还有 N 项"（点了选中那天）。上游的 renderEvent 是 EventTemplate（数据是 DataContext），renderDay 是 DayContent（日期与 CalendarBoardDayState，返回文字或控件），getDayNote 是 GetDayNote，getEventKey 不移植（格子随月份重建）。
+- 外观：页头是 Flex（标题 lg semibold 占满、Toolbar、"今天" sm soft neutral、上下月 sm 图标按钮，放不下换行）；表格是七列等宽的 Grid，表格线收拢成一条（每格画左、上两边，最后一列、最后一行补右、下）；格子至少 7em 高、四周 xs，周末 surfaceMuted，选中 accentSoft 加 2px accentBorder 内框（画在格子里的一层上，格子自己的边框是表格线）。格子、日程条是 Border，没有字号，em 解析不出来：高度、内边距、圆角、间距在代码里按看板的字号算；日程条的色调用 Resolved.Palette，样式取 Soft 与 Text。
+- 读屏：看板是分组，表格以标题为名称，日期数字是 DataItem，名称是完整日期（今天加"今天"）与"N 项日程"；只有当前日期在 Tab 顺序里，键盘移动后焦点跟过去；翻页时播报新的月份。点格子的空白处选中那天，点格子里的按钮、输入框照常。
+- 示例：schedule（筛选在 Toolbar 里，右边列出选中那天的日程）、roster（只读的车间排班，DayContent 放早中夜三班，GetDayNote 放节假日与调休）。
+
 ### TimePicker 与 TimeSlots（2026-11-15）
 
 - TimePicker 是 TimeField 的派生类（同 DatePicker 之于 DateField）：后缀里的按钮（Clock）打开 PickerPopover，弹层与外壳同宽（PickerPopover 的 MatchWidth，上游的 matchWidth）、内边距 xs（Inset），里面是时间列表（Listbox，最高 16em，其余滚动；必选，再点已选项不取消）与"此刻"（ghost、sm、占满宽度，上方 xs）。WinForms 同宽时内容层关掉 AutoSize（不再按自己想要的宽度改回去），列表开 AutoSize 才会被 FlexControl 按首选高度摆。
