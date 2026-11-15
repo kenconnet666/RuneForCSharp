@@ -86,6 +86,10 @@ Chromium（Skia）、Avalonia（Skia）、WPF（DirectWrite）、WinForms（GDI 
 
 listbox 页（remote 等远程选项）：single Avalonia 0.08%、WPF 0.07%、WinForms 1.40%；multiple 2.6% / 3.0% / 3.2%（上游示例的高度是 content-box，见 DESIGN §14 Listbox）。
 
+pivot-table 页（2026-11-16，仅 Avalonia）：count 0.43% / 0.43%；heatmap 1.47% / 1.51%（亮 / 暗）。数字列的宽度按内容比例分，上游的 system-ui 在 Windows 11 上是
+Segoe UI Variable，数字比我们的 Segoe UI 宽约 9%（14px 的"128.4"上游 36.2、我们 33.2），数字列分得宽一点、维度列窄 10 像素，热力底色的列边界跟着错开；字体是全局的取舍（DESIGN §6 的"字体"），不在透视表里改。
+table 页加了 column-table（0.07% / 0.08%），plans 不变。
+
 app-shell 页只做了 fullscreen（整页示例，效果区是 756×448 的 iframe，窄布局）：Avalonia 0.04%、WPF 0.04%、WinForms 1.24%（GDI 的文字：品牌名、H1 的行高把卡片往下推了 2 像素）。
 上游的整页示例在 iframe 里：ts-shots 进到 iframe 的文档收文字盒子；我们的示例写 `Framed: true`，inspect 不加画布的内边距与最小高度。
 

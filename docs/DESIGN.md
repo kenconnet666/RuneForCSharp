@@ -1464,6 +1464,19 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### PivotTable 与透视计算（2026-11-16，仅 Avalonia）
+
+- 透视计算是孪生文件 Pivot.cs（上游 pivot.ts）：Pivot.Of(明细, PivotOptions) 返回 PivotResult（RowKeys、ColumnKeys、Cell、RowTotal、ColumnTotal、GrandTotal、Extent）。数值全是 decimal：
+  求和、最小、最大精确，平均是和除以个数（上游平均是浮点）；接口给的十进制字符串按数字算（同 TableColumns.Numeric）。维度值按语言比较：CompareInfo 加 .NET 10 的 CompareOptions.NumericOrdering（同 localeCompare 的 numeric，中文按拼音），
+  Pivot.Comparer(语言) 给出，PivotOptions.Compare 可以换；行逐级排序（同一上级下的下级按 RowOrder 或比较），没列进 Order 的排在后面。
+- PivotTable 本身就是 Table（不继承 ColumnTable：上游的 rows、columns 是维度，和 ColumnTable 的同名属性意义不同）。ColumnTable 的建表抽成内部的 ColumnTable.Fill（ColumnTableSource 带上数据、列、语言、合并、按格定制），两者共用。
+  维度是 PivotDimension(Key, Header) 记录（Value、Format、Order），数值是 PivotValue(Key, Header)（Value、Type、Format），取值同列定义（同名属性或字典的键）；聚合 PivotAggregate 枚举。每行的 DataContext 是 PivotRow(Key, Dimensions)。
+  上游从 ColumnTable 继承的 cellSpan、summaryLabel 照转（GetCellSpan、SummaryLabel）；部件名同 ColumnTable。
+- 列：各级行维度（除最后一级外相同的上级合并）、列维度的每个值（靠结束边）、合计列（有列维度且 Totals 时）；Totals 时每列一个合计（合计行）。空格子是 Empty（默认"—"）。合计列的格是 semibold（模板优先级的资源绑定）。
+- 热力图：强调色按这一格在各格最小到最大之间的位置取 6% 到 45% 的不透明度，设在格的 Background 上（模板优先级）；Table 把格的 Background 画满整格（含内边距，同 td 的底色），盖在行的底色上，所以 TableCell 的 Background 现在是表格画的。
+- Table 的单元格加了等宽数字（TextElement.FontFeatures = tnum，同上游 td 的 tabular-nums；表头格没有）。Table 内部的 Rows（各部分的行）改名 SectionRows，免得和 PivotTable 的 Rows 冲突。
+- 像素对照：count 0.43%；heatmap 1.47% / 1.51%，是全局字体的差异（上游 system-ui 在 Windows 11 是 Segoe UI Variable，数字宽约 9%，数字列分得宽、热力底色的列边界错开），见 DOCSITE 差异基线。示例：PivotTable 页的 heatmap、count（同上游）。
+
 ### ColumnSettings（2026-11-16，仅 Avalonia）
 
 - Popover（bottom-end）的触发器是 IconButton（Columns3、ghost、中性，名称"列设置"），面板竖排隔 sm、至少 14rem 宽：标题行（标题 sm、中等字重；"重置"是 sm、ghost 的 Button）与最高 20rem 的 ScrollArea 里的 Sortable，每项是一列的 Checkbox。
