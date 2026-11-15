@@ -3,12 +3,13 @@ using Avalonia.Markup.Xaml.MarkupExtensions;
 
 namespace Rune.Avalonia.Examples;
 
-/// <summary>DocsKit 页的示例（vue-tsx-pro 文档站 docs-kit/DocsKit）：属性表与色块；文章、代码预览这几个示例站自己就在用。</summary>
+/// <summary>DocsKit 页的示例（vue-tsx-pro 文档站 docs-kit/DocsKit）：属性表、一组代码与色块；文章、代码预览这几个示例站自己就在用。</summary>
 static class DocsKitExamples
 {
     public static Example[] All =>
     [
         new("DocsKit", "handwritten", "手写的属性表", "给自己的组件手写 API 数据：名称、种类、类型、必填、默认值、可绑定、说明，档位类的列出每个可选值。外观属性同 Table：Density 默认 compact，这里加了斑马纹。", Handwritten),
+        new("DocsKit", "group", "一组代码", "CodeGroup 用标签页切换几段代码；两组绑同一个值：在一组里选了包管理器，另一组跟着切换。", Group),
         new("DocsKit", "swatches", "色块", "ColorSwatch 列出主题的颜色：颜色绑主题的画刷资源（DynamicResource），换主题时色块与取值跟着变；半透明的颜色（surfaceTranslucent）下面垫棋盘格。", Swatches),
     ];
 
@@ -28,6 +29,26 @@ static class DocsKitExamples
             new("Label", ApiPropKind.Prop, "string", "评分的名称，读屏念的是它") { Required = true },
         ],
     };
+
+    static Control Group()
+    {
+        static CodeGroup Commands(params (string Label, string Code)[] items)
+        {
+            var group = new CodeGroup();
+            foreach (var (label, code) in items)
+            {
+                var block = new CodeBlock { Code = code, Language = "bash" };
+                CodeGroup.SetLabel(block, label);
+                group.Items.Add(block);
+            }
+            return group;
+        }
+
+        var install = Commands(("dotnet CLI", "dotnet add package Rune.Avalonia"), ("Package Manager", "Install-Package Rune.Avalonia"), ("Paket", "paket add Rune.Avalonia"));
+        var remove = Commands(("dotnet CLI", "dotnet remove package Rune.Avalonia"), ("Package Manager", "Uninstall-Package Rune.Avalonia"), ("Paket", "paket remove Rune.Avalonia"));
+        remove[!!CodeGroup.ValueProperty] = install[!!CodeGroup.ValueProperty];
+        return new Flex { Direction = FlexDirection.Column, Gap = Space.Md, Children = { install, remove } };
+    }
 
     static readonly string[] Tokens = ["Accent", "AccentSoft", "Success", "Warning", "Danger", "Info", "Surface", "SurfaceTranslucent", "Text", "TextMuted", "Border", "Chart3"];
 

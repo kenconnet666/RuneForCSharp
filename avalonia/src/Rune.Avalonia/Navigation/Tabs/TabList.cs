@@ -41,6 +41,12 @@ public class TabList : Control
     /// <summary>标签栏结束端"全部标签页"的菜单（标签多、放不下时一眼找到并切过去）。</summary>
     public static readonly StyledProperty<bool> ShowAllMenuProperty = AvaloniaProperty.Register<TabList, bool>(nameof(ShowAllMenu));
 
+    /// <summary>标签栏的内边距（分隔线、底色仍横贯整个标签栏）：放进别的外框时让标签离开边缘，如 CodeGroup 左右 sm。</summary>
+    public static readonly StyledProperty<Thickness> PaddingProperty = Decorator.PaddingProperty.AddOwner<TabList>();
+
+    /// <summary>标签栏的底色，默认没有。</summary>
+    public static readonly StyledProperty<IBrush?> BackgroundProperty = Border.BackgroundProperty.AddOwner<TabList>();
+
     /// <summary>指示条的起点（主轴上，相对列表）。</summary>
     static readonly StyledProperty<double> IndicatorStartProperty = AvaloniaProperty.Register<TabList, double>("IndicatorStart");
 
@@ -84,6 +90,8 @@ public class TabList : Control
         next = ScrollButton(Lucide.ChevronRight, 1);
         bar = new Bar(this);
         frame.Child = bar;
+        frame[!Border.PaddingProperty] = this[!PaddingProperty];
+        frame[!Border.BackgroundProperty] = this[!BackgroundProperty];
         LogicalChildren.Add(frame);
         VisualChildren.Add(frame);
         SyncBar();
@@ -111,6 +119,12 @@ public class TabList : Control
 
     /// <summary>到两端后是否从另一端继续。</summary>
     public bool Loop { get => GetValue(LoopProperty); set => SetValue(LoopProperty, value); }
+
+    /// <summary>标签栏的内边距。</summary>
+    public Thickness Padding { get => GetValue(PaddingProperty); set => SetValue(PaddingProperty, value); }
+
+    /// <summary>标签栏的底色。</summary>
+    public IBrush? Background { get => GetValue(BackgroundProperty); set => SetValue(BackgroundProperty, value); }
 
     /// <summary>"全部标签页"菜单。</summary>
     public bool ShowAllMenu { get => GetValue(ShowAllMenuProperty); set => SetValue(ShowAllMenuProperty, value); }

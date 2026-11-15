@@ -1,0 +1,11 @@
+<!--
+  CodeGroup 的默认外观（vue-tsx-pro 的 codeGroupStyles）：外框、标签栏的颜色与尺寸在 CodeGroup.cs 里（模板优先级，样式盖得过）。
+  外框裁掉超出的内容，面板的焦点环画在里侧（focusRingStyles.inset），不然外面那圈被裁掉。
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|CodeGroup rune|TabPanel /template/ Border#PART_FocusRing">
+    <Setter Property="Margin" Value="0" />
+  </Style>
+</Styles>
