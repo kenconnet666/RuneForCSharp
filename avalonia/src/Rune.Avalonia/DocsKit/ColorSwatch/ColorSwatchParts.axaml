@@ -1,0 +1,18 @@
+<!--
+  ColorSwatch 的默认外观（vue-tsx-pro 的 colorSwatchStyles）：名称 sm、medium、text；取值 xs、等宽、textMuted。
+  色块（棋盘格、颜色、内描边）是自己画的，见 ColorSwatch.cs
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|ColorSwatch rune|Text#PART_Label">
+    <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Sm}" />
+    <Setter Property="FontWeight" Value="{DynamicResource Rune.FontWeight.Medium}" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+  </Style>
+  <Style Selector="rune|ColorSwatch rune|Text#PART_Value">
+    <Setter Property="FontSize" Value="{DynamicResource Rune.FontSize.Xs}" />
+    <Setter Property="FontFamily" Value="{DynamicResource Rune.Font.Mono}" />
+    <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" />
+  </Style>
+</Styles>
