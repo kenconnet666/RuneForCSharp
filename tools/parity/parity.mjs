@@ -81,7 +81,9 @@ function csharpTypes(dirs) {
     const seen = new Set([type]);
     for (let base = bases.get(type); base && !seen.has(base); base = bases.get(base)) {
       seen.add(base);
-      if (merged.has(`${base}Parts`)) merged.set(`${type}Parts`, new Set([...(merged.get(`${type}Parts`) ?? []), ...merged.get(`${base}Parts`)]));
+      // 抽象外壳 XBase 的部件名类可以叫 XParts（SegmentedFieldBase 的部件在 SegmentedFieldParts，同它的样式键）
+      const parts = merged.get(`${base}Parts`) ?? merged.get(`${base.replace(/Base$/, '')}Parts`);
+      if (parts) merged.set(`${type}Parts`, new Set([...(merged.get(`${type}Parts`) ?? []), ...parts]));
     }
   }
   return merged;

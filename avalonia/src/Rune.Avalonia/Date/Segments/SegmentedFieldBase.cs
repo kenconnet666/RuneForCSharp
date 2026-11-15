@@ -14,7 +14,7 @@ namespace Rune.Avalonia;
 
 /// <summary>
 /// 分段输入框的外壳（vue-tsx-pro 的 controlParts 加 useFieldSegments）：输入框外壳（同 TextField、Select）里放一组或两组日期分段（<see cref="DateSegmentGroup"/>）、
-/// 可选的前置图标、清空按钮与尾部内容。<see cref="SegmentedField"/> 是一组（DateField、TimeField、DatePicker），DateRangePicker 是两组（开始 – 结束）。
+/// 可选的前置图标、清空按钮与尾部内容。<see cref="SegmentedField"/> 是一组（DateField、TimeField、DatePicker），<see cref="DateRangePicker"/> 是两组（开始 – 结束）。
 /// 这里管与组数无关的部分：外观档位、所在 Field 的标签、说明、出错、只读、必填，表单重置时丢掉打了一半的段，清空，点外壳空白处聚焦；
 /// 值怎样读写由派生类给（<see cref="LaneValue"/>、<see cref="LaneChanged"/>）。
 /// 外观同输入框：控件高度、左右 space.md、xs 宽的 border 描边（悬停 borderStrong）、md 圆角、surface 底；soft、只读、出错、不可用同 TextField；聚焦在里面时焦点环压住边框。
