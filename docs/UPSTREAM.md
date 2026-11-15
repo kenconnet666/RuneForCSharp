@@ -241,7 +241,7 @@ NavBar（root、list、item）补了部件标记。这些组件都还没做，�
 
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
-| 日历成为配方组件 Calendar（CalendarView、RangeCalendar、日期选择的弹出层、QuarterCalendar 共用）：部件 root、months、month、header、heading、grid、weekday、weekNumber、cell、cellButton、footer；data-scope 统一为 calendar；CalendarOptions（size、showWeekNumbers、fixedWeeks）可按组件设默认值 | Calendar 已做（2026-11-15：Avalonia 的部件名在 CalendarViewParts，WPF 是部件样式键 CalendarViewParts，WinForms 是自己画的网格，没有部件属性；默认值用各平台的样式或属性设，没有 components.Calendar 配方）；RangeCalendar、QuarterCalendar 已做（2026-11-15）；日期选择的弹出层还没做 | 做时照新的 |
+| 日历成为配方组件 Calendar（CalendarView、RangeCalendar、日期选择的弹出层、QuarterCalendar 共用）：部件 root、months、month、header、heading、grid、weekday、weekNumber、cell、cellButton、footer；data-scope 统一为 calendar；CalendarOptions（size、showWeekNumbers、fixedWeeks）可按组件设默认值 | Calendar 已做（2026-11-15：Avalonia 的部件名在 CalendarViewParts，WPF 是部件样式键 CalendarViewParts，WinForms 是自己画的网格，没有部件属性；默认值用各平台的样式或属性设，没有 components.Calendar 配方）；RangeCalendar、QuarterCalendar 已做（2026-11-15）；日期选择的弹出层已做（2026-11-15，DatePicker、DateRangePicker 共用 PickerPopover，里面是 Calendar、RangeCalendar 或 QuarterCalendar）；TimePicker 还没做 | TimePicker 做时照新的 |
 | P12 复合组件转发里面基础组件的部件属性：Timeline（propsAvatar、propsPending）、PeoplePickerPanel（propsAvatar、propsCheckbox、propsSelectAll、propsDrill、propsClear、propsRemove）、DataImport（propsTemplate、propsPrevious、propsNext、propsAgain、propsOnlyErrors）；合并顺序 默认 < 使用方 < 组件管的 | 这些组件还没做；合并顺序我们本来如此（DESIGN §7） | 做时照新的；上游的候选清单在 .claude/reports/p12-candidates.md，已做的组件出现在里面时跟进 |
 
 ### 行为对照纳入文档站的浏览器测试（2026-11-15）

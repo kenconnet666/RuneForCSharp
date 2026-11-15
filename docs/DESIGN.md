@@ -1464,6 +1464,15 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### DateRangePicker 与 SegmentedFieldBase（2026-11-15）
+
+- 分段输入框的外壳拆成抽象基类 SegmentedFieldBase（WinForms 是 SegmentedFieldControlBase）：外观档位、所在 Field 的标签与状态、表单重置、清空、点外壳空白处聚焦都在这里，按"几组分段"（1 或 2）建 DateSegments 与 DateSegmentGroup；每组的值怎样读写、出错怎样判断、读屏名称由派生类给。SegmentedField 是一组（Value 字符串，DateField、TimeField、DatePicker 不变），DateRangePicker 是两组。整理与功能分开提交。
+- 外观共用一套：Avalonia 的 ControlTheme、WPF 的主题样式都以 SegmentedField 为键、以基类为目标类型（基类的样式键是 SegmentedField），模板里多了 PART_Separator（"–"，textMuted，左右 xs）与 PART_End（结束那组），一组时藏起来；两组时开始那组按内容宽，结束那组占满剩下的宽度。WinForms 的"–"是 TextControl，左右 xs 是它的内边距（FlexControl 不看外边距）。parity 把 XBase 的部件名类认作 XParts（SegmentedFieldBase 的部件在 SegmentedFieldParts）。
+- DateRangePicker：值是 IsoDateRange（两端 ISO 字符串，形式随 Granularity 同 DateField），两端都填好才写回；只填了一端时值是 null，那一端记在选择器里（自己写回的值不再同步回两端，否则删掉一端时写回的 null 会把另一端清掉；表单重置时两端放回值）。结束早于开始（同一种 ISO 形式按字符串比较）、超出范围、不可选时外壳出错，值照样写回。开始那组最后一段输满时焦点进结束那组，结束那组第一段删空再删回到开始那组的最后一段（DateSegments.Exit）。两组的读屏名称是"字段名 开始日期 / 结束日期"。上游的 valueType="dateValue" 在 C# 里是 Range（两端 DateOnly），startName / endName 是原生表单提交的字段名，不移植。
+- 弹层沿用 PickerPopover：按粒度是 RangeCalendar（年、月整段，周按 ISO 周：周一开始、显示周数，写回两天各自所在的周）或 QuarterCalendar 的区间模式；带时间时日历选日期，开始补 00:00、结束补 23:59（时的粒度 23:00、秒的粒度 23:59:59），已经填了的时间不变，选好后焦点去开始那组的"时"。快捷区间是 RangePreset（孪生文件）：内置的名字（DateRangePreset，按今天与语言的一周第一天算，名字取语言包）或自己的区间（固定或每次打开时算），夹到 Min–Max 之内，按粒度截成月、季度、周；当前区间那一项按下样式。VisibleMonths 默认 2。
+- 顺手修了 WPF PickerPopover 的一个焦点竞争：关弹层时推迟还焦点给按钮，选择器随后把焦点交给"时"那一段，推迟的那次又把焦点抢回按钮（CI 上偶发失败）；推迟执行时改读选择器指定的目标。
+- 示例：periods、report、states（上游三个 demo；states 里出差的天数用 Range 算）。
+
 ### Tour 与 FloatingGeometry（2026-11-15）
 
 - 浮层贴着目标的定位做成孪生文件 FloatingGeometry（上游 floating 的 computePlacement：想要的一侧放不下换对侧，crossAxisFallback 时再试垂直的两侧，都放不下选溢出最少的；只沿对齐方向挪回、离边 8）。WinForms 原来的 FloatingLayout.Position 就是这套逻辑的平台版，改成换算矩形后调它（提示、弹出框、菜单、下拉照旧），整理在同一个提交里。Avalonia、WPF 的浮层仍用平台 Popup 的定位，Tour 的卡片用它。
