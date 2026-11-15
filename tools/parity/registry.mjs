@@ -241,11 +241,11 @@ export const TYPE_RENAMES = {
   // 三个平台都自带 Label：表单标签叫 FieldLabel
   // 三个平台都有 System.DateTime：日期时间的文字叫 DateTimeText
   // Toast.tsx 的单元测试（文件名 Toast）测的是控制器 createToaster：桌面上是 ToasterController
-  Avalonia: { 'form-dialog': 'FormDialog', 'form-binding': 'Field', Label: 'FieldLabel', DateTime: 'DateTimeText', Toast: 'ToasterController' },
-  WPF: { 'form-dialog': 'FormDialog', 'form-binding': 'Field', Label: 'FieldLabel', DateTime: 'DateTimeText', Toast: 'ToasterController' },
+  Avalonia: { 'form-dialog': 'FormDialog', 'form-binding': 'Field', 'date-segments': 'DateSegments', Label: 'FieldLabel', DateTime: 'DateTimeText', Toast: 'ToasterController' },
+  WPF: { 'form-dialog': 'FormDialog', 'form-binding': 'Field', 'date-segments': 'DateSegments', Label: 'FieldLabel', DateTime: 'DateTimeText', Toast: 'ToasterController' },
   // WinForms 自己有 ListControl（ListBox、ComboBox 的基类）
   // WinForms 的提示是扩展组件（同平台的 ToolTip 组件），不是控件；平台自带 TabControl、TabPage：标签叫 TabItemControl
-  WinForms: { 'form-dialog': 'FormDialog', 'form-binding': 'Field', List: 'UnorderedList', Container: 'ContainerPanel', Label: 'FieldLabel', Tooltip: 'TooltipProvider', Tab: 'TabItem', DateTime: 'DateTimeText', Toast: 'ToasterController' },
+  WinForms: { 'form-dialog': 'FormDialog', 'form-binding': 'Field', 'date-segments': 'DateSegments', List: 'UnorderedList', Container: 'ContainerPanel', Label: 'FieldLabel', Tooltip: 'TooltipProvider', Tab: 'TabItem', DateTime: 'DateTimeText', Toast: 'ToasterController' },
 };
 
 const FORM_NAME = '表单提交的字段名是浏览器的概念；值经 Value 绑定，单选组的互斥由组自己管';
