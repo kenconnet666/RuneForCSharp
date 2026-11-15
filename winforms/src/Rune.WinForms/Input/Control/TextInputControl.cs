@@ -10,7 +10,7 @@ namespace Rune.WinForms;
 /// 外观：<see cref="Variant"/>（surface / soft）、<see cref="TextSize"/>、<see cref="Radius"/>（默认 md）。放进 FieldControl 时以标签为名称，沿用字段的出错、只读。
 /// 派生类把自己的输入框交给构造函数，再按自己的顺序把输入框、<see cref="ClearButton"/>、<see cref="Count"/> 与别的部件加进 Controls。
 /// </summary>
-public abstract class TextInputControl : FlexControl, IFieldControl
+public abstract class TextInputControl : FlexControl, IFieldControl, IBaseline
 {
     readonly TextBox input;
     readonly ClearButtonControl clear = new() { Radius = Radius.Full, Visible = false };
@@ -186,6 +186,19 @@ public abstract class TextInputControl : FlexControl, IFieldControl
 
     /// <summary>里面的输入框。</summary>
     internal TextBox Input => input;
+
+    /// <summary>
+    /// 第一行文字的基线：输入框的顶边加字体的上伸部。不报的话 Field 按里面最上面一个有基线的子控件对齐，
+    /// 多行文本框带字数时会对到贴底的字数上（标签落到框的底部）。
+    /// </summary>
+    int? IBaseline.Baseline
+    {
+        get
+        {
+            var family = input.Font.FontFamily;
+            return input.Top + (int)MathF.Round(input.Font.EmPixels(DeviceDpi) * family.GetCellAscent(input.Font.Style) / family.GetEmHeight(input.Font.Style));
+        }
+    }
 
     /// <summary>清空按钮。</summary>
     internal ClearButtonControl ClearButton => clear;

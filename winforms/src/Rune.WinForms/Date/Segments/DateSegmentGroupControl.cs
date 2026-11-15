@@ -13,7 +13,7 @@ namespace Rune.WinForms;
 /// 外观：上下 xs、数字等宽；每段左右 0.1em、xs 圆角，聚焦时 accent 底、accentContrast 字；没填的段与分隔符是 textMuted。
 /// </summary>
 [ToolboxItem(false)]
-public class DateSegmentGroupControl : Control
+public class DateSegmentGroupControl : Control, IBaseline
 {
     /// <summary>新建：能聚焦、自己画。</summary>
     public DateSegmentGroupControl()
@@ -50,6 +50,16 @@ public class DateSegmentGroupControl : Control
     internal string SegmentText => Segments is null ? "" : string.Concat(Segments.Segments.Select(segment => segment.Text));
 
     float Em => this.EmPixels();
+
+    /// <summary>各段文字的基线：上边留的 xs 加字体的上伸部（Field 的标签按它对齐）。</summary>
+    int? IBaseline.Baseline
+    {
+        get
+        {
+            var family = Font.FontFamily;
+            return (int)MathF.Round(Tokens.Space.Xs * Em) + (int)MathF.Round(Em * family.GetCellAscent(Font.Style) / family.GetEmHeight(Font.Style));
+        }
+    }
 
     /// <summary>值或状态变了：重排、重画。外面改了值（调过 DateSegments.Sync）后调它。</summary>
     public override void Refresh()
