@@ -1464,6 +1464,14 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### ColumnSettings（2026-11-16，仅 Avalonia）
+
+- Popover（bottom-end）的触发器是 IconButton（Columns3、ghost、中性，名称"列设置"），面板竖排隔 sm、至少 14rem 宽：标题行（标题 sm、中等字重；"重置"是 sm、ghost 的 Button）与最高 20rem 的 ScrollArea 里的 Sortable，每项是一列的 Checkbox。
+- Hidden、Order 是 IReadOnlyList&lt;string&gt;，默认双向绑定，写回新的列表（同上游给 _hidden、_order 赋新数组）；Order 没列到的列按定义的顺序排在后面（TableColumns.Arrange，孪生文件里；上游还把固定列排到两头，列定义有了固定再加）。
+  拖完排序时 Sortable 已经就地改好了列表，写回 Order 时不再按它重排。重置清空两者再发路由事件 ResetRequested（上游 onReset）；Changed 表示别的列设置改过，这时"重置"也可用。
+- 勾选框按项建一次，Hidden 变了就地改勾选与可用（整张列表重建会让键盘勾选的焦点丢掉）；只剩一列可见时它的勾选框不可用（只数现有的列）。部件名在 ColumnSettingsParts（上游 propsTrigger、propsPanel、propsList、propsCheckbox、propsReset，另有 header、title）。
+- 示例：Table 页的 column-settings（我们自己的：上游只在 QueryTable 里用它，这里配 ColumnTable，两边看同一份 Hidden、Order）。
+
 ### ColumnTable 与列定义（2026-11-16，仅 Avalonia）
 
 - 列定义是孪生文件 TableColumns.cs（以后的 DataTable 也用）：DataTableColumn(Key, Header) 记录，Value、Cell、Type（ColumnType 枚举）、Format（NumericFormat）、Width、MinWidth、Align（TableAlign）、Wrap、Empty、Statuses、Summary 是 init 属性；
