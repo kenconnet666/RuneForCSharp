@@ -400,6 +400,9 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - **Avalonia：模板里取组件根的属性用 TemplateBinding**，不用 `$parent[...]`（每个实例沿树往上找）；`{rune:Em}` 只有系数来自资源时才用多重绑定，取模板父级字号时是 TemplateBinding，取自己的字号时是单个绑定。
   自己的字号绑的是可继承的附加属性 `TextElement.FontSize`（TemplatedControl、TextBlock 的 FontSize 就是它）：原来绑 CLR 的 FontSize 属性，Border、Panel、Flex 没有它，绑定失败、值设不上
   （2026-11-16 修：FormSection 标题栏的下边距、Blockquote 的出处、NativeSelect 的圆角与列表边距、TagsInput 的最小宽度、TextField 的内层边距、AppShell 抽屉的标题栏都因此一直是 0）。
+- **行高与基线（Avalonia）**：ContentPresenter 给字符串生成的 TextBlock、模板里直接写的 TextBlock 不经过 Text，用的是字体自己的行距（约 1.33），上游处处继承 1.5；
+  放文字的部件要照 FieldLabel 的做法给 ContentPresenter 设 LineHeight = Leading × 字号（Card 的页头、页脚，Steps 的标题与说明已改）。
+  Flex 按基线对齐时找第一基线：TextBlock 的第一行、Flex 自己量出的第一基线、只包着一个子元素的包装（AnimatedNumber、Border、ContentPresenter）往里找；都没有才按底边。
 - **Avalonia：Transitions 可以共用**（过渡不存每个控件的状态，Fluent 也是一份给所有按钮），按（时长、缓动）缓存一份，不每个按钮各建三个。
 - **无限动画只在可见时跑**：Avalonia 样式里的动画、WPF 的动画时钟都不管元素看不看得见，每帧照走。Avalonia 写成 `^[IsVisible=True]` 的样式；WPF 在 IsVisibleChanged 里开停。隐藏的控件不测量、不套模板，所以按钮里收起的加载指示本来就不会建出图标。
 - **WPF：设 Content 时元素就初始化**（`AddLogicalChild` 里 TryFireInitialized），主题样式在这时套上，所以"创建"里包含了主题样式的开销，和"布局"要加在一起看。

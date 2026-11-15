@@ -98,7 +98,9 @@ app-shell 页（2026-11-16 重出上游截图：fullscreen 的效果区改成了
 
 stat 页（2026-11-16 第一次出上游截图）：basic 7.42%、change 5.18%、group 3.24%、loading 2.83%、live 10.45%、animated-number 35.68%（亮色）。
 animated-number 是上游示例的问题（#8，Descriptions 的容器查询在 align=start 里排成一列）；change 第一张卡上游把变化量换到了第二行，我们放得下（Segoe UI Variable 的数字宽 6.7 像素，同 pivot-table）；
-单位比数字的基线低约 3 像素（数值一行的基线对齐）、卡片高几像素，待收敛。
+单位比数字的基线低、卡片高几像素：Flex 的基线对齐只认直接的 TextBlock，AnimatedNumber 按底边对齐（改成往里找第一基线）；
+Card 页头、页脚写文字时 ContentPresenter 生成的 TextBlock 用字体自己的行距（改成 Leading × 字号）。之后 basic 0.06%、change 0.75%、group 0.09%、
+loading 1.52%、live 3.92%；app-shell 的 admin 2.16%、mixed 0.27%。
 
 pivot-table 页（2026-11-16，仅 Avalonia）：count 0.43% / 0.43%；heatmap 1.47% / 1.51%（亮 / 暗）。数字列的宽度按内容比例分，上游的 system-ui 在 Windows 11 上是
 Segoe UI Variable，数字比我们的 Segoe UI 宽约 9%（14px 的"128.4"上游 36.2、我们 33.2），数字列分得宽一点、维度列窄 10 像素，热力底色的列边界跟着错开；字体是全局的取舍（DESIGN §6 的"字体"），不在透视表里改。
