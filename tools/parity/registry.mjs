@@ -126,6 +126,8 @@ export const COMPONENT_PROP_RENAMES = {
   ResizeHandle: { width: 'Length', minWidth: 'MinLength', maxWidth: 'MaxLength', defaultWidth: 'DefaultLength', onWidthChange: 'LengthChanged' },
   // 值是平台 TextBox 的 Text；字符集叫 Charset（Type 是 TextField 的输入类型）；填满是事件
   OtpField: { _value: 'Text', type: 'Charset', onComplete: 'Completed' },
+  // 点选了一天是事件
+  Calendar: { onPick: 'Picked' },
   // 边长是平台的宽度；Margin 是平台的外边距，静区叫 QuietZone；颜色是平台的前景、背景画刷
   QRCode: { size: 'Width', margin: 'QuietZone', color: 'Foreground', bgColor: 'Background' },
   // Intl 的逐项选项是 .NET 的格式字符串（按语言包的文化）
@@ -254,6 +256,7 @@ const BUTTON_TYPE = '表单提交是浏览器的概念；对话框的默认、�
 
 /** 某个组件不移植的 prop 与原因（平台上没有对应的概念）：parity 不报缺 */
 export const PROPS_NOT_PORTED = {
+  Calendar: { valueType: '值是 ISO 字符串的 Value（多选是 Values），另有 DateOnly 的 Date 属性：没有 @internationalized/date 的日期值类型，不按传进来的值推类型' },
   ...Object.fromEntries(['SegmentedField', 'DateField', 'TimeField'].map((name) => [name, {
     name: FORM_NAME,
     propsSegment: '分段是里面的 DateSegmentGroup：样式写在每段的 DateSegmentBox 与分隔符 Text#PART_Literal 上',
@@ -722,6 +725,12 @@ export const PLATFORM_BEHAVIOR_NOT_APPLICABLE = {
 };
 
 export const BEHAVIOR_NOT_APPLICABLE = {
+  Calendar: {
+    '应用里统一显示周数': 'TS 的 components.Calendar 默认值与配方定制是网页的样式系统：桌面用样式统一设 ShowWeekNumbers 与部件外观（Avalonia 的 :is(rune|CalendarView) 选择器、WPF 的部件样式键），部件名在 CalendarViewParts',
+    'CalendarDate 进、CalendarDate 出': '值是 ISO 字符串（另有 DateOnly 的 Date 属性），没有 @internationalized/date 的日期值类型',
+    'CalendarDateTime 选了另一天，时间不变': '同上：没有带时间的日期值类型；多选时没变的那几天原样保留（带时间的 ISO 字符串不丢时间）',
+    '一开始为空：valueType': '同上：值总是 ISO 字符串，要 DateOnly 时读 Date',
+  },
   DateField: {
     '输入法：组合中的文字不进段': '桌面的输入法上屏后才发文字输入事件（Avalonia 的 TextInput、WPF 的 TextComposition、WinForms 的 KeyPress），段里没有可编辑的文字被组合改掉',
     'DateField：ZonedDateTime 改了月份': '值是 ISO 字符串（另有 DateOnly、DateTime 属性），没有带时区的日期值类型',
