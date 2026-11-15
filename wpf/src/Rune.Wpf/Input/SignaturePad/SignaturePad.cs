@@ -65,7 +65,7 @@ public class SignaturePad : CompositeControl, IFieldControl
     {
         FocusableProperty.OverrideMetadata(typeof(SignaturePad), new FrameworkPropertyMetadata(false));
         IsTabStopProperty.OverrideMetadata(typeof(SignaturePad), new FrameworkPropertyMetadata(false));
-        IsEnabledProperty.OverrideMetadata(typeof(SignaturePad), new UIPropertyMetadata(true, (d, _) => ((SignaturePad)d).Sync()));
+        IsEnabledProperty.OverrideMetadata(typeof(SignaturePad), new FrameworkPropertyMetadata(true, (d, _) => ((SignaturePad)d).Sync()));
     }
 
     /// <summary>新建：画布在外框里，提示在中间，撤销、清空在右上角。</summary>

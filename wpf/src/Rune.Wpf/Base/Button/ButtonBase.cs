@@ -63,7 +63,8 @@ public class ButtonBase : System.Windows.Controls.Button
     {
         DefaultStyleKeyProperty.OverrideMetadata(typeof(ButtonBase), new FrameworkPropertyMetadata(typeof(ButtonBase)));
         EmSize.Register(typeof(ButtonBase), CornerRadiusProperty);
-        IsEnabledProperty.OverrideMetadata(typeof(ButtonBase), new UIPropertyMetadata(true, null, CoerceIsEnabled));
+        // 用 FrameworkPropertyMetadata：平台的 Primitives.ButtonBase（滚动条里的 RepeatButton 也是）先初始化时基础元数据是它，UIPropertyMetadata 的替代会抛异常
+        IsEnabledProperty.OverrideMetadata(typeof(ButtonBase), new FrameworkPropertyMetadata(true, null, CoerceIsEnabled));
     }
 
     /// <summary>新建按钮。</summary>

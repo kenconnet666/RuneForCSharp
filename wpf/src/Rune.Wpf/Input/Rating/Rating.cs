@@ -59,7 +59,7 @@ public class Rating : FrameworkElement, IFieldControl
     double? hover;
     int hoveredStar;
 
-    static Rating() => IsEnabledProperty.OverrideMetadata(typeof(Rating), new UIPropertyMetadata(true, (d, _) => ((Rating)d).InvalidateVisual()));
+    static Rating() => IsEnabledProperty.OverrideMetadata(typeof(Rating), new FrameworkPropertyMetadata(true, (d, _) => ((Rating)d).InvalidateVisual()));
 
     /// <summary>新建：五颗星的单选组。</summary>
     public Rating()

@@ -75,7 +75,7 @@ public class Slider : FrameworkElement, IFieldControl
     Func<double, string>? valueText;
     int dragging = -1;
 
-    static Slider() => IsEnabledProperty.OverrideMetadata(typeof(Slider), new UIPropertyMetadata(true, (d, _) => ((Slider)d).ApplyEnabled()));
+    static Slider() => IsEnabledProperty.OverrideMetadata(typeof(Slider), new FrameworkPropertyMetadata(true, (d, _) => ((Slider)d).ApplyEnabled()));
 
     /// <summary>新建：0–100、步长 1 的单值滑块。</summary>
     public Slider()
