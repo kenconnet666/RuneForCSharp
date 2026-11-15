@@ -65,6 +65,8 @@ export const COMPONENT_PROP_RENAMES = {
   // 展开、选中、勾选的是 key 的列表（不是布尔）；isDisabled 是判断节点的函数
   // 数据模板是 ItemTemplate（WinForms 是建控件的 ItemFactory）；方向用平台的 Orientation；可见范围变了是事件
   VirtualList: { items: 'ItemsSource', children: 'ItemTemplate', horizontal: 'Orientation', onRangeChange: 'RangeChanged' },
+  // 各项是可改的列表，顺序就地改（ObservableCollection 用 Move）
+  Sortable: { _items: 'ItemsSource', children: 'ItemTemplate' },
   // noMore 是文字（false 不显示是 ShowNoMore）
   InfiniteListStatus: { noMore: 'NoMoreText' },
   // 控件自己的 MaxHeight 包括工具条与路径栏：上游的 maxHeight 只管树
@@ -183,6 +185,7 @@ export const PLATFORM_COMPONENT_PROP_RENAMES = {
     Carousel: { items: 'Slides' },
     // 每一项是控件，由函数建（没有数据模板）
     VirtualList: { children: 'ItemFactory' },
+    Sortable: { children: 'ItemFactory' },
     // 控件自己有 HasChildren；节点是画出来的，没有匹配时只能换说明文字
     Tree: { hasChildren: 'HasChildNodes', empty: 'EmptyText' },
     // 控件自己有 Size：起始一栏的百分比叫 Ratio，范围跟着叫 MinRatio、MaxRatio
@@ -405,6 +408,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     ScrollArea: { propsScrollbar: '两条滚动条是平台 ScrollViewer 认的固定部件名：样式里用 ScrollAreaParts.VerticalScrollbar、HorizontalScrollbar 选中' },
   },
   WPF: {
+    Sortable: Object.fromEntries(['propsItem', 'propsHandle', 'propsContent']
+      .map((prop) => [prop, '每一项（SortableItem）、把手（ButtonBase）与内容是 Sortable 代码组合的，外观跟 token 与 ButtonBase 的主题样式：没有部件样式键'])),
     VirtualList: {
       overscan: '平台的虚拟化面板自己决定多建几项（VirtualizingStackPanel 按 CacheLength，组件不另设）',
       propsSkeleton: '骨架行是 VirtualList 代码组合的 Skeleton，外观跟 Skeleton 的主题样式：没有部件样式键',
@@ -444,6 +449,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     CommandPalette: Object.fromEntries(['propsInput', 'propsListbox'].map((prop) => [prop, '面板里的搜索框、列表是 CommandPalette 建的，外观跟着 TextField、Listbox 的主题样式；部件样式键只有搜索行'])),
   },
   WinForms: {
+    Sortable: Object.fromEntries(['propsItem', 'propsHandle', 'propsContent']
+      .map((prop) => [prop, '每一项是 SortableControl 画边框的子控件，把手是 IconButtonControl，内容由 ItemFactory 建：没有部件属性记录'])),
     VirtualList: Object.fromEntries(['propsSkeleton', 'propsList']
       .map((prop) => [prop, '骨架行与放项的那一层是 VirtualListControl 组合的子控件，没有部件属性记录：外观跟主题'])),
     InfiniteListStatus: { propsRetry: '重试按钮是 InfiniteListStatusControl 组合的 ButtonControl（sm、ghost），走 ProviderControl 的组件定制' },

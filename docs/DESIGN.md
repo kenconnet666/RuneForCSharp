@@ -1378,6 +1378,15 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### Sortable 与 SortableModel（2026-11-15）
+
+- 孪生文件 SortableModel（上游 useSortable 里与平台无关的部分，连分组一起：看板 KanbanBoard 要用）：拿起、组内移动、换组、放下、取消、焦点离开，每一步的读屏播报（语言包的 Sortable*），按键换成 SortableKey 交给 Press，指针拖动时按“越过了几个别的项的中线”算位置（IndexAt）后调 DragOver。组内顺序立即写回（Reordered 带上被移动的项：相邻交换时按位移认不出是谁动了），换组只报告 SortableGroups.Moved。
+- 数据：上游 `_items` 写回新数组；C# 里 ItemsSource 是可改的列表，就地改（ObservableCollection 用它的 Move，别的 IList 删了再插）并发 Reordered（从第几位到第几位）。Avalonia、WPF 的内容是 ItemTemplate，WinForms 是 ItemFactory 建的控件。
+- 每一项按 key 留着、重排时挪动而不是重建：键盘焦点留在被移动的把手上；挪动子控件时会短暂失焦，这期间的失焦不算放下（上游的 reordering）。WinForms 不动子控件集合、只按顺序重排位置，焦点不会丢。
+- 外观：surface 底、borderMuted 细边、md 圆角，上下 xs、起始边 xs、结束边 sm；把手 max(1.75em, 最小点击区)，textMuted 的 GripVertical，悬停 fillHover，不出波纹；拿起时品牌色边框、md 阴影、放到最上层（WPF 的阴影在单独的一层，同 Card；WinForms 画不出阴影）。被拖的项跟着指针（位移 = 指针挪开的距离 − 它在排版里的位置变化），拖到外层滚动区域边缘 40 以内时朝那边滚（每次最多 16）。上游别的项的布局动画（平移让位）没有做，直接跳到新位置。
+- 读屏：列表、列表项（同级位置与总数），把手是按钮，名称“移动 项名”，说明是操作方法（上游的 aria-describedby）；播报是 assertive（Avalonia、WPF 的实时区域，WinForms 发通知）。上游把手的 aria-pressed 没有对应：拿起的状态在播报里。
+- WinForms 的 ScrollAreaControl 补了按内容的首选大小（开 AutoSize 时 FlexControl 按它排：横向滚动时高同内容，纵向时最高到 MaximumSize），横排的列表放进去不用自己算高度。
+
 ### VirtualList、InfiniteListStatus 与 InfiniteList（2026-11-15）
 
 - 孪生文件两个：VirtualScroll（VisibleRange、ScrollAlign，按对齐方式算滚动位置、二分查找可见范围：上游 virtualizer 里与平台无关的部分），InfiniteList<T>（上游的 useInfiniteList）。InfiniteList 没有上游的响应式 params：游标与参数由取页函数自己捕获，参数变了调 Restart(防抖) 或 Refresh；immediate 换成新建后调一次 Refresh；enabled 是 IsEnabled；状态变了发 PropertyChanged（Avalonia、WPF 可以直接绑定），Items 每次换新的列表。不管项类型的 IInfiniteList 给 InfiniteListStatus 读。

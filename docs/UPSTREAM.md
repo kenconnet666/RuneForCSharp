@@ -368,7 +368,7 @@ Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_
 | 状态层 stateLayerStyles：ghost（悬停 14%、按下 22% 文字色）给 Alert、Banner、Tag 的关闭按钮；overlay（悬停叠 8%）给可选中的 Tag（f5e4c5a6、e48a7c38） | Tag 已做；Alert、Banner 还没做 | 已跟：Tag 三个平台。按下沿用按钮本来的波纹（文字色的 22%）。Alert、Banner 做时照新的 |
 | Link：下划线平时 50% 文字色、悬停实色；tone=muted 悬停换正文色（d8e0429f、f5e4c5a6） | Link 已做 | 已跟：三个平台（WinForms 的下划线改成自己画） |
 | Switch 轨道悬停混进正文色（关 15%、开 12%，oklab）；输入外壳 soft 悬停 fillHover（bbdf86c9） | 已做 | 已跟：Switch 的 TrackHover（sRGB 里混，差不到一个色阶），TextField、Select 的 soft 悬停 |
-| Checklist、KanbanBoard、Upload、色块、Image、Carousel、Splitter 的悬停（bbdf86c9），Splitter / ResizeHandle 的悬停聚焦拖动（1046ed37） | Checklist、Splitter、ResizeHandle、Image、Carousel 已做（Image 能预览时悬停压暗 10%，Carousel 的页点悬停 textMuted），其余还没做 | Splitter、ResizeHandle 照新的做（2026-11-15）：悬停、拖动 borderStrong，键盘聚焦强调色，分隔线加粗到 md；收起按钮不透明的 surface 底、悬停 fillHover；其余做时照新的 |
+| Checklist、KanbanBoard、Upload、色块、Image、Carousel、Splitter 的悬停（bbdf86c9），Splitter / ResizeHandle 的悬停聚焦拖动（1046ed37） | Checklist、Splitter、ResizeHandle、Image、Carousel、Sortable 已做（Sortable 的把手悬停 fillHover，2026-11-15）（Image 能预览时悬停压暗 10%，Carousel 的页点悬停 textMuted），其余还没做 | Splitter、ResizeHandle 照新的做（2026-11-15）：悬停、拖动 borderStrong，键盘聚焦强调色，分隔线加粗到 md；收起按钮不透明的 surface 底、悬停 fillHover；其余做时照新的 |
 | TabList 横排可滚时可滚的一头渐隐（604d1334） | TabList 已做滚动 | 2026-11-14 做了：Avalonia、WPF 是滚动区域的 OpacityMask；WinForms 的标签是各自的窗口，没有渐隐 |
 | Steps 横排连接线对齐圆圈中线（4a257b71） | 已做（2026-11-14 移植时照新的） | 连接线按圆圈的中线画 |
 | AppShell：收起按钮从侧栏底部挪到品牌格结束边，收起后品牌格只放居中的展开按钮，AppShellBrand 不再按收起隐藏产品名（cb28b280） | 已做 | 已跟：三个平台，去掉 CollapseBar 部件、WPF 的 AppShellBrand.IsCompact 附加属性、WinForms 的 IsCompact |

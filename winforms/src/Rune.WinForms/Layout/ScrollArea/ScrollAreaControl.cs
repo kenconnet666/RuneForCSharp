@@ -197,6 +197,19 @@ public class ScrollAreaControl : Control
         UpdateActive();
     }
 
+    /// <summary>
+    /// 按内容的大小（开了 AutoSize 时 FlexControl 按它排，同 CSS 里滚动区域默认按内容高）：横向滚动时高同内容；
+    /// 纵向滚动时高同内容、最高到 MaximumSize 的高（超出才滚动）。宽度跟着外层。
+    /// </summary>
+    public override Size GetPreferredSize(Size proposedSize)
+    {
+        var width = proposedSize.Width is > 0 and < int.MaxValue ? proposedSize.Width : Width;
+        if (Content is not { } content) return new Size(width, 0);
+        var wanted = content is IVirtualScrollContent virtualContent ? virtualContent.Extent(new Size(width, Height)) : content.GetPreferredSize(ScrollsX ? Size.Empty : new Size(width, 0));
+        var cap = ScrollsY && MaximumSize.Height > 0 ? MaximumSize.Height : int.MaxValue;
+        return new Size(width, Math.Min(wanted.Height, cap));
+    }
+
     /// <summary>内容按滚动位置挪开；滑块按"视口 / 内容"的比例与位置摆到轨道上（至少 20 像素长）。</summary>
     void Arrange()
     {
