@@ -1378,6 +1378,12 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### FieldCompare（2026-11-15）
+
+- 上游的字段沿用表格的列定义（key、header、type、format、statuses、empty、value、cell）并用 ColumnTable 排表格；我们还没有数据表格的列定义，字段是独立的 CompareField 记录：Key（取同名属性，或字典的键）、Header、Value 取值函数、Format（孪生的 NumericFormat，同 Intl：金额、百分比、缩放）、Statuses（StatusMap）、Empty、Cell（记录与哪一份，返回显示的内容）、Better。上游的 type 由 Format 表达：金额是 Currency、百分比是 Percent（百分比字段的变化量就是百分点，不给变化率）；日期按短日期显示。
+- 计算是孪生文件 FieldComparison（diffFields 与格式化）：数值换成 decimal 精确相减，变化率 = 差 ÷ 原值；变化量带正负号，后面全角括号里是变化率；色调按 Better（没写或没变 muted，变好 success、变坏 danger）。
+- 表格用已有的静态 Table（紧凑密度）按行生成：字段、原值（淡显）、新值（改了的中等字重，没改的淡显）、变化（有数值改动才有这一列）；改了的行 Avalonia 加类 changed，WPF、WinForms 的 Tag 是 "changed"。列表是“字段名 | 值”两列（WPF 的 Grid 没有间距，用外边距；WinForms 自己排，字段名一列取最宽的），值是 ValueChange 加变化量。WinForms 的 ValueChangeControl 只放文字，状态在列表里显示名字；WinForms 的排法属性叫 CompareLayout（控件自己有 Layout 事件）。
+
 ### Affix（2026-11-15）
 
 - 桌面没有 CSS 的 position: sticky。Avalonia、WPF 照 sticky 的语义做：不脱离排版，所在的 ScrollViewer（Target，不写时是外层最近的）滚动、排版变了时算原来的位置，滚过 OffsetTop（或贴底时的 OffsetBottom）就用 RenderTransform 的位移钉在滚动区域里，位移不超出父元素的范围（父元素滚出去时跟着走）；钉着时 ZIndex 抬到兄弟元素上面（后面的兄弟会盖住它）。阴影 md 画在包着内容的那一层（Avalonia 的 PART_Root 的 BoxShadow，WPF 的 Effect）。
