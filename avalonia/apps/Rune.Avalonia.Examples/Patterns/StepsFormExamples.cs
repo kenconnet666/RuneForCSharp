@@ -106,8 +106,8 @@ static class StepsFormExamples
             new("联系人与账号", ["Contact", "Phone", "Password", "Confirm"], () => Fields(
                 new Field { Path = "Contact", Label = "联系人", Content = new TextField() },
                 new Field { Path = "Phone", Label = "手机号", Content = new TextField() },
-                new Field { Path = "Password", Label = "登录密码", Content = new TextField { PasswordChar = '•' } },
-                new Field { Path = "Confirm", Label = "确认密码", Content = new TextField { PasswordChar = '•' } }))
+                new Field { Path = "Password", Label = "登录密码", Content = new TextField { Type = TextFieldType.Password } },
+                new Field { Path = "Confirm", Label = "确认密码", Content = new TextField { Type = TextFieldType.Password } }))
             { Description = "登录账号发到手机" },
             new("确认提交", [], Summary) { Description = "核对后开户" },
         ];
