@@ -15,6 +15,7 @@ static class CalendarExamples
         new("Calendar", "prices", "自定义日期格", "酒店的价格日历：CellText 给读屏念的房价，DrawCell 在格子里画日期与房价，最低价用成功色标出；周五、周六更贵，售罄的日子不可选。", Prices),
         new("Calendar", "sizes", "尺寸与状态", "TextSize 改字号，格子按 em 等比缩放；只读能翻页、不能改；不可用整个变淡。", Sizes),
         new("Calendar", "unavailable", "不可选的日期", "会议室预约：只能约今天起 30 天内的工作日，节假日与已约满的日子不可选（仍能用方向键经过，读屏念\"不可用\"）。", Unavailable),
+        new("Calendar", "quarter", "季度面板", "QuarterCalendarControl：一年一页的四个季度（季度报表、考核周期），选一个季度或一段区间（先开始、再结束，可以跨年翻页）；整段在 Min–Max 之外的季度不可用。DatePicker 的季度粒度弹出的就是它。", Quarter),
         new("Calendar", "views", "月份与年份视图", "点标题从日期切到月份、再到年份，跨年份找日期很快；Granularity 让选择停在月份或年份（账期、入学年份）。", Views),
     ];
 
@@ -241,6 +242,27 @@ static class CalendarExamples
                     new BadgeControl { Variant = StatusVariant.Soft, Tone = StatusTone.Warning, Text = $"{holiday.ToString("M/d", Chinese)} 节假日" },
                     new BadgeControl { Variant = StatusVariant.Soft, Tone = StatusTone.Danger, Text = $"{fullyBooked.Count} 天已约满" })));
         return Row(calendar, side);
+    }
+
+    static Control Quarter()
+    {
+        var single = new QuarterCalendarControl { Value = QuarterState.Of(Today), Min = "2024-01-01", AccessibleName = "考核季度" };
+        var span = new QuarterCalendarControl { SelectionMode = CalendarSelectionMode.Range, AccessibleName = "对比区间" };
+        var singleText = new TextControl { TextSize = TextSize.Sm };
+        var spanText = new TextControl { TextSize = TextSize.Sm };
+        void Sync()
+        {
+            singleText.Text = single.Value ?? "选一个季度";
+            spanText.Text = span.RangeValue is { } range ? $"{range.Start} 至 {range.End}" : "先选开始、再选结束";
+        }
+        single.ValueChanged += (_, _) => Sync();
+        span.ValueChanged += (_, _) => Sync();
+        Sync();
+        return Columns("16rem",
+        [
+            Stack(Space.Xs, new SmallControl { Tone = TextTone.Muted, Text = "单选（2024 年以前不可选）" }, single, singleText),
+            Stack(Space.Xs, new SmallControl { Tone = TextTone.Muted, Text = "区间：SelectionMode=Range" }, span, spanText),
+        ]);
     }
 
     static Control Views()

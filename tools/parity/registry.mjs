@@ -129,6 +129,8 @@ export const COMPONENT_PROP_RENAMES = {
   // 点选了一天是事件
   Calendar: { onPick: 'Picked' },
   RangeCalendar: { onPick: 'Picked' },
+  // 选择方式同 Calendar 叫 SelectionMode（值的两种形式分成 Value、RangeValue）；选好了是事件
+  QuarterCalendar: { mode: 'SelectionMode', onPick: 'Picked' },
   // 边长是平台的宽度；Margin 是平台的外边距，静区叫 QuietZone；颜色是平台的前景、背景画刷
   QRCode: { size: 'Width', margin: 'QuietZone', color: 'Foreground', bgColor: 'Background' },
   // Intl 的逐项选项是 .NET 的格式字符串（按语言包的文化）
@@ -258,6 +260,8 @@ const BUTTON_TYPE = '表单提交是浏览器的概念；对话框的默认、�
 /** 某个组件不移植的 prop 与原因（平台上没有对应的概念）：parity 不报缺 */
 export const PROPS_NOT_PORTED = {
   Calendar: { valueType: '值是 ISO 字符串的 Value（多选是 Values），另有 DateOnly 的 Date 属性：没有 @internationalized/date 的日期值类型，不按传进来的值推类型' },
+  QuarterCalendar: Object.fromEntries(['propsPrevious', 'propsNext', 'propsHeader', 'propsHeading', 'propsGrid', 'propsCell', 'propsCellButton']
+    .map((prop) => [prop, '部件同 CalendarView（上游同一个配方）：Avalonia 是 CalendarViewParts 的部件名（样式选择器 :is(rune|CalendarSurface)），WPF 是 CalendarViewParts 的部件样式键，WinForms 的四格是自己画的 QuarterGridControl；按季度给的部件属性没有对应，格子的外观按状态写样式'])),
   RangeCalendar: { valueType: '值是 IsoDateRange（两端 ISO 字符串），另有日期的 Range 属性：没有 @internationalized/date 的日期值类型，不按传进来的值推类型' },
   ...Object.fromEntries(['SegmentedField', 'DateField', 'TimeField'].map((name) => [name, {
     name: FORM_NAME,
