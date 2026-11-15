@@ -38,6 +38,8 @@ export const COMPONENT_PROP_RENAMES = {
   FormSection: { collapsible: 'IsCollapsible' },
   // 表单与错误汇总是对话框里的部件实例：直接改它们的属性
   FormDialog: { propsForm: 'Form', propsSummary: 'Summary' },
+  // 表单控制器同 Form 的 Controller；disabled 只禁用字段与提交（IsEnabled 会连步骤条、上一步下一步一起禁用）
+  StepsForm: { form: 'Controller', disabled: 'IsDisabled' },
   // 多行文本框的值是平台 TextBox 的 Text（TextField 有 format，值另是 Value：有格式时是去掉分隔的原文）
   Textarea: { _value: 'Text' },
   // 数据是平台的 ItemsSource；点选是事件
