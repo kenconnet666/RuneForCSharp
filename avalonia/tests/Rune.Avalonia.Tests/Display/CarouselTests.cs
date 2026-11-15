@@ -50,6 +50,7 @@ public class CarouselTests
     });
 
     [Fact]
+    [Upstream("Carousel", "下一张：滚过去、序号写回；第一张往前绕到最后一张")]
     public Task Loop_wraps_and_arrow_keys_move() => HeadlessUi.Run(() =>
     {
         var carousel = new Carousel { ItemsSource = Seasons, Width = 300 };

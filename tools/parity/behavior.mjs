@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// 行为对照：vue-tsx-pro 一个组件的测试用例（packages/ui/src/**/.test/<组件>.test.tsx 里的 it）逐条对上三个平台的测试
+// 行为对照：vue-tsx-pro 一个组件的测试用例（packages/ui/src/**/.test/<组件>.test.tsx 里的 it，以及文档站真实浏览器里跑的
+// apps/docs/src/components/**/test/<组件>.browser.test.tsx）逐条对上三个平台的测试
 // （测试方法上的 [Upstream("组件", "it 名字的开头")]），桌面上不适用的登记在 registry.mjs 的 BEHAVIOR_NOT_APPLICABLE。
 //
 //   node tools/parity/behavior.mjs [组件,…] [--json]
@@ -37,12 +38,12 @@ function files(dir, pattern) {
  * describe 里并列几个组件（'Card、Descriptions、Text'）时归到用例名开头的那个；describe 不是组件名、或不在 describe 里时，
  * 用例名以组件名开头的归到它，再其次归到 describe 开头的组件名（'Dialog 的 onOpenChange'），否则归到文件名（Badge.test.tsx）
  */
-function upstreamTests(src) {
+function upstreamTests(src, docs) {
   const tests = new Map();
   const add = (component, name) => tests.set(component, [...(tests.get(component) ?? []), name]);
-  for (const file of files(src, /\.test\.tsx?$/)) {
-    if (!file.includes('.test')) continue;
-    const fileComponent = basename(file).replace(/\.test\.tsx?$/, '');
+  const unit = files(src, /\.test\.tsx?$/).filter((file) => file.includes('.test'));
+  for (const file of [...unit, ...files(docs, /\.browser\.test\.tsx?$/)]) {
+    const fileComponent = basename(file).replace(/(\.browser)?\.test\.tsx?$/, '');
     const describes = [];
     for (const line of readFileSync(file, 'utf8').split(/\r?\n/)) {
       const indent = line.length - line.trimStart().length;
@@ -85,7 +86,7 @@ function platform({ src, tests }) {
 }
 
 const vue = await openVue(options.vue);
-const upstream = upstreamTests(vue.src);
+const upstream = upstreamTests(vue.src, join(vue.root, 'apps/docs/src/components'));
 vue.close?.();
 const platforms = Object.fromEntries(Object.entries(PLATFORMS).map(([name, paths]) => [name, { ...platform(paths), library: paths.library }]));
 // 做了没有：类型名同组件，或平台上改了名（registry 的 TYPE_RENAMES），WinForms 只有控件的组件叫 XxxControl
