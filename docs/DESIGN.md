@@ -1464,6 +1464,13 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### Can 与 Provider.Permissions（2026-11-16，仅 Avalonia）
+
+- 权限判断是 Provider 的可继承附加属性 Permissions（`Func<string, bool>`，上游 createUi / Provider 的 permissions），哪里都没写时一律放行；`Provider.Can(控件, 权限点…)` 是上游的 useCan（几个时任一满足即可），用来禁用按钮、过滤菜单项。
+- 上游靠响应式状态让界面跟着权限变；C# 里换角色、登录退出后给 Permissions 换一个新的函数，属性变化沿逻辑树通知到每个 Can。自己用 Provider.Can 判断的地方（按钮的 IsEnabled）由使用方在同一处重算。
+- Can 是 Decorator：Content（有权限时）与 Fallback（文字或控件）由里面的 ContentPresenter 呈现。上游的 permission 可以是数组，XAML 里写成逗号分开的一个字符串；没写 Permission 时不设限。只控制界面，不是安全边界。
+- 示例在 Provider 页（permissions，同上游）：切换角色，"新建""删除"跟着出现、消失，"批量操作"按 Provider.Can 禁用。
+
 ### CalendarBoard（2026-11-15，仅 Avalonia）
 
 - 整页的月历（上游 CalendarBoard）建在孪生文件 CalendarState 上（同 Calendar：单选、今天、范围、只读、一周的第一天、键盘），只是界面换成每天一个大格子。Value 是选中那天的 ISO 日期，Month 是 yyyy-MM，都默认双向绑定；翻页写回 Month，父级改 Month 时翻过去。进界面前不碰状态：一开始的页先看选中的那天、再看 Month（同上游 useCalendarState 的 selected 优先于 defaultFocused），Month 写在初始化里也不会抢先定下页面。
