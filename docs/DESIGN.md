@@ -1378,6 +1378,15 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 上游靠 CSS 的 position: sticky 贴着滚动区域的底边。Avalonia、WPF 用渲染平移模拟：原来的位置在最近的 ScrollViewer 视口底边下面时往上挪到贴底，最多挪到父元素的顶上（sticky 只在包含块里挪）；挪了就是"盖着下面的内容"（Avalonia 的 :stuck、WPF 的 IsStuck），换成 border 描边加 md 阴影。平移参与命中，按钮照常点得到；ZIndex 设高，盖在前面的内容上面。
 - WinForms 没有渲染变换，子控件是窗口，挪位置会和容器的排版引擎互相改回去：不做吸底，文档里写明停靠在滚动区域外面的底边（一直看得见）。
 
+### Toast：ToasterController、Toaster（2026-11-15）
+
+- 控制器是孪生文件 ToasterController（上游的 createToaster）：TimeProvider 计时（测试里换成 FakeTimeProvider），计时器的回调回到建它的线程上执行（同 LoadingBarController）；列表与每条的变化经 Changed 通知。上游的 options 是对象展开、update 用 Object.assign 合并：桌面上 ToastOptions 是记录，不写（null）就是没给；Update 只换写了的，要去掉某一项时用同一个编号 Show 换掉整条。标题是文字（三个平台的 Alert 标题都是字符串），正文、操作同 Alert（WinForms 的正文是文字、操作是控件）；icon: false 是 ShowIcon = false；duration: Infinity 是 Timeout.InfiniteTimeSpan；setLimit 是 Limit 属性；promise 收 Task 与三个阶段（成功、失败由结果或异常算出）。上游 Toast.tsx 的单元测试测的就是控制器，parity 里把 Toast 对到 ToasterController。
+- 桌面上没有 position: fixed 与 Teleport：Toaster 放在盖住整个窗口的 Grid / Panel 里（Avalonia、WPF），区域停在一角（四周 lg、宽 min(26em, 可用宽)），空白处不挡点击；WinForms 的 ToasterControl 用 FloatCorner（从 FloatButton 挪到 Utils/Layout，改成按位置摆）停在父控件客户区的一角并放到最上层，大小正好包住通知，窗口区域（Region）裁到每条通知的圆角矩形，空白处透出下面的界面。模态对话框打开时上游把区域移进最上层的模态；桌面的对话框是弹出层（另一个窗口），通知在它下面，不做。
+- 每条通知是 Alert（surface，lg 阴影：Avalonia 的 BoxShadow、WPF 的 Effect；WinForms 画不出阴影），重要的 Live 是 assertive，其余 polite（Alert 自己播报）。能关闭时订阅 Alert 的 CloseRequested（订阅了才有关闭按钮）。WinForms 的 AlertControl 写过图标就回不到“按色调选”，要按色调选时换一个新的。
+- 进出场：进场淡入并从所在的边滑进 0.75em（md、enter）；离场淡出（sm、exit）、高度收起（md，间距在每一项里一起收掉）后调控制器的 Remove。Avalonia 是自己的 double 属性加 DoubleTransition（位移、缩放合成一个 TransformOperations），WPF 是“基础值写终点、从当前值起播”的 DoubleAnimation，WinForms 是 Animator 补间的 Signal（没有淡入淡出）。叠放：最新的一条在原位，更早的叠在它后面（每深一层错开 0.75em、缩小 5%，第三层之后隐藏），悬停或聚焦时展开；WinForms 不能缩放，用变窄代替。
+- 计时暂停：指针在通知上（Avalonia、WPF 是区域的指针进出；WinForms 的指针停在子控件上时自己收不到鼠标事件，定时看指针的位置）、焦点在区域里、窗口不在前台（上游是页面切到后台）。剩余时间条按这一轮计时的总时长缩短，暂停时停住：Avalonia 用 RequestAnimationFrame，WPF 用 CompositionTarget.Rendering，WinForms 用定时器。
+- F8：Avalonia 在顶层元素上隧道接按键，WPF 在窗口的 PreviewKeyDown，WinForms 用消息过滤器（所在窗体在前台时）。焦点在一条通知里时 Esc 关闭（WinForms 在 ProcessCmdKey 里）；关闭后焦点交给相邻的通知，没有时回到按 F8 之前的位置。横向拖动关闭：挪开 4 以上跟手（Avalonia、WPF 透明度随距离），超过宽度的 35% 滑出后关闭，不够就弹回；按在按钮、输入框上的不算。
+
 ### ImageCropper（2026-11-15）
 
 - 裁剪框按宽高比放在区域中间、四周至少留 FrameInset，图片在底下平移、缩放，框里永远是图：建在孪生文件 PanZoom 上，给它加了上游的 frame（PanZoomRegion，平移限制按框算）与 cover（缩放下限是盖满框所需的比例）。框、盖满的缩放、初始状态、框里是图片的哪一块、输出的像素大小是孪生文件 ImageCropGeometry（连同 ImageCropShape、ImageCropFileType、ImageCropOutput、ImageCropFormat）。

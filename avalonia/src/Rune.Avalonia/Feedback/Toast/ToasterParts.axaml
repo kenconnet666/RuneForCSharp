@@ -1,0 +1,19 @@
+<!--
+  Toaster 部件的默认外观（vue-tsx-pro 的 toasterRecipe）：每条通知（Alert）lg 阴影；剩余时间条圆角 full、textMuted 50%
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|ToastItem > rune|Alert > Border">
+    <Setter Property="BoxShadow" Value="{DynamicResource Rune.Shadow.Lg}" />
+  </Style>
+  <Style Selector="rune|ToastItem > Border#PART_Progress">
+    <Setter Property="CornerRadius" Value="9999" />
+    <Setter Property="Background">
+      <SolidColorBrush Color="{DynamicResource Rune.Color.TextMuted}" Opacity="0.5" />
+    </Setter>
+  </Style>
+  <Style Selector="rune|Toaster">
+    <Setter Property="FocusAdorner" Value="{x:Null}" />
+  </Style>
+</Styles>

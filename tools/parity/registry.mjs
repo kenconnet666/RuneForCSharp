@@ -211,11 +211,12 @@ export const PLATFORM_COMPONENT_PROP_RENAMES = {
 export const TYPE_RENAMES = {
   // 三个平台都自带 Label：表单标签叫 FieldLabel
   // 三个平台都有 System.DateTime：日期时间的文字叫 DateTimeText
-  Avalonia: { Label: 'FieldLabel', DateTime: 'DateTimeText' },
-  WPF: { Label: 'FieldLabel', DateTime: 'DateTimeText' },
+  // Toast.tsx 的单元测试（文件名 Toast）测的是控制器 createToaster：桌面上是 ToasterController
+  Avalonia: { Label: 'FieldLabel', DateTime: 'DateTimeText', Toast: 'ToasterController' },
+  WPF: { Label: 'FieldLabel', DateTime: 'DateTimeText', Toast: 'ToasterController' },
   // WinForms 自己有 ListControl（ListBox、ComboBox 的基类）
   // WinForms 的提示是扩展组件（同平台的 ToolTip 组件），不是控件；平台自带 TabControl、TabPage：标签叫 TabItemControl
-  WinForms: { List: 'UnorderedList', Container: 'ContainerPanel', Label: 'FieldLabel', Tooltip: 'TooltipProvider', Tab: 'TabItem', DateTime: 'DateTimeText' },
+  WinForms: { List: 'UnorderedList', Container: 'ContainerPanel', Label: 'FieldLabel', Tooltip: 'TooltipProvider', Tab: 'TabItem', DateTime: 'DateTimeText', Toast: 'ToasterController' },
 };
 
 const FORM_NAME = '表单提交的字段名是浏览器的概念；值经 Value 绑定，单选组的互斥由组自己管';
@@ -286,6 +287,13 @@ export const PROPS_NOT_PORTED = {
       .map((prop) => [prop, '表格、列表与里面的格子是 FieldCompare 按行生成的（表格是紧凑的 Table）：外观跟主题，要别的样子用字段的 Cell 换显示的内容'])),
   },
   Carousel: { getKey: '给 Vue 对比列表用的键：桌面上按 ItemsSource 的顺序重建每一张，没有按键复用' },
+  Toaster: {
+    ...Object.fromEntries(['propsList', 'propsItem', 'propsToast']
+      .map((prop) => [prop, '列表、每一项与每条通知（Alert）是 Toaster 按控制器生成的：外观跟主题，按通知不同的内容由 ToastOptions 给（色调、图标、操作）'])),
+    propsCollapse: '离场时收起高度由每一项自己做（没有单独的 Collapse 元素）',
+  },
+  ToastItem: Object.fromEntries(['toast', 'controller', 'fromTop', 'fallbackFocus', 'depth', 'progress', 'propsItem', 'propsToast', 'propsProgress', 'propsCollapse']
+    .map((prop) => [prop, 'ToastItem 由 Toaster 按控制器的通知生成、不单独使用：这些是 Toaster 交给它的'])),
   ImageCropper: {
     handle: '方法直接在控件上：ToBitmap（TS 的 toCanvas）、Encode（toBlob、toFile：PNG 或 JPEG 的字节，存文件、交给上传由调用方做）、Reset',
     propsImage: '图片、遮罩与裁剪框是区域自己画的（不是元素）：没有 img 的跨域属性，外观跟主题',
@@ -367,6 +375,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     ScrollArea: { propsScrollbar: '两条滚动条是平台 ScrollViewer 认的固定部件名：样式里用 ScrollAreaParts.VerticalScrollbar、HorizontalScrollbar 选中' },
   },
   WPF: {
+    Toaster: { propsProgress: '剩余时间条是每一项里的 Border，没有部件样式键：圆角 full、textMuted 50%' },
     ImageCropper: Object.fromEntries(['propsViewport', 'propsToolbar']
       .map((prop) => [prop, '区域与工具条是 ImageCropper 组合的子元素，没有部件样式键：外观跟主题'])),
     Carousel: Object.fromEntries(['propsViewport', 'propsSlide', 'propsPrevious', 'propsNext', 'propsControls', 'propsPause', 'propsDot']
@@ -395,6 +404,7 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     CommandPalette: Object.fromEntries(['propsInput', 'propsListbox'].map((prop) => [prop, '面板里的搜索框、列表是 CommandPalette 建的，外观跟着 TextField、Listbox 的主题样式；部件样式键只有搜索行'])),
   },
   WinForms: {
+    Toaster: { propsProgress: '剩余时间条是每一项里画出来的细条，没有部件属性：圆角 full、textMuted 与表面色各半（控件不能半透明）' },
     ImageCropper: Object.fromEntries(['propsViewport', 'propsToolbar']
       .map((prop) => [prop, '区域与工具条是 ImageCropperControl 组合的子控件，没有部件属性记录：外观跟主题'])),
     Carousel: Object.fromEntries(['propsViewport', 'propsSlide', 'propsPrevious', 'propsNext', 'propsControls', 'propsPause', 'propsDot']

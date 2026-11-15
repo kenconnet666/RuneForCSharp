@@ -288,7 +288,7 @@ QueryTable、ErrorBoundary、JsonViewer、ImageCropper、QuarterCalendar、Carou
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
 | NavList、NavItem、NavGroup、NavSection 共用配方 navListRecipe，部件 root、list、item、link、icon、label、badge、group、trigger、chevron、groupList、flyout、section、sectionLabel、sectionIcon、sectionText（f4065afc） | 外观不变；inspect 的部件名对不上了 | 已跟：inspect 把 NavRow、NavItem、NavGroupHeader、NavGroup、NavSection 归到 nav-list（NavItem 是 link、NavGroup 是 group、NavSection 是 section，分组的列表是 groupList，小节的标题行、图标、文字是 sectionLabel、sectionIcon、sectionText）；WPF 的 NavRowParts 补上 Chevron 的名字 |
-| Menu 配方（档位 size，部件 panel、content、item……）、Toaster 配方（档位 placement、max、stack、progress） | Menu 已做；Toaster 还没做 | Menu 2026-11-14 照新的（Size 档位，部件见 MenuParts、MenuItemBaseParts）；Toaster 做时照新的 |
+| Menu 配方（档位 size，部件 panel、content、item……）、Toaster 配方（档位 placement、max、stack、progress） | 都已做 | Menu 2026-11-14 照新的（Size 档位，部件见 MenuParts、MenuItemBaseParts）；Toaster 2026-11-15 照新的（Placement、Max、Stack、Progress，Avalonia 的剩余时间条 PART_Progress） |
 | AppShell 配方：档位 sidebarCollapsible、fullscreenable、skipLink、pageScrollbar 可在 components.AppShell 给默认，22 个部件（5785adb4） | 档位已有；部件名还没逐个对 | 跟 AppShell 的 admin、mixed 示例时对部件 |
 | Transfer 配方（68ef26a9） | 还没做 | 做时照新的 |
 | Text 截断与换行补一张 wrap="pretty" 的卡片，四张两行两列（aecc847d） | 三个平台的示例 | 已跟：加了第四张（桌面上 Pretty 同普通换行） |
