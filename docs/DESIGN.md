@@ -1464,6 +1464,12 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### AuthLayout（2026-11-16，仅 Avalonia）
+
+- 认证页版式：Hero（品牌区）、Content（表单）、Tools（结束边上角的工具）三块自己排版。有 Hero 且自己够 64rem 宽时左右分栏 1.15 : 1（上游 minmax(0, 1.15fr) minmax(0, 1fr)），品牌区铺满整高、表单区内容垂直居中；窄了品牌区按内容高放在顶部、表单区顶部 xl 内边距、内容贴近顶部；没有 Hero 时只有居中的表单区。工具区按整页定位在结束边上角（离两边 md），在最上层；从右往左时平台整体镜像。
+- 底色是 Background（默认 background，样式在 AuthLayoutParts.axaml），自己画；表单区是 Border，没有字号，内边距（lg、窄时顶部 xl）在代码里按字号算。上游的 minHeight: 100dvh 在桌面上是放进窗口时拉满。品牌区的外观（上游 propsHero）按部件名 Border#PART_Hero 写样式。
+- 示例：login（同上游；品牌区 accentSoft 底、四周 xl 的样式写在示例里）。
+
 ### AsideLayout（2026-11-16，仅 Avalonia）
 
 - 主栏 + 侧栏：Children 是主栏的块、Aside 是侧栏的块，各是一个竖排、隔 Gap（默认 md）的 Flex（部件 AsideLayoutParts.Main、Aside，侧栏的读屏名称是 AsideLabel）。按自己的宽度决定叠不叠（上游的容器查询）：不到 56rem 时叠成一列、侧栏在后；够宽时侧栏 AsideWidth（Length，默认 26rem）、主栏占满剩下的，顶端对齐；从右往左时平台整体镜像，侧栏到左边。
