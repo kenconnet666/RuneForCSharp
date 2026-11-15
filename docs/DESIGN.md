@@ -707,7 +707,7 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   与固定的格：子控件序号小的叠在上面，前面的列本来就在后面的列上面，只有表头要提到最上；透明的格只透出父控件（行）的底色，不透出兄弟控件，正好盖住滚到下面的格。
   Avalonia 的行线吸附不能用 Math.Round：它是银行家舍入，行高带 .5 时一条线的两边差出 2 像素。示例在 ScrollArea 页（both）。
 - 像素对照（plans）：Avalonia 0.08% / 0.12%、WPF 0.05% / 0.38%、WinForms 0.32% / 0.41%。剩下的主要是表头那一行：上游是文字加行内的徽标（vertical-align: middle），
-  行盒撑到 21.99，我们的 Flex 是 21，下面的行线差半个像素。示例：plans；invoice 要等 ToggleGroup，column-table 要等 ColumnTable。
+  行盒撑到 21.99，我们的 Flex 是 21，下面的行线差半个像素。示例：plans；invoice 要等 ToggleGroup；column-table 在 ColumnTable 一节（仅 Avalonia）。
 
 ### ItemList（2026-11-14）
 
@@ -1127,7 +1127,7 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 颜色是色调的实底（ToneFill，默认 accent）：折线 1.5 像素、圆头；面积 15%；柱 85%，标出最后一个值时前面 40%、最后一根实色；最后一个点 6 像素，外面一圈表面色。
   高度默认 2em（控件自己的 Height 盖过它；TS 的 height 是 CSS 长度）；数据是 `IReadOnlyList<decimal?>`，纵向范围 Domain 是 (double? Min, double? Max)。
 - WinForms：Sparkline 是元素、SparklineControl 是单元素宿主；控件画不到自己外面，标出最后一个点时结束边与上下各让出点的半径加一圈（TS 的点有一半伸到图外）。
-- 示例：Sparkline 页的 cards（in-table 等 ColumnTable）与 Stat 页的 live（每 2 秒推一个新值）。
+- 示例：Sparkline 页的 cards（in-table 2026-11-16 随 ColumnTable 补上，仅 Avalonia）与 Stat 页的 live（每 2 秒推一个新值）。
 
 ### Stat、StatGroup（2026-11-14）
 
@@ -1463,6 +1463,24 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 一开始就开着（IsOpen 写在初始化里）：等外壳进了窗口再弹出（平台的弹出层要锚点已经在窗口里）。WinForms 的日历要有窗口句柄才建网格，弹层还没显示时 CreateControl 不给看不见的窗口建子控件的句柄，量尺寸前逐个建。
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
+
+### ColumnTable 与列定义（2026-11-16，仅 Avalonia）
+
+- 列定义是孪生文件 TableColumns.cs（以后的 DataTable 也用）：DataTableColumn(Key, Header) 记录，Value、Cell、Type（ColumnType 枚举）、Format（NumericFormat）、Width、MinWidth、Align（TableAlign）、Wrap、Empty、Statuses、Summary 是 init 属性；
+  这一轮只放 ColumnTable 用得到的，排序、筛选、编辑、固定、调整宽度等 DataTable 再加。取值同 FieldCompare：Value 函数，或按 Key 取同名属性（字典按键）。
+  上游 summary 的 'sum' 或函数在这里是 ColumnSummary.Sum / ColumnSummary.Of(rows => …)。Cell 返回 null 时按类型显示值（上游是渲染空）：只有几行要换内容时不用自己格式化其余的行。
+- TableColumns 的计算照 columns.ts：TypeOf（写了 Type、Format 或相加的合计算数字；否则看第一个非空值，字符串不猜）、AlignOf（数字类靠结束边）、Numeric（数值与十进制字符串换成 decimal，不经过浮点）、
+  FormatCell（数字、金额、百分比按 NumericFormat，列的 Format 没另写样式时换成类型的样式，百分比默认最多 1 位小数；文件大小 1000 进位、取整后进到 1000 的换下一档；日期按 TimeText 的 medium，日期时间加 short 的时间）、
+  Sum（decimal 相加，没有数值时 null）、RepeatedRowSpans（mergeRepeated 的跨行数，后一列不跨前一列的分组）。显示（上游的 useColumnDisplay）在 ColumnTable 里：空值是列的 Empty 或语言包的 EmptyValue，状态是 StatusBadge。
+- ColumnTable 本身就是 Table（StyleKeyOverride 用 Table 的主题，外观属性同 Table），按列定义生成表头、表体、表尾。数据是 ItemsSource（Table 自己有 Rows），实现了 INotifyCollectionChanged 的集合增删时整张表重建；
+  每行的 DataContext 是那一行的数据。合并：GetCellSpan（上游 cellSpan，CellSpan 是它返回的记录）优先，其次 MergeRepeated；返回 0 的格不生成。没有行时一格跨满所有列、居中、textMuted 的 Empty（默认"暂无数据"）。
+  有一列写了 Summary 时多一行表尾（第一列没写时是 SummaryLabel，默认"合计"）。部件（上游 propsHeaderCell、propsRow、propsCell、propsSummaryCell）是 ColumnTableParts 的名字，按行定制写样式或绑定行的 DataContext（上游可以传按行计算的函数）。上游的 getKey 不需要（不比对虚拟 DOM）。
+- Table 加了合并单元格：TableCell.RowSpan、ColumnSpan（上游 rowspan、colspan）。网格按 HTML 表格的规则排格（每格放在本行第一个没被上面跨行的格占住的列，跨行不超出所在的部分）；跨列的格要的宽度比那几列合起来的大时差的平分，
+  跨行的格高出来的加到它的最后一行。分隔线改成画在格上（同 CSS 的 td 下边线）：跨过的行线在合并格那段断开；跨行的格用它所在那一行的底色（指针下的行、斑马纹不染到它）。
+- 单元格的裁剪框是含内边距的整格（同 CSS 的 td）：格排在内边距里、自己不裁（主题里 ClipToBounds 关掉），网格给它设 Clip 几何。原来格自己裁在内容区，表格里迷你图最后的点被切掉一半。
+  内边距不交给格自己的 ContentPresenter：布局取整会把 6.125 的内边距取成 6，行高比上游（内容加精确的内边距）矮，plans 暗色多出一整行的差异。网格本身画行时也不裁（固定的那几层才裁到自己的区域），不然高度带小数时裁掉吸附到整像素的最后一条线。
+- 像素对照：Table 页 column-table 0.07% / 0.08%，plans 不变（0.08% / 0.12%）。示例：Table 页的 column-table（询价比价单，同上游）、Sparkline 页的 in-table（同上游；迷你图高 1.5em 写成 21 像素，表格正文 md 字号）。
+- FieldCompare 的 CompareField 是这套列定义之前的独立记录；上游的字段就是 DataTableColumn。改成共用要动 WPF、WinForms 的 FieldCompare，等那两个平台恢复时一起改。
 
 ### CodeGroup（2026-11-16，仅 Avalonia）
 

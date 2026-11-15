@@ -427,7 +427,7 @@ defineTheme / defineLang 忽略 undefined——网页专用或 C# 没有 undefin
 | ContextMenu 触屏、触控笔按住 700ms 打开 | 已做 | 不用改：Avalonia 的长按手势会发 ContextRequested；WPF、WinForms 由 Windows 的按住相当于右键发右键菜单 |
 | NavList 紧凑分组触屏点图标弹出子项 | 紧凑时的弹出还没做（等 HoverCard） | 做时照新的：悬停、聚焦、点按都弹出，点外面、点了链接收起 |
 | 页面组合文案 notificationsNoMatch | 生成文件 | 重新生成 PatternsMessages |
-| ColumnTable empty；TagsInput 回车加打的字；Splitter、ResizeHandle 粗指针的命中区；ConditionBuilder、CodeEditor、Autocomplete 在只读 / 不可用表单里；NavBar 下拉里的徽标；Diagram fitView | Splitter、ResizeHandle、TagsInput、Autocomplete 已做，其余还没做 | 粗指针（触屏）扩命中区是网页的 pointer: coarse，桌面上不涉及（分隔条本来整条 space.md 都能按）；TagsInput 照新的做（允许自定义值时打字不自动高亮建议，回车加的是打的字，要选建议按 ↓）；Autocomplete 的只读、不可用跟着所在的 Field（TextBox 的只读与平台的 IsEnabled），列表不弹出；其余做时照新的 |
+| ColumnTable empty；TagsInput 回车加打的字；Splitter、ResizeHandle 粗指针的命中区；ConditionBuilder、CodeEditor、Autocomplete 在只读 / 不可用表单里；NavBar 下拉里的徽标；Diagram fitView | Splitter、ResizeHandle、TagsInput、Autocomplete 已做；ColumnTable 已做（2026-11-16，仅 Avalonia，Empty 照新的），其余还没做 | 粗指针（触屏）扩命中区是网页的 pointer: coarse，桌面上不涉及（分隔条本来整条 space.md 都能按）；TagsInput 照新的做（允许自定义值时打字不自动高亮建议，回车加的是打的字，要选建议按 ↓）；Autocomplete 的只读、不可用跟着所在的 Field（TextBox 的只读与平台的 IsEnabled），列表不弹出；其余做时照新的 |
 | usePersistentState、useMediaQuery 水合；sameValue 比 Map / Set；tableToXlsx 的时区 | 网页专用或还没做 | 不涉及 |
 
 锁定跟到 0.24.0（6e7b07b7）：页面组合文案表多了 notificationsNoMatch，docs-gen 的页面清单更新；token、图标、配方、语言包没变。
