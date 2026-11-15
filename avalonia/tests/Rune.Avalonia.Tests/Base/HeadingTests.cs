@@ -1,6 +1,8 @@
 using Avalonia;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
+using Avalonia.LogicalTree;
+using Avalonia.VisualTree;
 using Avalonia.Media;
 using Avalonia.Styling;
 
@@ -33,5 +35,33 @@ public class HeadingTests
         Assert.Equal(Enumerable.Range(1, 6), levels.Select(h => ControlAutomationPeer.CreatePeerForElement(h).GetHeadingLevel()));
         // 字号用 Size 改，级别不变
         Assert.Equal((Token("Rune.FontSize.Lg"), 2), (smaller.FontSize, ControlAutomationPeer.CreatePeerForElement(smaller).GetHeadingLevel()));
+    });
+
+    [Upstream("prose-elements", "标题有 id 且 anchor 时末尾有指向本节的链接；没有 id 时不加")]
+    [Fact]
+    public Task Anchors_need_a_name_and_raise_the_section_id() => HeadlessUi.Run(() =>
+    {
+        var install = new H2 { Name = "install", Anchor = true, Text = "安装" };
+        var unnamed = new H2 { Anchor = true, Text = "没有 id" };
+        var window = HeadlessUi.Show(new StackPanel { Children = { install, unnamed } });
+
+        var anchor = install.GetLogicalDescendants().OfType<ButtonBase>().Single();
+        Assert.Equal((HeadingParts.Anchor, "链接到本节"), (anchor.Name, global::Avalonia.Automation.AutomationProperties.GetName(anchor)));
+        Assert.Equal("安装", install.Text);
+        Assert.Empty(unnamed.GetLogicalDescendants().OfType<ButtonBase>());
+        // 平时透明，悬停标题时显示
+        Assert.Equal(0, anchor.Opacity);
+        string? requested = null;
+        install.AnchorRequested += (_, e) => requested = e.Id;
+        anchor.RaiseEvent(new global::Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
+        Assert.Equal("install", requested);
+
+        // 改了文字照样跟着 # 按钮；关掉 Anchor 只剩文字
+        install.Text = "安装与升级";
+        Assert.Single(install.GetLogicalDescendants().OfType<ButtonBase>());
+        install.Anchor = false;
+        HeadlessUi.Flush(window);
+        Assert.Equal("安装与升级", install.Text);
+        Assert.Empty(install.GetLogicalDescendants().OfType<ButtonBase>());
     });
 }
