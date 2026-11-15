@@ -484,6 +484,8 @@ export const PLATFORM_PROPS_NOT_PORTED = {
     ...Object.fromEntries(['SegmentedField', 'DateField', 'TimeField'].map((name) => [name, Object.fromEntries(['propsRoot', 'propsClear', 'propsIcon']
       .map((prop) => [prop, '外壳是 SegmentedFieldControl 自己画的（ControlShell，同 SelectControl），图标、清空按钮是组合的子控件：没有部件属性记录']))])),
     DateSegmentGroup: Object.fromEntries(['propsSegment', 'propsLiteral'].map((prop) => [prop, '各段与分隔符是 DateSegmentGroupControl 自己画的（同 OtpFieldControl），没有部件属性记录：外观跟主题'])),
+    Calendar: Object.fromEntries(['propsMonths', 'propsHeader', 'propsPrevious', 'propsNext', 'propsHeading', 'propsGrid', 'propsWeekday', 'propsWeekNumber', 'propsCell', 'propsCellButton', 'propsFooter']
+      .map((prop) => [prop, '网格是 CalendarGridControl 自己画的（表头、周数、格子、区间那一条），页头是 IconButtonControl、ButtonControl 子控件：没有部件属性记录；格子大小是 CellSizeEm，内容用 CellText、DrawCell'])),
     FormSection: Object.fromEntries(['propsHeader', 'propsHeading', 'propsTrigger', 'propsChevron', 'propsDescription', 'propsExtra', 'propsBody', 'propsCollapse']
       .map((prop) => [prop, '标题栏、标题、展开按钮、说明、操作区、栅格与展开收起层是 FormSectionControl 组合的子控件：没有部件属性记录，外观跟主题；栅格是 Grid 属性'])),
     FormErrorSummary: Object.fromEntries(['propsTitle', 'propsList', 'propsLink']
