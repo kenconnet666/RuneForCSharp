@@ -102,6 +102,10 @@ animated-number 是上游示例的问题（#8，Descriptions 的容器查询在 
 Card 页头、页脚写文字时 ContentPresenter 生成的 TextBlock 用字体自己的行距（改成 Leading × 字号）。之后 basic 0.06%、change 0.75%、group 0.09%、
 loading 1.52%、live 3.92%；app-shell 的 admin 2.16%、mixed 0.27%。
 
+badge 页（2026-11-16 重出上游截图：shapes 的"圆点"一行移走了，新增 in-context、status-dot、statuses）：shapes 1.00%、status-dot 0.85%、statuses 0.32%、
+tag-selectable 0.52%、tag 2.02%、tag-removable 2.42%；in-context 5.65%（我们矮 4 像素）、matrix 7.13%（高 3 像素），待收敛。
+text 页（同日重出）：list-icons 0.95%、numeric 1.03%、overflow 1.19%、lists 1.35%、tones 1.66%、scale 4.88%、inline 7.71%、links 7.80%、headings 14.96%（我们高 26 像素），待收敛。
+
 pivot-table 页（2026-11-16，仅 Avalonia）：count 0.43% / 0.43%；heatmap 1.47% / 1.51%（亮 / 暗）。数字列的宽度按内容比例分，上游的 system-ui 在 Windows 11 上是
 Segoe UI Variable，数字比我们的 Segoe UI 宽约 9%（14px 的"128.4"上游 36.2、我们 33.2），数字列分得宽一点、维度列窄 10 像素，热力底色的列边界跟着错开；字体是全局的取舍（DESIGN §6 的"字体"），不在透视表里改。
 table 页加了 column-table（0.07% / 0.08%），plans 不变。
