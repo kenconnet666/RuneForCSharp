@@ -1469,6 +1469,18 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### PeoplePicker、PeoplePickerPanel（2026-11-16，仅 Avalonia）
+
+- 数据是孪生文件 People.cs：PeopleEntry（Id、Type、Name、Description、Avatar、HasChildren；Key 是"类型:标识"，ToValue 去掉下级）、PeopleNode（部门带下级）、
+  PeopleTypes（user、department、role，接入方加类型就是另一个字符串）、PeopleSource（三个委托：Children、Search、Roles，带取消令牌）与 PeopleSource.Local（整棵在客户端的组织架构）。
+  上游的 id 是 string | number，C# 统一成字符串。
+- 面板：左边搜索框、浏览方式（组织架构 / 角色 / 最近，ToggleGroup）、面包屑、全选、列表（ItemList，hoverable、compact），右边 surfaceMuted 的框里是已选的（表头"已选 n / max"与清空）；
+  宽于 36rem 时左 3 右 2，否则上下排。请求只采用最后一次（换部门、改搜索词、离开界面时取消），搜索停下 300 毫秒再搜（Task.Delay，同 RemoteOptions）。
+- 上游的 recentKey 把"最近"存在浏览器里；桌面上同 ThemeSwitcher、Splitter，由使用方存：Recent 双向绑定，null 时没有"最近"页。头像地址桌面上不下载，人员显示名字的头一个字。
+- PeoplePicker 是 SelectBase 的子类（外壳、标签、Backspace、读屏的组合框都是基类的），值是 Entries；打开的不是弹出层而是对话框（Dialog.ShowAsync，lg，标题是占位文字），
+  里面改的是草稿，确定才写回；覆盖 Toggle 不开基类的弹出层，尾部的箭头换成人员图标。基类为它加了可覆盖的 Multiple（Max 不是 1 时显示标签）与 DefaultPlaceholder（选择人员）。
+- 像素对照：remote 0.04%、panel 0.77%（左边比上游矮 2px）、field 1.01%（标签那一行比上游矮 0.5px，同 Select、TreeSelect 的标签行；标签的 ×）。
+
 ### Cascader、Area（2026-11-16，仅 Avalonia）
 
 - Cascader 也是 SelectBase 的子类：值是 Values（第一级到选中节点的 key 路径，没有选择时 null；单选的 Value 不用），触发框里列出的是这一条路径（ShowAllLevels、Separator），

@@ -492,7 +492,7 @@ defineTheme / defineLang 忽略 undefined——网页专用或 C# 没有 undefin
 |---|---|---|
 | Collapse 的内容区宽度就是容器宽度（网格列 minmax(0, 1fr)、内容 min-width: 0），不再被最宽的内容撑开（2c45e89e） | 三个平台本来就按给的宽度量、按容器宽度排 | 不用改：Avalonia、WPF 按可用宽度量内容、按最终宽度排；WinForms 的 VerticalStack 取内容宽与给的宽度里小的那个 |
 | 新增 SearchField：搜索图标、清空、默认名称与占位文字是 selectSearch；onSearch 在停手 delay、回车、清空时调用，同一个词不重复，父级从外面改值不触发 | 已做 | 三个平台的 SearchField（WinForms 是 SearchFieldControl）：事件叫 SearchRequested（Search 是立即搜索的方法），Delay 是 TimeSpan。桌面分不出"父级改值"与"输入"：没有焦点时改的 Text 算从外面改 |
-| Select、Cascader、TreeSelect、Transfer、PeoplePicker、JsonViewer、表头筛选的搜索框换成 SearchField（有清空按钮） | Select、Transfer、TreeSelect、Cascader（Avalonia）已换；其余组件还没做 | 做时用 SearchField |
+| Select、Cascader、TreeSelect、Transfer、PeoplePicker、JsonViewer、表头筛选的搜索框换成 SearchField（有清空按钮） | Select、Transfer、TreeSelect、Cascader、PeoplePicker（Avalonia）已换；其余组件还没做 | 做时用 SearchField |
 | 新增 Sub、Sup、Del、Ins、Strike（Text 系列） | 已做 | Avalonia、WPF 是行内文字：Sub、Sup 是 Run（基线对齐不从外层 Span 继承；WPF 用 TextTop / TextBottom，平台的 Superscript 抬得太高），Del、Ins、Strike 是带主题的 Span；WinForms 是单独的控件（同 Code、Mark） |
 | 新增 Figure（caption、captionSide、align、propsCaption） | 已做 | 三个平台；说明在下（top 时在上）、次要色 sm、和内容隔 space.sm，读屏名称取说明。WinForms 的 FigureControl 是竖排的 FlexControl，对齐叫 FigureAlign（Align 是 Flex 自己的） |
 | 新增 AspectRatio（ratio 默认 16 / 9，内容铺满，图片按 cover 裁切） | 已做 | 三个平台；Ratio 是数（宽 ÷ 高），不收 CSS 的"4 / 3"写法；Avalonia、WPF 里的 Image 默认 UniformToFill，WinForms 的 PictureBox 没有 cover，自己选 SizeMode |
