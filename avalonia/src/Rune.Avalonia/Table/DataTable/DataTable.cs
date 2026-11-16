@@ -117,8 +117,24 @@ public partial class DataTable : Control
     /// <summary>斑马纹：隔行浅色底。</summary>
     public static readonly StyledProperty<bool> StripedProperty = AvaloniaProperty.Register<DataTable, bool>(nameof(Striped));
 
+    /// <summary>详情：给出一行展开后下面那一行的内容（控件或文字）；给了时多一列展开按钮。</summary>
+    public static readonly StyledProperty<Func<object, object?>?> RenderDetailProperty = AvaloniaProperty.Register<DataTable, Func<object, object?>?>(nameof(RenderDetail));
+
+    /// <summary>这一行有没有详情（没有时没有展开按钮）；不写时都有。</summary>
+    public static readonly StyledProperty<Func<object, bool>?> HasDetailProperty = AvaloniaProperty.Register<DataTable, Func<object, bool>?>(nameof(HasDetail));
+
+    /// <summary>展开了的行的 key（双向绑定）。</summary>
+    public static readonly StyledProperty<IReadOnlyList<object>> ExpandedRowsProperty =
+        AvaloniaProperty.Register<DataTable, IReadOnlyList<object>>(nameof(ExpandedRows), [], defaultBindingMode: BindingMode.TwoWay);
+
     /// <summary>勾选列的宽度（像素，同上游 SELECT_WIDTH）。</summary>
     internal const double SelectWidth = 44;
+
+    /// <summary>详情列（展开按钮）的宽度（像素，同上游 DETAIL_WIDTH）。</summary>
+    internal const double DetailWidth = 40;
+
+    /// <summary>详情行的估计高度（像素）：建出来量过之后以实际高度为准。</summary>
+    internal const double DetailHeight = 160;
 
     readonly Border frame = new() { ClipToBounds = true };
     readonly ScrollArea scroller = new() { Axis = ScrollAreaAxis.Both };
@@ -199,6 +215,25 @@ public partial class DataTable : Control
     /// <summary>调整过的列宽。</summary>
     public IReadOnlyDictionary<string, double>? ColumnWidths { get => GetValue(ColumnWidthsProperty); set => SetValue(ColumnWidthsProperty, value); }
 
+    /// <summary>详情。</summary>
+    public Func<object, object?>? RenderDetail { get => GetValue(RenderDetailProperty); set => SetValue(RenderDetailProperty, value); }
+
+    /// <summary>这一行有没有详情。</summary>
+    public Func<object, bool>? HasDetail { get => GetValue(HasDetailProperty); set => SetValue(HasDetailProperty, value); }
+
+    /// <summary>展开了的行。</summary>
+    public IReadOnlyList<object> ExpandedRows { get => GetValue(ExpandedRowsProperty); set => SetValue(ExpandedRowsProperty, value); }
+
+    /// <summary>这一行有详情（给了 RenderDetail，HasDetail 不是 false）。</summary>
+    internal bool RowHasDetail(object row) => RenderDetail is not null && (HasDetail?.Invoke(row) ?? true);
+
+    /// <summary>展开、收起一行的详情：写回 ExpandedRows。</summary>
+    internal void ToggleDetail(object row)
+    {
+        var key = KeyOf(row);
+        SetCurrentValue(ExpandedRowsProperty, ExpandedRows.Contains(key) ? [.. ExpandedRows.Where(item => !Equals(item, key))] : [.. ExpandedRows, key]);
+    }
+
     /// <summary>可以调整列宽。</summary>
     public bool Resizable { get => GetValue(ResizableProperty); set => SetValue(ResizableProperty, value); }
 
@@ -264,10 +299,13 @@ public partial class DataTable : Control
         else if (change.Property == SelectedProperty || change.Property == RowToneProperty || change.Property == IsRowSelectableProperty) surface.SyncRows();
         else if (change.Property == SelectionModeProperty || change.Property == IsLoadingProperty || change.Property == EmptyProperty || change.Property == SummaryLabelProperty
                  || change.Property == ResizableProperty || change.Property == ColumnMenuProperty || change.Property == CellNavigationProperty
-                 || change.Property == EditTriggerProperty || change.Property == ValidateRowProperty || change.Property == DensityProperty || change.Property == StripedProperty || change.Property == GetKeyProperty) surface.Rebuild();
+                 || change.Property == EditTriggerProperty || change.Property == ValidateRowProperty || change.Property == RenderDetailProperty
+                 || change.Property == HasDetailProperty || change.Property == DensityProperty || change.Property == StripedProperty || change.Property == GetKeyProperty) surface.Rebuild();
         if (change.Property == VariantProperty || change.Property == DensityProperty) SyncFrame();
         // 只是宽度变了：重排，不重建（拖动中的手柄要留着）
         if (change.Property == ColumnWidthsProperty) surface.Relayout();
+        // 展开、收起：各行的展开按钮跟着改，详情行在量的时候建或收（不重建各行，按钮的焦点留着）
+        else if (change.Property == ExpandedRowsProperty) surface.SyncDetails();
     }
 
     void OnItemsChanged(object? sender, NotifyCollectionChangedEventArgs e) => Refresh();
@@ -489,6 +527,15 @@ public static class DataTableParts
 
     /// <summary>表头的全选框。</summary>
     public const string SelectAll = "PART_SelectAll";
+
+    /// <summary>表头的详情列。</summary>
+    public const string DetailHeaderCell = "PART_DetailHeaderCell";
+
+    /// <summary>每行的展开按钮。</summary>
+    public const string DetailToggle = "PART_DetailToggle";
+
+    /// <summary>展开的详情那一行。</summary>
+    public const string DetailRow = "PART_DetailRow";
 
     /// <summary>每行的选择列。</summary>
     public const string SelectCell = "PART_SelectCell";

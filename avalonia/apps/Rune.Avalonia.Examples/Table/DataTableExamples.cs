@@ -4,7 +4,7 @@ using Avalonia.Controls.Documents;
 
 namespace Rune.Avalonia.Examples;
 
-/// <summary>DataTable 页的示例（vue-tsx-pro 文档站 table/DataTable）：已做的功能的示例：一万条订单、表头筛选与列菜单、就地编辑、单选、加载与空状态；其余（拖动、详情行等）随功能补上。</summary>
+/// <summary>DataTable 页的示例（vue-tsx-pro 文档站 table/DataTable）：已做的功能的示例：一万条订单、表头筛选与列菜单、就地编辑、展开行、单选、加载与空状态；其余（拖动、分组表头等）随功能补上。</summary>
 static class DataTableExamples
 {
     public static Example[] All =>
@@ -12,6 +12,7 @@ static class DataTableExamples
         new("DataTable", "orders", "一万条订单", "列定义里 Type 决定默认的格式与对齐（Number、Currency、Percent、FileSize、Date、DateTime，跟随语言；不写时按第一个值推断，数字靠右），Cell 自定义单元格，Value 给排序用的值；点可排序的列标题在升序、降序、不排之间切换（本地按数字、日期、按语言的文字排，ManualSort 时交给服务端）。SelectionMode=\"multiple\" 多一列勾选框；Sticky 的列横向滚动时固定在两侧；Resizable 时可以拖动或用键盘调整列宽，ColumnWidths 双向绑定可以存到本地设置里。工具栏（搜索、批量操作、分页）用现有组件组合，不内置。", Orders),
         new("DataTable", "columns", "采购单：表头筛选、多列排序与列菜单", "列定义写 Filter 时列标题上有筛选按钮：ColumnFilter.Values 列出这一列出现过的值（状态列按阶段顺序、显示状态名），也可以给 Options，ColumnFilter.Keyword 是输入关键字；Filters 双向绑定各列选中的值，默认在本地筛，ManualFilter 时交给服务端。MultiSort 时点列标题只按这一列排，按住 Shift 点是追加一列（列标题上标着次序），排序写在 Sorts。ColumnMenu 在列标题结尾放 ⋮：排序、固定在开头 / 结尾、前后移动、隐藏，写回 ColumnPins、ColumnOrder、HiddenColumns，都能双向绑定、存起来（上游记在浏览器里；这里在内存里，“还原列设置”清掉）。", Columns),
         new("DataTable", "editable", "采购申请明细：就地编辑与校验", "列写 Editable（或按行判断的 IsEditable）时可以就地编辑，表格随之变成网格：方向键在格之间走，只有一格能 Tab 进入；在可编辑的格上按 Enter、F2、双击或直接打字开始编辑，Enter 提交、Tab 提交并到下一个可编辑的格、点开别处提交、Esc 放弃。默认编辑器按列选（状态列是 Select，数字类是 NumberField，其余是 TextField），Editor 自己写（这里的交期是 DateField）。列的 Validate 拦下不合理的值，CellChange 写回，返回文字时是不接受的原因（接口拒绝），编辑器留着并显示它；ValidateRow 返回整行的问题，标在对应的格上（红框，悬停与读屏都能知道原因）。", Editable),
+        new("DataTable", "details", "供应商改进建议：展开行", "RenderDetail 给出一行的详情：多一列展开按钮（读屏念出展开状态），展开的行下面多一行跨全部列的详情，虚拟滚动按真实高度测量；HasDetail 决定哪些行能展开，ExpandedRows 可以双向绑定。详情横向滚动时贴着可见区域的起始边，宽度不超过可见区域。", Details),
         new("DataTable", "single", "单选：选一家报价", "SelectionMode=\"single\" 时每行是一个单选框：点击选中，选中的行整行高亮；没有全选，取消选择用 SelectionBar 的清空或把 Selected 设为空列表。", Single),
         new("DataTable", "states", "加载、空状态与外观", "IsLoading 时表体换成骨架行（首次加载与刷新一样，不另加进度条）；没有数据显示 Empty。Density、Variant、Striped 与静态表格相同。", States),
     ];
@@ -236,6 +237,66 @@ static class DataTableExamples
             return null;
         };
         return new Flex { Direction = FlexDirection.Column, Gap = Space.Sm, Align = FlexAlign.Stretch, Children = { table, saved } };
+    }
+
+    record Proposal(string Code, string Supplier, string Part, string Kind, decimal Saving, string Status, string? Content = null, string? Impact = null, string[]? Files = null, string? Submitted = null);
+
+    static Control Details()
+    {
+        var statuses = new StatusMap
+        {
+            ["draft"] = new("草稿", StatusTone.Neutral),
+            ["reviewing"] = new("评估中", StatusTone.Info),
+            ["accepted"] = new("已采纳", StatusTone.Success),
+            ["rejected"] = new("未采纳", StatusTone.Danger),
+        };
+        Proposal[] proposals =
+        [
+            new("GYS-2026-031", "供应商甲", "显示器支架", "材料替代", 5600, "reviewing",
+                "支架材料由 7050 铝合金改为 2024 铝合金，加工余量减少 30%，单件工时由 6.5 h 降到 4.8 h。", "强度裕度由 1.42 降到 1.31，仍满足设计要求；需补做一项静力试验。",
+                ["材料对比报告.pdf", "工时测算.xlsx"], "2026-10-08 张工"),
+            new("GYS-2026-034", "供应商乙", "包装纸箱", "供应商切换", 2380.5m, "accepted",
+                "引入第二供应商，年采购量 1,200 件分两家，单价由 186 元降到 162 元。", "新供应商需完成样品验收，预计 8 周。", ["报价单.pdf"], "2026-09-21 李工"),
+            new("GYS-2026-037", "供应商丙", "线束支架", "流程优化", 980, "rejected", "钣金件由数控铣改为冲压成形。", "批量不足 500 件，模具费摊销后不降反升，未采纳。", Submitted: "2026-09-15 王工"),
+            new("GYS-2026-040", "供应商甲", "机柜面板", "产品改进", 0, "draft"),
+        ];
+        Control Detail(object row)
+        {
+            var proposal = (Proposal)row;
+            // 附件：回形针与链接，没有时写"无"
+            Control files = new Small { Tone = TextTone.Muted, Text = "无" };
+            if (proposal.Files is { Length: > 0 } list)
+            {
+                var links = new Flex { Gap = Space.Md, Wrap = FlexWrap.Wrap };
+                foreach (var file in list)
+                    links.Children.Add(new Flex { Align = FlexAlign.Center, Gap = Space.Xs, Children = { new Icon { Data = Lucide.Paperclip }, new Link { Href = new Uri("https://example.com/files"), Content = file } } });
+                files = links;
+            }
+            var descriptions = new Descriptions { Columns = 2, Size = TextSize.Sm };
+            descriptions.Items.AddRange(
+            [
+                new DescriptionItem { Label = "建议内容", Value = proposal.Content, Span = 2 },
+                new DescriptionItem { Label = "影响评估", Value = proposal.Impact, Span = 2 },
+                new DescriptionItem { Label = "附件", Value = files },
+                new DescriptionItem { Label = "提交", Value = proposal.Submitted },
+            ]);
+            return descriptions;
+        }
+        var table = new DataTable
+        {
+            ItemsSource = proposals, GetKey = row => ((Proposal)row).Code, RenderDetail = Detail, HasDetail = row => ((Proposal)row).Content is not null, ExpandedRows = ["GYS-2026-031"],
+            Columns =
+            [
+                new("Code", "建议编号") { Width = 132, Sticky = ColumnSticky.Start },
+                new("Supplier", "供应商") { Width = 112 },
+                new("Part", "零件") { Width = 140 },
+                new("Kind", "类型") { Width = 104 },
+                new("Saving", "预计单价（元）") { Width = 156, Format = new NumericFormat { MinimumFractionDigits = 2, MaximumFractionDigits = 2 } },
+                new("Status", "状态") { Width = 112, Statuses = statuses },
+            ],
+        };
+        AutomationProperties.SetName(table, "供应商改进建议");
+        return table;
     }
 
     record Quote(string Id, string Supplier, decimal Price, int Days, string Rating);

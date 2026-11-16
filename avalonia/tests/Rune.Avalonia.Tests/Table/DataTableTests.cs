@@ -214,4 +214,34 @@ public class DataTableTests
         // 调整宽度不重建表头：手柄还是那一个
         Assert.Same(resizer, table.Surface.Header!.GetLogicalChildren().OfType<ColumnResizer>().Single());
     });
+
+    [Fact]
+    [Upstream("DataTable 的详情行", "展开按钮带 aria-expanded 与 aria-controls；展开后下面多一行跨全部列的详情，行号随之顺延；hasDetail 为 false 的行没有按钮")]
+    public Task Detail_rows_expand_below_their_row() => HeadlessUi.Run(() =>
+    {
+        var (table, window) = Render(new DataTable
+        {
+            ItemsSource = People, Columns = Columns, GetKey = row => ((Person)row).Name, SelectionMode = SelectionMode.Multiple,
+            RenderDetail = row => new TextBlock { Text = $"{((Person)row).Name} 的简历" }, HasDetail = row => ((Person)row).Name != "Ada",
+        });
+        List<IconButton> Toggles() => [.. Rows(table).Select(row => row.DetailToggle).OfType<IconButton>()];
+        Assert.Equal(People.Length - 1, Toggles().Count);
+        Assert.Equal("张三 的详情", AutomationProperties.GetName(Toggles()[0]));
+        Assert.Equal(false, Toggles()[0].GetValue(Popover.TriggerExpandedProperty));
+        Click(Toggles()[0]);
+        HeadlessUi.Flush(window);
+        Assert.Equal(["张三"], table.ExpandedRows);
+        Assert.Equal(true, Toggles()[0].GetValue(Popover.TriggerExpandedProperty));
+        var detail = Assert.Single(table.Surface.Details).Value;
+        Assert.Equal("张三 的简历", ((TextBlock)detail.Content!).Text);
+        // 详情在它的行下面、下一行上面
+        var rows = Rows(table);
+        Assert.True(detail.Bounds.Top >= rows[0].Bounds.Bottom - 0.5 && detail.Bounds.Bottom <= rows[1].Bounds.Top + 0.5);
+        // 内容让过勾选列（44）与展开列（40），和第一个数据列对齐
+        var text = (TextBlock)detail.Content!;
+        Assert.True(text.TranslatePoint(default, detail)!.Value.X >= 84);
+        table.ExpandedRows = [];
+        HeadlessUi.Flush(window);
+        Assert.Empty(table.Surface.Details);
+    });
 }

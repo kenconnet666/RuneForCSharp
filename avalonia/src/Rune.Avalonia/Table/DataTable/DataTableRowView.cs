@@ -36,6 +36,8 @@ internal sealed class DataTableRowView : Control
     // 表头里可调整宽度的列的手柄：列的下标 → 手柄
     readonly Dictionary<int, ColumnResizer> resizers = [];
     Control? selector;
+    // 详情列：表头是空的格（读屏名称"详情"），各行是展开按钮（没有详情的行空着）
+    Control? detailCell;
     bool hovered;
 
     public DataTableRowView(DataTableSurface surface, DataTableRowKind kind, int index = -1)
@@ -148,12 +150,18 @@ internal sealed class DataTableRowView : Control
         cells.Clear();
         resizers.Clear();
         selector = null;
+        detailCell = null;
         var owner = Owner;
         var lang = owner.Lang;
         if (surface.HasSelection)
         {
             selector = SelectCell(row, index, lang);
             Attach(selector);
+        }
+        if (surface.HasDetails)
+        {
+            detailCell = DetailCell(row, lang);
+            Attach(detailCell);
         }
         var columns = owner.Shown;
         for (var position = 0; position < columns.Count; position++)
@@ -191,6 +199,7 @@ internal sealed class DataTableRowView : Control
         // 编辑中的行浮在别的行上面：校验的原因在格子下面，不被下一行盖住
         ZIndex = cells.Any(cell => cell.Cell.Classes.Contains("editing")) ? 1 : 0;
         SyncSelection();
+        SyncDetail();
         InvalidateMeasure();
     }
 
@@ -344,6 +353,38 @@ internal sealed class DataTableRowView : Control
         }
     }
 
+    /// <summary>一行的名称（展开按钮、详情的读屏名称）：第一个数据列的文字。</summary>
+    internal static string LabelOf(DataTable owner, object row) =>
+        owner.Shown.Count > 0 ? Convert.ToString(TableColumns.ValueOf(owner.Shown[0], row), System.Globalization.CultureInfo.CurrentCulture) ?? "" : "";
+
+    /// <summary>详情列的格：表头是空的（读屏名称"详情"），有详情的行是展开按钮（ChevronRight，展开时转 90°）。</summary>
+    Control DetailCell(object? row, Lang lang)
+    {
+        var host = new Panel { Name = Kind == DataTableRowKind.Header ? DataTableParts.DetailHeaderCell : null };
+        if (Kind == DataTableRowKind.Header) AutomationProperties.SetName(host, lang.TableDetails);
+        if (Kind != DataTableRowKind.Body || row is null || !Owner.RowHasDetail(row)) return host;
+        var toggle = new IconButton { Name = DataTableParts.DetailToggle, Icon = Lucide.ChevronRight, Variant = ButtonVariant.Ghost, Tone = StatusTone.Neutral, Size = TextSize.Sm, HorizontalAlignment = HorizontalAlignment.Center };
+        AutomationProperties.SetName(toggle, lang.TableRowDetails(LabelOf(Owner, row)));
+        toggle.Click += (_, _) =>
+        {
+            if (Row is { } current) Owner.ToggleDetail(current);
+        };
+        host.Children.Add(toggle);
+        return host;
+    }
+
+    /// <summary>展开按钮（测试用）；没有详情的行为 null。</summary>
+    internal IconButton? DetailToggle => (detailCell as Panel)?.Children.OfType<IconButton>().FirstOrDefault();
+
+    /// <summary>展开按钮的展开状态与箭头的转向。</summary>
+    public void SyncDetail()
+    {
+        if (DetailToggle is not { } toggle || Row is not { } row) return;
+        var expanded = Owner.ExpandedRows.Contains(Owner.KeyOf(row));
+        toggle.SetValue(Popover.TriggerExpandedProperty, expanded);
+        toggle.RenderTransform = expanded ? new RotateTransform(FlowDirection == FlowDirection.RightToLeft ? -90 : 90) : null;
+    }
+
     /// <summary>选择框的状态与这一行是否已选（整行底色）。</summary>
     public void SyncSelection()
     {
@@ -390,6 +431,7 @@ internal sealed class DataTableRowView : Control
         var height = 0.0;
         // 选择框不撑高这一行（上游 choiceInCell：24px 的点击区域在行里叠放），有选择列的行与纯文字的行一样高
         selector?.Measure(new Size(DataTable.SelectWidth, double.PositiveInfinity));
+        detailCell?.Measure(new Size(DataTable.DetailWidth, double.PositiveInfinity));
         foreach (var resizer in resizers.Values) resizer.Measure(Size.Infinity);
         for (var i = 0; i < cells.Count && i < widths.Count; i++)
         {
@@ -416,6 +458,13 @@ internal sealed class DataTableRowView : Control
             var top = (height - 1.5 * TextElement.GetFontSize(selector)) / 2;
             selector.Arrange(new Rect(0, top, DataTable.SelectWidth, Math.Max(selector.DesiredSize.Height, height - top)));
             x = DataTable.SelectWidth;
+        }
+        if (detailCell is not null)
+        {
+            // 展开按钮同选择框：上下居中，多出的点击区域叠在行里
+            var top = (height - detailCell.DesiredSize.Height) / 2;
+            detailCell.Arrange(new Rect(x, top, DataTable.DetailWidth, detailCell.DesiredSize.Height));
+            x += DataTable.DetailWidth;
         }
         var scroll = surface.OffsetX;
         var view = surface.ViewportWidth;

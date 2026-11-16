@@ -18,7 +18,7 @@ namespace Rune.Avalonia;
 
 /// <summary>
 /// DataTable 滚动区域里的内容（上游 DataTableView 的 table）：只建看得见的行。表头按纵向偏移挪到视口顶上（吸顶），合计行挪到视口底下（吸底），
-/// 固定列的格按横向偏移挪回边上。行高按第一行量出的高度。
+/// 固定列的格按横向偏移挪回边上。行高按第一行量出的高度；展开的详情是一行另外的高度（量过之后记下，没量过时按估计），各行的位置按高度累加。
 /// </summary>
 internal sealed class DataTableSurface : Control
 {
@@ -30,6 +30,13 @@ internal sealed class DataTableSurface : Control
     readonly Dictionary<int, DataTableRowView> realized = [];
     readonly List<DataTableRowView> pool = [];
     readonly List<DataTableRowView> skeletons = [];
+    // 展开的详情：行的下标 → 详情行；量过的高度按行的 key 记
+    readonly Dictionary<int, DataTableDetailView> details = [];
+    readonly Dictionary<object, double> detailHeights = [];
+    // 各行的上边（不含表头），有详情时详情的上边；总高度
+    double[] rowTops = [];
+    readonly Dictionary<int, double> detailTops = [];
+    double bodyHeight;
     double rowHeight;
     double[] widths = [];
 
@@ -54,7 +61,13 @@ internal sealed class DataTableSurface : Control
 
     internal bool HasSelection => owner.SelectionMode is not null;
 
-    internal double Leading => HasSelection ? DataTable.SelectWidth : 0;
+    internal bool HasDetails => owner.RenderDetail is not null;
+
+    /// <summary>数据列前面的宽度：勾选列、详情列。</summary>
+    internal double Leading => (HasSelection ? DataTable.SelectWidth : 0) + (HasDetails ? DataTable.DetailWidth : 0);
+
+    /// <summary>展开的详情行（测试用）：行的下标 → 详情行。</summary>
+    internal IReadOnlyDictionary<int, DataTableDetailView> Details => details;
 
     internal IReadOnlyList<double> Widths => widths;
 
@@ -95,6 +108,7 @@ internal sealed class DataTableSurface : Control
         realized.Clear();
         pool.Clear();
         skeletons.Clear();
+        details.Clear();
         emptyView = null;
         header?.SyncFilters();
         summary = owner.Shown.Any(column => column.Summary is not null) ? new DataTableRowView(this, DataTableRowKind.Summary) { ZIndex = 2 } : null;
@@ -149,9 +163,9 @@ internal sealed class DataTableSurface : Control
     /// <summary>聚焦第 index 行的某一格：不在视口里时先滚过去（停在吸顶表头之下、吸底合计之上）。</summary>
     internal void FocusCell(int index, string column)
     {
-        if (rowHeight > 0)
+        if (rowHeight > 0 && index < rowTops.Length)
         {
-            var top = index * rowHeight;
+            var top = rowTops[index];
             var visible = Math.Max(rowHeight, Viewport.Height - HeaderHeight - SummaryHeight);
             if (top < Offset.Y) owner.Scroller.Offset = new Vector(Offset.X, top);
             else if (top + rowHeight > Offset.Y + visible) owner.Scroller.Offset = new Vector(Offset.X, top + rowHeight - visible);
@@ -160,6 +174,13 @@ internal sealed class DataTableSurface : Control
         {
             if (realized.TryGetValue(index, out var row)) row.CellOf(column)?.Focus(NavigationMethod.Tab);
         }, DispatcherPriority.Loaded);
+    }
+
+    /// <summary>展开的行变了：各行的展开按钮跟着改；详情行在下一次量的时候建或收。</summary>
+    internal void SyncDetails()
+    {
+        foreach (var row in realized.Values) row.SyncDetail();
+        InvalidateMeasure();
     }
 
     /// <summary>选择、色调变了：建好的行与表头的全选框跟着改，不重建。</summary>
@@ -178,12 +199,44 @@ internal sealed class DataTableSurface : Control
         header?.InvalidateArrange();
         summary?.InvalidateArrange();
         foreach (var row in realized.Values) row.InvalidateArrange();
+        foreach (var detail in details.Values) detail.InvalidateArrange();
     }
 
     internal void ScrollTo(int index)
     {
         if (rowHeight <= 0) owner.UpdateLayout();
-        owner.Scroller.Offset = new Vector(Offset.X, Math.Max(0, index * rowHeight));
+        owner.Scroller.Offset = new Vector(Offset.X, Math.Max(0, index < rowTops.Length ? rowTops[index] : index * rowHeight));
+    }
+
+    /// <summary>各行（与展开的详情）的位置：按行高与详情的高度（量过的，没量过时按估计）累加。</summary>
+    void Layout(IReadOnlyList<object> rows)
+    {
+        var expanded = HasDetails ? owner.ExpandedRows.ToHashSet() : [];
+        rowTops = new double[rows.Count];
+        detailTops.Clear();
+        var y = 0.0;
+        for (var index = 0; index < rows.Count; index++)
+        {
+            rowTops[index] = y;
+            y += rowHeight;
+            if (expanded.Count == 0 || !expanded.Contains(owner.KeyOf(rows[index])) || !owner.RowHasDetail(rows[index])) continue;
+            detailTops[index] = y;
+            y += detailHeights.TryGetValue(owner.KeyOf(rows[index]), out var measured) ? measured : DataTable.DetailHeight;
+        }
+        bodyHeight = y;
+    }
+
+    /// <summary>上边在 offset 之后的第一行的下标（二分查找）。</summary>
+    int RowAt(double offset)
+    {
+        int low = 0, high = rowTops.Length - 1;
+        while (low < high)
+        {
+            var middle = (low + high + 1) / 2;
+            if (rowTops[middle] <= offset) low = middle;
+            else high = middle - 1;
+        }
+        return low;
     }
 
     /// <summary>各列的宽度：调整过的、列定义的；其余平分剩下的（最小宽度不一样时按 FlexColumnWidth），放不下最小宽度时横向滚动。</summary>
@@ -237,8 +290,9 @@ internal sealed class DataTableSurface : Control
             }
             var viewportHeight = Viewport.Height > 0 ? Viewport.Height : 32 * TextElement.GetFontSize(this);
             var top = Math.Max(0, Offset.Y - HeaderHeight);
-            var first = Math.Max(0, (int)Math.Floor(top / rowHeight) - Overscan);
-            var last = Math.Min(rows.Count - 1, (int)Math.Ceiling((top + viewportHeight) / rowHeight) + Overscan);
+            Layout(rows);
+            var first = Math.Max(0, RowAt(top) - Overscan);
+            var last = Math.Min(rows.Count - 1, RowAt(top + viewportHeight) + Overscan);
             foreach (var index in realized.Keys.Where(index => index < first || index > last).ToList())
             {
                 var view = realized[index];
@@ -247,7 +301,32 @@ internal sealed class DataTableSurface : Control
                 pool.Add(view);
             }
             for (var index = first; index <= last; index++) Realize(index).Measure(infinite);
-            body = rows.Count * rowHeight;
+            // 详情：看得见的展开的行建（或留着）详情行，量出高度记下；量出来与估计不同时重算位置
+            foreach (var index in details.Keys.Where(index => index < first || index > last || !detailTops.ContainsKey(index)).ToList())
+            {
+                Remove(details[index]);
+                details.Remove(index);
+            }
+            var changed = false;
+            for (var index = first; index <= last; index++)
+            {
+                if (!detailTops.ContainsKey(index)) continue;
+                if (!details.TryGetValue(index, out var detail))
+                {
+                    detail = new DataTableDetailView(this, rows[index]);
+                    details[index] = detail;
+                    Add(detail);
+                }
+                detail.Measure(new Size(ViewportWidth > 0 ? ViewportWidth : width, double.PositiveInfinity));
+                var key = owner.KeyOf(rows[index]);
+                if (!detailHeights.TryGetValue(key, out var known) || Math.Abs(known - detail.DesiredSize.Height) > 0.5)
+                {
+                    detailHeights[key] = detail.DesiredSize.Height;
+                    changed = true;
+                }
+            }
+            if (changed) Layout(rows);
+            body = bodyHeight;
         }
         return new Size(width, HeaderHeight + body + SummaryHeight);
     }
@@ -295,8 +374,12 @@ internal sealed class DataTableSurface : Control
         }
         else
         {
-            foreach (var (index, view) in realized) view.Arrange(new Rect(0, headerHeight + index * rowHeight, width, rowHeight));
-            y += owner.View.Count * rowHeight;
+            foreach (var (index, view) in realized) view.Arrange(new Rect(0, headerHeight + (index < rowTops.Length ? rowTops[index] : index * rowHeight), width, rowHeight));
+            // 详情贴着可见区域的起始边、宽度不超过可见区域（横向滚动时不跟着滚走）
+            var visibleWidth = ViewportWidth > 0 ? ViewportWidth : width;
+            foreach (var (index, detail) in details)
+                if (detailTops.TryGetValue(index, out var detailTop)) detail.Arrange(new Rect(Offset.X, headerHeight + detailTop, visibleWidth, detail.DesiredSize.Height));
+            y += bodyHeight;
         }
         if (summary is not null)
         {
@@ -312,4 +395,62 @@ internal sealed class DataTableSurface : Control
 
     /// <summary>视口宽度。</summary>
     internal double ViewportWidth => Viewport.Width > 0 ? Viewport.Width : Bounds.Width;
+}
+
+/// <summary>
+/// 展开的详情那一行（上游 detailRow / detailContent）：fill 底、下边线，内容让过勾选列与展开列、和第一个数据列对齐，四周 space.md；
+/// 宽度是可见区域，横向滚动时贴着可见区域的起始边。读屏念出是哪一行的详情。
+/// </summary>
+internal sealed class DataTableDetailView : Control
+{
+    readonly DataTableSurface surface;
+    readonly ContentControl content = new();
+
+    public DataTableDetailView(DataTableSurface surface, object row)
+    {
+        this.surface = surface;
+        Name = DataTableParts.DetailRow;
+        Row = row;
+        DataContext = row;
+        content.Content = surface.Owner.RenderDetail?.Invoke(row);
+        AutomationProperties.SetName(this, surface.Owner.Lang.TableRowDetails(DataTableRowView.LabelOf(surface.Owner, row)));
+        LogicalChildren.Add(content);
+        VisualChildren.Add(content);
+    }
+
+    /// <summary>这一行的数据。</summary>
+    internal object Row { get; }
+
+    /// <summary>详情的内容（测试用）。</summary>
+    internal object? Content => content.Content;
+
+    Thickness Padding
+    {
+        get
+        {
+            var md = this.Resource<double>(ThemeKeys.Space.Md) * TextElement.GetFontSize(this);
+            return new Thickness(surface.Leading + md, md, md, md);
+        }
+    }
+
+    protected override Size MeasureOverride(Size availableSize)
+    {
+        var padding = Padding;
+        content.Measure(availableSize.Deflate(padding));
+        return new Size(availableSize.Width, content.DesiredSize.Height + padding.Top + padding.Bottom + 1);
+    }
+
+    protected override Size ArrangeOverride(Size finalSize)
+    {
+        var padding = Padding;
+        content.Arrange(new Rect(new Point(padding.Left, padding.Top), new Size(Math.Max(0, finalSize.Width - padding.Left - padding.Right), content.DesiredSize.Height)));
+        return finalSize;
+    }
+
+    public override void Render(DrawingContext context)
+    {
+        var bounds = new Rect(Bounds.Size);
+        if (this.Resource<IBrush?>(ThemeKeys.Brush.Fill) is { } fill) context.FillRectangle(fill, bounds);
+        if (this.Resource<IBrush?>(ThemeKeys.Brush.BorderMuted) is { } line) context.FillRectangle(line, new Rect(0, bounds.Height - 1, bounds.Width, 1));
+    }
 }
