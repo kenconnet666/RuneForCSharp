@@ -1469,6 +1469,23 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### Condition、ConditionBuilder（2026-11-16，仅 Avalonia）
+
+- 条件是孪生文件 Condition（上游 input/condition.ts）：抽象 record Condition 与 ConditionRule、ConditionAll、ConditionAny、ConditionNot，工厂 Condition.All / Any / Not；
+  比较方式、字段类型是枚举（ConditionOp、ConditionFieldType），JSON 与语言包里的键是小驼峰（KeyOf）。上游的 matchesCondition、describeCondition 是实例方法 Matches、Describe，
+  operatorsOf、valueShape、isRuleComplete 是 OperatorsOf、ShapeOf、ConditionRule.IsComplete。
+- 求值同上游：数字与十进制写法的文字按精确的十进制比（自己拆整数位与小数位，不经过浮点数；BigInteger、decimal 都算数字），其余写成文字按编码顺序；
+  字段的值是一组时等于、包含这些是"有一项满足"，不等于、不在其中是"没有一项满足"；没填完整的比较与空的组不加条件。默认按字典的键或同名属性取值，属性不分大小写（JSON 里的 amount 对上 C# 的 Amount）。
+- 存库、传给后端是 JSON（ConditionJsonConverter，形状同上游）；读回来的数字整数是 long、其余 decimal，一组是 object?[]。ConditionBuilder 比较"父级给的值是不是自己上次写回的"也用 JSON。
+- 自己画值的输入 ConditionField.Input 返回 object（孪生文件里不能写平台的控件类型），Avalonia 上当 Control 用。
+- WPF 有 System.Windows.Condition（MultiTrigger 的条件）：Rune.Wpf.Condition 与它同名，StyleCloner 里写全名。
+- ConditionBuilder：界面上的树（RuleNode、GroupNode）每次增删整个重排，但每条的控件（RuleEditor）与组的满足方式下拉是缓存的、搬到新的容器里，写了一半的值与焦点不丢；
+  换字段只换比较方式与值的输入。值的输入按类型：选项与是否是 Select（一组时多选、标签按宽度收起），文字与数字的一组是 TagsInput，数字是 NumberField / NumberRangeField，
+  日期是 DatePicker / DateRangePicker，其余 TextField。数字写回 decimal。
+- 每条的排法是内部的 RuleLayout（上游 rule 的 flex-wrap 加 flex-basis / grow / min / max-width）：Flex 没有 basis，这里只有这一处用，不加到公共的 Flex 上。
+- 不可用跟着平台的 IsEnabled（继承）；所在 Field、Form 只读（Field.IsReadOnly 继承）时增删条件、分组的按钮不可用。
+- 像素对照：approval 0.04%、custom-input 0.07%、filter 0.66%（表格是 ColumnTable，上游是 DataTable，高 1px）。
+
 ### CommentThread、CommentComposer（2026-11-16，仅 Avalonia）
 
 - 数据是 record：CommentItem（Id、Author、Content、Time，init 的 Avatar、Role、Edited、Attachments、Extra、Replies）、CommentAttachment、CommentAuthor（名字与头像）、
