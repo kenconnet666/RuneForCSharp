@@ -1753,8 +1753,9 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   展开与懒加载用 TreeExpansion（同 Tree）：加载开始、结束都重新展开表体（取回的子项放进了数据里），焦点在展开按钮上时跟到重建后的按钮。
   展开按钮与详情行的共用 DisclosureToggle / SetDisclosure；它们的外观（幽灵、中性、sm、圆形）从本地值挪进 DataTableParts.axaml，使用方按部件名写的样式盖得过（上游的 propsToggle）。
   缩进是 层级 × Indent em 的占位，叶子有 1.5em 的占位让文字对齐。
-- 还没做：上游按窗口剩余高度铺 6–50 行骨架、estimateRowHeight（我们按量出的行高排，不需要估计，属性不移植）；台账、导入的示例（导入在 DataImport 一起做）。
-- 像素对照：orders 0.17%、states 0.00%、single 0.58%（上游 205 高、我们 204）、columns 2.75%（表头矮约 1px、数字的字形）、editable 3.83%（行比上游矮约 0.5px，四行累加；合计的"合计"上游是粗体）、details 4.28%（同样是行高差，表高 323 对 327）、changes 0.49%、reorder 4.69%（状态列的行高差）、corrections 1.85%（行高差）、wide 0.01%、master-detail 0.14%、infinite 0.01%、locate 3.29%（状态列的行高差）、tree 0.03% / 0.33%。
+- 示例补齐：台账（合计、状态、不能勾选的行、列显示菜单）、导入校验（RowTone、IsRowSelectable）。
+- 还没做：上游按窗口剩余高度铺 6–50 行骨架、estimateRowHeight（我们按量出的行高排，不需要估计，属性不移植）。
+- 像素对照：orders 0.17%、states 0.00%、single 0.58%（上游 205 高、我们 204）、columns 2.75%（表头矮约 1px、数字的字形）、editable 3.83%（行比上游矮约 0.5px，四行累加；合计的"合计"上游是粗体）、details 4.28%（同样是行高差，表高 323 对 327）、changes 0.49%、reorder 4.69%（状态列的行高差）、corrections 1.85%（行高差）、wide 0.01%、master-detail 0.14%、infinite 0.01%、locate 3.29%（状态列的行高差）、tree 0.03% / 0.33%、ledger 0.39%、import 18.39%（带图标的格上游行高约 29px、我们 27px，同状态列的行内基线差，六行累加错位）。
 
 
 ### ColumnTable 与列定义（2026-11-16，仅 Avalonia）

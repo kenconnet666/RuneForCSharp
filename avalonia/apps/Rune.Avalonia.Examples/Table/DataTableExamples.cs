@@ -4,7 +4,7 @@ using Avalonia.Controls.Documents;
 
 namespace Rune.Avalonia.Examples;
 
-/// <summary>DataTable 页的示例（vue-tsx-pro 文档站 table/DataTable）：一万条订单、表头筛选与列菜单、就地编辑、数据修正、行拖动、分组表头、宽表、展开行、定位、主从视图、组织架构、单选、滚动加载、加载与空状态；台账、导入随功能补上。</summary>
+/// <summary>DataTable 页的示例（vue-tsx-pro 文档站 table/DataTable）：一万条订单、表头筛选与列菜单、就地编辑、数据修正、行拖动、分组表头、宽表、展开行、台账、定位、主从视图、导入校验、组织架构、单选、滚动加载、加载与空状态。</summary>
 static class DataTableExamples
 {
     public static Example[] All =>
@@ -14,11 +14,13 @@ static class DataTableExamples
         new("DataTable", "editable", "采购申请明细：就地编辑与校验", "列写 Editable（或按行判断的 IsEditable）时可以就地编辑，表格随之变成网格：方向键在格之间走，只有一格能 Tab 进入；在可编辑的格上按 Enter、F2、双击或直接打字开始编辑，Enter 提交、Tab 提交并到下一个可编辑的格、点开别处提交、Esc 放弃。默认编辑器按列选（状态列是 Select，数字类是 NumberField，其余是 TextField），Editor 自己写（这里的交期是 DateField）。列的 Validate 拦下不合理的值，CellChange 写回，返回文字时是不接受的原因（接口拒绝），编辑器留着并显示它；ValidateRow 返回整行的问题，标在对应的格上（红框，悬停与读屏都能知道原因）。", Editable),
         new("DataTable", "corrections", "数据修正：单击就改，看得到改了什么", "主要用来改数据的表写 EditTrigger=\"Click\"，单击就进入编辑，格上的光标也提示能改；点开别的格时前一格照常提交，异步保存也不会收掉新打开的编辑器。FieldComparison.DiffRows 按 key 和原来的数据比，给出新增、修改（带 ChangedFields）、删除的行，配合 RowTone 着色、ValueChange 写出原值，删除的行留在最后。", Corrections),
         new("DataTable", "reorder", "需求排期：拖动行", "订阅了 Reordered 时第一列前面有把手：按下拖动，或聚焦后空格拿起、↑↓ 移动、空格放下（每一步读屏都会播报），拖完得到新的顺序。排序、筛选时显示的顺序不是数据的顺序，把手收起，取消后又能拖。", Reorder),
+        new("DataTable", "ledger", "项目台账：合计、状态与批量操作", "列的 Summary 写 ColumnSummary.Sum 时底部多一行吸底的合计（decimal 精确相加，按列的格式显示）；Statuses 是状态映射，单元格显示成 StatusBadge；没有值时显示列的 Empty（默认 —，这里是“待签约”）。IsRowSelectable 决定哪些行能勾选，全选跳过不能勾选的；勾选后上方的 SelectionBar 显示已选几项与批量操作。HiddenColumns 隐藏列，这里用 Menu 的 MenuCheckboxItem 做列显示设置（也可以开 ColumnMenu）；固定列与滚动的列之间有一条竖线。", Ledger),
         new("DataTable", "changes", "采购方案调整：分组表头", "ColumnGroups 写组标题与组里各列的 Key：相邻的几列上方共用一个标题，表头变成两行，没分组的列跨两行；组与相邻的列之间有竖线，固定列照常固定。列定义仍是平铺的，排序、列宽、隐藏列都按列算，组里的列全隐藏时这一组也不显示。", Changes),
         new("DataTable", "wide", "宽表：列也虚拟滚动", "VirtualColumns 时只建看得见的列（前后各多几列），列宽、固定列、分组表头、列宽调整照常。几十上百列的宽表、透视结果打开它；行本来就是虚拟滚动的。没写宽度的列按 150px；两端的固定列总在，固定列夹在中间时不虚拟化。", Wide),
         new("DataTable", "details", "供应商改进建议：展开行", "RenderDetail 给出一行的详情：多一列展开按钮（读屏念出展开状态），展开的行下面多一行跨全部列的详情，虚拟滚动按真实高度测量；HasDetail 决定哪些行能展开，ExpandedRows 可以双向绑定。详情横向滚动时贴着可见区域的起始边，宽度不超过可见区域。", Details),
         new("DataTable", "locate", "定位到行", "从通知、搜索结果跳过来时 ScrollToRow 滚到那一行（ScrollAlign 可以居中），再用 RowTone 闪一下。两千行里还没建的行也能滚到，停在吸顶表头之下；找不到时返回 false。", Locate),
         new("DataTable", "master-detail", "主从视图：点一行看详情", "ActiveKey 高亮正在看的那一行（品牌色浅底、起始边一条强调色的竖线，读屏念“当前”）；RowClicked 是点了一行（点在行里的按钮上不算）。编号是链接按钮，键盘也能打开。", MasterDetail),
+        new("DataTable", "import", "导入校验", "RowTone 给整行着色：错误行浅红、提醒行浅黄，底色不透明，固定列也盖得住；配合 IsRowSelectable 只让校验通过的行能勾选导入。", ImportCheck),
         new("DataTable", "tree", "组织架构", "TreeDataTable 建在 DataTable 上，列定义、排序、勾选都一样；第一列带缩进与展开按钮，同级之间按排序排（ManualSort 时按数据的顺序）。多选默认父子联动：勾父行连带子孙，只勾一部分时父行半选；CheckStrictly 时各自勾选。LoadChildren 懒加载：展开时取回子项放进数据，期间按钮显示加载中；服务端在每行带上有没有子项，交给 HasChildren。", Org),
         new("DataTable", "single", "单选：选一家报价", "SelectionMode=\"single\" 时每行是一个单选框：点击选中，选中的行整行高亮；没有全选，取消选择用 SelectionBar 的清空或把 Selected 设为空列表。", Single),
         new("DataTable", "infinite", "滚动加载", "RangeChanged 报告可见行的范围（不含多建的行），离末尾不远时取下一页；取的时候 IsLoading，已有数据所以骨架接在末尾。页码、去重与失败重试交给 InfiniteList，它的 OnRangeChanged 直接接上。内容换行的行按量出的高度排。", Infinite),
@@ -617,6 +619,189 @@ static class DataTableExamples
         };
         AutomationProperties.SetName(table, "组织架构");
         return table;
+    }
+
+    /// <summary>台账的一行：金额以元保存（测算、合同价），合同没签时合同价为 null。</summary>
+    record LedgerTask(string Code, string Name, string Category, string Team, decimal Estimate, decimal? Agreed, decimal? Dmc, string Status);
+
+    static Control Ledger()
+    {
+        var statuses = new StatusMap
+        {
+            ["designing"] = new("设计中", StatusTone.Info),
+            ["verifying"] = new("测试中", StatusTone.Info),
+            ["awaiting"] = new("待验收", StatusTone.Warning),
+            ["settling"] = new("结算中", StatusTone.Warning),
+            ["closed"] = new("关闭", StatusTone.Success),
+        };
+        LedgerTask[] tasks =
+        [
+            new("PO-2026-0301", "华东门店陈列改造", "产品改进", "研发中心", 155353.20m, null, null, "verifying"),
+            new("PO-2026-0302", "仓库拣货流程优化", "流程优化", "产品部", 109600.00m, 98000.00m, 3.20m, "closed"),
+            new("PO-2026-0303", "包装纸箱第二供应商", "供应商切换", "采购", 143000.00m, 150500.00m, null, "negotiating"),
+            new("PO-2026-0304", "会员小程序改版", "产品改进", "研发中心", 178800.00m, null, 1.75m, "awaiting"),
+            new("PO-2026-0305", "仓库盘点流程优化", "流程优化", "产品部", 217000.00m, null, null, "designing"),
+            new("PO-2026-0306", "门店物料供应商切换", "供应商切换", "采购", 257600.00m, 240000.00m, 0.80m, "closed"),
+        ];
+        // 以元保存、按万元显示：表头写单位，数字列更整齐
+        var wan = new NumericFormat { Scale = 10_000, MinimumFractionDigits = 2, MaximumFractionDigits = 2 };
+        DataTableColumn[] columns =
+        [
+            new("Code", "项目编码") { Width = 132, Sticky = ColumnSticky.Start, Sortable = true },
+            new("Name", "项目名称") { Width = 240, Sortable = true },
+            new("Category", "类别") { Width = 96 },
+            new("Team", "责任团队") { Width = 120 },
+            new("Estimate", "测算（万元）") { Width = 128, Format = wan, Sortable = true, Summary = ColumnSummary.Sum },
+            new("Agreed", "合同价（万元）") { Width = 128, Format = wan, Empty = "待签约", Summary = ColumnSummary.Sum },
+            new("Dmc", "运费节省（元/单）") { Width = 140, Format = new NumericFormat { MinimumFractionDigits = 2 } },
+            new("Status", "状态") { Width = 120, Statuses = statuses },
+            new("Actions", "操作")
+            {
+                Width = 112, Sticky = ColumnSticky.End,
+                Cell = (row, _) =>
+                {
+                    var more = new IconButton { Size = TextSize.Sm, Icon = Lucide.Ellipsis };
+                    AutomationProperties.SetName(more, $"更多：{((LedgerTask)row).Code}");
+                    return new Flex
+                    {
+                        Align = FlexAlign.Center, Gap = Space.Xs,
+                        Children =
+                        {
+                            new Button { Size = TextSize.Sm, Variant = ButtonVariant.Ghost, Content = "查看" },
+                            new Menu { Trigger = more, Items = { new MenuItem { Icon = Lucide.FileText, Content = "任务卡" }, new MenuItem { Icon = Lucide.Send, Content = "提交验收" } } },
+                        },
+                    };
+                },
+            },
+        ];
+        var table = new DataTable
+        {
+            ItemsSource = tasks, Columns = columns, GetKey = row => ((LedgerTask)row).Code, SelectionMode = SelectionMode.Multiple,
+            IsRowSelectable = row => ((LedgerTask)row).Status != "closed", HiddenColumns = ["Dmc"], MaxHeight = 24 * 16,
+        };
+        AutomationProperties.SetName(table, "项目台账");
+        // 可以隐藏的列（编码、名称、操作一直显示）
+        var columnsMenu = new Menu { Trigger = new Button { Size = TextSize.Sm, Variant = ButtonVariant.Outline, Tone = StatusTone.Neutral, Icon = Lucide.Columns3, Content = "列" } };
+        foreach (var column in columns.Where(column => column.Key is not ("Code" or "Name" or "Actions")))
+        {
+            var item = new MenuCheckboxItem { Content = column.Header, IsChecked = !table.HiddenColumns!.Contains(column.Key) };
+            item.PropertyChanged += (_, e) =>
+            {
+                if (e.Property != MenuCheckboxItem.IsCheckedProperty) return;
+                var hidden = table.HiddenColumns ?? [];
+                table.HiddenColumns = item.IsChecked ? [.. hidden.Where(key => key != column.Key)] : [.. hidden, column.Key];
+            };
+            columnsMenu.Items.Add(item);
+        }
+        var bar = new SelectionBar
+        {
+            Actions =
+            {
+                new Button { Size = TextSize.Sm, Variant = ButtonVariant.Outline, Tone = StatusTone.Neutral, Icon = Lucide.Download, Content = "导出所选" },
+                new Button { Size = TextSize.Sm, Icon = Lucide.Send, Content = "批量提交验收" },
+            },
+        };
+        bar.ClearRequested += (_, _) => table.Selected = [];
+        table.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == DataTable.SelectedProperty) bar.Count = table.Selected.Count;
+        };
+        return new Flex
+        {
+            Direction = FlexDirection.Column, Gap = Space.Sm, Align = FlexAlign.Stretch,
+            Children =
+            {
+                new Flex
+                {
+                    Align = FlexAlign.Center, Justify = FlexJustify.Between, Gap = Space.Sm, Wrap = true,
+                    Children = { new Small { Tone = TextTone.Muted, Text = $"共 {tasks.Length} 项 · 已关闭的不能勾选" }, new Flex { Gap = Space.Sm, Children = { columnsMenu } } },
+                },
+                bar,
+                table,
+            },
+        };
+    }
+
+    /// <summary>导入校验的一行：校验的问题（错误或提醒）。</summary>
+    record ImportLine(int Row, string Part, string Name, int? Quantity, string? Price, (bool Error, string Message)? Issue = null);
+
+    static Control ImportCheck()
+    {
+        ImportLine[] lines =
+        [
+            new(2, "G26", "笔记本电脑", 2, "450.00"),
+            new(3, "G29", "笔记本电脑（更改后）", 2, "480.00"),
+            new(4, "", "紧固件组件", 36, "12.50", (true, "件号不能为空")),
+            new(5, "G43", "支架", null, "96.00", (true, "数量必须大于 0")),
+            new(6, "G44", "支架（更改后）", 1, "1960.00", (false, "单价比更改前高 20 倍，请核对")),
+            new(7, "G73", "密封条", 4, "38.80"),
+        ];
+        DataTableColumn[] columns =
+        [
+            new("Row", "行") { Width = 56, Sticky = ColumnSticky.Start },
+            new("Issue", "校验结果")
+            {
+                Width = 240, Wrap = true,
+                Cell = (row, _) => ((ImportLine)row).Issue is { } issue
+                    ? new Flex
+                    {
+                        Align = FlexAlign.Center, Gap = Space.Xs,
+                        Children =
+                        {
+                            new Icon { Data = issue.Error ? Lucide.CircleExclamationPoint : Lucide.TriangleExclamationPoint, Tone = issue.Error ? TextTone.Danger : TextTone.Warning },
+                            new TextBlock { Text = issue.Message, TextWrapping = global::Avalonia.Media.TextWrapping.Wrap },
+                        },
+                    }
+                    : new Flex { Align = FlexAlign.Center, Gap = Space.Xs, Children = { new Icon { Data = Lucide.CircleCheck, Tone = TextTone.Success }, new TextBlock { Text = "通过" } } },
+            },
+            new("Part", "件号") { Width = 96 },
+            new("Name", "零件名称") { Width = 180 },
+            new("Quantity", "数量") { Width = 96 },
+            new("Price", "材料单价（元）") { Width = 128, Type = ColumnType.Number, Format = new NumericFormat { MinimumFractionDigits = 2 } },
+        ];
+        var table = new DataTable
+        {
+            ItemsSource = lines, Columns = columns, GetKey = row => ((ImportLine)row).Row.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            RowTone = row => ((ImportLine)row).Issue is { } issue ? issue.Error ? StatusTone.Danger : StatusTone.Warning : null,
+            SelectionMode = SelectionMode.Multiple, Selected = ["2", "3", "7"], IsRowSelectable = row => ((ImportLine)row).Issue is not { Error: true },
+            Density = TableDensity.Compact,
+        };
+        AutomationProperties.SetName(table, "导入校验结果");
+        var errors = lines.Count(line => line.Issue is { Error: true });
+        var warnings = lines.Count(line => line.Issue is { Error: false });
+        var submit = new Button { Size = TextSize.Sm };
+        void Sync()
+        {
+            submit.Content = $"导入所选 {table.Selected.Count} 行";
+            submit.IsEnabled = table.Selected.Count > 0;
+        }
+        table.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == DataTable.SelectedProperty) Sync();
+        };
+        Sync();
+        var spacer = new Control();
+        Flex.SetGrow(spacer, true);
+        return new Flex
+        {
+            Direction = FlexDirection.Column, Gap = Space.Sm, Align = FlexAlign.Stretch,
+            Children =
+            {
+                new Flex
+                {
+                    Align = FlexAlign.Center, Gap = Space.Sm, Wrap = true,
+                    Children =
+                    {
+                        new Badge { Tone = StatusTone.Danger, Dot = true, Content = $"{errors} 行错误" },
+                        new Badge { Tone = StatusTone.Warning, Dot = true, Content = $"{warnings} 行提醒" },
+                        new Small { Tone = TextTone.Muted, Text = "错误行改好后重新上传；提醒行可以照常导入" },
+                        spacer,
+                        submit,
+                    },
+                },
+                table,
+            },
+        };
     }
 
     record ProjectTaskRow(string Code, string Name, string Owner, string Due, string Status);
