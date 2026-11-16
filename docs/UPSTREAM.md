@@ -295,7 +295,7 @@ QueryTable、ErrorBoundary、JsonViewer、ImageCropper、QuarterCalendar、Carou
 | NavList、NavItem、NavGroup、NavSection 共用配方 navListRecipe，部件 root、list、item、link、icon、label、badge、group、trigger、chevron、groupList、flyout、section、sectionLabel、sectionIcon、sectionText（f4065afc） | 外观不变；inspect 的部件名对不上了 | 已跟：inspect 把 NavRow、NavItem、NavGroupHeader、NavGroup、NavSection 归到 nav-list（NavItem 是 link、NavGroup 是 group、NavSection 是 section，分组的列表是 groupList，小节的标题行、图标、文字是 sectionLabel、sectionIcon、sectionText）；WPF 的 NavRowParts 补上 Chevron 的名字 |
 | Menu 配方（档位 size，部件 panel、content、item……）、Toaster 配方（档位 placement、max、stack、progress） | 都已做 | Menu 2026-11-14 照新的（Size 档位，部件见 MenuParts、MenuItemBaseParts）；Toaster 2026-11-15 照新的（Placement、Max、Stack、Progress，Avalonia 的剩余时间条 PART_Progress） |
 | AppShell 配方：档位 sidebarCollapsible、fullscreenable、skipLink、pageScrollbar 可在 components.AppShell 给默认，22 个部件（5785adb4） | 档位已有；部件名还没逐个对 | 跟 AppShell 的 admin、mixed 示例时对部件 |
-| Transfer 配方（68ef26a9） | 还没做 | 做时照新的 |
+| Transfer 配方（68ef26a9） | Avalonia 已做 | 2026-11-16 照新的：Transfer、TreeTransfer 共用外框与按钮（TransferBase），部件见 TransferParts |
 | Text 截断与换行补一张 wrap="pretty" 的卡片，四张两行两列（aecc847d） | 三个平台的示例 | 已跟：加了第四张（桌面上 Pretty 同普通换行） |
 | Select、Upload 两列示例挪齐（f3ea7cda）；Menu 右键菜单示例改用 RadioGroup 卡片（26187227） | Select 的示例已对过；Menu 已做 | 不涉及 / 右键菜单示例照新的用 RadioGroup 卡片 |
 
@@ -492,7 +492,7 @@ defineTheme / defineLang 忽略 undefined——网页专用或 C# 没有 undefin
 |---|---|---|
 | Collapse 的内容区宽度就是容器宽度（网格列 minmax(0, 1fr)、内容 min-width: 0），不再被最宽的内容撑开（2c45e89e） | 三个平台本来就按给的宽度量、按容器宽度排 | 不用改：Avalonia、WPF 按可用宽度量内容、按最终宽度排；WinForms 的 VerticalStack 取内容宽与给的宽度里小的那个 |
 | 新增 SearchField：搜索图标、清空、默认名称与占位文字是 selectSearch；onSearch 在停手 delay、回车、清空时调用，同一个词不重复，父级从外面改值不触发 | 已做 | 三个平台的 SearchField（WinForms 是 SearchFieldControl）：事件叫 SearchRequested（Search 是立即搜索的方法），Delay 是 TimeSpan。桌面分不出"父级改值"与"输入"：没有焦点时改的 Text 算从外面改 |
-| Select、Cascader、TreeSelect、Transfer、PeoplePicker、JsonViewer、表头筛选的搜索框换成 SearchField（有清空按钮） | Select 已换；其余组件还没做 | 做时用 SearchField |
+| Select、Cascader、TreeSelect、Transfer、PeoplePicker、JsonViewer、表头筛选的搜索框换成 SearchField（有清空按钮） | Select、Transfer（Avalonia）已换；其余组件还没做 | 做时用 SearchField |
 | 新增 Sub、Sup、Del、Ins、Strike（Text 系列） | 已做 | Avalonia、WPF 是行内文字：Sub、Sup 是 Run（基线对齐不从外层 Span 继承；WPF 用 TextTop / TextBottom，平台的 Superscript 抬得太高），Del、Ins、Strike 是带主题的 Span；WinForms 是单独的控件（同 Code、Mark） |
 | 新增 Figure（caption、captionSide、align、propsCaption） | 已做 | 三个平台；说明在下（top 时在上）、次要色 sm、和内容隔 space.sm，读屏名称取说明。WinForms 的 FigureControl 是竖排的 FlexControl，对齐叫 FigureAlign（Align 是 Flex 自己的） |
 | 新增 AspectRatio（ratio 默认 16 / 9，内容铺满，图片按 cover 裁切） | 已做 | 三个平台；Ratio 是数（宽 ÷ 高），不收 CSS 的"4 / 3"写法；Avalonia、WPF 里的 Image 默认 UniformToFill，WinForms 的 PictureBox 没有 cover，自己选 SizeMode |

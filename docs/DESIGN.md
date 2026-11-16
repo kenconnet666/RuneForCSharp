@@ -1477,7 +1477,11 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   全选只管看得见（搜索后留下）、能勾的项，半选是 IsIndeterminate。搜索默认按 SelectSearch.Matches（忽略大小写与重音）；上游还认拼音，我们没有拼音表。
 - 中间两个 soft、sm 的 IconButton（读屏名称"移到已选 / 可选"），没有勾上的时不可用；双击一项（DoubleTapped，从事件源找 ListboxItem 的 Option）直接移过去；
   不可用的选项勾不上也移不动。移完由 LiveRegion 播报"移了几项到哪边"。窄于 40rem 时上下排，按钮横排、旋转 90°。
-- 像素对照：members 0.33%。TreeTransfer（左边是勾选的 Tree）下一步做。
+- 外框、按钮、移动与播报在抽象基类 TransferBase 里，子类给出每边的内容（Listbox 或 Tree）、能勾的项、总数与能不能移；Values、Titles、Searchable 注册在基类上。
+- TreeTransfer：左边是勾选的 Tree（ItemsSource、GetKey、GetLabel、GetChildren 同 Tree），父子联动，只移叶子（Values 是叶子的 key）；
+  树上勾着的是 Values 加上左边勾上的，树的勾选变了按 CheckStrategy.Child 收起成叶子、去掉已经移过去的；已经移过去的节点勾上且不可用（IsItemDisabled）。
+  左边的计数与全选只算还没移过去的叶子（搜索时只算匹配的），右边是已选的 Listbox（文字取节点的 GetLabel）；树里双击不移（同上游）。
+- 像素对照：members 0.33%，tree 0.42%。
 
 ### Heading 的 Anchor（2026-11-16，仅 Avalonia）
 
@@ -1710,7 +1714,8 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 纯计算是孪生文件 TreeData（上游 utils/data/tree 的 flattenTree、buildTreeIndex、toggleChecked、checkedByStrategy、filterTree、buildTree、moveTreeNode，加上 useTreeExpansion 的 TreeExpansion）：节点是任意对象，经 TreeAccessors（GetKey、GetChildren、HasChildren）读取；勾选状态是 CheckState（未勾、勾上、半选），按 CheckStrategy 收起；Build 遇到重复的 key、环时抛 ArgumentException。三个平台的控件只管展示与输入。
 - 数据：上游的 getKey、getLabel、getChildren、hasChildren、loadChildren、isDisabled 在 C# 里是委托属性（isDisabled 叫 IsItemDisabled，判断节点；WinForms 的 hasChildren 叫 HasChildNodes：控件自己有 HasChildren）。Expanded、Selected、Checked 是 key 的列表（Avalonia、WPF 默认双向绑定；WinForms 报告各自的 Changed）。懒加载：LoadChildren 返回任务，结束前那一行显示加载图标；子节点放进数据后调 Refresh（WinForms 是覆盖的 Control.Refresh）；失败时收回去并报告 LoadError（没有订阅时写进跟踪日志）。
 - 行是平铺的（上游虚拟滚动不能嵌套 role="group"），层级与同级位置给读屏：Avalonia、WPF 是虚拟化列表（ItemsControl 加虚拟化面板）里的 TreeItem，自动化对等体实现 ExpandCollapse、SelectionItem、Toggle；WinForms 的行是画出来的（每行一样高、只画看得见的），读屏是大纲（Outline），子项是看得见的每一行。上游的 renderItem 在 Avalonia、WPF 是 ItemTemplate，WinForms 没有自定义内容（要多显示的写进 GetLabel）。
-- 行高：控件高度与最小点击区（minTarget）取大，上下各留 1；缩进每层 Indent（默认 1.25em），展开箭头 1.5em 见方（展开时转 90°，从右到左时镜像），勾选框 1em、右边多留 xs。状态同列表行：悬停、键盘高亮 fillHover，选中 accentSoft 底、accentText 字，不可用变淡；过滤匹配的加粗。焦点环画在树的边上往里收（上游 focusRingStyles.inset）。
+- 行高：WPF、WinForms 是控件高度与最小点击区（minTarget）取大；Avalonia 2026-11-16 起同上游的 treeStyles.item 只保底 minTarget（内容 1.5em 加上下 xs，比列表行紧凑），上下各留 1；缩进每层 Indent（默认 1.25em），展开箭头 1.5em 见方（展开时转 90°，从右到左时镜像），勾选框 Avalonia 1.125em（同 Checkbox，描边 borderWidth.sm）、WPF 与 WinForms 1em，右边多留 xs。
+- 示例的 MaxHeight 是上游的 rem（16px）：Avalonia 的四个示例 2026-11-16 起照这个，四个示例的像素都在 0.5% 以内（checkable 0.19%、files 0.42%、lazy 0.35%、outline 0.01%）；WPF、WinForms 恢复时同样改。状态同列表行：悬停、键盘高亮 fillHover，选中 accentSoft 底、accentText 字，不可用变淡；过滤匹配的加粗。焦点环画在树的边上往里收（上游 focusRingStyles.inset）。
 - 高度：按内容高，写了 MaxHeight（WinForms 是 MaximumSize 的高，不写时最高 20em）时节点多了在树里滚动。没有节点时：IsLoading 显示四条骨架（宽度依次递减），否则是空状态（文字取语言包，过滤时是“没有匹配”，Avalonia、WPF 的 Empty 可以换内容，WinForms 是 EmptyText）。
 - 键盘同 APG 的树：↑↓、Home、End，→ 展开 / 进入第一个子节点，← 收起 / 回到父节点（从右到左时对调），Enter 选中（没有选择方式时展开或收起），空格勾选或选中，按字母跳转（同 Listbox 的 Typeahead）。
 - 移动：订阅了 Moved 才能拖动（挪开 4 以上），落在一项的上四分之一放在前面、下四分之一放在后面、中间放进里面（accentSoft 底加 accent 框；前后是一条从那一层缩进处开始的线），拖到上下边缘时滚动；Alt + 方向键同上游。目标按移走之后的同级算，CanDrop 限制落点，放进自己的子孙里不行；移动后读屏念“移到哪里第几位”。新数据由使用方用 TreeData.Move 生成、交回 ItemsSource。
