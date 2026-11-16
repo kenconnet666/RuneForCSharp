@@ -1523,6 +1523,11 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 必填：写了 Required，或不可空的选择、数字、日期（不写就没有值；可空引用按 NullabilityInfoContext）。上游 emptyValues 给空白的初始值，C# 的模型自己有默认值，
   新的一行、嵌套对象按元素类型新建（NewItem），所以 emptyValues 没有对应；上游 decimalSchema 的 type、bigintSchema 是 ValueType（数字属性的类型）。
 - State、Walk、Pick、ColumnTotal、ConditionFields 照上游的 schemaFieldState、walkSchemaFields、pickFields、columnTotal、schemaConditionFields。
+- FormSources（上游 createUi 的 formSources）：Provider.FormSources 是继承的附加属性，SchemaView、SchemaForm 的 Sources 按名字盖在它上面（Merge）；
+  OptionSource 是固定列表（Items）或远程搜索（Search）。人员是 PeopleSource，上传是 UploadHandler。
+- SchemaView（Avalonia）：字段从 Schema（类型）推，不写时按 Values 的类型；分组各一块 Descriptions（部件 PART_Section），对象展开成"对象 · 字段"，
+  列表、明细表排成静态 Table（写了 Sum 的列靠结束边，表尾半粗的合计）。值是模型对象，改了里面的字段（没换对象）时调 Refresh。
+  propsDescriptions 是部件样式加 Columns。示例（上游 read-view：填写与查看切换）随 SchemaForm 补上。
 
 ### Condition、ConditionBuilder（2026-11-16，仅 Avalonia）
 
