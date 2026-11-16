@@ -1469,6 +1469,18 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### TreeSelect（2026-11-16，仅 Avalonia）
+
+- Select 的外壳抽成抽象基类 SelectBase（Avalonia）：外观、Value / Values / SelectionMode、清空、标签、弹出层与搜索框、开关与原因、触发框上的键盘、读屏的组合框都在基类；
+  主题的 ControlTheme 目标是 SelectBase，Select、TreeSelect 各一个 BasedOn 它的主题（类型选择器不匹配子类，SelectParts.axaml 的弹出层样式用 `:is(rune|SelectBase)`）。
+  子类给弹出层的内容（SetBody）、值的文字（LabelOf）、触发框里列哪些值（Shown）、打开（Show）与开着时的按键。焦点在弹出层的内容里（树）时 Esc、Tab 关闭并回到触发框；关上时焦点还在弹出层里也回到触发框（同上游的 onToggle）。
+- TreeSelect：数据同 Tree（ItemsSource、GetKey、GetLabel、GetChildren、HasChildren、LoadChildren，isDisabled 叫 IsItemDisabled），弹出层里是 Tree：单选时 SelectionMode single，选中就写回并关闭；
+  多选时可勾选，父子联动，值按 CheckedStrategy（All / Parent / Child）整理，还没加载的已选节点原样留在后面。触发框里多选只列最上层的整枝（Child 时列叶子），移除一个标签是 ToggleChecked 取消整枝。
+- 搜索：本地交给 Tree 的 Filter（或 FilterBy 接 Filter 委托）；Load 是 Select 的 OptionsLoader（只取第一页，返回命中的节点连同祖先），结果全部展开、不在本地过滤。打开时展开已选节点的祖先。
+  上游的 filter={false}、_search（自己发请求）不移植：服务端搜索用 Load。
+- 弹出层至少 16em 宽；上游的树按视口剩下的高度收（fitHeight），桌面的弹出层不会按窗口收，树最高 20em（同 Listbox）。
+- 像素对照：basic 0.25%、appearance 0.15%、remote 0.14%；strategy 1.76%（深色 2.27%）：标签的 × 与清空图标同 Select 的 tags（0.75%），另有 1px 的高度差没查出来。
+
 ### Transfer（2026-11-16，仅 Avalonia）
 
 - 数据同 Listbox：ItemsSource（ListboxOption、字符串，或任意数据加 ToOption），右边的值是 Values（多选的值同 Listbox 的叫法，默认双向绑定），按移过去的先后；Titles 两个标题，不写时取语言包。
