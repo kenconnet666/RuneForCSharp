@@ -58,6 +58,27 @@ public sealed record CompareField(string Key, string Header)
 /// <param name="Ratio">两边都是数值且原值不为 0 时的变化率（-0.2 是降了 20%）。</param>
 public sealed record FieldCompareRow(CompareField Field, object? Before, object? After, bool Changed, decimal? Delta, double? Ratio);
 
+/// <summary>一行和之前比怎么了（vue-tsx-pro 的 RowChanges）。</summary>
+public enum RowChange
+{
+    /// <summary>之前没有。</summary>
+    Inserted,
+
+    /// <summary>有字段变了。</summary>
+    Updated,
+
+    /// <summary>现在没有了。</summary>
+    Deleted,
+}
+
+/// <summary>一行的比较结果（vue-tsx-pro 的 RowDiff）。</summary>
+/// <param name="Key">行的 key。</param>
+/// <param name="Row">现在的行；删除了的行是之前的样子。</param>
+/// <param name="Change">没变时 null。</param>
+/// <param name="Before">修改了的行之前的样子。</param>
+/// <param name="ChangedFields">修改了的行里变了的字段（属性名）。</param>
+public sealed record RowDiff<T>(string Key, T Row, RowChange? Change = null, T? Before = default, IReadOnlyList<string>? ChangedFields = null);
+
 /// <summary>
 /// 字段对比的计算（vue-tsx-pro 的 diffFields 与 FieldCompare 里的格式化）：取值、比较、数值的变化量与变化率、显示的文字与色调。三个库共用一份。
 /// </summary>
@@ -80,6 +101,31 @@ public static class FieldComparison
             }
             return new FieldCompareRow(field, from, to, delta is { } d ? d != 0 : !Same(from, to), delta, ratio);
         })];
+
+    /// <summary>
+    /// 两份列表按 key 比较（vue-tsx-pro 的 diffRows：执行前后、编辑前后、两次导入）：哪些行是新增、修改、删除的。
+    /// 顺序是现在的行，删除了的排在最后；字段是行的公开属性，变没变按结构相等（内容一样的列表不算变了）。
+    /// </summary>
+    public static IReadOnlyList<RowDiff<T>> DiffRows<T>(IEnumerable<T> before, IEnumerable<T> after, Func<T, string> getKey) where T : class
+    {
+        var remaining = new Dictionary<string, T>();
+        foreach (var row in before) remaining.TryAdd(getKey(row), row);
+        var fields = typeof(T).GetProperties().Where(property => property.GetIndexParameters().Length == 0).Select(property => new CompareField(property.Name, property.Name)).ToList();
+        List<RowDiff<T>> rows = [];
+        foreach (var row in after)
+        {
+            var key = getKey(row);
+            if (!remaining.Remove(key, out var previous))
+            {
+                rows.Add(new RowDiff<T>(key, row, RowChange.Inserted));
+                continue;
+            }
+            var changed = Diff(fields, previous, row).Where(field => field.Changed).Select(field => field.Field.Key).ToList();
+            rows.Add(changed.Count > 0 ? new RowDiff<T>(key, row, RowChange.Updated, previous, changed) : new RowDiff<T>(key, row));
+        }
+        rows.AddRange(remaining.Select(pair => new RowDiff<T>(pair.Key, pair.Value, RowChange.Deleted)));
+        return rows;
+    }
 
     /// <summary>字段在一份记录里的值：Value 函数、字典的键或同名属性。</summary>
     public static object? ValueOf(CompareField field, object? record) => record switch
@@ -134,5 +180,8 @@ public static class FieldComparison
     };
 
     /// <summary>结构相等（同 sameValue）：日期按值，其余 Equals。</summary>
-    static bool Same(object? a, object? b) => Equals(a, b) || (a is IStructuralEquatable structural && structural.Equals(b, StructuralComparisons.StructuralEqualityComparer));
+    static bool Same(object? a, object? b) => Equals(a, b)
+        || (a is IStructuralEquatable structural && structural.Equals(b, StructuralComparisons.StructuralEqualityComparer))
+        // 列表（不只数组）也按内容比：编辑后新建的列表与原来的内容一样时不算变了
+        || (a is IEnumerable x and not string && b is IEnumerable y and not string && x.Cast<object?>().SequenceEqual(y.Cast<object?>(), EqualityComparer<object?>.Create((m, n) => Same(m, n), item => 0)));
 }

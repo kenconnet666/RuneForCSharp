@@ -12,6 +12,7 @@ static class DataTableExamples
         new("DataTable", "orders", "一万条订单", "列定义里 Type 决定默认的格式与对齐（Number、Currency、Percent、FileSize、Date、DateTime，跟随语言；不写时按第一个值推断，数字靠右），Cell 自定义单元格，Value 给排序用的值；点可排序的列标题在升序、降序、不排之间切换（本地按数字、日期、按语言的文字排，ManualSort 时交给服务端）。SelectionMode=\"multiple\" 多一列勾选框；Sticky 的列横向滚动时固定在两侧；Resizable 时可以拖动或用键盘调整列宽，ColumnWidths 双向绑定可以存到本地设置里。工具栏（搜索、批量操作、分页）用现有组件组合，不内置。", Orders),
         new("DataTable", "columns", "采购单：表头筛选、多列排序与列菜单", "列定义写 Filter 时列标题上有筛选按钮：ColumnFilter.Values 列出这一列出现过的值（状态列按阶段顺序、显示状态名），也可以给 Options，ColumnFilter.Keyword 是输入关键字；Filters 双向绑定各列选中的值，默认在本地筛，ManualFilter 时交给服务端。MultiSort 时点列标题只按这一列排，按住 Shift 点是追加一列（列标题上标着次序），排序写在 Sorts。ColumnMenu 在列标题结尾放 ⋮：排序、固定在开头 / 结尾、前后移动、隐藏，写回 ColumnPins、ColumnOrder、HiddenColumns，都能双向绑定、存起来（上游记在浏览器里；这里在内存里，“还原列设置”清掉）。", Columns),
         new("DataTable", "editable", "采购申请明细：就地编辑与校验", "列写 Editable（或按行判断的 IsEditable）时可以就地编辑，表格随之变成网格：方向键在格之间走，只有一格能 Tab 进入；在可编辑的格上按 Enter、F2、双击或直接打字开始编辑，Enter 提交、Tab 提交并到下一个可编辑的格、点开别处提交、Esc 放弃。默认编辑器按列选（状态列是 Select，数字类是 NumberField，其余是 TextField），Editor 自己写（这里的交期是 DateField）。列的 Validate 拦下不合理的值，CellChange 写回，返回文字时是不接受的原因（接口拒绝），编辑器留着并显示它；ValidateRow 返回整行的问题，标在对应的格上（红框，悬停与读屏都能知道原因）。", Editable),
+        new("DataTable", "corrections", "数据修正：单击就改，看得到改了什么", "主要用来改数据的表写 EditTrigger=\"Click\"，单击就进入编辑，格上的光标也提示能改；点开别的格时前一格照常提交，异步保存也不会收掉新打开的编辑器。FieldComparison.DiffRows 按 key 和原来的数据比，给出新增、修改（带 ChangedFields）、删除的行，配合 RowTone 着色、ValueChange 写出原值，删除的行留在最后。", Corrections),
         new("DataTable", "reorder", "需求排期：拖动行", "订阅了 Reordered 时第一列前面有把手：按下拖动，或聚焦后空格拿起、↑↓ 移动、空格放下（每一步读屏都会播报），拖完得到新的顺序。排序、筛选时显示的顺序不是数据的顺序，把手收起，取消后又能拖。", Reorder),
         new("DataTable", "changes", "采购方案调整：分组表头", "ColumnGroups 写组标题与组里各列的 Key：相邻的几列上方共用一个标题，表头变成两行，没分组的列跨两行；组与相邻的列之间有竖线，固定列照常固定。列定义仍是平铺的，排序、列宽、隐藏列都按列算，组里的列全隐藏时这一组也不显示。", Changes),
         new("DataTable", "details", "供应商改进建议：展开行", "RenderDetail 给出一行的详情：多一列展开按钮（读屏念出展开状态），展开的行下面多一行跨全部列的详情，虚拟滚动按真实高度测量；HasDetail 决定哪些行能展开，ExpandedRows 可以双向绑定。详情横向滚动时贴着可见区域的起始边，宽度不超过可见区域。", Details),
@@ -239,6 +240,90 @@ static class DataTableExamples
             return null;
         };
         return new Flex { Direction = FlexDirection.Column, Gap = Space.Sm, Align = FlexAlign.Stretch, Children = { table, saved } };
+    }
+
+    record Supplier(string Id, string Name, string City, decimal Rating);
+
+    static Control Corrections()
+    {
+        Supplier[] original = [new("S-101", "华东精密", "苏州", 92), new("S-102", "北辰机械", "天津", 78), new("S-103", "南方电子", "深圳", 85), new("S-104", "西部材料", "成都", 70)];
+        var suppliers = original.ToList();
+        var tones = new Dictionary<RowChange, StatusTone> { [RowChange.Inserted] = StatusTone.Success, [RowChange.Updated] = StatusTone.Warning, [RowChange.Deleted] = StatusTone.Danger };
+        var table = new DataTable { Density = TableDensity.Compact, EditTrigger = EditTrigger.Click, GetKey = row => ((RowDiff<Supplier>)row).Key };
+        AutomationProperties.SetName(table, "供应商");
+        var count = new Small { Tone = TextTone.Muted };
+        var restore = new Button { Size = TextSize.Sm, Variant = ButtonVariant.Soft, Icon = Lucide.RotateCcw, Content = "还原" };
+        void Sync()
+        {
+            var rows = FieldComparison.DiffRows(original, suppliers, item => item.Id);
+            table.ItemsSource = rows;
+            var changed = rows.Count(row => row.Change is not null);
+            count.Text = changed > 0 ? $"改动了 {changed} 行" : "单击单元格修改";
+            restore.IsEnabled = changed > 0;
+        }
+        // 一格：改过的写出原值
+        object? Field(object row, string key, Func<Supplier, object> value)
+        {
+            var diff = (RowDiff<Supplier>)row;
+            return diff.Before is { } before && diff.ChangedFields?.Contains(key) == true ? new ValueChange { Before = value(before), After = value(diff.Row) } : null;
+        }
+        bool Editable(object row) => ((RowDiff<Supplier>)row).Change != RowChange.Deleted;
+        table.Columns =
+        [
+            new("Id", "编号") { Width = 110, Value = row => ((RowDiff<Supplier>)row).Row.Id },
+            new("Name", "供应商")
+            {
+                Value = row => ((RowDiff<Supplier>)row).Row.Name, Cell = (row, _) => Field(row, "Name", item => item.Name), IsEditable = Editable,
+                Validate = (value, _) => value is string { Length: > 0 } ? null : "名称不能为空",
+            },
+            new("City", "城市") { Value = row => ((RowDiff<Supplier>)row).Row.City, Cell = (row, _) => Field(row, "City", item => item.City), IsEditable = Editable },
+            new("Rating", "评分")
+            {
+                Type = ColumnType.Number, Value = row => ((RowDiff<Supplier>)row).Row.Rating, Cell = (row, _) => Field(row, "Rating", item => item.Rating), IsEditable = Editable,
+                Validate = (value, _) => value is decimal rating && rating >= 0 && rating <= 100 ? null : "评分是 0 到 100",
+            },
+            new("Remove", "操作")
+            {
+                Width = 72,
+                Cell = (row, _) =>
+                {
+                    var diff = (RowDiff<Supplier>)row;
+                    if (diff.Change == RowChange.Deleted) return "";
+                    var remove = new IconButton { Size = TextSize.Sm, Variant = ButtonVariant.Ghost, Icon = Lucide.Trash };
+                    AutomationProperties.SetName(remove, $"删除 {diff.Row.Name}");
+                    remove.Click += (_, _) =>
+                    {
+                        suppliers = [.. suppliers.Where(item => item.Id != diff.Row.Id)];
+                        Sync();
+                    };
+                    return remove;
+                },
+            },
+        ];
+        table.RowTone = row => ((RowDiff<Supplier>)row).Change is { } change ? tones[change] : null;
+        table.CellChange = (row, key, value) =>
+        {
+            var id = ((RowDiff<Supplier>)row).Row.Id;
+            suppliers = [.. suppliers.Select(item => item.Id != id ? item : key switch
+            {
+                "Name" => item with { Name = (string)value! },
+                "City" => item with { City = (string)value! },
+                _ => item with { Rating = (decimal)value! },
+            })];
+            Sync();
+            return Task.FromResult<string?>(null);
+        };
+        restore.Click += (_, _) =>
+        {
+            suppliers = [.. original];
+            Sync();
+        };
+        Sync();
+        return new Flex
+        {
+            Direction = FlexDirection.Column, Gap = Space.Sm, Align = FlexAlign.Stretch,
+            Children = { new Flex { Align = FlexAlign.Center, Justify = FlexJustify.Between, Gap = Space.Sm, Children = { count, restore } }, table },
+        };
     }
 
     record Requirement(string Id, string Title, string Owner, int Hours, string Status);

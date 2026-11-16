@@ -77,6 +77,8 @@ public partial class DataTable
         var key = KeyOf(row);
         cell.Focusable = true;
         KeyboardNavigation.SetIsTabStop(cell, IsActiveCell(key, column.Key));
+        // 单击就能编辑的格：文字光标提示能改
+        if (EditTrigger == EditTrigger.Click && TableColumns.IsCellEditable(column, row)) cell.Cursor = new Cursor(StandardCursorType.Ibeam);
         if (ValidateRow?.Invoke(row) is { } errors && errors.TryGetValue(column.Key, out var message))
         {
             cell.Classes.Add("invalid");

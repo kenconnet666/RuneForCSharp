@@ -101,4 +101,26 @@ public class FieldCompareTests
         var headers = ((Table)text.Shown!).Sections.OfType<TableHead>().Single().Rows.Cast<TableRow>().Single().Cells.Select(TextOf);
         Assert.Equal(["字段", "原值", "新值"], headers);
     });
+
+    record Post(int Id, int Views, IReadOnlyList<string> Tags);
+
+    [Fact]
+    [Upstream("diff", "按 key 比较：新增、修改、删除，没变的没有 change；删除的排在最后")]
+    public void Diff_rows_by_key()
+    {
+        Post[] before = [new(1, 10, ["a"]), new(2, 20, []), new(3, 30, [])];
+        Post[] after = [new(4, 0, []), new(1, 11, ["a"]), new(2, 20, [])];
+        var rows = FieldComparison.DiffRows(before, after, row => row.Id.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        Assert.Equal(["4", "1", "2", "3"], rows.Select(row => row.Key));
+        Assert.Equal([RowChange.Inserted, RowChange.Updated, null, RowChange.Deleted], rows.Select(row => row.Change));
+        Assert.Same(before[0], rows[1].Before);
+        Assert.Equal(["Views"], rows[1].ChangedFields);
+        Assert.Same(after[2], rows[2].Row);
+        Assert.Same(before[2], rows[3].Row);
+    }
+
+    [Fact]
+    [Upstream("diff", "字段按结构相等比较：内容一样的数组不算变了")]
+    public void Diff_rows_compares_lists_by_content() =>
+        Assert.Null(FieldComparison.DiffRows([new Post(1, 0, ["a"])], [new Post(1, 0, new List<string> { "a" })], row => "1")[0].Change);
 }
