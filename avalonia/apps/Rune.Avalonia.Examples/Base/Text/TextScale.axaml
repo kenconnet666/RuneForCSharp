@@ -2,31 +2,32 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:rune="https://github.com/kenconnet666/RuneForCSharp/avalonia"
              x:Class="Rune.Avalonia.Examples.TextScale">
-  <!-- 左列：size 档位；右列：weight 档位。名字一列宽 5em -->
+  <!-- 左列：size 档位；右列：weight 档位。名字一列宽 5em（按它自己 xs 的字号是 60），右边的样例按基线对齐 -->
   <UserControl.Styles>
-    <Style Selector="StackPanel.row">
-      <Setter Property="Orientation" Value="Horizontal" />
-      <Setter Property="Spacing" Value="12" />
+    <Style Selector="rune|Flex.row">
+      <Setter Property="Align" Value="baseline" />
+      <Setter Property="Gap" Value="md" />
     </Style>
-    <Style Selector="StackPanel.row > rune|Text.name">
-      <Setter Property="Width" Value="70" />
-      <Setter Property="VerticalAlignment" Value="Center" />
+    <Style Selector="rune|Flex.row > rune|Text.name">
+      <Setter Property="Width" Value="60" />
+      <Setter Property="Size" Value="xs" />
+      <Setter Property="Tone" Value="muted" />
     </Style>
   </UserControl.Styles>
-  <WrapPanel ItemSpacing="32" LineSpacing="24">
-    <StackPanel Spacing="8">
-      <StackPanel Classes="row"><rune:Text Classes="name" Size="xs" Tone="muted">size=xs</rune:Text><rune:Text Size="xs">界面里的文字 Typography</rune:Text></StackPanel>
-      <StackPanel Classes="row"><rune:Text Classes="name" Size="xs" Tone="muted">size=sm</rune:Text><rune:Text Size="sm">界面里的文字 Typography</rune:Text></StackPanel>
-      <StackPanel Classes="row"><rune:Text Classes="name" Size="xs" Tone="muted">size=md</rune:Text><rune:Text Size="md">界面里的文字 Typography</rune:Text></StackPanel>
-      <StackPanel Classes="row"><rune:Text Classes="name" Size="xs" Tone="muted">size=lg</rune:Text><rune:Text Size="lg">界面里的文字 Typography</rune:Text></StackPanel>
-      <StackPanel Classes="row"><rune:Text Classes="name" Size="xs" Tone="muted">size=xl</rune:Text><rune:Text Size="xl">界面里的文字 Typography</rune:Text></StackPanel>
-    </StackPanel>
-    <StackPanel Spacing="8">
-      <StackPanel Classes="row"><rune:Text Classes="name" Size="xs" Tone="muted">light</rune:Text><rune:Text Weight="light" Size="lg">季度营收 ¥1,280,000</rune:Text></StackPanel>
-      <StackPanel Classes="row"><rune:Text Classes="name" Size="xs" Tone="muted">normal</rune:Text><rune:Text Weight="normal" Size="lg">季度营收 ¥1,280,000</rune:Text></StackPanel>
-      <StackPanel Classes="row"><rune:Text Classes="name" Size="xs" Tone="muted">medium</rune:Text><rune:Text Weight="medium" Size="lg">季度营收 ¥1,280,000</rune:Text></StackPanel>
-      <StackPanel Classes="row"><rune:Text Classes="name" Size="xs" Tone="muted">semibold</rune:Text><rune:Text Weight="semibold" Size="lg">季度营收 ¥1,280,000</rune:Text></StackPanel>
-      <StackPanel Classes="row"><rune:Text Classes="name" Size="xs" Tone="muted">bold</rune:Text><rune:Text Weight="bold" Size="lg">季度营收 ¥1,280,000</rune:Text></StackPanel>
-    </StackPanel>
-  </WrapPanel>
+  <rune:Grid MinItemWidth="18em" Gap="xl">
+    <rune:Flex Direction="column" Gap="sm" Align="stretch">
+      <rune:Flex Classes="row"><rune:Text Classes="name">size=xs</rune:Text><rune:Text Size="xs">界面里的文字 Typography</rune:Text></rune:Flex>
+      <rune:Flex Classes="row"><rune:Text Classes="name">size=sm</rune:Text><rune:Text Size="sm">界面里的文字 Typography</rune:Text></rune:Flex>
+      <rune:Flex Classes="row"><rune:Text Classes="name">size=md</rune:Text><rune:Text Size="md">界面里的文字 Typography</rune:Text></rune:Flex>
+      <rune:Flex Classes="row"><rune:Text Classes="name">size=lg</rune:Text><rune:Text Size="lg">界面里的文字 Typography</rune:Text></rune:Flex>
+      <rune:Flex Classes="row"><rune:Text Classes="name">size=xl</rune:Text><rune:Text Size="xl">界面里的文字 Typography</rune:Text></rune:Flex>
+    </rune:Flex>
+    <rune:Flex Direction="column" Gap="sm" Align="stretch">
+      <rune:Flex Classes="row"><rune:Text Classes="name">light</rune:Text><rune:Text Weight="light" Size="lg">季度营收 ¥1,280,000</rune:Text></rune:Flex>
+      <rune:Flex Classes="row"><rune:Text Classes="name">normal</rune:Text><rune:Text Weight="normal" Size="lg">季度营收 ¥1,280,000</rune:Text></rune:Flex>
+      <rune:Flex Classes="row"><rune:Text Classes="name">medium</rune:Text><rune:Text Weight="medium" Size="lg">季度营收 ¥1,280,000</rune:Text></rune:Flex>
+      <rune:Flex Classes="row"><rune:Text Classes="name">semibold</rune:Text><rune:Text Weight="semibold" Size="lg">季度营收 ¥1,280,000</rune:Text></rune:Flex>
+      <rune:Flex Classes="row"><rune:Text Classes="name">bold</rune:Text><rune:Text Weight="bold" Size="lg">季度营收 ¥1,280,000</rune:Text></rune:Flex>
+    </rune:Flex>
+  </rune:Grid>
 </UserControl>
