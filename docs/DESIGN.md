@@ -1469,6 +1469,16 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### Transfer（2026-11-16，仅 Avalonia）
+
+- 数据同 Listbox：ItemsSource（ListboxOption、字符串，或任意数据加 ToOption），右边的值是 Values（多选的值同 Listbox 的叫法，默认双向绑定），按移过去的先后；Titles 两个标题，不写时取语言包。
+- 每一边是 20em 高的外框（border、md 圆角、surface 底，裁剪）：标题栏（全选的 Checkbox、标题 medium 省略、sm muted 的"勾上 / 总数"，上下 xs 左右 sm，下边 borderMuted）、
+  Searchable 时的 SearchField（soft、sm，外面四周 xs）、占满剩下高度的可多选 Listbox。勾选的状态在 Transfer 里（每边一份），Listbox 的 Values 跟着它；
+  全选只管看得见（搜索后留下）、能勾的项，半选是 IsIndeterminate。搜索默认按 SelectSearch.Matches（忽略大小写与重音）；上游还认拼音，我们没有拼音表。
+- 中间两个 soft、sm 的 IconButton（读屏名称"移到已选 / 可选"），没有勾上的时不可用；双击一项（DoubleTapped，从事件源找 ListboxItem 的 Option）直接移过去；
+  不可用的选项勾不上也移不动。移完由 LiveRegion 播报"移了几项到哪边"。窄于 40rem 时上下排，按钮横排、旋转 90°。
+- 像素对照：members 0.33%。TreeTransfer（左边是勾选的 Tree）下一步做。
+
 ### Heading 的 Anchor（2026-11-16，仅 Avalonia）
 
 - 原来认为"桌面没有本页地址"不做；桌面文档站有了按 id 定位的章节（DocSection、TableOfContents），补上。Anchor 写了且有 Name（TS 的 id）时文字后面跟一个 # 按钮（行内的 InlineUIContainer，竖直居中），
