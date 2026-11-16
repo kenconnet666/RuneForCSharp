@@ -1469,6 +1469,17 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### Mentions、MentionText（2026-11-16，仅 Avalonia）
+
+- 拆分是孪生文件 MentionParsing（上游的 mentionSegments、mentionedValues）：按选项的显示文字找"@名字"，有多个能匹配时取最长的；@ 前面是字母、数字、下划线、点时不算（邮箱）。
+- Mentions 是 Textarea 的子类（主题 BasedOn Textarea），值仍是 Text；文字里提到的选项的值叫 Mentioned（属性不能与类同名，上游的 _mentions），随文字更新，远程搜索换掉了数据也认得见过的选项。
+  弹出的列表用 ListPopover，新加的 ShowAt 让它贴在 @ 的位置（TextPresenter.TextLayout.HitTestTextPosition 换到外壳坐标，Popup 的 AnchorAndGravity），宽 16em。
+  检测、Esc 后这个 @ 不再弹出、Tab / Enter 选中、远程搜索同上游；输入法组合中的键平台报 ImeProcessed，不当成列表的键。失焦是冒泡的路由事件，只认 Mentions 自己的（同 Combobox）。
+- MentionText 是 Text 的子类（行高同正文），文字叫 Value（Text 是 TextBlock 自己的）；提及是带 accentSoft 底、accentText 字、medium 的 Run，跟着段落换行，没有上游 span 的 sm 圆角与左右 0.125em。
+  RenderMention 返回行内元素（链接用 InlineUIContainer 包 Link）。上游的 propsMention 不移植。
+- 测试里不排空调度队列：headless 里弹出层打开后会抢走焦点（桌面上点外面才关的弹出层不抢），同 ComboboxTests。
+- 像素对照：approval、prefix、remote 都是 0.01%。
+
 ### ColorMath、ColorPicker、ColorField（2026-11-16，仅 Avalonia）
 
 - 颜色工具是孪生文件 ColorMath（上游 utils/data/color，基于 culori）：解析 #hex、rgb() / rgba()（旧写法与空格写法）、hsl() / hsla()、148 个颜色名与 transparent；
