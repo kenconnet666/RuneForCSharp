@@ -1469,6 +1469,20 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### FilterBar（2026-11-16，仅 Avalonia）
+
+- 常用条件是 Fields（Content，XAML 里直接写子元素），不常用的是 More，都是控件集合；每个条件包一个内部的格子（Decorator），收起时隐藏格子，不动使用方控件自己的 IsVisible。
+  上游 onSearch、onReset 是事件 SearchRequested、ResetRequested（同 SearchField）；_expanded 是 IsExpanded（双向），loading 是 IsLoading，minFieldWidth 是 em 数（默认 14）。
+- 排版在 FilterBar 自己的 Measure 里，规则同上游 layoutFields：按钮区带着"展开"量（没显示时用上次量到的宽度），算出第一排放得下几格、要不要"展开"、每格多宽；
+  展开的几排列宽同第一排的每格；一格也放不下时条件独占一排、按钮区换到下一行；GridItem 的 Span 跨几格。头一回要显示"展开"时还没量过它，在同一次 Measure 里显示、量过再算一遍
+  （上游是 ResizeObserver 的下一帧再排）。算法是 internal static 的 Layout，单独测。
+- 标签默认在起始边、宽度随文字：Field 新加了 AutoLabelWidth（LabelWidth 写正无穷，上游 labelWidth 的 auto），FilterBar 以模板优先级设 LabelPlacement、LabelWidth，继承给里面的 Field。
+- 按钮区是 Flex：Actions、End 没内容时不显示它们的 ContentPresenter（Flex 给每个显示着的子元素留间距，空的也占一个间距，按钮离结束边差 7px）。
+- 回车查询：单行输入框（TextBox 不接受换行）里没被处理的 Enter；上游是原生表单提交。读屏是 search 地标（AutomationLandmarkType.Search）。
+- 高级筛选同上游：ConditionBuilder 在 surfaceMuted 底的外框里，收起后有条件写一句话（Describe）带"清空"，"重置"清成 null；按钮旁的计数是条件里比较的条数。
+- 测试另外对上上游 FilterBar.browser 的四条排版用例（headless 的排版是真的；字号设成文档站的 14px）。
+- 像素对照：tasks 0.22%、advanced 0.19%（暗色 0.61%：表格是 ColumnTable）。
+
 ### Condition、ConditionBuilder（2026-11-16，仅 Avalonia）
 
 - 条件是孪生文件 Condition（上游 input/condition.ts）：抽象 record Condition 与 ConditionRule、ConditionAll、ConditionAny、ConditionNot，工厂 Condition.All / Any / Not；

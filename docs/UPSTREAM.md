@@ -49,13 +49,13 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
-| FilterBar 按钮区成为条件栅格的最后一格；QueryTable 查询栏与工具栏分开（a6ffbb54） | 还没做 | 做时照新的 |
+| FilterBar 按钮区成为条件栅格的最后一格；QueryTable 查询栏与工具栏分开（a6ffbb54） | 被 cad81082 作废，FilterBar 照 cad81082 做了（2026-11-16，仅 Avalonia）；QueryTable 还没做 | 做时照新的 |
 | Grid / GridList 的 balanced（b0baadf5） | 已做 | 跟到 ad4a77ac 时做了：孪生文件 GridLayout 加 BalancedColumns，三个平台的 Grid 加 Balanced |
 | Sparkline 的柱在 showLast 时最新一根实色，删 variant | 还没做 | 做时照新的 |
 | 静态 Table 的 stickyHeader、单元格的 sticky（9a57a058） | 已做 Table | 2026-11-14 做了（1873c1a），见第三批 |
 | ProportionBar 图例从起始边排、列间距 lg；CommentThread、NotificationCenter 用 RelativeTime | CommentThread 已做（2026-11-16，仅 Avalonia，时间是 RelativeTime），其余还没做 | 做时照新的 |
 | Listbox 根元素补上部件标记，border-box 罩得到（ff185e89） | 修了我们报的高度问题 | 下次锁定时重截 listbox multiple |
-| FilterBar / QueryTable 重做（cad81082，作废 a6ffbb54 那版）：标题单独一列，第一排条件 auto-fit 加按钮区（展开、高级筛选、actions、重置、查询、竖线、end），其余条件从第二排 auto-fill；minFieldWidth 默认 14em，加 propsBody、propsRow | 还没做 | 做时照 cad81082 |
+| FilterBar / QueryTable 重做（cad81082，作废 a6ffbb54 那版）：标题单独一列，第一排条件 auto-fit 加按钮区（展开、高级筛选、actions、重置、查询、竖线、end），其余条件从第二排 auto-fill；minFieldWidth 默认 14em，加 propsBody、propsRow | FilterBar 已做（2026-11-16，仅 Avalonia：第一排与展开的几排由 FilterBar 自己按量出的宽度排，propsBody、propsRow 没有单独的元素）；QueryTable 还没做 | 做时照 cad81082 |
 | 文档站合页：NavMenu、NavBar 并进 NavList 页等 | NavList 页现有的示例 id 不变 | menu、nav-bar 已做（2026-11-16，仅 Avalonia，随 NavMenu、NavBar） |
 
 ### 第三批（2026-11-07 通知，master 到 ff221742）
@@ -310,7 +310,7 @@ Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_
 |---|---|---|
 | NotificationList、NotificationCenter 配方；“只看未读”靠结束边（b70cbd69） | 还没做 | 做时照新的 |
 | Card padding="none"：正文贴边，页头、页脚上下 sm、左右 md（b70cbd69） | Card 已做 | 已跟：三个平台的页头、页脚在 none 时留上下 sm、左右 md，正文贴边 |
-| FilterBar 配方（839dd5e4）、Upload 配方（028b5f61） | 还没做 | 做时照新的 |
+| FilterBar 配方（839dd5e4）、Upload 配方（028b5f61） | 已做（FilterBar 2026-11-16、Upload 2026-11-16，仅 Avalonia，部件名在 FilterBarParts、UploadParts） | 不涉及 |
 | 列表行状态改条件别名：键盘高亮 data-highlighted（fillHover）、选中 aria-selected（accentText）、当前 aria-current / data-current（accentSoft 底）；Listbox、Tree 的 data-active 换成 data-highlighted（053d9658） | 外观不变；Listbox 的状态名 | 不涉及：我们的状态是控件属性（IsHighlighted 等），行为用例没变 |
 
 锁定跟到 0.15.0（7a5667d4，只改版本号）再到 1d07b19d：生成文件、parity、行为对照都没变。
@@ -379,7 +379,7 @@ Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_
 | Card 正文 flex-grow:1（e066fd2a）；padding=none 页头页脚留内边距（b70cbd69） | Card 已做 | 已跟：三个平台 |
 | Tabs：值转 id 不撞（dfb688b2）；整组卸载不另选、不写回（fe17e18c）；TabPanel 听 beforematch | Tabs 已做 | 我们按值关联、没有"另选旁边"的逻辑，补了测试对上两条用例；beforematch 是网页的 |
 | Listbox、Tree 的虚拟行改成网格叠放（c11dd9a3）；列表行状态的属性（053d9658、066ad66e、2bdf378e） | 网页结构 | 不涉及 |
-| FilterBar 一排放不下收进"展开"、两排同宽、按钮区窄屏换行（88da2f39、2f27376f、6fad7bfc）；QueryTable 工具栏 | 还没做 | 做时照新的 |
+| FilterBar 一排放不下收进"展开"、两排同宽、按钮区窄屏换行（88da2f39、2f27376f、6fad7bfc）；QueryTable 工具栏 | FilterBar 已做（2026-11-16，仅 Avalonia，测试对上 FilterBar.browser 的四条）；QueryTable 还没做 | 做时照新的 |
 | 表单模块：SchemaForm 条件与权限、明细表、数据来源、页签、SchemaView、useForm 校验（d815645c 等）；FormDialog 的 group、多选初始值（1fde03ee、88943ae0）；语言包 form* 键 | useForm 校验已做（孪生文件 FormController，2026-11-15），Form、Field 接入控制器已做（2026-11-15，自动绑定、失焦、约束、整组只读），FormErrorSummary 已做（2026-11-15，Form 页的 admission 示例也补上了）；FormSection 已做（2026-11-15，section-review、section-collapsible 示例；sections 示例等 TableOfContents）；FormDialog 与 PromptAsync（useFormDialog）已做（2026-11-15，date 字段用 DatePicker，reschedule 示例补上了；DateField、TimeField 已做；KanbanBoard 的 confirm 示例补上了），FormValue 不做（浏览器原生表单提交专用）；SchemaForm、SchemaView 还没做；语言包已重新生成 | 其余做时照新的；“控件里再嵌的控件不接 Field”那条用例已对上（2026-11-16，NumberRangeField，仅 Avalonia） |
 | 触屏输入框字号不小于 16px（touchInputStyles） | 桌面不涉及 | 不涉及 |
 | NavBar 下拉面板（fe3d4607，已被 130a8a74 撤回） | — | 不做 |
