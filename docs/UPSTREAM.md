@@ -360,7 +360,7 @@ Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
 | dark 的 accentHover #3758d4 → #4a6ddf；dark、midnight、ember、cyberpunk 的 dangerHover #a33b3e → #bd5356 | token 是生成的 | CI 绿后锁定，token-gen 重新生成 |
-| ThemeCustomizer、Diagram、QueryTable、Tree、ItemList、DatePicker、Splitter 等 30 个组件的内部节点补标记 | 都还没做 | 做时部件名照新的 |
+| ThemeCustomizer、Diagram、QueryTable、Tree、ItemList、DatePicker、Splitter 等 30 个组件的内部节点补标记 | ThemeCustomizer（2026-11-17，ThemeCustomizerParts）、QueryTable、Tree、ItemList、DatePicker、Splitter 已做，部件名照新的；Diagram 还没做 | 做时部件名照新的 |
 
 ### 第三十一批（2026-11-08 至 11-13 通知，0.16.0 到 0.21.0：交互状态 P2.5、表单模块、FilterBar、AppShell 收起按钮）
 

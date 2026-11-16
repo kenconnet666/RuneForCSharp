@@ -1852,6 +1852,13 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   @radix-ui/colors 生成三个库的 RadixScales.g.cs（CI 的生成文件核对里加了它，许可证在 licenses/radix-colors.txt）。ThemePalette（AccentSteps、NeutralSteps、Step、Swatch、Colors）
   照 palette.ts；ThemeSettings 是记录（Accent、Neutral 是色阶名的字符串，Radius、Font、Motion 是枚举），ThemeSettingsMath 给倍数与缩放。
   测试顺带核对了默认主题的颜色就是 indigo、slate 按色阶表取的值（暗色的 accentHover 为对比度调亮过，同上游 adjusted）。
+- ThemeCustomization（Avalonia）：设置换算成资源覆盖（上游 customizeTheme 生成一套新主题；这里是一个 ResourceDictionary，Apply 放进某个元素的 Resources 的合并字典，
+  再 Apply 换掉上一次的）。颜色给 Rune.Color.* 与 Rune.Brush.* 两个键（主题里画刷是单独的资源，不引用颜色）；按钮这类组件的颜色来自色调调色板 Rune.Palette.*，
+  用到换了的颜色的 accent、neutral 调色板也换一份。圆角按这套主题自己的取值缩放（应用的资源按变体取，不用像上游那样放进页面里量），字号、时长按 ThemeKeys.Fallback 的默认值缩放。
+  资源不分亮暗：换了亮暗主题要再 Apply。导出的是 XAML 的 ResourceDictionary（上游导出 defineTheme 的 TS 代码），下载存成 theme.axaml。
+  对比度检查读 ContrastTarget（默认所在窗口）上 TryFindResource 得到的颜色，排在设置变化之后的一轮（使用方要先 Apply）。
+- ThemeCustomizer：四组旋钮各是 ToggleGroup（Flex 换行，选项至少 6.5em、色块 2em 且左右不留内边距），建一次，设置变了就地改值、标题旁的当前取值、导出的代码与对比度。
+  文案表 ThemeCustomizerMessages 由 lang-gen 从上游 theme-customize/messages.ts 生成（三个库）。示例在 ThemeSwitcher 页（customizer），预览套在亮色的 ThemeVariantScope 里；像素 0.16%。
 - ThemeThumbnail（上游在 theme-customize，这里放 ThemeCustomize 文件夹）：自己画的页面一角，颜色用 TryFindResource(键, 主题变体) 取那套主题的资源，不用套 ThemeVariantScope；属性叫 ThemeVariant（Theme 是 Avalonia 控件主题）。6em × 3.75em 定宽，默认靠左、顶端对齐（上游 inline-flex，放在竖排里不被拉宽），读屏跳过。
 - 示例：ThemeSwitcher 页的 scoped（亮色、暗色、纸张，只作用于下面一块）与 gallery（全部内置主题的单选卡片）。
 
