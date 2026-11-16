@@ -127,7 +127,7 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
-| SchemaForm / SchemaFields：按 useForm 的 zod schema 生成字段（控件映射、meta.group 分组、columns 与 span、对象数组可增删的行），emptyValues、schemaFields、schemaFilters、schemaConditionFields | SchemaModel（孪生）、SchemaView、SchemaFields、SchemaForm 已做（2026-11-16，仅 Avalonia）：schema 换成模型的属性加 Display 与 SchemaField 特性；emptyValues 没有对应（模型自己有默认值），schemaConditionFields 是 SchemaModel.ConditionFields；schemaFilters 还没做 | 控件映射、分组、栏数、增删行照上游 |
+| SchemaForm / SchemaFields：按 useForm 的 zod schema 生成字段（控件映射、meta.group 分组、columns 与 span、对象数组可增删的行），emptyValues、schemaFields、schemaFilters、schemaConditionFields | SchemaModel（孪生）、SchemaView、SchemaFields、SchemaForm 已做（2026-11-16，仅 Avalonia）：schema 换成模型的属性加 Display 与 SchemaField 特性；emptyValues 没有对应（模型自己有默认值），schemaConditionFields 是 SchemaModel.ConditionFields，schemaFilters 是 SchemaFields.Filters | 控件映射、分组、栏数、增删行照上游 |
 
 ### 第九批（2026-11-08 通知，master 8c2f40a8，阶段 24.4 删旧写法，破坏性）
 

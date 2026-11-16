@@ -1539,7 +1539,8 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - SchemaForm：Form（错误汇总、SchemaFields、重置与提交那一行），Content 在按钮那一行的起始边（提交结果，读屏念变化）。上游 SchemaForm 上的 pick、fields、columns 等
   写在 FieldsView（SchemaFields）上，propsForm 是 Form 属性；Columns 直接转给 FieldsView。
 - 示例：Form 页的 generated、read-view（填写与查看切换）。像素对照 generated 1.14%、read-view 2.02%：标签行比上游矮约 2px（必填星号的基线），一组一组累加。
-- 还没做：schemaFilters（查询栏的条件）、Form 页的 conditional、sources 示例。
+- SchemaFields.Filters（上游 schemaFilters）：查询栏的一组 Field，值直接读写传进来的对象（不经表单控制器），文字与选择可以清空；控件上放值的属性与 Field 自动绑定用同一个查找
+  （Field.Bound.ValueProperty）。conditional、sources 示例补上了：像素 conditional 1.10%、sources 0.53%（同上，标签行矮约 2px）。
 
 ### Condition、ConditionBuilder（2026-11-16，仅 Avalonia）
 
