@@ -296,6 +296,8 @@ const BUTTON_TYPE = '表单提交是浏览器的概念；对话框的默认、�
 
 /** 某个组件不移植的 prop 与原因（平台上没有对应的概念）：parity 不报缺 */
 export const PROPS_NOT_PORTED = {
+  FilterBar: Object.fromEntries(['propsBody', 'propsRow']
+    .map((prop) => [prop, '第一排、start 右边那一列不是单独的元素：条件的格子、按钮区、展开的几排由 FilterBar 自己按量出的宽度排（上游 ResizeObserver 量完再排的那一套），部件是按钮区、按钮与高级筛选（FilterBarParts）'])),
   Calendar: { valueType: '值是 ISO 字符串的 Value（多选是 Values），另有 DateOnly 的 Date 属性：没有 @internationalized/date 的日期值类型，不按传进来的值推类型' },
   QuarterCalendar: Object.fromEntries(['propsPrevious', 'propsNext', 'propsHeader', 'propsHeading', 'propsGrid', 'propsCell', 'propsCellButton']
     .map((prop) => [prop, '部件同 CalendarView（上游同一个配方）：Avalonia 是 CalendarViewParts 的部件名（样式选择器 :is(rune|CalendarSurface)），WPF 是 CalendarViewParts 的部件样式键，WinForms 的四格是自己画的 QuarterGridControl；按季度给的部件属性没有对应，格子的外观按状态写样式'])),

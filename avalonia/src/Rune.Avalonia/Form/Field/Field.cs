@@ -21,7 +21,7 @@ namespace Rune.Avalonia;
 /// 里面的控件（勾选类、复选组、单选组，以后的输入框）取字段的出错、必填、只读（控件上自己写了的优先），读屏的帮助文字是说明与错误；
 /// 第一个控件认领标签：没有自己的名称时以标签为名，点标签聚焦它。有错误（且 IsInvalid 不是 false）时显示错误、控件标红；只写 IsInvalid 时只标红。
 /// 不可用写 IsEnabled（里面一起不可用，标签变淡）。
-/// 标签默认在上方，竖排间距 space.xs；<see cref="LabelPlacement"/> 为 start 时标签一列（<see cref="LabelWidth"/>，默认 8em；
+/// 标签默认在上方，竖排间距 space.xs；<see cref="LabelPlacement"/> 为 start 时标签一列（<see cref="LabelWidth"/>，默认 8em，<see cref="AutoLabelWidth"/> 时随文字；
 /// 文字默认贴着控件右对齐）、控件一列，列距 space.md，标签与控件第一行文字的基线对齐。<see cref="IsLabelHidden"/> 时标签只给读屏、不占位置。
 /// 说明与错误是 sm 字号、行高 normal（muted；错误是 dangerText，前面有警示图标）。说明、错误是文字（上游可以是任意内容）。
 /// 在 <see cref="Form"/> 里写了 <see cref="Path"/> 时（上游的 name）：错误取自表单控制器（何时显示见 FormController）、必填默认按模型的校验特性，
@@ -66,6 +66,9 @@ public class Field : Control
 
     /// <summary>标签在起始边时标签列的宽度（设备无关像素）；不写（NaN）时 8em。</summary>
     public static readonly StyledProperty<double> LabelWidthProperty = AvaloniaProperty.Register<Field, double>(nameof(LabelWidth), double.NaN, inherits: true);
+
+    /// <summary>LabelWidth 写它时标签列的宽度随文字（上游 labelWidth 的 auto）：控件紧跟着标签，不留空白（FilterBar 默认这样）。</summary>
+    public const double AutoLabelWidth = double.PositiveInfinity;
 
     /// <summary>标签在起始边时文字的对齐；默认 end（贴着控件）。</summary>
     public static readonly StyledProperty<FieldLabelAlign> LabelAlignProperty = AvaloniaProperty.Register<Field, FieldLabelAlign>(nameof(LabelAlign), inherits: true);
@@ -369,7 +372,8 @@ public class Field : Control
 
     double Spacing(string key) => this.Resource<double>(key) * Em;
 
-    double LabelColumn => double.IsNaN(LabelWidth) ? 8 * Em : LabelWidth;
+    /// <summary>标签列的宽度：没写是 8em，<see cref="AutoLabelWidth"/> 时随标签的文字（量过的宽度）。</summary>
+    double LabelColumn => double.IsNaN(LabelWidth) ? 8 * Em : double.IsPositiveInfinity(LabelWidth) ? (label.IsVisible ? label.DesiredSize.Width : 0) : LabelWidth;
 
     IEnumerable<Control> Below => new Control[] { description, error }.Where(part => part.IsVisible);
 
@@ -377,6 +381,7 @@ public class Field : Control
     protected override LayoutSize MeasureOverride(LayoutSize availableSize)
     {
         var gap = Spacing(ThemeKeys.Space.Xs);
+        if (Start && label.IsVisible) label.Measure(new LayoutSize(double.IsPositiveInfinity(LabelWidth) ? double.PositiveInfinity : LabelColumn, availableSize.Height));
         var column = Start ? LabelColumn + Spacing(ThemeKeys.Space.Md) : 0;
         var inner = availableSize.Deflate(new Thickness(column, 0, 0, 0));
         var height = 0d;
@@ -388,11 +393,7 @@ public class Field : Control
             height += part.DesiredSize.Height + (rows++ > 0 ? gap : 0);
             width = Math.Max(width, part.DesiredSize.Width);
         }
-        if (label.IsVisible)
-        {
-            if (Start) label.Measure(new LayoutSize(LabelColumn, availableSize.Height));
-            else Add(label, availableSize);
-        }
+        if (label.IsVisible && !Start) Add(label, availableSize);
         if (Content is { } content) Add(content, inner);
         foreach (var part in Below) Add(part, inner);
         if (Start)
