@@ -8,6 +8,8 @@
                     xmlns:rune="clr-namespace:Rune.Avalonia">
   <ControlTheme x:Key="{x:Type rune:TableCell}" TargetType="rune:TableCell">
     <Setter Property="Foreground" Value="{DynamicResource Rune.Brush.Text}" />
+    <!-- 同 Align 的默认 start：不写时 ContentControl 默认拉满，按钮这类内容会被拉宽、居中 -->
+    <Setter Property="HorizontalContentAlignment" Value="Left" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="ClipToBounds" Value="False" />
     <!-- 数字等宽：金额、数量、日期上下对齐（同上游 td 的 tabular-nums；表头格没有） -->
