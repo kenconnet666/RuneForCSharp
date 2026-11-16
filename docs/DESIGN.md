@@ -1469,6 +1469,20 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### Upload（2026-11-16，仅 Avalonia）
+
+- 值是 Files（UploadFile 的列表，双向绑定）；UploadFile 是 record（Id、Name、Status、Size、File（IStorageFile）、Url、Progress、Error、Rejected、Response），已有文件用 UploadFile.Existing。
+  上传函数叫 Uploader（UploadHandler：文件、IProgress&lt;double&gt;、取消令牌 → 结果），属性不能与类同名；上游的 action、fieldName（经 createUi 的 http 发）桌面上没有统一配置的请求客户端，不移植；name 是网页的表单提交，不移植。
+- 选到的、父级放进来的 Selected 文件统一在 Files 变了之后开始上传（排进调度队列，同上游的 watch）：Start 自己也改 Files，在属性变化里直接调会重入、同一个文件上传两次。
+  大小用 GetBasicPropertiesAsync 异步取（同步等在界面线程上会死锁），格式化同表格的 FileSize（1000 进位）。
+- 列表模式：FileDrop 在上、每项是 borderMuted 描边、md 圆角的一行（图标按状态、文件名或链接、大小 / 错误 / xs 进度条、重试、移除）；没有大小也没有错误时只剩文件名一行。
+- 图片墙：ImageGroup 里每格是方形缩略图（本地文件用 file:// 地址直接显示，不是图片时是图标与文件名），上传中、失败盖一层 scrim，右上角把手、重试、移除是 xs、85% 表面色底；
+  "添加图片"是最后一格的 FileDrop（新加了内部的 Compact：四周 xs、不限最小高度，字号 sm）。排序用孪生的 SortableModel：把手的键盘同 Sortable，指针拖到哪一格就换到哪；
+  粘贴：Ctrl + V 读剪贴板的文件（TryGetFilesAsync），截图是位图时存成临时的 PNG 再加进来。
+- 示例里的"内存里的文件"用 DispatchProxy 做（Avalonia 12 的 IStorageFile 不让使用方实现）；Upload/import 示例名改成上游的 file-drop。
+- 像素对照：form 0.65%、folder 1.15%、wall 1.19%（上游的图纸是没有固定尺寸的 SVG，在方格里按宽度放；我们的是 3:2 的 PNG，cover 时左右裁掉）、
+  photos 6.78%（上游截图时假上传已经走到失败，我们是一打开就截）、file-drop 1.51%（暗色 5.35%：上游那一栏的示例区多一层外框）。
+
 ### Mentions、MentionText（2026-11-16，仅 Avalonia）
 
 - 拆分是孪生文件 MentionParsing（上游的 mentionSegments、mentionedValues）：按选项的显示文字找"@名字"，有多个能匹配时取最长的；@ 前面是字母、数字、下划线、点时不算（邮箱）。
@@ -1664,7 +1678,7 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 选文件的区域：点击、Enter / 空格打开系统的文件对话框（TopLevel.StorageProvider，按 Accept 换成扩展名筛选；Directory 时是文件夹对话框），也接平台的拖放（DragDrop，Avalonia 12 的 DataTransfer.TryGetFiles）。交出的是 PickedFile（IStorageFile 与相对路径：选文件夹时"文件夹/子文件夹/文件名"，同上游的 webkitRelativePath），经路由事件 FilesPicked、Rejected（上游的 onFiles、onReject）；不是多选也不是选文件夹时只取第一个。文件夹递归用 IStorageFolder.GetItemsAsync。
 - accept 的匹配是孪生文件 FileAccept（上游 matchesAccept）：浏览器的文件带 MIME 类型，桌面上的只有名字，类型按扩展名推（常见的图片、音视频、文档、压缩包），推不出时只能靠扩展名规则；同时给对话框算出扩展名筛选。
 - 外观：底色与 2px 虚线边框自己画（Avalonia 的 Border 画不了虚线），状态是伪类 :pointerover、:dragging、:invalid、:locked（只读或不可用，样式在 FileDropParts.axaml）；键盘聚焦时外面一圈焦点环。图标按字号画（Icon 的大小是它的字号），1.5em 在代码里设；上游 propsIcon 换图标在这里是 Icon 属性。读屏是按钮，名称是字段的标签、否则是提示文字，按下打开对话框。
-- 示例：Upload 页的 import（同上游；Upload 还没做）。测试里的文件、文件夹是 DispatchProxy 做的假 IStorageFile、IStorageFolder。
+- 示例：Upload 页的 file-drop（同上游）。测试里的文件、文件夹是 DispatchProxy 做的假 IStorageFile、IStorageFolder。
 
 ### NumberRangeField（2026-11-16，仅 Avalonia）
 
@@ -1806,7 +1820,7 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 区域是自绘的：surfaceMuted 底、md 圆角，图片按状态画，框外压暗（黑 50%），框留一条白 80% 的细边（圆形是椭圆），键盘聚焦时一圈焦点环（WinForms 画在框里面一圈）。上游的 height（默认 18rem）叫 ViewportHeight（默认 18em；控件自己的 Height 包括工具条），padding 叫 FrameInset（WinForms 是逻辑像素，按 DPI 放大）。
 - 圆形导出：Avalonia、WPF 推一个椭圆裁剪再画；WinForms 的裁剪区域没有抗锯齿，先裁成矩形、再用它当画刷填抗锯齿的椭圆。GDI+ 的高质量插值在边上会取到图片外面的透明像素（矩形四角半透明），画的时候用镜像平铺（ImageAttributes 的 TileFlipXY）。
 - 图片原本的大小：Avalonia 用 Bitmap.Size，WPF、WinForms 按像素（不按图片里记的 DPI）。Avalonia 的 headless 测试不真解码、不真编码，像素与编码的字节在 WPF、WinForms 的测试里核对。
-- 上游的头像示例配 Upload 的 transform（选好图片先弹出裁剪），Upload 还没做，示例改成直接裁一张图纸、点按钮出头像。
+- 上游的头像示例配 Upload 的 transform（选好图片先弹出裁剪）；示例仍是直接裁一张图纸、点按钮出头像（Upload 的 Transform 已有，接上就是同样的流程）。
 
 ### Carousel（2026-11-15）
 
