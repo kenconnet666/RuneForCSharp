@@ -27,7 +27,7 @@ sealed record InspectOptions(string Command, string? Key, string Theme, double W
         用法：inspect <命令> [组件/示例] [选项]
           list                       列出全部示例
           source <组件/示例|all>      示例的源码（文档站"显示代码"取的那一段）；all 时核对每个示例都切得出源码
-          snapshot <组件/示例>        渲染成 PNG（artifacts/inspect/<平台>/）
+          snapshot <组件/示例|all>    渲染成 PNG（artifacts/inspect/<平台>/）；all 时在同一个进程里截全部示例（CI 用：每个示例起一个进程太慢）
           tree <组件/示例>            元素树：类型、名字、类、边界
           props <组件/示例>           每个元素解析后的属性与值的来源
           uia <组件/示例>             读屏看到的 UI Automation 树
@@ -92,7 +92,15 @@ static class InspectProgram
         Console.OutputEncoding = Encoding.UTF8;
         try
         {
-            Console.Out.Write(execute(InspectOptions.Parse(args)));
+            var options = InspectOptions.Parse(args);
+            if (options is not { Command: "snapshot", Key: "all" })
+            {
+                Console.Out.Write(execute(options));
+                return 0;
+            }
+            if (options.Out is not null) throw new UsageException("snapshot all 不能写 --out：每个示例各一张图");
+            using var list = JsonDocument.Parse(execute(options with { Command = "list", Json = true }));
+            foreach (var row in list.RootElement.EnumerateArray()) Console.Out.Write(execute(options with { Key = row.GetProperty("示例").GetString() }));
             return 0;
         }
         catch (UsageException e)

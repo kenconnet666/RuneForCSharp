@@ -75,7 +75,7 @@
 | 列出示例（"组件/示例名"，Gallery 与 inspect 共用的登记表） | `avalonia/tools/Rune.Avalonia.Inspect/bin/Release/net10.0/Rune.Avalonia.Inspect.exe list`（先 `export DOTNET_ROOT=~/.dotnet`） |
 | 截文档站每个示例的效果区（亮暗、1x / 2x，另存文字盒子），写到 `artifacts/ts-shots/<页面>/` | `node tools/ts-shots/ts-shots.mjs checkbox [示例,…]` |
 | 像素对照：两边同样条件出图（宽 756、留白 21、至少高 112 且内容竖直居中、`--exact` 不取整），盖掉文字、容 1 像素位移后逐像素比；报告 `artifacts/parity/pixels/<平台>/<页面>.html`；`all` 跑截过的全部页面出总表 | `node tools/parity/pixels.mjs checkbox --platform wpf` |
-| 截图（PNG 写到 `artifacts/inspect/avalonia/`）；`--theme dark`、`--width 600`、`--padding 0`、`--min-height 112`（至少多高，内容竖直居中）、`--scale 2`、`--exact`（布局不取整） | `… Rune.Avalonia.Inspect.exe snapshot Icon/tones` |
+| 截图（PNG 写到 `artifacts/inspect/avalonia/`）；`--theme dark`、`--width 600`、`--padding 0`、`--min-height 112`（至少多高，内容竖直居中）、`--scale 2`、`--exact`（布局不取整）；`all` 在同一个进程里截全部示例（CI 用，Avalonia 三百多个约一分钟） | `… Rune.Avalonia.Inspect.exe snapshot Icon/tones`、`… snapshot all --theme dark` |
 | 元素树（类型、类与伪类、边界、所在模板） / 属性与来源（本地值、样式、模板、继承，画刷报出 token 名） / UIA 控件视图（角色、名称、Pattern）；都能加 `--json` | `… tree Icon/basic`、`… props Icon/tones`、`… uia Icon/accessibility` |
 | WPF 的 inspect（同样的命令；tree 的"样式"列是隐式还是显式 Style，props 的来源分主题样式、样式触发器、资源引用等） | `wpf/tools/Rune.Wpf.Inspect/bin/Release/net10.0-windows/Rune.Wpf.Inspect.exe snapshot Icon/sizes` |
 | WinForms 的 inspect（同样的命令，没有 `--scale`；tree 里单元素宿主下面列出它的元素，uia 是 MSAA 树） | `winforms/tools/Rune.WinForms.Inspect/bin/Release/net10.0-windows/Rune.WinForms.Inspect.exe uia Icon/accessibility` |

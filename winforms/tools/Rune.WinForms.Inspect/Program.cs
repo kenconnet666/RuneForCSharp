@@ -8,11 +8,18 @@ namespace Rune.WinForms.Inspect;
 
 static class Program
 {
+    static bool initialized;
+
     [STAThread]
     static int Main(string[] args) => InspectProgram.Run(args, options =>
     {
         if (options.Command == "list") return Inspector.List(options);
-        ApplicationConfiguration.Initialize();
+        // snapshot all 在同一个进程里多次调用：建过窗口之后不能再设文字渲染的默认值
+        if (!initialized)
+        {
+            ApplicationConfiguration.Initialize();
+            initialized = true;
+        }
         return options.Command switch { "bench" => BenchRunner.Run(options), "source" => Inspector.Source(options), _ => Inspector.Run(options) };
     });
 }
@@ -54,16 +61,25 @@ static class Inspector
         if (options.Scale != 1) throw new UsageException("WinForms 按显示器的 DPI 渲染，不支持 --scale");
         RuneTheme.Current.Value = BuiltinThemes.All.FirstOrDefault(theme => theme.Name == options.Theme)
             ?? throw new UsageException($"没有主题 {options.Theme}；可选：{string.Join("、", BuiltinThemes.All.Select(theme => theme.Name))}");
-        using var form = Show(example.Create(), example.Framed ? options with { Padding = 0, MinHeight = 0 } : options);
-        var content = form.Controls[0];
-        var labels = Labels(content);
-        return options.Command switch
+        try
         {
-            "snapshot" => Snapshot(form, options),
-            "tree" => Tree(content, labels).Render(options.Json),
-            "props" => Props(labels).Render(options.Json),
-            _ => Accessibility(content, labels).Render(options.Json),
-        };
+            using var form = Show(example.Create(), example.Framed ? options with { Padding = 0, MinHeight = 0 } : options);
+            var content = form.Controls[0];
+            var labels = Labels(content);
+            return options.Command switch
+            {
+                "snapshot" => Snapshot(form, options),
+                "tree" => Tree(content, labels).Render(options.Json),
+                "props" => Props(labels).Render(options.Json),
+                _ => Accessibility(content, labels).Render(options.Json),
+            };
+        }
+        finally
+        {
+            // 组件库换字号时新建的 Font 留给终结器释放；snapshot all 在一个进程里建几百个窗口，不等内存吃紧就先耗尽 GDI 句柄（Font.ToHfont 报参数无效）
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        }
     }
 
     static Form Show(Control content, InspectOptions options)

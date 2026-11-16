@@ -24,11 +24,13 @@ static class Program
     static int Main(string[] args) => InspectProgram.Run(args, options =>
     {
         if (options.Command == "list") return Inspector.List(options);
-        AppBuilder.Configure<InspectApp>()
-            .UseSkia()
-            .UseHarfBuzz()
-            .UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false })
-            .SetupWithoutStarting();
+        // snapshot all 在同一个进程里多次调用：平台只能初始化一次
+        if (Application.Current is null)
+            AppBuilder.Configure<InspectApp>()
+                .UseSkia()
+                .UseHarfBuzz()
+                .UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false })
+                .SetupWithoutStarting();
         return options.Command switch { "bench" => BenchRunner.Run(options), "source" => Inspector.Source(options), _ => Inspector.Run(options) };
     });
 }
