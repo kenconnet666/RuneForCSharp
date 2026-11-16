@@ -876,6 +876,9 @@ export const EXCLUDED = {
   ListboxView: '不单独成组件：Listbox 自己就是渲染层（虚拟滚动的选项、分组标题、空状态与加载中）',
   OverlayScrollbar: '不单独成组件：ScrollArea 的滚动条是平台 ScrollViewer 的 ScrollBar，主题里画成浮层样式（滚动时出现、停下淡出、不占宽度）',
   PageScrollbar: '浏览器专用（换掉窗口自己的页面滚动条）：桌面窗口没有页面滚动条，AppShell 的正文就是 ScrollArea',
+  DataTableView: '不单独成组件：DataTable 自己就是渲染层（内部的 DataTableSurface 虚拟滚动、建行），上游拆开是为了 TreeDataTable 等复用，桌面上它们派生自 DataTable',
+  DataTableRow: '不单独成组件：DataTable 内部的 DataTableRowView（自己画底色、排各格）',
+  DataTableDetailRow: '不单独成组件：DataTable 内部的详情行（DataTableDetailView），内容是 RenderDetail 给的',
 };
 
 /**
