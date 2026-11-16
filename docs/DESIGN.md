@@ -1652,7 +1652,7 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 勾选框按项建一次，Hidden 变了就地改勾选与可用（整张列表重建会让键盘勾选的焦点丢掉）；只剩一列可见时它的勾选框不可用（只数现有的列）。部件名在 ColumnSettingsParts（上游 propsTrigger、propsPanel、propsList、propsCheckbox、propsReset，另有 header、title）。
 - 示例：Table 页的 column-settings（我们自己的：上游只在 QueryTable 里用它，这里配 ColumnTable，两边看同一份 Hidden、Order）。
 
-### DataTable：列定义的排序、筛选、宽度（2026-11-16，仅 Avalonia，分几轮做）
+### DataTable（2026-11-16 起，仅 Avalonia，分几轮做）
 
 - 计划：这一轮是孪生文件 TableColumns 里的纯计算；下一轮 DataTable 本体（一个 ScrollViewer，里面自己的面板只建看得见的行、表头吸顶、合计行吸底，固定列按横向偏移挪回来）、
   排序、勾选、加载与空状态、ColumnResizer；再往后是表头筛选与列菜单（ColumnHeaderActions）、就地编辑与单元格导航、行拖动、详情行、分组表头，然后 TreeDataTable、QueryTable、DataImport。
@@ -1662,6 +1662,21 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 筛选：FilterOptions（状态按阶段顺序、用状态名，其余按语言排）、FilterRows（关键字按 CompareInfo.IndexOf 忽略大小写与重音）。Arrange 加了 pins，固定列排到两头。
 - 宽度：StickyOffsetsOf、TableMinWidth、FlexColumnWidth（上游是 CSS 的 max(min, calc(min + (100cqi − 最小宽度) / n))，这里直接给外层宽度算出像素）、ColumnSkips（列虚拟化）。
 - 测试对上上游 table.test 的纯函数用例、column-features 的多列排序与筛选、column-window 的列虚拟化。
+- DataTable 本体（第二轮）：外框是 Border（surface：border、lg 圆角、surface 底；ghost：页面底色），里面一个 ScrollArea（两个方向），内容是内部的 DataTableSurface：
+  只建看得见的行（前后各多 8 行，回收复用），按第一行量出的行高算总高度；表头按纵向偏移挪到视口顶上（吸顶），合计行挪到视口底下（吸底），
+  固定列的格按横向偏移挪回边上、在格下面再铺一层行的底色盖住滚过去的内容，固定列与滚动的列之间一条 borderMuted 竖线。滚动、视口变了时除了重新量，
+  还要通知各行重排（行的位置没变时平台不会重排它，固定列就停在老地方）。
+- 每一行是内部的 DataTableRowView（Control：Panel 的 Render 是封死的）：自己画底色（表头、合计 fill；已选 accentSoft、悬停 accentSoftHover；色调的浅色底；悬停 fillHover；斑马纹）与下边线，
+  格是 TableCell / TableHeaderCell（同静态表格的主题，TableCell 新加了 ApplyRole 给不在 TableSection 里的格设 :head、:foot），左右 space.md、上下按密度，一行放不下时省略号。
+  单元格内容、对齐、合计的显示用 ColumnTable 的 Display、AlignOf（上游的 useColumnDisplay，两种表格共用）。
+- 列宽：调整过的（ColumnWidths）、列定义的；其余平分剩下的（最小宽度不一样时按 FlexColumnWidth）；各列都写了宽度、合起来比表格窄时按比例分掉多出来的（浏览器 table-layout: fixed 的做法，上游靠它）。
+- 选择：SelectionMode（Selection 孪生文件的 single / multiple，null 时没有选择列，宽 44px），Selected 是 key 的列表（GetKey，默认行本身）；选择框的 Toggling 拦下来由表格写回。
+  选择框不撑高这一行（上游 choiceInCell），它的第一行对着这一行的正中。全选只数能选的行（IsRowSelectable），五万行全选用 HashSet，几十毫秒。
+- 加载：IsLoading 时表体换成 6 行骨架（高 1em，宽度按行与列错开 90%、75%、60%、45%），没有行时是 Empty（默认"暂无数据"）。紧凑时表格里字号小一档（绑在内容上，外层的 32em 不变）。
+- 还没做：上游按窗口剩余高度铺 6–50 行骨架、滚动加载的骨架接在末尾、调整列宽的把手、表头筛选与列菜单、多列排序的界面、就地编辑、行拖动、详情行、分组表头、列虚拟化、
+  主从视图的 activeKey。single 示例的行比上游高约 1.5px（compact 的行高），下一轮查。
+- 像素对照：orders 0.17%、states 0.00%、single 5.79%（行高差 1.5px 累积）。
+
 
 ### ColumnTable 与列定义（2026-11-16，仅 Avalonia）
 
