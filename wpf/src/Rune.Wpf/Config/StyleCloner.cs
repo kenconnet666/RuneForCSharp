@@ -92,12 +92,12 @@ static class StyleCloner
                 return data;
             case MultiTrigger t:
                 var multi = new MultiTrigger();
-                foreach (var c in t.Conditions) multi.Conditions.Add(new Condition(c.Property, c.Value, c.SourceName));
+                foreach (var c in t.Conditions) multi.Conditions.Add(new System.Windows.Condition(c.Property, c.Value, c.SourceName));
                 CopySetters(t.Setters, multi.Setters);
                 return multi;
             case MultiDataTrigger t:
                 var multiData = new MultiDataTrigger();
-                foreach (var c in t.Conditions) multiData.Conditions.Add(new Condition(c.Binding, c.Value));
+                foreach (var c in t.Conditions) multiData.Conditions.Add(new System.Windows.Condition(c.Binding, c.Value));
                 CopySetters(t.Setters, multiData.Setters);
                 return multiData;
             default:
