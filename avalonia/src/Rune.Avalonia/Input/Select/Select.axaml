@@ -66,4 +66,5 @@
     </Style>
   </ControlTheme>
   <ControlTheme x:Key="{x:Type rune:Select}" TargetType="rune:Select" BasedOn="{StaticResource {x:Type rune:SelectBase}}" />
+  <ControlTheme x:Key="{x:Type rune:TreeSelect}" TargetType="rune:TreeSelect" BasedOn="{StaticResource {x:Type rune:SelectBase}}" />
 </ResourceDictionary>
