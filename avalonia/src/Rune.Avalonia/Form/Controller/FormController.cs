@@ -186,6 +186,19 @@ public interface IFormController : INotifyPropertyChanged
     /// <param name="path">字段路径。</param>
     /// <param name="field">标签与聚焦。</param>
     IDisposable Register(string path, FormFieldInfo field);
+
+    /// <summary>模型的类型（SchemaForm 按它推出字段）。</summary>
+    Type ModelType { get; }
+
+    /// <summary>
+    /// 字段此刻的样子（按 Access 与模型上 SchemaField 特性的条件）：不显示的不校验，SchemaForm 不渲染；路径里列表的行号照写（<c>Lines.0.Price</c>）。
+    /// </summary>
+    /// <param name="path">字段路径。</param>
+    SchemaFieldState FieldState(string path);
+
+    /// <summary>列表字段的增删、移动（SchemaForm 的可增删的行、明细表用）。</summary>
+    /// <param name="path">字段路径。</param>
+    FieldArray Array(string path);
 }
 
 /// <summary>FormController 的共用部分（数组项的 key、路径的读写、错误的文案）。</summary>
@@ -255,6 +268,18 @@ public static class FormController
             var array = System.Array.CreateInstance(element, list.Count);
             list.CopyTo(array, 0);
             return array;
+        }
+        // 日期控件的值是 ISO 文字（2026-10-21、2026-10-21T09:30），模型是 DateOnly、DateTime
+        switch (value)
+        {
+            case string iso when target == typeof(DateOnly):
+                return DateOnly.ParseExact(iso.Length > 10 ? iso[..10] : iso, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            case string iso when target == typeof(DateTime):
+                return DateTime.Parse(iso, CultureInfo.InvariantCulture, DateTimeStyles.None);
+            case DateOnly date when target == typeof(string):
+                return date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            case DateTime time when target == typeof(string):
+                return time.ToString(time.TimeOfDay == TimeSpan.Zero && time.Kind == DateTimeKind.Unspecified ? "yyyy-MM-dd" : "yyyy-MM-dd'T'HH:mm", CultureInfo.InvariantCulture);
         }
         return target.IsEnum ? Enum.Parse(target, value.ToString()!) : System.Convert.ChangeType(value, target, CultureInfo.InvariantCulture);
     }
@@ -386,6 +411,31 @@ public sealed class FormController<T> : IFormController where T : class
 
     /// <summary>校验通过后调用；任务进行中 IsSubmitting 为 true。</summary>
     public Func<T, Task>? OnSubmit { get; init; }
+
+    /// <summary>
+    /// 字段的权限（上游 useForm 的 access，按去掉行号的路径：<c>Lines.Price</c>）：Hidden 不显示、不校验，Readonly 只读、不算必填，Required 必填；
+    /// 拿到当前的值（随环节、随人、随值变）。与模型上 SchemaField 特性的 VisibleWhen、RequiredWhen、ReadonlyWhen 一起算出字段此刻的样子（<see cref="FieldState"/>）。
+    /// 换了一套权限时调 <see cref="Refresh"/>。
+    /// </summary>
+    public Func<T, IReadOnlyDictionary<string, SchemaFieldAccess>>? Access { get; init; }
+
+    /// <inheritdoc />
+    public Type ModelType => typeof(T);
+
+    /// <inheritdoc />
+    public SchemaFieldState FieldState(string path) => States().GetValueOrDefault(path, new SchemaFieldState(true, false, false));
+
+    /// <summary>权限的来源（Access 读的外部状态：环节、角色）变了：通知字段与表单重新算。</summary>
+    public void Refresh() => Notify(nameof(Values));
+
+    /// <summary>全部字段此刻的样子（每次按当前的值与权限算；字段几十个，不缓存）。</summary>
+    Dictionary<string, SchemaFieldState> States()
+    {
+        var states = new Dictionary<string, SchemaFieldState>();
+        var access = Access?.Invoke(Values) ?? new Dictionary<string, SchemaFieldAccess>();
+        SchemaModel.Walk(SchemaModel.Of(typeof(T)), Values, access, (path, _, state) => states[path] = state);
+        return states;
+    }
 
     /// <inheritdoc />
     public IReadOnlyDictionary<string, string> Errors => Merged();
@@ -642,6 +692,13 @@ public sealed class FormController<T> : IFormController where T : class
         if (Validate is not null && await Validate(Values) is { } custom)
             foreach (var (path, message) in custom)
                 if (!string.IsNullOrEmpty(message)) found.TryAdd(path, message);
+        // 权限与条件：不显示的字段（及它下面的）不报错，条件必填、权限必填的空着报"必填"
+        foreach (var (path, state) in States())
+        {
+            if (!state.Visible)
+                foreach (var key in found.Keys.Where(key => key == path || key.StartsWith(path + ".", StringComparison.Ordinal)).ToList()) found.Remove(key);
+            else if (state.Required && FormController.IsBlank(GetValue(path))) found.TryAdd(path, lang().FormRequired);
+        }
         if (full)
             await Task.WhenAll(FieldValidators.Where(pair => scope is null || FormController.InScope(pair.Key, scope)).Select(pair => RunField(pair.Key, pair.Value)));
         return found;

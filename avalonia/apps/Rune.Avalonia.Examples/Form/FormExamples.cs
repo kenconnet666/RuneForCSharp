@@ -5,11 +5,13 @@ using Avalonia.Layout;
 namespace Rune.Avalonia.Examples;
 
 /// <summary>Form 的示例（vue-tsx-pro 文档站 form/Form）。数组字段、按模型生成的表单、分节目录还没做。</summary>
-static class FormExamples
+static partial class FormExamples
 {
     public static Example[] All =>
     [
         new("Form", "admission", "供应商准入：自动绑定与错误汇总", "Field 写 Path、里面只放控件：值自动绑定模型的这个字段（开关写回 IsChecked）。FormErrorSummary 放在表单顶上：提交没通过时列出显示着的错误（按字段在表单里的顺序、带字段名），焦点先到它上面，点哪一项跳到那个字段，改对一项就少一项。跨字段的规则写在模型的 IValidatableObject 里，成员名指到要标错的字段；Dependencies 让开始日期改了之后结束日期跟着重新校验。", Admission),
+        new("Form", "generated", "按 schema 生成：SchemaForm", "同一份准入申请：SchemaForm 按表单控制器的模型生成字段，控件按属性的类型选（文字、枚举或写了 SchemaOption 的下拉、DateOnly 的日期、数字、布尔的开关、枚举集合的多选、嵌套对象的一组、对象列表的可增删的行）。标签、说明、占位、分组用 Display（Name、Description、Prompt、GroupName），栏宽（Span）、换控件（Control：Radio、Checkbox、Checkboxes、Textarea……）写在 SchemaField 特性里。模型自己的默认值就是空白的初始值。某个字段要别的控件时写 Fields（字段路径 → 控件）；只想生成一部分时，在手写的 Form 里放 SchemaFields（Pick / Omit），其余照旧手写。", Generated),
+        new("Form", "read-view", "页签与只读视图", "SchemaField 特性写 Tab = \"费用\" 分进标签页（页签里照旧分组，没写的排在页签前面）。SchemaView 按同一个模型只读地显示值（审批时看单据、打印）：选项显示文字（含登记的字典）、开关显示是否、人员与附件显示名字、对象展开成“对象 · 字段”、明细表排成表格带合计；Access 与 VisibleWhen 不显示的不列，分组与页签各成一块。", ReadView),
         new("Form", "signup", "注册：校验与异步校验", "Field 写 Path、里面只放控件：值自动双向绑定，错误取自 FormController，失焦或提交过之后才显示；必填星号、最大长度、年龄的范围来自模型上的特性。用户名另有异步校验（防抖、只采用最后一次结果，提交时等它完成）。单行输入框里按回车提交，没通过时焦点移到第一个出错的字段。", Signup),
         new("Form", "layout", "标签在左侧、整组只读", "标签放在起始边在 Form 上统一设置：标签一列右对齐、控件一列，按第一行文字的基线对齐。IsReadOnly、IsEnabled 写在 Form 上，所有字段与控件（含勾选、开关、分段）一起只读或不可用。", Layout),
         new("Form", "section-review", "审批时整组只读", "申请内容整组只读（IsReadOnly 写在 FormSection 上），只有最后一组“审批意见”能填；标签放在起始边，两组用同一个宽度。分组有标题栏与细线，读屏是以标题为名称的一组。", SectionReview),
