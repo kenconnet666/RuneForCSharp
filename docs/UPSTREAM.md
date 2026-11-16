@@ -53,7 +53,7 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 | Grid / GridList 的 balanced（b0baadf5） | 已做 | 跟到 ad4a77ac 时做了：孪生文件 GridLayout 加 BalancedColumns，三个平台的 Grid 加 Balanced |
 | Sparkline 的柱在 showLast 时最新一根实色，删 variant | 还没做 | 做时照新的 |
 | 静态 Table 的 stickyHeader、单元格的 sticky（9a57a058） | 已做 Table | 2026-11-14 做了（1873c1a），见第三批 |
-| ProportionBar 图例从起始边排、列间距 lg；CommentThread、NotificationCenter 用 RelativeTime | 还没做 | 做时照新的 |
+| ProportionBar 图例从起始边排、列间距 lg；CommentThread、NotificationCenter 用 RelativeTime | CommentThread 已做（2026-11-16，仅 Avalonia，时间是 RelativeTime），其余还没做 | 做时照新的 |
 | Listbox 根元素补上部件标记，border-box 罩得到（ff185e89） | 修了我们报的高度问题 | 下次锁定时重截 listbox multiple |
 | FilterBar / QueryTable 重做（cad81082，作废 a6ffbb54 那版）：标题单独一列，第一排条件 auto-fit 加按钮区（展开、高级筛选、actions、重置、查询、竖线、end），其余条件从第二排 auto-fill；minFieldWidth 默认 14em，加 propsBody、propsRow | 还没做 | 做时照 cad81082 |
 | 文档站合页：NavMenu、NavBar 并进 NavList 页等 | NavList 页现有的示例 id 不变 | menu、nav-bar 已做（2026-11-16，仅 Avalonia，随 NavMenu、NavBar） |
@@ -151,7 +151,7 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
 | 组件内部节点统一带 data-scope / data-part，[data-part] 一律 border-box；部件属性按“默认 < 使用方的 < 组件管的（值、无障碍、事件）”合并 | 网页的标记与盒模型；部件的合并顺序我们本来如此（DESIGN §7） | 不涉及 |
-| 新增部件属性：CommentThread、CommentComposer、Checklist、Cascader、KanbanBoard、CalendarBoard、ColorPicker、DiagramNode | Checklist、KanbanBoard 已做（KanbanBoard 2026-11-15，Avalonia 的部件名在 KanbanBoardParts）；CalendarBoard 已做（2026-11-15，仅 Avalonia，部件名在 CalendarBoardParts，按条的日程外观用 EventTemplate 或按 DataContext 写样式），其余还没做 | 做时照新的部件 |
+| 新增部件属性：CommentThread、CommentComposer、Checklist、Cascader、KanbanBoard、CalendarBoard、ColorPicker、DiagramNode | Checklist、KanbanBoard 已做（KanbanBoard 2026-11-15，Avalonia 的部件名在 KanbanBoardParts）；CalendarBoard 已做（2026-11-15，仅 Avalonia，部件名在 CalendarBoardParts，按条的日程外观用 EventTemplate 或按 DataContext 写样式）；CommentThread、CommentComposer 已做（2026-11-16，仅 Avalonia，部件名在 CommentThreadParts、CommentComposerParts）；Cascader、ColorPicker 已做，其余还没做 | 做时照新的部件 |
 | AppShell、FilterBar、Timeline、Tree、ItemList 等只补了标记 | AppShell 已做，部件属性不变 | 不涉及 |
 
 锁定跟到 95a6c2ee（这一批全部绿了）：生成文件、对照结果都没变。

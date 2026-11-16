@@ -1469,6 +1469,18 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### CommentThread、CommentComposer（2026-11-16，仅 Avalonia）
+
+- 数据是 record：CommentItem（Id、Author、Content、Time，init 的 Avatar、Role、Edited、Attachments、Extra、Replies）、CommentAttachment、CommentAuthor（名字与头像）、
+  CommentDraft（内容、提到的人、上传完的 UploadFile、ReplyTo）。头像是 IImage（上游是地址），没有时 Avatar 显示首字母；Role、Extra 是 object，控件直接放、其余写成文字。
+- 发送是 Func&lt;CommentDraft, Task&gt;（上游 onSend 返回 Promise）：任务进行中发送按钮转圈，成功清空，抛异常时保留内容、显示 dangerText 的提示并经 LiveRegion 播报（上游 role=alert）。
+  上传函数沿用 Upload 的 Uploader（上游 upload）；附件按钮切换下面的 Upload，带个数，附件还在上传时不能发送。
+- Ctrl + Enter、Esc 在隧道阶段接：多行输入框自己会把 Enter 当换行吃掉；提及的列表开着时不管，Esc、Enter 交给列表。
+- 列表每次属性变化整个重建（同上游的渲染函数）：使用方给的 Role、Extra、Empty 控件先从上一次的父级拿下来；回复框是缓存的实例，Comments 变了也不丢写了一半的内容。
+  回复只分一层，回复框的读屏名称是"回复 某人"，开头写上"@作者 "，发出后收起。时间用 RelativeTime（Now 固定"现在"），附件大小同表格的 FileSize。
+- autofocus 按上游叫 Autofocus（一个词）。部件名在 CommentThreadParts、CommentComposerParts。
+- 像素对照：discussion 0.82%（暗色 0.79%）、negotiation 0.74%（暗色 0.65%）：文字抗锯齿、禁用按钮的透明度、输入框描边，结构对得上。
+
 ### Upload（2026-11-16，仅 Avalonia）
 
 - 值是 Files（UploadFile 的列表，双向绑定）；UploadFile 是 record（Id、Name、Status、Size、File（IStorageFile）、Url、Progress、Error、Rejected、Response），已有文件用 UploadFile.Existing。
