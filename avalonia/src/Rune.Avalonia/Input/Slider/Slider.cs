@@ -163,7 +163,30 @@ public class Slider : Control, IFieldControl, global::Avalonia.Rendering.ICustom
 
     double ThumbSize => (this.Resource<double>(ThemeKeys.Space.Lg) + this.Resource<double>(ThemeKeys.Space.Xs)) * Em;
 
-    double TrackThickness => this.Resource<double>(ThemeKeys.Space.Xs) * 1.5 * Em;
+    double TrackThickness => TrackEm is { } em ? em * Em : this.Resource<double>(ThemeKeys.Space.Xs) * 1.5 * Em;
+
+    /// <summary>自己画轨道（取色器的色相、不透明度，TS 里改 propsTrack、propsRange）：写了时不画底色、已选范围与刻度点。</summary>
+    internal Action<DrawingContext, RoundedRect>? PaintTrack
+    {
+        get;
+        set
+        {
+            field = value;
+            InvalidateVisual();
+        }
+    }
+
+    /// <summary>轨道的粗细（em）；不写时 xs 的 1.5 倍。</summary>
+    internal double? TrackEm
+    {
+        get;
+        set
+        {
+            field = value;
+            InvalidateArrange();
+            InvalidateVisual();
+        }
+    }
 
     bool Labelled => Marks?.Any(mark => mark.Label is not null) == true;
 
@@ -369,6 +392,12 @@ public class Slider : Control, IFieldControl, global::Avalonia.Rendering.ICustom
         if (track.Width <= 0 || track.Height <= 0) return;
         var (fillKey, onFillKey) = ToneFill.Keys(Tone);
         var round = Math.Min(track.Width, track.Height) / 2;
+        if (PaintTrack is { } paint)
+        {
+            paint(context, new RoundedRect(track, round));
+            DrawFocusRing(context);
+            return;
+        }
         context.DrawRectangle(this.Resource<IBrush>(ThemeKeys.Brush.Fill), null, new RoundedRect(track, round));
         var values = Enumerable.Range(0, Values.Length).Select(Shown).ToArray();
         var (from, to) = values.Length > 1 ? (values[0], values[1]) : (Min, values[0]);
@@ -384,7 +413,12 @@ public class Slider : Control, IFieldControl, global::Avalonia.Rendering.ICustom
             var active = mark.Value >= from && mark.Value <= to;
             context.DrawEllipse(this.Resource<IBrush>(active ? onFillKey : ThemeKeys.Brush.BorderStrong), null, center, dot / 2, dot / 2);
         }
-        // 键盘聚焦的滑块外面一圈焦点环（滑块是子元素，画在它下面也露在外圈）
+        DrawFocusRing(context);
+    }
+
+    /// <summary>键盘聚焦的滑块外面一圈焦点环（滑块是子元素，画在它下面也露在外圈）。</summary>
+    void DrawFocusRing(DrawingContext context)
+    {
         foreach (var thumb in thumbs.Where(thumb => thumb.IsFocused && thumb.ShowsFocusRing))
         {
             var ring = thumb.Bounds.Inflate(2);

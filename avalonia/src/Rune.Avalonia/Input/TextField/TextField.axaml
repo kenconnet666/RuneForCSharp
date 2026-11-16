@@ -218,4 +218,37 @@
     <Setter Property="FontFeatures" Value="+tnum" />
     <Style Selector="^:over"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.DangerText}" /></Style>
   </ControlTheme>
+  <!-- ColorField：外壳同 TextField，前面是色块（弹出层的触发元素，在 ColorField.cs 里放进 PART_SwatchHost），文字是等宽字体 -->
+  <ControlTheme x:Key="{x:Type rune:ColorField}" TargetType="rune:ColorField" BasedOn="{StaticResource Rune.TextInput}">
+    <Setter Property="FontFamily" Value="{DynamicResource Rune.Font.Mono}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border Name="PART_Root" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
+            <rune:Flex Align="center" Gap="sm">
+              <ContentPresenter Name="PART_SwatchHost" VerticalAlignment="Center" />
+              <Panel rune:Flex.Grow="True" ClipToBounds="True" VerticalAlignment="Center">
+                <TextPresenter Name="PART_TextPresenter"
+                               Text="{TemplateBinding Text, Mode=TwoWay}"
+                               CaretBlinkInterval="{TemplateBinding CaretBlinkInterval}"
+                               CaretIndex="{TemplateBinding CaretIndex}"
+                               SelectionStart="{TemplateBinding SelectionStart}"
+                               SelectionEnd="{TemplateBinding SelectionEnd}"
+                               TextAlignment="{TemplateBinding TextAlignment}"
+                               TextWrapping="NoWrap"
+                               LineHeight="{TemplateBinding LineHeight}"
+                               SelectionBrush="{TemplateBinding SelectionBrush}"
+                               SelectionForegroundBrush="{TemplateBinding SelectionForegroundBrush}"
+                               CaretBrush="{TemplateBinding CaretBrush}"
+                               VerticalAlignment="Center" />
+              </Panel>
+            </rune:Flex>
+          </Border>
+          <Border Name="PART_FocusRing" IsVisible="False" IsHitTestVisible="False" Margin="-1" BorderThickness="2"
+                  BorderBrush="{DynamicResource Rune.Brush.FocusRing}" CornerRadius="{TemplateBinding CornerRadius}" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
 </ResourceDictionary>

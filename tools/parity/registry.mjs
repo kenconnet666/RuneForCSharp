@@ -502,6 +502,8 @@ export const PROPS_NOT_PORTED = {
     propsDialog: '对话框是打开时建的（lg、标题是占位文字、确定写回）：样式写在 Dialog 的主题或部件上',
     propsPanel: '对话框里的面板是 PeoplePickerPanel：样式写在它的主题或部件上（PeoplePickerPanelParts）',
   },
+  ColorPicker: { propsEyeDropper: '吸管是浏览器的 EyeDropper：桌面上没有跨平台的屏幕取色，不做吸管按钮' },
+  ColorField: { propsPicker: '弹出层里的取色器跟着 ColorField 的 Presets、Alpha；样式写在 ColorPicker 的主题或部件上（ColorPickerParts）' },
   SelectedTags: { propsTag: '标签固定是 sm、soft 的 Tag：样式写在 Tag 的主题或部件上' },
   TagsInput: {
     placement: '弹出层固定贴着外壳下方、至少与它同宽（放不下时翻到上方），同 Select',
