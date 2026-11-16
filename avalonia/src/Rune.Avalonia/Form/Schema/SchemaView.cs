@@ -12,7 +12,7 @@ namespace Rune.Avalonia;
 /// <code>
 /// new SchemaView { Values = order, Access = new Dictionary&lt;string, SchemaFieldAccess&gt; { ["Cost"] = SchemaFieldAccess.Hidden } }
 /// </code>
-/// 字段从 <see cref="Schema"/> 推（<see cref="SchemaFields"/>），不写时按 Values 的类型。部件：每一块是 <see cref="SchemaViewParts.Section"/>（Descriptions）。
+/// 字段从 <see cref="Schema"/> 推（<see cref="SchemaModel"/>），不写时按 Values 的类型。部件：每一块是 <see cref="SchemaViewParts.Section"/>（Descriptions）。
 /// </summary>
 public class SchemaView : Control
 {
@@ -86,9 +86,9 @@ public class SchemaView : Control
         if (Values is not { } values) return;
         var lang = Provider.GetLang(this);
         var sources = FormSources.Merge(Provider.GetFormSources(this), Sources);
-        var fields = SchemaFields.Of(Schema ?? values.GetType());
+        var fields = SchemaModel.Of(Schema ?? values.GetType());
         var states = new Dictionary<string, SchemaFieldState>();
-        SchemaFields.Walk(fields, values, Access ?? new Dictionary<string, SchemaFieldAccess>(), (path, _, state) => states[path] = state);
+        SchemaModel.Walk(fields, values, Access ?? new Dictionary<string, SchemaFieldAccess>(), (path, _, state) => states[path] = state);
         bool Visible(string path) => !states.TryGetValue(path, out var state) || state.Visible;
 
         IEnumerable<DescriptionItem> Items(SchemaField field, object? value, string path, string label)
@@ -106,7 +106,7 @@ public class SchemaView : Control
         }
 
         // 分组各一块（页签里的字段也照分组排：只读、打印时一次看全）
-        foreach (var group in SchemaFields.Pick(fields, Pick, Omit).GroupBy(field => field.Group ?? field.Tab))
+        foreach (var group in SchemaModel.Pick(fields, Pick, Omit).GroupBy(field => field.Group ?? field.Tab))
         {
             var block = new Descriptions { Name = SchemaViewParts.Section, Columns = Columns, Title = group.Key };
             block.Items.AddRange(group.SelectMany(field => Items(field, FormController.Read(values, field.Key), field.Key, field.Label)));
@@ -118,7 +118,7 @@ public class SchemaView : Control
     internal static object Display(SchemaField field, object? value, FormSources sources, Lang lang)
     {
         if (field.Control is SchemaControl.Switch or SchemaControl.Checkbox) return value is true ? lang.FormValueTrue : lang.FormValueFalse;
-        if (SchemaFields.IsBlank(value)) return lang.FormValueEmpty;
+        if (SchemaModel.IsBlank(value)) return lang.FormValueEmpty;
         var items = value is IEnumerable list and not string ? list.Cast<object?>().ToList() : [value];
         switch (field.Control)
         {
@@ -179,7 +179,7 @@ public class SchemaView : Control
                 total.Cells.Add(new TableCell
                 {
                     Name = SchemaViewParts.TableTotal, Align = AlignOf(columns[at]), FontWeight = global::Avalonia.Media.FontWeight.SemiBold,
-                    Content = columns[at].Sum ? SchemaFields.ColumnTotal(columns[at], rows) : at == 0 ? lang.TableSummary : null,
+                    Content = columns[at].Sum ? SchemaModel.ColumnTotal(columns[at], rows) : at == 0 ? lang.TableSummary : null,
                 });
             table.Sections.Add(new TableFoot { Rows = { total } });
         }

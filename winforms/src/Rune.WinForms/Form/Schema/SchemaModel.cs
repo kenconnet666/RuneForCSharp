@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Reflection;
 
-namespace Rune.Avalonia;
+namespace Rune.WinForms;
 
 /// <summary>SchemaForm 能生成的控件（vue-tsx-pro 的 SchemaControls）。</summary>
 public enum SchemaControl
@@ -212,7 +212,7 @@ public readonly record struct SchemaFieldState(bool Visible, bool Readonly, bool
 /// <item>按属性的声明顺序；Display.Order 写了时按它排在前面（同 DataAnnotations 的约定）。</item>
 /// </list>
 /// </summary>
-public static class SchemaFields
+public static class SchemaModel
 {
     static readonly ConcurrentDictionary<Type, IReadOnlyList<SchemaField>> Cache = new();
     static readonly NullabilityInfoContext Nullability = new();

@@ -1513,7 +1513,9 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 测试：IStorageFile 不能自己实现（Avalonia 标了不让用户实现），测试把读好的表交给 internal 的 Load；读 CSV 由 Sheet 的测试覆盖。
 - 像素对照：parts 0.92%（上游写着"支持 .xlsx, .csv"，这里只有 .csv）。
 
-### SchemaFields（2026-11-16，孪生文件；SchemaView、SchemaForm 在它上面做）
+### SchemaModel（2026-11-16，孪生文件；SchemaView、SchemaForm 在它上面做）
+
+- 上游的 schemaFields() 等是函数，组件叫 SchemaFields；C# 的静态类不能与控件同名，函数收在 SchemaModel 里（Of、Walk、State、Pick、ColumnTotal、ConditionFields、NewItem）。
 
 - 上游从 zod schema（经 JSON Schema）推出字段；C# 的表单校验已经是模型上的 DataAnnotations（FormController，见上面），所以字段也从模型的类型推：
   属性的类型选控件，标签、说明、占位、分组用平台的 DisplayAttribute（Name、Description、Prompt、GroupName、Order），上游 .meta() 里其余的写在 SchemaFieldAttribute
@@ -1525,7 +1527,7 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - State、Walk、Pick、ColumnTotal、ConditionFields 照上游的 schemaFieldState、walkSchemaFields、pickFields、columnTotal、schemaConditionFields。
 - FormSources（上游 createUi 的 formSources）：Provider.FormSources 是继承的附加属性，SchemaView、SchemaForm 的 Sources 按名字盖在它上面（Merge）；
   OptionSource 是固定列表（Items）或远程搜索（Search）。人员是 PeopleSource，上传是 UploadHandler。
-- SchemaView（Avalonia）：字段从 Schema（类型）推，不写时按 Values 的类型；分组各一块 Descriptions（部件 PART_Section），对象展开成"对象 · 字段"，
+- SchemaView（Avalonia）：字段从 Schema（类型）推（SchemaModel.Of），不写时按 Values 的类型；分组各一块 Descriptions（部件 PART_Section），对象展开成"对象 · 字段"，
   列表、明细表排成静态 Table（写了 Sum 的列靠结束边，表尾半粗的合计）。值是模型对象，改了里面的字段（没换对象）时调 Refresh。
   propsDescriptions 是部件样式加 Columns。示例（上游 read-view：填写与查看切换）随 SchemaForm 补上。
 

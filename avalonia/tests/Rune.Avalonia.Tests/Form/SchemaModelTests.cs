@@ -2,8 +2,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Rune.Avalonia.Tests;
 
-/// <summary>SchemaFields：从模型推出字段（控件按类型选、Display 与 SchemaField 特性的标签与选项、嵌套与列表）；字段此刻的样子（权限、条件）；逐个走字段；条件构造器的字段；明细表的合计。</summary>
-public class SchemaFieldsTests
+/// <summary>SchemaModel：从模型推出字段（控件按类型选、Display 与 SchemaField 特性的标签与选项、嵌套与列表）；字段此刻的样子（权限、条件）；逐个走字段；条件构造器的字段；明细表的合计。</summary>
+public class SchemaModelTests
 {
     enum Category
     {
@@ -43,7 +43,7 @@ public class SchemaFieldsTests
         [SchemaOption("normal", "普通"), SchemaOption("rush")] public string Mode { get; set; } = "normal";
     }
 
-    static SchemaField ByKey(string key) => SchemaFields.Of<Supplier>().Single(field => field.Key == key);
+    static SchemaField ByKey(string key) => SchemaModel.Of<Supplier>().Single(field => field.Key == key);
 
     [Fact]
     [Upstream("schema-fields", "按类型选控件，meta 写了 control 时用它")]
@@ -54,7 +54,7 @@ public class SchemaFieldsTests
             ("Company", SchemaControl.Text), ("Category", SchemaControl.Select), ("Level", SchemaControl.Radio), ("Amount", SchemaControl.Number),
             ("Days", SchemaControl.Number), ("Agreed", SchemaControl.Switch), ("Tags", SchemaControl.Multiselect), ("Start", SchemaControl.Date),
             ("At", SchemaControl.Datetime), ("Note", SchemaControl.Textarea), ("Address", SchemaControl.Object), ("Contacts", SchemaControl.List), ("Mode", SchemaControl.Select),
-        ], SchemaFields.Of<Supplier>().Select(field => (field.Key, field.Control)));
+        ], SchemaModel.Of<Supplier>().Select(field => (field.Key, field.Control)));
     }
 
     [Fact]
@@ -83,7 +83,7 @@ public class SchemaFieldsTests
     {
         Assert.Equal(["城市"], ByKey("Address").Fields!.Select(field => field.Label));
         Assert.Equal([("Name", "姓名"), ("Phone", "Phone")], ByKey("Contacts").Fields!.Select(field => (field.Key, field.Label)));
-        Assert.IsType<Contact>(SchemaFields.NewItem(ByKey("Contacts")));
+        Assert.IsType<Contact>(SchemaModel.NewItem(ByKey("Contacts")));
     }
 
     [Fact]
@@ -97,7 +97,7 @@ public class SchemaFieldsTests
 
     [Fact]
     [Upstream("schema-fields", "不是对象的 schema 没有字段")]
-    public void Scalar_types_have_no_fields() => Assert.Empty(SchemaFields.Of<string>());
+    public void Scalar_types_have_no_fields() => Assert.Empty(SchemaModel.Of<string>());
 
     sealed class Line
     {
@@ -119,9 +119,9 @@ public class SchemaFieldsTests
     public void State_and_walk_follow_access_and_conditions()
     {
         var request = new Request { Lines = [new() { Part = "P-1", Amount = 1.5m }, new() { Part = "P-2", Amount = 2.25m }] };
-        var fields = SchemaFields.Of<Request>();
+        var fields = SchemaModel.Of<Request>();
         var seen = new Dictionary<string, SchemaFieldState>();
-        SchemaFields.Walk(fields, request, new Dictionary<string, SchemaFieldAccess> { ["Lines.Part"] = SchemaFieldAccess.Readonly }, (path, _, state) => seen[path] = state);
+        SchemaModel.Walk(fields, request, new Dictionary<string, SchemaFieldAccess> { ["Lines.Part"] = SchemaFieldAccess.Readonly }, (path, _, state) => seen[path] = state);
         // 显示条件不成立：不显示、只读、不必填
         Assert.Equal(new SchemaFieldState(false, true, false), seen["Reason"]);
         // 明细表逐行走，权限按去掉行号的路径找；列的条件先读同一行、再读顶层
@@ -131,23 +131,23 @@ public class SchemaFieldsTests
         request.Kind = "rush";
         request.Locked = true;
         seen.Clear();
-        SchemaFields.Walk(fields, request, new Dictionary<string, SchemaFieldAccess> { ["Lines"] = SchemaFieldAccess.Readonly }, (path, _, state) => seen[path] = state);
+        SchemaModel.Walk(fields, request, new Dictionary<string, SchemaFieldAccess> { ["Lines"] = SchemaFieldAccess.Readonly }, (path, _, state) => seen[path] = state);
         Assert.Equal(new SchemaFieldState(true, false, true), seen["Reason"]);
         // 列没写权限时跟着明细表
         Assert.True(seen["Lines.0.Amount"].Readonly);
         Assert.True(seen["Lines.1.Note"].Readonly);
 
-        Assert.Equal("3.75 元", SchemaFields.ColumnTotal(fields.Single(field => field.Key == "Lines").Fields!.Single(field => field.Key == "Amount"), request.Lines));
+        Assert.Equal("3.75 元", SchemaModel.ColumnTotal(fields.Single(field => field.Key == "Lines").Fields!.Single(field => field.Key == "Amount"), request.Lines));
     }
 
     [Fact]
     public void Condition_fields_reuse_labels_types_and_options()
     {
-        var conditions = SchemaFields.ConditionFields(typeof(Supplier), omit: ["Company"]);
+        var conditions = SchemaModel.ConditionFields(typeof(Supplier), omit: ["Company"]);
         Assert.DoesNotContain(conditions, field => field.Name is "Company" or "Address" or "Contacts");
         var category = conditions.Single(field => field.Name == "Category");
         Assert.Equal(("供货品类", ConditionFieldType.Select, "机械件"), (category.Label, category.Type, category.Options![0].Label));
         Assert.Equal(ConditionFieldType.Boolean, conditions.Single(field => field.Name == "Agreed").Type);
-        Assert.Equal(["Amount", "Days"], SchemaFields.ConditionFields(typeof(Supplier), pick: ["Amount", "Days"]).Select(field => field.Name));
+        Assert.Equal(["Amount", "Days"], SchemaModel.ConditionFields(typeof(Supplier), pick: ["Amount", "Days"]).Select(field => field.Name));
     }
 }
