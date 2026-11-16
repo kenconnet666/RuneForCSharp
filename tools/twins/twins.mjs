@@ -27,6 +27,7 @@ const TWINS = [
   ['avalonia/src/Rune.Avalonia/Utils/Data/Area/Area.cs', 'wpf/src/Rune.Wpf/Utils/Data/Area/Area.cs', 'winforms/src/Rune.WinForms/Utils/Data/Area/Area.cs'],
   ['avalonia/src/Rune.Avalonia/Utils/Data/ColorMath.cs', 'wpf/src/Rune.Wpf/Utils/Data/ColorMath.cs', 'winforms/src/Rune.WinForms/Utils/Data/ColorMath.cs'],
   ['avalonia/src/Rune.Avalonia/Input/PeoplePicker/People.cs', 'wpf/src/Rune.Wpf/Input/PeoplePicker/People.cs', 'winforms/src/Rune.WinForms/Input/PeoplePicker/People.cs'],
+  ['avalonia/src/Rune.Avalonia/Input/Mentions/MentionParsing.cs', 'wpf/src/Rune.Wpf/Input/Mentions/MentionParsing.cs', 'winforms/src/Rune.WinForms/Input/Mentions/MentionParsing.cs'],
   ['avalonia/src/Rune.Avalonia/Overlay/Menu/MenuVariants.cs', 'wpf/src/Rune.Wpf/Overlay/Menu/MenuVariants.cs', 'winforms/src/Rune.WinForms/Overlay/Menu/MenuVariants.cs'],
   ['avalonia/src/Rune.Avalonia/Utils/Data/Selection.cs', 'wpf/src/Rune.Wpf/Utils/Data/Selection.cs', 'winforms/src/Rune.WinForms/Utils/Data/Selection.cs'],
   ['avalonia/src/Rune.Avalonia/Input/ToggleGroup/ToggleGroupVariants.cs', 'wpf/src/Rune.Wpf/Input/ToggleGroup/ToggleGroupVariants.cs', 'winforms/src/Rune.WinForms/Input/ToggleGroup/ToggleGroupVariants.cs'],

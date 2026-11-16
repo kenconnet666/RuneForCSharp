@@ -46,6 +46,18 @@ sealed class ListPopover
         if (popup.IsOpen != shown) popup.IsOpen = shown;
     }
 
+    /// <summary>贴着外壳里的一个位置显示（Mentions 的 @，<paramref name="anchor"/> 是外壳坐标里的光标矩形）：下方、起始边对齐，面板宽 <paramref name="width"/>，不跟外壳同宽。</summary>
+    public void ShowAt(Rect anchor, double width)
+    {
+        popup.Placement = PlacementMode.AnchorAndGravity;
+        popup.PlacementRect = anchor;
+        popup.PlacementAnchor = PopupAnchor.BottomLeft;
+        popup.PlacementGravity = PopupGravity.BottomRight;
+        Panel.MinWidth = 0;
+        Panel.Width = width;
+        if (!popup.IsOpen) popup.IsOpen = true;
+    }
+
     /// <summary>按外壳的字号：面板 lg 圆角；弹出层不在外壳里，字号同外壳。</summary>
     public void UpdateMetrics(double em)
     {

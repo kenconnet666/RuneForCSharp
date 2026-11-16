@@ -218,6 +218,9 @@
     <Setter Property="FontFeatures" Value="+tnum" />
     <Style Selector="^:over"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.DangerText}" /></Style>
   </ControlTheme>
+  <!-- Mentions：同 Textarea（弹出的列表在 Mentions.cs 里，面板外观同 Select） -->
+  <ControlTheme x:Key="{x:Type rune:Mentions}" TargetType="rune:Mentions" BasedOn="{StaticResource {x:Type rune:Textarea}}" />
+
   <!-- ColorField：外壳同 TextField，前面是色块（弹出层的触发元素，在 ColorField.cs 里放进 PART_SwatchHost），文字是等宽字体 -->
   <ControlTheme x:Key="{x:Type rune:ColorField}" TargetType="rune:ColorField" BasedOn="{StaticResource Rune.TextInput}">
     <Setter Property="FontFamily" Value="{DynamicResource Rune.Font.Mono}" />

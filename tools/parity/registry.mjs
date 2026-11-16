@@ -132,6 +132,10 @@ export const COMPONENT_PROP_RENAMES = {
   Cascader: { items: 'ItemsSource', isDisabled: 'IsItemDisabled', _value: 'Values' },
   // 选中的是 PeopleEntry 的列表；最近选过的由使用方存（上游存在浏览器里）
   PeoplePicker: { _value: 'Entries', recentKey: 'Recent' },
+  // 值是 TextBox 的 Text；提到的人叫 Mentioned（属性不能与类同名）
+  Mentions: { items: 'ItemsSource', _mentions: 'Mentioned', children: 'ItemTemplate', filter: 'Filter' },
+  // text 是 TextBlock 自己的属性
+  MentionText: { text: 'Value' },
   PeoplePickerPanel: { _value: 'Entries', recentKey: 'Recent' },
   // 输入框就是平台 TextBox：没确认的文字是 Text；已选的值是 Values（同多选 Select）
   TagsInput: { _value: 'Values', items: 'ItemsSource', _inputValue: 'Text', children: 'ItemTemplate' },
@@ -502,6 +506,11 @@ export const PROPS_NOT_PORTED = {
     propsDialog: '对话框是打开时建的（lg、标题是占位文字、确定写回）：样式写在 Dialog 的主题或部件上',
     propsPanel: '对话框里的面板是 PeoplePickerPanel：样式写在它的主题或部件上（PeoplePickerPanelParts）',
   },
+  Mentions: {
+    propsPopover: '弹出层是 Mentions 建的列表面板（PART_Popover，外观同 Select），贴着 @ 的位置、宽 16em：样式写在部件上',
+    propsListbox: '列表是 Mentions 建的 Listbox（PART_Listbox）：选项内容用 ItemTemplate',
+  },
+  MentionText: { propsMention: '提及是带底色的行内文字（Run）：要换样子用 RenderMention 自己画' },
   ColorPicker: { propsEyeDropper: '吸管是浏览器的 EyeDropper：桌面上没有跨平台的屏幕取色，不做吸管按钮' },
   ColorField: { propsPicker: '弹出层里的取色器跟着 ColorField 的 Presets、Alpha；样式写在 ColorPicker 的主题或部件上（ColorPickerParts）' },
   SelectedTags: { propsTag: '标签固定是 sm、soft 的 Tag：样式写在 Tag 的主题或部件上' },

@@ -6,7 +6,7 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:rune="clr-namespace:Rune.Avalonia">
-  <Style Selector="rune|TagsInput Border#PART_Popover, :is(rune|Combobox) Border#PART_Popover, :is(rune|SelectBase) Border#PART_Popover">
+  <Style Selector="rune|TagsInput Border#PART_Popover, rune|Mentions Border#PART_Popover, :is(rune|Combobox) Border#PART_Popover, :is(rune|SelectBase) Border#PART_Popover">
     <Setter Property="Background" Value="{DynamicResource Rune.Brush.SurfaceRaised}" />
     <Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.Border}" />
     <Setter Property="BorderThickness" Value="1" />
