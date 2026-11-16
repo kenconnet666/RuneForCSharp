@@ -226,6 +226,29 @@ internal sealed class DataTableSurface : Control
         bodyHeight = y;
     }
 
+    /// <summary>表格内容里纵坐标 y（含表头）落在第几行；没有行时 -1。</summary>
+    internal int RowIndexAt(double y) => rowTops.Length == 0 ? -1 : RowAt(Math.Max(0, y - HeaderHeight));
+
+    /// <summary>拖着的行变了：那一行半透明、浮在别的行上面。</summary>
+    internal void SyncDragging()
+    {
+        var dragging = owner.DraggingKey;
+        foreach (var row in realized.Values)
+        {
+            var active = dragging is not null && row.Row is { } data && Convert.ToString(owner.KeyOf(data), System.Globalization.CultureInfo.InvariantCulture) == dragging;
+            row.Opacity = active ? 0.6 : 1;
+            row.ZIndex = active ? 1 : 0;
+        }
+    }
+
+    /// <summary>聚焦 key 那一行的拖动把手（重排后行重建了）。</summary>
+    internal void FocusHandle(string key)
+    {
+        foreach (var row in realized.Values)
+            if (row.Row is { } data && Convert.ToString(owner.KeyOf(data), System.Globalization.CultureInfo.InvariantCulture) == key)
+                row.GetLogicalDescendants().OfType<ButtonBase>().FirstOrDefault(button => button.Name == DataTableParts.RowHandle)?.Focus(NavigationMethod.Tab);
+    }
+
     /// <summary>上边在 offset 之后的第一行的下标（二分查找）。</summary>
     int RowAt(double offset)
     {

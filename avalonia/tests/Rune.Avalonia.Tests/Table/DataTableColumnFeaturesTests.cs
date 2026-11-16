@@ -1,3 +1,5 @@
+using Avalonia.Headless;
+using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -41,6 +43,8 @@ public class DataTableColumnFeaturesTests
     static List<TableHeaderCell> Headers(DataTable table) => [.. table.Surface.Header!.Cells.OfType<TableHeaderCell>()];
 
     static T Part<T>(DataTable table, Func<T, bool> match) where T : Control => table.Surface.Header!.GetLogicalDescendants().OfType<T>().First(match);
+
+    static void Press(Control target, Key key) => target.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = key, Source = target });
 
     static void Click(Control control) => control.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
 
@@ -120,5 +124,53 @@ public class DataTableColumnFeaturesTests
         Act("金额", "隐藏这一列");
         Assert.Equal(["Amount"], table.HiddenColumns);
         Assert.Equal(["状态", "编号", "团队"], Headers(table).Select(cell => TableColumns.Label(table.Shown[Headers(table).IndexOf(cell)])));
+    });
+
+    static ButtonBase? Handle(DataTable table, string id) =>
+        table.Surface.Realized.Values.SelectMany(row => row.GetLogicalDescendants().OfType<ButtonBase>()).FirstOrDefault(button => button.Name == DataTableParts.RowHandle && (string?)button.Tag == id);
+
+    [Fact]
+    [Upstream("DataTable 的行拖动", "把手在第一列前面：空格拿起、↓ 移动、空格放下，onReorder 得到新顺序；排序时没有把手")]
+    public Task Keyboard_reorders_rows() => HeadlessUi.Run(() =>
+    {
+        var table = new DataTable();
+        IReadOnlyList<object> rows = Orders;
+        table.Reordered += (_, next) => table.ItemsSource = rows = next;
+        var (_, window) = Render(table);
+        var handle = Handle(table, "o1")!;
+        Assert.Equal("移动 o1", AutomationProperties.GetName(handle));
+        Assert.Contains("按空格拿起", AutomationProperties.GetHelpText(handle));
+        handle.Focus();
+        Press(handle, Key.Space);
+        HeadlessUi.Flush(window);
+        Press(Handle(table, "o1")!, Key.Down);
+        HeadlessUi.Flush(window);
+        Press(Handle(table, "o1")!, Key.Space);
+        HeadlessUi.Flush(window);
+        Assert.Equal(["o2", "o1", "o3", "o4"], rows.Cast<Order>().Select(order => order.Id));
+        // 拖动后焦点回到那一行的把手上
+        Assert.True(Handle(table, "o1")!.IsFocused);
+
+        table.Sort = new SortState("Amount", SortDirection.Ascending);
+        HeadlessUi.Flush(window);
+        Assert.Null(Handle(table, "o1"));
+    });
+
+    [Fact]
+    public Task Pointer_drag_reorders_rows() => HeadlessUi.Run(() =>
+    {
+        var table = new DataTable();
+        IReadOnlyList<object> rows = Orders;
+        table.Reordered += (_, next) => table.ItemsSource = rows = next;
+        var (_, window) = Render(table);
+        var handle = Handle(table, "o1")!;
+        var from = handle.TranslatePoint(new Point(handle.Bounds.Width / 2, handle.Bounds.Height / 2), window)!.Value;
+        var third = table.Surface.Realized[2];
+        var to = third.TranslatePoint(new Point(10, third.Bounds.Height / 2), window)!.Value;
+        window.MouseDown(from, MouseButton.Left);
+        window.MouseMove(to);
+        window.MouseUp(to, MouseButton.Left);
+        HeadlessUi.Flush(window);
+        Assert.Equal(["o2", "o3", "o1", "o4"], rows.Cast<Order>().Select(order => order.Id));
     });
 }

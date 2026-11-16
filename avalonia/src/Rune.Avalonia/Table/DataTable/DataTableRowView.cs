@@ -189,6 +189,12 @@ internal sealed class DataTableRowView : Control
             };
             cell.ApplyRole(head: Kind == DataTableRowKind.Header, foot: Kind == DataTableRowKind.Summary);
             TextBlock.SetTextTrimming(cell, TextTrimming.CharacterEllipsis);
+            // 行拖动：把手在第一个数据列的前面
+            if (Kind == DataTableRowKind.Body && position == 0 && owner.CanReorder)
+            {
+                var inner = cell.Content as Control ?? new TextBlock { Text = Convert.ToString(cell.Content, System.Globalization.CultureInfo.CurrentCulture), TextTrimming = TextTrimming.CharacterEllipsis };
+                cell.Content = new Flex { Align = FlexAlign.Center, Gap = Space.Xs, Children = { owner.RowHandle(row!), inner } };
+            }
             if (Kind == DataTableRowKind.Body) owner.PrepareCell(cell, row!, column);
             if (column.Sticky is not null) cell.ZIndex = 1;
             cells.Add((cell, column));

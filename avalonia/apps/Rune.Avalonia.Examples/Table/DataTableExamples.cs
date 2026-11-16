@@ -4,7 +4,7 @@ using Avalonia.Controls.Documents;
 
 namespace Rune.Avalonia.Examples;
 
-/// <summary>DataTable 页的示例（vue-tsx-pro 文档站 table/DataTable）：已做的功能的示例：一万条订单、表头筛选与列菜单、就地编辑、分组表头、展开行、单选、加载与空状态；其余（拖动、列虚拟化等）随功能补上。</summary>
+/// <summary>DataTable 页的示例（vue-tsx-pro 文档站 table/DataTable）：已做的功能的示例：一万条订单、表头筛选与列菜单、就地编辑、行拖动、分组表头、展开行、单选、加载与空状态；其余（列虚拟化等）随功能补上。</summary>
 static class DataTableExamples
 {
     public static Example[] All =>
@@ -12,6 +12,7 @@ static class DataTableExamples
         new("DataTable", "orders", "一万条订单", "列定义里 Type 决定默认的格式与对齐（Number、Currency、Percent、FileSize、Date、DateTime，跟随语言；不写时按第一个值推断，数字靠右），Cell 自定义单元格，Value 给排序用的值；点可排序的列标题在升序、降序、不排之间切换（本地按数字、日期、按语言的文字排，ManualSort 时交给服务端）。SelectionMode=\"multiple\" 多一列勾选框；Sticky 的列横向滚动时固定在两侧；Resizable 时可以拖动或用键盘调整列宽，ColumnWidths 双向绑定可以存到本地设置里。工具栏（搜索、批量操作、分页）用现有组件组合，不内置。", Orders),
         new("DataTable", "columns", "采购单：表头筛选、多列排序与列菜单", "列定义写 Filter 时列标题上有筛选按钮：ColumnFilter.Values 列出这一列出现过的值（状态列按阶段顺序、显示状态名），也可以给 Options，ColumnFilter.Keyword 是输入关键字；Filters 双向绑定各列选中的值，默认在本地筛，ManualFilter 时交给服务端。MultiSort 时点列标题只按这一列排，按住 Shift 点是追加一列（列标题上标着次序），排序写在 Sorts。ColumnMenu 在列标题结尾放 ⋮：排序、固定在开头 / 结尾、前后移动、隐藏，写回 ColumnPins、ColumnOrder、HiddenColumns，都能双向绑定、存起来（上游记在浏览器里；这里在内存里，“还原列设置”清掉）。", Columns),
         new("DataTable", "editable", "采购申请明细：就地编辑与校验", "列写 Editable（或按行判断的 IsEditable）时可以就地编辑，表格随之变成网格：方向键在格之间走，只有一格能 Tab 进入；在可编辑的格上按 Enter、F2、双击或直接打字开始编辑，Enter 提交、Tab 提交并到下一个可编辑的格、点开别处提交、Esc 放弃。默认编辑器按列选（状态列是 Select，数字类是 NumberField，其余是 TextField），Editor 自己写（这里的交期是 DateField）。列的 Validate 拦下不合理的值，CellChange 写回，返回文字时是不接受的原因（接口拒绝），编辑器留着并显示它；ValidateRow 返回整行的问题，标在对应的格上（红框，悬停与读屏都能知道原因）。", Editable),
+        new("DataTable", "reorder", "需求排期：拖动行", "订阅了 Reordered 时第一列前面有把手：按下拖动，或聚焦后空格拿起、↑↓ 移动、空格放下（每一步读屏都会播报），拖完得到新的顺序。排序、筛选时显示的顺序不是数据的顺序，把手收起，取消后又能拖。", Reorder),
         new("DataTable", "changes", "采购方案调整：分组表头", "ColumnGroups 写组标题与组里各列的 Key：相邻的几列上方共用一个标题，表头变成两行，没分组的列跨两行；组与相邻的列之间有竖线，固定列照常固定。列定义仍是平铺的，排序、列宽、隐藏列都按列算，组里的列全隐藏时这一组也不显示。", Changes),
         new("DataTable", "details", "供应商改进建议：展开行", "RenderDetail 给出一行的详情：多一列展开按钮（读屏念出展开状态），展开的行下面多一行跨全部列的详情，虚拟滚动按真实高度测量；HasDetail 决定哪些行能展开，ExpandedRows 可以双向绑定。详情横向滚动时贴着可见区域的起始边，宽度不超过可见区域。", Details),
         new("DataTable", "single", "单选：选一家报价", "SelectionMode=\"single\" 时每行是一个单选框：点击选中，选中的行整行高亮；没有全选，取消选择用 SelectionBar 的清空或把 Selected 设为空列表。", Single),
@@ -238,6 +239,46 @@ static class DataTableExamples
             return null;
         };
         return new Flex { Direction = FlexDirection.Column, Gap = Space.Sm, Align = FlexAlign.Stretch, Children = { table, saved } };
+    }
+
+    record Requirement(string Id, string Title, string Owner, int Hours, string Status);
+
+    static Control Reorder()
+    {
+        var statuses = new StatusMap { ["todo"] = new("未开始", StatusTone.Neutral), ["doing"] = new("进行中", StatusTone.Info), ["review"] = new("待验收", StatusTone.Warning) };
+        IReadOnlyList<object> rows =
+        [
+            new Requirement("R-201", "台账导出按分组表头合并单元格", "林小满", 16, "doing"),
+            new Requirement("R-198", "供应商报价单批量导入", "周一航", 24, "todo"),
+            new Requirement("R-205", "审批流超时自动提醒", "陈默", 8, "review"),
+            new Requirement("R-187", "移动端看板只读视图", "许悠", 32, "todo"),
+            new Requirement("R-210", "验收单打印模板", "王晴", 6, "todo"),
+            new Requirement("R-193", "项目编码规则可配置", "赵浩然", 12, "doing"),
+        ];
+        var table = new DataTable
+        {
+            ItemsSource = rows, GetKey = row => ((Requirement)row).Id,
+            Columns =
+            [
+                // 排期是数据里的位置（不是显示的位置）
+                new("Rank", "排期") { Width = 88, Cell = (row, _) => (rows.ToList().IndexOf(row) + 1).ToString(System.Globalization.CultureInfo.InvariantCulture) },
+                new("Title", "需求") { MinWidth = 240 },
+                new("Id", "编号") { Width = 90 },
+                new("Owner", "负责人") { Width = 100 },
+                new("Hours", "预计工时") { Width = 110, Type = ColumnType.Number, Sortable = true },
+                new("Status", "状态") { Width = 100, Statuses = statuses },
+            ],
+        };
+        AutomationProperties.SetName(table, "需求排期");
+        table.Reordered += (_, next) => table.ItemsSource = rows = next;
+        var hint = new Small { Tone = TextTone.Muted };
+        void Sync() => hint.Text = table.Sort is null ? "拖动把手调整排期，排在前面的先做" : "按工时排序中：取消排序后才能拖动调整排期";
+        table.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == DataTable.SortProperty) Sync();
+        };
+        Sync();
+        return new Flex { Direction = FlexDirection.Column, Gap = Space.Sm, Align = FlexAlign.Stretch, Children = { table, hint } };
     }
 
     record Side(string Part, decimal Price, int Quantity)

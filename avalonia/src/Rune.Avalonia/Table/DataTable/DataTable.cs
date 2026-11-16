@@ -474,6 +474,7 @@ public partial class DataTable : Control
         // 默认最高 32em（同上游 root 的 maxHeight）：使用方写了 MaxHeight 或 Height 时以它为准
         var cap = IsSet(MaxHeightProperty) || IsSet(HeightProperty) ? double.PositiveInfinity : 32 * TextElement.GetFontSize(this);
         frame.Measure(availableSize.WithHeight(Math.Min(availableSize.Height, cap)));
+        announcer?.Measure(Size.Infinity);
         return frame.DesiredSize;
     }
 
@@ -481,6 +482,7 @@ public partial class DataTable : Control
     protected override Size ArrangeOverride(Size finalSize)
     {
         frame.Arrange(new Rect(finalSize));
+        announcer?.Arrange(default);
         return finalSize;
     }
 
@@ -506,6 +508,9 @@ public static class DataTableParts
 
     /// <summary>调整列宽的手柄（ColumnResizer）。</summary>
     public const string Resizer = "PART_Resizer";
+
+    /// <summary>行拖动的把手（第一个数据列的前面）。</summary>
+    public const string RowHandle = "PART_RowHandle";
 
     /// <summary>编辑中的格里的编辑器。</summary>
     public const string Editor = "PART_Editor";
