@@ -99,20 +99,44 @@ public static partial class ExampleSources
         return -1;
     }
 
-    /// <summary>跳过一个字符串或字符字面量（普通、逐字 @、插值 $、原始 """）；返回它最后一个字符的位置。</summary>
+    /// <summary>
+    /// 跳过一个字符串或字符字面量（普通、逐字 @、插值 $、原始 """）；返回它最后一个字符的位置。
+    /// 插值字符串里的 {…} 是表达式，里面可以再有字符串（$"[{string.Join(",", names)}]"），按 <see cref="SkipHole"/> 整段跳过。
+    /// </summary>
     static int SkipString(string text, int quote)
     {
         if (text.AsSpan(quote).StartsWith("\"\"\"")) return SkipTo(text, quote + 3, "\"\"\"") + 2;
-        var verbatim = quote > 0 && (text[quote - 1] == '@' || (quote > 1 && text[quote - 2] == '@'));
+        var prefix = text.AsSpan(Math.Max(0, quote - 2), Math.Min(2, quote));
+        var verbatim = prefix.EndsWith("@") || prefix.SequenceEqual("@$");
+        var interpolated = prefix.EndsWith("$") || prefix.SequenceEqual("$@");
         var delimiter = text[quote];
         for (var i = quote + 1; i < text.Length; i++)
         {
-            if (!verbatim && text[i] == '\\') i++;
+            if (interpolated && text[i] == '{')
+            {
+                if (i + 1 < text.Length && text[i + 1] == '{') i++;
+                else i = SkipHole(text, i);
+            }
+            else if (!verbatim && text[i] == '\\') i++;
             else if (text[i] == delimiter)
             {
                 if (verbatim && i + 1 < text.Length && text[i + 1] == delimiter) i++;
                 else return i;
             }
+        }
+        return text.Length - 1;
+    }
+
+    /// <summary>跳过插值字符串里的一个 {…}：括号配对，里面的字符串照样跳过；返回配对的右花括号的位置。</summary>
+    static int SkipHole(string text, int open)
+    {
+        var depth = 0;
+        for (var i = open; i < text.Length; i++)
+        {
+            var c = text[i];
+            if (c is '"' or '\'') i = SkipString(text, i);
+            else if (c is '{' or '(' or '[') depth++;
+            else if (c is '}' or ')' or ']' && --depth == 0) return i;
         }
         return text.Length - 1;
     }
