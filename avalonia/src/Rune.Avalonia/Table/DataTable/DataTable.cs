@@ -123,6 +123,9 @@ public partial class DataTable : Control
     /// </summary>
     public static readonly StyledProperty<bool> VirtualColumnsProperty = AvaloniaProperty.Register<DataTable, bool>(nameof(VirtualColumns));
 
+    /// <summary>主从视图里正在看的那一行的 key：品牌色浅底、起始边一条强调色的竖线，读屏念"当前"。</summary>
+    public static readonly StyledProperty<object?> ActiveKeyProperty = AvaloniaProperty.Register<DataTable, object?>(nameof(ActiveKey));
+
     /// <summary>分组表头：组标题与组里各列的 Key，相邻的列上方共用一个标题（表头变成两行）。</summary>
     public static readonly StyledProperty<IReadOnlyList<DataTableColumnGroup>?> ColumnGroupsProperty = AvaloniaProperty.Register<DataTable, IReadOnlyList<DataTableColumnGroup>?>(nameof(ColumnGroups));
 
@@ -224,6 +227,28 @@ public partial class DataTable : Control
     /// <summary>调整过的列宽。</summary>
     public IReadOnlyDictionary<string, double>? ColumnWidths { get => GetValue(ColumnWidthsProperty); set => SetValue(ColumnWidthsProperty, value); }
 
+    /// <summary>正在看的那一行的 key。</summary>
+    public object? ActiveKey { get => GetValue(ActiveKeyProperty); set => SetValue(ActiveKeyProperty, value); }
+
+    /// <summary>点了一行（上游 onRowClick，主从视图里打开详情）：参数是那一行；订阅了时整行是手形指针。点在行里的按钮、选择框上不算。</summary>
+    public event EventHandler<object>? RowClicked;
+
+    /// <summary>
+    /// 可见行的范围变了（不含多建的行，上游 onRangeChange）：接近末尾时加载更多（接 InfiniteList 的 OnRangeChanged）。
+    /// 订阅了时加载中（已有数据）不换掉表体，骨架接在末尾。
+    /// </summary>
+    public event EventHandler<VisibleRange>? RangeChanged;
+
+    internal bool HasRowClick => RowClicked is not null;
+
+    internal bool HasRangeListener => RangeChanged is not null;
+
+    internal void RaiseRowClicked(object row) => RowClicked?.Invoke(this, row);
+
+    internal void RaiseRangeChanged(VisibleRange range) => RangeChanged?.Invoke(this, range);
+
+    internal bool IsActiveRow(object row) => ActiveKey is { } key && Equals(KeyOf(row), key);
+
     /// <summary>列也虚拟滚动。</summary>
     public bool VirtualColumns { get => GetValue(VirtualColumnsProperty); set => SetValue(VirtualColumnsProperty, value); }
 
@@ -290,12 +315,12 @@ public partial class DataTable : Control
 
     internal bool CanSelect(object row) => IsRowSelectable?.Invoke(row) ?? true;
 
-    /// <summary>滚到 key 对应的那一行（停在吸顶表头之下）；找不到时返回 false、不滚动。</summary>
-    public bool ScrollToRow(object key)
+    /// <summary>滚到 key 对应的那一行（默认停在吸顶表头之下，align 可以是居中、末尾、看得见就不动）；找不到时返回 false、不滚动。</summary>
+    public bool ScrollToRow(object key, ScrollAlign align = ScrollAlign.Start)
     {
         var index = View.ToList().FindIndex(row => Equals(KeyOf(row), key));
         if (index < 0) return false;
-        surface.ScrollTo(index);
+        surface.ScrollTo(index, align);
         return true;
     }
 
@@ -314,7 +339,7 @@ public partial class DataTable : Control
                  || change.Property == MultiSortProperty || change.Property == SortsProperty || change.Property == ManualFilterProperty
                  || change.Property == ColumnOrderProperty || change.Property == ColumnPinsProperty || change.Property == ColumnGroupsProperty || change.Property == Provider.LangProperty) Refresh();
         else if (change.Property == FiltersProperty) Refresh(header: false);
-        else if (change.Property == SelectedProperty || change.Property == RowToneProperty || change.Property == IsRowSelectableProperty) surface.SyncRows();
+        else if (change.Property == SelectedProperty || change.Property == ActiveKeyProperty || change.Property == RowToneProperty || change.Property == IsRowSelectableProperty) surface.SyncRows();
         else if (change.Property == SelectionModeProperty || change.Property == IsLoadingProperty || change.Property == EmptyProperty || change.Property == SummaryLabelProperty
                  || change.Property == ResizableProperty || change.Property == ColumnMenuProperty || change.Property == CellNavigationProperty
                  || change.Property == EditTriggerProperty || change.Property == ValidateRowProperty || change.Property == RenderDetailProperty

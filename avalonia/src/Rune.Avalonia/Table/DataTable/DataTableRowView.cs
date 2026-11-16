@@ -41,6 +41,7 @@ internal sealed class DataTableRowView : Control
     readonly List<int> dividers = [];
     double groupRowHeight;
     Control? selector;
+    bool rowPressed;
     // 详情列：表头是空的格（读屏名称"详情"），各行是展开按钮（没有详情的行空着）
     Control? detailCell;
     bool hovered;
@@ -63,7 +64,16 @@ internal sealed class DataTableRowView : Control
             PointerExited += (_, _) => SetHovered(false);
             PointerPressed += (_, e) =>
             {
-                if (Row is { } row && CellAt(e.GetPosition(this).X) is { } hit && !e.Handled) Owner.CellPressed(hit.Cell, row, hit.Column);
+                if (e.Handled) return;
+                // 整行能点（主从视图）：按下时记住，抬起时在这一行上才算点了
+                rowPressed = Owner.HasRowClick && e.GetCurrentPoint(this).Properties.IsLeftButtonPressed;
+                if (Row is { } row && CellAt(e.GetPosition(this).X) is { } hit) Owner.CellPressed(hit.Cell, row, hit.Column);
+            };
+            PointerReleased += (_, e) =>
+            {
+                if (!rowPressed || e.Handled) return;
+                rowPressed = false;
+                if (Row is { } row && new Rect(Bounds.Size).Contains(e.GetPosition(this))) Owner.RaiseRowClicked(row);
             };
             DoubleTapped += (_, e) =>
             {
@@ -433,10 +443,15 @@ internal sealed class DataTableRowView : Control
         toggle.RenderTransform = expanded ? new RotateTransform(FlowDirection == FlowDirection.RightToLeft ? -90 : 90) : null;
     }
 
-    /// <summary>选择框的状态与这一行是否已选（整行底色）。</summary>
+    /// <summary>选择框的状态与这一行是否已选、是不是正在看的（整行底色、读屏的"当前"）。</summary>
     public void SyncSelection()
     {
         var owner = Owner;
+        if (Kind == DataTableRowKind.Body && Row is { } data)
+        {
+            AutomationProperties.SetItemStatus(this, owner.IsActiveRow(data) ? "current" : null);
+            Cursor = owner.HasRowClick ? new Cursor(StandardCursorType.Hand) : null;
+        }
         if (Choice is Checkbox { Name: DataTableParts.SelectAll } all)
         {
             var (every, some) = owner.SelectionState();
@@ -573,7 +588,7 @@ internal sealed class DataTableRowView : Control
         var owner = Owner;
         string key;
         if (Kind is DataTableRowKind.Header or DataTableRowKind.Summary) key = ThemeKeys.Brush.Fill;
-        else if (Row is { } row && owner.IsSelected(row)) key = hovered ? ThemeKeys.Brush.AccentSoftHover : ThemeKeys.Brush.AccentSoft;
+        else if (Row is { } row && (owner.IsSelected(row) || owner.IsActiveRow(row))) key = hovered ? ThemeKeys.Brush.AccentSoftHover : ThemeKeys.Brush.AccentSoft;
         else if (Row is { } toned && owner.RowTone?.Invoke(toned) is { } tone && ToneBrush(tone) is { } soft) key = soft;
         else if (hovered) key = ThemeKeys.Brush.FillHover;
         else if (owner.Striped && Index % 2 == 1) key = ThemeKeys.Brush.Fill;
@@ -636,6 +651,9 @@ internal sealed class DataTableRowView : Control
             if (this.Resource<IBrush?>(focused ? ThemeKeys.Brush.FocusRing : ThemeKeys.Brush.Danger) is { } ring)
                 context.DrawRectangle(new Pen(ring, width), area.Deflate(width / 2));
         }
+        // 正在看的一行：起始边一条 3px 的强调色竖线（与勾选区分开）
+        if (Row is { } current && Owner.IsActiveRow(current) && this.Resource<IBrush?>(ThemeKeys.Brush.Accent) is { } accent)
+            context.FillRectangle(accent, FlowDirection == FlowDirection.RightToLeft ? new Rect(bounds.Width - 3, 0, 3, bounds.Height) : new Rect(0, 0, 3, bounds.Height));
         // 下边线：表头 border，表体 borderMuted；合计行的上边线是 border
         var line = Kind == DataTableRowKind.Header || Kind == DataTableRowKind.Summary ? ThemeKeys.Brush.Border : ThemeKeys.Brush.BorderMuted;
         if (this.Resource<IBrush?>(line) is { } stroke)

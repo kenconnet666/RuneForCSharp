@@ -1,3 +1,4 @@
+using Avalonia.Headless;
 using System.Diagnostics;
 using Avalonia;
 using Avalonia.Automation;
@@ -305,5 +306,64 @@ public class DataTableTests
         Assert.Contains("门店", headers);
         Assert.Contains("合计", headers);
         Assert.InRange(Built(first).Count, 2, 39);
+    });
+
+    [Fact]
+    [Upstream("DataTable", "滚动加载（有 onRangeChange）：已有数据时骨架接在末尾，已有的行留着")]
+    public Task Range_listener_appends_skeletons_while_loading() => HeadlessUi.Run(() =>
+    {
+        var table = new DataTable { ItemsSource = People, Columns = Columns, IsLoading = true };
+        VisibleRange? range = null;
+        table.RangeChanged += (_, visible) => range = visible;
+        var (_, window) = Render(table);
+        Assert.Equal(People.Length, table.Surface.Realized.Count);
+        Assert.Empty(table.Surface.Skeletons);
+        Assert.True(table.Surface.Trailing.Count > 0);
+        // 末尾的骨架在最后一行下面
+        Assert.True(table.Surface.Trailing[0].Bounds.Top >= Rows(table)[^1].Bounds.Bottom - 0.5);
+        HeadlessUi.Flush(window);
+        Assert.Equal(new VisibleRange(0, People.Length - 1), range);
+    });
+
+    [Fact]
+    public Task Active_row_and_row_click() => HeadlessUi.Run(() =>
+    {
+        var table = new DataTable { ItemsSource = People, Columns = Columns, GetKey = row => ((Person)row).Id, ActiveKey = "b" };
+        object? clicked = null;
+        table.RowClicked += (_, row) => clicked = row;
+        var (_, window) = Render(table);
+        Assert.Equal([null, "current", null], Rows(table).Select(AutomationProperties.GetItemStatus));
+        var row = Rows(table)[2];
+        var at = row.TranslatePoint(new Point(row.Bounds.Width / 2, row.Bounds.Height / 2), window)!.Value;
+        window.MouseDown(at, global::Avalonia.Input.MouseButton.Left);
+        window.MouseUp(at, global::Avalonia.Input.MouseButton.Left);
+        Assert.Same(People[2], clicked);
+    });
+
+    [Fact]
+    public Task Scroll_to_row_can_center_it() => HeadlessUi.Run(() =>
+    {
+        var many = Enumerable.Range(0, 1000).Select(index => new Person(index.ToString(), $"第 {index} 人", index)).ToList();
+        var (table, window) = Render(new DataTable { ItemsSource = many, Columns = Columns, GetKey = row => ((Person)row).Id });
+        Assert.True(table.ScrollToRow("500", ScrollAlign.Center));
+        HeadlessUi.Flush(window);
+        var row = table.Surface.Realized[500];
+        var top = row.TranslatePoint(default, table.Scroller)!.Value.Y;
+        // 居中：行在视口（表头之下）的中间附近
+        Assert.InRange(top, table.Scroller.Viewport.Height / 3, table.Scroller.Viewport.Height * 2 / 3);
+    });
+
+    record Event(int Id, string Message);
+
+    [Fact]
+    public Task Wrapping_rows_get_their_own_height() => HeadlessUi.Run(() =>
+    {
+        Event[] events = [new(1, "短"), new(2, string.Concat(Enumerable.Repeat("导出报表：2026 年 9 月销售明细（含退款与优惠券核销）", 3))), new(3, "短")];
+        var (table, window) = Render(new DataTable { ItemsSource = events, Columns = [new("Id", "#") { Width = 64 }, new("Message", "事件") { Width = 200, Wrap = true }] });
+        HeadlessUi.Flush(window);
+        var rows = Rows(table);
+        Assert.True(rows[1].Bounds.Height > rows[0].Bounds.Height * 1.5);
+        // 下一行接在换行的行下面，不叠在一起
+        Assert.True(rows[2].Bounds.Top >= rows[1].Bounds.Bottom - 0.5);
     });
 }

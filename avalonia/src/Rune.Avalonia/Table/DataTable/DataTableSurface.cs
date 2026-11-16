@@ -30,6 +30,11 @@ internal sealed class DataTableSurface : Control
     readonly Dictionary<int, DataTableRowView> realized = [];
     readonly List<DataTableRowView> pool = [];
     readonly List<DataTableRowView> skeletons = [];
+    // 滚动加载（有 RangeChanged）时已有数据还在加载：骨架接在末尾，已有的行留着
+    readonly List<DataTableRowView> trailing = [];
+    // 量过的行高（行的 key → 高度）：内容换行的行比别的行高；没量过的按第一行的高度估计
+    readonly Dictionary<object, double> rowHeights = [];
+    VisibleRange? lastRange;
     // 展开的详情：行的下标 → 详情行；量过的高度按行的 key 记
     readonly Dictionary<int, DataTableDetailView> details = [];
     readonly Dictionary<object, double> detailHeights = [];
@@ -49,6 +54,9 @@ internal sealed class DataTableSurface : Control
 
     /// <summary>建好的行（测试用）：下标 → 行。</summary>
     internal IReadOnlyDictionary<int, DataTableRowView> Realized => realized;
+
+    /// <summary>接在末尾的骨架行（滚动加载时，测试用）。</summary>
+    internal IReadOnlyList<DataTableRowView> Trailing => trailing;
 
     /// <summary>骨架行（测试用）。</summary>
     internal IReadOnlyList<DataTableRowView> Skeletons => skeletons;
@@ -113,12 +121,22 @@ internal sealed class DataTableSurface : Control
         realized.Clear();
         pool.Clear();
         skeletons.Clear();
+        trailing.Clear();
         details.Clear();
+        rowHeights.Clear();
+        lastRange = null;
         emptyView = null;
         header?.SyncFilters();
         summary = owner.Shown.Any(column => column.Summary is not null) ? new DataTableRowView(this, DataTableRowKind.Summary) { ZIndex = 2 } : null;
         if (summary is not null) Add(summary);
-        if (owner.IsLoading)
+        if (owner.IsLoading && owner.HasRangeListener && owner.View.Count > 0)
+            for (var i = 0; i < 3; i++)
+            {
+                var skeleton = new DataTableRowView(this, DataTableRowKind.Skeleton, i);
+                trailing.Add(skeleton);
+                Add(skeleton);
+            }
+        else if (owner.IsLoading)
             for (var i = 0; i < 6; i++)
             {
                 var skeleton = new DataTableRowView(this, DataTableRowKind.Skeleton, i);
@@ -207,11 +225,17 @@ internal sealed class DataTableSurface : Control
         foreach (var detail in details.Values) detail.InvalidateArrange();
     }
 
-    internal void ScrollTo(int index)
+    /// <summary>滚到第 index 行：按对齐方式（默认开头，停在吸顶表头之下）。</summary>
+    internal void ScrollTo(int index, ScrollAlign align = ScrollAlign.Start)
     {
-        if (rowHeight <= 0) owner.UpdateLayout();
-        owner.Scroller.Offset = new Vector(Offset.X, Math.Max(0, index < rowTops.Length ? rowTops[index] : index * rowHeight));
+        if (rowHeight <= 0 || index >= rowTops.Length) owner.UpdateLayout();
+        if (index >= rowTops.Length) return;
+        var visible = Math.Max(rowHeight, Viewport.Height - HeaderHeight - SummaryHeight);
+        owner.Scroller.Offset = new Vector(Offset.X, VirtualScroll.OffsetFor(rowTops[index], HeightOf(index), Offset.Y, visible, bodyHeight, align));
     }
+
+    /// <summary>第 index 行的高度：量过的，没量过时按估计。</summary>
+    double HeightOf(int index) => index < owner.View.Count && rowHeights.TryGetValue(owner.KeyOf(owner.View[index]), out var measured) ? measured : rowHeight;
 
     /// <summary>各行（与展开的详情）的位置：按行高与详情的高度（量过的，没量过时按估计）累加。</summary>
     void Layout(IReadOnlyList<object> rows)
@@ -223,7 +247,7 @@ internal sealed class DataTableSurface : Control
         for (var index = 0; index < rows.Count; index++)
         {
             rowTops[index] = y;
-            y += rowHeight;
+            y += rowHeights.Count > 0 && rowHeights.TryGetValue(owner.KeyOf(rows[index]), out var own) ? own : rowHeight;
             if (expanded.Count == 0 || !expanded.Contains(owner.KeyOf(rows[index])) || !owner.RowHasDetail(rows[index])) continue;
             detailTops[index] = y;
             y += detailHeights.TryGetValue(owner.KeyOf(rows[index]), out var measured) ? measured : DataTable.DetailHeight;
@@ -330,14 +354,33 @@ internal sealed class DataTableSurface : Control
                 view.IsVisible = false;
                 pool.Add(view);
             }
-            for (var index = first; index <= last; index++) Realize(index).Measure(infinite);
+            var changed = false;
+            for (var index = first; index <= last; index++)
+            {
+                var view = Realize(index);
+                view.Measure(infinite);
+                // 行高：量出来与估计（第一行的高度）不同的记下（内容换行的行）
+                var key = owner.KeyOf(rows[index]);
+                var height = view.DesiredSize.Height;
+                if (rowHeights.TryGetValue(key, out var known) ? Math.Abs(known - height) > 0.5 : Math.Abs(height - rowHeight) > 0.5)
+                {
+                    rowHeights[key] = height;
+                    changed = true;
+                }
+            }
+            // 可见行的范围（不含多建的行）变了：报告（排到之后，不在量的时候改数据）
+            var range = new VisibleRange(RowAt(top), RowAt(Math.Max(top, top + viewportHeight - HeaderHeight - SummaryHeight - 1)));
+            if (lastRange != range && owner.HasRangeListener)
+            {
+                lastRange = range;
+                Dispatcher.UIThread.Post(() => owner.RaiseRangeChanged(range));
+            }
             // 详情：看得见的展开的行建（或留着）详情行，量出高度记下；量出来与估计不同时重算位置
             foreach (var index in details.Keys.Where(index => index < first || index > last || !detailTops.ContainsKey(index)).ToList())
             {
                 Remove(details[index]);
                 details.Remove(index);
             }
-            var changed = false;
             for (var index = first; index <= last; index++)
             {
                 if (!detailTops.ContainsKey(index)) continue;
@@ -357,6 +400,11 @@ internal sealed class DataTableSurface : Control
             }
             if (changed) Layout(rows);
             body = bodyHeight;
+            foreach (var skeleton in trailing)
+            {
+                skeleton.Measure(infinite);
+                body += skeleton.DesiredSize.Height;
+            }
         }
         return new Size(width, HeaderHeight + body + SummaryHeight);
     }
@@ -420,12 +468,17 @@ internal sealed class DataTableSurface : Control
         }
         else
         {
-            foreach (var (index, view) in realized) view.Arrange(new Rect(0, headerHeight + (index < rowTops.Length ? rowTops[index] : index * rowHeight), width, rowHeight));
+            foreach (var (index, view) in realized) view.Arrange(new Rect(0, headerHeight + (index < rowTops.Length ? rowTops[index] : index * rowHeight), width, view.DesiredSize.Height));
             // 详情贴着可见区域的起始边、宽度不超过可见区域（横向滚动时不跟着滚走）
             var visibleWidth = ViewportWidth > 0 ? ViewportWidth : width;
             foreach (var (index, detail) in details)
                 if (detailTops.TryGetValue(index, out var detailTop)) detail.Arrange(new Rect(Offset.X, headerHeight + detailTop, visibleWidth, detail.DesiredSize.Height));
             y += bodyHeight;
+            foreach (var skeleton in trailing)
+            {
+                skeleton.Arrange(new Rect(0, y, width, skeleton.DesiredSize.Height));
+                y += skeleton.DesiredSize.Height;
+            }
         }
         if (summary is not null)
         {

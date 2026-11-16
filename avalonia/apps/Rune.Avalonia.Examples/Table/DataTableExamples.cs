@@ -4,7 +4,7 @@ using Avalonia.Controls.Documents;
 
 namespace Rune.Avalonia.Examples;
 
-/// <summary>DataTable 页的示例（vue-tsx-pro 文档站 table/DataTable）：一万条订单、表头筛选与列菜单、就地编辑、数据修正、行拖动、分组表头、宽表、展开行、单选、加载与空状态；台账、定位、主从视图、导入、组织架构、滚动加载随功能补上。</summary>
+/// <summary>DataTable 页的示例（vue-tsx-pro 文档站 table/DataTable）：一万条订单、表头筛选与列菜单、就地编辑、数据修正、行拖动、分组表头、宽表、展开行、定位、主从视图、单选、滚动加载、加载与空状态；台账、导入、组织架构随功能补上。</summary>
 static class DataTableExamples
 {
     public static Example[] All =>
@@ -17,7 +17,10 @@ static class DataTableExamples
         new("DataTable", "changes", "采购方案调整：分组表头", "ColumnGroups 写组标题与组里各列的 Key：相邻的几列上方共用一个标题，表头变成两行，没分组的列跨两行；组与相邻的列之间有竖线，固定列照常固定。列定义仍是平铺的，排序、列宽、隐藏列都按列算，组里的列全隐藏时这一组也不显示。", Changes),
         new("DataTable", "wide", "宽表：列也虚拟滚动", "VirtualColumns 时只建看得见的列（前后各多几列），列宽、固定列、分组表头、列宽调整照常。几十上百列的宽表、透视结果打开它；行本来就是虚拟滚动的。没写宽度的列按 150px；两端的固定列总在，固定列夹在中间时不虚拟化。", Wide),
         new("DataTable", "details", "供应商改进建议：展开行", "RenderDetail 给出一行的详情：多一列展开按钮（读屏念出展开状态），展开的行下面多一行跨全部列的详情，虚拟滚动按真实高度测量；HasDetail 决定哪些行能展开，ExpandedRows 可以双向绑定。详情横向滚动时贴着可见区域的起始边，宽度不超过可见区域。", Details),
+        new("DataTable", "locate", "定位到行", "从通知、搜索结果跳过来时 ScrollToRow 滚到那一行（ScrollAlign 可以居中），再用 RowTone 闪一下。两千行里还没建的行也能滚到，停在吸顶表头之下；找不到时返回 false。", Locate),
+        new("DataTable", "master-detail", "主从视图：点一行看详情", "ActiveKey 高亮正在看的那一行（品牌色浅底、起始边一条强调色的竖线，读屏念“当前”）；RowClicked 是点了一行（点在行里的按钮上不算）。编号是链接按钮，键盘也能打开。", MasterDetail),
         new("DataTable", "single", "单选：选一家报价", "SelectionMode=\"single\" 时每行是一个单选框：点击选中，选中的行整行高亮；没有全选，取消选择用 SelectionBar 的清空或把 Selected 设为空列表。", Single),
+        new("DataTable", "infinite", "滚动加载", "RangeChanged 报告可见行的范围（不含多建的行），离末尾不远时取下一页；取的时候 IsLoading，已有数据所以骨架接在末尾。页码、去重与失败重试交给 InfiniteList，它的 OnRangeChanged 直接接上。内容换行的行按量出的高度排。", Infinite),
         new("DataTable", "states", "加载、空状态与外观", "IsLoading 时表体换成骨架行（首次加载与刷新一样，不另加进度条）；没有数据显示 Empty。Density、Variant、Striped 与静态表格相同。", States),
     ];
 
@@ -499,6 +502,170 @@ static class DataTableExamples
         };
         AutomationProperties.SetName(table, "供应商改进建议");
         return table;
+    }
+
+    record TodoItem(string Id, string Code, string Name, string Node, DateOnly Due);
+
+    static Control MasterDetail()
+    {
+        var today = new DateOnly(2026, 10, 21);
+        TodoItem[] todos =
+        [
+            new("t1", "PO-2026-0187", "办公椅供应商切换", "资料审核", new DateOnly(2026, 10, 23)),
+            new("t2", "PO-2026-0214", "卡箍改用铝合金", "方案设计", new DateOnly(2026, 10, 16)),
+            new("t3", "PO-2026-0233", "机柜导轨第二供应商", "财务复核", new DateOnly(2026, 10, 30)),
+            new("t4", "FA-2026-0142", "密封件国产化", "方案评审", today),
+        ];
+        var table = new DataTable { ItemsSource = todos, GetKey = row => ((TodoItem)row).Id, ActiveKey = "t2", Density = TableDensity.Compact, Height = 18 * 16 };
+        AutomationProperties.SetName(table, "待办");
+        var detail = new ContentControl();
+        void Show()
+        {
+            if (todos.FirstOrDefault(todo => todo.Id == table.ActiveKey as string) is not { } current)
+            {
+                detail.Content = new Empty { Size = TextSize.Sm, Title = "选一条看详情", VerticalAlignment = global::Avalonia.Layout.VerticalAlignment.Center };
+                return;
+            }
+            var descriptions = new Descriptions { Columns = 1, Size = TextSize.Sm, Margin = new global::Avalonia.Thickness(12) };
+            descriptions.Items.AddRange(
+            [
+                new DescriptionItem { Label = "编号", Value = current.Code },
+                new DescriptionItem { Label = "名称", Value = current.Name },
+                new DescriptionItem { Label = "环节", Value = current.Node },
+                new DescriptionItem { Label = "截止", Value = current.Due.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture) },
+            ]);
+            detail.Content = descriptions;
+        }
+        table.Columns =
+        [
+            new("Code", "编号")
+            {
+                Width = 140,
+                Cell = (row, _) =>
+                {
+                    var open = new Button { Size = TextSize.Sm, Variant = ButtonVariant.Link, Content = ((TodoItem)row).Code };
+                    open.Click += (_, _) => table.ActiveKey = ((TodoItem)row).Id;
+                    return open;
+                },
+            },
+            new("Node", "环节") { Width = 110 },
+            new("Due", "剩余") { Width = 140, Cell = (row, _) => new DeadlineBadge { Due = ((TodoItem)row).Due, Today = today } },
+        ];
+        table.RowClicked += (_, row) => table.ActiveKey = ((TodoItem)row).Id;
+        table.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == DataTable.ActiveKeyProperty) Show();
+        };
+        Show();
+        return new Card { Variant = CardVariant.Outline, Padding = Space.None, Radius = Radius.Md, Content = new Splitter { Height = 18 * 16, Size = 55, Start = table, End = detail } };
+    }
+
+    record ProjectTaskRow(string Code, string Name, string Owner, string Due, string Status);
+
+    static Control Locate()
+    {
+        var statuses = new StatusMap { ["doing"] = new("进行中", StatusTone.Info), ["overdue"] = new("已超期", StatusTone.Danger), ["done"] = new("已完成", StatusTone.Success) };
+        string[] owners = ["张工", "李工", "王工", "赵工", "刘工"];
+        string[] parts = ["显示器", "支架", "纸箱", "线缆", "键盘", "鼠标"];
+        ProjectTaskRow[] tasks =
+        [
+            .. Enumerable.Range(0, 2000).Select(index => new ProjectTaskRow(
+                $"PO-2026-{index + 1:0000}", $"{parts[index % parts.Length]}改进方案 {index + 1}", owners[index * 3 % owners.Length],
+                $"2026-{index % 12 + 1:00}-{index % 28 + 1:00}", index % 17 == 0 ? "overdue" : index % 3 == 0 ? "done" : "doing")),
+        ];
+        string? flashing = null;
+        var table = new DataTable
+        {
+            ItemsSource = tasks, GetKey = row => ((ProjectTaskRow)row).Code, Density = TableDensity.Compact, MaxHeight = 22 * 16,
+            RowTone = row => ((ProjectTaskRow)row).Code == flashing ? StatusTone.Info : null,
+            Columns =
+            [
+                new("Code", "任务编码") { Width = 136, Sticky = ColumnSticky.Start },
+                new("Name", "任务名称"),
+                new("Owner", "责任人") { Width = 96 },
+                new("Due", "截止日期") { Width = 120 },
+                new("Status", "状态") { Width = 104, Statuses = statuses },
+            ],
+        };
+        AutomationProperties.SetName(table, "项目任务");
+        var code = new TextField { Text = "PO-2026-1360", PlaceholderText = "任务编码", Width = 14 * 16 };
+        AutomationProperties.SetName(code, "任务编码");
+        var missing = new Small { Tone = TextTone.Danger, Text = "没有这个任务", IsVisible = false };
+        var timer = new global::Avalonia.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(1.5) };
+        void Flash(string? key)
+        {
+            flashing = key;
+            // 色调由 RowTone 给：重设一次让各行重画
+            var tone = table.RowTone;
+            table.RowTone = null;
+            table.RowTone = tone;
+        }
+        timer.Tick += (_, _) =>
+        {
+            timer.Stop();
+            Flash(null);
+        };
+        void Go(string key)
+        {
+            missing.IsVisible = !table.ScrollToRow(key, ScrollAlign.Center);
+            if (missing.IsVisible) return;
+            // 滚到之后闪一下：浅色底停 1.5 秒
+            Flash(key);
+            timer.Stop();
+            timer.Start();
+        }
+        code.KeyDown += (_, e) =>
+        {
+            if (e.Key == global::Avalonia.Input.Key.Enter) Go((code.Text ?? "").Trim());
+        };
+        var locate = new Button { Size = TextSize.Sm, Icon = Lucide.LocateFixed, Content = "定位" };
+        locate.Click += (_, _) => Go((code.Text ?? "").Trim());
+        var first = new Button { Size = TextSize.Sm, Variant = ButtonVariant.Ghost, Content = "第一条" };
+        first.Click += (_, _) => Go(tasks[0].Code);
+        var last = new Button { Size = TextSize.Sm, Variant = ButtonVariant.Ghost, Content = "最后一条" };
+        last.Click += (_, _) => Go(tasks[^1].Code);
+        return new Flex
+        {
+            Direction = FlexDirection.Column, Gap = Space.Sm, Align = FlexAlign.Stretch,
+            Children = { new Flex { Align = FlexAlign.Center, Gap = Space.Sm, Wrap = FlexWrap.Wrap, Children = { code, locate, first, last, missing } }, table },
+        };
+    }
+
+    record FeedEvent(int Id, string At, string Message);
+
+    static Control Infinite()
+    {
+        const int page = 40, total = 400;
+        string[] messages = ["用户登录成功", "导出报表：2026 年 9 月销售明细（含退款与优惠券核销）", "支付回调重试第 2 次", "库存同步完成"];
+        var events = new InfiniteList<FeedEvent>(async (cursor, cancellation) =>
+        {
+            var number = (int?)cursor ?? 0;
+            await Task.Delay(400, cancellation);
+            FeedEvent[] items = [.. Enumerable.Range(0, page).Select(index =>
+            {
+                var id = number * page + index + 1;
+                return new FeedEvent(id, $"10:{id % 60:00}", messages[id % messages.Length]);
+            })];
+            return new InfinitePage<FeedEvent>(items, (number + 1) * page < total ? number + 1 : null);
+        }) { KeyOf = item => item.Id, Threshold = 10 };
+        var table = new DataTable
+        {
+            GetKey = row => ((FeedEvent)row).Id, Height = 18 * 16,
+            Columns = [new("Id", "#") { Width = 64 }, new("At", "时间") { Width = 80 }, new("Message", "事件") { Width = 280, Wrap = true }],
+        };
+        AutomationProperties.SetName(table, "事件流");
+        var loaded = new Small { Tone = TextTone.Muted };
+        void Sync()
+        {
+            table.ItemsSource = events.Items;
+            table.IsLoading = events.IsLoading;
+            loaded.Text = $"已加载 {events.Count} / {total} 条";
+        }
+        events.PropertyChanged += (_, _) => Sync();
+        table.RangeChanged += (_, range) => events.OnRangeChanged(range);
+        Sync();
+        _ = events.Refresh();
+        return new Flex { Direction = FlexDirection.Column, Gap = Space.Sm, Align = FlexAlign.Stretch, Children = { table, new InfiniteListStatus { List = events }, loaded } };
     }
 
     record Quote(string Id, string Supplier, decimal Price, int Days, string Rating);
