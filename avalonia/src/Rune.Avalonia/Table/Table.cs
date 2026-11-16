@@ -681,7 +681,9 @@ public class TableCell : ContentControl
         PseudoClasses.Set(":head", head);
         PseudoClasses.Set(":foot", foot);
         PseudoClasses.Set(":row-header", this is TableHeaderCell && !head);
-        if (!IsSet(NowrapProperty)) TextBlock.SetTextWrapping(this, this is TableHeaderCell && head ? TextWrapping.NoWrap : TextWrapping.Wrap);
+        // 写了 Nowrap 时按它（写成默认的 false 时属性变化不会触发，也要在这里设上换行）；没写时列标题不换行、其余换行
+        var nowrap = IsSet(NowrapProperty) ? Nowrap : this is TableHeaderCell && head;
+        TextBlock.SetTextWrapping(this, nowrap ? TextWrapping.NoWrap : TextWrapping.Wrap);
     }
 
     /// <inheritdoc />
