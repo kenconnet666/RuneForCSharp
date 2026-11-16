@@ -187,6 +187,9 @@ public abstract class SelectBase : TemplatedControl, IFieldControl
     /// <summary>那一排已选标签（测试用）。</summary>
     internal SelectedTags? TagRow => tags;
 
+    /// <summary>触发框里的文字（模板的 PART_Value）。</summary>
+    private protected TextBlock? ValueText => valueText;
+
     /// <summary>弹出层顶部的搜索框。</summary>
     private protected SearchField Search { get; } = new() { Name = SelectParts.Search, Variant = ControlVariant.Soft };
 
@@ -340,9 +343,15 @@ public abstract class SelectBase : TemplatedControl, IFieldControl
 
     void OnClear(object? sender, RoutedEventArgs e)
     {
+        ClearSelection();
+        Focus(NavigationMethod.Tab);
+    }
+
+    /// <summary>清空按钮：单选写回 null，多选写回空列表。</summary>
+    protected virtual void ClearSelection()
+    {
         if (Multiple) SetCurrentValue(ValuesProperty, Array.Empty<string>());
         else SetCurrentValue(ValueProperty, null);
-        Focus(NavigationMethod.Tab);
     }
 
     void OnTagRemoved(object? sender, SelectedTagEventArgs e) => Remove(e.Value);

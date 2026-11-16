@@ -129,6 +129,7 @@ export const COMPONENT_PROP_RENAMES = {
   // 数据是平台的 ItemsSource；自定义选项内容是数据模板；新建是事件（Control 自己有 Created）
   Select: { items: 'ItemsSource', children: 'ItemTemplate', onCreate: 'OptionCreated' },
   TreeSelect: { items: 'ItemsSource', isDisabled: 'IsItemDisabled' },
+  Cascader: { items: 'ItemsSource', isDisabled: 'IsItemDisabled', _value: 'Values' },
   // 输入框就是平台 TextBox：没确认的文字是 Text；已选的值是 Values（同多选 Select）
   TagsInput: { _value: 'Values', items: 'ItemsSource', _inputValue: 'Text', children: 'ItemTemplate' },
   // 输入框就是平台 TextBox：输入的文字是 Text，选中项的值是 Value
@@ -487,6 +488,11 @@ export const PROPS_NOT_PORTED = {
     _search: '搜索词只在弹出层的搜索框里；服务端搜索用 Load（同 Select）',
     propsRoot: '外壳就是 TreeSelect 自己：样式直接写在 TreeSelect 上',
     propsTag: '标签是 SelectedTags 建的 sm、soft 的 Tag：样式写在 Tag 的主题或部件上',
+  },
+  Cascader: {
+    placement: '弹出层固定贴着外壳下方、至少与它同宽（放不下时翻到上方），同 Select',
+    name: FORM_NAME,
+    propsRoot: '外壳就是 Cascader 自己：样式直接写在 Cascader 上',
   },
   SelectedTags: { propsTag: '标签固定是 sm、soft 的 Tag：样式写在 Tag 的主题或部件上' },
   TagsInput: {
