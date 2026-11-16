@@ -12,6 +12,7 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.LogicalTree;
 using Avalonia.Media;
+using Avalonia.Threading;
 
 namespace Rune.Avalonia;
 
@@ -36,7 +37,7 @@ namespace Rune.Avalonia;
 /// 行高按第一行量出的高度（单元格默认一行，放不下省略号）。表头筛选、列菜单、就地编辑、行拖动、详情行、分组表头还没做（见 docs/DESIGN.md）。
 /// 部件：<see cref="DataTableParts"/>。外观同 Table：<see cref="Density"/>、<see cref="Variant"/>、<see cref="Striped"/>。
 /// </summary>
-public class DataTable : Control
+public partial class DataTable : Control
 {
     /// <summary>数据（TS 的 rows）：实现了 INotifyCollectionChanged 的集合增删时跟着变。</summary>
     public static readonly StyledProperty<IEnumerable?> ItemsSourceProperty = AvaloniaProperty.Register<DataTable, IEnumerable?>(nameof(ItemsSource));
@@ -262,7 +263,8 @@ public class DataTable : Control
         else if (change.Property == FiltersProperty) Refresh(header: false);
         else if (change.Property == SelectedProperty || change.Property == RowToneProperty || change.Property == IsRowSelectableProperty) surface.SyncRows();
         else if (change.Property == SelectionModeProperty || change.Property == IsLoadingProperty || change.Property == EmptyProperty || change.Property == SummaryLabelProperty
-                 || change.Property == ResizableProperty || change.Property == ColumnMenuProperty || change.Property == DensityProperty || change.Property == StripedProperty || change.Property == GetKeyProperty) surface.Rebuild();
+                 || change.Property == ResizableProperty || change.Property == ColumnMenuProperty || change.Property == CellNavigationProperty
+                 || change.Property == EditTriggerProperty || change.Property == ValidateRowProperty || change.Property == DensityProperty || change.Property == StripedProperty || change.Property == GetKeyProperty) surface.Rebuild();
         if (change.Property == VariantProperty || change.Property == DensityProperty) SyncFrame();
         // 只是宽度变了：重排，不重建（拖动中的手柄要留着）
         if (change.Property == ColumnWidthsProperty) surface.Relayout();
@@ -553,6 +555,42 @@ internal sealed class DataTableSurface : Control
         }
     }
 
+    /// <summary>重建 key 对应的那一行（开始、结束编辑）；它没建时不用管。</summary>
+    internal void RebuildRow(object key)
+    {
+        foreach (var row in realized.Values)
+            if (row.Row is { } data && Equals(owner.KeyOf(data), key)) row.Rebuild();
+    }
+
+    /// <summary>能 Tab 进入的格变了：各行的格跟着改 Tab 停靠点。</summary>
+    internal void SyncTabStops()
+    {
+        foreach (var row in realized.Values) row.SyncTabStops();
+    }
+
+    /// <summary>聚焦 key 那一行的某一格（滚到看得见、重建完再聚焦）。</summary>
+    internal void FocusCell(object key, string column)
+    {
+        var index = owner.View.ToList().FindIndex(row => Equals(owner.KeyOf(row), key));
+        if (index >= 0) FocusCell(index, column);
+    }
+
+    /// <summary>聚焦第 index 行的某一格：不在视口里时先滚过去（停在吸顶表头之下、吸底合计之上）。</summary>
+    internal void FocusCell(int index, string column)
+    {
+        if (rowHeight > 0)
+        {
+            var top = index * rowHeight;
+            var visible = Math.Max(rowHeight, Viewport.Height - HeaderHeight - SummaryHeight);
+            if (top < Offset.Y) owner.Scroller.Offset = new Vector(Offset.X, top);
+            else if (top + rowHeight > Offset.Y + visible) owner.Scroller.Offset = new Vector(Offset.X, top + rowHeight - visible);
+        }
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (realized.TryGetValue(index, out var row)) row.CellOf(column)?.Focus(NavigationMethod.Tab);
+        }, DispatcherPriority.Loaded);
+    }
+
     /// <summary>选择、色调变了：建好的行与表头的全选框跟着改，不重建。</summary>
     internal void SyncRows()
     {
@@ -743,6 +781,14 @@ internal sealed class DataTableRowView : Control
         {
             PointerEntered += (_, _) => SetHovered(true);
             PointerExited += (_, _) => SetHovered(false);
+            PointerPressed += (_, e) =>
+            {
+                if (Row is { } row && CellAt(e.GetPosition(this).X) is { } hit && !e.Handled) Owner.CellPressed(hit.Cell, row, hit.Column);
+            };
+            DoubleTapped += (_, e) =>
+            {
+                if (Row is { } row && CellAt(e.GetPosition(this).X) is { } hit) Owner.CellDoubleTapped(row, hit.Column);
+            };
         }
     }
 
@@ -781,6 +827,35 @@ internal sealed class DataTableRowView : Control
     {
         hovered = value;
         InvalidateVisual();
+    }
+
+    /// <summary>按现在的状态（编辑中的格、校验）重建这一行。</summary>
+    public void Rebuild()
+    {
+        if (Row is { } row) Build(row, Index);
+    }
+
+    /// <summary>横坐标落在哪一格（含左右内边距）；落在选择列上时 null。</summary>
+    (TableCell Cell, DataTableColumn Column)? CellAt(double x)
+    {
+        foreach (var (cell, column) in cells)
+        {
+            var padding = PaddingOf(cell);
+            if (cell is TableCell table && column is not null && x >= cell.Bounds.X - padding.Left && x < cell.Bounds.Right + padding.Right) return (table, column);
+        }
+        return null;
+    }
+
+    /// <summary>某一列的格。</summary>
+    internal TableCell? CellOf(string column) => cells.FirstOrDefault(cell => cell.Column?.Key == column).Cell as TableCell;
+
+    /// <summary>网格时只有一格能 Tab 进入。</summary>
+    public void SyncTabStops()
+    {
+        if (Row is not { } row || !Owner.GridMode) return;
+        var key = Owner.KeyOf(row);
+        foreach (var (cell, column) in cells)
+            if (column is not null) KeyboardNavigation.SetIsTabStop(cell, Owner.IsActiveCell(key, column.Key));
     }
 
     /// <summary>表体的行换成另一行的数据（回收）。</summary>
@@ -825,6 +900,7 @@ internal sealed class DataTableRowView : Control
             };
             cell.ApplyRole(head: Kind == DataTableRowKind.Header, foot: Kind == DataTableRowKind.Summary);
             TextBlock.SetTextTrimming(cell, TextTrimming.CharacterEllipsis);
+            if (Kind == DataTableRowKind.Body) owner.PrepareCell(cell, row!, column);
             if (column.Sticky is not null) cell.ZIndex = 1;
             cells.Add((cell, column));
             Attach(cell);
@@ -839,6 +915,8 @@ internal sealed class DataTableRowView : Control
                 Attach(resizer);
             }
         }
+        // 编辑中的行浮在别的行上面：校验的原因在格子下面，不被下一行盖住
+        ZIndex = cells.Any(cell => cell.Cell.Classes.Contains("editing")) ? 1 : 0;
         SyncSelection();
         InvalidateMeasure();
     }
@@ -1019,7 +1097,8 @@ internal sealed class DataTableRowView : Control
         var em = TextElement.GetFontSize(cell);
         var density = Owner.Density;
         var block = density == TableDensity.Compact ? 0.25 : density == TableDensity.Comfortable ? 0.75 : 0.5;
-        return new Thickness(0.75 * em, block * em);
+        // 编辑中的格：编辑器贴满格子，上下内边距收掉
+        return new Thickness(0.75 * em, cell.Classes.Contains("editing") ? 0 : block * em);
     }
 
     /// <summary>
@@ -1135,6 +1214,17 @@ internal sealed class DataTableRowView : Control
                 if (column.Key == edges.StartEdge) context.FillRectangle(divider, new Rect(cell.Bounds.Right + padding.Right - 1, 0, 1, bounds.Height));
                 else if (column.Key == edges.EndEdge) context.FillRectangle(divider, new Rect(cell.Bounds.X - padding.Left, 0, 1, bounds.Height));
             }
+        // 单元格导航：聚焦的格一圈 sm 宽的焦点环；校验没过的格一圈 xs 宽的 danger 内描边（聚焦时仍是焦点环）
+        foreach (var (cell, _) in cells)
+        {
+            var focused = cell.IsFocused;
+            if (!focused && !cell.Classes.Contains("invalid")) continue;
+            var padding = PaddingOf(cell);
+            var area = new Rect(cell.Bounds.X - padding.Left, 0, cell.Bounds.Width + padding.Left + padding.Right, bounds.Height - 1);
+            var width = this.Resource<double>(focused ? ThemeKeys.BorderWidth.Sm : ThemeKeys.BorderWidth.Xs);
+            if (this.Resource<IBrush?>(focused ? ThemeKeys.Brush.FocusRing : ThemeKeys.Brush.Danger) is { } ring)
+                context.DrawRectangle(new Pen(ring, width), area.Deflate(width / 2));
+        }
         // 下边线：表头 border，表体 borderMuted；合计行的上边线是 border
         var line = Kind == DataTableRowKind.Header || Kind == DataTableRowKind.Summary ? ThemeKeys.Brush.Border : ThemeKeys.Brush.BorderMuted;
         if (this.Resource<IBrush?>(line) is { } stroke)
@@ -1156,6 +1246,12 @@ public static class DataTableParts
 
     /// <summary>调整列宽的手柄（ColumnResizer）。</summary>
     public const string Resizer = "PART_Resizer";
+
+    /// <summary>编辑中的格里的编辑器。</summary>
+    public const string Editor = "PART_Editor";
+
+    /// <summary>编辑器下面校验没过的原因。</summary>
+    public const string EditorError = "PART_EditorError";
 
     /// <summary>列标题里的表头筛选按钮（ColumnFilterButton）。</summary>
     public const string FilterButton = "PART_FilterButton";

@@ -165,7 +165,28 @@ public sealed record DataTableColumn(string Key, object Header)
 
     /// <summary>可以拖动调整宽度；不写时跟随表格的 Resizable（DataTable）。</summary>
     public bool? Resizable { get; init; }
+
+    /// <summary>可以就地编辑（DataTable 的 CellChange 写回）；表格随之变成可以用方向键走格的网格。按行判断写 <see cref="IsEditable"/>。</summary>
+    public bool Editable { get; init; }
+
+    /// <summary>按行判断能不能编辑（上游 editable 的函数写法）；写了时以它为准。</summary>
+    public Func<object, bool>? IsEditable { get; init; }
+
+    /// <summary>编辑器：参数是编辑的上下文，返回平台的控件；不写时按列选（状态列是下拉，数字类是数字框，其余是文字框）。</summary>
+    public Func<CellEditorContext, object>? Editor { get; init; }
+
+    /// <summary>提交前校验这一格：参数是新值与行，返回原因就不提交，编辑器标红并说明。</summary>
+    public Func<object?, object, string?>? Validate { get; init; }
 }
+
+/// <summary>自定义单元格编辑器拿到的（vue-tsx-pro 的 CellEditorContext）。</summary>
+/// <param name="Row">这一行。</param>
+/// <param name="Value">正在编辑的值（草稿）。</param>
+/// <param name="Change">改草稿。</param>
+/// <param name="Commit">提交（校验通过后交给 CellChange）。</param>
+/// <param name="Cancel">放弃，回到原来的值。</param>
+/// <param name="Error">校验没过的原因：编辑器用它标出错误。</param>
+public sealed record CellEditorContext(object Row, object? Value, Action<object?> Change, Action Commit, Action Cancel, string? Error);
 
 /// <summary>列定义的计算（vue-tsx-pro 的 columns.ts）：取值、类型、对齐、格式化、合计、排序、表头筛选、列的位置与宽度、列虚拟化、相同值合并的跨行数。三个库各有一份（tools/twins）。</summary>
 public static class TableColumns
@@ -494,6 +515,9 @@ public static class TableColumns
         if (last + 1 < trail) skips.Add(new ColumnSkip(last + 1, trail));
         return skips;
     }
+
+    /// <summary>这一格能不能编辑：列的 IsEditable 按行判断，否则看 Editable。</summary>
+    public static bool IsCellEditable(DataTableColumn column, object row) => column.IsEditable?.Invoke(row) ?? column.Editable;
 
     /// <summary>
     /// 相同值合并（TS 的 mergeRepeated）的跨行数：每列一个数组，第 i 行是这一格往下合并几行，被合并掉的是 0。

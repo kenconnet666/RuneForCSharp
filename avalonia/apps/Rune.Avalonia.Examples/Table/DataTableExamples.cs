@@ -4,13 +4,14 @@ using Avalonia.Controls.Documents;
 
 namespace Rune.Avalonia.Examples;
 
-/// <summary>DataTable 页的示例（vue-tsx-pro 文档站 table/DataTable）：已做的功能的示例：一万条订单、表头筛选与列菜单、单选、加载与空状态；其余（编辑、拖动、详情行等）随功能补上。</summary>
+/// <summary>DataTable 页的示例（vue-tsx-pro 文档站 table/DataTable）：已做的功能的示例：一万条订单、表头筛选与列菜单、就地编辑、单选、加载与空状态；其余（拖动、详情行等）随功能补上。</summary>
 static class DataTableExamples
 {
     public static Example[] All =>
     [
         new("DataTable", "orders", "一万条订单", "列定义里 Type 决定默认的格式与对齐（Number、Currency、Percent、FileSize、Date、DateTime，跟随语言；不写时按第一个值推断，数字靠右），Cell 自定义单元格，Value 给排序用的值；点可排序的列标题在升序、降序、不排之间切换（本地按数字、日期、按语言的文字排，ManualSort 时交给服务端）。SelectionMode=\"multiple\" 多一列勾选框；Sticky 的列横向滚动时固定在两侧；Resizable 时可以拖动或用键盘调整列宽，ColumnWidths 双向绑定可以存到本地设置里。工具栏（搜索、批量操作、分页）用现有组件组合，不内置。", Orders),
         new("DataTable", "columns", "采购单：表头筛选、多列排序与列菜单", "列定义写 Filter 时列标题上有筛选按钮：ColumnFilter.Values 列出这一列出现过的值（状态列按阶段顺序、显示状态名），也可以给 Options，ColumnFilter.Keyword 是输入关键字；Filters 双向绑定各列选中的值，默认在本地筛，ManualFilter 时交给服务端。MultiSort 时点列标题只按这一列排，按住 Shift 点是追加一列（列标题上标着次序），排序写在 Sorts。ColumnMenu 在列标题结尾放 ⋮：排序、固定在开头 / 结尾、前后移动、隐藏，写回 ColumnPins、ColumnOrder、HiddenColumns，都能双向绑定、存起来（上游记在浏览器里；这里在内存里，“还原列设置”清掉）。", Columns),
+        new("DataTable", "editable", "采购申请明细：就地编辑与校验", "列写 Editable（或按行判断的 IsEditable）时可以就地编辑，表格随之变成网格：方向键在格之间走，只有一格能 Tab 进入；在可编辑的格上按 Enter、F2、双击或直接打字开始编辑，Enter 提交、Tab 提交并到下一个可编辑的格、点开别处提交、Esc 放弃。默认编辑器按列选（状态列是 Select，数字类是 NumberField，其余是 TextField），Editor 自己写（这里的交期是 DateField）。列的 Validate 拦下不合理的值，CellChange 写回，返回文字时是不接受的原因（接口拒绝），编辑器留着并显示它；ValidateRow 返回整行的问题，标在对应的格上（红框，悬停与读屏都能知道原因）。", Editable),
         new("DataTable", "single", "单选：选一家报价", "SelectionMode=\"single\" 时每行是一个单选框：点击选中，选中的行整行高亮；没有全选，取消选择用 SelectionBar 的清空或把 Selected 设为空列表。", Single),
         new("DataTable", "states", "加载、空状态与外观", "IsLoading 时表体换成骨架行（首次加载与刷新一样，不另加进度条）；没有数据显示 Empty。Density、Variant、Striped 与静态表格相同。", States),
     ];
@@ -170,6 +171,71 @@ static class DataTableExamples
             Direction = FlexDirection.Column, Gap = Space.Sm, Align = FlexAlign.Stretch,
             Children = { new Flex { Align = FlexAlign.Center, Justify = FlexJustify.Between, Gap = Space.Md, Wrap = FlexWrap.Wrap, Children = { summary, reset } }, table },
         };
+    }
+
+    record Line(string Id, string Part, decimal Quantity, decimal Price, string Due, string Status);
+
+    static Control Editable()
+    {
+        const string today = "2026-10-24";
+        var statuses = new StatusMap { ["draft"] = new("草稿", StatusTone.Neutral), ["ordered"] = new("已下单", StatusTone.Info) };
+        DataTableColumn[] columns =
+        [
+            new("Id", "行号") { Width = 70 },
+            new("Part", "零件") { MinWidth = 180, Editable = true, Validate = (value, _) => value is string text && text.Trim().Length > 0 ? null : "零件名称不能为空" },
+            new("Quantity", "数量") { Width = 100, Type = ColumnType.Number, Editable = true, Validate = (value, _) => value is decimal number && number > 0 && number == Math.Floor(number) ? null : "数量是正整数" },
+            new("Price", "单价") { Width = 120, Type = ColumnType.Currency, Editable = true, Validate = (value, _) => value is decimal number && number >= 0 ? null : "单价不能为负" },
+            new("Subtotal", "小计") { Width = 130, Type = ColumnType.Currency, Value = row => ((Line)row).Quantity * ((Line)row).Price, Summary = ColumnSummary.Sum },
+            new("Due", "交期")
+            {
+                Width = 150, Type = ColumnType.Date, Editable = true,
+                // 自定义编辑器：拿到草稿、提交与放弃
+                Editor = context =>
+                {
+                    var field = new DateField { Value = context.Value as string, Size = TextSize.Sm, IsInvalid = context.Error is not null };
+                    AutomationProperties.SetName(field, "交期");
+                    field.PropertyChanged += (_, e) =>
+                    {
+                        if (e.Property == DateField.ValueProperty) context.Change(field.Value);
+                    };
+                    return field;
+                },
+            },
+            new("Status", "状态") { Width = 100, Statuses = statuses },
+        ];
+        List<Line> lines =
+        [
+            new("1", "显示器支架", 40, 128, "2026-11-05", "ordered"),
+            new("2", "铰链底座", 80, 76.5m, "2026-11-12", "draft"),
+            new("3", "检修口盖板", 24, 212, "2026-10-20", "draft"),
+            new("4", "线束卡箍", 300, 3.2m, "2026-11-30", "draft"),
+        ];
+        var saved = new Small { Tone = TextTone.Muted, Text = "方向键在格之间走；在可编辑的格上按 Enter、F2、双击或直接打字开始编辑，Enter 提交，Tab 到下一格，Esc 放弃" };
+        AutomationProperties.SetLiveSetting(saved, global::Avalonia.Automation.AutomationLiveSetting.Polite);
+        var table = new DataTable
+        {
+            ItemsSource = lines, Columns = columns, GetKey = row => ((Line)row).Id,
+            ValidateRow = row => string.CompareOrdinal(((Line)row).Due, today) < 0 ? new Dictionary<string, string> { ["Due"] = "交期早于今天，请重新约定" } : null,
+        };
+        AutomationProperties.SetName(table, "采购申请明细");
+        // 模拟保存：已下单的行不能改数量（接口拒绝时返回原因，编辑器留着并显示它）
+        table.CellChange = async (row, key, value) =>
+        {
+            await Task.Delay(300);
+            var line = (Line)row;
+            if (line.Status == "ordered" && key == "Quantity") return "已下单的行不能改数量，请走变更单";
+            lines = [.. lines.Select(item => item.Id != line.Id ? item : key switch
+            {
+                "Part" => item with { Part = (string)value! },
+                "Quantity" => item with { Quantity = (decimal)value! },
+                "Price" => item with { Price = (decimal)value! },
+                _ => item with { Due = (string)value! },
+            })];
+            table.ItemsSource = lines;
+            saved.Text = $"第 {line.Id} 行已保存";
+            return null;
+        };
+        return new Flex { Direction = FlexDirection.Column, Gap = Space.Sm, Align = FlexAlign.Stretch, Children = { table, saved } };
     }
 
     record Quote(string Id, string Supplier, decimal Price, int Days, string Rating);
