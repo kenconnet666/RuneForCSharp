@@ -187,6 +187,9 @@ export const COMPONENT_PROP_RENAMES = {
   ColumnTable: { rows: 'ItemsSource', cellSpan: 'GetCellSpan' },
   // 数据叫 ItemsSource（同 ColumnTable）；已选行的 key 是列表，同 Tree 的 Selected
   DataTable: { rows: 'ItemsSource', _selected: 'Selected' },
+  // 选中值变了、选了菜单里的一项是事件（Action 会和 System.Action 混）
+  ColumnFilterButton: { onChange: 'ValuesChanged' },
+  ColumnMenuButton: { onAction: 'ActionRequested' },
   PivotTable: { cellSpan: 'GetCellSpan' },
   DocSection: { id: 'SectionId' },
   // 控件自己有 Width
@@ -300,6 +303,13 @@ const BUTTON_TYPE = '表单提交是浏览器的概念；对话框的默认、�
 
 /** 某个组件不移植的 prop 与原因（平台上没有对应的概念）：parity 不报缺 */
 export const PROPS_NOT_PORTED = {
+  ColumnFilterButton: {
+    propsTrigger: '漏斗按钮是部件 ColumnHeaderActionsParts.Trigger（IconButton）：外观按部件名写样式；选项的 \'text\' 是 IsKeyword',
+  },
+  ColumnMenuButton: {
+    canMove: '拆成两个布尔 CanMoveBackward、CanMoveForward（上游是 { backward, forward } 对象）',
+    propsTrigger: '⋮ 按钮是部件 ColumnHeaderActionsParts.Trigger（IconButton）：外观按部件名写样式',
+  },
   FilterBar: Object.fromEntries(['propsBody', 'propsRow']
     .map((prop) => [prop, '第一排、start 右边那一列不是单独的元素：条件的格子、按钮区、展开的几排由 FilterBar 自己按量出的宽度排（上游 ResizeObserver 量完再排的那一套），部件是按钮区、按钮与高级筛选（FilterBarParts）'])),
   Calendar: { valueType: '值是 ISO 字符串的 Value（多选是 Values），另有 DateOnly 的 Date 属性：没有 @internationalized/date 的日期值类型，不按传进来的值推类型' },

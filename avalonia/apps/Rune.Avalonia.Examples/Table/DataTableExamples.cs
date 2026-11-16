@@ -4,12 +4,13 @@ using Avalonia.Controls.Documents;
 
 namespace Rune.Avalonia.Examples;
 
-/// <summary>DataTable 页的示例（vue-tsx-pro 文档站 table/DataTable）：这一轮是一万条订单、单选、加载与空状态；其余（表头筛选、编辑、拖动、详情行等）随功能补上。</summary>
+/// <summary>DataTable 页的示例（vue-tsx-pro 文档站 table/DataTable）：已做的功能的示例：一万条订单、表头筛选与列菜单、单选、加载与空状态；其余（编辑、拖动、详情行等）随功能补上。</summary>
 static class DataTableExamples
 {
     public static Example[] All =>
     [
         new("DataTable", "orders", "一万条订单", "列定义里 Type 决定默认的格式与对齐（Number、Currency、Percent、FileSize、Date、DateTime，跟随语言；不写时按第一个值推断，数字靠右），Cell 自定义单元格，Value 给排序用的值；点可排序的列标题在升序、降序、不排之间切换（本地按数字、日期、按语言的文字排，ManualSort 时交给服务端）。SelectionMode=\"multiple\" 多一列勾选框；Sticky 的列横向滚动时固定在两侧；Resizable 时可以拖动或用键盘调整列宽，ColumnWidths 双向绑定可以存到本地设置里。工具栏（搜索、批量操作、分页）用现有组件组合，不内置。", Orders),
+        new("DataTable", "columns", "采购单：表头筛选、多列排序与列菜单", "列定义写 Filter 时列标题上有筛选按钮：ColumnFilter.Values 列出这一列出现过的值（状态列按阶段顺序、显示状态名），也可以给 Options，ColumnFilter.Keyword 是输入关键字；Filters 双向绑定各列选中的值，默认在本地筛，ManualFilter 时交给服务端。MultiSort 时点列标题只按这一列排，按住 Shift 点是追加一列（列标题上标着次序），排序写在 Sorts。ColumnMenu 在列标题结尾放 ⋮：排序、固定在开头 / 结尾、前后移动、隐藏，写回 ColumnPins、ColumnOrder、HiddenColumns，都能双向绑定、存起来（上游记在浏览器里；这里在内存里，“还原列设置”清掉）。", Columns),
         new("DataTable", "single", "单选：选一家报价", "SelectionMode=\"single\" 时每行是一个单选框：点击选中，选中的行整行高亮；没有全选，取消选择用 SelectionBar 的清空或把 Selected 设为空列表。", Single),
         new("DataTable", "states", "加载、空状态与外观", "IsLoading 时表体换成骨架行（首次加载与刷新一样，不另加进度条）；没有数据显示 Empty。Density、Variant、Striped 与静态表格相同。", States),
     ];
@@ -97,6 +98,77 @@ static class DataTableExamples
                 },
                 table,
             },
+        };
+    }
+
+    record PurchaseOrder(string Id, string Supplier, string Category, string Buyer, string Status, decimal Amount, DateOnly OrderedAt);
+
+    static readonly StatusMap PurchaseStatuses = new()
+    {
+        ["draft"] = new("草稿", StatusTone.Neutral),
+        ["approving"] = new("审批中", StatusTone.Warning),
+        ["ordered"] = new("已下单", StatusTone.Info),
+        ["received"] = new("已到货", StatusTone.Success),
+    };
+
+    static readonly PurchaseOrder[] PurchaseOrders =
+    [
+        .. Enumerable.Range(0, 240).Select(index => new PurchaseOrder(
+            $"PO-2026-{1000 + index}",
+            new[] { "华辰精密", "启航塑胶", "远山钣金", "恒通紧固件", "北辰电子" }[index * 3 % 5],
+            new[] { "机械件", "塑料件", "钣金件", "标准件", "线缆" }[index * 7 % 5],
+            new[] { "林小满", "周一航", "陈默", "许悠", "王晴", "赵浩然" }[index * 5 % 6],
+            PurchaseStatuses.Keys[index * 11 % PurchaseStatuses.Keys.Count],
+            index * 7919 % 90_000 + 1200,
+            new DateOnly(2026, 10, 21).AddDays(-(index * 13 % 60)))),
+    ];
+
+    static Control Columns()
+    {
+        DataTableColumn[] columns =
+        [
+            new("Id", "采购单号") { Width = 160, Sticky = ColumnSticky.Start, Filter = ColumnFilter.Keyword },
+            new("Supplier", "供应商") { Sortable = true, Filter = ColumnFilter.Values },
+            new("Category", "品类") { Width = 130, Sortable = true, Filter = ColumnFilter.Values },
+            new("Buyer", "采购员") { Width = 140, Filter = ColumnFilter.Values },
+            new("Status", "状态") { Width = 140, Statuses = PurchaseStatuses, Filter = ColumnFilter.Values },
+            new("Amount", "金额") { Width = 150, Type = ColumnType.Currency, Sortable = true },
+            new("OrderedAt", "下单日期") { Width = 150, Type = ColumnType.Date, Sortable = true },
+        ];
+        var table = new DataTable
+        {
+            ItemsSource = PurchaseOrders, Columns = columns, GetKey = row => ((PurchaseOrder)row).Id, MultiSort = true, ColumnMenu = true, Resizable = true,
+            Sorts = [new SortState("OrderedAt", SortDirection.Descending)], Height = 22 * 16,
+        };
+        AutomationProperties.SetName(table, "采购单");
+        string Header(string key) => columns.FirstOrDefault(column => column.Key == key)?.Header as string ?? key;
+        var summary = new Small { Tone = TextTone.Muted };
+        var reset = new Button { Size = TextSize.Sm, Variant = ButtonVariant.Ghost, Icon = Lucide.RotateCcw, Content = "还原列设置" };
+        reset.Click += (_, _) =>
+        {
+            table.HiddenColumns = [];
+            table.ColumnOrder = [];
+            table.ColumnPins = new Dictionary<string, ColumnSticky?>();
+            table.ColumnWidths = new Dictionary<string, double>();
+        };
+        void Sync()
+        {
+            var parts = (table.Filters ?? new Dictionary<string, IReadOnlyList<string>>()).Where(pair => pair.Value.Count > 0)
+                .Select(pair => $"{Header(pair.Key)}：{string.Join("、", pair.Key == "Status" ? pair.Value.Select(PurchaseStatuses.Label) : pair.Value)}").ToList();
+            var order = table.Sorts.Select((sort, index) => $"{index + 1}. {Header(sort.Key)}{(sort.Direction == SortDirection.Ascending ? "↑" : "↓")}").ToList();
+            summary.Text = $"{(parts.Count > 0 ? $"筛选 {string.Join("；", parts)}" : "没有筛选")} · {(order.Count > 0 ? $"排序 {string.Join(" ", order)}" : "没有排序")}";
+            reset.IsEnabled = table.HiddenColumns is { Count: > 0 } || table.ColumnOrder is { Count: > 0 } || table.ColumnPins is { Count: > 0 } || table.ColumnWidths is { Count: > 0 };
+        }
+        table.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == DataTable.FiltersProperty || e.Property == DataTable.SortsProperty || e.Property == DataTable.HiddenColumnsProperty
+                || e.Property == DataTable.ColumnOrderProperty || e.Property == DataTable.ColumnPinsProperty || e.Property == DataTable.ColumnWidthsProperty) Sync();
+        };
+        Sync();
+        return new Flex
+        {
+            Direction = FlexDirection.Column, Gap = Space.Sm, Align = FlexAlign.Stretch,
+            Children = { new Flex { Align = FlexAlign.Center, Justify = FlexJustify.Between, Gap = Space.Md, Wrap = FlexWrap.Wrap, Children = { summary, reset } }, table },
         };
     }
 

@@ -8,7 +8,9 @@ using Avalonia.Controls.Documents;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.LogicalTree;
 using Avalonia.Media;
 
 namespace Rune.Avalonia;
@@ -69,8 +71,31 @@ public class DataTable : Control
     /// <summary>整行的色调（导入校验的错误行）：返回 info、success、warning、danger，其余不着色。</summary>
     public static readonly StyledProperty<Func<object, StatusTone?>?> RowToneProperty = AvaloniaProperty.Register<DataTable, Func<object, StatusTone?>?>(nameof(RowTone));
 
-    /// <summary>隐藏的列（列的 Key）。</summary>
-    public static readonly StyledProperty<IReadOnlyList<string>?> HiddenColumnsProperty = AvaloniaProperty.Register<DataTable, IReadOnlyList<string>?>(nameof(HiddenColumns));
+    /// <summary>隐藏的列（列的 Key，双向绑定：列菜单的"隐藏"写回）。</summary>
+    public static readonly StyledProperty<IReadOnlyList<string>?> HiddenColumnsProperty = AvaloniaProperty.Register<DataTable, IReadOnlyList<string>?>(nameof(HiddenColumns), defaultBindingMode: BindingMode.TwoWay);
+
+    /// <summary>多列排序：排序写在 <see cref="Sorts"/>（几列），点表头只按这一列，按住 Shift 点是追加一列。</summary>
+    public static readonly StyledProperty<bool> MultiSortProperty = AvaloniaProperty.Register<DataTable, bool>(nameof(MultiSort));
+
+    /// <summary>多列排序时的排序（双向绑定），前面的优先。</summary>
+    public static readonly StyledProperty<IReadOnlyList<SortState>> SortsProperty = AvaloniaProperty.Register<DataTable, IReadOnlyList<SortState>>(nameof(Sorts), [], defaultBindingMode: BindingMode.TwoWay);
+
+    /// <summary>表头筛选：各列选中的值（列的 Key → 值，关键字筛选时是 [关键字]；双向绑定）。</summary>
+    public static readonly StyledProperty<IReadOnlyDictionary<string, IReadOnlyList<string>>?> FiltersProperty =
+        AvaloniaProperty.Register<DataTable, IReadOnlyDictionary<string, IReadOnlyList<string>>?>(nameof(Filters), defaultBindingMode: BindingMode.TwoWay);
+
+    /// <summary>不在本地筛选：只写回 Filters，数据由调用方筛好。</summary>
+    public static readonly StyledProperty<bool> ManualFilterProperty = AvaloniaProperty.Register<DataTable, bool>(nameof(ManualFilter));
+
+    /// <summary>列菜单：每个列标题结尾有 ⋮（排序、固定在开头 / 结尾、前后移动、隐藏），写回 ColumnPins、ColumnOrder、HiddenColumns。</summary>
+    public static readonly StyledProperty<bool> ColumnMenuProperty = AvaloniaProperty.Register<DataTable, bool>(nameof(ColumnMenu));
+
+    /// <summary>列的顺序（列的 Key，没列到的按定义的顺序排在后面；双向绑定）。</summary>
+    public static readonly StyledProperty<IReadOnlyList<string>?> ColumnOrderProperty = AvaloniaProperty.Register<DataTable, IReadOnlyList<string>?>(nameof(ColumnOrder), defaultBindingMode: BindingMode.TwoWay);
+
+    /// <summary>列的固定（列的 Key → 固定在哪一侧，null 取消列定义里的固定；双向绑定）。</summary>
+    public static readonly StyledProperty<IReadOnlyDictionary<string, ColumnSticky?>?> ColumnPinsProperty =
+        AvaloniaProperty.Register<DataTable, IReadOnlyDictionary<string, ColumnSticky?>?>(nameof(ColumnPins), defaultBindingMode: BindingMode.TwoWay);
 
     /// <summary>调整过的列宽（列的 Key → 像素，双向绑定，可以存到本地设置里）。</summary>
     public static readonly StyledProperty<IReadOnlyDictionary<string, double>?> ColumnWidthsProperty =
@@ -149,6 +174,27 @@ public class DataTable : Control
     /// <summary>隐藏的列。</summary>
     public IReadOnlyList<string>? HiddenColumns { get => GetValue(HiddenColumnsProperty); set => SetValue(HiddenColumnsProperty, value); }
 
+    /// <summary>多列排序。</summary>
+    public bool MultiSort { get => GetValue(MultiSortProperty); set => SetValue(MultiSortProperty, value); }
+
+    /// <summary>多列排序时的排序。</summary>
+    public IReadOnlyList<SortState> Sorts { get => GetValue(SortsProperty); set => SetValue(SortsProperty, value); }
+
+    /// <summary>表头筛选。</summary>
+    public IReadOnlyDictionary<string, IReadOnlyList<string>>? Filters { get => GetValue(FiltersProperty); set => SetValue(FiltersProperty, value); }
+
+    /// <summary>不在本地筛选。</summary>
+    public bool ManualFilter { get => GetValue(ManualFilterProperty); set => SetValue(ManualFilterProperty, value); }
+
+    /// <summary>列菜单。</summary>
+    public bool ColumnMenu { get => GetValue(ColumnMenuProperty); set => SetValue(ColumnMenuProperty, value); }
+
+    /// <summary>列的顺序。</summary>
+    public IReadOnlyList<string>? ColumnOrder { get => GetValue(ColumnOrderProperty); set => SetValue(ColumnOrderProperty, value); }
+
+    /// <summary>列的固定。</summary>
+    public IReadOnlyDictionary<string, ColumnSticky?>? ColumnPins { get => GetValue(ColumnPinsProperty); set => SetValue(ColumnPinsProperty, value); }
+
     /// <summary>调整过的列宽。</summary>
     public IReadOnlyDictionary<string, double>? ColumnWidths { get => GetValue(ColumnWidthsProperty); set => SetValue(ColumnWidthsProperty, value); }
 
@@ -211,10 +257,12 @@ public class DataTable : Control
             Refresh();
         }
         else if (change.Property == ColumnsProperty || change.Property == SortProperty || change.Property == ManualSortProperty || change.Property == HiddenColumnsProperty
-                 || change.Property == Provider.LangProperty) Refresh();
+                 || change.Property == MultiSortProperty || change.Property == SortsProperty || change.Property == ManualFilterProperty
+                 || change.Property == ColumnOrderProperty || change.Property == ColumnPinsProperty || change.Property == Provider.LangProperty) Refresh();
+        else if (change.Property == FiltersProperty) Refresh(header: false);
         else if (change.Property == SelectedProperty || change.Property == RowToneProperty || change.Property == IsRowSelectableProperty) surface.SyncRows();
         else if (change.Property == SelectionModeProperty || change.Property == IsLoadingProperty || change.Property == EmptyProperty || change.Property == SummaryLabelProperty
-                 || change.Property == ResizableProperty || change.Property == DensityProperty || change.Property == StripedProperty || change.Property == GetKeyProperty) surface.Rebuild();
+                 || change.Property == ResizableProperty || change.Property == ColumnMenuProperty || change.Property == DensityProperty || change.Property == StripedProperty || change.Property == GetKeyProperty) surface.Rebuild();
         if (change.Property == VariantProperty || change.Property == DensityProperty) SyncFrame();
         // 只是宽度变了：重排，不重建（拖动中的手柄要留着）
         if (change.Property == ColumnWidthsProperty) surface.Relayout();
@@ -231,14 +279,87 @@ public class DataTable : Control
     }
 
     /// <summary>数据、列、排序变了：重算显示的列与行，表格重建。</summary>
-    void Refresh()
+    void Refresh(bool header = true)
     {
         source = ItemsSource?.Cast<object>().ToList() ?? [];
         var hidden = HiddenColumns ?? [];
-        Shown = [.. Columns.Where(column => !hidden.Contains(column.Key))];
+        Arranged = TableColumns.Arrange(Columns, ColumnOrder, ColumnPins);
+        Shown = [.. Arranged.Where(column => !hidden.Contains(column.Key))];
         Types = [.. Shown.Select(column => TableColumns.TypeOf(column, source))];
-        View = ManualSort || Sort is null ? source : TableColumns.SortRows(source, Columns, [Sort], Lang.Code);
-        surface.Rebuild();
+        // 筛选的选项看全部行（不是筛过的）
+        FilterOptionsOf = Columns.Where(column => column.Filter is not null).ToDictionary(column => column.Key, column => TableColumns.FilterOptions(column, source, Lang.Code));
+        var kept = ManualFilter ? source : TableColumns.FilterRows(source, Columns, Filters, Lang.Code);
+        View = ManualSort ? kept : TableColumns.SortRows(kept, Columns, ActiveSorts, Lang.Code);
+        if (header) surface.Rebuild();
+        else surface.RebuildBody();
+    }
+
+    /// <summary>当前的排序：多列排序时是 Sorts，否则是 Sort（一个或零个）。</summary>
+    internal IReadOnlyList<SortState> ActiveSorts => MultiSort ? Sorts : Sort is { } one ? [one] : [];
+
+    /// <summary>按顺序与固定排好的全部列（含隐藏的）。</summary>
+    internal IReadOnlyList<DataTableColumn> Arranged { get; private set; } = [];
+
+    /// <summary>各列表头筛选的选项。</summary>
+    internal IReadOnlyDictionary<string, IReadOnlyList<ColumnFilterOption>> FilterOptionsOf { get; private set; } = new Dictionary<string, IReadOnlyList<ColumnFilterOption>>();
+
+    /// <summary>点了列标题：多列排序时按住 Shift 是追加，否则只按这一列。</summary>
+    internal void SortClicked(string key, bool additive)
+    {
+        if (MultiSort) SetCurrentValue(SortsProperty, TableColumns.NextSorts(Sorts, key, additive));
+        else SetCurrentValue(SortProperty, TableColumns.NextSort(Sort, key));
+    }
+
+    /// <summary>列菜单里的排序：多列排序时这一列排到最前。</summary>
+    void SetSort(string key, SortDirection? direction)
+    {
+        if (!MultiSort) SetCurrentValue(SortProperty, direction is { } one ? new SortState(key, one) : null);
+        else
+        {
+            var rest = Sorts.Where(item => item.Key != key);
+            SetCurrentValue(SortsProperty, direction is { } first ? [new SortState(key, first), .. rest] : rest.ToList());
+        }
+    }
+
+    /// <summary>改了一列的表头筛选。</summary>
+    internal void SetFilter(string key, IReadOnlyList<string> values)
+    {
+        var next = new Dictionary<string, IReadOnlyList<string>>(Filters ?? new Dictionary<string, IReadOnlyList<string>>()) { [key] = values };
+        SetCurrentValue(FiltersProperty, next);
+    }
+
+    /// <summary>往前、往后移一列：与相邻的可见列交换位置，写回 ColumnOrder。</summary>
+    void Move(string key, int step)
+    {
+        var hidden = (HiddenColumns ?? []).ToHashSet();
+        var keys = Arranged.Select(column => column.Key).ToList();
+        var visible = keys.Where(item => !hidden.Contains(item)).ToList();
+        var at = visible.IndexOf(key) + step;
+        if (at < 0 || at >= visible.Count) return;
+        var neighbour = visible[at];
+        var (from, to) = (keys.IndexOf(key), keys.IndexOf(neighbour));
+        (keys[from], keys[to]) = (neighbour, key);
+        SetCurrentValue(ColumnOrderProperty, keys);
+    }
+
+    /// <summary>列菜单选了一项：排序、移动、隐藏、固定（固定没写宽度的列时记下它现在的宽度：固定列的偏移按列宽累加）。</summary>
+    internal void ColumnAction(string key, ColumnMenuAction action, double width)
+    {
+        switch (action)
+        {
+            case ColumnMenuAction.SortAscending: SetSort(key, SortDirection.Ascending); break;
+            case ColumnMenuAction.SortDescending: SetSort(key, SortDirection.Descending); break;
+            case ColumnMenuAction.Unsort: SetSort(key, null); break;
+            case ColumnMenuAction.MoveBackward: Move(key, -1); break;
+            case ColumnMenuAction.MoveForward: Move(key, 1); break;
+            case ColumnMenuAction.Hide: SetCurrentValue(HiddenColumnsProperty, [.. HiddenColumns ?? [], key]); break;
+            default:
+                ColumnSticky? side = action == ColumnMenuAction.PinStart ? ColumnSticky.Start : action == ColumnMenuAction.PinEnd ? ColumnSticky.End : null;
+                SetCurrentValue(ColumnPinsProperty, new Dictionary<string, ColumnSticky?>(ColumnPins ?? new Dictionary<string, ColumnSticky?>()) { [key] = side });
+                var column = Columns.FirstOrDefault(item => item.Key == key);
+                if (side is not null && column?.Width is null && ColumnWidths?.ContainsKey(key) != true && width > 0) ResizeColumn(key, width);
+                break;
+        }
     }
 
     /// <summary>外框：surface 有 border 边框、lg 圆角、surface 底；ghost 是页面底色。</summary>
@@ -262,8 +383,6 @@ public class DataTable : Control
         SetCurrentValue(ColumnWidthsProperty, next);
     }
 
-    /// <summary>点了列标题：下一个排序，写回 Sort。</summary>
-    internal void ToggleSort(string key) => SetCurrentValue(SortProperty, TableColumns.NextSort(Sort, key));
 
     /// <summary>点了一行的选择框。</summary>
     internal void ToggleRow(object row)
@@ -387,13 +506,24 @@ internal sealed class DataTableSurface : Control
     /// <summary>列、数据、外观变了：表头、合计、骨架、空状态与建好的行都重建。</summary>
     internal void Rebuild()
     {
-        foreach (var child in VisualChildren.OfType<Control>().ToList()) Remove(child);
+        if (header is not null) Remove(header);
+        header = new DataTableRowView(this, DataTableRowKind.Header) { ZIndex = 2 };
+        Add(header);
+        RebuildBody();
+    }
+
+    /// <summary>
+    /// 只重建表体（行、骨架、空状态）与合计：表头筛选变了时用。表头不动——重建会换掉筛选按钮，正在勾选的弹出层就关了（上游是就地更新）；
+    /// 筛选按钮的选中值就地改。
+    /// </summary>
+    internal void RebuildBody()
+    {
+        foreach (var child in VisualChildren.OfType<Control>().Where(child => child != header).ToList()) Remove(child);
         realized.Clear();
         pool.Clear();
         skeletons.Clear();
         emptyView = null;
-        header = new DataTableRowView(this, DataTableRowKind.Header) { ZIndex = 2 };
-        Add(header);
+        header?.SyncFilters();
         summary = owner.Shown.Any(column => column.Summary is not null) ? new DataTableRowView(this, DataTableRowKind.Summary) { ZIndex = 2 } : null;
         if (summary is not null) Add(summary);
         if (owner.IsLoading)
@@ -684,7 +814,7 @@ internal sealed class DataTableRowView : Control
             var align = ColumnTable.AlignOf(column, owner.Types, position);
             TableCell cell = Kind switch
             {
-                DataTableRowKind.Header => HeaderCell(column, align),
+                DataTableRowKind.Header => HeaderCell(column, align, position),
                 DataTableRowKind.Summary => new TableCell { Name = DataTableParts.SummaryCell, Align = align, Nowrap = true, Content = SummaryContent(column, position, lang) },
                 DataTableRowKind.Skeleton => new TableCell { Name = DataTableParts.Cell, Content = new Skeleton { HorizontalAlignment = HorizontalAlignment.Left } },
                 _ => new TableCell
@@ -713,15 +843,65 @@ internal sealed class DataTableRowView : Control
         InvalidateMeasure();
     }
 
-    TableHeaderCell HeaderCell(DataTableColumn column, TableAlign align)
+    TableHeaderCell HeaderCell(DataTableColumn column, TableAlign align, int position)
     {
+        var owner = Owner;
         var cell = new TableHeaderCell { Name = DataTableParts.HeaderCell, Align = align, Scope = "col" };
-        var sort = Owner.Sort?.Key == column.Key ? Owner.Sort.Direction : (SortDirection?)null;
-        if (!column.Sortable)
+        var main = column.Sortable ? SortButton(cell, column, align) : column.Header;
+        var filter = column.Filter is { } spec ? FilterButton(column, spec) : null;
+        var menu = owner.ColumnMenu ? MenuButton(column, position) : null;
+        if (filter is null && menu is null)
         {
-            cell.Content = column.Header;
+            cell.Content = main;
             return cell;
         }
+        // 有筛选、列菜单按钮的列标题：文字（或排序按钮）占满剩下的宽度，按钮在结尾
+        var content = new Flex { Align = FlexAlign.Center, Gap = Space.Xs };
+        var head = main as Control ?? new TextBlock { Text = main as string, TextTrimming = TextTrimming.CharacterEllipsis };
+        if (align == TableAlign.End) head.HorizontalAlignment = HorizontalAlignment.Right;
+        Flex.SetGrow(head, true);
+        content.Children.Add(head);
+        if (filter is not null) content.Children.Add(filter);
+        if (menu is not null) content.Children.Add(menu);
+        cell.Content = content;
+        cell.HorizontalContentAlignment = HorizontalAlignment.Stretch;
+        return cell;
+    }
+
+    ColumnFilterButton FilterButton(DataTableColumn column, ColumnFilter spec)
+    {
+        var owner = Owner;
+        var button = new ColumnFilterButton
+        {
+            Name = DataTableParts.FilterButton, Label = TableColumns.Label(column), IsKeyword = spec.IsKeyword, Tag = column.Key,
+            Options = owner.FilterOptionsOf.TryGetValue(column.Key, out var options) ? options : [],
+            Values = owner.Filters?.TryGetValue(column.Key, out var values) == true ? values : [],
+        };
+        button.ValuesChanged += (_, next) => owner.SetFilter(column.Key, next);
+        return button;
+    }
+
+    ColumnMenuButton MenuButton(DataTableColumn column, int position)
+    {
+        var owner = Owner;
+        var shown = owner.Shown;
+        var menu = new ColumnMenuButton
+        {
+            Name = DataTableParts.ColumnMenuButton, Label = TableColumns.Label(column), Sortable = column.Sortable,
+            Sorted = owner.ActiveSorts.FirstOrDefault(item => item.Key == column.Key)?.Direction, Pinned = column.Sticky,
+            CanMoveBackward = position > 0, CanMoveForward = position < shown.Count - 1, CanHide = shown.Count > 1,
+        };
+        menu.ActionRequested += (_, action) => owner.ColumnAction(column.Key, action, surface.Widths.Count > position ? surface.Widths[position] : 0);
+        return menu;
+    }
+
+    /// <summary>可排序列标题里的按钮：文字、方向箭头（排序中是强调色）、多列排序时的次序。</summary>
+    ButtonBase SortButton(TableHeaderCell cell, DataTableColumn column, TableAlign align)
+    {
+        var owner = Owner;
+        var sorts = owner.ActiveSorts;
+        var priority = sorts.ToList().FindIndex(item => item.Key == column.Key);
+        var sort = priority >= 0 ? sorts[priority].Direction : (SortDirection?)null;
         var icon = new Icon
         {
             Name = DataTableParts.SortIcon,
@@ -734,12 +914,29 @@ internal sealed class DataTableRowView : Control
             Content = new Flex { Align = FlexAlign.Center, Gap = Space.Xs, Children = { new TextBlock { Text = column.Header as string, TextTrimming = TextTrimming.CharacterEllipsis }, icon } },
             HorizontalAlignment = align == TableAlign.End ? HorizontalAlignment.Right : align == TableAlign.Center ? HorizontalAlignment.Center : HorizontalAlignment.Left,
         };
-        if (column.Header is not string) ((Flex)button.Content).Children[0] = new ContentControl { Content = column.Header };
-        button.Click += (_, _) => Owner.ToggleSort(column.Key);
-        cell.Content = button;
-        // 上游 th 的 aria-sort：读屏念出排序的方向
-        AutomationProperties.SetItemStatus(cell, sort switch { SortDirection.Ascending => "ascending", SortDirection.Descending => "descending", _ => "none" });
-        return cell;
+        var parts = (Flex)button.Content;
+        if (column.Header is not string) parts.Children[0] = new ContentControl { Content = column.Header };
+        var lang = owner.Lang;
+        if (sorts.Count > 1 && priority >= 0)
+        {
+            // 多列排序时的次序（1、2…）：小号数字跟在箭头后面；读屏另外念出"第几排序"
+            var number = new TextBlock { Name = DataTableParts.SortPriority, Text = (priority + 1).ToString(System.Globalization.CultureInfo.InvariantCulture), FontSize = 0.75 * Em };
+            number[!TextBlock.ForegroundProperty] = this.GetResourceObservable(ThemeKeys.Brush.AccentText).ToBinding();
+            parts.Children.Add(number);
+            if (priority > 0) AutomationProperties.SetHelpText(cell, lang.TableSortPriority(priority + 1, sort == SortDirection.Ascending ? lang.TableSortAscending : lang.TableSortDescending));
+        }
+        // 按住 Shift 点是追加一列（多列排序）：点击事件不带修饰键，按下时记住
+        var additive = false;
+        button.AddHandler(PointerPressedEvent, (_, e) => additive = e.KeyModifiers.HasFlag(KeyModifiers.Shift), RoutingStrategies.Tunnel, handledEventsToo: true);
+        button.AddHandler(KeyDownEvent, (_, e) => additive = e.KeyModifiers.HasFlag(KeyModifiers.Shift), RoutingStrategies.Tunnel, handledEventsToo: true);
+        button.Click += (_, _) =>
+        {
+            owner.SortClicked(column.Key, additive);
+            additive = false;
+        };
+        // 上游 th 的 aria-sort（只在第一排序列上）：读屏念出排序的方向
+        AutomationProperties.SetItemStatus(cell, priority == 0 ? sort == SortDirection.Ascending ? "ascending" : "descending" : "none");
+        return button;
     }
 
     object? SummaryContent(DataTableColumn column, int position, Lang lang) => column.Summary switch
@@ -783,6 +980,17 @@ internal sealed class DataTableRowView : Control
             host.Children.Add(choice);
         }
         return host;
+    }
+
+    /// <summary>表头筛选按钮的选中值跟上表格的 Filters。</summary>
+    public void SyncFilters()
+    {
+        var filters = Owner.Filters;
+        foreach (var button in this.GetLogicalDescendants().OfType<ColumnFilterButton>())
+        {
+            var key = (string)button.Tag!;
+            button.Values = filters?.TryGetValue(key, out var values) == true ? values : [];
+        }
     }
 
     /// <summary>选择框的状态与这一行是否已选（整行底色）。</summary>
@@ -948,6 +1156,15 @@ public static class DataTableParts
 
     /// <summary>调整列宽的手柄（ColumnResizer）。</summary>
     public const string Resizer = "PART_Resizer";
+
+    /// <summary>列标题里的表头筛选按钮（ColumnFilterButton）。</summary>
+    public const string FilterButton = "PART_FilterButton";
+
+    /// <summary>列标题里的列菜单按钮（ColumnMenuButton）。</summary>
+    public const string ColumnMenuButton = "PART_ColumnMenuButton";
+
+    /// <summary>多列排序时的次序数字。</summary>
+    public const string SortPriority = "PART_SortPriority";
 
     /// <summary>可排序列标题里的按钮。</summary>
     public const string SortButton = "PART_SortButton";
