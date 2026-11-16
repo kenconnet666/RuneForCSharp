@@ -1704,8 +1704,12 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   拖着的行半透明、浮在别的行上面（上游是浮起的阴影）。
 - 行高与上游的差：状态列（StatusBadge）的行上游约 36.7px、我们 36px——上游的徽标是行内元素，按基线放进行框，行框比一行文字高出一点；
   editable、details、reorder 的像素差多半是它累加的。
-- 还没做：上游按窗口剩余高度铺 6–50 行骨架、滚动加载的骨架接在末尾、列虚拟化、主从视图的 activeKey、corrections 示例（单击就改、看得到改了什么）。
-- 像素对照：orders 0.17%、states 0.00%、single 0.58%（上游 205 高、我们 204）、columns 2.75%（表头矮约 1px、数字的字形）、editable 3.83%（行比上游矮约 0.5px，四行累加；合计的"合计"上游是粗体）、details 4.28%（同样是行高差，表高 323 对 327）、changes 0.49%、reorder 4.69%（状态列的行高差）。
+- 数据修正（第九轮）：孪生文件 FieldComparison 加了 DiffRows（上游 diffRows：按 key 比较，新增、修改带 ChangedFields、删除的排在最后；字段是行的公开属性），
+  RowChange、RowDiff；字段相等改成按内容比（列表也算，不只数组）。EditTrigger=Click 时可编辑的格是文字光标。corrections 示例：RowTone 着色、ValueChange 写原值。
+- 顺手修的：TableCell 的 Align 默认是 start，但只在 Align 改了时才设内容的对齐，没写时 ContentControl 默认拉满——按钮这类内容被拉宽、居中。
+  主题里补上默认的 HorizontalContentAlignment=Left（静态表格的像素没变）。
+- 还没做：上游按窗口剩余高度铺 6–50 行骨架、滚动加载的骨架接在末尾、列虚拟化、主从视图的 activeKey。
+- 像素对照：orders 0.17%、states 0.00%、single 0.58%（上游 205 高、我们 204）、columns 2.75%（表头矮约 1px、数字的字形）、editable 3.83%（行比上游矮约 0.5px，四行累加；合计的"合计"上游是粗体）、details 4.28%（同样是行高差，表高 323 对 327）、changes 0.49%、reorder 4.69%（状态列的行高差）、corrections 1.85%（行高差）。
 
 
 ### ColumnTable 与列定义（2026-11-16，仅 Avalonia）
