@@ -1677,9 +1677,14 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 列宽调整（第三轮）：ColumnResizer 是 ResizeHandle 的子类（上游也是包一层），读屏名称取语言包，最小宽度默认 64；ResizeHandle 原来改父元素的 Width，
   它内部的 Override 改成读写表格的列宽，写回 ColumnWidths（新字典）。列宽变了只重新量、重新排各行，不重建（拖动中的手柄要留着）。
   各列都写了宽度、按比例放大时，调整的是放大前的宽度（同浏览器）。
-- 还没做：上游按窗口剩余高度铺 6–50 行骨架、滚动加载的骨架接在末尾、表头筛选与列菜单、多列排序的界面、就地编辑、行拖动、详情行、分组表头、列虚拟化、
-  主从视图的 activeKey。
-- 像素对照：orders 0.17%、states 0.00%、single 0.58%（上游 205 高、我们 204）。
+- 表头筛选、多列排序与列菜单（第四轮）：ColumnFilterButton（漏斗 + Popover：勾选的值多于 8 个时可以搜索；关键字是 SearchField，停手 300ms、回车、清空生效）、
+  ColumnMenuButton（⋮ + Menu：排序、固定、移动、隐藏，发 ActionRequested）是公共控件，状态都在 DataTable：Filters、Sorts（MultiSort）、ColumnOrder、ColumnPins、HiddenColumns 都双向绑定。
+  先筛（ManualFilter 时不筛）再排；筛选的选项按全部行算。固定没写宽度的列时记下它现在的宽度（固定列的偏移按列宽累加）。
+  Shift 点追加排序：点击事件不带修饰键，排序按钮在隧道阶段的按下（指针、键盘）时记住 Shift。第一排序列的格 ItemStatus 是方向（上游 aria-sort），其余排序列的 HelpText 念"第 2 排序，升序"。
+- 筛选变了只重建表体与合计，表头不重建、筛选按钮就地改选中值：重建会换掉正在勾选的筛选按钮，弹出层就关了（上游 Vue 是就地更新）。
+  列标题上的两个小按钮是 xs 的 IconButton，上下 −0.25em 外边距，不撑高表头（同上游）。
+- 还没做：上游按窗口剩余高度铺 6–50 行骨架、滚动加载的骨架接在末尾、就地编辑、行拖动、详情行、分组表头、列虚拟化、主从视图的 activeKey。
+- 像素对照：orders 0.17%、states 0.00%、single 0.58%（上游 205 高、我们 204）、columns 2.75%（表头矮约 1px、数字的字形）。
 
 
 ### ColumnTable 与列定义（2026-11-16，仅 Avalonia）
