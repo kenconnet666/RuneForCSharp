@@ -44,6 +44,8 @@ export const COMPONENT_PROP_RENAMES = {
   Textarea: { _value: 'Text' },
   // 数据是平台的 ItemsSource；点选是事件
   Listbox: { items: 'ItemsSource', onPick: 'Picked' },
+  // 多选的值同 Listbox 叫 Values
+  Transfer: { items: 'ItemsSource', _value: 'Values' },
   // Text 是 TextBlock 自己的属性
   CodeText: { text: 'Source' },
   // Measure 是布局的方法
