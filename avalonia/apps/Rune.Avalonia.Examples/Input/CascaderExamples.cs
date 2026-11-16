@@ -41,9 +41,17 @@ static class CascaderExamples
             address.ShowAllLevels = invoice.ShowAllLevels = allLevels.IsChecked;
         };
         var note = new Small { Tone = TextTone.Muted };
-        void Update() => note.Text = address.Values is { Count: > 0 } path
-            ? $"value：[{string.Join(",", path.Select(code => $"\"{code}\""))}]（{string.Join(" ", Area.Names(path))}）"
-            : "value：null";
+        void Update()
+        {
+            if (address.Values is not { Count: > 0 } path)
+            {
+                note.Text = "value：null";
+                return;
+            }
+            var codes = string.Join(',', path.Select(code => '"' + code + '"'));
+            var names = string.Join(' ', Area.Names(path));
+            note.Text = $"value：[{codes}]（{names}）";
+        }
         address.PropertyChanged += (_, e) =>
         {
             if (e.Property == SelectBase.ValuesProperty) Update();
