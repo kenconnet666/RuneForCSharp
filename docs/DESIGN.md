@@ -1711,8 +1711,13 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 列虚拟化（第十轮）：VirtualColumns 时按横向偏移用 ColumnSkips 算出不建的列（前后各多 3 列，两端的固定列总在），没写宽度的列按 150px；
   换了一批时表头与建好的行重建各格。没建的列在行里是一个不显示、不挂上去的占位（Control），各格的下标仍对着列（列宽、固定列、分组表头的计算都按下标）；
   组里的列都没建时组标题也不建。上游用一格 colspan 占位、各格带 aria-colindex，这里的格本来就按列宽排，不用占位格。
-- 还没做：上游按窗口剩余高度铺 6–50 行骨架、滚动加载的骨架接在末尾（RangeChange）、主从视图的 activeKey 与 RowClick；台账、定位、主从视图、导入、滚动加载的示例。
-- 像素对照：orders 0.17%、states 0.00%、single 0.58%（上游 205 高、我们 204）、columns 2.75%（表头矮约 1px、数字的字形）、editable 3.83%（行比上游矮约 0.5px，四行累加；合计的"合计"上游是粗体）、details 4.28%（同样是行高差，表高 323 对 327）、changes 0.49%、reorder 4.69%（状态列的行高差）、corrections 1.85%（行高差）、wide 0.01%。
+- 第十一轮：ActiveKey（正在看的一行：accentSoft 底、起始边 3px 的 accent 竖线、ItemStatus "current"）、RowClicked 事件（上游 onRowClick：订阅了时整行手形指针，
+  按下与抬起都在这一行上才算，点在行里的按钮、选择框上不算）、ScrollToRow 的对齐（VirtualScroll.OffsetFor，可以居中）、RangeChanged 事件（上游 onRangeChange：
+  可见行的范围变了，排到量完之后再发；订阅了时已有数据还在加载，表体不换成骨架，3 行骨架接在末尾）。
+  行高不再一样：每一行量出来的高度按 key 记下（内容换行的行），没量过的按第一行的高度估计，各行的位置按高度累加（同详情行）。
+- 顺手修的：TableCell 写了 Nowrap=false（要换行）时不换行——属性写成默认值不会触发变化，ApplyRole 又跳过写了 Nowrap 的格。改成按写了的值设（静态表格的像素没变）。
+- 还没做：上游按窗口剩余高度铺 6–50 行骨架、estimateRowHeight（我们按量出的行高排，不需要估计，属性不移植）；台账、导入的示例（导入在 DataImport 一起做），组织架构在 TreeDataTable。
+- 像素对照：orders 0.17%、states 0.00%、single 0.58%（上游 205 高、我们 204）、columns 2.75%（表头矮约 1px、数字的字形）、editable 3.83%（行比上游矮约 0.5px，四行累加；合计的"合计"上游是粗体）、details 4.28%（同样是行高差，表高 323 对 327）、changes 0.49%、reorder 4.69%（状态列的行高差）、corrections 1.85%（行高差）、wide 0.01%、master-detail 0.14%、infinite 0.01%、locate 3.29%（状态列的行高差）。
 
 
 ### ColumnTable 与列定义（2026-11-16，仅 Avalonia）
