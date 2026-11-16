@@ -187,6 +187,7 @@ export const COMPONENT_PROP_RENAMES = {
   ColumnTable: { rows: 'ItemsSource', cellSpan: 'GetCellSpan' },
   // 数据叫 ItemsSource（同 ColumnTable）；已选行的 key 是列表，同 Tree 的 Selected
   DataTable: { rows: 'ItemsSource', _selected: 'Selected', onReorder: 'Reordered', onRowClick: 'RowClicked', onRangeChange: 'RangeChanged' },
+  QueryTable: { _selected: 'Selected' },
   // TreeDataTable 是 DataTable 的子类：同名的属性一样改名，rows 是第一层
   TreeDataTable: {
     rows: 'ItemsSource', _expanded: 'Expanded', _selected: 'Selected', onReorder: 'Reordered', onRowClick: 'RowClicked', onRangeChange: 'RangeChanged',
@@ -328,6 +329,9 @@ const DATA_TABLE_NOT_PORTED = {
 
 export const PROPS_NOT_PORTED = {
   DataTable: DATA_TABLE_NOT_PORTED,
+  QueryTable: {
+    persistKey: '桌面没有 localStorage：列设置与行高是 Table 的 HiddenColumns、ColumnOrder、ColumnPins、ColumnWidths、Density，要记住时调用方存进自己的设置、下次设回去',
+  },
   TreeDataTable: { ...DATA_TABLE_NOT_PORTED, propsToggle: '展开按钮是部件 PART_Toggle（TreeDataTableParts）：外观在部件样式里，按名字写的样式盖得过；展开状态、加载中与点击由表格管' },
   ColumnFilterButton: {
     propsTrigger: '漏斗按钮是部件 ColumnHeaderActionsParts.Trigger（IconButton）：外观按部件名写样式；选项的 \'text\' 是 IsKeyword',
