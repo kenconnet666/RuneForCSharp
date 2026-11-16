@@ -331,6 +331,9 @@ const DATA_TABLE_NOT_PORTED = {
 
 export const PROPS_NOT_PORTED = {
   DataTable: DATA_TABLE_NOT_PORTED,
+  SchemaView: {
+    propsDescriptions: '每一块是 Descriptions 部件（SchemaViewParts.Section）：Bordered、Size 等按部件名写样式；栏数是 SchemaView 的 Columns',
+  },
   QueryTable: {
     persistKey: '桌面没有 localStorage：列设置与行高是 Table 的 HiddenColumns、ColumnOrder、ColumnPins、ColumnWidths、Density，要记住时调用方存进自己的设置、下次设回去',
   },

@@ -27,6 +27,9 @@ public class Provider : Decorator
     /// </summary>
     public static readonly AttachedProperty<Func<string, bool>?> PermissionsProperty = AvaloniaProperty.RegisterAttached<Provider, AvaloniaObject, Func<string, bool>?>("Permissions", inherits: true);
 
+    /// <summary>表单的数据来源（上游 createUi 的 formSources）：选择题的字典与远程搜索、人员与部门、上传；SchemaForm、SchemaView 按名字引用，自己的 Sources 盖在它上面。往下继承。</summary>
+    public static readonly AttachedProperty<FormSources?> FormSourcesProperty = AvaloniaProperty.RegisterAttached<Provider, AvaloniaObject, FormSources?>("FormSources", inherits: true);
+
     /// <summary>这片区域的语言包。</summary>
     public Lang? Lang { get => GetValue(LangProperty); set => SetValue(LangProperty, value); }
 
@@ -35,6 +38,15 @@ public class Provider : Decorator
 
     /// <summary>这片区域的权限判断。</summary>
     public Func<string, bool>? Permissions { get => GetValue(PermissionsProperty); set => SetValue(PermissionsProperty, value); }
+
+    /// <summary>表单的数据来源。</summary>
+    public FormSources? FormSources { get => GetValue(FormSourcesProperty); set => SetValue(FormSourcesProperty, value); }
+
+    /// <summary>读外层给的表单数据来源。</summary>
+    public static FormSources? GetFormSources(AvaloniaObject target) => target.GetValue(FormSourcesProperty);
+
+    /// <summary>给这一层与里面设表单数据来源。</summary>
+    public static void SetFormSources(AvaloniaObject target, FormSources? value) => target.SetValue(FormSourcesProperty, value);
 
     /// <summary>某个控件所在作用域的权限判断；没接入时 null（一律放行）。</summary>
     /// <param name="target">控件。</param>
