@@ -8,9 +8,9 @@ static class DocsKitExamples
 {
     public static Example[] All =>
     [
-        new("DocsKit", "handwritten", "手写的属性表", "给自己的组件手写 API 数据：名称、种类、类型、必填、默认值、可绑定、说明，档位类的列出每个可选值。外观属性同 Table：Density 默认 compact，这里加了斑马纹。", Handwritten),
-        new("DocsKit", "group", "一组代码", "CodeGroup 用标签页切换几段代码；两组绑同一个值：在一组里选了包管理器，另一组跟着切换。", Group),
-        new("DocsKit", "swatches", "色块", "ColorSwatch 列出主题的颜色：颜色绑主题的画刷资源（DynamicResource），换主题时色块与取值跟着变；半透明的颜色（surfaceTranslucent）下面垫棋盘格。", Swatches),
+        new("DocsKit", "props-table", "手写的属性表", "给自己的组件手写 API 数据：名称、种类、类型、必填、默认值、可绑定、说明，档位类的列出每个可选值。外观属性同 Table：Density 默认 compact，这里加了斑马纹。", Handwritten),
+        new("DocsKit", "code-group", "一组代码", "CodeGroup 用标签页切换几段代码；两组绑同一个值：在一组里选了包管理器，另一组跟着切换。", Group),
+        new("DocsKit", "color-swatch", "色块", "ColorSwatch 列出主题的颜色：颜色绑主题的画刷资源（DynamicResource），换主题时色块与取值跟着变；半透明的颜色（surfaceTranslucent）下面垫棋盘格。", Swatches),
     ];
 
     static Control Handwritten() => new PropsTable
