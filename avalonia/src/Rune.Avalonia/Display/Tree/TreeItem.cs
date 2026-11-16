@@ -25,7 +25,7 @@ public sealed class TreeItem : Control
     readonly Panel toggle = new() { Name = TreeParts.Toggle, Background = Brushes.Transparent };
     readonly Icon chevron = new() { Data = Lucide.ChevronRight, RenderTransformOrigin = RelativePoint.Center, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
     readonly Spinner spinner = new() { HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
-    readonly Border checkbox = new() { Name = TreeParts.Checkbox, BorderThickness = new Thickness(1) };
+    readonly Border checkbox = new() { Name = TreeParts.Checkbox };
     readonly Icon mark = new();
     readonly Icon icon = new();
     readonly TextBlock label = new() { Name = TreeParts.Label, TextTrimming = TextTrimming.CharacterEllipsis, VerticalAlignment = VerticalAlignment.Center };
@@ -80,7 +80,8 @@ public sealed class TreeItem : Control
         spinner.IsVisible = state.Loading;
         // 勾选框画成 Checkbox 的样子：选中、半选时 accent 实底、accentContrast 的对勾或横线
         checkbox.IsVisible = owner.Checkable;
-        checkbox.Width = checkbox.Height = em;
+        checkbox.Width = checkbox.Height = 1.125 * em;
+        checkbox.BorderThickness = new Thickness(this.Resource<double>(ThemeKeys.BorderWidth.Sm));
         checkbox.CornerRadius = new CornerRadius(this.Resource<double>(ThemeKeys.Radius.Sm) * em);
         checkbox.Margin = new Thickness(0, 0, Space(ThemeKeys.Space.Xs), 0);
         var marked = state.Checked != CheckState.Unchecked;
@@ -103,7 +104,8 @@ public sealed class TreeItem : Control
         layout.Spacing = Space(ThemeKeys.Space.Xs);
         root.Padding = new Thickness(Space(ThemeKeys.Space.Xs), Space(ThemeKeys.Space.Xs), Space(ThemeKeys.Space.Sm), Space(ThemeKeys.Space.Xs));
         root.CornerRadius = new CornerRadius(this.Resource<double>(ThemeKeys.Radius.Sm) * em);
-        root.MinHeight = Math.Max(ControlHeight.Of(em, this.Resource<double>(ThemeKeys.Size.Control)), this.Resource<double>(ThemeKeys.Size.MinTarget));
+        // 树比列表行紧凑：只保底 24px 的点击区域（TS 的 treeStyles.item 盖掉了列表行的控件高度）
+        root.MinHeight = this.Resource<double>(ThemeKeys.Size.MinTarget);
         // 行与行之间上下各 1 像素
         Margin = new Thickness(0, 1);
         Paint();

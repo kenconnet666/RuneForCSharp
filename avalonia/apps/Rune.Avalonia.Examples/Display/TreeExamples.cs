@@ -63,7 +63,7 @@ static class TreeExamples
             Expanded = ["/src", "/src/components"],
             SelectionMode = SelectionMode.Single,
             Selected = ["/src/components/Button.tsx"],
-            MaxHeight = 17 * 14,
+            MaxHeight = 17 * 16,
         }, "项目文件");
         void Sync() => note.Text = $"选中：{(tree.Selected.Count > 0 ? tree.Selected[0] : "无")}";
         tree.PropertyChanged += (_, e) => { if (e.Property == Tree.SelectedProperty) Sync(); };
@@ -99,7 +99,7 @@ static class TreeExamples
             Expanded = ["intro", "process", "quality"],
             // 附录放在第一层，不放进别的章节里，也不接收子节点
             CanDrop = (node, target) => ((Section)node).Appendix ? target.Parent is null : target.Parent != "appendix",
-            MaxHeight = 18 * 14,
+            MaxHeight = 18 * 16,
         }, "手册目录");
         tree.Moved += (_, e) =>
         {
@@ -137,7 +137,7 @@ static class TreeExamples
             Expanded = ["east", "zj"],
             Checkable = true,
             Checked = ["sh", "hz", "nb"],
-            MaxHeight = 17 * 14,
+            MaxHeight = 17 * 16,
         }, "配送范围");
         void Sync() => note.Text = $"已勾选 {tree.Checked.Count} 个节点";
         tree.PropertyChanged += (_, e) => { if (e.Property == Tree.CheckedProperty) Sync(); };
@@ -201,7 +201,7 @@ static class TreeExamples
                 Align = FlexAlign.Center, Gap = Space.Xs,
                 Children = { new TextBlock { Text = department.Name }, new Badge { Size = TextSize.Sm, Variant = StatusVariant.Soft, Tone = StatusTone.Neutral, Content = $"{department.People} 人" } },
             }),
-            MaxHeight = 16 * 14,
+            MaxHeight = 16 * 16,
         }, "组织架构");
         tree.PropertyChanged += (_, e) =>
         {
