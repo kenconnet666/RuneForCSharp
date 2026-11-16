@@ -1,4 +1,3 @@
-using System.Globalization;
 using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Controls;
@@ -12,7 +11,7 @@ namespace Rune.Avalonia;
 /// &lt;rune:ColorSwatch Color="#3e63dd" Label="品牌色" /&gt;
 /// &lt;rune:ColorSwatch Color="{DynamicResource Rune.Brush.Accent}" Label="accent" /&gt;   &lt;!-- 主题 token：换主题时取值跟着变 --&gt;
 /// </code>
-/// 取值不写时显示颜色本身（#rrggbb，半透明时 #rrggbbaa）；<see cref="ShowValue"/> 为 false 时不显示。
+/// 取值不写时显示颜色本身（#rrggbb，半透明时 rgba(r, g, b, a)，同上游读出的 token 值）；<see cref="ShowValue"/> 为 false 时不显示。
 /// 半透明的颜色（如 surfaceTranslucent）下面垫棋盘格，看得出透明度。色块是装饰（读屏跳过），名称与取值是文字。部件：<see cref="ColorSwatchParts"/>。
 /// </summary>
 public class ColorSwatch : Control
@@ -30,7 +29,8 @@ public class ColorSwatch : Control
     public static readonly StyledProperty<bool> ShowValueProperty = AvaloniaProperty.Register<ColorSwatch, bool>(nameof(ShowValue), true);
 
     readonly Flex root = new() { Direction = FlexDirection.Column, Gap = Space.Xs, Align = FlexAlign.Stretch };
-    readonly SwatchView swatch = new() { Name = ColorSwatchParts.Swatch };
+    // 色块 3rem 高、md 圆角；棋盘格 8 像素一格（文档站的色块在根字号下画）
+    readonly SwatchView swatch = new() { Name = ColorSwatchParts.Swatch, Height = 48, Cell = 8 };
     readonly Text label = new() { Name = ColorSwatchParts.Label, IsVisible = false };
     readonly Text value = new() { Name = ColorSwatchParts.Value };
 
@@ -56,14 +56,13 @@ public class ColorSwatch : Control
     /// <summary>显示取值。</summary>
     public bool ShowValue { get => GetValue(ShowValueProperty); set => SetValue(ShowValueProperty, value); }
 
-    /// <summary>纯色的写法：#rrggbb，不透明度不满时 #rrggbbaa；渐变等没有单一取值时 null。</summary>
-    internal static string? Hex(IBrush? brush)
+    /// <summary>纯色的写法（同上游读出的 token 值）：不透明时 #rrggbb，半透明时 rgba(r, g, b, a)；渐变等没有单一取值时 null。</summary>
+    internal static string? Format(IBrush? brush)
     {
         if (brush is not ISolidColorBrush solid) return null;
         var color = solid.Color;
-        var alpha = (byte)Math.Round(color.A * solid.Opacity);
-        var hex = string.Create(CultureInfo.InvariantCulture, $"#{color.R:x2}{color.G:x2}{color.B:x2}");
-        return alpha == 255 ? hex : hex + alpha.ToString("x2", CultureInfo.InvariantCulture);
+        var rgba = new Rgba(color.R / 255d, color.G / 255d, color.B / 255d, color.A / 255d * solid.Opacity);
+        return rgba.A < 1 ? ColorMath.FormatRgb(rgba) : ColorMath.ToHex(rgba);
     }
 
     /// <inheritdoc />
@@ -78,7 +77,7 @@ public class ColorSwatch : Control
         swatch.Fill = Color;
         label.Text = Label;
         label.IsVisible = !string.IsNullOrEmpty(Label);
-        var shown = Value ?? Hex(Color);
+        var shown = Value ?? Format(Color);
         value.Text = shown;
         value.IsVisible = ShowValue && !string.IsNullOrEmpty(shown);
     }
@@ -95,52 +94,6 @@ public class ColorSwatch : Control
     {
         root.Arrange(new Rect(finalSize));
         return finalSize;
-    }
-
-    /// <summary>
-    /// 色块：3rem 高、md 圆角，棋盘格（fill 与 surface 相间、8 像素一格）垫底，上面是颜色，内描边是正文色 14% 的细线（亮色、暗色主题里都看得见边界）。
-    /// </summary>
-    sealed class SwatchView : Control
-    {
-        public IBrush? Fill
-        {
-            get;
-            set
-            {
-                field = value;
-                InvalidateVisual();
-            }
-        }
-
-        public SwatchView()
-        {
-            Height = 48;
-            ClipToBounds = true;
-            ActualThemeVariantChanged += (_, _) => InvalidateVisual();
-        }
-
-        public override void Render(DrawingContext context)
-        {
-            var bounds = new Rect(Bounds.Size);
-            var em = global::Avalonia.Controls.Documents.TextElement.GetFontSize(this);
-            var radius = this.Resource<double>(ThemeKeys.Radius.Md) * em;
-            var shape = new RoundedRect(bounds, radius);
-            using (context.PushClip(shape))
-            {
-                context.FillRectangle(this.Resource<IBrush>(ThemeKeys.Brush.Surface), bounds);
-                var checker = this.Resource<IBrush>(ThemeKeys.Brush.Fill);
-                const double cell = 8;
-                for (var y = 0; y * cell < bounds.Height; y++)
-                    for (var x = y % 2; x * cell < bounds.Width; x += 2)
-                        context.FillRectangle(checker, new Rect(x * cell, y * cell, cell, cell));
-                if (Fill is { } fill) context.FillRectangle(fill, bounds);
-            }
-            if (this.Resource<IBrush>(ThemeKeys.Brush.Text) is ISolidColorBrush text)
-            {
-                var ring = new Pen(new SolidColorBrush(text.Color, 0.14), 1);
-                context.DrawRectangle(null, ring, new RoundedRect(bounds.Deflate(0.5), Math.Max(0, radius - 0.5)));
-            }
-        }
     }
 }
 

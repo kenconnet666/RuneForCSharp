@@ -28,7 +28,7 @@ public class ColorSwatchTests
         Assert.Empty(Texts(red));
         var swatch = brand.GetLogicalDescendants().OfType<Control>().Single(control => control.Name == ColorSwatchParts.Swatch);
         Assert.Equal(AccessibilityView.Raw, AutomationProperties.GetAccessibilityView(swatch));
-        Assert.Equal("#00000080", ColorSwatch.Hex(mask.Color));
+        Assert.Equal("rgba(0, 0, 0, 0.5)", ColorSwatch.Format(mask.Color));
     });
 
     [Fact]
@@ -41,12 +41,12 @@ public class ColorSwatchTests
         {
             HeadlessUi.Flush(window);
             Application.Current!.TryGetResource("Rune.Brush.Surface", ThemeVariant.Light, out var light);
-            Assert.Equal(ColorSwatch.Hex((IBrush?)light), Texts(surface).Last());
+            Assert.Equal(ColorSwatch.Format((IBrush?)light), Texts(surface).Last());
             Application.Current!.RequestedThemeVariant = ThemeVariant.Dark;
             HeadlessUi.Flush(window);
             Application.Current!.TryGetResource("Rune.Brush.Surface", ThemeVariant.Dark, out var dark);
-            Assert.Equal(ColorSwatch.Hex((IBrush?)dark), Texts(surface).Last());
-            Assert.NotEqual(ColorSwatch.Hex((IBrush?)light), ColorSwatch.Hex((IBrush?)dark));
+            Assert.Equal(ColorSwatch.Format((IBrush?)dark), Texts(surface).Last());
+            Assert.NotEqual(ColorSwatch.Format((IBrush?)light), ColorSwatch.Format((IBrush?)dark));
         }
         finally
         {
