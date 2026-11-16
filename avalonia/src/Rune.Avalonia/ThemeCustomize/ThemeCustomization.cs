@@ -38,11 +38,25 @@ public static class ThemeCustomization
     {
         var overrides = new List<KeyValuePair<string, object>>();
         void Add(string key, object value) => overrides.Add(new(key, value));
-        foreach (var (token, css) in ThemePalette.Colors(settings.Accent, settings.Neutral, IsDark(variant)))
+        var colors = ThemePalette.Colors(settings.Accent, settings.Neutral, IsDark(variant));
+        var brushes = new Dictionary<string, IBrush>();
+        foreach (var (token, css) in colors)
         {
             var color = ToColor(css);
             Add($"Rune.Color.{Pascal(token)}", color);
-            Add($"Rune.Brush.{Pascal(token)}", new SolidColorBrush(color));
+            Add($"Rune.Brush.{Pascal(token)}", brushes[token] = new SolidColorBrush(color));
+        }
+        // 按钮这类组件的颜色来自色调调色板（Rune.Palette.*，主题里各是一组画刷）：用到换了的颜色的调色板换一份，其余字段沿用主题的画刷
+        foreach (var tone in new[] { "accent", "neutral" })
+        {
+            var fields = PaletteTokens(tone);
+            if (!fields.Values.Any(brushes.ContainsKey)) continue;
+            IBrush? Brush(string token) => brushes.GetValueOrDefault(token) ?? (Application.Current?.TryGetResource($"Rune.Brush.{Pascal(token)}", variant, out var value) == true ? value as IBrush : null);
+            Add($"Rune.Palette.{Pascal(tone)}", new TonePalette
+            {
+                Solid = Brush(fields["Solid"]), SolidHover = Brush(fields["SolidHover"]), Contrast = Brush(fields["Contrast"]), Soft = Brush(fields["Soft"]),
+                SoftHover = Brush(fields["SoftHover"]), Surface = Brush(fields["Surface"]), SubtleHover = Brush(fields["SubtleHover"]), Text = Brush(fields["Text"]), Border = Brush(fields["Border"]),
+            });
         }
         if (settings.Radius is { } radius && radius != ThemeRadius.Medium)
         {
@@ -87,7 +101,8 @@ public static class ThemeCustomization
         var lines = new StringBuilder();
         lines.AppendLine("<ResourceDictionary xmlns=\"https://github.com/avaloniaui\"");
         lines.AppendLine("                    xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\"");
-        lines.AppendLine("                    xmlns:sys=\"clr-namespace:System;assembly=System.Runtime\">");
+        lines.AppendLine("                    xmlns:sys=\"clr-namespace:System;assembly=System.Runtime\"");
+        lines.AppendLine("                    xmlns:rune=\"https://github.com/kenconnet666/RuneForCSharp/avalonia\">");
         foreach (var (key, value) in Overrides(settings, variant))
             lines.AppendLine(value switch
             {
@@ -96,6 +111,7 @@ public static class ThemeCustomization
                 double number => $"  <x:Double x:Key=\"{key}\">{number.ToString(CultureInfo.InvariantCulture)}</x:Double>",
                 TimeSpan time => $"  <sys:TimeSpan x:Key=\"{key}\">{time.ToString("c", CultureInfo.InvariantCulture)}</sys:TimeSpan>",
                 FontFamily font => $"  <FontFamily x:Key=\"{key}\">{System.Security.SecurityElement.Escape(string.Join(", ", font.FamilyNames))}</FontFamily>",
+                TonePalette => $"  <rune:TonePalette x:Key=\"{key}\" {string.Join(' ', PaletteTokens(key["Rune.Palette.".Length..].ToLowerInvariant()).Select(pair => $"{pair.Key}=\"{{DynamicResource Rune.Brush.{Pascal(pair.Value)}}}\""))} />",
                 _ => $"  <!-- {key}: {value} -->",
             });
         lines.AppendLine("</ResourceDictionary>");
@@ -110,6 +126,11 @@ public static class ThemeCustomization
         ThemeContrast.Check(token => target.TryFindResource($"Rune.Color.{Pascal(token)}", target.ActualThemeVariant, out var value) && value is Color color
             ? color.A == 255 ? $"#{color.R:x2}{color.G:x2}{color.B:x2}" : string.Create(CultureInfo.InvariantCulture, $"rgba({color.R}, {color.G}, {color.B}, {color.A / 255d})")
             : "#000000");
+
+    /// <summary>色调调色板的字段 → 它取的颜色 token（同 tools/token-gen/palette.mjs）。</summary>
+    static Dictionary<string, string> PaletteTokens(string tone) => tone == "neutral"
+        ? new() { ["Solid"] = "inverseSurface", ["SolidHover"] = "inverseSurfaceHover", ["Contrast"] = "inverseText", ["Soft"] = "fill", ["SoftHover"] = "fillHover", ["Surface"] = "surface", ["SubtleHover"] = "fillHover", ["Text"] = "text", ["Border"] = "border" }
+        : new() { ["Solid"] = tone, ["SolidHover"] = $"{tone}Hover", ["Contrast"] = $"{tone}Contrast", ["Soft"] = $"{tone}Soft", ["SoftHover"] = $"{tone}SoftHover", ["Surface"] = $"{tone}Soft", ["SubtleHover"] = $"{tone}Soft", ["Text"] = $"{tone}Text", ["Border"] = $"{tone}Border" };
 
     /// <summary>主题变体是不是暗色（自定义的变体看它所属的亮或暗）。</summary>
     internal static bool IsDark(ThemeVariant variant)
