@@ -1513,6 +1513,17 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 测试：IStorageFile 不能自己实现（Avalonia 标了不让用户实现），测试把读好的表交给 internal 的 Load；读 CSV 由 Sheet 的测试覆盖。
 - 像素对照：parts 0.92%（上游写着"支持 .xlsx, .csv"，这里只有 .csv）。
 
+### SchemaFields（2026-11-16，孪生文件；SchemaView、SchemaForm 在它上面做）
+
+- 上游从 zod schema（经 JSON Schema）推出字段；C# 的表单校验已经是模型上的 DataAnnotations（FormController，见上面），所以字段也从模型的类型推：
+  属性的类型选控件，标签、说明、占位、分组用平台的 DisplayAttribute（Name、Description、Prompt、GroupName、Order），上游 .meta() 里其余的写在 SchemaFieldAttribute
+  （Control、Span、Tab、Unit、VisibleWhen / RequiredWhen / ReadonlyWhen、Sum、Source；占位、分组也能写在这里，优先），枚举值的显示文字是枚举成员的 Display.Name，
+  或属性上的 SchemaOptionAttribute（字符串属性写了它就是从这些值里选，同上游的 z.enum）。条件写成 Condition 的 JSON（特性的参数只能是常量）。
+- 键是属性名，路径同 FormController（<c>Contacts.0.Name</c>）；条件里的字段名也是属性名。span 'full' 是 SchemaFieldAttribute.Full。
+- 必填：写了 Required，或不可空的选择、数字、日期（不写就没有值；可空引用按 NullabilityInfoContext）。上游 emptyValues 给空白的初始值，C# 的模型自己有默认值，
+  新的一行、嵌套对象按元素类型新建（NewItem），所以 emptyValues 没有对应；上游 decimalSchema 的 type、bigintSchema 是 ValueType（数字属性的类型）。
+- State、Walk、Pick、ColumnTotal、ConditionFields 照上游的 schemaFieldState、walkSchemaFields、pickFields、columnTotal、schemaConditionFields。
+
 ### Condition、ConditionBuilder（2026-11-16，仅 Avalonia）
 
 - 条件是孪生文件 Condition（上游 input/condition.ts）：抽象 record Condition 与 ConditionRule、ConditionAll、ConditionAny、ConditionNot，工厂 Condition.All / Any / Not；
