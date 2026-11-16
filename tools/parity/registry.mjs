@@ -157,6 +157,8 @@ export const COMPONENT_PROP_RENAMES = {
   Splitter: { _collapsed: 'IsCollapsed' },
   // 手柄改的是父元素的宽度：Width、MinWidth、MaxWidth 是平台控件自己的布局属性，这里叫 Length（横线时是高度）；调整了是事件
   ResizeHandle: { width: 'Length', minWidth: 'MinLength', maxWidth: 'MaxLength', defaultWidth: 'DefaultLength', onWidthChange: 'LengthChanged' },
+  // 同 ResizeHandle（ColumnResizer 就是它的子类）
+  ColumnResizer: { width: 'Length', minWidth: 'MinLength', maxWidth: 'MaxLength', defaultWidth: 'DefaultLength', onWidthChange: 'LengthChanged' },
   // 值是平台 TextBox 的 Text；字符集叫 Charset（Type 是 TextField 的输入类型）；填满是事件
   OtpField: { _value: 'Text', type: 'Charset', onComplete: 'Completed' },
   // 点选了一天是事件

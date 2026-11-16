@@ -191,4 +191,27 @@ public class DataTableTests
         Assert.True(table.Scroller.Offset.Y > 400);
         Assert.True(table.Surface.Realized.ContainsKey(500));
     });
+
+    [Fact]
+    public Task Resizer_writes_column_widths() => HeadlessUi.Run(() =>
+    {
+        // 有一列没写宽度：不按比例放大写了宽度的列
+        DataTableColumn[] columns = [new("Name", "姓名") { Width = 160 }, new("Age", "年龄") { Width = 120, Resizable = false }, new("Id", "编号") { Resizable = false }];
+        var (table, window) = Render(new DataTable { ItemsSource = People, Columns = columns, Resizable = true });
+        var resizers = table.Surface.Header!.GetLogicalChildren().OfType<ColumnResizer>().ToList();
+        // 列自己写了 Resizable = false 的没有手柄；手柄的名称取语言包
+        var resizer = Assert.Single(resizers);
+        Assert.Equal("调整“姓名”的列宽", AutomationProperties.GetName(resizer));
+        Assert.Equal(160, resizer.Length);
+        resizer.Press(global::Avalonia.Input.Key.Right);
+        HeadlessUi.Flush(window);
+        Assert.Equal(160 + resizer.Step, table.ColumnWidths!["Name"]);
+        Assert.Equal(160 + resizer.Step, table.Surface.Widths[0]);
+        // 不能窄过最小宽度（默认 64）
+        resizer.Resize(10);
+        HeadlessUi.Flush(window);
+        Assert.Equal(TableColumns.ColumnMinWidth, table.ColumnWidths!["Name"]);
+        // 调整宽度不重建表头：手柄还是那一个
+        Assert.Same(resizer, table.Surface.Header!.GetLogicalChildren().OfType<ColumnResizer>().Single());
+    });
 }

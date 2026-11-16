@@ -9,7 +9,7 @@ static class DataTableExamples
 {
     public static Example[] All =>
     [
-        new("DataTable", "orders", "一万条订单", "列定义里 Type 决定默认的格式与对齐（Number、Currency、Percent、FileSize、Date、DateTime，跟随语言；不写时按第一个值推断，数字靠右），Cell 自定义单元格，Value 给排序用的值；点可排序的列标题在升序、降序、不排之间切换（本地按数字、日期、按语言的文字排，ManualSort 时交给服务端）。SelectionMode=\"multiple\" 多一列勾选框；Sticky 的列横向滚动时固定在两侧。工具栏（搜索、批量操作、分页）用现有组件组合，不内置。", Orders),
+        new("DataTable", "orders", "一万条订单", "列定义里 Type 决定默认的格式与对齐（Number、Currency、Percent、FileSize、Date、DateTime，跟随语言；不写时按第一个值推断，数字靠右），Cell 自定义单元格，Value 给排序用的值；点可排序的列标题在升序、降序、不排之间切换（本地按数字、日期、按语言的文字排，ManualSort 时交给服务端）。SelectionMode=\"multiple\" 多一列勾选框；Sticky 的列横向滚动时固定在两侧；Resizable 时可以拖动或用键盘调整列宽，ColumnWidths 双向绑定可以存到本地设置里。工具栏（搜索、批量操作、分页）用现有组件组合，不内置。", Orders),
         new("DataTable", "single", "单选：选一家报价", "SelectionMode=\"single\" 时每行是一个单选框：点击选中，选中的行整行高亮；没有全选，取消选择用 SelectionBar 的清空或把 Selected 设为空列表。", Single),
         new("DataTable", "states", "加载、空状态与外观", "IsLoading 时表体换成骨架行（首次加载与刷新一样，不另加进度条）；没有数据显示 Empty。Density、Variant、Striped 与静态表格相同。", States),
     ];
@@ -59,7 +59,7 @@ static class DataTableExamples
         var table = new DataTable
         {
             ItemsSource = Orders_, Columns = columns, GetKey = row => ((Order)row).Id, SelectionMode = SelectionMode.Multiple,
-            Sort = new SortState("PlacedAt", SortDirection.Descending), MaxHeight = 26 * 16,
+            Sort = new SortState("PlacedAt", SortDirection.Descending), MaxHeight = 26 * 16, Resizable = true,
         };
         AutomationProperties.SetName(table, "订单");
         var keyword = new TextField { Icon = Lucide.Search, PlaceholderText = "订单号或客户", Width = 16 * 16 };

@@ -30,7 +30,8 @@ namespace Rune.Avalonia;
 /// <item>合计：列写了 Summary 时底部多一行吸底的合计；<see cref="RowTone"/> 给整行着色（导入校验的错误行）；<see cref="HiddenColumns"/> 隐藏列。</item>
 /// <item>定位：<see cref="ScrollToRow"/> 滚到那一行（停在吸顶表头之下）。</item>
 /// </list>
-/// 行高按第一行量出的高度（单元格默认一行，放不下省略号）。表头筛选、列菜单、就地编辑、行拖动、详情行、分组表头、调整列宽的把手还没做（见 docs/DESIGN.md）。
+/// 列宽：<see cref="Resizable"/>（或列的 Resizable）时表头的列结束边有 <see cref="ColumnResizer"/>，拖动或用 ← / → 调整，写回 <see cref="ColumnWidths"/>。
+/// 行高按第一行量出的高度（单元格默认一行，放不下省略号）。表头筛选、列菜单、就地编辑、行拖动、详情行、分组表头还没做（见 docs/DESIGN.md）。
 /// 部件：<see cref="DataTableParts"/>。外观同 Table：<see cref="Density"/>、<see cref="Variant"/>、<see cref="Striped"/>。
 /// </summary>
 public class DataTable : Control
@@ -74,6 +75,9 @@ public class DataTable : Control
     /// <summary>调整过的列宽（列的 Key → 像素，双向绑定，可以存到本地设置里）。</summary>
     public static readonly StyledProperty<IReadOnlyDictionary<string, double>?> ColumnWidthsProperty =
         AvaloniaProperty.Register<DataTable, IReadOnlyDictionary<string, double>?>(nameof(ColumnWidths), defaultBindingMode: BindingMode.TwoWay);
+
+    /// <summary>可以拖动或用键盘调整列宽（列的 Resizable 优先）：调整后写回 <see cref="ColumnWidths"/>。</summary>
+    public static readonly StyledProperty<bool> ResizableProperty = AvaloniaProperty.Register<DataTable, bool>(nameof(Resizable));
 
     /// <summary>合计行第一列的内容（第一列自己没写 Summary 时），默认取语言包（合计）。</summary>
     public static readonly StyledProperty<object?> SummaryLabelProperty = AvaloniaProperty.Register<DataTable, object?>(nameof(SummaryLabel));
@@ -148,6 +152,9 @@ public class DataTable : Control
     /// <summary>调整过的列宽。</summary>
     public IReadOnlyDictionary<string, double>? ColumnWidths { get => GetValue(ColumnWidthsProperty); set => SetValue(ColumnWidthsProperty, value); }
 
+    /// <summary>可以调整列宽。</summary>
+    public bool Resizable { get => GetValue(ResizableProperty); set => SetValue(ResizableProperty, value); }
+
     /// <summary>合计行第一列的内容。</summary>
     public object? SummaryLabel { get => GetValue(SummaryLabelProperty); set => SetValue(SummaryLabelProperty, value); }
 
@@ -207,8 +214,10 @@ public class DataTable : Control
                  || change.Property == Provider.LangProperty) Refresh();
         else if (change.Property == SelectedProperty || change.Property == RowToneProperty || change.Property == IsRowSelectableProperty) surface.SyncRows();
         else if (change.Property == SelectionModeProperty || change.Property == IsLoadingProperty || change.Property == EmptyProperty || change.Property == SummaryLabelProperty
-                 || change.Property == ColumnWidthsProperty || change.Property == DensityProperty || change.Property == StripedProperty || change.Property == GetKeyProperty) surface.Rebuild();
+                 || change.Property == ResizableProperty || change.Property == DensityProperty || change.Property == StripedProperty || change.Property == GetKeyProperty) surface.Rebuild();
         if (change.Property == VariantProperty || change.Property == DensityProperty) SyncFrame();
+        // 只是宽度变了：重排，不重建（拖动中的手柄要留着）
+        if (change.Property == ColumnWidthsProperty) surface.Relayout();
     }
 
     void OnItemsChanged(object? sender, NotifyCollectionChangedEventArgs e) => Refresh();
@@ -244,6 +253,13 @@ public class DataTable : Control
         frame[!Border.BorderBrushProperty] = this.GetResourceObservable(ThemeKeys.Brush.Border).ToBinding();
         frame[!Border.BackgroundProperty] = this.GetResourceObservable(ghost ? ThemeKeys.Brush.Background : ThemeKeys.Brush.Surface).ToBinding();
         surface.InvalidateVisual();
+    }
+
+    /// <summary>调整了一列的宽度：写回 ColumnWidths（新的字典）。</summary>
+    internal void ResizeColumn(string key, double width)
+    {
+        var next = new Dictionary<string, double>(ColumnWidths ?? new Dictionary<string, double>()) { [key] = width };
+        SetCurrentValue(ColumnWidthsProperty, next);
     }
 
     /// <summary>点了列标题：下一个排序，写回 Sort。</summary>
@@ -394,6 +410,17 @@ internal sealed class DataTableSurface : Control
         }
         rowHeight = 0;
         InvalidateMeasure();
+    }
+
+    /// <summary>列宽变了：各行重新量、重新排。</summary>
+    internal void Relayout()
+    {
+        InvalidateMeasure();
+        foreach (var row in VisualChildren.OfType<DataTableRowView>())
+        {
+            row.InvalidateMeasure();
+            row.InvalidateArrange();
+        }
     }
 
     /// <summary>选择、色调变了：建好的行与表头的全选框跟着改，不重建。</summary>
@@ -565,6 +592,8 @@ internal sealed class DataTableRowView : Control
 {
     readonly DataTableSurface surface;
     readonly List<(Control Cell, DataTableColumn? Column)> cells = [];
+    // 表头里可调整宽度的列的手柄：列的下标 → 手柄
+    readonly Dictionary<int, ColumnResizer> resizers = [];
     Control? selector;
     bool hovered;
 
@@ -639,6 +668,7 @@ internal sealed class DataTableRowView : Control
     {
         foreach (var child in VisualChildren.OfType<Control>().ToList()) Detach(child);
         cells.Clear();
+        resizers.Clear();
         selector = null;
         var owner = Owner;
         var lang = owner.Lang;
@@ -668,6 +698,16 @@ internal sealed class DataTableRowView : Control
             if (column.Sticky is not null) cell.ZIndex = 1;
             cells.Add((cell, column));
             Attach(cell);
+            if (Kind == DataTableRowKind.Header && (column.Resizable ?? owner.Resizable))
+            {
+                var key = column.Key;
+                var at = position;
+                var resizer = new ColumnResizer { Name = DataTableParts.Resizer, Label = TableColumns.Label(column), ZIndex = 2 };
+                if (column.MinWidth is { } min) resizer.MinLength = min;
+                resizer.Bind(() => surface.Widths.Count > at ? surface.Widths[at] : 0, width => owner.ResizeColumn(key, width));
+                resizers[position] = resizer;
+                Attach(resizer);
+            }
         }
         SyncSelection();
         InvalidateMeasure();
@@ -774,6 +814,15 @@ internal sealed class DataTableRowView : Control
         return new Thickness(0.75 * em, block * em);
     }
 
+    /// <summary>
+    /// 格里内容的高度：一行文字按行高（1.5em，不取整）。量出来的高度按像素向上取整，紧凑时 18.375 算成 19，行行累加会比上游高出一截（上游的行高是小数）。
+    /// </summary>
+    static double ContentHeight(Control cell)
+    {
+        var lineHeight = TextBlock.GetLineHeight(cell);
+        return cell is TableCell { Content: string } && !double.IsNaN(lineHeight) && cell.DesiredSize.Height <= Math.Ceiling(lineHeight) ? lineHeight : cell.DesiredSize.Height;
+    }
+
     /// <inheritdoc />
     protected override Size MeasureOverride(Size availableSize)
     {
@@ -781,6 +830,7 @@ internal sealed class DataTableRowView : Control
         var height = 0.0;
         // 选择框不撑高这一行（上游 choiceInCell：24px 的点击区域在行里叠放），有选择列的行与纯文字的行一样高
         selector?.Measure(new Size(DataTable.SelectWidth, double.PositiveInfinity));
+        foreach (var resizer in resizers.Values) resizer.Measure(Size.Infinity);
         for (var i = 0; i < cells.Count && i < widths.Count; i++)
         {
             var padding = PaddingOf(cells[i].Cell);
@@ -788,7 +838,7 @@ internal sealed class DataTableRowView : Control
             if (cells[i].Cell is TableCell { Content: Skeleton bar })
                 (bar.Width, bar.Height) = (Math.Max(0, widths[i] - padding.Left - padding.Right) * (90 - (Index + i) % 4 * 15) / 100, TextElement.GetFontSize(cells[i].Cell));
             cells[i].Cell.Measure(new Size(Math.Max(0, widths[i] - padding.Left - padding.Right), double.PositiveInfinity));
-            height = Math.Max(height, cells[i].Cell.DesiredSize.Height + padding.Top + padding.Bottom);
+            height = Math.Max(height, ContentHeight(cells[i].Cell) + padding.Top + padding.Bottom);
         }
         return new Size(surface.TableWidth, height + 1);
     }
@@ -818,6 +868,9 @@ internal sealed class DataTableRowView : Control
             else if (column?.Sticky == ColumnSticky.End && offsets.End.TryGetValue(column.Key, out var end)) left = Math.Min(x, scroll + view - end - widths[i]);
             var padding = PaddingOf(cell);
             cell.Arrange(new Rect(left + padding.Left, padding.Top, Math.Max(0, widths[i] - padding.Left - padding.Right), Math.Max(0, height - padding.Top - padding.Bottom)));
+            // 手柄贴着这一列的结束边（同上游 th 里的 ResizeHandle）
+            if (resizers.TryGetValue(i, out var resizer))
+                resizer.Arrange(new Rect(left + widths[i] - resizer.DesiredSize.Width, 0, resizer.DesiredSize.Width, finalSize.Height));
             x += widths[i];
         }
         return finalSize;
@@ -892,6 +945,9 @@ public static class DataTableParts
 
     /// <summary>列标题。</summary>
     public const string HeaderCell = "PART_HeaderCell";
+
+    /// <summary>调整列宽的手柄（ColumnResizer）。</summary>
+    public const string Resizer = "PART_Resizer";
 
     /// <summary>可排序列标题里的按钮。</summary>
     public const string SortButton = "PART_SortButton";
