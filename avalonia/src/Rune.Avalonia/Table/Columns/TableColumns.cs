@@ -433,13 +433,17 @@ public static class TableColumns
     /// 按排序排列（返回新列表，原列表不变）：可以是几列（前一列相等时比下一列），相等时保持原来的先后；空值不随方向翻转、总在最后。
     /// 数字类的列里十进制字符串（"2.5"、"2.10"）按数值排。没有排序、排序列都不存在时原样返回。
     /// </summary>
-    public static IReadOnlyList<object> SortRows(IReadOnlyList<object> rows, IReadOnlyList<DataTableColumn> columns, IEnumerable<SortState>? sorts, string culture)
+    public static IReadOnlyList<object> SortRows(IReadOnlyList<object> rows, IReadOnlyList<DataTableColumn> columns, IEnumerable<SortState>? sorts, string culture) =>
+        SortOrder(rows, columns, sorts, culture) is { } order ? [.. order.Select(index => rows[index])] : rows;
+
+    /// <summary>排序后各行原来的下标（同 <see cref="SortRows"/>）；没有可排的列时为 null（保持原样）。树形表格按它排每一层。</summary>
+    public static IReadOnlyList<int>? SortOrder(IReadOnlyList<object> rows, IReadOnlyList<DataTableColumn> columns, IEnumerable<SortState>? sorts, string culture)
     {
         List<(Func<object, object?> Value, int Factor)> keys = [];
         foreach (var state in sorts ?? [])
             if (columns.FirstOrDefault(item => item.Key == state.Key) is { } column)
                 keys.Add((SortValue(column, rows), state.Direction == SortDirection.Ascending ? 1 : -1));
-        if (keys.Count == 0) return rows;
+        if (keys.Count == 0) return null;
         var compare = Comparer(culture);
         var entries = rows.Select((row, index) => (Row: row, Index: index, Values: keys.Select(key => key.Value(row)).ToArray())).ToList();
         entries.Sort((a, b) =>
@@ -452,7 +456,7 @@ public static class TableColumns
             }
             return a.Index.CompareTo(b.Index);
         });
-        return [.. entries.Select(entry => entry.Row)];
+        return [.. entries.Select(entry => entry.Index)];
 
         static Func<object, object?> SortValue(DataTableColumn column, IReadOnlyList<object> rows)
         {

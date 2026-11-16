@@ -4,7 +4,7 @@ using Avalonia.Controls.Documents;
 
 namespace Rune.Avalonia.Examples;
 
-/// <summary>DataTable 页的示例（vue-tsx-pro 文档站 table/DataTable）：一万条订单、表头筛选与列菜单、就地编辑、数据修正、行拖动、分组表头、宽表、展开行、定位、主从视图、单选、滚动加载、加载与空状态；台账、导入、组织架构随功能补上。</summary>
+/// <summary>DataTable 页的示例（vue-tsx-pro 文档站 table/DataTable）：一万条订单、表头筛选与列菜单、就地编辑、数据修正、行拖动、分组表头、宽表、展开行、定位、主从视图、组织架构、单选、滚动加载、加载与空状态；台账、导入随功能补上。</summary>
 static class DataTableExamples
 {
     public static Example[] All =>
@@ -19,6 +19,7 @@ static class DataTableExamples
         new("DataTable", "details", "供应商改进建议：展开行", "RenderDetail 给出一行的详情：多一列展开按钮（读屏念出展开状态），展开的行下面多一行跨全部列的详情，虚拟滚动按真实高度测量；HasDetail 决定哪些行能展开，ExpandedRows 可以双向绑定。详情横向滚动时贴着可见区域的起始边，宽度不超过可见区域。", Details),
         new("DataTable", "locate", "定位到行", "从通知、搜索结果跳过来时 ScrollToRow 滚到那一行（ScrollAlign 可以居中），再用 RowTone 闪一下。两千行里还没建的行也能滚到，停在吸顶表头之下；找不到时返回 false。", Locate),
         new("DataTable", "master-detail", "主从视图：点一行看详情", "ActiveKey 高亮正在看的那一行（品牌色浅底、起始边一条强调色的竖线，读屏念“当前”）；RowClicked 是点了一行（点在行里的按钮上不算）。编号是链接按钮，键盘也能打开。", MasterDetail),
+        new("DataTable", "tree", "组织架构", "TreeDataTable 建在 DataTable 上，列定义、排序、勾选都一样；第一列带缩进与展开按钮，同级之间按排序排（ManualSort 时按数据的顺序）。多选默认父子联动：勾父行连带子孙，只勾一部分时父行半选；CheckStrictly 时各自勾选。LoadChildren 懒加载：展开时取回子项放进数据，期间按钮显示加载中；服务端在每行带上有没有子项，交给 HasChildren。", Org),
         new("DataTable", "single", "单选：选一家报价", "SelectionMode=\"single\" 时每行是一个单选框：点击选中，选中的行整行高亮；没有全选，取消选择用 SelectionBar 的清空或把 Selected 设为空列表。", Single),
         new("DataTable", "infinite", "滚动加载", "RangeChanged 报告可见行的范围（不含多建的行），离末尾不远时取下一页；取的时候 IsLoading，已有数据所以骨架接在末尾。页码、去重与失败重试交给 InfiniteList，它的 OnRangeChanged 直接接上。内容换行的行按量出的高度排。", Infinite),
         new("DataTable", "states", "加载、空状态与外观", "IsLoading 时表体换成骨架行（首次加载与刷新一样，不另加进度条）；没有数据显示 Empty。Density、Variant、Striped 与静态表格相同。", States),
@@ -558,6 +559,64 @@ static class DataTableExamples
         };
         Show();
         return new Card { Variant = CardVariant.Outline, Padding = Space.None, Radius = Radius.Md, Content = new Splitter { Height = 18 * 16, Size = 55, Start = table, End = detail } };
+    }
+
+    /// <summary>部门：还没加载的部门 Children 为 null、Lazy 为 true。</summary>
+    sealed class Unit(string id, string name, string lead, int headcount, decimal budget)
+    {
+        public string Id => id;
+        public string Name => name;
+        public string Lead => lead;
+        public int Headcount => headcount;
+        public decimal Budget => budget;
+        public Unit[]? Children { get; set; }
+        public bool Lazy { get; set; }
+    }
+
+    static Control Org()
+    {
+        Unit[] org =
+        [
+            new("rd", "研发部", "林小满", 46, 3_200_000)
+            {
+                Children = [new("fe", "前端组", "赵浩然", 12, 820_000), new("be", "后端组", "陈默", 18, 1_300_000), new("qa", "测试组", "孙思远", 8, 480_000)],
+            },
+            new("mk", "市场部", "许悠", 21, 1_800_000) { Lazy = true },
+            new("ds", "设计中心", "周一航", 9, 650_000),
+        ];
+        var table = new TreeDataTable
+        {
+            ItemsSource = org, GetKey = row => ((Unit)row).Id, MaxHeight = 20 * 16, Expanded = ["rd"],
+            GetChildren = row => ((Unit)row).Children,
+            HasChildren = row => ((Unit)row).Children is { Length: > 0 } || ((Unit)row).Lazy,
+            // 懒加载：展开还没有子项的部门时取回来、放进数据里；任务结束前展开按钮显示加载中
+            LoadChildren = async row =>
+            {
+                await Task.Delay(900);
+                var unit = (Unit)row;
+                unit.Children = [new("brand", "品牌组", "王晴", 7, 900_000), new("channel", "渠道组", "李雨桐", 14, 900_000)];
+                unit.Lazy = false;
+            },
+            Columns =
+            [
+                new("Name", "部门") { Width = 200, Sortable = true },
+                new("Lead", "负责人")
+                {
+                    Width = 140,
+                    Cell = (row, _) => new Flex
+                    {
+                        Align = FlexAlign.Center, Gap = Space.Sm,
+                        Children = { new Avatar { Size = TextSize.Xs, DisplayName = ((Unit)row).Lead }, new Text { Text = ((Unit)row).Lead } },
+                    },
+                },
+                // 数字列：按第一个值推断成数字，靠右对齐
+                new("Headcount", "人数") { Width = 80, Sortable = true },
+                // 预算以元存、按万元显示：Scale 缩放，单位写在表头里，一列数字更整齐
+                new("Budget", "年度预算（万元）") { Width = 150, Sortable = true, Format = new NumericFormat { Scale = 10_000, MinimumFractionDigits = 1, MaximumFractionDigits = 1 } },
+            ],
+        };
+        AutomationProperties.SetName(table, "组织架构");
+        return table;
     }
 
     record ProjectTaskRow(string Code, string Name, string Owner, string Due, string Status);

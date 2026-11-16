@@ -205,11 +205,16 @@ internal sealed class DataTableRowView : Control
             };
             cell.ApplyRole(head: Kind == DataTableRowKind.Header, foot: Kind == DataTableRowKind.Summary);
             TextBlock.SetTextTrimming(cell, TextTrimming.CharacterEllipsis);
-            // 行拖动：把手在第一个数据列的前面
-            if (Kind == DataTableRowKind.Body && position == 0 && owner.CanReorder)
+            // 第一个数据列的前面：行拖动的把手，再是 Leading（树形表格的缩进与展开按钮）
+            if (Kind == DataTableRowKind.Body && position == 0 && (owner.CanReorder ? owner.RowHandle(row!) : null) is var handle
+                && owner.LeadingOf(row!, index) is var leading && (handle is not null || leading is not null))
             {
                 var inner = cell.Content as Control ?? new TextBlock { Text = Convert.ToString(cell.Content, System.Globalization.CultureInfo.CurrentCulture), TextTrimming = TextTrimming.CharacterEllipsis };
-                cell.Content = new Flex { Align = FlexAlign.Center, Gap = Space.Xs, Children = { owner.RowHandle(row!), inner } };
+                var wrap = new Flex { Name = DataTableParts.Leading, Align = FlexAlign.Center, Gap = Space.Xs };
+                if (handle is not null) wrap.Children.Add(handle);
+                if (leading is not null) wrap.Children.Add(leading);
+                wrap.Children.Add(inner);
+                cell.Content = wrap;
             }
             if (Kind == DataTableRowKind.Body) owner.PrepareCell(cell, row!, column);
             if (column.Sticky is not null) cell.ZIndex = 1;
@@ -421,14 +426,33 @@ internal sealed class DataTableRowView : Control
         var host = new Panel { Name = Kind == DataTableRowKind.Header ? DataTableParts.DetailHeaderCell : null };
         if (Kind == DataTableRowKind.Header) AutomationProperties.SetName(host, lang.TableDetails);
         if (Kind != DataTableRowKind.Body || row is null || !Owner.RowHasDetail(row)) return host;
-        var toggle = new IconButton { Name = DataTableParts.DetailToggle, Icon = Lucide.ChevronRight, Variant = ButtonVariant.Ghost, Tone = StatusTone.Neutral, Size = TextSize.Sm, HorizontalAlignment = HorizontalAlignment.Center };
-        AutomationProperties.SetName(toggle, lang.TableRowDetails(LabelOf(Owner, row)));
+        var toggle = DisclosureToggle(DataTableParts.DetailToggle, lang.TableRowDetails(LabelOf(Owner, row)));
+        toggle.HorizontalAlignment = HorizontalAlignment.Center;
         toggle.Click += (_, _) =>
         {
             if (Row is { } current) Owner.ToggleDetail(current);
         };
         host.Children.Add(toggle);
         return host;
+    }
+
+    /// <summary>展开按钮（详情行、树形表格的子项共用的样子，同上游 IconButton sm、圆形、ChevronRight）。</summary>
+    internal static IconButton DisclosureToggle(string name, string label)
+    {
+        // 外观（幽灵、中性、sm、圆形）在 DataTableParts.axaml：使用方的样式盖得过
+        var toggle = new IconButton { Name = name, Icon = Lucide.ChevronRight };
+        AutomationProperties.SetName(toggle, label);
+        return toggle;
+    }
+
+    /// <summary>
+    /// 展开按钮的展开状态（读屏的 expanded）与箭头的转向（展开时转 90°，从右往左排时反过来）。
+    /// 流向由调用方给：按钮刚建、还没挂上时继承不到。
+    /// </summary>
+    internal static void SetDisclosure(IconButton toggle, bool expanded, FlowDirection direction)
+    {
+        toggle.SetValue(Popover.TriggerExpandedProperty, expanded);
+        toggle.RenderTransform = expanded ? new RotateTransform(direction == FlowDirection.RightToLeft ? -90 : 90) : null;
     }
 
     /// <summary>展开按钮（测试用）；没有详情的行为 null。</summary>
@@ -438,9 +462,7 @@ internal sealed class DataTableRowView : Control
     public void SyncDetail()
     {
         if (DetailToggle is not { } toggle || Row is not { } row) return;
-        var expanded = Owner.ExpandedRows.Contains(Owner.KeyOf(row));
-        toggle.SetValue(Popover.TriggerExpandedProperty, expanded);
-        toggle.RenderTransform = expanded ? new RotateTransform(FlowDirection == FlowDirection.RightToLeft ? -90 : 90) : null;
+        SetDisclosure(toggle, Owner.ExpandedRows.Contains(Owner.KeyOf(row)), FlowDirection);
     }
 
     /// <summary>选择框的状态与这一行是否已选、是不是正在看的（整行底色、读屏的"当前"）。</summary>
@@ -461,6 +483,7 @@ internal sealed class DataTableRowView : Control
         else if (Choice is { } choice && Row is { } row)
         {
             choice.IsChecked = owner.IsSelected(row);
+            if (choice is Checkbox box) box.IsIndeterminate = owner.IsPartial(row);
             choice.IsEnabled = owner.CanSelect(row);
         }
         InvalidateVisual();

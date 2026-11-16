@@ -187,6 +187,10 @@ export const COMPONENT_PROP_RENAMES = {
   ColumnTable: { rows: 'ItemsSource', cellSpan: 'GetCellSpan' },
   // 数据叫 ItemsSource（同 ColumnTable）；已选行的 key 是列表，同 Tree 的 Selected
   DataTable: { rows: 'ItemsSource', _selected: 'Selected', onReorder: 'Reordered', onRowClick: 'RowClicked', onRangeChange: 'RangeChanged' },
+  // TreeDataTable 是 DataTable 的子类：同名的属性一样改名，rows 是第一层
+  TreeDataTable: {
+    rows: 'ItemsSource', _expanded: 'Expanded', _selected: 'Selected', onReorder: 'Reordered', onRowClick: 'RowClicked', onRangeChange: 'RangeChanged',
+  },
   // 选中值变了、选了菜单里的一项是事件（Action 会和 System.Action 混）
   ColumnFilterButton: { onChange: 'ValuesChanged' },
   ColumnMenuButton: { onAction: 'ActionRequested' },
@@ -302,7 +306,29 @@ const FORM_NAME = '表单提交的字段名是浏览器的概念；值经 Value 
 const BUTTON_TYPE = '表单提交是浏览器的概念；对话框的默认、取消按钮用平台的 IsDefault、IsCancel';
 
 /** 某个组件不移植的 prop 与原因（平台上没有对应的概念）：parity 不报缺 */
+/** DataTable 没移植的属性（TreeDataTable 继承它，一样） */
+const DATA_TABLE_NOT_PORTED = {
+  onEditStart: '编辑由表格自己管（EditTrigger、Enter / F2、直接打字），代码里调 StartEdit；上游这是 DataTable 交给 DataTableView 的内部回调',
+  onEditKeydown: '同 onEditStart：编辑中的按键（Enter 提交、Tab 到下一格、Esc 放弃）由表格自己处理',
+  partialKeys: '半选由子类给（TreeDataTable 的父子联动，internal 的 IsPartial）；上游这是 TreeDataTable 交给 DataTable 的内部属性',
+  estimateRowHeight: '各行量出的高度按 key 记下，没量过的按第一行估计，不要调用方估计',
+  handle: '方法直接在控件上：ScrollToRow（ScrollAlign 对齐）',
+  flexible: '写 MaxHeight（如 Infinity）就去掉默认的 32em 上限：放在 Grid 的 * 行里按行数自己的高度，最多占满剩下的高度',
+  propsRoot: '外层就是 DataTable 自己（外框与滚动区域由它管）：高度写 Height / MaxHeight，外观按密度、样式与主题 token',
+  propsSkeleton: '加载中的骨架是普通的行：样式写行（PART_Row）与格（PART_Cell）',
+  propsSortLabel: '排序按钮里的文字不另包一层：样式写排序按钮（PART_SortButton）',
+  propsHead: '表头是一行（PART_HeaderRow，吸顶由表格排），没有 thead 一层',
+  propsHeadRow: '表头就是 PART_HeaderRow 这一行，分组表头也在这一行里',
+  propsContent: '有把手或 Leading 时内容直接是外层 Flex（PART_Leading）的最后一个子项，不另包一层',
+  propsEmptyCell: '空状态直接放在表体里（PART_Empty），没有跨列的格',
+  propsDetailToggleCell: '展开按钮所在的格不另成部件：样式写展开按钮（PART_DetailToggle）',
+  propsDetailCell: '详情行（PART_DetailRow）本身就是详情的容器，没有跨列的格',
+  propsFoot: '合计是一行（吸底由表格排），没有 tfoot 一层：样式写合计格（PART_SummaryCell）',
+};
+
 export const PROPS_NOT_PORTED = {
+  DataTable: DATA_TABLE_NOT_PORTED,
+  TreeDataTable: { ...DATA_TABLE_NOT_PORTED, propsToggle: '展开按钮是部件 PART_Toggle（TreeDataTableParts）：外观在部件样式里，按名字写的样式盖得过；展开状态、加载中与点击由表格管' },
   ColumnFilterButton: {
     propsTrigger: '漏斗按钮是部件 ColumnHeaderActionsParts.Trigger（IconButton）：外观按部件名写样式；选项的 \'text\' 是 IsKeyword',
   },

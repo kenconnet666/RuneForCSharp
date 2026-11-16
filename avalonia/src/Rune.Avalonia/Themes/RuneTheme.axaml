@@ -60,6 +60,7 @@
   <StyleInclude Source="avares://Rune.Avalonia/Layout/Splitter/SplitterParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Layout/FloatButton/FloatButtonParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Table/SelectionBarParts.axaml" />
+  <StyleInclude Source="avares://Rune.Avalonia/Table/DataTable/DataTableParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Display/Card/CardParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Base/CodeBlock/CodeBlockParts.axaml" />
   <StyleInclude Source="avares://Rune.Avalonia/Display/Avatar/AvatarParts.axaml" />

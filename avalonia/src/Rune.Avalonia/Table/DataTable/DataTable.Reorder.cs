@@ -67,7 +67,7 @@ public partial class DataTable
         return model;
     }
 
-    string KeyText(object row) => Convert.ToString(KeyOf(row), System.Globalization.CultureInfo.InvariantCulture) ?? "";
+    internal string KeyText(object row) => Convert.ToString(KeyOf(row), System.Globalization.CultureInfo.InvariantCulture) ?? "";
 
     /// <summary>拖着的那一行的 key（行画成浮起的样子）；没有时 null。</summary>
     internal string? DraggingKey => sorting?.Active;

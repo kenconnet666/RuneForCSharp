@@ -1,0 +1,11 @@
+<!-- DataTable 部件的默认外观：详情行、树形表格子项的展开按钮（同上游 IconButton sm、圆形；幽灵、中性色调）。写成样式，使用方按部件名写的样式盖得过 -->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rune="clr-namespace:Rune.Avalonia">
+  <Style Selector="rune|DataTable rune|IconButton#PART_DetailToggle, rune|TreeDataTable rune|IconButton#PART_Toggle">
+    <Setter Property="Variant" Value="Ghost" />
+    <Setter Property="Tone" Value="Neutral" />
+    <Setter Property="Size" Value="Sm" />
+    <Setter Property="Radius" Value="Full" />
+  </Style>
+</Styles>

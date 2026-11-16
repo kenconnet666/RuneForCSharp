@@ -34,7 +34,7 @@ namespace Rune.Avalonia;
 /// <item>定位：<see cref="ScrollToRow"/> 滚到那一行（停在吸顶表头之下）。</item>
 /// </list>
 /// 列宽：<see cref="Resizable"/>（或列的 Resizable）时表头的列结束边有 <see cref="ColumnResizer"/>，拖动或用 ← / → 调整，写回 <see cref="ColumnWidths"/>。
-/// 行高按第一行量出的高度（单元格默认一行，放不下省略号）。表头筛选、列菜单、就地编辑、行拖动、详情行、分组表头还没做（见 docs/DESIGN.md）。
+/// 还有表头筛选、列菜单、就地编辑、行拖动、详情行、分组表头、列虚拟化（见 docs/DESIGN.md）；有层级的行用 <see cref="TreeDataTable"/>。
 /// 部件：<see cref="DataTableParts"/>。外观同 Table：<see cref="Density"/>、<see cref="Variant"/>、<see cref="Striped"/>。
 /// </summary>
 public partial class DataTable : Control
@@ -138,6 +138,9 @@ public partial class DataTable : Control
     /// <summary>展开了的行的 key（双向绑定）。</summary>
     public static readonly StyledProperty<IReadOnlyList<object>> ExpandedRowsProperty =
         AvaloniaProperty.Register<DataTable, IReadOnlyList<object>>(nameof(ExpandedRows), [], defaultBindingMode: BindingMode.TwoWay);
+
+    /// <summary>第一个数据列的内容前面加的东西（行与它在显示的行里的下标；TreeDataTable 用它放缩进与展开按钮）。</summary>
+    public static readonly StyledProperty<Func<object, int, Control?>?> LeadingProperty = AvaloniaProperty.Register<DataTable, Func<object, int, Control?>?>(nameof(Leading));
 
     /// <summary>勾选列的宽度（像素，同上游 SELECT_WIDTH）。</summary>
     internal const double SelectWidth = 44;
@@ -267,6 +270,12 @@ public partial class DataTable : Control
     /// <summary>展开了的行。</summary>
     public IReadOnlyList<object> ExpandedRows { get => GetValue(ExpandedRowsProperty); set => SetValue(ExpandedRowsProperty, value); }
 
+    /// <summary>第一个数据列前面加的东西。</summary>
+    public Func<object, int, Control?>? Leading { get => GetValue(LeadingProperty); set => SetValue(LeadingProperty, value); }
+
+    /// <summary>一行第一个数据列前面的东西：默认是 <see cref="Leading"/> 给的。</summary>
+    internal virtual Control? LeadingOf(object row, int index) => Leading?.Invoke(row, index);
+
     /// <summary>这一行有详情（给了 RenderDetail，HasDetail 不是 false）。</summary>
     internal bool RowHasDetail(object row) => RenderDetail is not null && (HasDetail?.Invoke(row) ?? true);
 
@@ -311,7 +320,19 @@ public partial class DataTable : Control
 
     internal object KeyOf(object row) => GetKey?.Invoke(row) ?? row;
 
-    internal bool IsSelected(object row) => Selected.Contains(KeyOf(row));
+    internal bool IsSelected(object row) => CheckedKeys.Contains(KeyOf(row));
+
+    /// <summary>显示为选中的行的 key：默认就是 <see cref="Selected"/>；树形表格按父子联动推出（子行全勾上时父行也算勾上）。</summary>
+    internal virtual IReadOnlyCollection<object> CheckedKeys => Selected;
+
+    /// <summary>这一行的勾选框半选（树形表格的父行：子孙只勾了一部分）。</summary>
+    internal virtual bool IsPartial(object row) => false;
+
+    /// <summary>勾选写回 Selected 之前的最后一步：默认原样；树形表格按变了的那一行联动子孙与祖先。</summary>
+    internal virtual IReadOnlyList<object> LinkSelection(IReadOnlyList<object> next) => next;
+
+    /// <summary>数据整理成显示的顺序（筛选之前）：默认按排序（ManualSort 时原样）；树形表格按展开状态展开、每一层各自排序。</summary>
+    internal virtual IReadOnlyList<object> Ordered(IReadOnlyList<object> items) => ManualSort ? items : TableColumns.SortRows(items, Columns, ActiveSorts, Lang.Code);
 
     internal bool CanSelect(object row) => IsRowSelectable?.Invoke(row) ?? true;
 
@@ -343,7 +364,7 @@ public partial class DataTable : Control
         else if (change.Property == SelectionModeProperty || change.Property == IsLoadingProperty || change.Property == EmptyProperty || change.Property == SummaryLabelProperty
                  || change.Property == ResizableProperty || change.Property == ColumnMenuProperty || change.Property == CellNavigationProperty
                  || change.Property == EditTriggerProperty || change.Property == ValidateRowProperty || change.Property == RenderDetailProperty
-                 || change.Property == HasDetailProperty || change.Property == VirtualColumnsProperty || change.Property == DensityProperty || change.Property == StripedProperty || change.Property == GetKeyProperty) surface.Rebuild();
+                 || change.Property == HasDetailProperty || change.Property == LeadingProperty || change.Property == VirtualColumnsProperty || change.Property == DensityProperty || change.Property == StripedProperty || change.Property == GetKeyProperty) surface.Rebuild();
         if (change.Property == VariantProperty || change.Property == DensityProperty) SyncFrame();
         // 只是宽度变了：重排，不重建（拖动中的手柄要留着）
         if (change.Property == ColumnWidthsProperty) surface.Relayout();
@@ -361,10 +382,10 @@ public partial class DataTable : Control
         Refresh();
     }
 
-    /// <summary>数据、列、排序变了：重算显示的列与行，表格重建。</summary>
-    void Refresh(bool header = true)
+    /// <summary>数据、列、排序变了：重算显示的列与行，表格重建（header 为 false 时只重建表体）。</summary>
+    internal void Refresh(bool header = true)
     {
-        source = ItemsSource?.Cast<object>().ToList() ?? [];
+        source = Ordered(ItemsSource?.Cast<object>().ToList() ?? []);
         var hidden = HiddenColumns ?? [];
         Arranged = TableColumns.Arrange(Columns, ColumnOrder, ColumnPins);
         Shown = [.. Arranged.Where(column => !hidden.Contains(column.Key))];
@@ -374,8 +395,7 @@ public partial class DataTable : Control
         HeaderCells = layout.Any(cell => cell.Group is not null) ? layout : [];
         // 筛选的选项看全部行（不是筛过的）
         FilterOptionsOf = Columns.Where(column => column.Filter is not null).ToDictionary(column => column.Key, column => TableColumns.FilterOptions(column, source, Lang.Code));
-        var kept = ManualFilter ? source : TableColumns.FilterRows(source, Columns, Filters, Lang.Code);
-        View = ManualSort ? kept : TableColumns.SortRows(kept, Columns, ActiveSorts, Lang.Code);
+        View = ManualFilter ? source : TableColumns.FilterRows(source, Columns, Filters, Lang.Code);
         if (header) surface.Rebuild();
         else surface.RebuildBody();
     }
@@ -475,28 +495,29 @@ public partial class DataTable : Control
     {
         if (!CanSelect(row) || SelectionMode is not { } mode) return;
         var key = KeyOf(row);
+        var current = CheckedKeys;
         IReadOnlyList<object> next = mode == Rune.Avalonia.SelectionMode.Multiple
-            ? Selected.Contains(key) ? [.. Selected.Where(item => !Equals(item, key))] : [.. Selected, key]
+            ? current.Contains(key) ? [.. current.Where(item => !Equals(item, key))] : [.. current, key]
             : [key];
-        SetCurrentValue(SelectedProperty, next);
+        SetCurrentValue(SelectedProperty, LinkSelection(next));
     }
 
     /// <summary>点了表头的全选：能选的行都已选时取消它们，否则选上它们（不能选的行原样）。</summary>
     internal void ToggleAll()
     {
         var selectable = View.Where(CanSelect).Select(KeyOf).ToList();
-        var set = Selected.ToHashSet();
+        var set = CheckedKeys.ToHashSet();
         var all = selectable.Count > 0 && selectable.All(set.Contains);
         if (all) set.ExceptWith(selectable);
         else set.UnionWith(selectable);
-        SetCurrentValue(SelectedProperty, set.ToList());
+        SetCurrentValue(SelectedProperty, LinkSelection(set.ToList()));
     }
 
     /// <summary>全选框的状态：全选、部分、没选（只数能选的行）。</summary>
     internal (bool All, bool Some) SelectionState()
     {
-        if (Selected.Count == 0) return (false, false);
-        var set = Selected.ToHashSet();
+        if (CheckedKeys.Count == 0) return (false, false);
+        var set = CheckedKeys.ToHashSet();
         var selectable = View.Where(CanSelect).Select(KeyOf).ToList();
         var count = selectable.Count(set.Contains);
         return (selectable.Count > 0 && count == selectable.Count, count > 0 && count < selectable.Count);
@@ -545,6 +566,9 @@ public static class DataTableParts
 
     /// <summary>行拖动的把手（第一个数据列的前面）。</summary>
     public const string RowHandle = "PART_RowHandle";
+
+    /// <summary>第一个数据列里把手、Leading 与内容的外层（有把手或 Leading 时才有，Flex）。</summary>
+    public const string Leading = "PART_Leading";
 
     /// <summary>编辑中的格里的编辑器。</summary>
     public const string Editor = "PART_Editor";
