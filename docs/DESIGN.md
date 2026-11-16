@@ -1652,9 +1652,20 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 勾选框按项建一次，Hidden 变了就地改勾选与可用（整张列表重建会让键盘勾选的焦点丢掉）；只剩一列可见时它的勾选框不可用（只数现有的列）。部件名在 ColumnSettingsParts（上游 propsTrigger、propsPanel、propsList、propsCheckbox、propsReset，另有 header、title）。
 - 示例：Table 页的 column-settings（我们自己的：上游只在 QueryTable 里用它，这里配 ColumnTable，两边看同一份 Hidden、Order）。
 
+### DataTable：列定义的排序、筛选、宽度（2026-11-16，仅 Avalonia，分几轮做）
+
+- 计划：这一轮是孪生文件 TableColumns 里的纯计算；下一轮 DataTable 本体（一个 ScrollViewer，里面自己的面板只建看得见的行、表头吸顶、合计行吸底，固定列按横向偏移挪回来）、
+  排序、勾选、加载与空状态、ColumnResizer；再往后是表头筛选与列菜单（ColumnHeaderActions）、就地编辑与单元格导航、行拖动、详情行、分组表头，然后 TreeDataTable、QueryTable、DataImport。
+- DataTableColumn 加了 Sortable、Filter（ColumnFilter：Values 列出出现过的值、Keyword 关键字、或自己给 Options 与 Match）、Sticky（ColumnSticky）、Resizable。
+- 排序：SortState(Key, SortDirection)，NextSort、NextSorts（Shift 追加）、FormatSorts / ParseSorts（-amount,name）、SortRows（几列、稳定、空值总在最后、数字列里的十进制字符串按数值）。
+  比较是 TableColumns.Comparer（上游 createComparer）：数值按 decimal、日期按时间、文字按 CompareInfo 的 IgnoreCase | IgnoreNonSpace | NumericOrdering（同 Intl.Collator 的 sensitivity: base、numeric）。
+- 筛选：FilterOptions（状态按阶段顺序、用状态名，其余按语言排）、FilterRows（关键字按 CompareInfo.IndexOf 忽略大小写与重音）。Arrange 加了 pins，固定列排到两头。
+- 宽度：StickyOffsetsOf、TableMinWidth、FlexColumnWidth（上游是 CSS 的 max(min, calc(min + (100cqi − 最小宽度) / n))，这里直接给外层宽度算出像素）、ColumnSkips（列虚拟化）。
+- 测试对上上游 table.test 的纯函数用例、column-features 的多列排序与筛选、column-window 的列虚拟化。
+
 ### ColumnTable 与列定义（2026-11-16，仅 Avalonia）
 
-- 列定义是孪生文件 TableColumns.cs（以后的 DataTable 也用）：DataTableColumn(Key, Header) 记录，Value、Cell、Type（ColumnType 枚举）、Format（NumericFormat）、Width、MinWidth、Align（TableAlign）、Wrap、Empty、Statuses、Summary 是 init 属性；
+- 列定义是孪生文件 TableColumns.cs（DataTable 也用，见上一节）：DataTableColumn(Key, Header) 记录，Value、Cell、Type（ColumnType 枚举）、Format（NumericFormat）、Width、MinWidth、Align（TableAlign）、Wrap、Empty、Statuses、Summary 是 init 属性；
   这一轮只放 ColumnTable 用得到的，排序、筛选、编辑、固定、调整宽度等 DataTable 再加。取值同 FieldCompare：Value 函数，或按 Key 取同名属性（字典按键）。
   上游 summary 的 'sum' 或函数在这里是 ColumnSummary.Sum / ColumnSummary.Of(rows => …)。Cell 返回 null 时按类型显示值（上游是渲染空）：只有几行要换内容时不用自己格式化其余的行。
 - TableColumns 的计算照 columns.ts：TypeOf（写了 Type、Format 或相加的合计算数字；否则看第一个非空值，字符串不猜）、AlignOf（数字类靠结束边）、Numeric（数值与十进制字符串换成 decimal，不经过浮点）、
