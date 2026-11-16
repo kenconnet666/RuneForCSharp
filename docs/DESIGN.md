@@ -1848,6 +1848,10 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 
 - 上游的主题偏好（createThemePreference：选择存在 localStorage、按系统切换、把主题交给 createUi）在桌面上就是 Avalonia 的主题变体：Value 是当前的选择（ThemeVariant，Default 是跟随系统），选中时写回，AppliesToApplication（默认 true）时设到 Application.Current.RequestedThemeVariant；只改一块时关掉它，把 Value 交给 ThemeVariantScope。记住选择由应用自己存 Value。列出的主题是 Themes（默认亮色、暗色，全部内置的是 RuneThemeVariants.All），IncludeSystem 列"跟随系统"（上游的 system，与 System 命名空间同名）。上游选中后从按钮处圆形展开（View Transitions），桌面上直接切换。
 - 菜单是 Menu 加一个 MenuRadioGroup（读屏名称"主题"，不显示组标题），触发器是 IconButton（图标表示当前的选择）。内置主题与跟随系统有默认文字（语言包 Theme*，公开为 ThemeSwitcher.BuiltinLabel，上游的 builtinThemeLabel）和默认图标（同上游 DEFAULT_ICONS），自己的主题用 Labels、Icons（按主题变体的 Key）。上游透传给菜单的属性：IsOpen、Placement、Size、Ripple、OpenChanged 接到里面的菜单。
+- 主题定制的数据与换算（2026-11-16，孪生文件 ThemeSettings；ThemeCustomizer 的界面接着做）：Radix 色阶由 tools/theme-gen 从上游 palette.ts 列出的色阶与它依赖的
+  @radix-ui/colors 生成三个库的 RadixScales.g.cs（CI 的生成文件核对里加了它，许可证在 licenses/radix-colors.txt）。ThemePalette（AccentSteps、NeutralSteps、Step、Swatch、Colors）
+  照 palette.ts；ThemeSettings 是记录（Accent、Neutral 是色阶名的字符串，Radius、Font、Motion 是枚举），ThemeSettingsMath 给倍数与缩放。
+  测试顺带核对了默认主题的颜色就是 indigo、slate 按色阶表取的值（暗色的 accentHover 为对比度调亮过，同上游 adjusted）。
 - ThemeThumbnail（上游在 theme-customize，这里放 ThemeCustomize 文件夹）：自己画的页面一角，颜色用 TryFindResource(键, 主题变体) 取那套主题的资源，不用套 ThemeVariantScope；属性叫 ThemeVariant（Theme 是 Avalonia 控件主题）。6em × 3.75em 定宽，默认靠左、顶端对齐（上游 inline-flex，放在竖排里不被拉宽），读屏跳过。
 - 示例：ThemeSwitcher 页的 scoped（亮色、暗色、纸张，只作用于下面一块）与 gallery（全部内置主题的单选卡片）。
 
