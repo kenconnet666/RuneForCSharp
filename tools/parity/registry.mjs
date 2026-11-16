@@ -188,6 +188,8 @@ export const COMPONENT_PROP_RENAMES = {
   // 数据叫 ItemsSource（同 ColumnTable）；已选行的 key 是列表，同 Tree 的 Selected
   DataTable: { rows: 'ItemsSource', _selected: 'Selected', onReorder: 'Reordered', onRowClick: 'RowClicked', onRangeChange: 'RangeChanged' },
   QueryTable: { _selected: 'Selected' },
+  // 上游的 zod schema 既校验又转换：C# 里是逐行解析的函数，返回导入的值或各字段的错误
+  DataImport: { schema: 'ParseRow' },
   // TreeDataTable 是 DataTable 的子类：同名的属性一样改名，rows 是第一层
   TreeDataTable: {
     rows: 'ItemsSource', _expanded: 'Expanded', _selected: 'Selected', onReorder: 'Reordered', onRowClick: 'RowClicked', onRangeChange: 'RangeChanged',
