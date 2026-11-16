@@ -46,6 +46,7 @@ export const COMPONENT_PROP_RENAMES = {
   Listbox: { items: 'ItemsSource', onPick: 'Picked' },
   // 多选的值同 Listbox 叫 Values
   Transfer: { items: 'ItemsSource', _value: 'Values' },
+  TreeTransfer: { items: 'ItemsSource', _value: 'Values' },
   // Text 是 TextBlock 自己的属性
   CodeText: { text: 'Source' },
   // Measure 是布局的方法
