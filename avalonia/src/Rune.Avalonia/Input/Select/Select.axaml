@@ -45,6 +45,8 @@
       <Setter Property="MinHeight" Value="{rune:Em 1.5, Min=24}" />
       <Setter Property="Margin" Value="{rune:Em -0.25, 0}" />
     </Style>
+    <!-- 框里的小按钮 textMuted（TS 的 controlParts.button）：带上 :ghost 才盖得过按钮主题里 ghost 的文字色 -->
+    <Style Selector="^ /template/ rune|ClearButton#PART_Clear:ghost"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" /></Style>
     <Style Selector="^:pointerover"><Setter Property="BorderBrush" Value="{DynamicResource Rune.Brush.BorderStrong}" /></Style>
     <Style Selector="^:focus /template/ Border#PART_FocusRing"><Setter Property="IsVisible" Value="True" /></Style>
     <Style Selector="^:soft">

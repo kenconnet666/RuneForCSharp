@@ -44,6 +44,8 @@
       <Setter Property="MinHeight" Value="{rune:Em 1.5, Min=24}" />
       <Setter Property="Margin" Value="{rune:Em -0.25, 0}" />
     </Style>
+    <!-- 框里的小按钮 textMuted（TS 的 controlParts.button）：带上 :ghost 才盖得过按钮主题里 ghost 的文字色 -->
+    <Style Selector="^ /template/ rune|IconButton#PART_Chevron:ghost"><Setter Property="Foreground" Value="{DynamicResource Rune.Brush.TextMuted}" /></Style>
     <Style Selector="^:open /template/ rune|IconButton#PART_Chevron"><Setter Property="RenderTransform" Value="rotate(180deg)" /></Style>
   </ControlTheme>
   <ControlTheme x:Key="{x:Type rune:Autocomplete}" TargetType="rune:Autocomplete" BasedOn="{StaticResource {x:Type rune:Combobox}}" />

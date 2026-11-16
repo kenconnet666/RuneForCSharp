@@ -53,8 +53,8 @@ public sealed class EmExtension
     /// <summary>系数取元素自己的 <see cref="Rune.Avalonia.Resolved"/> 附加属性（档位解析出的系数，如 <c>Radius</c>）；没有值时不设。</summary>
     public string? Resolved { get; set; }
 
-    /// <summary>下限（设备无关像素）：CSS 的 <c>max(2.25em, 24px)</c>。</summary>
-    public double Min { get; set; }
+    /// <summary>下限（设备无关像素）：CSS 的 <c>max(2.25em, 24px)</c>；不写时不限（负的外边距照常是负的）。</summary>
+    public double Min { get; set; } = double.NegativeInfinity;
 
     /// <summary>XAML 调用：返回绑定到字号的绑定（Resource 写了时是字号与资源的多重绑定）。</summary>
     /// <param name="serviceProvider">XAML 服务（不使用）。</param>
