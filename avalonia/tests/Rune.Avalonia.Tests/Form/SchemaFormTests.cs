@@ -288,4 +288,53 @@ public class SchemaFormTests
         var error = Assert.Throws<InvalidOperationException>(() => SchemaFields.ControlOf(field, new FormSources()));
         Assert.Contains("FormSources", error.Message);
     }
+
+    enum OrderStatus
+    {
+        [Display(Name = "草稿")] Draft,
+        [Display(Name = "已下单")] Ordered,
+    }
+
+    sealed class OrderFilters
+    {
+        [Display(Name = "关键字", Prompt = "单号或供应商")] public string Keyword { get; set; } = "";
+        [Display(Name = "状态")] public OrderStatus? Status { get; set; }
+        [Display(Name = "只看加急"), SchemaField(Control = SchemaControl.Checkbox)] public bool Urgent { get; set; }
+        [Display(Name = "金额")] public decimal? Amount { get; set; }
+        public Address Address { get; set; } = new();
+    }
+
+    sealed class Address
+    {
+        public string City { get; set; } = "";
+    }
+
+    [Fact]
+    [Upstream("schema-filters", "按 pick 的顺序给出 Field，值读写传进来的对象；文字可以清空；嵌套对象不生成")]
+    public Task Filters_read_and_write_the_object() => HeadlessUi.Run(() =>
+    {
+        var values = new OrderFilters();
+        var fields = SchemaFields.Filters(typeof(OrderFilters), values, omit: ["Amount"]);
+        Assert.Equal(["关键字", "状态", "只看加急"], fields.Select(field => field.Label));
+        var text = Assert.IsType<TextField>(fields[0].Content);
+        Assert.Equal(("单号或供应商", true), (text.PlaceholderText, text.Clearable));
+        text.Text = "PO-1031";
+        Assert.Equal("PO-1031", values.Keyword);
+        var checkbox = Assert.IsType<Checkbox>(fields[2].Content);
+        checkbox.Toggle();
+        Assert.True(values.Urgent);
+        var select = Assert.IsType<Select>(fields[1].Content);
+        select.Value = "Ordered";
+        Assert.Equal(OrderStatus.Ordered, values.Status);
+    });
+
+    [Fact]
+    [Upstream("schema-filters", "fields 换掉某个条件的控件")]
+    public Task Filters_can_take_custom_controls() => HeadlessUi.Run(() =>
+    {
+        var custom = new TextBlock { Text = "自定义" };
+        var fields = SchemaFields.Filters(typeof(OrderFilters), new OrderFilters(), pick: ["Status"], fields: new Dictionary<string, Func<SchemaField, Control>> { ["Status"] = _ => custom });
+        var field = Assert.Single(fields);
+        Assert.Equal(("状态", (Control?)custom), (field.Label, field.Content));
+    });
 }

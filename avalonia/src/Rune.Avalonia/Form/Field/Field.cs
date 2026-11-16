@@ -311,7 +311,7 @@ public class Field : Control
     /// 字段与唯一控件的双向绑定：表单的值变了写到控件（SetCurrentValue，不顶掉控件上的样式与绑定），控件的值变了写回表单。
     /// 控件上已经写了值（本地值或绑定）时不接管，同上游"控件上没写值时"。
     /// </summary>
-    sealed class Bound : IDisposable
+    internal sealed class Bound : IDisposable
     {
         static readonly string[] Candidates = ["Value", "IsChecked", "Values", "Text"];
 
@@ -334,14 +334,20 @@ public class Field : Control
         /// <summary>找到要绑定的属性并接上；previous 是上一次的绑定（同一个控件、同一个属性时，控件上的值是自己写的，照样接管）。</summary>
         internal static Bound? Create(Control control, string? name, IFormController form, string path, Bound? previous)
         {
+            if (ValueProperty(control, name) is not { } property) return null;
+            var ours = previous is not null && previous.control == control && previous.property == property;
+            return ours || !control.IsSet(property) ? new Bound(control, property, form, path) : null;
+        }
+
+        /// <summary>控件上放值的属性：写了名字时用它，否则是候选里第一个默认双向绑定的（Text、Value、IsChecked……）；没有可写的时为 null。</summary>
+        internal static AvaloniaProperty? ValueProperty(Control control, string? name)
+        {
             var registry = AvaloniaPropertyRegistry.Instance;
             var property = name is not null
                 ? registry.FindRegistered(control, name)
                 : Candidates.Select(candidate => registry.FindRegistered(control, candidate))
                     .FirstOrDefault(found => found is not null && found.GetMetadata(control.GetType()).DefaultBindingMode == global::Avalonia.Data.BindingMode.TwoWay);
-            if (property is not { IsReadOnly: false }) return null;
-            var ours = previous is not null && previous.control == control && previous.property == property;
-            return ours || !control.IsSet(property) ? new Bound(control, property, form, path) : null;
+            return property is { IsReadOnly: false } ? property : null;
         }
 
         /// <summary>表单的值写到控件（类型不同时按控件属性的类型转换，值相同时不写）。</summary>

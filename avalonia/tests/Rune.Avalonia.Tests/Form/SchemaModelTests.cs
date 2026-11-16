@@ -141,6 +141,7 @@ public class SchemaModelTests
     }
 
     [Fact]
+    [Upstream("schema-filters", "标签、类型、可选值来自同一份描述；嵌套对象不能当条件")]
     public void Condition_fields_reuse_labels_types_and_options()
     {
         var conditions = SchemaModel.ConditionFields(typeof(Supplier), omit: ["Company"]);

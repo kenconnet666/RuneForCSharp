@@ -208,6 +208,41 @@ public class SchemaFields : Control
     static string WithoutIndexes(string path) =>
         string.Join('.', path.Split('.').Where(part => !int.TryParse(part, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out _)));
 
+    /// <summary>
+    /// 按模型给出查询栏的一组条件（vue-tsx-pro 的 schemaFilters）：Field 加控件，值直接读写 values（QueryTable 的草稿、自己的对象），不经表单控制器；
+    /// 文字与选择可以清空。嵌套的对象、列表、人员、附件不生成。放进 FilterBar 的 Fields、QueryTable 的 Filters：
+    /// <code>Filters = draft =&gt; SchemaFields.Filters(typeof(OrderFilters), draft, pick: ["Keyword", "Status"])</code>
+    /// </summary>
+    /// <param name="type">条件的类型（字段从它推）。</param>
+    /// <param name="values">读写的对象。</param>
+    /// <param name="pick">只要这些字段，按这里的顺序（常用的放 Filters，其余的放 MoreFilters）。</param>
+    /// <param name="omit">不要这些字段。</param>
+    /// <param name="fields">换掉某些字段的控件：自己读写值。</param>
+    /// <param name="sources">数据来源（字典与远程选项）。</param>
+    public static IReadOnlyList<Field> Filters(Type type, object values, IReadOnlyList<string>? pick = null, IReadOnlyList<string>? omit = null,
+        IReadOnlyDictionary<string, Func<SchemaField, Control>>? fields = null, FormSources? sources = null) =>
+    [
+        .. SchemaModel.Pick(SchemaModel.Of(type), pick, omit)
+            .Where(field => field.Control is not (SchemaControl.Object or SchemaControl.List or SchemaControl.Table or SchemaControl.People or SchemaControl.File))
+            .Select(field =>
+            {
+                if (fields?.GetValueOrDefault(field.Key) is { } custom)
+                    return new Field { Label = field.Label, IsLabelHidden = field.Control == SchemaControl.Checkbox, Description = field.Description, Content = custom(field) };
+                var control = ControlOf(field, sources ?? new FormSources());
+                if (control is TextInputBase text and not NumberField) text.Clearable = true;
+                if (control is SelectBase select) select.Clearable = true;
+                if (Field.Bound.ValueProperty(control, BoundPropertyOf(field.Control)) is { } property)
+                {
+                    control.SetValue(property, FormController.Convert(FormController.Read(values, field.Key), property.PropertyType) ?? (property.PropertyType == typeof(string) ? "" : null));
+                    control.PropertyChanged += (_, e) =>
+                    {
+                        if (e.Property == property) FormController.Write(values, field.Key, e.NewValue);
+                    };
+                }
+                return new Field { Label = field.Label, IsLabelHidden = field.Control == SchemaControl.Checkbox, Description = field.Description, Content = control };
+            }),
+    ];
+
     /// <summary>按字段的描述选控件（上游 controlOf）。</summary>
     internal static Control ControlOf(SchemaField field, FormSources sources)
     {

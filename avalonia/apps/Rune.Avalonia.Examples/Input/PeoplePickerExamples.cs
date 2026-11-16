@@ -36,7 +36,7 @@ static class PeoplePickerExamples
         new("r-cashier", PeopleTypes.Role, "出纳", "财务部"),
     ];
 
-    static readonly PeopleSource Local = PeopleSource.Local(Org, Roles);
+    internal static readonly PeopleSource Local = PeopleSource.Local(Org, Roles);
 
     static Control Field()
     {
