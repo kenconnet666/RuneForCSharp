@@ -1469,6 +1469,19 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### ColorMath、ColorPicker、ColorField（2026-11-16，仅 Avalonia）
+
+- 颜色工具是孪生文件 ColorMath（上游 utils/data/color，基于 culori）：解析 #hex、rgb() / rgba()（旧写法与空格写法）、hsl() / hsla()、148 个颜色名与 transparent；
+  ToHex、FormatRgb、FormatHsl、FormatColor 的输出与 culori 4 逐字相同（JS 的 Math.round 往正无穷取，C# 默认是银行家舍入，自己写了 Round）；HSV 互转、WCAG 对比度（半透明先叠到底色上）、
+  ReadableText、MixColors、WithAlpha。测试里的期望值是在 node 里用 culori 跑出来的。
+- 色块（上游 swatchStyles）抽成内部的 SwatchView：棋盘格（fill / surface，0.5em 一组）垫底、颜色、正文色 14% 的内描边；ColorSwatch（格子 8px，同上游的 1rem 一组）、取色器的预览与预设、ColorField 的色块共用。
+  ColorSwatch 的取值改成同上游读出的 token 值：不透明 #rrggbb、半透明 rgba()（原来是 #rrggbbaa）；DocsKit 的示例名改成上游的（props-table、code-group、color-swatch），color-swatch 9.88% → 0.05%。
+- ColorPicker：值是 #hex，内部按 HSV 记着（自己写出去的值回来时不重算，拖到灰色色相不丢）。色板是自画的（左白右纯色、上面压黑），把手可聚焦、读屏是滑块（值是饱和度，ItemStatus 念饱和度与明度）；
+  色相、不透明度是 Slider，Slider 为它加了内部的 PaintTrack（自己画轨道，不画已选范围）与 TrackEm（0.75em）。格式 HEX / RGB / HSL（ToggleGroup xs）、输入框（回车或失焦写回）、预设与最近使用（同一个应用里共用，最多 8 个）。
+  上游的吸管（浏览器的 EyeDropper）桌面上没有。色块按钮 SwatchButton 发 Button.ClickEvent，可以直接当 Popover 的触发元素。
+- ColorField：TextInputBase 的子类，主题 BasedOn Rune.TextInput，模板里前面是色块（PART_SwatchHost 放 Popover，触发元素是色块），等宽字体；值只在回车或失焦时写回，写不成颜色时标 :invalid、失焦恢复。
+- 像素对照：ColorField brand 0.41%、formats 0.24%、states 0.21%；ColorPicker button 1.93%（上游有吸管按钮，滑块往右让出一格）。
+
 ### PeoplePicker、PeoplePickerPanel（2026-11-16，仅 Avalonia）
 
 - 数据是孪生文件 People.cs：PeopleEntry（Id、Type、Name、Description、Avatar、HasChildren；Key 是"类型:标识"，ToValue 去掉下级）、PeopleNode（部门带下级）、
