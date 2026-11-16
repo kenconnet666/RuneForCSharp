@@ -162,11 +162,11 @@ public class ColumnTable : Table
     }
 
     /// <summary>列的对齐：写了的，状态列起始边，其余按值类型。</summary>
-    static TableAlign AlignOf(DataTableColumn column, ColumnType[] types, int position) =>
+    internal static TableAlign AlignOf(DataTableColumn column, ColumnType[] types, int position) =>
         column.Align ?? (column.Statuses is not null ? TableAlign.Start : TableColumns.AlignOf(types[position]));
 
     /// <summary>一个值的显示（TS 的 useColumnDisplay）：空值显示列的 Empty（默认"—"），状态显示成 StatusBadge，其余按类型与 Format 格式化。</summary>
-    static object? Display(DataTableColumn column, ColumnType type, object? value, Lang lang)
+    internal static object? Display(DataTableColumn column, ColumnType type, object? value, Lang lang)
     {
         if (TableColumns.IsEmpty(value)) return column.Empty ?? lang.EmptyValue;
         if (column.Statuses is { } statuses) return new StatusBadge { Statuses = statuses, Value = Convert.ToString(value, System.Globalization.CultureInfo.InvariantCulture) };

@@ -183,6 +183,8 @@ export const COMPONENT_PROP_RENAMES = {
   TextTable: { rows: 'TextRows' },
   // 数据是 ItemsSource（Table 自己有 Rows，同 ItemsControl 的叫法）；合并单元格的函数加 Get 前缀（CellSpan 是它返回的类型）
   ColumnTable: { rows: 'ItemsSource', cellSpan: 'GetCellSpan' },
+  // 数据叫 ItemsSource（同 ColumnTable）；已选行的 key 是列表，同 Tree 的 Selected
+  DataTable: { rows: 'ItemsSource', _selected: 'Selected' },
   PivotTable: { cellSpan: 'GetCellSpan' },
   DocSection: { id: 'SectionId' },
   // 控件自己有 Width

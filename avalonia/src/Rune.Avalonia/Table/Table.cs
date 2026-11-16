@@ -672,10 +672,16 @@ public class TableCell : ContentControl
     internal void Apply(TableSection section, TableDensity density)
     {
         Section = section;
-        PseudoClasses.Set(":head", section is TableHead);
-        PseudoClasses.Set(":foot", section is TableFoot);
-        PseudoClasses.Set(":row-header", this is TableHeaderCell && section is not TableHead);
-        if (!IsSet(NowrapProperty)) TextBlock.SetTextWrapping(this, this is TableHeaderCell && section is TableHead ? TextWrapping.NoWrap : TextWrapping.Wrap);
+        ApplyRole(head: section is TableHead, foot: section is TableFoot);
+    }
+
+    /// <summary>按所在的部分设外观（伪类 :head、:foot、:row-header）；DataTable 的格不在 TableSection 里，直接给。</summary>
+    internal void ApplyRole(bool head, bool foot)
+    {
+        PseudoClasses.Set(":head", head);
+        PseudoClasses.Set(":foot", foot);
+        PseudoClasses.Set(":row-header", this is TableHeaderCell && !head);
+        if (!IsSet(NowrapProperty)) TextBlock.SetTextWrapping(this, this is TableHeaderCell && head ? TextWrapping.NoWrap : TextWrapping.Wrap);
     }
 
     /// <inheritdoc />
