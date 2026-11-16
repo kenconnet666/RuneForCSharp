@@ -1501,6 +1501,18 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 字重：同一窗口里先出现 DemiBold 的中文（标题"采购单"）后，Medium 的中文（Field 标签、按钮）渲染成粗体。Microsoft YaHei UI 没有 500 的字面，
   Avalonia 按已经加载的字面找最近的字重，DemiBold 先被加载时 500 离它更近（浏览器对 500 先找 400）。标题改成 Normal 时标签就恢复正常，属性都是对的。还没处理。
 
+### Sheet、TableCsv、DataImport（2026-11-16，仅 Avalonia；Sheet、TableCsv 是孪生文件）
+
+- Sheet（上游 table/sheet）：SheetTable(Name, Headers, Rows) 的行是 标题 → 值 的字典；FromMatrix 的选项里上游 splitLines 的 true 拆成 SplitAllLines，列名的集合是 SplitLines。
+  ReadCsv 读 Stream（按 BOM 认编码，默认 UTF-8），名字是去掉扩展名的文件名。TableCsv.ToCsv（上游 tableToCsv）按 CsvOptions 的 Culture、Currency、Zone 格式化（上游拿 useFormat）。
+- DataImport：上游的 zod schema 既校验又转换，这里是 ParseRow（字段名 → 原值 → ImportParseResult：导入的值，或 字段名 → 原因）；没有 ParseRow 时同上游的 required、type、validate，
+  数字是 decimal（TableColumns.Numeric，去掉千分位的逗号）。Parse 拿到 FileDrop 交出的 IStorageFile，默认读 CSV；Excel（上游 xlsx 子路径的 readXlsx、exportXlsx）随 xlsx 扩展再做。
+  onTemplate 是 TemplateRequested 事件，订阅了才有"下载模板"（按订阅数判断）。onImport 是 Import（返回 Task 时按钮加载中，出错时留在预览、说出 Message）。
+- 每换一步按当前这一步重建内容（Border 包着，Focusable、读屏名称是这一步的标题），换步后把焦点交给它（上游 panel.focus()）。预览表是 DataTable：RowTone 给错误行浅红、
+  ValidateRow 标出格子（invalid 类与提示）、CellChange 改原值并只重新校验这一行；对应列一步改了 Select 时就地改示例与"下一步"，不重建表（下拉框的焦点留着）。
+- 测试：IStorageFile 不能自己实现（Avalonia 标了不让用户实现），测试把读好的表交给 internal 的 Load；读 CSV 由 Sheet 的测试覆盖。
+- 像素对照：parts 0.92%（上游写着"支持 .xlsx, .csv"，这里只有 .csv）。
+
 ### Condition、ConditionBuilder（2026-11-16，仅 Avalonia）
 
 - 条件是孪生文件 Condition（上游 input/condition.ts）：抽象 record Condition 与 ConditionRule、ConditionAll、ConditionAny、ConditionNot，工厂 Condition.All / Any / Not；
