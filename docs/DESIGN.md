@@ -1483,6 +1483,24 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 测试另外对上上游 FilterBar.browser 的四条排版用例（headless 的排版是真的；字号设成文档站的 14px）。
 - 像素对照：tasks 0.22%、advanced 0.19%（暗色 0.61%：表格是 ColumnTable）。
 
+### TableQuery、QueryTable（2026-11-16，仅 Avalonia；TableQuery 是孪生文件）
+
+- TableQuery<T, TFilters>（上游 useTableQuery）：fetcher 拿到 TableQueryRequest（上游的 TableQuery：Page、PageSize、Sorts、ColumnFilters、Total、Filters、Params），
+  返回 TablePage。上游靠侦听合并同一轮的变化，这里每个改动各自只请求一次：Sort / Sorts / PageSize / ColumnFilters / Params 的 setter 在不是第一页时设 Page = 1
+  （Page 的 setter 去请求），已在第一页时直接请求。Search 总是请求，并和 Refresh 一样清掉已知的总数；已知总数按"筛选条件、表头筛选、Params"的文字比较是否同一组条件。
+  只采用最后一次请求（编号 + 取消），失败时保留上一次的行。上游的 params 是函数，这里是可写的 Params 属性；syncToUrl 是浏览器的概念，没有。新建后调一次 Refresh（同 InfiniteList）。
+- ToParams（上游 tableParams）：结果是有序的键值对（同名的键可以重复），QueryString 拼成地址。筛选条件的字段：字典按键，对象按公开属性（JsonPropertyName 优先），
+  值按线上的文字（decimal 不用科学计数法、日期 ISO、DateRange 两个同名参数、集合重复参数、Condition 写 JSON）。
+- QueryTable 不是泛型控件：Query 是 ITableQuery（RowItems、AppliedFilters、Search(object)）。Filters / MoreFilters 是 草稿 → 控件 的函数，草稿是已应用条件的浅拷贝
+  （字典复制、对象 MemberwiseClone）：控件改草稿的字段，"查询"交出又一份拷贝；"重置"换一份新草稿、重新建出条件控件（不要求筛选条件实现属性变化通知）。
+- 上游的 propsTable、propsFilterBar、propsPagination 是公开的 Table、FilterBar、Pagination（控件本身，详情行、色调、每页条数的选项直接写在上面）；
+  列设置与行高就在 Table 的 HiddenColumns、ColumnOrder、ColumnPins、ColumnWidths、Density 上，persistKey 不移植（调用方自己存）。
+  全屏按钮没有（上游在不支持 Fullscreen API 时也不显示）：桌面窗口自己可以最大化。错误文案是异常的 Message，没有时用语言包的 RequestFailed（桌面上没有 HTTP 的业务错误码）。
+- 有查询栏时标题与工具栏是 FilterBar 的 Start、End；没有时放在表格上方单独的一行。Fill 时外面包 ViewportFill，表格写 MaxHeight=Infinity 去掉 32em 的默认上限（上游 flexible）。
+- 像素对照：orders 6.05%：少了全屏按钮（工具栏的按钮整体右移一格）、状态列的行高差（同 DataTable），以及下面这条字重的问题。
+- 字重：同一窗口里先出现 DemiBold 的中文（标题"采购单"）后，Medium 的中文（Field 标签、按钮）渲染成粗体。Microsoft YaHei UI 没有 500 的字面，
+  Avalonia 按已经加载的字面找最近的字重，DemiBold 先被加载时 500 离它更近（浏览器对 500 先找 400）。标题改成 Normal 时标签就恢复正常，属性都是对的。还没处理。
+
 ### Condition、ConditionBuilder（2026-11-16，仅 Avalonia）
 
 - 条件是孪生文件 Condition（上游 input/condition.ts）：抽象 record Condition 与 ConditionRule、ConditionAll、ConditionAny、ConditionNot，工厂 Condition.All / Any / Not；
