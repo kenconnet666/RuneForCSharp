@@ -1469,6 +1469,20 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
 - 快捷选项是 DatePreset（固定值或每次打开时算的函数），当前值那一项 soft 样式、读屏念"已按下"；超出范围的不可用。"今天"按粒度是今年、本季度、本月、本周或今天，带时间时保留原来的时间（没有时补 00:00），选好后焦点去"时"那一段接着输入。WinForms 的按钮没有内容对齐，快捷选项的文字居中（上游靠左）。
 - 上游的值可以是 DateValue（valueType、CalendarDate 进出）：C# 里值总是 ISO 字符串，要日期运算时读 Date。示例：booking、granularity、presets、states、values（values 改成用 Date 做日期运算）。
 
+### Cascader、Area（2026-11-16，仅 Avalonia）
+
+- Cascader 也是 SelectBase 的子类：值是 Values（第一级到选中节点的 key 路径，没有选择时 null；单选的 Value 不用），触发框里列出的是这一条路径（ShowAllLevels、Separator），
+  清空写回 null（基类加了可覆盖的 ClearSelection）；上游的 renderValue 叫 RenderValue，返回 PART_Value 里的行内文字（Inline）。getKey 带同级位置，C# 是 Func&lt;object, int, string&gt;。
+- 弹出层里横排的各列是 CascaderColumn（可聚焦的 Border，读屏是列表；最窄 10em、最宽 16em，列间 borderMuted），每一项是 CascaderOption（外观同列表行，路径上的那一项 fillHover，
+  列有焦点时它画 2px 焦点环，已选 accentText，尾部是箭头 / 转圈 / 对勾）。没有用 Listbox：一列的"高亮"就是路径，切换高亮要同时换后面的列，Listbox 的单选与活动项对不上。
+  数据没变的列只更新状态，滚动位置留着；各列最高 20em（桌面的弹出层不会按窗口剩下的高度收）。
+- 键盘、懒加载（加载中那一列是转圈）、搜索整条路径（只列能选的）同上游；propsOption 的按节点计算不移植：选项上的 Node 就是节点，样式按它写。
+- Area（上游的 ui/area）：tools/area-gen 从上游的 data.ts（@vant/area-data，MIT，许可在 licenses/vant-area-data.txt）生成三个库的 AreaData.g.cs（"代码=名称;"的文本，第一次用到时解析），
+  CI 的生成文件核对里多一步 --check；Area.cs 是孪生文件：Tree(depth)（同样的 depth 返回同一个列表）、Name、Names、取值函数 KeyOf、LabelOf、ChildrenOf。region 示例的拼音匹配不移植。
+- 顺带修了 EmExtension：Min 默认是 0，`{rune:Em -0.25, 0}` 被截成 0——框里小按钮（清空、显示密码、步进、日期框的按钮、Combobox 的展开）、FormSection、AppShell 的负外边距一直没生效；
+  现在默认不限。框里的小按钮按上游 controlParts.button 改成 textMuted（选择器要带 :ghost 才盖得过按钮主题里 ghost 的文字色）。
+- 像素对照：change-on-select 0.02%、display 0.05%、lazy 0.02%、region 1.44%（Switch 的滑块、字体）。
+
 ### TreeSelect（2026-11-16，仅 Avalonia）
 
 - Select 的外壳抽成抽象基类 SelectBase（Avalonia）：外观、Value / Values / SelectionMode、清空、标签、弹出层与搜索框、开关与原因、触发框上的键盘、读屏的组合框都在基类；
