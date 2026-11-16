@@ -311,7 +311,7 @@ public class OtpFieldControl : Control, IFieldControl, IScopeAware
         Color? border = Invalid ? colors.Danger : ReadOnly ? colors.BorderMuted : soft ? null : hovered ? colors.BorderStrong : colors.Border;
         var radius = (Radius.In(theme.Radii) ?? 0) * Em;
         var px = DeviceDpi / 96f;
-        using var font = Fonts.Get(Font.FamilyName(), Font.SizeInPoints * Tokens.FontSize.Lg / Tokens.FontSize.Md, FontStyle.Bold);
+        var font = Fonts.Get(Font.FamilyName(), Font.SizeInPoints * Tokens.FontSize.Lg / Tokens.FontSize.Md, FontStyle.Bold);
         var ends = GroupEnds;
         var active = Active;
         var shown = Shown;

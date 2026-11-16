@@ -407,7 +407,7 @@ public class SliderControl : Control, IFieldControl, IScopeAware
     void PaintLabels(Graphics graphics, RectangleF track, Color color)
     {
         if (!Labelled) return;
-        using var font = Fonts.Get(Font.FamilyName(), Tokens.FontSize.Sm * 72 / 96 * (Font.SizeInPoints * 96 / 72 / Tokens.FontSize.Md), Font.Style);
+        var font = Fonts.Get(Font.FamilyName(), Tokens.FontSize.Sm * 72 / 96 * (Font.SizeInPoints * 96 / 72 / Tokens.FontSize.Md), Font.Style);
         foreach (var mark in Marks!)
         {
             if (mark.Label is not { } text) continue;
