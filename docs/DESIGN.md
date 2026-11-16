@@ -1695,8 +1695,11 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   量出来与估计不同时同一次 Measure 里重算位置。展开、收起不重建各行（按钮的焦点留着），详情行在量的时候建或收。
   详情行（DataTableDetailView）fill 底、下边线，宽度是可见区域、横向滚动时贴着可见区域的起始边，内容让过勾选列与展开列、和第一个数据列对齐。
 - 整理：DataTable.cs 拆成 DataTable（属性与状态）、DataTableSurface（虚拟滚动的内容）、DataTableRowView（一行）、DataTable.Editing（导航与编辑）。
-- 还没做：上游按窗口剩余高度铺 6–50 行骨架、滚动加载的骨架接在末尾、行拖动、分组表头、列虚拟化、主从视图的 activeKey、corrections 示例（单击就改、看得到改了什么）。
-- 像素对照：orders 0.17%、states 0.00%、single 0.58%（上游 205 高、我们 204）、columns 2.75%（表头矮约 1px、数字的字形）、editable 3.83%（行比上游矮约 0.5px，四行累加；合计的"合计"上游是粗体）、details 4.28%（同样是行高差，表高 323 对 327）。
+- 分组表头（第七轮）：孪生文件加了 DataTableColumnGroup 与 HeaderLayout（上游 headerLayout：组里的列被别的列隔开时另起一格、重复组标题），ColumnGroups 写组标题与组里各列的 Key。
+  有分组显示时表头两行：组标题在第一行、跨组里的列、居中，下边一条 borderMuted；组里的列在第二行；没分组的列与勾选列、详情列跨两行。
+  与分组相邻处一条竖线（分组的起始边、分组后面那一列的起始边，第一格除外），同上游的 groupDivider。隐藏了的列不算进组，组里的列全隐藏时回到一行表头。
+- 还没做：上游按窗口剩余高度铺 6–50 行骨架、滚动加载的骨架接在末尾、行拖动、列虚拟化、主从视图的 activeKey、corrections 示例（单击就改、看得到改了什么）。
+- 像素对照：orders 0.17%、states 0.00%、single 0.58%（上游 205 高、我们 204）、columns 2.75%（表头矮约 1px、数字的字形）、editable 3.83%（行比上游矮约 0.5px，四行累加；合计的"合计"上游是粗体）、details 4.28%（同样是行高差，表高 323 对 327）、changes 0.49%。
 
 
 ### ColumnTable 与列定义（2026-11-16，仅 Avalonia）
