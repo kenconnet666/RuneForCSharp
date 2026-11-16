@@ -107,7 +107,7 @@ WinForms 的输入框外壳点在不能聚焦的部件（图标、前后缀）�
 | 语言包破坏性合并：zoomIn、zoomOut、slideCounter、resetView 代替 lightbox*、chart* 的同义键 | Lightbox 已做（2026-11-15），用的是合并后的键 | 锁定时重新生成语言包即可 |
 | ImageCropper，usePanZoom 加 frame、cover，Upload 的 transform（88671dd1） | PanZoom 的 frame、cover 与 ImageCropper 三个平台都做了（2026-11-15），Upload 还没做 | 做 Upload 时加 transform，头像示例换成上游的“选好图片先弹出裁剪” |
 | ColorPicker 与颜色工具；ColorField 的色块改成按钮弹出 ColorPicker（613b93bb，破坏性） | 还没做 ColorField | 做 ColorField 时直接照新的 |
-| DataTable、TreeDataTable 的 virtualColumns（96efc7ad） | 还没做 DataTable | 做时照新的 |
+| DataTable、TreeDataTable 的 virtualColumns（96efc7ad） | DataTable 已做（2026-11-16，仅 Avalonia），TreeDataTable 继承它（2026-11-16） | 照新的 |
 | 下一步上游做 P2 文档站整改、P2.5 逐个组件精修，做完请我们整体跟进一遍 | | 到时按页重截、逐页对照 |
 
 ### 第七批（2026-11-08 通知，master 到 685a7553）
@@ -327,7 +327,7 @@ Avalonia 小节标题图标的颜色选择器（`rune|NavSection rune|Icon#PART_
 | 上游的变化 | 对我们 | 做法 |
 |---|---|---|
 | 按钮家族的不可用按 disabled / aria-disabled（buttonSx 去掉 disabled 参数） | 外观不变；我们的不可用是控件状态（IsDisabled，含可聚焦的不可用） | 不涉及 |
-| DataTable 已选、正在看的行按 aria-selected / aria-current（压过行色调）；CalendarBoard 选中、不可用按 aria-selected / aria-disabled，不可用格悬停不再有底色 | CalendarBoard 已做（2026-11-15，仅 Avalonia：选中、不可用是格子的类 selected、disabled，不可用格悬停没有底色）；DataTable 还没做 | DataTable 做时照新的 |
+| DataTable 已选、正在看的行按 aria-selected / aria-current（压过行色调）；CalendarBoard 选中、不可用按 aria-selected / aria-disabled，不可用格悬停不再有底色 | CalendarBoard 已做（2026-11-15，仅 Avalonia：选中、不可用是格子的类 selected、disabled，不可用格悬停没有底色）；DataTable 已做（2026-11-16，仅 Avalonia：已选、正在看的行 accentSoft 底压过色调） | 照新的 |
 
 先在 2bdf378e 上预跑：parity、行为对照都没变；CI 绿后连同 066ad66e 一起锁定。
 

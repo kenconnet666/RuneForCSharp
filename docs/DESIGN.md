@@ -1716,8 +1716,15 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   可见行的范围变了，排到量完之后再发；订阅了时已有数据还在加载，表体不换成骨架，3 行骨架接在末尾）。
   行高不再一样：每一行量出来的高度按 key 记下（内容换行的行），没量过的按第一行的高度估计，各行的位置按高度累加（同详情行）。
 - 顺手修的：TableCell 写了 Nowrap=false（要换行）时不换行——属性写成默认值不会触发变化，ApplyRole 又跳过写了 Nowrap 的格。改成按写了的值设（静态表格的像素没变）。
-- 还没做：上游按窗口剩余高度铺 6–50 行骨架、estimateRowHeight（我们按量出的行高排，不需要估计，属性不移植）；台账、导入的示例（导入在 DataImport 一起做），组织架构在 TreeDataTable。
-- 像素对照：orders 0.17%、states 0.00%、single 0.58%（上游 205 高、我们 204）、columns 2.75%（表头矮约 1px、数字的字形）、editable 3.83%（行比上游矮约 0.5px，四行累加；合计的"合计"上游是粗体）、details 4.28%（同样是行高差，表高 323 对 327）、changes 0.49%、reorder 4.69%（状态列的行高差）、corrections 1.85%（行高差）、wide 0.01%、master-detail 0.14%、infinite 0.01%、locate 3.29%（状态列的行高差）。
+- 第十二轮：TreeDataTable（子类，ItemsSource 是第一层）。DataTable 留了几个扩展点（internal virtual）：Ordered（数据整理成显示的顺序，在筛选之前；默认按排序，
+  树形表格按展开状态用 TreeData.Flatten 展开、每一层用 TableColumns.SortOrder 各自排）、LeadingOf（第一个数据列前面的东西，默认是公开的 Leading 属性，同上游 leading；
+  把手、Leading、内容包在部件 PART_Leading 的 Flex 里）、CheckedKeys / IsPartial / LinkSelection（勾选的显示与写回：树形表格多选时按 TreeData 的 Index、CheckStates、
+  ToggleChecked 联动，只变了一行时联动，全选原样写回；勾选框半选同上游 partialKeys）。key 按文字比较（GetKey 的值转成文字），写回时换回原来的 key。
+  展开与懒加载用 TreeExpansion（同 Tree）：加载开始、结束都重新展开表体（取回的子项放进了数据里），焦点在展开按钮上时跟到重建后的按钮。
+  展开按钮与详情行的共用 DisclosureToggle / SetDisclosure；它们的外观（幽灵、中性、sm、圆形）从本地值挪进 DataTableParts.axaml，使用方按部件名写的样式盖得过（上游的 propsToggle）。
+  缩进是 层级 × Indent em 的占位，叶子有 1.5em 的占位让文字对齐。
+- 还没做：上游按窗口剩余高度铺 6–50 行骨架、estimateRowHeight（我们按量出的行高排，不需要估计，属性不移植）；台账、导入的示例（导入在 DataImport 一起做）。
+- 像素对照：orders 0.17%、states 0.00%、single 0.58%（上游 205 高、我们 204）、columns 2.75%（表头矮约 1px、数字的字形）、editable 3.83%（行比上游矮约 0.5px，四行累加；合计的"合计"上游是粗体）、details 4.28%（同样是行高差，表高 323 对 327）、changes 0.49%、reorder 4.69%（状态列的行高差）、corrections 1.85%（行高差）、wide 0.01%、master-detail 0.14%、infinite 0.01%、locate 3.29%（状态列的行高差）、tree 0.03% / 0.33%。
 
 
 ### ColumnTable 与列定义（2026-11-16，仅 Avalonia）
