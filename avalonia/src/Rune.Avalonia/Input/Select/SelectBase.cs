@@ -194,7 +194,7 @@ public abstract class SelectBase : TemplatedControl, IFieldControl
     private protected SearchField Search { get; } = new() { Name = SelectParts.Search, Variant = ControlVariant.Soft };
 
     /// <summary>多选。</summary>
-    protected bool Multiple => SelectionMode == SelectionMode.Multiple;
+    protected virtual bool Multiple => SelectionMode == SelectionMode.Multiple;
 
     /// <summary>校验未通过（自己的或所在 Field 的）。</summary>
     protected bool Invalid => IsInvalid ?? Field.Of(this)?.Invalid ?? false;
@@ -216,6 +216,9 @@ public abstract class SelectBase : TemplatedControl, IFieldControl
 
     /// <summary>触发框里列出的值（标签、文字）：默认就是已选的值。</summary>
     protected virtual IReadOnlyList<string> Shown => Selected;
+
+    /// <summary>没写 <see cref="Placeholder"/> 时的占位文字：语言包的"请选择"。</summary>
+    protected virtual string DefaultPlaceholder => Provider.GetLang(this).SelectPlaceholder;
 
     /// <summary>值的显示文字。</summary>
     protected abstract string LabelOf(string value);
@@ -278,7 +281,6 @@ public abstract class SelectBase : TemplatedControl, IFieldControl
     /// <summary>值 → 触发框（文字或标签）、清空按钮、状态伪类；子类先同步自己的内容再调它。</summary>
     protected virtual void Sync()
     {
-        var lang = Provider.GetLang(this);
         var shown = Shown;
         var labels = shown.Select(LabelOf).ToList();
         var tagged = Multiple && labels.Count > 0;
@@ -293,7 +295,7 @@ public abstract class SelectBase : TemplatedControl, IFieldControl
         if (valueText is not null)
         {
             valueText.IsVisible = !tagged;
-            valueText.Text = labels.Count == 0 ? Placeholder ?? lang.SelectPlaceholder : labels[0];
+            valueText.Text = labels.Count == 0 ? Placeholder ?? DefaultPlaceholder : labels[0];
         }
         PseudoClasses.Set(":placeholder", labels.Count == 0);
         PseudoClasses.Set(":invalid", Invalid);
