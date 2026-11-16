@@ -178,7 +178,18 @@ public class FileDrop : Control, IFieldControl
             Sync();
     }
 
-    /// <summary>内容、文字、状态伪类、读屏名称；四周 lg、至少 8em 高按字号算。</summary>
+    /// <summary>紧凑（Upload 图片墙里"添加图片"那一格，TS 改 propsRoot 的样式）：四周 xs、不限最小高度，尺寸由使用方给。</summary>
+    internal bool Compact
+    {
+        get;
+        set
+        {
+            field = value;
+            Sync();
+        }
+    }
+
+    /// <summary>内容、文字、状态伪类、读屏名称；四周 lg、至少 8em 高按字号算（紧凑时四周 xs、不限高度）。</summary>
     void Sync()
     {
         var lang = Provider.GetLang(this);
@@ -189,8 +200,8 @@ public class FileDrop : Control, IFieldControl
         description.Text = Description;
         description.IsVisible = !string.IsNullOrEmpty(Description);
         presenter.Content = Content ?? body;
-        presenter.Padding = new Thickness(this.Resource<double>(ThemeKeys.Space.Lg) * Em);
-        MinHeight = 8 * Em;
+        presenter.Padding = new Thickness(this.Resource<double>(Compact ? ThemeKeys.Space.Xs : ThemeKeys.Space.Lg) * Em);
+        MinHeight = Compact ? 0 : 8 * Em;
         var field = Field.Of(this) is { } owner && owner.Owns(this) ? owner : null;
         PseudoClasses.Set(":invalid", IsInvalid ?? field?.Invalid ?? false);
         PseudoClasses.Set(":locked", Locked);

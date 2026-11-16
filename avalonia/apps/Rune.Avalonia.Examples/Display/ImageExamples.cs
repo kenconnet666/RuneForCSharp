@@ -12,7 +12,7 @@ static class ImageExamples
     ];
 
     /// <summary>六张示例图纸：图号、零件名称。</summary>
-    static readonly (string Code, string Title)[] Drawings =
+    internal static readonly (string Code, string Title)[] Drawings =
     [
         ("DWG-1021", "显示器支架"),
         ("DWG-1034", "检修口盖板"),
@@ -22,7 +22,7 @@ static class ImageExamples
         ("DWG-1078", "端盖"),
     ];
 
-    static Uri Drawing(string code) => new($"drawings/{code}.png", UriKind.Relative);
+    internal static Uri Drawing(string code) => new($"drawings/{code}.png", UriKind.Relative);
 
     static Control Gallery()
     {

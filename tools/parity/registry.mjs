@@ -134,6 +134,8 @@ export const COMPONENT_PROP_RENAMES = {
   PeoplePicker: { _value: 'Entries', recentKey: 'Recent' },
   // 值是 TextBox 的 Text；提到的人叫 Mentioned（属性不能与类同名）
   Mentions: { items: 'ItemsSource', _mentions: 'Mentioned', children: 'ItemTemplate', filter: 'Filter' },
+  // 值是文件列表；上传函数叫 Uploader（属性不能与类同名）
+  Upload: { _value: 'Files', upload: 'Uploader' },
   // text 是 TextBlock 自己的属性
   MentionText: { text: 'Value' },
   PeoplePickerPanel: { _value: 'Entries', recentKey: 'Recent' },
@@ -506,6 +508,13 @@ export const PROPS_NOT_PORTED = {
     propsDialog: '对话框是打开时建的（lg、标题是占位文字、确定写回）：样式写在 Dialog 的主题或部件上',
     propsPanel: '对话框里的面板是 PeoplePickerPanel：样式写在它的主题或部件上（PeoplePickerPanelParts）',
   },
+  Upload: {
+    action: '桌面没有应用统一配置的请求客户端（createUi 的 http）：上传由 Uploader 自己发',
+    fieldName: '同 action：multipart 的字段名由 Uploader 自己定',
+    name: FORM_NAME,
+    ...Object.fromEntries(['propsDrop', 'propsList', 'propsItem', 'propsIcon', 'propsBody', 'propsName', 'propsMeta', 'propsProgress', 'propsRetry', 'propsRemove', 'propsLink', 'propsHandle']
+      .map((prop) => [prop, '各部分是 Upload 建的控件（UploadParts 的部件名）：样式按部件名写'])),
+  },
   Mentions: {
     propsPopover: '弹出层是 Mentions 建的列表面板（PART_Popover，外观同 Select），贴着 @ 的位置、宽 16em：样式写在部件上',
     propsListbox: '列表是 Mentions 建的 Listbox（PART_Listbox）：选项内容用 ItemTemplate',
@@ -867,6 +876,7 @@ export const BEHAVIOR_NOT_APPLICABLE = {
     '只当导航用（没有 TabPanel）时标签不写 aria-controls': '桌面的读屏没有 aria-controls：标签与面板的关系由面板的名称（对应标签的文字）表达',
     'lazy：面板第一次显示时才渲染内容': '看不见的面板不排版、不绘制，本来就是懒的（PROPS_NOT_PORTED）',
   },
+  Upload: { 'action：用配置的请求客户端 POST': '桌面没有应用统一配置的请求客户端（createUi 的 http）：上传由 Uploader 自己发（PROPS_NOT_PORTED 的 action、fieldName）' },
   LinkButton: { '站内链接经 router 跳转': '桌面没有站内地址：Href 是绝对地址，用系统打开（ROADMAP 平台化的约定）' },
   IconLinkButton: { '站内链接经 router 跳转': '桌面没有站内地址：Href 是绝对地址，用系统打开（ROADMAP 平台化的约定）' },
   Flex: { createFlex: '桌面没有语义标签：别的语义容器从 Flex 派生、改读屏角色（FlexList、FlexOrderedList 就是这样，测试覆盖）' },
