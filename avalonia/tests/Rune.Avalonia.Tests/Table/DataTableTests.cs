@@ -271,4 +271,39 @@ public class DataTableTests
         HeadlessUi.Flush(window);
         Assert.Empty(table.Surface.Header!.Groups);
     });
+
+    record Store(string Name, int[] Days);
+
+    [Fact]
+    [Upstream("VirtualColumns.browser", "只渲染看得见的列；滚到中间换一批；每行占的列数都等于总列数")]
+    public Task Virtual_columns_build_only_visible_cells() => HeadlessUi.Run(() =>
+    {
+        var stores = Enumerable.Range(0, 60).Select(store => new Store($"店 {store + 1}", [.. Enumerable.Range(0, 120).Select(day => 40 + (store * 37 + day * 13) % 90)])).ToList();
+        DataTableColumn[] columns =
+        [
+            new("Store", "门店") { Width = 120, Sticky = ColumnSticky.Start, Value = row => ((Store)row).Name },
+            .. Enumerable.Range(0, 120).Select(day => new DataTableColumn($"d{day}", $"{day + 1} 日") { Width = 64, Align = TableAlign.End, Value = row => ((Store)row).Days[day] }),
+            new("Total", "合计") { Width = 96, Sticky = ColumnSticky.End, Align = TableAlign.End, Value = row => ((Store)row).Days.Sum() },
+        ];
+        var table = new DataTable { ItemsSource = stores, Columns = columns, GetKey = row => ((Store)row).Name, Density = TableDensity.Compact, VirtualColumns = true, Width = 1000, Height = 400 };
+        var window = HeadlessUi.Show(table);
+        HeadlessUi.Flush(window);
+        List<TableCell> Built(DataTableRowView row) => [.. row.Cells.OfType<TableCell>()];
+        var first = table.Surface.Realized[0];
+        Assert.Equal(122, first.Cells.Count);
+        Assert.InRange(Built(first).Count, 2, 39);
+        // 第一天那列（门店之后）建了
+        Assert.IsType<TableCell>(first.CellOf("d0"));
+
+        table.Scroller.Offset = new Vector(64 * 60, 0);
+        HeadlessUi.Flush(window);
+        first = table.Surface.Realized[0];
+        Assert.Null(first.CellOf("d0"));
+        Assert.NotNull(first.CellOf("d62"));
+        // 两端的固定列总在
+        var headers = table.Surface.Header!.Cells.OfType<TableHeaderCell>().Select(cell => cell.Content as string ?? "").ToList();
+        Assert.Contains("门店", headers);
+        Assert.Contains("合计", headers);
+        Assert.InRange(Built(first).Count, 2, 39);
+    });
 }

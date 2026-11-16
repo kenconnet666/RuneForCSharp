@@ -4,7 +4,7 @@ using Avalonia.Controls.Documents;
 
 namespace Rune.Avalonia.Examples;
 
-/// <summary>DataTable 页的示例（vue-tsx-pro 文档站 table/DataTable）：已做的功能的示例：一万条订单、表头筛选与列菜单、就地编辑、行拖动、分组表头、展开行、单选、加载与空状态；其余（列虚拟化等）随功能补上。</summary>
+/// <summary>DataTable 页的示例（vue-tsx-pro 文档站 table/DataTable）：一万条订单、表头筛选与列菜单、就地编辑、数据修正、行拖动、分组表头、宽表、展开行、单选、加载与空状态；台账、定位、主从视图、导入、组织架构、滚动加载随功能补上。</summary>
 static class DataTableExamples
 {
     public static Example[] All =>
@@ -15,6 +15,7 @@ static class DataTableExamples
         new("DataTable", "corrections", "数据修正：单击就改，看得到改了什么", "主要用来改数据的表写 EditTrigger=\"Click\"，单击就进入编辑，格上的光标也提示能改；点开别的格时前一格照常提交，异步保存也不会收掉新打开的编辑器。FieldComparison.DiffRows 按 key 和原来的数据比，给出新增、修改（带 ChangedFields）、删除的行，配合 RowTone 着色、ValueChange 写出原值，删除的行留在最后。", Corrections),
         new("DataTable", "reorder", "需求排期：拖动行", "订阅了 Reordered 时第一列前面有把手：按下拖动，或聚焦后空格拿起、↑↓ 移动、空格放下（每一步读屏都会播报），拖完得到新的顺序。排序、筛选时显示的顺序不是数据的顺序，把手收起，取消后又能拖。", Reorder),
         new("DataTable", "changes", "采购方案调整：分组表头", "ColumnGroups 写组标题与组里各列的 Key：相邻的几列上方共用一个标题，表头变成两行，没分组的列跨两行；组与相邻的列之间有竖线，固定列照常固定。列定义仍是平铺的，排序、列宽、隐藏列都按列算，组里的列全隐藏时这一组也不显示。", Changes),
+        new("DataTable", "wide", "宽表：列也虚拟滚动", "VirtualColumns 时只建看得见的列（前后各多几列），列宽、固定列、分组表头、列宽调整照常。几十上百列的宽表、透视结果打开它；行本来就是虚拟滚动的。没写宽度的列按 150px；两端的固定列总在，固定列夹在中间时不虚拟化。", Wide),
         new("DataTable", "details", "供应商改进建议：展开行", "RenderDetail 给出一行的详情：多一列展开按钮（读屏念出展开状态），展开的行下面多一行跨全部列的详情，虚拟滚动按真实高度测量；HasDetail 决定哪些行能展开，ExpandedRows 可以双向绑定。详情横向滚动时贴着可见区域的起始边，宽度不超过可见区域。", Details),
         new("DataTable", "single", "单选：选一家报价", "SelectionMode=\"single\" 时每行是一个单选框：点击选中，选中的行整行高亮；没有全选，取消选择用 SelectionBar 的清空或把 Selected 设为空列表。", Single),
         new("DataTable", "states", "加载、空状态与外观", "IsLoading 时表体换成骨架行（首次加载与刷新一样，不另加进度条）；没有数据显示 Empty。Density、Variant、Striped 与静态表格相同。", States),
@@ -415,6 +416,29 @@ static class DataTableExamples
         };
         AutomationProperties.SetName(table, "采购方案调整");
         return table;
+    }
+
+    record StoreSales(string Store, int[] Days);
+
+    static Control Wide()
+    {
+        const int days = 120;
+        var start = new DateOnly(2026, 7, 1);
+        string[] cities = ["杭州", "宁波", "苏州", "南京", "合肥", "上海"];
+        StoreSales[] stores = [.. Enumerable.Range(0, 60).Select(store => new StoreSales($"{cities[store % cities.Length]} {store + 1:00} 店", [.. Enumerable.Range(0, days).Select(day => 40 + (store * 37 + day * 13) % 90)]))];
+        List<DataTableColumn> columns = [new("Store", "门店") { Width = 120, Sticky = ColumnSticky.Start }];
+        columns.AddRange(Enumerable.Range(0, days).Select(day => new DataTableColumn($"d{day}", $"{start.AddDays(day).Day} 日") { Width = 64, Align = TableAlign.End, Value = row => ((StoreSales)row).Days[day] }));
+        columns.Add(new("Total", "合计") { Width = 96, Sticky = ColumnSticky.End, Align = TableAlign.End, Value = row => ((StoreSales)row).Days.Sum() });
+        // 按月份分组：同一个月的日期列放在一组下面
+        var groups = Enumerable.Range(0, days).GroupBy(day => start.AddDays(day).Month)
+            .Select(month => new DataTableColumnGroup($"2026-{month.Key}", $"{month.Key} 月", [.. month.Select(day => $"d{day}")])).ToList();
+        var table = new DataTable { ItemsSource = stores, Columns = columns, ColumnGroups = groups, GetKey = row => ((StoreSales)row).Store, Density = TableDensity.Compact, VirtualColumns = true, Height = 22 * 16 };
+        AutomationProperties.SetName(table, "门店日销量");
+        return new Flex
+        {
+            Direction = FlexDirection.Column, Gap = Space.Sm, Align = FlexAlign.Stretch,
+            Children = { table, new Small { Tone = TextTone.Muted, Text = $"{stores.Length} 行 × {columns.Count} 列，只建看得见的几十格" } },
+        };
     }
 
     record Proposal(string Code, string Supplier, string Part, string Kind, decimal Saving, string Status, string? Content = null, string? Impact = null, string[]? Files = null, string? Submitted = null);

@@ -117,6 +117,12 @@ public partial class DataTable : Control
     /// <summary>斑马纹：隔行浅色底。</summary>
     public static readonly StyledProperty<bool> StripedProperty = AvaloniaProperty.Register<DataTable, bool>(nameof(Striped));
 
+    /// <summary>
+    /// 列也虚拟滚动：只建看得见的列（前后各多 3 列），几十上百列的宽表、透视结果打开它。没写宽度的列按 150px（宽度要确定才算得出哪些列看得见）；
+    /// 两端的固定列总在，固定列夹在中间时不虚拟化。
+    /// </summary>
+    public static readonly StyledProperty<bool> VirtualColumnsProperty = AvaloniaProperty.Register<DataTable, bool>(nameof(VirtualColumns));
+
     /// <summary>分组表头：组标题与组里各列的 Key，相邻的列上方共用一个标题（表头变成两行）。</summary>
     public static readonly StyledProperty<IReadOnlyList<DataTableColumnGroup>?> ColumnGroupsProperty = AvaloniaProperty.Register<DataTable, IReadOnlyList<DataTableColumnGroup>?>(nameof(ColumnGroups));
 
@@ -218,6 +224,9 @@ public partial class DataTable : Control
     /// <summary>调整过的列宽。</summary>
     public IReadOnlyDictionary<string, double>? ColumnWidths { get => GetValue(ColumnWidthsProperty); set => SetValue(ColumnWidthsProperty, value); }
 
+    /// <summary>列也虚拟滚动。</summary>
+    public bool VirtualColumns { get => GetValue(VirtualColumnsProperty); set => SetValue(VirtualColumnsProperty, value); }
+
     /// <summary>分组表头。</summary>
     public IReadOnlyList<DataTableColumnGroup>? ColumnGroups { get => GetValue(ColumnGroupsProperty); set => SetValue(ColumnGroupsProperty, value); }
 
@@ -309,7 +318,7 @@ public partial class DataTable : Control
         else if (change.Property == SelectionModeProperty || change.Property == IsLoadingProperty || change.Property == EmptyProperty || change.Property == SummaryLabelProperty
                  || change.Property == ResizableProperty || change.Property == ColumnMenuProperty || change.Property == CellNavigationProperty
                  || change.Property == EditTriggerProperty || change.Property == ValidateRowProperty || change.Property == RenderDetailProperty
-                 || change.Property == HasDetailProperty || change.Property == DensityProperty || change.Property == StripedProperty || change.Property == GetKeyProperty) surface.Rebuild();
+                 || change.Property == HasDetailProperty || change.Property == VirtualColumnsProperty || change.Property == DensityProperty || change.Property == StripedProperty || change.Property == GetKeyProperty) surface.Rebuild();
         if (change.Property == VariantProperty || change.Property == DensityProperty) SyncFrame();
         // 只是宽度变了：重排，不重建（拖动中的手柄要留着）
         if (change.Property == ColumnWidthsProperty) surface.Relayout();

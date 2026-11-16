@@ -38,6 +38,8 @@ internal sealed class DataTableSurface : Control
     readonly Dictionary<int, double> detailTops = [];
     double bodyHeight;
     double rowHeight;
+    // 列虚拟化时没建的列（下标）：横向滚动后换了一批时重建表头与各行
+    HashSet<int> skipped = [];
     double[] widths = [];
 
     public DataTableSurface(DataTable owner) => this.owner = owner;
@@ -70,6 +72,9 @@ internal sealed class DataTableSurface : Control
     internal IReadOnlyDictionary<int, DataTableDetailView> Details => details;
 
     internal IReadOnlyList<double> Widths => widths;
+
+    /// <summary>列虚拟化时第 position 列没建（不在看得见的范围里）。</summary>
+    internal bool IsSkipped(int position) => skipped.Contains(position);
 
     internal DataTable Owner => owner;
 
@@ -266,7 +271,8 @@ internal sealed class DataTableSurface : Control
     void ComputeWidths(double viewport)
     {
         var columns = owner.Shown;
-        double? WidthOf(DataTableColumn column) => owner.ColumnWidths?.TryGetValue(column.Key, out var own) == true ? own : column.Width;
+        // 列虚拟化：没写宽度的列按 150px，宽度要确定才算得出哪些列看得见
+        double? WidthOf(DataTableColumn column) => owner.ColumnWidths?.TryGetValue(column.Key, out var own) == true ? own : column.Width ?? (owner.VirtualColumns ? TableColumns.VirtualColumnWidth : null);
         var total = Math.Max(viewport, TableColumns.TableMinWidth(columns, WidthOf, Leading));
         var flexible = columns.Where(column => WidthOf(column) is null).ToList();
         var rest = Math.Max(0, total - Leading - columns.Sum(column => WidthOf(column) ?? 0));
@@ -287,6 +293,7 @@ internal sealed class DataTableSurface : Control
     {
         var viewport = Viewport.Width > 0 ? Viewport.Width : double.IsInfinity(availableSize.Width) ? 0 : availableSize.Width;
         ComputeWidths(viewport);
+        SyncSkips(viewport);
         var width = TableWidth;
         var infinite = new Size(width, double.PositiveInfinity);
         header?.Measure(infinite);
@@ -352,6 +359,22 @@ internal sealed class DataTableSurface : Control
             body = bodyHeight;
         }
         return new Size(width, HeaderHeight + body + SummaryHeight);
+    }
+
+    /// <summary>列虚拟化：按横向偏移算出不建的列；换了一批时表头与建好的行重建各格。</summary>
+    void SyncSkips(double viewport)
+    {
+        HashSet<int> next = [];
+        if (owner.VirtualColumns && viewport > 0)
+        {
+            var columns = owner.Shown;
+            foreach (var skip in TableColumns.ColumnSkips(columns, column => widths[columns.ToList().IndexOf(column)], Offset.X, viewport, Leading))
+                for (var position = skip.From; position < skip.To; position++) next.Add(position);
+        }
+        if (next.SetEquals(skipped)) return;
+        skipped = next;
+        header?.Rebuild();
+        foreach (var row in realized.Values) row.Rebuild();
     }
 
     /// <summary>建（或从池里拿）第 index 行。</summary>

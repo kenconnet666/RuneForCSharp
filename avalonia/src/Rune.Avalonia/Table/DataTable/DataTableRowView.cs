@@ -112,7 +112,7 @@ internal sealed class DataTableRowView : Control
     /// <summary>按现在的状态（编辑中的格、校验）重建这一行。</summary>
     public void Rebuild()
     {
-        if (Row is { } row) Build(row, Index);
+        if (Row is { } row || Kind == DataTableRowKind.Header) Build(Row, Index);
     }
 
     /// <summary>横坐标落在哪一格（含左右内边距）；落在选择列上时 null。</summary>
@@ -175,6 +175,12 @@ internal sealed class DataTableRowView : Control
         for (var position = 0; position < columns.Count; position++)
         {
             var column = columns[position];
+            // 列虚拟化时没建的列：一个不显示、不挂上去的占位，各格的下标仍对着列
+            if (surface.IsSkipped(position))
+            {
+                cells.Add((new Control { IsVisible = false }, column));
+                continue;
+            }
             var align = ColumnTable.AlignOf(column, owner.Types, position);
             TableCell cell = Kind switch
             {
@@ -231,7 +237,8 @@ internal sealed class DataTableRowView : Control
             var entry = layout[position];
             var first = shown.IndexOf(entry.Columns[0]);
             if (position > 0 && (entry.Group is not null || layout[position - 1].Group is not null)) dividers.Add(first);
-            if (entry.Group is not { } group) continue;
+            // 组里的列都没建（列虚拟化）：组标题也不建
+            if (entry.Group is not { } group || entry.Columns.All(column => surface.IsSkipped(shown.IndexOf(column)))) continue;
             var cell = new TableHeaderCell { Name = DataTableParts.GroupHeaderCell, Align = TableAlign.Center, Scope = "colgroup", Content = group.Header };
             cell.ApplyRole(head: true, foot: false);
             TextBlock.SetTextTrimming(cell, TextTrimming.CharacterEllipsis);
@@ -476,6 +483,7 @@ internal sealed class DataTableRowView : Control
         foreach (var resizer in resizers.Values) resizer.Measure(Size.Infinity);
         for (var i = 0; i < cells.Count && i < widths.Count; i++)
         {
+            if (!cells[i].Cell.IsVisible) continue;
             var padding = PaddingOf(cells[i].Cell);
             // 骨架：高 1em，宽度按行与列错开（90%、75%、60%、45%，同上游）
             if (cells[i].Cell is TableCell { Content: Skeleton bar })
@@ -525,6 +533,11 @@ internal sealed class DataTableRowView : Control
         for (var i = 0; i < cells.Count && i < widths.Count; i++)
         {
             var (cell, column) = cells[i];
+            if (!cell.IsVisible)
+            {
+                x += widths[i];
+                continue;
+            }
             var left = x;
             // 固定列：挪到视口的边上（起始边不早于偏移，结束边不晚于视口的右边）
             if (column?.Sticky == ColumnSticky.Start && offsets.Start.TryGetValue(column.Key, out var start)) left = Math.Max(x, scroll + start);
@@ -606,7 +619,7 @@ internal sealed class DataTableRowView : Control
                 var padding = PaddingOf(cell);
                 context.FillRectangle(muted, new Rect(cell.Bounds.X - padding.Left, groupRowHeight - 1, cell.Bounds.Width + padding.Left + padding.Right, 1));
             }
-            foreach (var column in dividers.Where(column => column < cells.Count))
+            foreach (var column in dividers.Where(column => column < cells.Count && cells[column].Cell.IsVisible))
             {
                 var cell = cells[column].Cell;
                 context.FillRectangle(muted, new Rect(cell.Bounds.X - PaddingOf(cell).Left, 0, 1, bounds.Height));
