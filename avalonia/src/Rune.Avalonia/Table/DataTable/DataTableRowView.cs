@@ -35,6 +35,11 @@ internal sealed class DataTableRowView : Control
     readonly List<(Control Cell, DataTableColumn? Column)> cells = [];
     // 表头里可调整宽度的列的手柄：列的下标 → 手柄
     readonly Dictionary<int, ColumnResizer> resizers = [];
+    // 分组表头（两行）：组标题与它跨的列（第一列的下标、几列）；与分组相邻的竖线在这些列的起始边；第一行的高度
+    readonly List<(TableHeaderCell Cell, int First, int Count)> groups = [];
+    readonly HashSet<int> grouped = [];
+    readonly List<int> dividers = [];
+    double groupRowHeight;
     Control? selector;
     // 详情列：表头是空的格（读屏名称"详情"），各行是展开按钮（没有详情的行空着）
     Control? detailCell;
@@ -149,6 +154,9 @@ internal sealed class DataTableRowView : Control
         foreach (var child in VisualChildren.OfType<Control>().ToList()) Detach(child);
         cells.Clear();
         resizers.Clear();
+        groups.Clear();
+        grouped.Clear();
+        dividers.Clear();
         selector = null;
         detailCell = null;
         var owner = Owner;
@@ -196,12 +204,39 @@ internal sealed class DataTableRowView : Control
                 Attach(resizer);
             }
         }
+        if (Kind == DataTableRowKind.Header) BuildGroups();
         // 编辑中的行浮在别的行上面：校验的原因在格子下面，不被下一行盖住
         ZIndex = cells.Any(cell => cell.Cell.Classes.Contains("editing")) ? 1 : 0;
         SyncSelection();
         SyncDetail();
         InvalidateMeasure();
     }
+
+    /// <summary>
+    /// 分组表头（上游 renderHeaderRows）：组标题在第一行、跨组里的列，居中；没分组的列与勾选列、详情列跨两行。
+    /// 与分组相邻处一条竖线：分组的起始边、分组后面那一列的起始边（第一格除外）。
+    /// </summary>
+    void BuildGroups()
+    {
+        var layout = Owner.HeaderCells;
+        var shown = Owner.Shown.ToList();
+        for (var position = 0; position < layout.Count; position++)
+        {
+            var entry = layout[position];
+            var first = shown.IndexOf(entry.Columns[0]);
+            if (position > 0 && (entry.Group is not null || layout[position - 1].Group is not null)) dividers.Add(first);
+            if (entry.Group is not { } group) continue;
+            var cell = new TableHeaderCell { Name = DataTableParts.GroupHeaderCell, Align = TableAlign.Center, Scope = "colgroup", Content = group.Header };
+            cell.ApplyRole(head: true, foot: false);
+            TextBlock.SetTextTrimming(cell, TextTrimming.CharacterEllipsis);
+            groups.Add((cell, first, entry.Columns.Count));
+            for (var i = first; i < first + entry.Columns.Count; i++) grouped.Add(i);
+            Attach(cell);
+        }
+    }
+
+    /// <summary>分组表头的组标题（测试用）：标题、第一列的下标、跨几列。</summary>
+    internal IReadOnlyList<(TableHeaderCell Cell, int First, int Count)> Groups => groups;
 
     TableHeaderCell HeaderCell(DataTableColumn column, TableAlign align, int position)
     {
@@ -440,7 +475,20 @@ internal sealed class DataTableRowView : Control
             if (cells[i].Cell is TableCell { Content: Skeleton bar })
                 (bar.Width, bar.Height) = (Math.Max(0, widths[i] - padding.Left - padding.Right) * (90 - (Index + i) % 4 * 15) / 100, TextElement.GetFontSize(cells[i].Cell));
             cells[i].Cell.Measure(new Size(Math.Max(0, widths[i] - padding.Left - padding.Right), double.PositiveInfinity));
-            height = Math.Max(height, ContentHeight(cells[i].Cell) + padding.Top + padding.Bottom);
+            if (!grouped.Contains(i)) height = Math.Max(height, ContentHeight(cells[i].Cell) + padding.Top + padding.Bottom);
+        }
+        if (groups.Count > 0)
+        {
+            // 两行表头：第一行是组标题，组里的列在第二行；没分组的列跨两行
+            groupRowHeight = 0;
+            foreach (var (cell, first, count) in groups)
+            {
+                var padding = PaddingOf(cell);
+                cell.Measure(new Size(Math.Max(0, widths.Skip(first).Take(count).Sum() - padding.Left - padding.Right), double.PositiveInfinity));
+                groupRowHeight = Math.Max(groupRowHeight, ContentHeight(cell) + padding.Top + padding.Bottom);
+            }
+            var second = grouped.Where(i => i < cells.Count).Select(i => ContentHeight(cells[i].Cell) + PaddingOf(cells[i].Cell).Top + PaddingOf(cells[i].Cell).Bottom).DefaultIfEmpty(0).Max();
+            height = Math.Max(height, groupRowHeight + second);
         }
         return new Size(surface.TableWidth, height + 1);
     }
@@ -476,11 +524,19 @@ internal sealed class DataTableRowView : Control
             if (column?.Sticky == ColumnSticky.Start && offsets.Start.TryGetValue(column.Key, out var start)) left = Math.Max(x, scroll + start);
             else if (column?.Sticky == ColumnSticky.End && offsets.End.TryGetValue(column.Key, out var end)) left = Math.Min(x, scroll + view - end - widths[i]);
             var padding = PaddingOf(cell);
-            cell.Arrange(new Rect(left + padding.Left, padding.Top, Math.Max(0, widths[i] - padding.Left - padding.Right), Math.Max(0, height - padding.Top - padding.Bottom)));
+            // 组里的列在第二行
+            var top = grouped.Contains(i) ? groupRowHeight : 0;
+            cell.Arrange(new Rect(left + padding.Left, top + padding.Top, Math.Max(0, widths[i] - padding.Left - padding.Right), Math.Max(0, height - top - padding.Top - padding.Bottom)));
             // 手柄贴着这一列的结束边（同上游 th 里的 ResizeHandle）
             if (resizers.TryGetValue(i, out var resizer))
                 resizer.Arrange(new Rect(left + widths[i] - resizer.DesiredSize.Width, 0, resizer.DesiredSize.Width, finalSize.Height));
             x += widths[i];
+        }
+        foreach (var (cell, first, count) in groups)
+        {
+            var padding = PaddingOf(cell);
+            var start = surface.Leading + widths.Take(first).Sum();
+            cell.Arrange(new Rect(start + padding.Left, padding.Top, Math.Max(0, widths.Skip(first).Take(count).Sum() - padding.Left - padding.Right), Math.Max(0, groupRowHeight - padding.Top - padding.Bottom)));
         }
         return finalSize;
     }
@@ -536,6 +592,20 @@ internal sealed class DataTableRowView : Control
                 if (column.Key == edges.StartEdge) context.FillRectangle(divider, new Rect(cell.Bounds.Right + padding.Right - 1, 0, 1, bounds.Height));
                 else if (column.Key == edges.EndEdge) context.FillRectangle(divider, new Rect(cell.Bounds.X - padding.Left, 0, 1, bounds.Height));
             }
+        // 分组表头：组标题下边一条淡线（与下面一行的列标题仍是一个表头），与分组相邻处一条竖线
+        if (groups.Count > 0 && this.Resource<IBrush?>(ThemeKeys.Brush.BorderMuted) is { } muted)
+        {
+            foreach (var (cell, _, _) in groups)
+            {
+                var padding = PaddingOf(cell);
+                context.FillRectangle(muted, new Rect(cell.Bounds.X - padding.Left, groupRowHeight - 1, cell.Bounds.Width + padding.Left + padding.Right, 1));
+            }
+            foreach (var column in dividers.Where(column => column < cells.Count))
+            {
+                var cell = cells[column].Cell;
+                context.FillRectangle(muted, new Rect(cell.Bounds.X - PaddingOf(cell).Left, 0, 1, bounds.Height));
+            }
+        }
         // 单元格导航：聚焦的格一圈 sm 宽的焦点环；校验没过的格一圈 xs 宽的 danger 内描边（聚焦时仍是焦点环）
         foreach (var (cell, _) in cells)
         {

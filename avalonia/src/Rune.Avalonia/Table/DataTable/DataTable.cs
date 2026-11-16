@@ -117,6 +117,9 @@ public partial class DataTable : Control
     /// <summary>斑马纹：隔行浅色底。</summary>
     public static readonly StyledProperty<bool> StripedProperty = AvaloniaProperty.Register<DataTable, bool>(nameof(Striped));
 
+    /// <summary>分组表头：组标题与组里各列的 Key，相邻的列上方共用一个标题（表头变成两行）。</summary>
+    public static readonly StyledProperty<IReadOnlyList<DataTableColumnGroup>?> ColumnGroupsProperty = AvaloniaProperty.Register<DataTable, IReadOnlyList<DataTableColumnGroup>?>(nameof(ColumnGroups));
+
     /// <summary>详情：给出一行展开后下面那一行的内容（控件或文字）；给了时多一列展开按钮。</summary>
     public static readonly StyledProperty<Func<object, object?>?> RenderDetailProperty = AvaloniaProperty.Register<DataTable, Func<object, object?>?>(nameof(RenderDetail));
 
@@ -215,6 +218,12 @@ public partial class DataTable : Control
     /// <summary>调整过的列宽。</summary>
     public IReadOnlyDictionary<string, double>? ColumnWidths { get => GetValue(ColumnWidthsProperty); set => SetValue(ColumnWidthsProperty, value); }
 
+    /// <summary>分组表头。</summary>
+    public IReadOnlyList<DataTableColumnGroup>? ColumnGroups { get => GetValue(ColumnGroupsProperty); set => SetValue(ColumnGroupsProperty, value); }
+
+    /// <summary>表头第一行的各格（有分组时）；没有分组显示时为空（一行表头）。</summary>
+    internal IReadOnlyList<HeaderLayoutCell> HeaderCells { get; private set; } = [];
+
     /// <summary>详情。</summary>
     public Func<object, object?>? RenderDetail { get => GetValue(RenderDetailProperty); set => SetValue(RenderDetailProperty, value); }
 
@@ -294,7 +303,7 @@ public partial class DataTable : Control
         }
         else if (change.Property == ColumnsProperty || change.Property == SortProperty || change.Property == ManualSortProperty || change.Property == HiddenColumnsProperty
                  || change.Property == MultiSortProperty || change.Property == SortsProperty || change.Property == ManualFilterProperty
-                 || change.Property == ColumnOrderProperty || change.Property == ColumnPinsProperty || change.Property == Provider.LangProperty) Refresh();
+                 || change.Property == ColumnOrderProperty || change.Property == ColumnPinsProperty || change.Property == ColumnGroupsProperty || change.Property == Provider.LangProperty) Refresh();
         else if (change.Property == FiltersProperty) Refresh(header: false);
         else if (change.Property == SelectedProperty || change.Property == RowToneProperty || change.Property == IsRowSelectableProperty) surface.SyncRows();
         else if (change.Property == SelectionModeProperty || change.Property == IsLoadingProperty || change.Property == EmptyProperty || change.Property == SummaryLabelProperty
@@ -326,6 +335,9 @@ public partial class DataTable : Control
         Arranged = TableColumns.Arrange(Columns, ColumnOrder, ColumnPins);
         Shown = [.. Arranged.Where(column => !hidden.Contains(column.Key))];
         Types = [.. Shown.Select(column => TableColumns.TypeOf(column, source))];
+        // 隐藏了的列不算进组；组里的列全隐藏时回到一行表头
+        var layout = ColumnGroups is { Count: > 0 } groups ? TableColumns.HeaderLayout(Shown, groups) : [];
+        HeaderCells = layout.Any(cell => cell.Group is not null) ? layout : [];
         // 筛选的选项看全部行（不是筛过的）
         FilterOptionsOf = Columns.Where(column => column.Filter is not null).ToDictionary(column => column.Key, column => TableColumns.FilterOptions(column, source, Lang.Code));
         var kept = ManualFilter ? source : TableColumns.FilterRows(source, Columns, Filters, Lang.Code);
@@ -527,6 +539,9 @@ public static class DataTableParts
 
     /// <summary>表头的全选框。</summary>
     public const string SelectAll = "PART_SelectAll";
+
+    /// <summary>分组表头里的组标题。</summary>
+    public const string GroupHeaderCell = "PART_GroupHeaderCell";
 
     /// <summary>表头的详情列。</summary>
     public const string DetailHeaderCell = "PART_DetailHeaderCell";

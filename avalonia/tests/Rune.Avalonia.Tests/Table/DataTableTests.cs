@@ -244,4 +244,31 @@ public class DataTableTests
         HeadlessUi.Flush(window);
         Assert.Empty(table.Surface.Details);
     });
+
+    [Fact]
+    [Upstream("DataTable 的台账能力", "分组表头：两行，组标题跨组里的列，没分组的列与勾选列跨两行；行号从表头之后算起；隐藏列不算进组")]
+    public Task Grouped_header_spans_its_columns() => HeadlessUi.Run(() =>
+    {
+        var (table, window) = Render(new DataTable
+        {
+            ItemsSource = Tasks, Columns = Ledger, GetKey = row => ((Task_)row).Id, SelectionMode = SelectionMode.Multiple,
+            ColumnGroups = [new DataTableColumnGroup("money", "金额", ["Estimate", "Agreed"])],
+        });
+        var header = table.Surface.Header!;
+        var (group, first, count) = Assert.Single(header.Groups);
+        Assert.Equal(("金额", "colgroup", 2, 2), (group.Content as string, group.Scope, first, count));
+        var cells = header.Cells.OfType<TableHeaderCell>().ToList();
+        // 没分组的列跨两行（从表头顶上排起），组里的列在组标题下面
+        Assert.True(cells[0].Bounds.Bottom > group.Bounds.Bottom);
+        Assert.True(cells[2].Bounds.Top >= group.Bounds.Bottom);
+        Assert.True(group.Bounds.Width > cells[2].Bounds.Width);
+
+        table.HiddenColumns = ["Agreed"];
+        HeadlessUi.Flush(window);
+        Assert.Equal(1, Assert.Single(table.Surface.Header!.Groups).Count);
+        // 组里的列全隐藏：回到一行表头
+        table.HiddenColumns = ["Agreed", "Estimate"];
+        HeadlessUi.Flush(window);
+        Assert.Empty(table.Surface.Header!.Groups);
+    });
 }

@@ -200,4 +200,13 @@ public class TableColumnsTests
     [Upstream("column-window", "滚到最后：前面跳过，后面不剩")]
     public void Skips_at_the_end() =>
         Assert.Equal([new ColumnSkip(0, 46)], TableColumns.ColumnSkips(Columns(50), Hundred, 4600, 400, overscan: 0));
+
+    [Fact]
+    [Upstream("table", "组里的列被别的列隔开时另起一格；不在任何组里的列单独一格")]
+    public void Header_layout_splits_separated_groups()
+    {
+        DataTableColumn[] columns = [.. new[] { "a", "b", "x", "c" }.Select(key => new DataTableColumn(key, key))];
+        var cells = TableColumns.HeaderLayout(columns, [new DataTableColumnGroup("g", "G", ["a", "b", "c"])]);
+        Assert.Equal(["g[a,b]", "x", "g[c]"], cells.Select(cell => cell.Group is { } group ? $"{group.Key}[{string.Join(",", cell.Columns.Select(column => column.Key))}]" : cell.Columns[0].Key));
+    }
 }

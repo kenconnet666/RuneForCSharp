@@ -4,7 +4,7 @@ using Avalonia.Controls.Documents;
 
 namespace Rune.Avalonia.Examples;
 
-/// <summary>DataTable 页的示例（vue-tsx-pro 文档站 table/DataTable）：已做的功能的示例：一万条订单、表头筛选与列菜单、就地编辑、展开行、单选、加载与空状态；其余（拖动、分组表头等）随功能补上。</summary>
+/// <summary>DataTable 页的示例（vue-tsx-pro 文档站 table/DataTable）：已做的功能的示例：一万条订单、表头筛选与列菜单、就地编辑、分组表头、展开行、单选、加载与空状态；其余（拖动、列虚拟化等）随功能补上。</summary>
 static class DataTableExamples
 {
     public static Example[] All =>
@@ -12,6 +12,7 @@ static class DataTableExamples
         new("DataTable", "orders", "一万条订单", "列定义里 Type 决定默认的格式与对齐（Number、Currency、Percent、FileSize、Date、DateTime，跟随语言；不写时按第一个值推断，数字靠右），Cell 自定义单元格，Value 给排序用的值；点可排序的列标题在升序、降序、不排之间切换（本地按数字、日期、按语言的文字排，ManualSort 时交给服务端）。SelectionMode=\"multiple\" 多一列勾选框；Sticky 的列横向滚动时固定在两侧；Resizable 时可以拖动或用键盘调整列宽，ColumnWidths 双向绑定可以存到本地设置里。工具栏（搜索、批量操作、分页）用现有组件组合，不内置。", Orders),
         new("DataTable", "columns", "采购单：表头筛选、多列排序与列菜单", "列定义写 Filter 时列标题上有筛选按钮：ColumnFilter.Values 列出这一列出现过的值（状态列按阶段顺序、显示状态名），也可以给 Options，ColumnFilter.Keyword 是输入关键字；Filters 双向绑定各列选中的值，默认在本地筛，ManualFilter 时交给服务端。MultiSort 时点列标题只按这一列排，按住 Shift 点是追加一列（列标题上标着次序），排序写在 Sorts。ColumnMenu 在列标题结尾放 ⋮：排序、固定在开头 / 结尾、前后移动、隐藏，写回 ColumnPins、ColumnOrder、HiddenColumns，都能双向绑定、存起来（上游记在浏览器里；这里在内存里，“还原列设置”清掉）。", Columns),
         new("DataTable", "editable", "采购申请明细：就地编辑与校验", "列写 Editable（或按行判断的 IsEditable）时可以就地编辑，表格随之变成网格：方向键在格之间走，只有一格能 Tab 进入；在可编辑的格上按 Enter、F2、双击或直接打字开始编辑，Enter 提交、Tab 提交并到下一个可编辑的格、点开别处提交、Esc 放弃。默认编辑器按列选（状态列是 Select，数字类是 NumberField，其余是 TextField），Editor 自己写（这里的交期是 DateField）。列的 Validate 拦下不合理的值，CellChange 写回，返回文字时是不接受的原因（接口拒绝），编辑器留着并显示它；ValidateRow 返回整行的问题，标在对应的格上（红框，悬停与读屏都能知道原因）。", Editable),
+        new("DataTable", "changes", "采购方案调整：分组表头", "ColumnGroups 写组标题与组里各列的 Key：相邻的几列上方共用一个标题，表头变成两行，没分组的列跨两行；组与相邻的列之间有竖线，固定列照常固定。列定义仍是平铺的，排序、列宽、隐藏列都按列算，组里的列全隐藏时这一组也不显示。", Changes),
         new("DataTable", "details", "供应商改进建议：展开行", "RenderDetail 给出一行的详情：多一列展开按钮（读屏念出展开状态），展开的行下面多一行跨全部列的详情，虚拟滚动按真实高度测量；HasDetail 决定哪些行能展开，ExpandedRows 可以双向绑定。详情横向滚动时贴着可见区域的起始边，宽度不超过可见区域。", Details),
         new("DataTable", "single", "单选：选一家报价", "SelectionMode=\"single\" 时每行是一个单选框：点击选中，选中的行整行高亮；没有全选，取消选择用 SelectionBar 的清空或把 Selected 设为空列表。", Single),
         new("DataTable", "states", "加载、空状态与外观", "IsLoading 时表体换成骨架行（首次加载与刷新一样，不另加进度条）；没有数据显示 Empty。Density、Variant、Striped 与静态表格相同。", States),
@@ -237,6 +238,57 @@ static class DataTableExamples
             return null;
         };
         return new Flex { Direction = FlexDirection.Column, Gap = Space.Sm, Align = FlexAlign.Stretch, Children = { table, saved } };
+    }
+
+    record Side(string Part, decimal Price, int Quantity)
+    {
+        public decimal Amount => Price * Quantity;
+    }
+
+    record Change(int No, string Name, Side Before, Side After)
+    {
+        public decimal Saving => Before.Amount - After.Amount;
+    }
+
+    static Control Changes()
+    {
+        Change[] changes =
+        [
+            new(1, "笔记本电脑", new("LT-14", 4520m, 20), new("LT-15", 3980m, 20)),
+            new(2, "显示器", new("MN-27", 1260m, 40), new("MN-27S", 1080m, 40)),
+            new(3, "键盘鼠标套装", new("KB-200", 129m, 60), new("KB-210", 99m, 56)),
+            new(4, "办公椅", new("CH-01", 860m, 30), new("CH-01", 860m, 24)),
+            new(5, "打印机", new("PR-6", 2380m, 4), new("PR-8", 2650m, 4)),
+        ];
+        var money = new NumericFormat { MinimumFractionDigits = 2, MaximumFractionDigits = 2 };
+        var table = new DataTable
+        {
+            ItemsSource = changes, GetKey = row => ((Change)row).No, Density = TableDensity.Compact,
+            Columns =
+            [
+                new("No", "序号") { Width = 64, Sticky = ColumnSticky.Start },
+                new("Name", "物品") { Width = 140, Sticky = ColumnSticky.Start },
+                new("BeforePart", "型号") { Width = 88, Value = row => ((Change)row).Before.Part },
+                new("BeforePrice", "单价（元）") { Width = 112, Value = row => ((Change)row).Before.Price, Format = money },
+                new("BeforeQuantity", "数量") { Width = 72, Value = row => ((Change)row).Before.Quantity },
+                new("AfterPart", "型号") { Width = 88, Value = row => ((Change)row).After.Part },
+                new("AfterPrice", "单价（元）") { Width = 112, Value = row => ((Change)row).After.Price, Format = money },
+                new("AfterQuantity", "数量") { Width = 72, Value = row => ((Change)row).After.Quantity },
+                new("Saving", "节省（元）")
+                {
+                    Width = 132, Value = row => ((Change)row).Saving, Format = money, Summary = ColumnSummary.Sum,
+                    // 调整后反而更贵：节省是负数，标红（其余按格式显示）
+                    Cell = (row, _) => ((Change)row).Saving < 0 ? new Text { Tone = TextTone.Danger, Text = money.Format(((Change)row).Saving, "zh-CN", "CNY") } : null,
+                },
+            ],
+            ColumnGroups =
+            [
+                new DataTableColumnGroup("before", "调整前", ["BeforePart", "BeforePrice", "BeforeQuantity"]),
+                new DataTableColumnGroup("after", "调整后", ["AfterPart", "AfterPrice", "AfterQuantity"]),
+            ],
+        };
+        AutomationProperties.SetName(table, "采购方案调整");
+        return table;
     }
 
     record Proposal(string Code, string Supplier, string Part, string Kind, decimal Saving, string Status, string? Content = null, string? Impact = null, string[]? Files = null, string? Submitted = null);

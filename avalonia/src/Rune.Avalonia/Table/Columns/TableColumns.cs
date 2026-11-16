@@ -179,6 +179,17 @@ public sealed record DataTableColumn(string Key, object Header)
     public Func<object?, object, string?>? Validate { get; init; }
 }
 
+/// <summary>分组表头（vue-tsx-pro 的 DataTableColumnGroup）：相邻的几列上方共用一个标题（如"测算"下的 A、B、D 值）；只分一层。</summary>
+/// <param name="Key">组的标识。</param>
+/// <param name="Header">组标题：文字或控件。</param>
+/// <param name="Columns">组里各列的 Key：要相邻，显示顺序随列定义。</param>
+public sealed record DataTableColumnGroup(string Key, object Header, IReadOnlyList<string> Columns);
+
+/// <summary>表头第一行的一格（vue-tsx-pro 的 HeaderLayoutCell）：一个分组（跨组里的几列），或没有分组的一列（跨两行）。</summary>
+/// <param name="Group">分组；没有分组的一列时为 null。</param>
+/// <param name="Columns">这一格下面的列：分组时是组里（这一段）的列，否则是那一列。</param>
+public sealed record HeaderLayoutCell(DataTableColumnGroup? Group, IReadOnlyList<DataTableColumn> Columns);
+
 /// <summary>自定义单元格编辑器拿到的（vue-tsx-pro 的 CellEditorContext）。</summary>
 /// <param name="Row">这一行。</param>
 /// <param name="Value">正在编辑的值（草稿）。</param>
@@ -514,6 +525,25 @@ public static class TableColumns
         if (first > lead) skips.Add(new ColumnSkip(lead, first));
         if (last + 1 < trail) skips.Add(new ColumnSkip(last + 1, trail));
         return skips;
+    }
+
+    /// <summary>
+    /// 按分组排出表头第一行（上游 headerLayout）：columns 是显示的列（隐藏了的不算），组里的列全隐藏时这一组也不显示；
+    /// 组里的列被别的列隔开时，后一段另起一格、重复组标题。
+    /// </summary>
+    public static IReadOnlyList<HeaderLayoutCell> HeaderLayout(IReadOnlyList<DataTableColumn> columns, IReadOnlyList<DataTableColumnGroup> groups)
+    {
+        var groupOf = new Dictionary<string, DataTableColumnGroup>();
+        foreach (var group in groups)
+            foreach (var key in group.Columns) groupOf[key] = group;
+        List<(DataTableColumnGroup? Group, List<DataTableColumn> Columns)> cells = [];
+        foreach (var column in columns)
+        {
+            var group = groupOf.GetValueOrDefault(column.Key);
+            if (group is not null && cells.Count > 0 && cells[^1].Group == group) cells[^1].Columns.Add(column);
+            else cells.Add((group, [column]));
+        }
+        return [.. cells.Select(cell => new HeaderLayoutCell(cell.Group, cell.Columns))];
     }
 
     /// <summary>这一格能不能编辑：列的 IsEditable 按行判断，否则看 Editable。</summary>
