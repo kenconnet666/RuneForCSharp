@@ -1529,7 +1529,17 @@ TS 版的规则（COMPONENTS.md §2，`utils/props.ts`，被 178 个组件文件
   OptionSource 是固定列表（Items）或远程搜索（Search）。人员是 PeopleSource，上传是 UploadHandler。
 - SchemaView（Avalonia）：字段从 Schema（类型）推（SchemaModel.Of），不写时按 Values 的类型；分组各一块 Descriptions（部件 PART_Section），对象展开成"对象 · 字段"，
   列表、明细表排成静态 Table（写了 Sum 的列靠结束边，表尾半粗的合计）。值是模型对象，改了里面的字段（没换对象）时调 Refresh。
-  propsDescriptions 是部件样式加 Columns。示例（上游 read-view：填写与查看切换）随 SchemaForm 补上。
+  propsDescriptions 是部件样式加 Columns。
+- FormController（孪生）加了 Access（拿到当前的值，给出 路径 → 权限）与 FieldState(path)：按 SchemaModel.Walk 算，校验时不显示的字段（与它下面的）不报错，
+  条件必填、权限必填的空着报"必填"（同上游 useForm）。IFormController 多了 ModelType、FieldState、Array（SchemaForm 不知道模型的类型参数）。
+  顺手：Field 自动绑定时 DateOnly / DateTime 与日期控件的 ISO 文字互转（以前 ChangeType 转不了，日期字段只能用字符串属性）。
+- SchemaFields（控件，放在 Form 里；控制器取 Form 继承下来的）：挂到逻辑树上才建（数据来源从外层的 Provider 继承下来）。建一次，值变了就地改各字段的显示、只读、必填
+  与明细表的合计；列表的行数变了（加一行、删一行）才重建，之后把焦点放到新行的第一个控件，或删掉后相邻的行（没有行了到"添加"）。
+  一个控件有几个双向属性时写 Field.BoundProperty（多选的 Values、人员的 Entries、附件的 Files）。不可空的选择、数字、日期也标必填的星号（同上游 zod 的非可选）。
+- SchemaForm：Form（错误汇总、SchemaFields、重置与提交那一行），Content 在按钮那一行的起始边（提交结果，读屏念变化）。上游 SchemaForm 上的 pick、fields、columns 等
+  写在 FieldsView（SchemaFields）上，propsForm 是 Form 属性；Columns 直接转给 FieldsView。
+- 示例：Form 页的 generated、read-view（填写与查看切换）。像素对照 generated 1.14%、read-view 2.02%：标签行比上游矮约 2px（必填星号的基线），一组一组累加。
+- 还没做：schemaFilters（查询栏的条件）、Form 页的 conditional、sources 示例。
 
 ### Condition、ConditionBuilder（2026-11-16，仅 Avalonia）
 
